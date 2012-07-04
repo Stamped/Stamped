@@ -1422,6 +1422,9 @@
 		6323F11315260FEC00BE408C /* STStampedActions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F11115260FEC00BE408C /* STStampedActions.m */; };
 		6323F11B1526360600BE408C /* STScrollViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F11A152635FE00BE408C /* STScrollViewContainer.m */; };
 		6323F11C1526360600BE408C /* STScrollViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6323F11A152635FE00BE408C /* STScrollViewContainer.m */; };
+		632DAFC815A1E2270049A7B0 /* entity_create_cafe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632DAFC715A1E2270049A7B0 /* entity_create_cafe@2x.png */; };
+		632DAFC915A1E2270049A7B0 /* entity_create_cafe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632DAFC715A1E2270049A7B0 /* entity_create_cafe@2x.png */; };
+		632DAFCA15A1E2270049A7B0 /* entity_create_cafe@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632DAFC715A1E2270049A7B0 /* entity_create_cafe@2x.png */; };
 		632E0E9C157EBE8000D018AA /* TEMP_eDetailBox_arrow_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632E0E9B157EBE7F00D018AA /* TEMP_eDetailBox_arrow_right@2x.png */; };
 		632E0E9D157EBE8000D018AA /* TEMP_eDetailBox_arrow_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632E0E9B157EBE7F00D018AA /* TEMP_eDetailBox_arrow_right@2x.png */; };
 		632E0E9F157EBE8000D018AA /* TEMP_eDetailBox_arrow_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 632E0E9B157EBE7F00D018AA /* TEMP_eDetailBox_arrow_right@2x.png */; };
@@ -1637,6 +1640,12 @@
 		6355A753157FA4F000FF6B0F /* STAccountParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 6355A752157FA4F000FF6B0F /* STAccountParameters.m */; };
 		6355A754157FA4F000FF6B0F /* STAccountParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 6355A752157FA4F000FF6B0F /* STAccountParameters.m */; };
 		6355A756157FA4F000FF6B0F /* STAccountParameters.m in Sources */ = {isa = PBXBuildFile; fileRef = 6355A752157FA4F000FF6B0F /* STAccountParameters.m */; };
+		6356DE2C15A20D48002CEEB2 /* libCocoaLibSpotifySim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6356DE2B15A20D48002CEEB2 /* libCocoaLibSpotifySim.a */; };
+		6356DE2D15A20D48002CEEB2 /* libCocoaLibSpotifySim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6356DE2B15A20D48002CEEB2 /* libCocoaLibSpotifySim.a */; };
+		6356DE2E15A20D48002CEEB2 /* libCocoaLibSpotifySim.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6356DE2B15A20D48002CEEB2 /* libCocoaLibSpotifySim.a */; };
+		6356DE3015A20D4E002CEEB2 /* libCocoaLibSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6356DE2F15A20D4E002CEEB2 /* libCocoaLibSpotify.a */; };
+		6356DE3115A20D4E002CEEB2 /* libCocoaLibSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6356DE2F15A20D4E002CEEB2 /* libCocoaLibSpotify.a */; };
+		6356DE3215A20D4E002CEEB2 /* libCocoaLibSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6356DE2F15A20D4E002CEEB2 /* libCocoaLibSpotify.a */; };
 		6357E7A3158B7B2F00A624EB /* icon_9pt_other.png in Resources */ = {isa = PBXBuildFile; fileRef = 6357E76F158B7B2F00A624EB /* icon_9pt_other.png */; };
 		6357E7A4158B7B2F00A624EB /* icon_9pt_other.png in Resources */ = {isa = PBXBuildFile; fileRef = 6357E76F158B7B2F00A624EB /* icon_9pt_other.png */; };
 		6357E7A5158B7B2F00A624EB /* icon_9pt_other.png in Resources */ = {isa = PBXBuildFile; fileRef = 6357E76F158B7B2F00A624EB /* icon_9pt_other.png */; };
@@ -1965,7 +1974,63 @@
 		6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		63877B591520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
 		63877B5A1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
-		638BF1BC159F96F300777A3C /* libCocoaLibSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 638BF1B7159F96BA00777A3C /* libCocoaLibSpotify.a */; };
+		638BF1C315A0952B00777A3C /* stamped_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1C215A0952B00777A3C /* stamped_logo@2x.png */; };
+		638BF1C415A0952B00777A3C /* stamped_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1C215A0952B00777A3C /* stamped_logo@2x.png */; };
+		638BF1C515A0952B00777A3C /* stamped_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1C215A0952B00777A3C /* stamped_logo@2x.png */; };
+		638BF1C915A0ABF700777A3C /* STNewNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1C815A0ABF700777A3C /* STNewNavigationBar.m */; };
+		638BF1CA15A0ABF700777A3C /* STNewNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1C815A0ABF700777A3C /* STNewNavigationBar.m */; };
+		638BF1CB15A0ABF700777A3C /* STNewNavigationBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1C815A0ABF700777A3C /* STNewNavigationBar.m */; };
+		638BF1DC15A0AD8500777A3C /* STButtonTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1CF15A0AD8500777A3C /* STButtonTableCell.m */; };
+		638BF1DD15A0AD8500777A3C /* STButtonTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1CF15A0AD8500777A3C /* STButtonTableCell.m */; };
+		638BF1DE15A0AD8500777A3C /* STButtonTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1CF15A0AD8500777A3C /* STButtonTableCell.m */; };
+		638BF1DF15A0AD8500777A3C /* STCompressedTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1D215A0AD8500777A3C /* STCompressedTableCell.m */; };
+		638BF1E015A0AD8500777A3C /* STCompressedTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1D215A0AD8500777A3C /* STCompressedTableCell.m */; };
+		638BF1E115A0AD8500777A3C /* STCompressedTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1D215A0AD8500777A3C /* STCompressedTableCell.m */; };
+		638BF1E215A0AD8500777A3C /* STSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1D515A0AD8500777A3C /* STSegmentedControl.m */; };
+		638BF1E315A0AD8500777A3C /* STSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1D515A0AD8500777A3C /* STSegmentedControl.m */; };
+		638BF1E415A0AD8500777A3C /* STSegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1D515A0AD8500777A3C /* STSegmentedControl.m */; };
+		638BF1E815A0AD8500777A3C /* STTextViewTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1DB15A0AD8500777A3C /* STTextViewTableCell.m */; };
+		638BF1E915A0AD8500777A3C /* STTextViewTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1DB15A0AD8500777A3C /* STTextViewTableCell.m */; };
+		638BF1EA15A0AD8500777A3C /* STTextViewTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF1DB15A0AD8500777A3C /* STTextViewTableCell.m */; };
+		638BF1F515A0AD9F00777A3C /* entity_create_album@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EC15A0AD9F00777A3C /* entity_create_album@2x.png */; };
+		638BF1F615A0AD9F00777A3C /* entity_create_album@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EC15A0AD9F00777A3C /* entity_create_album@2x.png */; };
+		638BF1F715A0AD9F00777A3C /* entity_create_album@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EC15A0AD9F00777A3C /* entity_create_album@2x.png */; };
+		638BF1F815A0AD9F00777A3C /* entity_create_artist@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1ED15A0AD9F00777A3C /* entity_create_artist@2x.png */; };
+		638BF1F915A0AD9F00777A3C /* entity_create_artist@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1ED15A0AD9F00777A3C /* entity_create_artist@2x.png */; };
+		638BF1FA15A0AD9F00777A3C /* entity_create_artist@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1ED15A0AD9F00777A3C /* entity_create_artist@2x.png */; };
+		638BF1FB15A0AD9F00777A3C /* entity_create_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EE15A0AD9F00777A3C /* entity_create_bar@2x.png */; };
+		638BF1FC15A0AD9F00777A3C /* entity_create_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EE15A0AD9F00777A3C /* entity_create_bar@2x.png */; };
+		638BF1FD15A0AD9F00777A3C /* entity_create_bar@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EE15A0AD9F00777A3C /* entity_create_bar@2x.png */; };
+		638BF1FE15A0AD9F00777A3C /* entity_create_film@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EF15A0AD9F00777A3C /* entity_create_film@2x.png */; };
+		638BF1FF15A0AD9F00777A3C /* entity_create_film@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EF15A0AD9F00777A3C /* entity_create_film@2x.png */; };
+		638BF20015A0AD9F00777A3C /* entity_create_film@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1EF15A0AD9F00777A3C /* entity_create_film@2x.png */; };
+		638BF20115A0AD9F00777A3C /* entity_create_footer_shadow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F015A0AD9F00777A3C /* entity_create_footer_shadow@2x.png */; };
+		638BF20215A0AD9F00777A3C /* entity_create_footer_shadow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F015A0AD9F00777A3C /* entity_create_footer_shadow@2x.png */; };
+		638BF20315A0AD9F00777A3C /* entity_create_footer_shadow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F015A0AD9F00777A3C /* entity_create_footer_shadow@2x.png */; };
+		638BF20415A0AD9F00777A3C /* entity_create_other@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F115A0AD9F00777A3C /* entity_create_other@2x.png */; };
+		638BF20515A0AD9F00777A3C /* entity_create_other@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F115A0AD9F00777A3C /* entity_create_other@2x.png */; };
+		638BF20615A0AD9F00777A3C /* entity_create_other@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F115A0AD9F00777A3C /* entity_create_other@2x.png */; };
+		638BF20715A0AD9F00777A3C /* entity_create_restaurant@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F215A0AD9F00777A3C /* entity_create_restaurant@2x.png */; };
+		638BF20815A0AD9F00777A3C /* entity_create_restaurant@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F215A0AD9F00777A3C /* entity_create_restaurant@2x.png */; };
+		638BF20915A0AD9F00777A3C /* entity_create_restaurant@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F215A0AD9F00777A3C /* entity_create_restaurant@2x.png */; };
+		638BF20A15A0AD9F00777A3C /* entity_create_song@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F315A0AD9F00777A3C /* entity_create_song@2x.png */; };
+		638BF20B15A0AD9F00777A3C /* entity_create_song@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F315A0AD9F00777A3C /* entity_create_song@2x.png */; };
+		638BF20C15A0AD9F00777A3C /* entity_create_song@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F315A0AD9F00777A3C /* entity_create_song@2x.png */; };
+		638BF20D15A0AD9F00777A3C /* entity_create_tv_series@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F415A0AD9F00777A3C /* entity_create_tv_series@2x.png */; };
+		638BF20E15A0AD9F00777A3C /* entity_create_tv_series@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F415A0AD9F00777A3C /* entity_create_tv_series@2x.png */; };
+		638BF20F15A0AD9F00777A3C /* entity_create_tv_series@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1F415A0AD9F00777A3C /* entity_create_tv_series@2x.png */; };
+		638BF21915A0ADBA00777A3C /* CountriesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21215A0ADBA00777A3C /* CountriesViewController.m */; };
+		638BF21A15A0ADBA00777A3C /* CountriesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21215A0ADBA00777A3C /* CountriesViewController.m */; };
+		638BF21B15A0ADBA00777A3C /* CountriesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21215A0ADBA00777A3C /* CountriesViewController.m */; };
+		638BF21C15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21515A0ADBA00777A3C /* CreateEntityViewController.m */; };
+		638BF21D15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21515A0ADBA00777A3C /* CreateEntityViewController.m */; };
+		638BF21E15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21515A0ADBA00777A3C /* CreateEntityViewController.m */; };
+		638BF21F15A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21815A0ADBA00777A3C /* STMusicPickerViewController.m */; };
+		638BF22015A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21815A0ADBA00777A3C /* STMusicPickerViewController.m */; };
+		638BF22115A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638BF21815A0ADBA00777A3C /* STMusicPickerViewController.m */; };
+		638BF27515A0C32A00777A3C /* SPLoginResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 638BF27415A0C32A00777A3C /* SPLoginResources.bundle */; };
+		638BF27615A0C32A00777A3C /* SPLoginResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 638BF27415A0C32A00777A3C /* SPLoginResources.bundle */; };
+		638BF27715A0C32A00777A3C /* SPLoginResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 638BF27415A0C32A00777A3C /* SPLoginResources.bundle */; };
 		638D7717152A55A9006E4988 /* STStampDetailHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7716152A55A9006E4988 /* STStampDetailHeaderView.m */; };
 		638D7718152A55A9006E4988 /* STStampDetailHeaderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7716152A55A9006E4988 /* STStampDetailHeaderView.m */; };
 		638D7728152B4F89006E4988 /* STStampedAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 638D7727152B4F89006E4988 /* STStampedAPI.m */; };
@@ -2069,6 +2134,18 @@
 		63BFCC7E1541F7AE00817EC5 /* STUserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC7C1541F7AE00817EC5 /* STUserCell.m */; };
 		63BFCC9615435B7C00817EC5 /* STRootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC9515435B7C00817EC5 /* STRootScrollView.m */; };
 		63BFCC9715435B7C00817EC5 /* STRootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC9515435B7C00817EC5 /* STRootScrollView.m */; };
+		63C4842E15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */; };
+		63C4842F15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */; };
+		63C4843015A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */; };
+		63C4843615A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
+		63C4843715A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
+		63C4843815A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
+		63C4843C15A38CA900CE8F25 /* STCreditPageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843B15A38CA900CE8F25 /* STCreditPageSource.m */; };
+		63C4843D15A38CA900CE8F25 /* STCreditPageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843B15A38CA900CE8F25 /* STCreditPageSource.m */; };
+		63C4843E15A38CA900CE8F25 /* STCreditPageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843B15A38CA900CE8F25 /* STCreditPageSource.m */; };
+		63C4844115A3A6E500CE8F25 /* STAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */; };
+		63C4844215A3A6E500CE8F25 /* STAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */; };
+		63C4844315A3A6E500CE8F25 /* STAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */; };
 		63C9834715489F75000180DC /* todo_mini@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C9834415489F75000180DC /* todo_mini@2x.png */; };
 		63C9834815489F75000180DC /* todo_mini@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C9834415489F75000180DC /* todo_mini@2x.png */; };
 		63C9834A15489F75000180DC /* comment_mini@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C9834515489F75000180DC /* comment_mini@2x.png */; };
@@ -2841,27 +2918,6 @@
 			remoteGlobalIDString = 25160D1514564E810060A5C5;
 			remoteInfo = RestKit;
 		};
-		638BF1B6159F96BA00777A3C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 638BF1AD159F96B900777A3C /* CocoaLibSpotify iOS Library.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 50AF49DC1439CBFE00E4A5EF;
-			remoteInfo = CocoaLibSpotify;
-		};
-		638BF1B8159F96BA00777A3C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 638BF1AD159F96B900777A3C /* CocoaLibSpotify iOS Library.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 50D4F52B156BCDE800E237DD;
-			remoteInfo = CocoaLSTests;
-		};
-		638BF1BA159F96E400777A3C /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 638BF1AD159F96B900777A3C /* CocoaLibSpotify iOS Library.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 50AF49DB1439CBFE00E4A5EF;
-			remoteInfo = CocoaLibSpotify;
-		};
 		7E5893B5147C468B002268C4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
@@ -3349,6 +3405,36 @@
 		6323F1141526101400BE408C /* STActionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActionDelegate.h; sourceTree = "<group>"; };
 		6323F119152635F900BE408C /* STScrollViewContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScrollViewContainer.h; sourceTree = "<group>"; };
 		6323F11A152635FE00BE408C /* STScrollViewContainer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScrollViewContainer.m; sourceTree = "<group>"; };
+		632DAFC715A1E2270049A7B0 /* entity_create_cafe@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_cafe@2x.png"; sourceTree = "<group>"; };
+		632DAFE615A1F3A60049A7B0 /* api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = api.h; sourceTree = "<group>"; };
+		632DAFE715A1F3A60049A7B0 /* CocoaLibSpotify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaLibSpotify.h; sourceTree = "<group>"; };
+		632DAFE815A1F3A60049A7B0 /* CocoaLibSpotifyPlatformImports.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CocoaLibSpotifyPlatformImports.h; sourceTree = "<group>"; };
+		632DAFE915A1F3A60049A7B0 /* SPAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPAlbum.h; sourceTree = "<group>"; };
+		632DAFEA15A1F3A60049A7B0 /* SPAlbumBrowse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPAlbumBrowse.h; sourceTree = "<group>"; };
+		632DAFEB15A1F3A60049A7B0 /* SPArtist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPArtist.h; sourceTree = "<group>"; };
+		632DAFEC15A1F3A60049A7B0 /* SPArtistBrowse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPArtistBrowse.h; sourceTree = "<group>"; };
+		632DAFED15A1F3A60049A7B0 /* SPAsyncLoading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPAsyncLoading.h; sourceTree = "<group>"; };
+		632DAFEE15A1F3A60049A7B0 /* SPCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPCircularBuffer.h; sourceTree = "<group>"; };
+		632DAFEF15A1F3A60049A7B0 /* SPCommon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPCommon.h; sourceTree = "<group>"; };
+		632DAFF015A1F3A60049A7B0 /* SPCoreAudioController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPCoreAudioController.h; sourceTree = "<group>"; };
+		632DAFF115A1F3A60049A7B0 /* SPErrorExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPErrorExtensions.h; sourceTree = "<group>"; };
+		632DAFF215A1F3A60049A7B0 /* SPImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPImage.h; sourceTree = "<group>"; };
+		632DAFF315A1F3A60049A7B0 /* SPLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPLoginViewController.h; sourceTree = "<group>"; };
+		632DAFF415A1F3A60049A7B0 /* SPPlaybackManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPPlaybackManager.h; sourceTree = "<group>"; };
+		632DAFF515A1F3A60049A7B0 /* SPPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPPlaylist.h; sourceTree = "<group>"; };
+		632DAFF615A1F3A60049A7B0 /* SPPlaylistContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPPlaylistContainer.h; sourceTree = "<group>"; };
+		632DAFF715A1F3A60049A7B0 /* SPPlaylistFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPPlaylistFolder.h; sourceTree = "<group>"; };
+		632DAFF815A1F3A60049A7B0 /* SPPlaylistFolderInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPPlaylistFolderInternal.h; sourceTree = "<group>"; };
+		632DAFF915A1F3A60049A7B0 /* SPPlaylistItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPPlaylistItem.h; sourceTree = "<group>"; };
+		632DAFFA15A1F3A60049A7B0 /* SPPostTracksToInboxOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPPostTracksToInboxOperation.h; sourceTree = "<group>"; };
+		632DAFFB15A1F3A60049A7B0 /* SPSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPSearch.h; sourceTree = "<group>"; };
+		632DAFFC15A1F3A60049A7B0 /* SPSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPSession.h; sourceTree = "<group>"; };
+		632DAFFD15A1F3A60049A7B0 /* SPSignupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPSignupViewController.h; sourceTree = "<group>"; };
+		632DAFFE15A1F3A60049A7B0 /* SPToplist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPToplist.h; sourceTree = "<group>"; };
+		632DAFFF15A1F3A60049A7B0 /* SPTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPTrack.h; sourceTree = "<group>"; };
+		632DB00015A1F3A60049A7B0 /* SPUnknownPlaylist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPUnknownPlaylist.h; sourceTree = "<group>"; };
+		632DB00115A1F3A60049A7B0 /* SPURLExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPURLExtensions.h; sourceTree = "<group>"; };
+		632DB00215A1F3A60049A7B0 /* SPUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SPUser.h; sourceTree = "<group>"; };
 		632E0E9B157EBE7F00D018AA /* TEMP_eDetailBox_arrow_right@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_eDetailBox_arrow_right@2x.png"; sourceTree = "<group>"; };
 		632E0EA0157EC69800D018AA /* TEMP_sDetail_dots@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_sDetail_dots@2x.png"; sourceTree = "<group>"; };
 		632ECB0B159B8B170047399F /* STUserImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserImageView.h; sourceTree = "<group>"; };
@@ -3480,6 +3566,8 @@
 		6354EE0C1539D9C4008D1A9D /* badge_1stYou@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "badge_1stYou@2x.png"; sourceTree = "<group>"; };
 		6355A751157FA4F000FF6B0F /* STAccountParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAccountParameters.h; sourceTree = "<group>"; };
 		6355A752157FA4F000FF6B0F /* STAccountParameters.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAccountParameters.m; sourceTree = "<group>"; };
+		6356DE2B15A20D48002CEEB2 /* libCocoaLibSpotifySim.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libCocoaLibSpotifySim.a; sourceTree = "<group>"; };
+		6356DE2F15A20D4E002CEEB2 /* libCocoaLibSpotify.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libCocoaLibSpotify.a; sourceTree = "<group>"; };
 		6357E76F158B7B2F00A624EB /* icon_9pt_other.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_9pt_other.png; sourceTree = "<group>"; };
 		6357E770158B7B2F00A624EB /* icon_9pt_other@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon_9pt_other@2x.png"; sourceTree = "<group>"; };
 		6357E771158B7B2F00A624EB /* icon_9pt_app.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon_9pt_app.png; sourceTree = "<group>"; };
@@ -3684,7 +3772,33 @@
 		6386EF371513E2D20019F1DC /* STSimpleActionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActionItem.m; sourceTree = "<group>"; };
 		63877B571520C35700DE5A3A /* STSynchronousWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSynchronousWrapper.h; sourceTree = "<group>"; };
 		63877B581520C35700DE5A3A /* STSynchronousWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSynchronousWrapper.m; sourceTree = "<group>"; };
-		638BF1AD159F96B900777A3C /* CocoaLibSpotify iOS Library.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "CocoaLibSpotify iOS Library.xcodeproj"; path = "../../../cocoalibspotify/iOS Library/CocoaLibSpotify iOS Library.xcodeproj"; sourceTree = "<group>"; };
+		638BF1C215A0952B00777A3C /* stamped_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamped_logo@2x.png"; sourceTree = "<group>"; };
+		638BF1C715A0ABF700777A3C /* STNewNavigationBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STNewNavigationBar.h; sourceTree = "<group>"; };
+		638BF1C815A0ABF700777A3C /* STNewNavigationBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STNewNavigationBar.m; sourceTree = "<group>"; };
+		638BF1CE15A0AD8500777A3C /* STButtonTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STButtonTableCell.h; sourceTree = "<group>"; };
+		638BF1CF15A0AD8500777A3C /* STButtonTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STButtonTableCell.m; sourceTree = "<group>"; };
+		638BF1D115A0AD8500777A3C /* STCompressedTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCompressedTableCell.h; sourceTree = "<group>"; };
+		638BF1D215A0AD8500777A3C /* STCompressedTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCompressedTableCell.m; sourceTree = "<group>"; };
+		638BF1D415A0AD8500777A3C /* STSegmentedControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSegmentedControl.h; sourceTree = "<group>"; };
+		638BF1D515A0AD8500777A3C /* STSegmentedControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSegmentedControl.m; sourceTree = "<group>"; };
+		638BF1DA15A0AD8500777A3C /* STTextViewTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTextViewTableCell.h; sourceTree = "<group>"; };
+		638BF1DB15A0AD8500777A3C /* STTextViewTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTextViewTableCell.m; sourceTree = "<group>"; };
+		638BF1EC15A0AD9F00777A3C /* entity_create_album@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_album@2x.png"; sourceTree = "<group>"; };
+		638BF1ED15A0AD9F00777A3C /* entity_create_artist@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_artist@2x.png"; sourceTree = "<group>"; };
+		638BF1EE15A0AD9F00777A3C /* entity_create_bar@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_bar@2x.png"; sourceTree = "<group>"; };
+		638BF1EF15A0AD9F00777A3C /* entity_create_film@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_film@2x.png"; sourceTree = "<group>"; };
+		638BF1F015A0AD9F00777A3C /* entity_create_footer_shadow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_footer_shadow@2x.png"; sourceTree = "<group>"; };
+		638BF1F115A0AD9F00777A3C /* entity_create_other@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_other@2x.png"; sourceTree = "<group>"; };
+		638BF1F215A0AD9F00777A3C /* entity_create_restaurant@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_restaurant@2x.png"; sourceTree = "<group>"; };
+		638BF1F315A0AD9F00777A3C /* entity_create_song@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_song@2x.png"; sourceTree = "<group>"; };
+		638BF1F415A0AD9F00777A3C /* entity_create_tv_series@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "entity_create_tv_series@2x.png"; sourceTree = "<group>"; };
+		638BF21115A0ADBA00777A3C /* CountriesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CountriesViewController.h; sourceTree = "<group>"; };
+		638BF21215A0ADBA00777A3C /* CountriesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CountriesViewController.m; sourceTree = "<group>"; };
+		638BF21415A0ADBA00777A3C /* CreateEntityViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateEntityViewController.h; sourceTree = "<group>"; };
+		638BF21515A0ADBA00777A3C /* CreateEntityViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreateEntityViewController.m; sourceTree = "<group>"; };
+		638BF21715A0ADBA00777A3C /* STMusicPickerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STMusicPickerViewController.h; sourceTree = "<group>"; };
+		638BF21815A0ADBA00777A3C /* STMusicPickerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STMusicPickerViewController.m; sourceTree = "<group>"; };
+		638BF27415A0C32A00777A3C /* SPLoginResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SPLoginResources.bundle; sourceTree = "<group>"; };
 		638D7713152A4ABF006E4988 /* STStamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStamp.h; sourceTree = "<group>"; };
 		638D7714152A4B2B006E4988 /* STEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntity.h; sourceTree = "<group>"; };
 		638D7715152A55A9006E4988 /* STStampDetailHeaderView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampDetailHeaderView.h; sourceTree = "<group>"; };
@@ -3769,6 +3883,14 @@
 		63BFCC7C1541F7AE00817EC5 /* STUserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUserCell.m; sourceTree = "<group>"; };
 		63BFCC9415435B7C00817EC5 /* STRootScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRootScrollView.h; sourceTree = "<group>"; };
 		63BFCC9515435B7C00817EC5 /* STRootScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRootScrollView.m; sourceTree = "<group>"; };
+		63C4842C15A3839200CE8F25 /* STInviteFriendsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STInviteFriendsViewController.h; sourceTree = "<group>"; };
+		63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STInviteFriendsViewController.m; sourceTree = "<group>"; };
+		63C4843415A387AC00CE8F25 /* STStampsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampsViewController.h; sourceTree = "<group>"; };
+		63C4843515A387AC00CE8F25 /* STStampsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampsViewController.m; sourceTree = "<group>"; };
+		63C4843A15A38CA900CE8F25 /* STCreditPageSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreditPageSource.h; sourceTree = "<group>"; };
+		63C4843B15A38CA900CE8F25 /* STCreditPageSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreditPageSource.m; sourceTree = "<group>"; };
+		63C4843F15A3A6E400CE8F25 /* STAttributedLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAttributedLabel.h; sourceTree = "<group>"; };
+		63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAttributedLabel.m; sourceTree = "<group>"; };
 		63C9834415489F75000180DC /* todo_mini@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "todo_mini@2x.png"; sourceTree = "<group>"; };
 		63C9834515489F75000180DC /* comment_mini@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "comment_mini@2x.png"; sourceTree = "<group>"; };
 		63C9834615489F75000180DC /* like_mini@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "like_mini@2x.png"; sourceTree = "<group>"; };
@@ -4227,7 +4349,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				638BF1BC159F96F300777A3C /* libCocoaLibSpotify.a in Frameworks */,
 				6376B45E159F5ED800860CDD /* CoreAudio.framework in Frameworks */,
 				6376B45C159F5EBF00860CDD /* libstdc++.dylib in Frameworks */,
 				63CAB15F159E1A6B002D3A1E /* MediaPlayer.framework in Frameworks */,
@@ -4257,6 +4378,8 @@
 				034BE0BE1562F6980008F160 /* CoreGraphics.framework in Frameworks */,
 				034BE0BF1562F6980008F160 /* CrashReporter.framework in Frameworks */,
 				034BE0C01562F6980008F160 /* Rdio.framework in Frameworks */,
+				6356DE2E15A20D48002CEEB2 /* libCocoaLibSpotifySim.a in Frameworks */,
+				6356DE3215A20D4E002CEEB2 /* libCocoaLibSpotify.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4287,6 +4410,8 @@
 				7E589436147C468B002268C4 /* CoreGraphics.framework in Frameworks */,
 				7ED2824A14914ABA0086FF18 /* CrashReporter.framework in Frameworks */,
 				63733FEF1521108700EEFAB3 /* Rdio.framework in Frameworks */,
+				6356DE2D15A20D48002CEEB2 /* libCocoaLibSpotifySim.a in Frameworks */,
+				6356DE3115A20D4E002CEEB2 /* libCocoaLibSpotify.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4317,6 +4442,8 @@
 				7EC0177A13C3754300ABE6E2 /* CoreGraphics.framework in Frameworks */,
 				7ED2824914914ABA0086FF18 /* CrashReporter.framework in Frameworks */,
 				63733FEE1521108700EEFAB3 /* Rdio.framework in Frameworks */,
+				6356DE2C15A20D48002CEEB2 /* libCocoaLibSpotifySim.a in Frameworks */,
+				6356DE3015A20D4E002CEEB2 /* libCocoaLibSpotify.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4339,6 +4466,8 @@
 				633FB61115717F3A00D7D776 /* STCache.m */,
 				639DABF81572F4D70046C46F /* STInboxPageSource.h */,
 				639DABF91572F4D70046C46F /* STInboxPageSource.m */,
+				63C4843A15A38CA900CE8F25 /* STCreditPageSource.h */,
+				63C4843B15A38CA900CE8F25 /* STCreditPageSource.m */,
 				639DABFE1572F6AA0046C46F /* STGenericCacheConfiguration.h */,
 				639DABFF1572F6AA0046C46F /* STGenericCacheConfiguration.m */,
 				63F582AC1597DD7100450961 /* STPlayer.h */,
@@ -5416,6 +5545,42 @@
 			name = Vendor;
 			sourceTree = "<group>";
 		};
+		632DAFE515A1F3A60049A7B0 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				632DAFE615A1F3A60049A7B0 /* api.h */,
+				632DAFE715A1F3A60049A7B0 /* CocoaLibSpotify.h */,
+				632DAFE815A1F3A60049A7B0 /* CocoaLibSpotifyPlatformImports.h */,
+				632DAFE915A1F3A60049A7B0 /* SPAlbum.h */,
+				632DAFEA15A1F3A60049A7B0 /* SPAlbumBrowse.h */,
+				632DAFEB15A1F3A60049A7B0 /* SPArtist.h */,
+				632DAFEC15A1F3A60049A7B0 /* SPArtistBrowse.h */,
+				632DAFED15A1F3A60049A7B0 /* SPAsyncLoading.h */,
+				632DAFEE15A1F3A60049A7B0 /* SPCircularBuffer.h */,
+				632DAFEF15A1F3A60049A7B0 /* SPCommon.h */,
+				632DAFF015A1F3A60049A7B0 /* SPCoreAudioController.h */,
+				632DAFF115A1F3A60049A7B0 /* SPErrorExtensions.h */,
+				632DAFF215A1F3A60049A7B0 /* SPImage.h */,
+				632DAFF315A1F3A60049A7B0 /* SPLoginViewController.h */,
+				632DAFF415A1F3A60049A7B0 /* SPPlaybackManager.h */,
+				632DAFF515A1F3A60049A7B0 /* SPPlaylist.h */,
+				632DAFF615A1F3A60049A7B0 /* SPPlaylistContainer.h */,
+				632DAFF715A1F3A60049A7B0 /* SPPlaylistFolder.h */,
+				632DAFF815A1F3A60049A7B0 /* SPPlaylistFolderInternal.h */,
+				632DAFF915A1F3A60049A7B0 /* SPPlaylistItem.h */,
+				632DAFFA15A1F3A60049A7B0 /* SPPostTracksToInboxOperation.h */,
+				632DAFFB15A1F3A60049A7B0 /* SPSearch.h */,
+				632DAFFC15A1F3A60049A7B0 /* SPSession.h */,
+				632DAFFD15A1F3A60049A7B0 /* SPSignupViewController.h */,
+				632DAFFE15A1F3A60049A7B0 /* SPToplist.h */,
+				632DAFFF15A1F3A60049A7B0 /* SPTrack.h */,
+				632DB00015A1F3A60049A7B0 /* SPUnknownPlaylist.h */,
+				632DB00115A1F3A60049A7B0 /* SPURLExtensions.h */,
+				632DB00215A1F3A60049A7B0 /* SPUser.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
 		632ECB22159BF2610047399F /* Notifications */ = {
 			isa = PBXGroup;
 			children = (
@@ -5949,17 +6114,104 @@
 				63159A891544E959008E75DD /* STRightMenuViewController.m */,
 				63C9835015499F45000180DC /* STCancellation.h */,
 				63C9835115499F45000180DC /* STCancellation.m */,
+				638BF1C715A0ABF700777A3C /* STNewNavigationBar.h */,
+				638BF1C815A0ABF700777A3C /* STNewNavigationBar.m */,
 			);
 			name = Globals;
 			sourceTree = "<group>";
 		};
-		638BF1AE159F96B900777A3C /* Products */ = {
+		638BF1CC15A0AD6F00777A3C /* Create Entity */ = {
 			isa = PBXGroup;
 			children = (
-				638BF1B7159F96BA00777A3C /* libCocoaLibSpotify.a */,
-				638BF1B9159F96BA00777A3C /* CocoaLSTests.app */,
+				638BF21015A0ADBA00777A3C /* CountriesViewController */,
+				638BF21315A0ADBA00777A3C /* CreateEntityViewController */,
+				638BF21615A0ADBA00777A3C /* STMusicPickerController */,
+				638BF1CD15A0AD8500777A3C /* STButtonTableCell */,
+				638BF1D015A0AD8500777A3C /* STCompressedTableCell */,
+				638BF1D315A0AD8500777A3C /* STSegmentedControl */,
+				638BF1D915A0AD8500777A3C /* STTextViewTableCell */,
 			);
-			name = Products;
+			name = "Create Entity";
+			sourceTree = "<group>";
+		};
+		638BF1CD15A0AD8500777A3C /* STButtonTableCell */ = {
+			isa = PBXGroup;
+			children = (
+				638BF1CE15A0AD8500777A3C /* STButtonTableCell.h */,
+				638BF1CF15A0AD8500777A3C /* STButtonTableCell.m */,
+			);
+			path = STButtonTableCell;
+			sourceTree = "<group>";
+		};
+		638BF1D015A0AD8500777A3C /* STCompressedTableCell */ = {
+			isa = PBXGroup;
+			children = (
+				638BF1D115A0AD8500777A3C /* STCompressedTableCell.h */,
+				638BF1D215A0AD8500777A3C /* STCompressedTableCell.m */,
+			);
+			path = STCompressedTableCell;
+			sourceTree = "<group>";
+		};
+		638BF1D315A0AD8500777A3C /* STSegmentedControl */ = {
+			isa = PBXGroup;
+			children = (
+				638BF1D415A0AD8500777A3C /* STSegmentedControl.h */,
+				638BF1D515A0AD8500777A3C /* STSegmentedControl.m */,
+			);
+			path = STSegmentedControl;
+			sourceTree = "<group>";
+		};
+		638BF1D915A0AD8500777A3C /* STTextViewTableCell */ = {
+			isa = PBXGroup;
+			children = (
+				638BF1DA15A0AD8500777A3C /* STTextViewTableCell.h */,
+				638BF1DB15A0AD8500777A3C /* STTextViewTableCell.m */,
+			);
+			path = STTextViewTableCell;
+			sourceTree = "<group>";
+		};
+		638BF1EB15A0AD8F00777A3C /* Create Entity */ = {
+			isa = PBXGroup;
+			children = (
+				638BF1EC15A0AD9F00777A3C /* entity_create_album@2x.png */,
+				638BF1ED15A0AD9F00777A3C /* entity_create_artist@2x.png */,
+				638BF1EE15A0AD9F00777A3C /* entity_create_bar@2x.png */,
+				638BF1EF15A0AD9F00777A3C /* entity_create_film@2x.png */,
+				638BF1F015A0AD9F00777A3C /* entity_create_footer_shadow@2x.png */,
+				638BF1F115A0AD9F00777A3C /* entity_create_other@2x.png */,
+				632DAFC715A1E2270049A7B0 /* entity_create_cafe@2x.png */,
+				638BF1F215A0AD9F00777A3C /* entity_create_restaurant@2x.png */,
+				638BF1F315A0AD9F00777A3C /* entity_create_song@2x.png */,
+				638BF1F415A0AD9F00777A3C /* entity_create_tv_series@2x.png */,
+			);
+			name = "Create Entity";
+			sourceTree = "<group>";
+		};
+		638BF21015A0ADBA00777A3C /* CountriesViewController */ = {
+			isa = PBXGroup;
+			children = (
+				638BF21115A0ADBA00777A3C /* CountriesViewController.h */,
+				638BF21215A0ADBA00777A3C /* CountriesViewController.m */,
+			);
+			path = CountriesViewController;
+			sourceTree = "<group>";
+		};
+		638BF21315A0ADBA00777A3C /* CreateEntityViewController */ = {
+			isa = PBXGroup;
+			children = (
+				638BF21415A0ADBA00777A3C /* CreateEntityViewController.h */,
+				638BF21515A0ADBA00777A3C /* CreateEntityViewController.m */,
+			);
+			path = CreateEntityViewController;
+			sourceTree = "<group>";
+		};
+		638BF21615A0ADBA00777A3C /* STMusicPickerController */ = {
+			isa = PBXGroup;
+			children = (
+				638BF21715A0ADBA00777A3C /* STMusicPickerViewController.h */,
+				638BF21815A0ADBA00777A3C /* STMusicPickerViewController.m */,
+			);
+			path = STMusicPickerController;
 			sourceTree = "<group>";
 		};
 		638D7725152B4F76006E4988 /* Stamped API */ = {
@@ -6038,6 +6290,24 @@
 				6376B44A159F562B00860CDD /* STSpotify.m */,
 			);
 			name = Actions;
+			sourceTree = "<group>";
+		};
+		63C4842B15A3833900CE8F25 /* Invite Friends */ = {
+			isa = PBXGroup;
+			children = (
+				63C4842C15A3839200CE8F25 /* STInviteFriendsViewController.h */,
+				63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */,
+			);
+			name = "Invite Friends";
+			sourceTree = "<group>";
+		};
+		63C4843215A3878700CE8F25 /* Stamps List */ = {
+			isa = PBXGroup;
+			children = (
+				63C4843415A387AC00CE8F25 /* STStampsViewController.h */,
+				63C4843515A387AC00CE8F25 /* STStampsViewController.m */,
+			);
+			name = "Stamps List";
 			sourceTree = "<group>";
 		};
 		63C9835A154A00A6000180DC /* Cache */ = {
@@ -6152,6 +6422,7 @@
 		63CB0E2B1587C850000A4832 /* Global */ = {
 			isa = PBXGroup;
 			children = (
+				638BF1C215A0952B00777A3C /* stamped_logo@2x.png */,
 				7E5893AF147C4628002268C4 /* icon_dev@2x.png */,
 				7E5893AD147C4620002268C4 /* icon_dev.png */,
 				7E5EEEC7151BD68E004FFBB9 /* icon@2x.png */,
@@ -6333,6 +6604,8 @@
 				6370FE231581738C00A4401A /* STEntityAnnotation.m */,
 				637589BB1593A4F90049A0AA /* STHoverToolbar.h */,
 				637589BC1593A4FA0049A0AA /* STHoverToolbar.m */,
+				63C4843F15A3A6E400CE8F25 /* STAttributedLabel.h */,
+				63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */,
 			);
 			name = "View Components";
 			sourceTree = "<group>";
@@ -6629,7 +6902,7 @@
 		7EC0176613C3754300ABE6E2 = {
 			isa = PBXGroup;
 			children = (
-				638BF1AD159F96B900777A3C /* CocoaLibSpotify iOS Library.xcodeproj */,
+				638BF27415A0C32A00777A3C /* SPLoginResources.bundle */,
 				6376B45D159F5ED800860CDD /* CoreAudio.framework */,
 				6376B45B159F5EBF00860CDD /* libstdc++.dylib */,
 				63CAB15E159E1A6B002D3A1E /* MediaPlayer.framework */,
@@ -6638,6 +6911,9 @@
 				7EC0177413C3754300ABE6E2 /* Frameworks */,
 				1E5AFFC5141D2A5000772F11 /* Vendor */,
 				7EC0177213C3754300ABE6E2 /* Products */,
+				6356DE2F15A20D4E002CEEB2 /* libCocoaLibSpotify.a */,
+				6356DE2B15A20D48002CEEB2 /* libCocoaLibSpotifySim.a */,
+				632DAFE515A1F3A60049A7B0 /* include */,
 			);
 			sourceTree = "<group>";
 		};
@@ -6742,6 +7018,7 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				638BF1EB15A0AD8F00777A3C /* Create Entity */,
 				632ECB44159CB2FB0047399F /* two_tone_bar@2x.png */,
 				632ECB43159CAFFF0047399F /* Linked Accounts */,
 				632ECB28159BFC720047399F /* Notifications */,
@@ -7042,6 +7319,9 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				63C4843215A3878700CE8F25 /* Stamps List */,
+				63C4842B15A3833900CE8F25 /* Invite Friends */,
+				638BF1CC15A0AD6F00777A3C /* Create Entity */,
 				632ECB39159CA42A0047399F /* Linked Accounts */,
 				632ECB22159BF2610047399F /* Notifications */,
 				634DAC90158100600004946C /* Layout */,
@@ -7109,7 +7389,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				638BF1BB159F96E400777A3C /* PBXTargetDependency */,
 				034BDF9A1562F6980008F160 /* PBXTargetDependency */,
 				034BDF9C1562F6980008F160 /* PBXTargetDependency */,
 			);
@@ -7170,15 +7449,12 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				English,
 			);
 			mainGroup = 7EC0176613C3754300ABE6E2;
 			productRefGroup = 7EC0177213C3754300ABE6E2 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
-				{
-					ProductGroup = 638BF1AE159F96B900777A3C /* Products */;
-					ProjectRef = 638BF1AD159F96B900777A3C /* CocoaLibSpotify iOS Library.xcodeproj */;
-				},
 				{
 					ProductGroup = 1E5AFFB2141D29EC00772F11 /* Products */;
 					ProjectRef = 1E5AFFB1141D29EC00772F11 /* GTMOAuth.xcodeproj */;
@@ -7253,20 +7529,6 @@
 			fileType = wrapper.cfbundle;
 			path = RestKitFrameworkTests.octest;
 			remoteRef = 63733FDD1521046300EEFAB3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		638BF1B7159F96BA00777A3C /* libCocoaLibSpotify.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libCocoaLibSpotify.a;
-			remoteRef = 638BF1B6159F96BA00777A3C /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		638BF1B9159F96BA00777A3C /* CocoaLSTests.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = CocoaLSTests.app;
-			remoteRef = 638BF1B8159F96BA00777A3C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -7824,6 +8086,18 @@
 				632ECBAD159CBFD30047399F /* linked_accounts_greenbar@2x.png in Resources */,
 				632ECBB0159CBFD30047399F /* linked_accounts_lock.png in Resources */,
 				632ECBB3159CBFD30047399F /* linked_accounts_lock@2x.png in Resources */,
+				638BF1C515A0952B00777A3C /* stamped_logo@2x.png in Resources */,
+				638BF1F715A0AD9F00777A3C /* entity_create_album@2x.png in Resources */,
+				638BF1FA15A0AD9F00777A3C /* entity_create_artist@2x.png in Resources */,
+				638BF1FD15A0AD9F00777A3C /* entity_create_bar@2x.png in Resources */,
+				638BF20015A0AD9F00777A3C /* entity_create_film@2x.png in Resources */,
+				638BF20315A0AD9F00777A3C /* entity_create_footer_shadow@2x.png in Resources */,
+				638BF20615A0AD9F00777A3C /* entity_create_other@2x.png in Resources */,
+				638BF20915A0AD9F00777A3C /* entity_create_restaurant@2x.png in Resources */,
+				638BF20C15A0AD9F00777A3C /* entity_create_song@2x.png in Resources */,
+				638BF20F15A0AD9F00777A3C /* entity_create_tv_series@2x.png in Resources */,
+				638BF27715A0C32A00777A3C /* SPLoginResources.bundle in Resources */,
+				632DAFCA15A1E2270049A7B0 /* entity_create_cafe@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8378,6 +8652,18 @@
 				632ECBAC159CBFD30047399F /* linked_accounts_greenbar@2x.png in Resources */,
 				632ECBAF159CBFD30047399F /* linked_accounts_lock.png in Resources */,
 				632ECBB2159CBFD30047399F /* linked_accounts_lock@2x.png in Resources */,
+				638BF1C415A0952B00777A3C /* stamped_logo@2x.png in Resources */,
+				638BF1F615A0AD9F00777A3C /* entity_create_album@2x.png in Resources */,
+				638BF1F915A0AD9F00777A3C /* entity_create_artist@2x.png in Resources */,
+				638BF1FC15A0AD9F00777A3C /* entity_create_bar@2x.png in Resources */,
+				638BF1FF15A0AD9F00777A3C /* entity_create_film@2x.png in Resources */,
+				638BF20215A0AD9F00777A3C /* entity_create_footer_shadow@2x.png in Resources */,
+				638BF20515A0AD9F00777A3C /* entity_create_other@2x.png in Resources */,
+				638BF20815A0AD9F00777A3C /* entity_create_restaurant@2x.png in Resources */,
+				638BF20B15A0AD9F00777A3C /* entity_create_song@2x.png in Resources */,
+				638BF20E15A0AD9F00777A3C /* entity_create_tv_series@2x.png in Resources */,
+				638BF27615A0C32A00777A3C /* SPLoginResources.bundle in Resources */,
+				632DAFC915A1E2270049A7B0 /* entity_create_cafe@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8935,6 +9221,18 @@
 				632ECBAB159CBFD30047399F /* linked_accounts_greenbar@2x.png in Resources */,
 				632ECBAE159CBFD30047399F /* linked_accounts_lock.png in Resources */,
 				632ECBB1159CBFD30047399F /* linked_accounts_lock@2x.png in Resources */,
+				638BF1C315A0952B00777A3C /* stamped_logo@2x.png in Resources */,
+				638BF1F515A0AD9F00777A3C /* entity_create_album@2x.png in Resources */,
+				638BF1F815A0AD9F00777A3C /* entity_create_artist@2x.png in Resources */,
+				638BF1FB15A0AD9F00777A3C /* entity_create_bar@2x.png in Resources */,
+				638BF1FE15A0AD9F00777A3C /* entity_create_film@2x.png in Resources */,
+				638BF20115A0AD9F00777A3C /* entity_create_footer_shadow@2x.png in Resources */,
+				638BF20415A0AD9F00777A3C /* entity_create_other@2x.png in Resources */,
+				638BF20715A0AD9F00777A3C /* entity_create_restaurant@2x.png in Resources */,
+				638BF20A15A0AD9F00777A3C /* entity_create_song@2x.png in Resources */,
+				638BF20D15A0AD9F00777A3C /* entity_create_tv_series@2x.png in Resources */,
+				638BF27515A0C32A00777A3C /* SPLoginResources.bundle in Resources */,
+				632DAFC815A1E2270049A7B0 /* entity_create_cafe@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9281,6 +9579,18 @@
 				63CAB164159E4696002D3A1E /* STSimpleLinkedAccounts.m in Sources */,
 				63CAB169159E46DF002D3A1E /* STSimpleLinkedAccount.m in Sources */,
 				6376B44D159F562B00860CDD /* STSpotify.m in Sources */,
+				638BF1CB15A0ABF700777A3C /* STNewNavigationBar.m in Sources */,
+				638BF1DE15A0AD8500777A3C /* STButtonTableCell.m in Sources */,
+				638BF1E115A0AD8500777A3C /* STCompressedTableCell.m in Sources */,
+				638BF1E415A0AD8500777A3C /* STSegmentedControl.m in Sources */,
+				638BF1EA15A0AD8500777A3C /* STTextViewTableCell.m in Sources */,
+				638BF21B15A0ADBA00777A3C /* CountriesViewController.m in Sources */,
+				638BF21E15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */,
+				638BF22115A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */,
+				63C4843015A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */,
+				63C4843815A387AC00CE8F25 /* STStampsViewController.m in Sources */,
+				63C4843E15A38CA900CE8F25 /* STCreditPageSource.m in Sources */,
+				63C4844315A3A6E500CE8F25 /* STAttributedLabel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9624,6 +9934,18 @@
 				63CAB163159E4696002D3A1E /* STSimpleLinkedAccounts.m in Sources */,
 				63CAB168159E46DF002D3A1E /* STSimpleLinkedAccount.m in Sources */,
 				6376B44C159F562B00860CDD /* STSpotify.m in Sources */,
+				638BF1CA15A0ABF700777A3C /* STNewNavigationBar.m in Sources */,
+				638BF1DD15A0AD8500777A3C /* STButtonTableCell.m in Sources */,
+				638BF1E015A0AD8500777A3C /* STCompressedTableCell.m in Sources */,
+				638BF1E315A0AD8500777A3C /* STSegmentedControl.m in Sources */,
+				638BF1E915A0AD8500777A3C /* STTextViewTableCell.m in Sources */,
+				638BF21A15A0ADBA00777A3C /* CountriesViewController.m in Sources */,
+				638BF21D15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */,
+				638BF22015A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */,
+				63C4842F15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */,
+				63C4843715A387AC00CE8F25 /* STStampsViewController.m in Sources */,
+				63C4843D15A38CA900CE8F25 /* STCreditPageSource.m in Sources */,
+				63C4844215A3A6E500CE8F25 /* STAttributedLabel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9978,6 +10300,18 @@
 				63CAB162159E4696002D3A1E /* STSimpleLinkedAccounts.m in Sources */,
 				63CAB167159E46DF002D3A1E /* STSimpleLinkedAccount.m in Sources */,
 				6376B44B159F562B00860CDD /* STSpotify.m in Sources */,
+				638BF1C915A0ABF700777A3C /* STNewNavigationBar.m in Sources */,
+				638BF1DC15A0AD8500777A3C /* STButtonTableCell.m in Sources */,
+				638BF1DF15A0AD8500777A3C /* STCompressedTableCell.m in Sources */,
+				638BF1E215A0AD8500777A3C /* STSegmentedControl.m in Sources */,
+				638BF1E815A0AD8500777A3C /* STTextViewTableCell.m in Sources */,
+				638BF21915A0ADBA00777A3C /* CountriesViewController.m in Sources */,
+				638BF21C15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */,
+				638BF21F15A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */,
+				63C4842E15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */,
+				63C4843615A387AC00CE8F25 /* STStampsViewController.m in Sources */,
+				63C4843C15A38CA900CE8F25 /* STCreditPageSource.m in Sources */,
+				63C4844115A3A6E500CE8F25 /* STAttributedLabel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10008,11 +10342,6 @@
 			isa = PBXTargetDependency;
 			name = RestKit;
 			targetProxy = 6380A78A1506928F003087EF /* PBXContainerItemProxy */;
-		};
-		638BF1BB159F96E400777A3C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = CocoaLibSpotify;
-			targetProxy = 638BF1BA159F96E400777A3C /* PBXContainerItemProxy */;
 		};
 		7E5893B4147C468B002268C4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -10047,14 +10376,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv7,
-					armv6,
-				);
-				"ARCHS[sdk=*]" = (
-					armv7,
-					armv6,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = NO;
@@ -10064,6 +10387,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -10080,18 +10404,18 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "StampedEther copy-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2.5;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "7A213450-F178-4B84-8729-F24BAE4C193E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7A213450-F178-4B84-8729-F24BAE4C193E";
+				PROVISIONING_PROFILE = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
 			};
@@ -10101,14 +10425,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv7,
-					armv6,
-				);
-				"ARCHS[sdk=*]" = (
-					armv7,
-					armv6,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
@@ -10118,6 +10436,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
@@ -10129,18 +10448,18 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "StampedEther copy-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2.5;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "7A213450-F178-4B84-8729-F24BAE4C193E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7A213450-F178-4B84-8729-F24BAE4C193E";
+				PROVISIONING_PROFILE = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
@@ -10151,14 +10470,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = (
-					armv7,
-					armv6,
-				);
-				"ARCHS[sdk=*]" = (
-					armv7,
-					armv6,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
@@ -10168,6 +10481,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
@@ -10179,18 +10493,18 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = "";
 				INFOPLIST_FILE = "StampedEther copy-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2.5;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "7A213450-F178-4B84-8729-F24BAE4C193E";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7A213450-F178-4B84-8729-F24BAE4C193E";
+				PROVISIONING_PROFILE = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				WARNING_CFLAGS = "";
 				WRAPPER_EXTENSION = app;
@@ -10219,6 +10533,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -10274,6 +10589,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
@@ -10325,6 +10641,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
@@ -10358,8 +10675,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -10370,15 +10687,15 @@
 					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
 					"\"$(SOURCE_ROOT)/RestKit/Build\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				PROVISIONING_PROFILE = "ECAFB5F3-3623-4122-B2C1-1B4E77D9258C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "ECAFB5F3-3623-4122-B2C1-1B4E77D9258C";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -10407,6 +10724,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";
@@ -10435,8 +10753,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -10450,14 +10768,14 @@
 					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
 					"\"$(SOURCE_ROOT)/RestKit/Build\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				PROVISIONING_PROFILE = "ECAFB5F3-3623-4122-B2C1-1B4E77D9258C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "ECAFB5F3-3623-4122-B2C1-1B4E77D9258C";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -10468,8 +10786,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Landon Judkins (YZY4U2N8WL)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -10480,15 +10798,15 @@
 					"$(SOURCE_ROOT)/Vendor/gtm-oauth/Source/**",
 					"\"$(SOURCE_ROOT)/RestKit/Build\"",
 				);
-				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				LIBRARY_SEARCH_PATHS = "\"$(SOURCE_ROOT)/RestKit/Build/$(BUILD_STYLE)-$(PLATFORM_NAME)\"";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
 				);
-				PROVISIONING_PROFILE = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "25CEF8AA-37A5-43FE-8291-F4A6929522B6";
+				PROVISIONING_PROFILE = "ECAFB5F3-3623-4122-B2C1-1B4E77D9258C";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "ECAFB5F3-3623-4122-B2C1-1B4E77D9258C";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRIP_INSTALLED_PRODUCT = NO;
@@ -10517,6 +10835,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -10563,6 +10882,7 @@
 					"\"$(SRCROOT)/Stamped\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/QuincyKit\"",
+					"\"$(SRCROOT)/cocoalibspotify/iOS Library/libspotify-12.1.45-iOS-universal\"",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Stamped/Stamped-Prefix.pch";

@@ -7,6 +7,7 @@
 //
 
 #import "STCachePage.h"
+#import "STCache.h"
 
 @interface STCachePage ()
 
@@ -240,6 +241,34 @@
         STCachePage* finalResult = [[[STCachePage alloc] initWithObjects:page.localObjects start:page.start end:page.end created:page.created andNext:self] autorelease];
         NSAssert2(finalResult.count >= page.count, @"Count should have been at least %d was %d", page.count, finalResult.count);
         return finalResult;
+    }
+}
+
+
+- (STCachePage*)pageWithUpdatesFromAccelerator:(id<STCacheAccelerator>)accelerator {
+    BOOL different = NO;
+    STCachePage* next = [self.next pageWithUpdatesFromAccelerator:accelerator];
+    if (next != self.next) {
+        different = YES;
+    }
+    NSMutableArray<STDatum>* localObjects = (id)[NSMutableArray array];
+    if (self.localObjects.count) {
+        for (id<STDatum> datum in self.localObjects) {
+            id<STDatum> replacement = [accelerator datumForCurrentDatum:datum];
+            if (replacement && [[replacement timestamp] isEqualToDate:[datum timestamp]]) {
+                [localObjects addObject:replacement];
+                different = YES;
+            }
+            else {
+                [localObjects addObject:datum];
+            }
+        }
+    }
+    if (different) {
+        return [[[STCachePage alloc] initWithObjects:localObjects start:self.start end:self.end created:self.created andNext:next] autorelease];
+    }
+    else {
+        return self;
     }
 }
 

@@ -18,11 +18,15 @@
 
 @interface FriendsViewController ()
 @property(nonatomic,retain,readonly) Friends *friends;
+
+@property (nonatomic, readonly, assign) FriendsRequestType requestType;
 - (void)presentTwitterAccounts;
 @end
 
 @implementation FriendsViewController
+
 @synthesize friends=_friends;
+@synthesize requestType = _requestType;
 
 - (void)commonInitWithType:(FriendsRequestType)type andQuery:(NSString*)query {
     _friends = [[Friends alloc] init];
@@ -89,11 +93,46 @@
     [super dealloc];
 }
 
+- (void)addTableHeaderWithAction:(SEL)action andTitle:(NSString*)title {
+    UIButton* header = [[[UIButton alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 40)] autorelease];
+    
+    UIView* text = [Util viewWithText:title
+                                 font:[UIFont stampedFontWithSize:12]
+                                color:[UIColor stampedGrayColor]
+                                 mode:UILineBreakModeTailTruncation
+                           andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+    [Util addGradientToLayer:header.layer withColors:[UIColor stampedLightGradient] vertical:YES];
+    text.frame = [Util centeredAndBounded:text.frame.size inFrame:header.frame];
+    [header addSubview:text];
+    [header addTarget:self action:action forControlEvents:UIControlEventTouchUpInside];
+    self.tableView.tableFooterView = header;
+}
+
+- (void)addFooter {
+    NSString* headerTitle = @"Invite your friends to stamped";
+    SEL headerAction = @selector(invite:);
+    BOOL useHeader = NO;
+    if (self.requestType == FriendsRequestTypeFacebook) {
+        useHeader = YES;
+    }
+    else if (self.requestType == FriendsRequestTypeTwitter) {
+        useHeader = YES;
+    }
+    else if (self.requestType == FriendsRequestTypeContacts) {
+        useHeader = YES;
+    }
+    if (useHeader) {
+        [self addTableHeaderWithAction:headerAction andTitle:headerTitle];
+    }
+    
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
         
     self.tableView.rowHeight = 64.0f;
     self.tableView.separatorColor = [UIColor colorWithWhite:0.0f alpha:0.05f];
+   
     
     BOOL addDoneButton = NO;
     if (!self.navigationItem.rightBarButtonItem && self.navigationController) {
@@ -226,7 +265,7 @@
             [self animateIn];
         }
     }
-    
+//    [self addFooter];
 }
 
 

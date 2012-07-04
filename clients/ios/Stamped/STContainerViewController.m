@@ -20,8 +20,6 @@ static const CGFloat kReloadHeight = 60.0;
 
 @interface STContainerViewController ()
 
-@property (nonatomic, assign) BOOL disableReload;
-@property (nonatomic, assign) BOOL shouldReload;
 @property (nonatomic, assign) BOOL loading;
 @property (nonatomic, readonly) UIView* shelfView;
 @property (nonatomic, readonly) UILabel* reloadLabel;
@@ -30,6 +28,7 @@ static const CGFloat kReloadHeight = 60.0;
 @property (nonatomic, readonly) UIActivityIndicatorView* spinnerView;
 @property (nonatomic, readwrite, assign) BOOL loadedToolbar;
 @property (nonatomic, readonly, retain) NSMutableArray* retainedObjects;
+@property (nonatomic, readwrite, assign) BOOL shouldReload;
 
 - (void)userPulledToReload;
 - (void)reloadData;
@@ -142,9 +141,10 @@ static const CGFloat kReloadHeight = 60.0;
     }
 }
 
+
 - (void)viewWillUnload {
-    [super viewWillUnload];
-    //NSLog(@"warning SHOULD IMPLEMENT");
+    self.loadedToolbar = NO;
+    [self unloadToolbar];   
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -180,7 +180,7 @@ static const CGFloat kReloadHeight = 60.0;
 #pragma mark - UIScrollViewDelegate methods
 
 - (void)scrollViewDidScroll:(UIScrollView*)scrollView {
-    
+    if (self.disableReload) return;
     self.shouldReload = scrollView.contentOffset.y < -kReloadHeight;
     if (NO)
         self.reloadLabel.text = kNotConnectedText;
@@ -204,6 +204,7 @@ static const CGFloat kReloadHeight = 60.0;
 }
 
 - (void)scrollViewDidEndDragging:(UIScrollView*)scrollView willDecelerate:(BOOL)decelerate {
+    if (self.disableReload) return;
     if (self.shouldReload) {
         self.loading = YES;
         [self userPulledToReload];

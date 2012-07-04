@@ -209,7 +209,7 @@
     label.textColor = [UIColor colorWithRed:0.600f green:0.600f blue:0.600f alpha:1.0f];
     label.shadowColor = [UIColor whiteColor];
     label.shadowOffset = CGSizeMake(0.0f, 1.0f);
-    label.font = [UIFont boldSystemFontOfSize:12];
+    label.font = [UIFont stampedBoldFontWithSize:12];
     label.text = title;
     
     [label sizeToFit];
@@ -299,6 +299,8 @@
             //sign out
             if (buttonIndex == 0) {
                 [[STRestKitLoader sharedInstance] logout];
+                
+                [Util goToInboxWithScope:STStampedAPIScopeEveryone animated:YES];
                 STAppDelegate* appDelegate = [UIApplication sharedApplication].delegate;
                 [appDelegate.menuController showSignIn];
             }

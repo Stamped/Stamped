@@ -13,9 +13,7 @@
 
 int main(int argc, char* argv[]) {
     if ([[STConfiguration sharedInstance] internalVersion] > 0) {
-        @autoreleasepool {
-            return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
-        }
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
     }
     else {
         NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];

@@ -350,6 +350,9 @@ static const CGFloat _bodyWidth = 214;
                 credits:(NSArray<STStampPreview>*)credits
                 andBody:(NSString*)body {
     
+    if (!body) {
+        body = @"";
+    }
     CGFloat width = _bodyWidth;
     CGFloat lineHeight = 16;
     
