@@ -59,13 +59,14 @@ if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
 defaultExceptions = [
-    (StampedAuthError, StampedHTTPError(401, kind='invalid_credentials', msg='There was an error during authentication')),
-    (StampedInputError, StampedHTTPError(400, kind='bad_request', msg='An error occurred. Please try again later.')),
-    (StampedIllegalActionError, StampedHTTPError(403, kind='bad_request', msg='An error occurred. Please try again later.')),
-    (StampedPermissionsError, StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges')),
-    (StampedDuplicationError, StampedHTTPError(409, kind='already_exists', msg='An error occurred. Please try again later')),
-    (StampedUnavailableError, StampedHTTPError(404, kind='not_found', msg='Not found')),
-    (StampedInternalError, StampedHTTPError(500, kind='internal', msg='An error occurred.  Please try again later')),
+    (StampedAuthError, StampedHTTPError(401,            kind='invalid_credentials', msg='There was an error during authentication')),
+    (StampedInputError, StampedHTTPError(400,           kind='bad_request',         msg='An error occurred. Please try again later.')),
+    (StampedIllegalActionError, StampedHTTPError(403,   kind='bad_request',         msg='An error occurred. Please try again later.')),
+    (StampedPermissionsError, StampedHTTPError(403,     kind='forbidden',           msg='Insufficient privileges')),
+    (StampedDuplicationError, StampedHTTPError(409,     kind='already_exists',      msg='An error occurred. Please try again later')),
+    (StampedUnavailableError, StampedHTTPError(404,     kind='not_found',           msg='Not found')),
+    (StampedMissingParametersError, StampedHTTPError(400, kind='bad_request',       msg='An error occurred.  Please try again later')),
+    (StampedInternalError, StampedHTTPError(500,        kind='internal',            msg='An error occurred.  Please try again later')),
 ]
 
 
