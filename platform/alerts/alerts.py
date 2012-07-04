@@ -269,8 +269,11 @@ class PushNotification(object):
 
     @property 
     def badge(self):
-        if self.__unreadCount > 0:
-            return self.__unreadCount
+        try:
+            if self.__unreadCount > 0:
+                return self.__unreadCount
+        except Exception as e:
+            logs.warning('Unable to get unread count: %s' % e)
         return -1
 
 
