@@ -1481,16 +1481,6 @@ class ActivityReference(Schema):
         cls.addProperty('entity_id',                        basestring)
         cls.addPropertyList('indices',                      int)
 
-class Alert(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('alert_id',                         basestring)
-        cls.addProperty('activity_id',                      basestring, required=True)
-        cls.addProperty('recipient_id',                     basestring, required=True)
-        cls.addProperty('user_id',                          basestring)
-        cls.addProperty('genre',                            basestring)
-        cls.addProperty('created',                          datetime)
-
 class Activity(Schema):
     @classmethod
     def setSchema(cls):
@@ -1586,6 +1576,17 @@ class EnrichedActivity(Schema):
         cls.addProperty('header',                           basestring)
         cls.addProperty('body',                             basestring)
         cls.addProperty('footer',                           basestring)
+
+class Alert(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('alert_id',                         basestring)
+        cls.addProperty('activity_id',                      basestring, required=True)
+        cls.addProperty('recipient_id',                     basestring, required=True)
+        cls.addProperty('subject',                          basestring)
+        cls.addProperty('verb',                             basestring)
+        cls.addNestedProperty('objects',                    ActivityObjectIds)
+        cls.addProperty('created',                          datetime)
 
 
 # ####### #
