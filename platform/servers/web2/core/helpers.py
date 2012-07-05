@@ -50,13 +50,24 @@ class StampedAPIProxy(object):
         
         if self._ec2:
             ts = HTTPTimeSlice.exportTimeSlice(HTTPTimeSlice().dataImport(params))
-            return self._transform(self.api.getStampCollection(ts, None))
+            
+            return self._transform_stamps(self.api.getStampCollection(ts, None))
         else:
             return self._handle_get("stamps/collection.json", params)
     
-    def _transform(self, value):
-        # TODO: is this necessary?
-        return json.loads(json.dumps(value))
+    def _transform_stamps(self, stamps):
+        if stamps is None:
+            stamps = []
+        
+        result = []
+        
+        for stamp in stamps:
+            try:
+                result.append(HTTPStamp().importStamp(stamp).dataExport())
+            except Exception:
+                logs.warn(utils.getFormattedException())
+        
+        return result
     
     def getFriends(self, params, limit=None):
         return self._get_users("friendships/friends.json", params, limit)
