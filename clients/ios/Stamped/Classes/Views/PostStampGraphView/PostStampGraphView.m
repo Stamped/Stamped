@@ -13,6 +13,8 @@
 #import "ImageLoader.h"
 #import "STGraphCallout.h"
 #import "STTextCalloutView.h"
+#import "STBlockUIView.h"
+#import "Util.h"
 
 @interface STPostGraphCell : UIControl {
     UIImage *_icon;

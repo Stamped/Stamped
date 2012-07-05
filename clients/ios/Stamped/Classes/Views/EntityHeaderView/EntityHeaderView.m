@@ -7,6 +7,9 @@
 //
 
 #import "EntityHeaderView.h"
+#import "Util.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 #define kLatLongSpan 600.0f / 111000.0f
 

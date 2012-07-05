@@ -10,6 +10,7 @@
 #import "STAvatarView.h"
 #import "FriendStatusButton.h"
 #import "UserStampView.h"
+#import "STEvents.h"
 
 @interface FriendTableCell ()
 @end

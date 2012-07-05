@@ -7,6 +7,7 @@
 //
 
 #import "STProgressView.h"
+#import <QuartzCore/QuartzCore.h>
 
 @implementation STProgressView
 @synthesize progress=_progress;

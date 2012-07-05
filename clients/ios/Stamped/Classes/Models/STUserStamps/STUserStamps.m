@@ -12,6 +12,7 @@
 #import "STSimpleStamp.h"
 #import "STDebug.h"
 #import "Util.h"
+#import "STEvents.h"
 
 #define kStampLimit 20
 

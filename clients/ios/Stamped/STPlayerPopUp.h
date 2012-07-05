@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STPlaylistItem.h"
 
 @interface STPlayerPopUp : UIView
 

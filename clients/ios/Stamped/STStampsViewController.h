@@ -7,6 +7,7 @@
 //
 
 #import "STRestViewController.h"
+#import "STCache.h"
 
 @interface STStampsViewController : STRestViewController
 

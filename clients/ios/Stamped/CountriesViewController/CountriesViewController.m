@@ -8,6 +8,7 @@
 
 #import "CountriesViewController.h"
 #import "STTableViewSectionHeader.h"
+#import "STNavigationItem.h"
 
 #define kCellCheckMarkTag 301
 

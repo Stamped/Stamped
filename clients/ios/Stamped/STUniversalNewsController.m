@@ -7,6 +7,7 @@
 //
 
 #import "STUniversalNewsController.h"
+#import <UIKit/UIKit.h>
 #import "STStampedAPI.h"
 #import "STActivity.h"
 #import "STActionManager.h"
@@ -17,6 +18,7 @@
 #import "STEvents.h"
 #import "STBlockUIView.h"
 #import <QuartzCore/QuartzCore.h>
+#import "QuartzUtils.h"
 
 static NSString* const STUniversalNewWasUpdatedNotification = @"STUniversalNewsWasUpdatedNotification";
 

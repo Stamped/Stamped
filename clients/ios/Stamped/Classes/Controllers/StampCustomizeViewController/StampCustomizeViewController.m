@@ -8,6 +8,8 @@
 
 #import "StampCustomizeViewController.h"
 #import "StampColorPickerSliderView.h"
+#import "STNavigationItem.h"
+#import "QuartzUtils.h"
 
 @interface StampCustomizeViewController ()
 @property(nonatomic,readonly,retain) StampColorPickerSliderView *slider;

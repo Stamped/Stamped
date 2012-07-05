@@ -7,6 +7,7 @@
 //
 
 #import "STTableViewSectionBackground.h"
+#import "QuartzUtils.h"
 
 @implementation STTableViewSectionBackground
 

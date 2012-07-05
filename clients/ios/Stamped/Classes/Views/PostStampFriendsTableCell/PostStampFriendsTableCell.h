@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STStampedBy.h"
+#import "STStamp.h"
 
 @protocol PostStampFriendsTableCellDelegate;
 @interface PostStampFriendsTableCell : UITableViewCell {

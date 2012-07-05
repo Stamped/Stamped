@@ -7,6 +7,8 @@
 //
 
 #import "STSegmentedControl.h"
+#import "STBlockUIView.h"
+#import "QuartzUtils.h"
 
 #define kSegmentCellHeight 58
 #define kSegmentBuffer 15

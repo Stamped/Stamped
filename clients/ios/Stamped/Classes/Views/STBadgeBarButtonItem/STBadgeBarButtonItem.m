@@ -9,6 +9,8 @@
 #import "STBadgeBarButtonItem.h"
 #import "STNavigationItem.h"
 #import "STUnreadActivity.h"
+#import "STEvents.h"
+#import "Util.h"
 
 @implementation STBadgeBarButtonItem
 

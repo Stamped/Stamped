@@ -17,6 +17,7 @@
 #import "STActionManager.h"
 #import "STEntityAnnotation.h"
 #import "STPreviewsView.h"
+#import "UIColor+Stamped.h"
 
 static NSString* const _cacheOverlayKey = @"Consumption.food.cacheOverlay";
 

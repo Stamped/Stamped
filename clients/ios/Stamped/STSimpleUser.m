@@ -8,6 +8,7 @@
 
 #import "STSimpleUser.h"
 #import "STStampedAPI.h"
+#import "STEvents.h"
 
 @implementation STSimpleUser
 

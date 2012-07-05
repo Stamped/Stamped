@@ -8,6 +8,8 @@
 
 #import "STMusicPickerViewController.h"
 #import "STTableViewSectionHeader.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 @interface STMusicPickerViewController ()
 @property(nonatomic,retain) NSArray *dataSource;

@@ -8,6 +8,7 @@
 
 #import "PostStampFriendView.h"
 #import "STAvatarView.h"
+#import "STStampedAPI.h"
 
 @implementation PostStampFriendView
 @synthesize user=_user;

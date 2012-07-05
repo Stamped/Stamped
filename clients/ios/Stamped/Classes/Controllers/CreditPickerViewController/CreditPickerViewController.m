@@ -10,6 +10,9 @@
 #import "CreditHeaderView.h"
 #import "CreditUserTableCell.h"
 #import "STSimpleUser.h"
+#import "STStampedBy.h"
+#import "STStampedAPI.h"
+#import "STNavigationItem.h"
 
 @interface CreditPickerViewController ()
 @property(nonatomic,retain) CreditHeaderView *headerView;

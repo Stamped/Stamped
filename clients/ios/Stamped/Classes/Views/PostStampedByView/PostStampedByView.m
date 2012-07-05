@@ -9,6 +9,7 @@
 #import "PostStampedByView.h"
 #import "STTableViewSectionBackground.h"
 #import "STAvatarView.h"
+#import "STStampedAPI.h"
 
 #define kPostStampedByMaxHeight 100.0f
 #define kStampedByCellWidth 39.0f

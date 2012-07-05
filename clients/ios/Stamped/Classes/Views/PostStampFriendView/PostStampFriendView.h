@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STUser.h"
+#import "STStamp.h"
 
 @class STAvatarView;
 @interface PostStampFriendView : UIControl {

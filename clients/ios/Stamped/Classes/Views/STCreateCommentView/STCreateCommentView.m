@@ -7,6 +7,12 @@
 //
 
 #import "STCreateCommentView.h"
+#import "STBlockUIView.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import "QuartzUtils.h"
+#import "STStampedAPI.h"
+#import "Util.h"
 
 #define KEYBOARD_HEIGHT 216.0f
 #define DEFAULT_CALLOUT_HEIGHT 30
@@ -267,7 +273,7 @@
         [self setLoading:NO];
         
         if (comment && !error) {
-            
+            self.text = @"";
             if ([(id)delegate respondsToSelector:@selector(stCreateCommentView:addedComment:)]) {
                 [self.delegate stCreateCommentView:self addedComment:comment];
             }

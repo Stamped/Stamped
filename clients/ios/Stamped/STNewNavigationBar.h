@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STBlockUIView.h"
+#import "STUser.h"
 
 @interface STNewNavigationBar : UINavigationBar{
     STBlockUIView *_userStrip;

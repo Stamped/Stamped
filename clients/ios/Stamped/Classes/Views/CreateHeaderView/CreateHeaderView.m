@@ -7,6 +7,9 @@
 //
 
 #import "CreateHeaderView.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import "Util.h"
 
 @implementation CreateHeaderView
 
