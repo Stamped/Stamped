@@ -1,25 +1,6 @@
 {% extends "base2.html" %}
 {% load stamped_tags %}
 
-<!-- Javascript dependencies
-     - - - - - - - - - - - -
-    
-    jQuery plugin dependencies
-    script: libs/jquery.infinitescroll.js
-    script: libs/jquery.isotope.js
-    script: libs/jquery.emoji.js
-    script: libs/jquery-easing.js
-    script: libs/history/jquery.history.js
-    script: libs/jquery.fancybox.js
-    script: libs/jquery.mousewheel.js
-    script: libs/jquery.jscrollpane.js
-    
-    script: libs/moment.js
-    
-    script: social_sharing.js
-    script: profile.js
--->
-
 <!-- 
     NOTE: this is a workaround because the built-in ssi tag doesn't support 
     context variables as arguments. We use ssi to include other html files 
@@ -29,8 +10,43 @@
 -->
 {% load ssi from future %}
 
+<!-- Javascript Dependencies => profile.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    jQuery plugin dependencies:
+        script: libs/jquery.infinitescroll.js
+        script: libs/jquery.isotope.js
+        script: libs/jquery.emoji.js
+        script: libs/jquery-easing.js
+        script: libs/history/jquery.history.js
+        script: libs/jquery.fancybox.js
+        script: libs/jquery.mousewheel.js
+        script: libs/jquery.jscrollpane.js
+    
+    Third-party library dependencies:
+        script: libs/moment.js
+    
+    Core stamped dependencies:
+        script: social_sharing.js
+        script: profile.js
+-->
+
+<!-- CSS Dependencies => profile.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        stylesheet: libs/jquery.fancybox.css?v=2.0.6
+        stylesheet: libs/jquery.jscrollpane.less
+    
+    Core stamped dependencies:
+        stylesheet: profile.less
+        stylesheet: sdetail.less
+-->
+
 {% block styles %}
     {{ block.super }}
+    
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.generated.css">-->
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">

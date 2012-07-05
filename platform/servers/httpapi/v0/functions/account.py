@@ -34,20 +34,20 @@ from Facebook           import *
 
 
 exceptions = [
-    (StampedInvalidEmailError,         StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address")),
-    (StampedInvalidScreenNameError,    StampedHTTPError(400, kind='invalid_credentials', msg="Invalid screen name")),
-    (StampedScreenNameInUseError,      StampedHTTPError(400, kind='invalid_credentials', msg="Screen name is already in use")),
-    (StampedBlackListedScreenNameError, StampedHTTPError(403, kind='forbidden',          msg='Invalid screen name')),
-    (StampedInvalidPasswordError,      StampedHTTPError(403, kind='invalid_credentials', msg='Incorrect password')),
-    (StampedInvalidWebsiteError,       StampedHTTPError(403, kind='invalid_credentials', msg="Could not update account website")),
-    (StampedInvalidStampColorsError,   StampedHTTPError(403, kind='invalid_credentials', msg="Invalid stamp colors")),
-    (StampedDuplicateEmailError,       StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that email address")),
-    (StampedDuplicateScreenNameError,  StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists with that screen name")),
-    (StampedAccountNotFoundError,      StampedHTTPError(404, kind='not_found',           msg='There was an error retrieving account information')),
-    (StampedAlreadyStampedAuthError,   StampedHTTPError(400, kind='bad_request',         msg='This account is already a Stamped account')),
-    (StampedLinkedAccountMismatchError, StampedHTTPError(400, kind='illegal_action',     msg="There was a problem verifying the third-party account")),
+    (StampedInvalidEmailError,         400, 'invalid_credentials', "Invalid email address"),
+    (StampedInvalidScreenNameError,    400, 'invalid_credentials', "Invalid screen name"),
+    (StampedScreenNameInUseError,      400, 'invalid_credentials', "Screen name is already in use"),
+    (StampedBlackListedScreenNameError, 403, 'forbidden',          'Invalid screen name'),
+    (StampedInvalidPasswordError,      403, 'invalid_credentials', 'Incorrect password'),
+    (StampedInvalidWebsiteError,       403, 'invalid_credentials', "Could not update account website"),
+    (StampedInvalidStampColorsError,   403, 'invalid_credentials', "Invalid stamp colors"),
+    (StampedDuplicateEmailError,       409, 'invalid_credentials', "An account already exists with that email address"),
+    (StampedDuplicateScreenNameError,  409, 'invalid_credentials', "An account already exists with that screen name"),
+    (StampedAccountNotFoundError,      404, 'not_found',           'There was an error retrieving account information'),
+    (StampedAlreadyStampedAuthError,   400, 'bad_request',         'This account is already a Stamped account'),
+    (StampedLinkedAccountMismatchError, 400, 'illegal_action',     "There was a problem verifying the third-party account"),
 ]
-exceptions_create = [(StampedInternalError,  StampedHTTPError(400, kind='internal', msg='There was a problem creating the account.  Please try again later.'))]
+exceptions_create = [(StampedInternalError,  400, 'internal', 'There was a problem creating the account.  Please try again later.')]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPAccountNew,
@@ -67,7 +67,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
 
     return transformOutput(output)
 
-exceptions_update = [(StampedInternalError, StampedHTTPError(400, kind='internal', msg='There was a problem upgrading the account.  Please try again later.'))]
+exceptions_update = [(StampedInternalError, 400, 'internal', 'There was a problem upgrading the account.  Please try again later.')]
 # upgrade account from third party auth to stamped auth
 @handleHTTPRequest(requires_client=True,
                    http_schema=HTTPAccountUpgradeForm,
@@ -86,8 +86,8 @@ def upgrade(request, client_id, authUserId, http_schema, **kwargs):
 
 
 exceptions_createWithFacebook = [
-    (StampedLinkedAccountAlreadyExistsError, StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Facebook user")),
-    (StampedThirdPartyError, StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Facebook")),
+    (StampedLinkedAccountAlreadyExistsError, 409, 'invalid_credentials', "An account already exists for this Facebook user"),
+    (StampedThirdPartyError, 400, 'third_party', "There was an error connecting to Facebook"),
 ]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
@@ -108,8 +108,8 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
     return transformOutput(output)
 
 exceptions_createWithTwitter = [
-    (StampedLinkedAccountAlreadyExistsError, StampedHTTPError(409, kind='invalid_credentials', msg="An account already exists for this Twitter user")),
-    (StampedThirdPartyError, StampedHTTPError(400, kind='third_party', msg="There was an error connecting to Twitter")),
+    (StampedLinkedAccountAlreadyExistsError, 409, 'invalid_credentials', "An account already exists for this Twitter user"),
+    (StampedThirdPartyError, 400, 'third_party', "There was an error connecting to Twitter"),
 ]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
@@ -148,7 +148,7 @@ def show(request, authUserId, **kwargs):
     return transformOutput(account.dataExport())
 
 
-exceptions_update = [(StampedInternalError, StampedHTTPError(400, kind='internal', msg='There was a problem updating the account.  Please try again later.'))]
+exceptions_update = [(StampedInternalError, 400, 'internal', 'There was a problem updating the account.  Please try again later.')]
 @handleHTTPRequest(http_schema=HTTPAccountUpdateForm,
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm,
                    exceptions=exceptions + exceptions_update)

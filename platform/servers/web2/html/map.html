@@ -2,15 +2,26 @@
 {% load stamped_tags %}
 {% load ssi from future %}
 
-<!-- Javascript dependencies
-     - - - - - - - - - - - -
+<!-- Javascript dependencies => map.generated.js
+     - - - - - - - - - - - - - - - - - - - - - -
     
-    script: libs/jquery.hotkeys.js
-    script: libs/handlebars.js
-    script: libs/infobox.js
-    script: libs/markerclusterer.js
+    jQuery plugin dependencies:
+        script: libs/jquery.hotkeys.js
     
-    script: map.js
+    Third-party library dependencies:
+        script: libs/handlebars.js
+        script: libs/infobox.js
+        script: libs/markerclusterer.js
+    
+    Core stamped dependencies:
+        script: map.js
+-->
+
+<!-- CSS Dependencies => map.generated.css
+     - - - - - - - - - - - - - - - - - - -
+    
+    Core stamped dependencies:
+        stylesheet: map.less
 -->
 
 {% block styles %}

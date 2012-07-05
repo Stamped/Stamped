@@ -2356,7 +2356,7 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
-        logs.debug('### addStamp section 2: %s' % (ime.time() - t1))
+        logs.debug('### addStamp section 2: %s' % (time.time() - t1))
         t1 = time.time()
 
         if imageUrl is not None:
@@ -2372,7 +2372,7 @@ class StampedAPI(AStampedAPI):
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
         logs.info('### stampExists: %s' % stampExists)
 
-        logs.debug('### addStamp section 3: %s' % (ime.time() - t1))
+        logs.debug('### addStamp section 3: %s' % (time.time() - t1))
         t1 = time.time()
 
         if not stampExists:
@@ -2397,7 +2397,7 @@ class StampedAPI(AStampedAPI):
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
-        logs.debug('### addStamp section 4: %s' % (ime.time() - t1))
+        logs.debug('### addStamp section 4: %s' % (time.time() - t1))
         t1 = time.time()
 
         return stamp
@@ -4271,8 +4271,8 @@ class StampedAPI(AStampedAPI):
         logs.debug("### getActivity section 2a: %s" % (time.time() - t1))
         t1 = time.time()
 
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
 
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
@@ -4728,4 +4728,3 @@ class StampedAPI(AStampedAPI):
         entry.created = datetime.utcnow()
 
         return self._clientLogsDB.addEntry(entry)
-

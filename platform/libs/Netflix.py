@@ -308,14 +308,14 @@ class Netflix(object):
         )
         userUrl = userInfo['resource']['link']['href']
         userId = userUrl[userUrl.rfind('/')+1:]
-        return self.getUserInfoWithId(userId, user_token, user_secret)['user']
+        return self.getUserInfoWithId(userId, user_token, user_secret)
 
     def getUserInfoWithId(self, user_id, user_token, user_secret):
         token = oauth.OAuthToken(user_token, user_secret)
         return self.__get(
             'users/%s' % user_id,
             token = token,
-        )
+        )['user']
 
     def getUserRatings(self, user_id, user_token, user_secret, netflix_ids=None):
         # Returns a list of tuples (netflix_id, rating), where rating is an int value
@@ -395,7 +395,6 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     from pprint import pprint
     netflix = Netflix()
 
-    netflix_id = BIGLEB_ID
     title = 'arrested development'
     if 'netflix_id' in params:  netflix_id  = params['netflix_id']
     if 'title' in params:       title       = params['title']
@@ -413,7 +412,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'getTitleDetails'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
