@@ -15,15 +15,15 @@ from logs import report
 
 try:
     import json, re, logs
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from libs.Factual               import globalFactual
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from utils                      import lazyProperty
     from functools                  import partial
     from urllib2                    import HTTPError
-    from GenericSource              import generatorSource
+    from resolve.GenericSource              import generatorSource
     from pprint                     import pformat
     from gevent.pool                import Pool
     from api.Schemas                import TimesSchema, HoursSchema

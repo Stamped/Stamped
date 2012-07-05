@@ -13,14 +13,14 @@ try:
     import utils
     import os, logs, re, time, urlparse, math, pylibmc, gevent
 
-    import Blacklist
+    from api import Blacklist
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
-    import Entity
-    import SchemaValidation
+    from api import Entity
+    from api import SchemaValidation
 
-    from auth                       import convertPasswordForStorage
+    from api.auth                       import convertPasswordForStorage
     from utils                      import lazyProperty
     from functools                  import wraps
     from errors                     import *
@@ -28,43 +28,43 @@ try:
     from pprint                     import pprint, pformat
     from operator                   import itemgetter, attrgetter
 
-    from AStampedAPI                import AStampedAPI
-    from AAccountDB                 import AAccountDB
-    from AEntityDB                  import AEntityDB
-    from APlacesEntityDB            import APlacesEntityDB
-    from AUserDB                    import AUserDB
-    from AStampDB                   import AStampDB
-    from ACommentDB                 import ACommentDB
-    from ATodoDB                    import ATodoDB
-    from ACollectionDB              import ACollectionDB
-    from AFriendshipDB              import AFriendshipDB
-    from AActivityDB                import AActivityDB
+    from api.AStampedAPI                import AStampedAPI
+    from api.AAccountDB                 import AAccountDB
+    from api.AEntityDB                  import AEntityDB
+    from api.APlacesEntityDB            import APlacesEntityDB
+    from api.AUserDB                    import AUserDB
+    from api.AStampDB                   import AStampDB
+    from api.ACommentDB                 import ACommentDB
+    from api.ATodoDB                    import ATodoDB
+    from api.ACollectionDB              import ACollectionDB
+    from api.AFriendshipDB              import AFriendshipDB
+    from api.AActivityDB                import AActivityDB
     from api.Schemas                import *
-    from ActivityCollectionCache    import ActivityCollectionCache
-    from Memcache                   import globalMemcache
-    from HTTPSchemas                import generateStampUrl
+    from api.ActivityCollectionCache    import ActivityCollectionCache
+    from libs.Memcache                   import globalMemcache
+    from api.HTTPSchemas                import generateStampUrl
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
-    from AmazonSource               import AmazonSource
-    from FactualSource              import FactualSource
-    from GooglePlacesSource         import GooglePlacesSource
-    from iTunesSource               import iTunesSource
-    from RdioSource                 import RdioSource
-    from SpotifySource              import SpotifySource
-    from TMDBSource                 import TMDBSource
-    from TheTVDBSource              import TheTVDBSource
-    from StampedSource              import StampedSource
+    from resolve.AmazonSource               import AmazonSource
+    from resolve.FactualSource              import FactualSource
+    from resolve.GooglePlacesSource         import GooglePlacesSource
+    from resolve.iTunesSource               import iTunesSource
+    from resolve.RdioSource                 import RdioSource
+    from resolve.SpotifySource              import SpotifySource
+    from resolve.TMDBSource                 import TMDBSource
+    from resolve.TheTVDBSource              import TheTVDBSource
+    from resolve.StampedSource              import StampedSource
 
     # TODO (travis): we should NOT be importing * here -- it's okay in limited
     # situations, but in general, this is very bad practice.
 
-    from Netflix                    import *
-    from Facebook                   import *
-    from Twitter                    import *
-    from GooglePlaces               import *
-    from Rdio                       import *
+    from libs.Netflix               import *
+    from libs.Facebook                   import *
+    from libs.Twitter                    import *
+    from libs.GooglePlaces               import *
+    from libs.Rdio                       import *
     
     from datetime                   import datetime, timedelta
 except Exception:

@@ -6,8 +6,8 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from MongoEntityCollection import MongoEntityCollection
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 
 class MongoSearchCacheCollection(AMongoCollection):
     

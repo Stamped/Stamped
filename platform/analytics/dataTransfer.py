@@ -2,9 +2,9 @@ import Globals
 
 import sys
 import keys.aws, logs, utils
-from MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 import boto
-from db.mongodb.MongoStatsCollection            import MongoStatsCollection
+from api.db.mongodb.MongoStatsCollection            import MongoStatsCollection
 from bson.objectid          import ObjectId
 from gevent.pool import Pool
 import sha

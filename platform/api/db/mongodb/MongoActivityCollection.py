@@ -11,10 +11,10 @@ from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
 from api.Schemas                            import *
 
-from AActivityDB                        import AActivityDB
-from MongoAlertQueueCollection          import MongoAlertQueueCollection
-from MongoActivityItemCollection        import MongoActivityItemCollection
-from MongoActivityLinkCollection        import MongoActivityLinkCollection
+from api.AActivityDB                        import AActivityDB
+from api.db.mongodb.MongoAlertQueueCollection          import MongoAlertQueueCollection
+from api.db.mongodb.MongoActivityItemCollection        import MongoActivityItemCollection
+from api.db.mongodb.MongoActivityLinkCollection        import MongoActivityLinkCollection
 
 class MongoActivityCollection(AActivityDB):
     

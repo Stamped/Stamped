@@ -11,8 +11,8 @@ from datetime import datetime
 from utils import lazyProperty
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
-from MongoStampCommentsCollection import MongoStampCommentsCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
+from api.db.mongodb.MongoStampCommentsCollection import MongoStampCommentsCollection
 
 from api.ACommentDB import ACommentDB
 

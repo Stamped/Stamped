@@ -10,10 +10,10 @@ import api.HTTPSchemas
 import os, pprint, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
-from schemas        import *
-from helpers        import *
+from servers.web2.core.schemas        import *
+from servers.web2.core.helpers        import *
 
-import travis_test
+from servers.web2.core import travis_test
 
 # TODO: stricter input schema validation
 

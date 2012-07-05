@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals
 import json, re, time, utils
 
-from MongoStampedAPI    import MongoStampedAPI
-from GooglePlaces       import GooglePlaces
-from Geocoder           import Geocoder
+from api.MongoStampedAPI    import MongoStampedAPI
+from libs.GooglePlaces       import GooglePlaces
+from libs.Geocoder           import Geocoder
 
 from gevent.pool        import Pool
 from optparse           import OptionParser

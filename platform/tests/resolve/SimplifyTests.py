@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from StampedTestUtils       import *
+from tests.StampedTestUtils       import *
 from resolve.Resolver       import *
 
 # TODO: add books, movies, apps, places, etc.

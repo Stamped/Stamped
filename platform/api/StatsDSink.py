@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils, logs
 import libs.ec2_utils, pickle, os, time
 
-from AStatsSink     import AStatsSink
+from api.AStatsSink     import AStatsSink
 from libs.StatsD    import StatsD
 from gevent.pool    import Pool
 from pprint         import pformat

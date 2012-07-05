@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import pprint, time, utils
 
-from S3ImageDB              import S3ImageDB
+from api.S3ImageDB              import S3ImageDB
 from api.HTTPSchemas        import HTTPTimeSlice
 from api.MongoStampedAPI    import MongoStampedAPI
 from libs.ImageCollages     import *
