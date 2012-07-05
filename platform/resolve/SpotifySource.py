@@ -129,7 +129,7 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
     @lazyProperty
     def albums(self):
         try:
-            album_list = self.full_data['albums']
+            album_list = self.full_data.get('albums', [])
         except LookupRequiredError:
             return []
         return [

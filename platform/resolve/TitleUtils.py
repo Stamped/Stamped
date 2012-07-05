@@ -78,7 +78,7 @@ def applyTitleTests(titleTests, searchResult, searchQuery):
 
 def makeTokenRegexp(token):
     """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
-    return re.compile("[^ ,-:\[(]%s[$ ,-:\])]" % token, re.IGNORECASE)
+    return re.compile("(^|[ ,-:\[(])%s($|[ ,-:\])])" % token, re.IGNORECASE)
 
 
 def makeDelimitedSectionRe(pattern):
@@ -149,7 +149,7 @@ def isDelimitedPrefix(a, b):
     return remainder and remainder[0] in delimiters
 
 
-POSSESSIVE_RE = re.compile('\'s[$\s]', re.IGNORECASE)
+POSSESSIVE_RE = re.compile('\'s($|\s)', re.IGNORECASE)
 NON_CHAR_LETTER_RE = re.compile('[ /.,:;"\'&-]')
 def tokenizeString(string):
     withoutPossessives = POSSESSIVE_RE.sub(' ', string)
@@ -192,12 +192,12 @@ def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1, useRa
 
 # These are things we're so confident don't belong in TV titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
-TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('\s*[^:,\[\(-]\s*The Complete ', re.IGNORECASE)
+TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*The Complete ', re.IGNORECASE)
 TV_SEASON1_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Seasons? ', re.IGNORECASE)
 TV_SEASON2_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
-TV_BOXED_SET_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Box(ed)? Set[:,\]\) $-]', re.IGNORECASE)
+TV_BOXED_SET_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Box(ed)? Set([:,\]\) -]|$)', re.IGNORECASE)
 TV_VOLUMES_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}[\]) ]+$', re.IGNORECASE)
-TV_BEST_OF_REGEX_CONFIDENT = re.compile('\s*[^:,\[\(-]\s*The Best of ', re.IGNORECASE)
+TV_BEST_OF_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*The Best of ', re.IGNORECASE)
 
 TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\)\s*$")
 

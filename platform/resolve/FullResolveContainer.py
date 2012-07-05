@@ -15,6 +15,8 @@ try:
     from EntityGroups           import *
     from ResolverSources        import *
     from pprint                 import pformat
+
+    import re
 except:
     report()
     raise
@@ -46,6 +48,7 @@ class FullResolveContainer(BasicSourceContainer):
         # Allow itunes to overwrite seed for iTunes id (necessary because ids can deprecate)
         self.setGroupPriority('itunes', 'itunes', seedPriority + 1)
 
+
 def buildQueryFromArgs(args):
     title = args[0]
     subcategory = args[1] if len(args) > 1 else None
@@ -58,7 +61,6 @@ def buildQueryFromArgs(args):
 
 
 def getEntityFromSearchId(searchId):
-    import re
     source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', searchId).groups()
 
     sources = {
@@ -73,7 +75,7 @@ def getEntityFromSearchId(searchId):
     }
 
     if source_name.lower() not in sources:
-        raise Exception('Source not found: %s (%s)' % (source_name, search_id))
+        raise Exception('Source not found: %s (%s)' % (source_name, searchId))
 
     source = sources[source_name.lower()]()
     proxy = source.entityProxyFromKey(source_id)
@@ -133,6 +135,9 @@ def main():
                 print( "%s" % pformat(v.dataExport()) )
             except Exception:
                 print( "%s" % pformat(v) )
+
+    from libs.CountedFunction import printFunctionCounts
+    printFunctionCounts()
 
 
 if __name__ == "__main__":

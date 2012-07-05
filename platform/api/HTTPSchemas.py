@@ -926,7 +926,6 @@ class HTTPComment(Schema):
         cls.addProperty('comment_id',                       basestring, required=True)
         cls.addNestedProperty('user',                       HTTPUserMini, required=True)
         cls.addProperty('stamp_id',                         basestring, required=True)
-        cls.addProperty('restamp_id',                       basestring)
         cls.addProperty('blurb',                            basestring, required=True)
         cls.addNestedPropertyList('blurb_references',       HTTPTextReference)
         cls.addProperty('created',                          basestring)

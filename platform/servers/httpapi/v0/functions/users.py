@@ -8,10 +8,9 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 exceptions = [
-    (StampedDocumentNotFoundError, StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data.")),
-    (StampedMissingParametersError, StampedHTTPError(400, kind='bad_request', msg="Missing parameters: user ids or screen names required")),
-    (StampedAccountNotFoundError, StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information')),
-    (StampedViewUserPermissionsError, StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to view user')),
+    (StampedMissingParametersError, 400, 'bad_request', "Missing parameters: user ids or screen names required"),
+    (StampedAccountNotFoundError, 404, 'not_found', 'There was an error retrieving account information'),
+    (StampedViewUserPermissionsError, 403, 'forbidden', 'Insufficient privileges to view user'),
 ]
 
 
@@ -152,7 +151,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-exceptions_findTwitter = [(StampedThirdPartyInvalidCredentialsError, StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Twitter credentials')) ]
+exceptions_findTwitter = [(StampedThirdPartyInvalidCredentialsError, 403, 'invalid_credentials', 'Invalid Twitter credentials') ]
 @handleHTTPRequest(http_schema=HTTPFindTwitterUser, 
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]},
                    exceptions=exceptions + exceptions_findTwitter)
@@ -168,8 +167,8 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
 
 
 exceptions_findFacebook = [
-    (StampedThirdPartyInvalidCredentialsError, StampedHTTPError(403, kind='invalid_credentials', msg='Invalid Facebook credentials')),
-    (StampedFacebookTokenError, StampedHTTPError(401, kind='facebook_auth', msg="Facebook login failed. Please reauthorize your account.")),
+    (StampedThirdPartyInvalidCredentialsError, 403, 'invalid_credentials', 'Invalid Facebook credentials'),
+    (StampedFacebookTokenError, 401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
 ]
 @handleHTTPRequest(http_schema=HTTPFindFacebookUser, 
                    parse_request_kwargs={'obfuscate':['user_token' ]},

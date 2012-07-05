@@ -9,16 +9,15 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 exceptions = [
-    (StampedDocumentNotFoundError, StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data.")),
-    (StampedAccountNotFoundError, StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information')),
-    (StampedOutOfStampsError, StampedHTTPError(403, kind='forbidden', msg='No more stamps remaining')),
-    (StampedNotLoggedInError, StampedHTTPError(401, kind='bad_request', msg='You must be logged in to perform this action.')),
-    (StampedRemoveStampPermissionsError, StampedHTTPError(403, kind='forbidden', msg='Insufficient privileges to remove stamp')),
-    (StampedViewStampPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view stamp")),
-    (StampedAddCommentPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to add comment")),
-    (StampedRemoveCommentPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to remove comment")),
-    (StampedViewCommentPermissionsError, StampedHTTPError(403, kind="forbidden", msg="Insufficient privileges to view comment")),
-    (StampedBlockedUserError, StampedHTTPError(403, kind='forbidden', msg="User is blocked")),
+    (StampedAccountNotFoundError, 404, 'not_found', 'There was an error retrieving account information'),
+    (StampedOutOfStampsError, 403, 'forbidden', 'No more stamps remaining'),
+    (StampedNotLoggedInError, 401, 'bad_request', 'You must be logged in to perform this action.'),
+    (StampedRemoveStampPermissionsError, 403, 'forbidden', 'Insufficient privileges to remove stamp'),
+    (StampedViewStampPermissionsError, 403, "forbidden", "Insufficient privileges to view stamp"),
+    (StampedAddCommentPermissionsError, 403, "forbidden", "Insufficient privileges to add comment"),
+    (StampedRemoveCommentPermissionsError, 403, "forbidden", "Insufficient privileges to remove comment"),
+    (StampedViewCommentPermissionsError, 403, "forbidden", "Insufficient privileges to view comment"),
+    (StampedBlockedUserError, 403, 'forbidden', "User is blocked"),
 ]
 
 def transformStamps(stamps):
@@ -56,8 +55,8 @@ def create(request, authUserId, data, **kwargs):
     return transformOutput(stamp.dataExport())
 
 exceptions_share = [
-    (StampedMissingParametersError, StampedHTTPError(400, kind='bad_request', msg='Missing third party service name')),
-    (StampedFacebookTokenError, StampedHTTPError(401, kind='facebook_auth', msg="Facebook login failed. Please reauthorize your account.")),
+    (StampedMissingParametersError, StampedHTTPError(400, 'bad_request', 'Missing third party service name')),
+    (StampedFacebookTokenError, StampedHTTPError(401, 'facebook_auth', "Facebook login failed. Please reauthorize your account.")),
 ]
 @handleHTTPRequest(http_schema=HTTPStampShare,
                    exceptions=exceptions + exceptions_share)
@@ -72,22 +71,20 @@ def share(request, authUserId, http_schema, data, **kwargs):
     try:
         stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
     except StampedLinkedAccountError:
-        raise StampedHTTPError(401, msg="Missing credentials for linked account")
+        raise StampedHTTPError(401, "Missing credentials for linked account")
     except StampedThirdPartyError:
-        raise StampedHTTPError(400, msg="There was an error connecting to the third-party service")
+        raise StampedHTTPError(400, "There was an error connecting to the third-party service")
 
     stamp = HTTPStamp().importStamp(stamp)
     return transformOutput(stamp.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPStampId,
-                   exceptions=exceptions)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPStampId, exceptions=exceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importStamp(stamp)
-    
-    return transformOutput(stamp.dataExport())
+    stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
+    return transformOutput(True)
+
 
 exceptions_show = [ (StampedPermissionsError, StampedHTTPError(403, "forbidden", "Insufficient privileges to view stamp")) ]
 @handleHTTPRequest(requires_auth=False,

@@ -10,8 +10,43 @@
 -->
 {% load ssi from future %}
 
+<!-- Javascript Dependencies => profile.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    jQuery plugin dependencies:
+        script: libs/jquery.infinitescroll.js
+        script: libs/jquery.isotope.js
+        script: libs/jquery.emoji.js
+        script: libs/jquery-easing.js
+        script: libs/history/jquery.history.js
+        script: libs/jquery.fancybox.js
+        script: libs/jquery.mousewheel.js
+        script: libs/jquery.jscrollpane.js
+    
+    Third-party library dependencies:
+        script: libs/moment.js
+    
+    Core stamped dependencies:
+        script: social_sharing.js
+        script: profile.js
+-->
+
+<!-- CSS Dependencies => profile.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        stylesheet: libs/jquery.fancybox.css?v=2.0.6
+        stylesheet: libs/jquery.jscrollpane.less
+    
+    Core stamped dependencies:
+        stylesheet: profile.less
+        stylesheet: sdetail.less
+-->
+
 {% block styles %}
     {{ block.super }}
+    
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.generated.css">-->
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
@@ -372,33 +407,13 @@
 {% block scripts %}
     {{ block.super }}
      
-     <!-- jQuery plugins -->
-    <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
-    <!--<script src="{{ STATIC_URL }}js/libs/jquery.colorbox{% if IS_PROD %}.min{% endif %}.js"></script>-->
-    <script src="{{ STATIC_URL }}js/libs/jquery.fancybox{% if IS_PROD %}.pack{% endif %}.js?v=2.0.6"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.hotkeys{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/glfx.js"></script>
+    <!-- Stamped profile scripts -->
+    <script src="{{ STATIC_URL }}js/profile.generated.js"></script>
     
     <!-- Social sharing plugins -->
     <script src="//platform.twitter.com/widgets.js"></script>
     <script src="//connect.facebook.net/en_US/all.js"></script>
     <script src="https://apis.google.com/js/plusone.js"></script>
-    
-    <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
-    
-    <!-- Misc library dependencies -->
-    <script src="{{ STATIC_URL }}js/libs/moment{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
-    
-    <!-- Stamped scripts -->
-    <script src="{{ STATIC_URL }}js/client.js"></script>
-    <script src="{{ STATIC_URL }}js/profile.js"></script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}

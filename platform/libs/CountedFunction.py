@@ -21,7 +21,7 @@ def countedFn(name=None, devOnly=True):
         @functools.wraps(userFn)
         def wrappedFn(*args, **kwargs):
             global functionCounts
-            fnName = name if name is not None else fnName
+            fnName = name if name is not None else userFn.__name__
             functionCounts[fnName] += 1
             return userFn(*args, **kwargs)
 
