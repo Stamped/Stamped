@@ -429,7 +429,7 @@ class StampedAPI(AStampedAPI):
         #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
 
         account = self.addAccount(account, tempImageUrl=tempImageUrl)
-        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[account.user_id, new_fb_account.user_token])
+        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[account.user_id, fb_acct.token])
         return account
 
     @API_CALL
@@ -4262,6 +4262,7 @@ class StampedAPI(AStampedAPI):
 
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
         for stamp in stamps:
+
             stampIds[str(stamp.stamp_id)] = stamp
 
         logs.debug("### getActivity section 2b: %s" % (time.time() - t1))
@@ -4648,3 +4649,6 @@ class StampedAPI(AStampedAPI):
         entry.created = datetime.utcnow()
 
         return self._clientLogsDB.addEntry(entry)
+
+
+
