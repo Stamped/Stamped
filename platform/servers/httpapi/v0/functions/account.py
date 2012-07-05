@@ -49,7 +49,7 @@ exceptions = [
     (StampedUnsetRequiredFieldError,   400, 'illegal_action',      "Cannot remove a required account field"),
     (StampedEmailInUseError,           400, 'invalid_credentials', "Email address is already in use"),
 ]
-exceptions_create = [(StampedInternalError,  400, 'internal', 'There was a problem creating the account.  Please try again later.')]
+exceptions_create = [(StampedInternalError,  400, 'internal', 'There was a problem creating the account. Please try again later.')]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPAccountNew,
@@ -69,7 +69,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
 
     return transformOutput(output)
 
-exceptions_update = [(StampedInternalError, 400, 'internal', 'There was a problem upgrading the account.  Please try again later.')]
+exceptions_update = [(StampedInternalError, 400, 'internal', 'There was a problem upgrading the account. Please try again later.')]
 # upgrade account from third party auth to stamped auth
 @handleHTTPRequest(requires_client=True,
                    http_schema=HTTPAccountUpgradeForm,
