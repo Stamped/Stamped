@@ -1773,22 +1773,20 @@ var g_update_stamps = null;
                 
                 // reenable gallery animations
                 enable_gallery_animations(true);
+                update_gallery_layout(true);
                 
                 if (!href) {
-                    update_gallery_layout(true);
                     init_header_subsections();
                 }
                 
                 resize_sdetail_wrapper($target, 'closing', function() {
                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
                     
-                    if (!href) {
-                        update_gallery_layout(true);
-                        
-                        setTimeout(function() {
-                            update_gallery_layout(true, null, true);
-                        }, 150);
-                    }
+                    update_gallery_layout(true);
+                    
+                    setTimeout(function() {
+                        update_gallery_layout(true, null, true);
+                    }, 150);
                 });
             };
             
