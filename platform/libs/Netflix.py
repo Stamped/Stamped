@@ -214,8 +214,6 @@ class Netflix(object):
             service         = netflix_id,
             expand          ='synopsis,cast,directors,formats,delivery_formats'
         )
-        import pprint
-        pprint.pprint (results)
         return results.get('catalog_title', None)
 
     def getInstantQueue(self, user_id, user_token, user_secret, start=0, count=100):
