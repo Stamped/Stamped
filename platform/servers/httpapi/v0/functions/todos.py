@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from httpapi.v0.helpers import *
+from servers.httpapi.v0.helpers import *
 
 exceptions = [
     (StampedActivityMissingRecipientError, 400, "bad_request", "There was an error adding the activity item."),

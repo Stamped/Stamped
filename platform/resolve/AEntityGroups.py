@@ -9,7 +9,7 @@ import Globals
 from logs import report
 
 try:
-    from BasicFieldGroup        import BasicFieldGroup
+    from resolve.BasicFieldGroup        import BasicFieldGroup
 except:
     report()
     raise

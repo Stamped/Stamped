@@ -16,14 +16,14 @@ from logs import report
 try:
     from utils                      import lazyProperty
     import logs
-    from Resolver                   import *
+    from resolve.Resolver                   import *
     from urllib                     import unquote
     from pprint                     import pprint
     import re
-    from iTunesSource               import iTunesSource
+    from resolve.iTunesSource               import iTunesSource
     from libs.Rdio                  import globalRdio
-    from RdioSource                 import RdioSource
-    from TMDBSource                 import TMDBMovie
+    from resolve.RdioSource                 import RdioSource
+    from resolve.TMDBSource                 import TMDBMovie
 except:
     report()
     raise

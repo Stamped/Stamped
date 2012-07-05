@@ -9,9 +9,9 @@ import Globals, utils
 import atexit
 
 from api.Schemas                import *
-from StampedTestUtils           import *
-from FixtureTest                import *
-from MongoStampedAPI            import MongoStampedAPI
+from tests.StampedTestUtils           import *
+from tests.framework.FixtureTest                import *
+from api.MongoStampedAPI            import MongoStampedAPI
 from utils                      import lazyProperty
 
 _accounts  = []

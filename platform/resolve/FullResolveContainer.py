@@ -11,9 +11,9 @@ import Globals
 from logs import report
 
 try:
-    from BasicSourceContainer   import BasicSourceContainer
-    from EntityGroups           import *
-    from ResolverSources        import *
+    from resolve.BasicSourceContainer   import BasicSourceContainer
+    from resolve.EntityGroups           import *
+    from resolve.ResolverSources        import *
     from pprint                 import pformat
 
     import re
@@ -80,7 +80,7 @@ def getEntityFromSearchId(searchId):
     source = sources[source_name.lower()]()
     proxy = source.entityProxyFromKey(source_id)
 
-    from EntityProxyContainer import EntityProxyContainer
+    from resolve.EntityProxyContainer import EntityProxyContainer
     return EntityProxyContainer(proxy).buildEntity()
 
 

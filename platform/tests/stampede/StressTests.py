@@ -7,10 +7,10 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from AStampedAPIHttpTestCase    import *
-from StampedTestUtils       import *
-from ASimulatedUser         import *
-from AStressTest            import StressTest
+from tests.AStampedAPIHttpTestCase    import *
+from tests.StampedTestUtils       import *
+from tests.stampede.ASimulatedUser         import *
+from tests.stampede.AStressTest            import StressTest
 from pprint                 import pprint
 from utils                  import abstract
 

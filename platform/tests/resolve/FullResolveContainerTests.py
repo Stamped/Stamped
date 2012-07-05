@@ -14,7 +14,7 @@ from logs import report
 
 try:
     from resolve.FullResolveContainer   import FullResolveContainer
-    from AStampedAPIHttpTestCase            import *
+    from tests.AStampedAPIHttpTestCase            import *
     from api.Schemas                    import Entity
     from pprint                         import pformat
     from datetime                       import datetime

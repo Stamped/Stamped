@@ -10,12 +10,12 @@ import Globals, pymongo
 from datetime                           import datetime
 from utils                              import lazyProperty
 
-from ATodoDB                            import ATodoDB
-from AMongoCollectionView               import AMongoCollectionView
-from MongoUserTodosEntitiesCollection   import MongoUserTodosEntitiesCollection
-from MongoUserTodosHistoryCollection    import MongoUserTodosHistoryCollection
+from api.ATodoDB                            import ATodoDB
+from api.db.mongodb.AMongoCollectionView               import AMongoCollectionView
+from api.db.mongodb.MongoUserTodosEntitiesCollection   import MongoUserTodosEntitiesCollection
+from api.db.mongodb.MongoUserTodosHistoryCollection    import MongoUserTodosHistoryCollection
 from api.Schemas                        import *
-from Entity                             import buildEntity
+from api.Entity                             import buildEntity
 
 class MongoTodoCollection(AMongoCollectionView, ATodoDB):
 

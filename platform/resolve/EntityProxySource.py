@@ -11,9 +11,9 @@ import Globals
 from logs import report
 
 try:
-    from AExternalSource        import AExternalSource
-    from EntityGroups           import *
-    from ResolverSources        import *
+    from resolve.AExternalSource        import AExternalSource
+    from resolve.EntityGroups           import *
+    from resolve.ResolverSources        import *
 except:
     report()
     raise

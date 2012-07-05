@@ -6,10 +6,10 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import Entity
+from api import Entity
 import copy, json, urllib, utils
 
-from Schemas    import *
+from api.Schemas    import *
 from optparse   import OptionParser
 from utils      import AttributeDict
 from pprint     import pprint

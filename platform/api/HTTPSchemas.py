@@ -9,13 +9,13 @@ __license__   = "TODO"
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
 import libs.ec2_utils
-import Entity
+from api import Entity
 
 from errors             import *
 from schema             import *
 from api.Schemas        import *
-from Entity             import *
-from SchemaValidation   import *
+from api.Entity             import *
+from api.SchemaValidation   import *
 
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries

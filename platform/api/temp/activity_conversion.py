@@ -7,13 +7,13 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 from api.db.mongodb.AMongoCollection import AMongoCollection
-from HTTPSchemas import *
+from api.HTTPSchemas import *
 from api.Schemas import *
 from datetime import datetime
 from pprint import pprint
-import Entity
+from api import Entity
 import pymongo
 
 api = MongoStampedAPI()

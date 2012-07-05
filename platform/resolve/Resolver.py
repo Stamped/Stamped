@@ -37,7 +37,7 @@ try:
     import unicodedata
     # from EntityProxyContainer import EntityProxyContainer
     
-    from BasicSource                import BasicSource
+    from resolve.BasicSource                import BasicSource
     from utils                      import lazyProperty
     from pprint                     import pprint, pformat
     from gevent.pool                import Pool
@@ -46,7 +46,7 @@ try:
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
     from time                       import time
-    from ResolverObject             import *
+    from resolve.ResolverObject             import *
 except:
     report()
     raise
@@ -1395,8 +1395,8 @@ def demo(generic_source, default_title, subcategory=None):
     """
     _verbose = True
     import sys
-    import StampedSource
-    import Schemas
+    from resolve import StampedSource
+    from api import Schemas
 
     title = default_title
     count = 1
@@ -1415,7 +1415,7 @@ def demo(generic_source, default_title, subcategory=None):
     if len(sys.argv) > 4:
         index = int(sys.argv[3])
 
-    from MongoStampedAPI import MongoStampedAPI
+    from api.MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
     query = {'titlel':title.lower()}

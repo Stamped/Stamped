@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from ElasticMongo   import AElasticMongo
-from ElasticSearch  import ElasticSearch
+from libs.ElasticMongo   import AElasticMongo
+from libs.ElasticSearch  import ElasticSearch
 
 class StampedElasticMongo(AElasticMongo):
     

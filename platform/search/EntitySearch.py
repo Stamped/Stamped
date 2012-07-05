@@ -21,8 +21,8 @@ from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
 from api.Schemas                import PlaceEntity
-from SearchResultDeduper        import SearchResultDeduper
-from DataQualityUtils           import *
+from search.SearchResultDeduper        import SearchResultDeduper
+from search.DataQualityUtils           import *
 
 
 def total_seconds(timedelta):

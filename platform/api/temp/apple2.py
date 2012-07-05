@@ -7,9 +7,9 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from sources.dumps.AppleEPFRelationalDB import *
-from MongoStampedAPI        import MongoStampedAPI
-from match.EntityMatcher    import EntityMatcher
+from crawler.sources.dumps.AppleEPFRelationalDB import *
+from api.MongoStampedAPI        import MongoStampedAPI
+from crawler.match.EntityMatcher    import EntityMatcher
 from gevent.pool            import Pool
 from libs.apple             import AppleAPI
 from optparse               import OptionParser

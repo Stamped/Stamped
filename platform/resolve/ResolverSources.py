@@ -9,20 +9,20 @@ import Globals
 from logs import report
 
 try:
-    from SeedSource             import SeedSource
-    from FactualSource          import FactualSource
-    from GooglePlacesSource     import GooglePlacesSource
-    from SinglePlatformSource   import SinglePlatformSource
-    from TMDBSource             import TMDBSource
-    from FormatSource           import FormatSource
-    from RdioSource             import RdioSource
-    from SpotifySource          import SpotifySource
-    from iTunesSource           import iTunesSource
-    from AmazonSource           import AmazonSource
-    from StampedSource          import StampedSource
-    from TheTVDBSource          import TheTVDBSource
-    from NetflixSource          import NetflixSource
-    from InstagramSource        import InstagramSource
+    from resolve.SeedSource             import SeedSource
+    from resolve.FactualSource          import FactualSource
+    from resolve.GooglePlacesSource     import GooglePlacesSource
+    from resolve.SinglePlatformSource   import SinglePlatformSource
+    from resolve.TMDBSource             import TMDBSource
+    from resolve.FormatSource           import FormatSource
+    from resolve.RdioSource             import RdioSource
+    from resolve.SpotifySource          import SpotifySource
+    from resolve.iTunesSource           import iTunesSource
+    from resolve.AmazonSource           import AmazonSource
+    from resolve.StampedSource          import StampedSource
+    from resolve.TheTVDBSource          import TheTVDBSource
+    from resolve.NetflixSource          import NetflixSource
+    from resolve.InstagramSource        import InstagramSource
 except:
     report()
     raise

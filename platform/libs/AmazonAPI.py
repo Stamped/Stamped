@@ -13,7 +13,7 @@ from BeautifulSoup  import BeautifulSoup
 from optparse       import OptionParser
 from api.Schemas    import BasicEntity
 from lxml           import objectify, etree
-from bottlenose     import Amazon
+from libs.bottlenose     import Amazon
 from errors         import Fail
 from pprint         import pprint
 

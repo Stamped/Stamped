@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import time
 
-from ASimulatedUserAction   import *
+from tests.stampede.ASimulatedUserAction   import *
 from gevent                 import Greenlet
 from gevent.pool            import Pool
 

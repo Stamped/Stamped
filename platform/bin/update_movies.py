@@ -9,8 +9,8 @@ import Globals
 import re, time, utils
 
 from gevent.pool            import Pool
-from MongoStampedAPI        import MongoStampedAPI
-from match.EntityMatcher    import EntityMatcher
+from api.MongoStampedAPI        import MongoStampedAPI
+from crawler.match.EntityMatcher    import EntityMatcher
 from optparse               import OptionParser
 from pprint                 import pprint
 

@@ -8,10 +8,10 @@ __license__   = "TODO"
 import Globals, utils, logs
 from datetime   import datetime
 from utils      import lazyProperty
-from Schemas    import *
+from api.Schemas    import *
 
-from AMongoCollection           import AMongoCollection
-from MongoInviteQueueCollection import MongoInviteQueueCollection
+from api.db.mongodb.AMongoCollection           import AMongoCollection
+from api.db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
 
 class MongoInvitationCollection(AMongoCollection):
     

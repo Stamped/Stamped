@@ -12,7 +12,7 @@ from utils import lazyProperty
 
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 # from AAlertDB import AAlertDB
 
 class MongoAlertQueueCollection(AMongoCollection):

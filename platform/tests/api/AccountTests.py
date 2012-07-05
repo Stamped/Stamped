@@ -10,10 +10,10 @@ import Globals, utils
 from utils                  import lazyProperty
 from pymongo.errors          import *
 from errors                 import *
-from framework.FixtureTest  import *
-from AStampedAPITestCase    import *
-from AStampedAPIHttpTestCase import *
-from MongoStampedAPI import MongoStampedAPI
+from tests.framework.FixtureTest  import *
+from tests.AStampedAPITestCase    import *
+from tests.AStampedAPIHttpTestCase import *
+from api.MongoStampedAPI import MongoStampedAPI
 from pprint import pprint
 
 import logs

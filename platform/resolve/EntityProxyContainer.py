@@ -11,10 +11,10 @@ import Globals
 from logs import report
 
 try:
-    import Entity
-    from BasicSourceContainer   import BasicSourceContainer
-    from EntityGroups           import *
-    from EntityProxySource      import EntityProxySource
+    from api import Entity
+    from resolve.BasicSourceContainer   import BasicSourceContainer
+    from resolve.EntityGroups           import *
+    from resolve.EntityProxySource      import EntityProxySource
 except:
     report()
     raise

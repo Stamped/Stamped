@@ -10,12 +10,12 @@ import Globals
 
 import calendar, pprint, datetime, sys, argparse
 import keys.aws, logs, utils
-import Queries
+from analytics import Queries
 
-from MongoStampedAPI                            import MongoStampedAPI
+from api.MongoStampedAPI                            import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
-from db.mongodb.MongoStatsCollection            import MongoStatsCollection
+from api.db.mongodb.MongoStatsCollection            import MongoStatsCollection
 
  
 #Handle command line input

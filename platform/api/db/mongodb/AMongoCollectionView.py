@@ -12,8 +12,8 @@ import libs.worldcities, unicodedata
 
 from errors             import *
 from utils              import AttributeDict
-from AMongoCollection   import AMongoCollection
-from Entity             import *
+from api.db.mongodb.AMongoCollection   import AMongoCollection
+from api.Entity             import *
 
 class AMongoCollectionView(AMongoCollection):
     

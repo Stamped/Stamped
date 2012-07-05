@@ -10,7 +10,7 @@ from logs import report
 
 try:
     import sys, inspect
-    from AEntityGroups        import *
+    from resolve.AEntityGroups        import *
 except:
     report()
     raise

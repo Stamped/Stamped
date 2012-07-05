@@ -11,7 +11,7 @@ from datetime import datetime
 from utils import lazyProperty
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 
 class MongoGuideCollection(AMongoCollection):
     

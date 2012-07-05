@@ -6,12 +6,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import Entity
+from api import Entity
 
-from Schemas                            import *
-from StampedTestUtils                   import *
-from ASearchTestSuite                   import ASearchTestSuite
-from db.mongodb.MongoSuggestedEntities  import MongoSuggestedEntities
+from api.Schemas                            import *
+from tests.StampedTestUtils                   import *
+from tests.search.ASearchTestSuite                   import ASearchTestSuite
+from api.db.mongodb.MongoSuggestedEntities  import MongoSuggestedEntities
 from pprint                             import pformat
 from collections                        import defaultdict
 

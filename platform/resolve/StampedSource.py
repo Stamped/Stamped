@@ -19,18 +19,18 @@ import re
 try:
     import logs
     
-    from Resolver                   import *
-    from ResolverObject             import *
-    from GenericSource              import GenericSource
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat
     from libs.LibUtils              import parseDateString
     from api.Schemas                import BasicEntity
-    from Schemas                    import BasicEntityMini as BasicEntityMini1
+    from api.Schemas                    import BasicEntityMini as BasicEntityMini1
     from api.Schemas                import BasicEntityMini as BasicEntityMini2
     from datetime                   import datetime
     from bson                       import ObjectId
-    from Entity                     import buildEntity
+    from api.Entity                     import buildEntity
 
     # TODO GET RID OF SEARCH IMPORTS
     from search.SearchResult import SearchResult
@@ -443,7 +443,7 @@ class StampedSource(GenericSource):
     @lazyProperty
     def __entityDB(self):
         if not self._stamped_api:
-            import MongoStampedAPI
+            from api import MongoStampedAPI
             self._stamped_api = MongoStampedAPI.globalMongoStampedAPI()
         
         return self._stamped_api._entityDB

@@ -16,9 +16,9 @@ from logs import report
 
 try:
     import logs, httplib, urllib
-    from RateLimiter import RateLimiter, RateException
-    from LRUCache import lru_cache
-    from CachedFunction import cachedFn
+    from libs.RateLimiter import RateLimiter, RateException
+    from libs.LRUCache import lru_cache
+    from libs.CachedFunction import cachedFn
     from libs.CountedFunction import countedFn
     from errors import StampedThirdPartyError
     

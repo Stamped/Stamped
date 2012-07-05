@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals, utils
 import libs.ec2_utils, os
 
-from AStampedAPIHttpTestCase    import *
+from tests.AStampedAPIHttpTestCase    import *
 from api.MongoStampedAPI    import MongoStampedAPI
 from api.HTTPSchemas        import *
 from api.Schemas            import *

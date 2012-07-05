@@ -17,7 +17,7 @@ except:
     utils.printException()
     pass
 
-from AImageDB           import AImageDB
+from api.AImageDB           import AImageDB
 from StringIO           import StringIO
 from errors             import *
 from api.Schemas        import ImageSizeSchema

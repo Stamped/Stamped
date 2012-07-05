@@ -12,16 +12,16 @@ import binascii, boto, keys.aws, libs.ec2_utils
  
 from optparse               import OptionParser
 from errors                 import *
-from HTTPSchemas            import *
-from SchemaValidation       import validateEmail
+from api.HTTPSchemas            import *
+from api.SchemaValidation       import validateEmail
 from utils                  import lazyProperty
 from jinja2                 import Template
 
-from db.mongodb.MongoAlertQueueCollection   import MongoAlertQueueCollection
-from db.mongodb.MongoInviteQueueCollection  import MongoInviteQueueCollection
-from db.mongodb.MongoAccountCollection      import MongoAccountCollection
-from MongoStampedAuth                       import MongoStampedAuth
-from MongoStampedAPI                        import MongoStampedAPI
+from api.db.mongodb.MongoAlertQueueCollection   import MongoAlertQueueCollection
+from api.db.mongodb.MongoInviteQueueCollection  import MongoInviteQueueCollection
+from api.db.mongodb.MongoAccountCollection      import MongoAccountCollection
+from api.MongoStampedAuth                       import MongoStampedAuth
+from api.MongoStampedAPI                        import MongoStampedAPI
 
 from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackWrapper
 

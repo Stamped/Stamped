@@ -11,7 +11,7 @@ import Globals
 from logs import report
 
 try:
-    from AExternalSource        import AExternalSource
+    from resolve.AExternalSource        import AExternalSource
 except:
     report()
     raise

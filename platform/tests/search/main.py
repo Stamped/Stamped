@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from StampedTestUtils import *
+from tests.StampedTestUtils import *
 
 if __name__ == '__main__':
     import tests.search

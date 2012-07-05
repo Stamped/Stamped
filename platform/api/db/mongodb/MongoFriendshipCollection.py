@@ -14,12 +14,12 @@ from utils                      import lazyProperty
 from pprint                     import pprint
 from api.Schemas                import *
 
-from AMongoCollection           import AMongoCollection
-from MongoUserCollection        import MongoUserCollection
-from MongoFriendsCollection     import MongoFriendsCollection
-from MongoFollowersCollection   import MongoFollowersCollection
-from MongoStampCollection       import MongoStampCollection
-from MongoBlockCollection       import MongoBlockCollection
+from api.db.mongodb.AMongoCollection           import AMongoCollection
+from api.db.mongodb.MongoUserCollection        import MongoUserCollection
+from api.db.mongodb.MongoFriendsCollection     import MongoFriendsCollection
+from api.db.mongodb.MongoFollowersCollection   import MongoFollowersCollection
+from api.db.mongodb.MongoStampCollection       import MongoStampCollection
+from api.db.mongodb.MongoBlockCollection       import MongoBlockCollection
 
 from api.AFriendshipDB          import AFriendshipDB
 
@@ -53,7 +53,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     @lazyProperty
     def collection_collection(self):
-        from MongoCollectionCollection  import MongoCollectionCollection
+        from api.db.mongodb.MongoCollectionCollection  import MongoCollectionCollection
         
         return MongoCollectionCollection()
     

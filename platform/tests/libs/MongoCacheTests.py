@@ -16,7 +16,7 @@ import functools
 import time
 from logs import log, report
 
-from AStampedAPIHttpTestCase            import *
+from tests.AStampedAPIHttpTestCase            import *
 from libs.MongoCache                    import mongoCachedFn, SerializationError
 from schema                             import Schema
 from api.db.mongodb.AMongoCollection    import MongoDBConfig

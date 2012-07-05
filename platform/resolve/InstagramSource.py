@@ -2,10 +2,10 @@
 
 from utils              import lazyProperty
 from libs.Instagram     import globalInstagram
-from GenericSource      import GenericSource
-from Resolver           import *
-from ResolverObject     import ResolverPlace
-from TitleUtils         import *
+from resolve.GenericSource      import GenericSource
+from resolve.Resolver           import *
+from resolve.ResolverObject     import ResolverPlace
+from resolve.TitleUtils         import *
 
 #class InstagramObject(object):
 #

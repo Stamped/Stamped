@@ -4,7 +4,7 @@ __date_ = "$Date$"
 
 import Globals
 import sys
-import oauth as oauth
+from libs import oauth as oauth
 import httplib
 import json
 import utils
@@ -12,9 +12,9 @@ import logs
 from errors import *
 
 from datetime           import datetime, timedelta
-from RateLimiter        import RateLimiter
-from LRUCache               import lru_cache
-from CachedFunction         import cachedFn
+from libs.RateLimiter        import RateLimiter
+from libs.LRUCache               import lru_cache
+from libs.CachedFunction         import cachedFn
 from libs.CountedFunction   import countedFn
 
 HOST              = 'api-public.netflix.com'

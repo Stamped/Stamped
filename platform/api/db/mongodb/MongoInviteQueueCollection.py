@@ -13,7 +13,7 @@ from errors import *
 
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 
 class MongoInviteQueueCollection(AMongoCollection):
     

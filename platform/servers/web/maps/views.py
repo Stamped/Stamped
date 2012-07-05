@@ -12,8 +12,8 @@ import os, utils, json, random, time, hashlib, logs, traceback, string
 
 from datetime           import *
 from errors             import *
-from HTTPSchemas        import *
-from MongoStampedAPI    import MongoStampedAPI
+from api.HTTPSchemas        import *
+from api.MongoStampedAPI    import MongoStampedAPI
 from django.http        import HttpResponse, Http404, HttpResponseRedirect, HttpResponsePermanentRedirect
 from django.shortcuts   import render_to_response
 

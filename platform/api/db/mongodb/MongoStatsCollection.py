@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, ast, pymongo
 
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 
 class MongoStatsCollection(AMongoCollection):
     

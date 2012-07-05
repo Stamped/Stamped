@@ -10,14 +10,14 @@ import Globals
 
 import calendar, pprint, datetime, sys, argparse
 import keys.aws, logs, utils
-import Queries
+from analytics import Queries
 
-from MongoStampedAPI                    import MongoStampedAPI
+from api.MongoStampedAPI                    import MongoStampedAPI
 from boto.sdb.connection                import SDBConnection
 from boto.exception                     import SDBResponseError
-from db.mongodb.MongoStatsCollection    import MongoStatsCollection
+from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                        import Pool
-from logsQuery                          import logsQuery
+from analytics.logsQuery                          import logsQuery
  
 #Handle command line input
 

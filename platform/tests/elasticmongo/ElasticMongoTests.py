@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals, utils
 import pyes, libs.corpus
 
-from StampedTestUtils   import *
+from tests.StampedTestUtils   import *
 from libs.ElasticMongo  import *
 
 from pyes.query         import *

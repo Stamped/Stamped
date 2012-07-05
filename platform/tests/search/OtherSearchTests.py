@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from StampedTestUtils       import *
+from tests.StampedTestUtils       import *
 from api.Schemas            import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
 

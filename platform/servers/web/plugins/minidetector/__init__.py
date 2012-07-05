@@ -1,5 +1,5 @@
 
-from useragents import search_strings
+from servers.web.plugins.minidetector.useragents import search_strings
 
 class Middleware(object):
     @staticmethod

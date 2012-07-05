@@ -14,13 +14,13 @@ from logs import report
 try:
     import logs, re
     from libs.TMDB                  import globalTMDB
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from abc                        import ABCMeta, abstractproperty
     from urllib2                    import HTTPError
     from datetime                   import datetime
-    from Resolver                   import *
-    from ResolverObject             import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
 except:
@@ -86,7 +86,7 @@ class FandangoSource(GenericSource):
 
 
 def testFandango(fandango_id, title, release_date):
-    import TMDBSource
+    from resolve import TMDBSource
     tmdb = TMDBSource.TMDBSource()
 
     source = tmdb.matchSource(movie)

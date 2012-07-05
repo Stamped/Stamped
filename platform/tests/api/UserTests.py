@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPIHttpTestCase import *
+from tests.AStampedAPIHttpTestCase import *
 
 CLIENT_ID = DEFAULT_CLIENT_ID
 CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]

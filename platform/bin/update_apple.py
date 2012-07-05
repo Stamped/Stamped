@@ -10,7 +10,7 @@ import re, time, utils
 
 from gevent.pool            import Pool
 from libs.applerss          import AppleRSS
-from MongoStampedAPI        import MongoStampedAPI
+from api.MongoStampedAPI        import MongoStampedAPI
 from optparse               import OptionParser
 from pprint                 import pprint
 from datetime               import datetime

@@ -9,9 +9,9 @@ __license__   = "TODO"
 import Globals
 import base64, os, utils, Image, binascii
 
-from AStampedAPIHttpTestCase import *
-from MongoStampedAPI import MongoStampedAPI
-from S3ImageDB import S3ImageDB
+from tests.AStampedAPIHttpTestCase import *
+from api.MongoStampedAPI import MongoStampedAPI
+from api.S3ImageDB import S3ImageDB
 
 # ###### #
 # IMAGES #

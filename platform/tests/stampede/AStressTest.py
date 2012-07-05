@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import gevent, random, time
 
-from ASimulatedUser import *
+from tests.stampede.ASimulatedUser import *
 from gevent         import Greenlet
 
 class StressTest(Greenlet):

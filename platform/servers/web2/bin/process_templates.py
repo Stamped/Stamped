@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import os, utils
 
-from core.templatetags.stamped_tags import global_handlebars_template_library
+from servers.web2.core.templatetags.stamped_tags import global_handlebars_template_library
 
 def process_templates(output_path):
     library   = global_handlebars_template_library()

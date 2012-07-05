@@ -1,4 +1,4 @@
 
 import Globals
-from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
 

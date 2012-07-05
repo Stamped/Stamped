@@ -8,7 +8,7 @@ __license__   = "TODO"
 __all__ = [ 'ADecorationDB' ]
 
 import Globals
-from logs import log, report
+from logs import report
 
 try:
     from utils      import abstract

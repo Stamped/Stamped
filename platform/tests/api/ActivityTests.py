@@ -7,9 +7,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, pprint
-from AStampedAPIHttpTestCase import *
-from MongoStampedAPI import *
-from Schemas import *
+from tests.AStampedAPIHttpTestCase import *
+from api.MongoStampedAPI import *
+from api.Schemas import *
 
 # ######## #
 # ACTIVITY #

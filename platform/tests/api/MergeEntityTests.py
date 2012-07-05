@@ -11,7 +11,7 @@ from tests.framework.FixtureTest import *
 import datetime
 from libs.MongoCache import mongoCachedFn
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
-from MongoStampedAPI import globalMongoStampedAPI
+from api.MongoStampedAPI import globalMongoStampedAPI
 from pprint import pprint
 
 ARTIST = 'Carly Rae Jepsen'

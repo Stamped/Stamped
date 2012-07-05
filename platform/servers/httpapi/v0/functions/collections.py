@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 from errors import StampedHTTPError
-from httpapi.v0.helpers import *
+from servers.httpapi.v0.helpers import *
 import time
 
 def transform_stamps(stamps):

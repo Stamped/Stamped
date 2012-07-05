@@ -16,14 +16,14 @@ from logs import report
 try:
     import logs
     from libs.Netflix               import globalNetflix
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from pprint                     import pformat
     from datetime                   import datetime
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
 except:
     report()
     raise

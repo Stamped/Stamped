@@ -8,7 +8,7 @@ __license__   = "TODO"
 
 import logs, time
 
-from ACollectionCache                           import ACollectionCache
+from api.ACollectionCache                           import ACollectionCache
 from utils                                      import lazyProperty
 
 class ActivityCollectionCache(ACollectionCache):

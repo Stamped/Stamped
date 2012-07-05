@@ -10,12 +10,12 @@ import heapq
 
 from collections                    import defaultdict
 from utils                          import lazyProperty
-from LRUCache                       import lru_cache
+from libs.LRUCache                       import lru_cache
 
-from MongoUserStampsCollection      import MongoUserStampsCollection
-from MongoInboxStampsCollection     import MongoInboxStampsCollection
-from MongoCreditReceivedCollection  import MongoCreditReceivedCollection
-from MongoFriendshipCollection      import MongoFriendshipCollection
+from api.db.mongodb.MongoUserStampsCollection      import MongoUserStampsCollection
+from api.db.mongodb.MongoInboxStampsCollection     import MongoInboxStampsCollection
+from api.db.mongodb.MongoCreditReceivedCollection  import MongoCreditReceivedCollection
+from api.db.mongodb.MongoFriendshipCollection      import MongoFriendshipCollection
 
 from api.ACollectionDB              import ACollectionDB
 

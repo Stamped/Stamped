@@ -12,7 +12,7 @@ from logs import log, report
 import logs
 
 try:
-    from AFieldGroup    import AFieldGroup
+    from resolve.AFieldGroup    import AFieldGroup
     from pprint         import pformat, pprint
     from schema         import Schema
 except:

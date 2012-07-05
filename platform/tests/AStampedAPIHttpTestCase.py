@@ -10,7 +10,7 @@ import Globals, utils
 import atexit, os, json, mimetools, sys, urllib, urllib2
 
 from pprint           import pprint
-from StampedTestUtils import *
+from tests.StampedTestUtils import *
 
 
 DEFAULT_CLIENT_ID       = "iphone8"

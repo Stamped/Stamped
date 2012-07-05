@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from StampedTestUtils       import *
+from tests.StampedTestUtils       import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
 from libs.Fandango          import Fandango
 

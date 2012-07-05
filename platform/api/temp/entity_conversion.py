@@ -1,6 +1,6 @@
 
 import Globals
-from Schemas            import *
+from api.Schemas            import *
 from Entity             import deriveTypeFromSubcategory
 from bson.objectid      import ObjectId
 from libs.LibUtils      import parseDateString

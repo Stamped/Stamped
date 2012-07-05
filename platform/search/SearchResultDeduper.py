@@ -8,8 +8,8 @@ __license__   = "TODO"
 import Globals
 from resolve.ResolverObject import *
 from resolve.Resolver import *
-from ScoringUtils import *
-from SearchResultCluster import *
+from search.ScoringUtils import *
+from search.SearchResultCluster import *
 
 class SearchResultDeduper(object):
 

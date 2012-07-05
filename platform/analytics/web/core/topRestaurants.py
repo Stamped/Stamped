@@ -13,7 +13,7 @@ import datetime
 import calendar
 import pprint
 import keys.aws, logs, utils
-from MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 from boto.sdb.connection    import SDBConnection
 from boto.exception         import SDBResponseError
 from bson.code import Code

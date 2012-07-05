@@ -11,13 +11,13 @@ import Globals
 
 import keys.aws, logs, utils
 
-from logsQuery                          import logsQuery
-from MongoStampedAPI                    import MongoStampedAPI
+from analytics.web.core.logsQuery                          import logsQuery
+from api.MongoStampedAPI                    import MongoStampedAPI
 from boto.sdb.connection                import SDBConnection
 from boto.exception                     import SDBResponseError
-from db.mongodb.MongoStatsCollection    import MongoStatsCollection
+from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from datetime                           import datetime, timedelta
-from topStamped                         import getTopStamped
+from analytics.web.core.topStamped                         import getTopStamped
 
 
 utils.init_db_config('peach.db2')

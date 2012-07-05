@@ -13,10 +13,10 @@ import datetime
 import calendar
 import pprint
 import keys.aws, logs, utils
-from MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 from boto.sdb.connection    import SDBConnection
 from boto.exception         import SDBResponseError
-from db.mongodb.MongoStatsCollection            import MongoStatsCollection
+from api.db.mongodb.MongoStatsCollection            import MongoStatsCollection
 from bson.code import Code
 
 #This file contains all analytics queries supported by the Stats.py module

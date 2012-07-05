@@ -14,10 +14,10 @@ import logs, utils
 
 from boto.sdb.connection                import SDBConnection
 from boto.exception                     import SDBResponseError
-from db.mongodb.MongoStatsCollection    import MongoStatsCollection
+from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                        import Pool
-from logsQuery                          import logsQuery
-from mongoQuery                         import mongoQuery
+from analytics.web.core.logsQuery                          import logsQuery
+from analytics.web.core.mongoQuery                         import mongoQuery
  
 class Stats():
     

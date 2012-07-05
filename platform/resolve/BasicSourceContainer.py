@@ -12,13 +12,13 @@ from logs import log, report
 
 try:
     import sys, traceback, string
-    from ASourceContainer       import ASourceContainer
-    from ASourceController      import ASourceController
+    from resolve.ASourceContainer       import ASourceContainer
+    from resolve.ASourceController      import ASourceController
     from datetime               import datetime
     from datetime               import timedelta
     from copy                   import deepcopy
     from pprint                 import pformat, pprint
-    from Entity                 import buildEntity
+    from api.Entity                 import buildEntity
     import logs                 
     from libs.ec2_utils         import is_prod_stack
 except Exception:

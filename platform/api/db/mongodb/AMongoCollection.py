@@ -14,7 +14,7 @@ from errors                 import *
 from utils                  import AttributeDict, getPythonConfigFile, Singleton, lazyProperty
 from datetime               import datetime
 from pymongo.errors         import AutoReconnect, DuplicateKeyError
-from MongoCollectionProxy   import MongoCollectionProxy
+from api.db.mongodb.MongoCollectionProxy   import MongoCollectionProxy
 
 class MongoDBConfig(Singleton):
     def __init__(self):
