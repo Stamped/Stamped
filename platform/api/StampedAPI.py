@@ -2912,20 +2912,16 @@ class StampedAPI(AStampedAPI):
         for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
             repliedUserId = prevComment.user.user_id
 
-            if repliedUserId not in commentedUserIds \
-                and repliedUserId not in mentionedUserIds \
-                and repliedUserId not in repliedUserIds \
+            if repliedUserId not in commentedUserIds.union(mentionedUserIds).union(repliedUserIds) \
                 and repliedUserId != authUserId:
-                logs.info('\n### passed first test round')
-                replied_user_id = prevComment.user.user_id
 
                 # Check if block exists between user and previous commenter
                 friendship              = Friendship()
                 friendship.user_id      = authUserId
-                friendship.friend_id    = replied_user_id
+                friendship.friend_id    = repliedUserId
 
                 if self._friendshipDB.blockExists(friendship) == False:
-                    repliedUserIds.add(replied_user_id)
+                    repliedUserIds.add(repliedUserId)
 
         if len(repliedUserIds) > 0:
             self._addReplyActivity(authUserId, list(repliedUserIds), stamp.stamp_id, comment.comment_id)
