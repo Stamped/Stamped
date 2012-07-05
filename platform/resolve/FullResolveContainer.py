@@ -134,6 +134,9 @@ def main():
             except Exception:
                 print( "%s" % pformat(v) )
 
+    from libs.CountedFunction import *
+    printFunctionCounts()
+
 
 if __name__ == "__main__":
     main()
