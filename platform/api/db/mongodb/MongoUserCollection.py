@@ -369,12 +369,12 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         # new format find
         data = self._collection.find(
-            {"linked.twitter.user_id": {"$in": twitterIds}}
+            {"linked.twitter.linked_user_id": {"$in": twitterIds}}
         ).limit(limit)
 
         for item in data:
             user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['twitter']['user_id']
+            user.search_identifier = item['linked']['twitter']['linked_user_id']
             result.append(user)
         return result
 
@@ -393,12 +393,12 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         # new format find
         data = self._collection.find(
-                {"linked.facebook.user_id": {"$in": facebookIds}}
+                {"linked.facebook.linked_user_id": {"$in": facebookIds}}
         ).limit(limit)
 
         for item in data:
             user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['facebook']['user_id']
+            user.search_identifier = item['linked']['facebook']['linked_user_id']
             result.append(user)
         
         return result
