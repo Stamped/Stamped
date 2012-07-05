@@ -3891,17 +3891,12 @@ class StampedAPI(AStampedAPI):
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.todos')
 
-        # Stamp
-        if stampId is not None:
-            stamp = self._stampDB.getStamp(stampId)
-            stampOwner = stamp.user.user_id
-
         # Enrich todo
         todo = self._enrichTodo(todo, user=user, entity=entity, stamp=users_stamp, friendIds=friendIds, authUserId=authUserId)
 
         tasks.invoke(tasks.APITasks.addTodo, 
                         args=[authUserId, entity.entity_id], 
-                        kwargs={'stampId': stamp.stamp_id, 'previouslyTodoed': previouslyTodoed})
+                        kwargs={'stampId': stampId, 'previouslyTodoed': previouslyTodoed})
 
         return todo
 
@@ -3909,6 +3904,11 @@ class StampedAPI(AStampedAPI):
         
         # Friends
         friendIds = self._friendshipDB.getFriends(authUserId)
+
+        # Stamp
+        if stampId is not None:
+            stamp = self._stampDB.getStamp(stampId)
+            stampOwner = stamp.user.user_id
 
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
@@ -3940,8 +3940,6 @@ class StampedAPI(AStampedAPI):
         if stampId is not None:
             tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId, 'todoStampId':stampId})
 
-        return todo
-
     @API_CALL
     def completeTodo(self, authUserId, entityId, complete):
         ### TODO: Fail gracefully if todo doesn't exist
@@ -3972,9 +3970,9 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeTodo(self, authUserId, entityId):
         ### TODO: Fail gracefully if todo doesn't exist
-        RawTodo = self._todoDB.getTodo(authUserId, entityId)
+        rawTodo = self._todoDB.getTodo(authUserId, entityId)
 
-        if not RawTodo or not RawTodo.todo_id:
+        if not rawTodo or not rawTodo.todo_id:
             return True
 
         self._todoDB.removeTodo(authUserId, entityId)
@@ -3982,8 +3980,8 @@ class StampedAPI(AStampedAPI):
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=-1)
 
-        if todo.stamp is not None and todo.stamp.stamp_id is not None:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
+        if rawTodo.stamp_id is not None:
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[rawTodo.stamp_id])
 
         return True
 
