@@ -1,12 +1,15 @@
 
 var init_social_sharing = function($scope, params) {
     if (!!$scope && !!params) {
-        var $tweet_buttons = $scope.find('.twitter-share-button');
+        var $tweet_buttons   = $scope.find('.twitter-share-button');
+        var $fb_like_buttons = $scope.find('.fb-like');
+        
         var text = "Check out this stamp of " + params.title;
         
         // TODO: prefer .data or .attr?
-        $tweet_buttons.attr("data-text", text);
-        $tweet_buttons.attr("data-url",  params.url);
+        $tweet_buttons.attr("data-text",    text);
+        $tweet_buttons.attr("data-url",     params.url);
+        $fb_like_buttons.attr("data-href",  params.url);
     }
     
     // Twitter

@@ -123,7 +123,7 @@
             </div>
             
             <div class='share-button twitter'>
-                <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-hashtags="stamped">Tweet</a>
+                <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp">Tweet</a>
             </div>
             
             <div class='share-button google'>
@@ -136,11 +136,11 @@
 <!-- stamp-card-image.template.html -->
 <script id='stamp-card-image' type='text/html' class='handlebars-template'>
     <div class="stamp-preview stamp-category-{{entity.category}} stamp-subcategory-{{entity.subcategory}}">
-        <div class='preview-image stamp-user-image'>
-            {{#contents}}
+        {{#contents}}
+            <div class='preview-image stamp-user-image'>
                 {{entity_image}}
-            {{/contents}}
-        </div>
+            </div>
+        {{/contents}}
     </div>
 </script>
 
