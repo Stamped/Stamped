@@ -9,7 +9,7 @@ import Globals, utils
 import os, re, time, urllib2
 
 from gevent.pool import Pool
-from AEntitySource import AExternalEntitySource
+from crawler.AEntitySource import AExternalEntitySource
 from Schemas import Entity
 
 __all__ = [ "UrbanspoonCrawler" ]
@@ -170,6 +170,6 @@ class UrbanspoonCrawler(AExternalEntitySource):
         
         self._output.put(entity)
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('urbanspoon', UrbanspoonCrawler)
 

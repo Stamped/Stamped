@@ -10,8 +10,8 @@ import json, logs, string, sys, urllib, urllib2
 
 from pprint         import pprint
 from optparse       import OptionParser
-from Geocoder       import Geocoder
-from AEntitySource  import AExternalServiceEntitySource
+from libs.Geocoder       import Geocoder
+from crawler.AEntitySource  import AExternalServiceEntitySource
 from Schemas        import Entity
 
 class GoogleLocal(AExternalServiceEntitySource):

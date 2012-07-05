@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals, utils
 import gzip, json, math, re, string, time, sys, unicodedata
 
-from MongoStampedAPI    import MongoStampedAPI
-from HTTPSchemas        import *
-from Schemas            import *
+from api.MongoStampedAPI    import MongoStampedAPI
+from api.HTTPSchemas        import *
+from api.Schemas            import *
 from gevent.pool        import Pool
 from optparse           import OptionParser
 from pprint             import pprint, pformat
