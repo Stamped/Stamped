@@ -160,27 +160,6 @@ def update(request, authUserId, http_schema, schema, **kwargs):
     user    = HTTPUser().importUser(account)
     return transformOutput(user.dataExport())
 
-##@handleHTTPRequest(parse_request=False)
-##@require_http_methods(["POST"])
-##def update(request, authUserId, **kwargs):x
-##    ### TODO: Carve out password changes, require original password sent again?
-##
-##    ### TEMP: Generate list of changes. Need to do something better eventually..
-##    schema = parseRequest(HTTPAccountSettings(), request)
-##    data   = schema.dataExport()
-##
-##    for k, v in data.iteritems():
-##        if v == '':
-##            data[k] = None
-##
-##    ### TODO: Verify email is valid
-##    account = stampedAPI.updateAccountSettings(authUserId, data)
-##
-##    account     = HTTPAccount().importAccount(account)
-##
-##    return transformOutput(account.dataExport())
-
-
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp,
                    exceptions=exceptions)
 @require_http_methods(["POST"])
