@@ -15,8 +15,6 @@ from helpers        import *
 
 import travis_test
 
-ENABLE_TRAVIS_TEST = (False and not IS_PROD)
-
 # TODO: stricter input schema validation
 
 def _is_static_profile_image(url):
@@ -102,69 +100,52 @@ def handle_profile(request, schema, **kwargs):
     friends       = []
     followers     = []
     
-    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
-        # useful debugging utility -- circumvent dev server to speed up reloads
-        user        = travis_test.user
-        user_id     = user['user_id']
-        
-        stamps      = travis_test.stamps
-        
-        if schema.category is not None:
-            stamps  = filter(lambda s: s['entity']['category'] == schema.category or ('coordinates' in s['entity'] and s['entity']['coordinates'] is not None and schema.category == 'place'), stamps)
-        
-        if schema.subcategory is not None:
-            stamps  = filter(lambda s: s['entity']['subcategory'] == schema.subcategory, stamps)
-        
-        stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
+    if ajax and schema.user_id is not None:
+        user        = None
+        user_id     = schema.user_id
     else:
-        if ajax and schema.user_id is not None:
-            user        = None
-            user_id     = schema.user_id
-        else:
-            user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
-            user_id     = user['user_id']
-        
-        # simple sanity check validation of user_id
-        if utils.tryGetObjectId(user_id) is None:
-            raise StampedInputError("invalid user_id")
-        
-        #utils.log(pprint.pformat(schema.dataExport()))
-        schema_data = schema.dataExport()
-        del schema_data['screen_name']
-        schema_data['user_id'] = user_id
-        
-        stamps = stampedAPIProxy.getUserStamps(schema_data)
-        
-        if user is None:
-            user = {
-                'user_id' : user_id
-            }
-            
-            if len(stamps) > 0:
-                user2    = stamps[0]['user']
-                user2_id = user2['user_id']
-                
-                if user2_id is None or user2_id != user_id:
-                    raise StampedInputError("mismatched user_id")
-                else:
-                    user.update(user2)
-            else:
-                user = stampedAPIProxy.getUser(dict(user_id=user_id))
-                
-                if user['user_id'] is None or user['user_id'] != user_id:
-                    raise StampedInputError("mismatched user_id")
+        user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
+        user_id     = user['user_id']
     
-    if not ajax:
-        if ENABLE_TRAVIS_TEST:
-            friends     = travis_test.friends
-            followers   = travis_test.followers
+    # simple sanity check validation of user_id
+    if utils.tryGetObjectId(user_id) is None:
+        raise StampedInputError("invalid user_id")
+    
+    #utils.log(pprint.pformat(schema.dataExport()))
+    schema_data = schema.dataExport()
+    del schema_data['screen_name']
+    schema_data['user_id'] = user_id
+    
+    stamps = stampedAPIProxy.getUserStamps(schema_data)
+    
+    if user is None:
+        user = {
+            'user_id' : user_id
+        }
+        
+        if len(stamps) > 0:
+            user2    = stamps[0]['user']
+            user2_id = user2['user_id']
+            
+            if user2_id is None or user2_id != user_id:
+                raise StampedInputError("mismatched user_id")
+            else:
+                user.update(user2)
         else:
-            params      = dict(user_id=user_id, screen_name=screen_name)
-            friends     = stampedAPIProxy.getFriends  (params, limit=10)
-            followers   = stampedAPIProxy.getFollowers(params, limit=10)
+            user = stampedAPIProxy.getUser(dict(user_id=user_id))
+            
+            if user['user_id'] is None or user['user_id'] != user_id:
+                raise StampedInputError("mismatched user_id")
+    
+    """
+    if not ajax:
+        params      = dict(user_id=user_id, screen_name=screen_name)
+        friends     = stampedAPIProxy.getFriends  (params, limit=10)
+        followers   = stampedAPIProxy.getFollowers(params, limit=10)
         
         friends   = _shuffle_split_users(friends)
         followers = _shuffle_split_users(followers)
+    """
     
     #utils.log("USER:")
     #utils.log(pprint.pformat(user))

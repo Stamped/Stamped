@@ -20,13 +20,14 @@ LESS_CSS_SOURCES			= $(strip \
 LESS_CSS_TARGETS			= $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS_TARGET_SUFFIX))
 
 JS_BASE_DIR					= assets/js
+CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 HTML_PAGES					= profile map
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
+GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^[ \t]*stylesheet:[ \t]*' $1 | sed 's/[ \t]*stylesheet:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
 JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE).generated.js)
-#$(call GET_JS_DEPENDENCIES,html/profile.html)
-
+CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(CSS_BASE_DIR)/$(PAGE).generated.css)
 
 TEMPLATE_DIRS				= templates
 TEMPLATE_SUFFIX				= template.html

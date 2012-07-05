@@ -33,20 +33,29 @@ class StampedAPIProxy(object):
     
     def __init__(self):
         self._prod = IS_PROD
-        self.api = globalMongoStampedAPI()
+        self._ec2  = utils.is_ec2()
+        
+        self.api   = globalMongoStampedAPI()
     
     def getUser(self, params):
-        if self._prod:
-            raise NotImplementedError
+        if self._ec2:
+            user = self.api.getUser(HTTPUserId().dataImport(params), None)
+            
+            return HTTPUser().importUser(user).dataExport()
         else:
             return self._handle_get("users/show.json", params)
     
     def getUserStamps(self, params):
-        if self._prod:
-            raise NotImplementedError
+        params['scope'] = 'user'
+        
+        if self._ec2:
+            return self._transform(self.api.getStampCollection(HTTPTimeSlice.exportTimeSlice(params), None))
         else:
-            params['scope'] = 'user'
             return self._handle_get("stamps/collection.json", params)
+    
+    def _transform(self, value):
+        # TODO: is this necessary?
+        return json.loads(json.dumps(value))
     
     def getFriends(self, params, limit=None):
         return self._get_users("friendships/friends.json", params, limit)
@@ -58,11 +67,12 @@ class StampedAPIProxy(object):
         return self._get_users("stamps/likes/show.json", params, limit)
     
     def getTodos(self, params, limit=None):
-        # TODO: this endpoint doesn't yet
         return self._get_users("stamps/todos/show.json", params, limit)
     
     def _get_users(self, path, params, limit=None):
         if self._prod:
+            # TODO TODO TODO _ec2
+            
             raise NotImplementedError
         else:
             response = self._handle_get(path, params)
@@ -79,8 +89,10 @@ class StampedAPIProxy(object):
                 return []
     
     def getStampFromUser(self, user_id, stamp_num):
-        if self._prod:
-            raise NotImplementedError
+        if self._ec2:
+            stamp = self.api.getStampFromUser(userId=user_id, stampNumber=stamp_num)
+            
+            return HTTPStamp().importStamp(stamp).dataExport()
         else:
             return self._handle_get("stamps/show.json", {
                 'user_id'   : user_id, 
@@ -88,23 +100,24 @@ class StampedAPIProxy(object):
             })
     
     def getEntity(self, entity_id):
-        if self._prod:
-            raise NotImplementedError
+        if self._ec2:
+            entity = self.api.getEntity(HTTPEntityIdSearchId().dataImport({'entity_id' : entity_id}), None)
+            
+            return HTTPEntity().importEntity(entity, None).dataExport()
         else:
             return self._handle_get("entities/show.json", {
                 'entity_id' : entity_id
             })
     
     def getEntityMenu(self, entity_id):
-        if self._prod:
-            raise NotImplementedError
+        if self._ec2:
+            menu = self.api.getMenu(entity_id)
+            
+            return HTTPMenu().importMenu(menu).dataExport()
         else:
             return self._handle_get("entities/menu.json", {
                 'entity_id' : entity_id
             })
-    
-    def _handle_local_get(self, func, params):
-        pass
     
     def _handle_get(self, path, data):
         params = urllib.urlencode(data)
