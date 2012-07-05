@@ -34,10 +34,6 @@ class MongoDBConfig(Singleton):
     @property
     def isValid(self):
         return 'mongodb' in self.config and 'hosts' in self.config.mongodb 
-
-        # return 'mongodb' in self.config and \
-        #           'host' in self.config.mongodb and \
-        #           'port' in self.config.mongodb
     
     def _init(self):
         if utils.is_ec2():
@@ -78,11 +74,6 @@ class MongoDBConfig(Singleton):
         if self._connection:
             return self._connection
         
-        # TODO: have a more consistent approach to handling AutoReconnect!
-        logs.debug("Creating connection")
-        #for line in traceback.format_stack():
-        #    logs.debug(line)
-        
         reinitialized = False
         max_delay = 16
         delay = 1
@@ -105,7 +96,6 @@ class MongoDBConfig(Singleton):
                     self._connection = pymongo.Connection(hosts,
                                                           read_preference=pymongo.ReadPreference.SECONDARY)
                 
-                #self._connection.stamped.read_preference = pymongo.ReadPreference.SECONDARY
                 return self._connection
             except AutoReconnect as e:
                 if delay > max_delay:
@@ -276,6 +266,9 @@ class AMongoCollection(object):
             return True
     
     def _removeMongoDocuments(self, documentIds):
+        if documentIds is None or len(documentIds) == 0:
+            return True
+
         # Confused here. Supposed to return None on success, so I guess it's 
         # working, but should probably test more.
         if self._collection.remove({'_id': {'$in': documentIds}}):

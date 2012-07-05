@@ -8,6 +8,7 @@
 
 #import "STAttributedLabel.h"
 #import "STActionManager.h"
+#import "Util.h"
 
 @interface STAttributedLabel () <TTTAttributedLabelDelegate>
 

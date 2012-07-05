@@ -30,7 +30,7 @@ class StampedAPITodoHttpTest(AStampedAPIHttpTestCase):
 
 class StampedAPITodosShow(StampedAPITodoHttpTest):
     def test_show(self):
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
             }
@@ -38,7 +38,7 @@ class StampedAPITodosShow(StampedAPITodoHttpTest):
         self.assertEqual(len(result), 1)
 
     def test_show_nothing(self):
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             }
@@ -48,7 +48,7 @@ class StampedAPITodosShow(StampedAPITodoHttpTest):
 class StampedAPITodosComplete(StampedAPITodoHttpTest):
     def test_complete(self):
         todo = self.completeTodo(self.tokenB, self.entity['entity_id'], True)
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
             }
@@ -57,7 +57,7 @@ class StampedAPITodosComplete(StampedAPITodoHttpTest):
 
     def test_uncomplete(self):
         todo = self.completeTodo(self.tokenB, self.entity['entity_id'], False)
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
             }
@@ -74,7 +74,7 @@ class StampedAPITodosPreviews(StampedAPITodoHttpTest):
         self.todo = self.createTodo(self.tokenC, self.entity['entity_id'])
         self.todo = self.createTodo(self.tokenD, self.entity['entity_id'])
 
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
             }
@@ -96,7 +96,7 @@ class StampedAPITodosAlreadyComplete(StampedAPITodoHttpTest):
         self.stampB     = self.createStamp(self.tokenB, self.entityB['entity_id'])
         self.todoB      = self.createTodo(self.tokenB, self.entityB['entity_id'])
 
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
             }
@@ -114,9 +114,8 @@ class StampedAPITodosAlreadyComplete(StampedAPITodoHttpTest):
 
 class StampedAPITodosAlreadyOnList(StampedAPITodoHttpTest):
     def test_already_on_list(self):
-        with expected_exception():
-            self.todoB = self.createTodo(self.tokenB, self.entity['entity_id'])
-
+        todo = self.createTodo(self.tokenB, self.entity['entity_id'])
+        self.assertTrue(self.todo['todo_id'] == todo['todo_id'])
 
 class StampedAPITodosViaStamp(StampedAPITodoHttpTest):
     def test_show_via_stamp(self):
@@ -125,7 +124,7 @@ class StampedAPITodosViaStamp(StampedAPITodoHttpTest):
             self.entity['entity_id'],\
             stampId=self.stamp['stamp_id'])
 
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenB['access_token'],
             }
@@ -135,7 +134,7 @@ class StampedAPITodosViaStamp(StampedAPITodoHttpTest):
     def test_todo_own_stamp(self):
         self.todo = self.createTodo(self.tokenA, self.entity['entity_id'], stampId=self.stamp['stamp_id'])
 
-        path = "todos/show.json"
+        path = "todos/collection.json"
         data = {
             "oauth_token": self.tokenA['access_token'],
             }

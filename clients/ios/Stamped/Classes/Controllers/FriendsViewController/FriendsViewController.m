@@ -15,6 +15,10 @@
 #import "SignupWelcomeViewController.h"
 #import "STSimpleUser.h"
 #import "FindFriendsViewController.h"
+#import "STEvents.h"
+#import "Util.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 @interface FriendsViewController ()
 @property(nonatomic,retain,readonly) Friends *friends;
@@ -292,19 +296,15 @@
 #pragma mark - Facebook Notifications
 
 - (void)facebookAuthFinished:(NSNotification*)notification {
-    
     _performingAuth = NO;
     NSString *token = [[[STFacebook sharedInstance] facebook] accessToken];
     _friends.requestParameters = [NSDictionary dictionaryWithObject:token forKey:@"user_token"];
     [self reloadDataSource];
-    
 }
 
 - (void)facebookAuthFailed:(NSNotification*)notification {
-    
     _performingAuth = NO;
     [self dataSourceDidFinishLoading];
-
 }
 
 

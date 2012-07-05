@@ -12,6 +12,7 @@
 #import "STDebug.h"
 #import "STStampedAPI.h"
 #import "STSimpleUserDetail.h"
+#import "STEvents.h"
 
 static id __instance;
 
@@ -112,7 +113,7 @@ static id __instance;
     
     [[STStampedAPI sharedInstance] createAccountWithPassword:password accountParameters:params andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
         if (error) {
-            [STEvents postEvent:EventTypeSignupFailed];
+            [STEvents postEvent:EventTypeSignupFailed identifier:nil object:error];
             [[STDebug sharedInstance] log:[error localizedDescription]];
             NSLog(@"email signup error %@", [error localizedDescription]);
         } else {
@@ -128,7 +129,7 @@ static id __instance;
         
         if (error) {
             
-            [STEvents postEvent:EventTypeSignupFailed];
+            [STEvents postEvent:EventTypeSignupFailed identifier:nil object:error];
             [[STDebug sharedInstance] log:[error localizedDescription]];
             NSLog(@"facebook signup error %@", [error localizedDescription]);
 

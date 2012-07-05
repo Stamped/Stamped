@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <RestKit/RestKit.h>
 #import "STStampPreview.h"
+#import "STStamp.h"
 
 @interface STSimpleStampPreview : NSObject <STStampPreview, NSCoding>
 

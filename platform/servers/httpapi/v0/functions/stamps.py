@@ -79,14 +79,12 @@ def share(request, authUserId, http_schema, data, **kwargs):
     return transformOutput(stamp.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPStampId,
-                   exceptions=exceptions)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPStampId, exceptions=exceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importStamp(stamp)
-    
-    return transformOutput(stamp.dataExport())
+    stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
+    return transformOutput(True)
+
 
 exceptions_show = [ (StampedPermissionsError, StampedHTTPError(403, "forbidden", "Insufficient privileges to view stamp")) ]
 @handleHTTPRequest(requires_auth=False,

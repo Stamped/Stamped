@@ -36,6 +36,8 @@
 #import "STMenuController.h"
 #import "STUserViewController.h"
 #import "STUnreadActivity.h"
+#import "STNavigationItem.h"
+#import "STAppDelegate.h"
 
 @interface STInboxViewController ()
 

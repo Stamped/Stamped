@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "STCalloutView.h"
+#import <QuartzCore/QuartzCore.h>
 
 @interface STTextCalloutView : STCalloutView {
     CATextLayer *_textLayer;

@@ -8,6 +8,7 @@
 
 #import "STTextPopoverView.h"
 #import "QuartzUtils.h"
+#import "STAppDelegate.h"
 
 #define CALLOUT_HEIGHT 50
 #define OUT_ANIMATION_DURATION 0.2f

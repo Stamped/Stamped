@@ -7,6 +7,7 @@
 //
 
 #import "UserStampView.h"
+#import "Util.h"
 
 @implementation UserStampView
 @synthesize size;

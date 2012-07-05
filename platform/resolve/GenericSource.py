@@ -66,13 +66,7 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
     return source
 
 def listSource(items, **kwargs):
-    def gen():
-        try:
-            for item in items:
-                yield item
-        except Exception:
-            pass
-    return generatorSource(gen(), **kwargs)
+    return generatorSource(iter(items), **kwargs)
 
 def multipleSource(source_functions, initial_timeout=None, final_timeout=None, **kwargs):
     def gen():

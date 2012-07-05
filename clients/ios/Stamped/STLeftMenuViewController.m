@@ -34,6 +34,7 @@
 #import "STPlayerPopUp.h"
 #import "STEvents.h"
 #import "UIFont+Stamped.h"
+#import "STAppDelegate.h"
 
 #define kAvatarViewTag 101
 

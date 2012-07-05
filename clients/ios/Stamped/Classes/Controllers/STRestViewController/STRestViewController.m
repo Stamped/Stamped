@@ -6,6 +6,7 @@
 //
 
 #import "STRestViewController.h"
+#import "Util.h"
 
 static CGFloat _shelfOffset = 9;
 

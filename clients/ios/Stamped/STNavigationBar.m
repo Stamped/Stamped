@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <CoreText/CoreText.h>
 #import "UIColor+Stamped.h"
+#import "Util.h"
 
 @interface STNavigationBar ()
 - (void)initialize;

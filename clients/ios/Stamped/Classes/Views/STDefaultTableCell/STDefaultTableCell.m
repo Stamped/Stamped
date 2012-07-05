@@ -7,6 +7,8 @@
 //
 
 #import "STDefaultTableCell.h"
+#import "STBlockUIView.h"
+#import "QuartzUtils.h"
 
 @implementation STDefaultTableCell
 @synthesize titleLabel=_titleLabel;

@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "STGenericCollectionSlice.h"
 #import "STStamp.h"
+#import "STTypes.h"
+#import "STCancellation.h"
 
 @class STStampsViewSource;
 

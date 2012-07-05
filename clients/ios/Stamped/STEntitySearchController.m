@@ -15,6 +15,8 @@
 #import "STTableViewSectionHeader.h"
 #import "CreateStampViewController.h"
 #import "CreateEntityViewController.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 #define kAddEntityCellTag 101
 
@@ -204,7 +206,6 @@ static const CGFloat _offscreenCancelPadding = 5;
         
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
-            NSLog(@"SearchSections:%d", sectionObject.entities.count);
             return sectionObject.entities.count + 1; // plus one to add 'add' cell
         }
         
@@ -356,17 +357,16 @@ static const CGFloat _offscreenCancelPadding = 5;
     BOOL add = NO;
     if (tableView == self.searchResultsTableView) {
         
-#warning this should take the user to create entity, not implemented yet
         NSInteger count = 0;
         if (self.autoCompleteResults.count) {
             count = self.autoCompleteResults.count;
         } else if (self.searchSections && indexPath.section < self.searchSections.count) {
             if (indexPath.section < self.searchSections.count) {
                 id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
-                if (count == 0) {
+                if ([sectionObject entities].count == 0) {
                     add = YES;
                 }
-                else if (indexPath.row >= count) {
+                else if (indexPath.row >= [sectionObject entities].count) {
                     add = YES;
                 }
             }
@@ -393,16 +393,6 @@ static const CGFloat _offscreenCancelPadding = 5;
             [self.searchView resignKeyboard];
             [self performSearchWithText:autoCompleteResult.completion];
         }
-        else {
-            
-#warning former crasher, needs fix
-        }
-        /*
-        id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
-        [self.searchView setText:autoCompleteResult.completion];
-        [self.searchView resignKeyboard];
-        [self performSearchWithText:autoCompleteResult.completion];
-         */
     } else {
         
         id<STEntitySearchResult> result = nil;

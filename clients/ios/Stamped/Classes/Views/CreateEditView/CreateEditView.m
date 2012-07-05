@@ -9,6 +9,8 @@
 #import "CreateEditView.h"
 #import "STAvatarView.h"
 #import <CoreText/CoreText.h>
+#import "STUser.h"
+#import "STStampedAPI.h"
 
 @interface CreateCreditToolbar : UIControl {
     UILabel *_titleLabel;

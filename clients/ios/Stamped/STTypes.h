@@ -39,3 +39,11 @@ typedef enum {
     STCategoryIconSize9 = 9,
     STCategoryIconSize15 = 15,
 } STCategoryIconSize;
+
+
+typedef enum {
+    STStampedAPIScopeYou = 0,
+    STStampedAPIScopeFriends,
+    STStampedAPIScopeEveryone,
+    STStampedAPIScopeFriendsOfFriends,
+} STStampedAPIScope;

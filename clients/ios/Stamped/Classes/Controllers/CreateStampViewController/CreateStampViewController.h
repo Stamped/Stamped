@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STEntitySearchResult.h"
+#import "STEntity.h"
 
 @interface CreateStampViewController : UITableViewController
 
