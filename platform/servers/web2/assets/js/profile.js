@@ -709,7 +709,6 @@ var g_update_stamps = null;
                 
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
-                    $window.scrollTop(0);
                     
                     $sdetail_wrapper
                         .stop(true, false)
@@ -730,6 +729,7 @@ var g_update_stamps = null;
                                 });*/
                                 
                                 $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
+                                $window.scrollTop(0);
                                 
                                 if (!!anim_callback) {
                                     anim_callback();
