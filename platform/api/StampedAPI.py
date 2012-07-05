@@ -1334,6 +1334,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getFriends(self, userRequest):
+        # TODO (travis): optimization - no need to query DB for user here if userRequest already contains user_id!
         user = self.getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
@@ -1344,20 +1345,39 @@ class StampedAPI(AStampedAPI):
         friends.reverse()
 
         return friends
-
+    
+    @API_CALL
+    def getEnrichedFriends(self, user_id, limit=100):
+        user_ids = self._friendshipDB.getFriends(user.user_id, limit=limit)
+        
+        # Return data in reverse-chronological order
+        user_ids.reverse()
+        
+        return self._userDB.lookupUsers(user_ids, None, limit=limit)
+    
     @API_CALL
     def getFollowers(self, userRequest):
+        # TODO (travis): optimization - no need to query DB for user here if userRequest already contains user_id!
         user = self.getUserFromIdOrScreenName(userRequest)
-
+        
         # Note: This function returns data even if user is private
-
+        
         followers = self._friendshipDB.getFollowers(user.user_id)
-
+        
         # Return data in reverse-chronological order
         followers.reverse()
-
+        
         return followers
-
+    
+    @API_CALL
+    def getEnrichedFollowers(self, user_id, limit=100):
+        user_ids = self._friendshipDB.getFollowers(user.user_id, limit=limit)
+        
+        # Return data in reverse-chronological order
+        user_ids.reverse()
+        
+        return self._userDB.lookupUsers(user_ids, None, limit=limit)
+    
     @API_CALL
     def addBlock(self, authUserId, userRequest):
         user = self.getUserFromIdOrScreenName(userRequest)

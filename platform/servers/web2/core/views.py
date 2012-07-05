@@ -137,15 +137,12 @@ def handle_profile(request, schema, **kwargs):
             if user['user_id'] is None or user['user_id'] != user_id:
                 raise StampedInputError("mismatched user_id")
     
-    """
     if not ajax:
-        params      = dict(user_id=user_id, screen_name=screen_name)
-        friends     = stampedAPIProxy.getFriends  (params, limit=10)
-        followers   = stampedAPIProxy.getFollowers(params, limit=10)
+        friends     = stampedAPIProxy.getFriends  (user_id, limit=3)
+        followers   = stampedAPIProxy.getFollowers(user_id, limit=3)
         
         friends   = _shuffle_split_users(friends)
         followers = _shuffle_split_users(followers)
-    """
     
     #utils.log("USER:")
     #utils.log(pprint.pformat(user))
@@ -329,8 +326,8 @@ def test_view(request, **kwargs):
 @stamped_view(schema=HTTPStampId)
 def popup_sdetail_social(request, schema, **kwargs):
     params = schema.dataExport()
-    likes  = stampedAPIProxy.getLikes(params)
-    todos  = stampedAPIProxy.getTodos(params)
+    likes  = stampedAPIProxy.getLikes(schema['stamp_id'])
+    todos  = stampedAPIProxy.getTodos(schema['stamp_id'])
     users  = []
     
     for user in likes:
@@ -367,7 +364,7 @@ def popup_sdetail_social(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPUserId)
 def popup_followers(request, schema, **kwargs):
-    users = stampedAPIProxy.getFollowers(schema.dataExport())
+    users = stampedAPIProxy.getFollowers(schema['user_id'])
     num_users = len(users)
     
     return stamped_render(request, 'popup.html', {
@@ -378,7 +375,7 @@ def popup_followers(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPUserId)
 def popup_following(request, schema, **kwargs):
-    users = stampedAPIProxy.getFriends(schema.dataExport())
+    users = stampedAPIProxy.getFriends(schema['user_id'])
     num_users = len(users)
     
     return stamped_render(request, 'popup.html', {
