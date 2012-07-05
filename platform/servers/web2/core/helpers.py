@@ -50,7 +50,7 @@ class StampedAPIProxy(object):
         
         if self._ec2:
             ts = HTTPTimeSlice.exportTimeSlice(HTTPTimeSlice().dataImport(params))
-            return self._transform(self.api.getStampCollection(, None))
+            return self._transform(self.api.getStampCollection(ts, None))
         else:
             return self._handle_get("stamps/collection.json", params)
     
