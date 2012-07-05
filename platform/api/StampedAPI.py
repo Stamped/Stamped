@@ -1348,7 +1348,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getEnrichedFriends(self, user_id, limit=100):
-        user_ids = self._friendshipDB.getFriends(user.user_id, limit=limit)
+        user_ids = self._friendshipDB.getFriends(user_id, limit=limit)
         
         # Return data in reverse-chronological order
         user_ids.reverse()
@@ -1371,7 +1371,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def getEnrichedFollowers(self, user_id, limit=100):
-        user_ids = self._friendshipDB.getFollowers(user.user_id, limit=limit)
+        user_ids = self._friendshipDB.getFollowers(user_id, limit=limit)
         
         # Return data in reverse-chronological order
         user_ids.reverse()
