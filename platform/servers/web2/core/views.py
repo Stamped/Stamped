@@ -364,7 +364,7 @@ def popup_sdetail_social(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPUserId)
 def popup_followers(request, schema, **kwargs):
-    users = stampedAPIProxy.getFollowers(schema['user_id'])
+    users = stampedAPIProxy.getFollowers(schema.user_id)
     num_users = len(users)
     
     return stamped_render(request, 'popup.html', {
@@ -375,7 +375,7 @@ def popup_followers(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPUserId)
 def popup_following(request, schema, **kwargs):
-    users = stampedAPIProxy.getFriends(schema['user_id'])
+    users = stampedAPIProxy.getFriends(schema.user_id)
     num_users = len(users)
     
     return stamped_render(request, 'popup.html', {
