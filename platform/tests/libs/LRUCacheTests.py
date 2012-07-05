@@ -13,7 +13,7 @@ __license__   = "TODO"
 import Globals
 import functools
 from libs.LRUCache import lru_cache
-from AStampedAPIHttpTestCase            import *
+from tests.AStampedAPIHttpTestCase            import *
 
 # TODO: Eliminate code duplication here -- all the usage counting shit is common to MongoCacheTests.
 class UsageCounters(object):

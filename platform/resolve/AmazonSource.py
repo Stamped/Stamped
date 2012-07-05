@@ -15,10 +15,10 @@ from logs import report
 
 try:
     import logs, re
-    from GenericSource              import GenericSource, multipleSource
-    from TitleUtils                 import *
-    from Resolver                   import *
-    from ResolverObject             import *
+    from resolve.GenericSource              import GenericSource, multipleSource
+    from resolve.TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
     from datetime                   import datetime
     from libs.LibUtils              import months, parseDateString, xp
     from libs.AmazonAPI             import AmazonAPI

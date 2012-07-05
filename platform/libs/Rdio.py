@@ -29,13 +29,13 @@ import Globals
 from logs   import report
 try:
     import urllib2, urllib
-    import TwitterOAuth as oauth
+    from libs import TwitterOAuth as oauth
     import urllib
     import logs
     
-    from RateLimiter            import RateLimiter, RateException
-    from LRUCache               import lru_cache
-    from CachedFunction         import cachedFn
+    from libs.RateLimiter            import RateLimiter, RateException
+    from libs.LRUCache               import lru_cache
+    from libs.CachedFunction         import cachedFn
     from libs.CountedFunction   import countedFn
     from urlparse               import parse_qsl
     from urllib2                import HTTPError

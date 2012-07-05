@@ -15,11 +15,11 @@ from logs import report
 
 try:
     import re, logs
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from libs.TMDB                  import globalTMDB
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from abc                        import ABCMeta, abstractproperty
     from urllib2                    import HTTPError

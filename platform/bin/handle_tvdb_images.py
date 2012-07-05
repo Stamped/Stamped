@@ -12,7 +12,7 @@ from api.S3ImageDB      import S3ImageDB
 from StringIO           import StringIO
 from PIL                import Image, ImageFilter
 from gevent.pool        import Pool
-from MongoStampedAPI    import MongoStampedAPI
+from api.MongoStampedAPI    import MongoStampedAPI
 
 if __name__ == '__main__':
     import argparse

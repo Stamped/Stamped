@@ -13,14 +13,14 @@ try:
     import utils
     import os, logs, re, time, urlparse, math, pylibmc, gevent
 
-    import Blacklist
+    from api import Blacklist
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
-    import Entity
-    import SchemaValidation
+    from api import Entity
+    from api import SchemaValidation
 
-    from auth                       import convertPasswordForStorage
+    from api.auth                       import convertPasswordForStorage
     from utils                      import lazyProperty
     from functools                  import wraps
     from errors                     import *
@@ -28,43 +28,43 @@ try:
     from pprint                     import pprint, pformat
     from operator                   import itemgetter, attrgetter
 
-    from AStampedAPI                import AStampedAPI
-    from AAccountDB                 import AAccountDB
-    from AEntityDB                  import AEntityDB
-    from APlacesEntityDB            import APlacesEntityDB
-    from AUserDB                    import AUserDB
-    from AStampDB                   import AStampDB
-    from ACommentDB                 import ACommentDB
-    from ATodoDB                    import ATodoDB
-    from ACollectionDB              import ACollectionDB
-    from AFriendshipDB              import AFriendshipDB
-    from AActivityDB                import AActivityDB
+    from api.AStampedAPI                import AStampedAPI
+    from api.AAccountDB                 import AAccountDB
+    from api.AEntityDB                  import AEntityDB
+    from api.APlacesEntityDB            import APlacesEntityDB
+    from api.AUserDB                    import AUserDB
+    from api.AStampDB                   import AStampDB
+    from api.ACommentDB                 import ACommentDB
+    from api.ATodoDB                    import ATodoDB
+    from api.ACollectionDB              import ACollectionDB
+    from api.AFriendshipDB              import AFriendshipDB
+    from api.AActivityDB                import AActivityDB
     from api.Schemas                import *
-    from ActivityCollectionCache    import ActivityCollectionCache
-    from Memcache                   import globalMemcache
-    from HTTPSchemas                import generateStampUrl
+    from api.ActivityCollectionCache    import ActivityCollectionCache
+    from libs.Memcache                   import globalMemcache
+    from api.HTTPSchemas                import generateStampUrl
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
-    from AmazonSource               import AmazonSource
-    from FactualSource              import FactualSource
-    from GooglePlacesSource         import GooglePlacesSource
-    from iTunesSource               import iTunesSource
-    from RdioSource                 import RdioSource
-    from SpotifySource              import SpotifySource
-    from TMDBSource                 import TMDBSource
-    from TheTVDBSource              import TheTVDBSource
-    from StampedSource              import StampedSource
+    from resolve.AmazonSource               import AmazonSource
+    from resolve.FactualSource              import FactualSource
+    from resolve.GooglePlacesSource         import GooglePlacesSource
+    from resolve.iTunesSource               import iTunesSource
+    from resolve.RdioSource                 import RdioSource
+    from resolve.SpotifySource              import SpotifySource
+    from resolve.TMDBSource                 import TMDBSource
+    from resolve.TheTVDBSource              import TheTVDBSource
+    from resolve.StampedSource              import StampedSource
 
     # TODO (travis): we should NOT be importing * here -- it's okay in limited
     # situations, but in general, this is very bad practice.
 
-    from Netflix                    import *
-    from Facebook                   import *
-    from Twitter                    import *
-    from GooglePlaces               import *
-    from Rdio                       import *
+    from libs.Netflix               import *
+    from libs.Facebook                   import *
+    from libs.Twitter                    import *
+    from libs.GooglePlaces               import *
+    from libs.Rdio                       import *
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -2383,16 +2383,16 @@ class StampedAPI(AStampedAPI):
             # Asynchronously add references to the stamp in follower's inboxes and
             # add activity for credit and mentions
             tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
-
+            tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
         else:
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         logs.debug('### addStamp section 4: %s' % (time.time() - t1))
         t1 = time.time()
-
+        
         return stamp
-
+    
     @API_CALL
     def addStampAsync(self, authUserId, stampId, imageUrl):
         stamp   = self._stampDB.getStamp(stampId)
@@ -2409,9 +2409,9 @@ class StampedAPI(AStampedAPI):
                 self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
-
+        
         creditedUserIds = set()
-
+        
         # Give credit
         if stamp.credits is not None and len(stamp.credits) > 0:
             for item in stamp.credits:
@@ -2461,8 +2461,14 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph,
                 kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
-
-
+    
+    @API_CALL
+    def updateUserImageCollageAsync(self, user_id, category):
+        user        = self._userDB.getUser(user_id)
+        categories  = [ 'default', category ]
+        
+        self._userImageCollageDB.process_user(user, categories)
+    
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, stampId, contentId):
         assert imageUrl is not None, "stamp image url unavailable!"
@@ -2528,18 +2534,19 @@ class StampedAPI(AStampedAPI):
         except StampedDocumentNotFoundError:
             logs.info("Stamp has already been deleted")
             return True
-
+        
         # Verify user has permission to delete
         if stamp.user.user_id != authUserId:
             raise StampedRemoveStampPermissionsError("Insufficient privileges to remove stamp")
-
+        
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
-
+        
         tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits])
-
+        tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
+        
         return True
-
+    
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None):
 
         # Remove from user collection

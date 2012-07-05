@@ -9,12 +9,12 @@ import Globals, utils
 import json, logs, string, urllib, urllib2
 
 from optparse       import OptionParser
-from Geocoder       import Geocoder
-from AKeyBasedAPI   import AKeyBasedAPI
-from AEntitySource  import AExternalServiceEntitySource
+from libs.Geocoder       import Geocoder
+from libs.AKeyBasedAPI   import AKeyBasedAPI
+from crawler.AEntitySource  import AExternalServiceEntitySource
 from api.Schemas    import PlaceEntity, Coordinates
-from LRUCache       import lru_cache
-from CachedFunction import *
+from libs.LRUCache       import lru_cache
+from libs.CachedFunction import *
 from libs.CountedFunction import countedFn
 
 class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):

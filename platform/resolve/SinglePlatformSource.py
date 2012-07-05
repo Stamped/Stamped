@@ -15,7 +15,7 @@ from logs import report
 
 try:
     from libs.SinglePlatform        import StampedSinglePlatform
-    from BasicSource                import BasicSource
+    from resolve.BasicSource                import BasicSource
     from utils                      import lazyProperty
     import logs
     from urllib2                    import HTTPError

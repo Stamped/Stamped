@@ -16,9 +16,9 @@ from pprint                     import pformat
 from errors                     import *
 
 from api.Schemas                import *
-from AMongoCollection           import AMongoCollection
-from MongoFollowersCollection   import MongoFollowersCollection
-from MongoFriendsCollection     import MongoFriendsCollection
+from api.db.mongodb.AMongoCollection           import AMongoCollection
+from api.db.mongodb.MongoFollowersCollection   import MongoFollowersCollection
+from api.db.mongodb.MongoFriendsCollection     import MongoFriendsCollection
 from api.AUserDB                import AUserDB
 
 try:

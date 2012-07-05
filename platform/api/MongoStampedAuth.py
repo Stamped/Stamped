@@ -8,13 +8,13 @@ __license__   = "TODO"
 import Globals
 
 from utils import lazyProperty
-from StampedAuth import StampedAuth
+from api.StampedAuth import StampedAuth
 
-from db.mongodb.MongoAccountCollection import MongoAccountCollection
-from db.mongodb.MongoAuthAccessTokenCollection import MongoAuthAccessTokenCollection
-from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
-from db.mongodb.MongoAuthPasswordResetCollection import MongoAuthPasswordResetCollection
-from db.mongodb.MongoAuthEmailAlertsCollection import MongoAuthEmailAlertsCollection
+from api.db.mongodb.MongoAccountCollection import MongoAccountCollection
+from api.db.mongodb.MongoAuthAccessTokenCollection import MongoAuthAccessTokenCollection
+from api.db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
+from api.db.mongodb.MongoAuthPasswordResetCollection import MongoAuthPasswordResetCollection
+from api.db.mongodb.MongoAuthEmailAlertsCollection import MongoAuthEmailAlertsCollection
 
 class MongoStampedAuth(StampedAuth):
     """

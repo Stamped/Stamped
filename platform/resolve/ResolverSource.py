@@ -14,12 +14,12 @@ import Globals
 from logs import report
 
 try:
-    from BasicSource    import BasicSource
+    from resolve.BasicSource    import BasicSource
     import logs
     import re
     from datetime       import datetime
     from libs.LibUtils           import months
-    from StampedSource  import StampedSource
+    from resolve.StampedSource  import StampedSource
 except:
     report()
     raise

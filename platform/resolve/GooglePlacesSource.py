@@ -17,16 +17,16 @@ try:
     import logs
     import math
     import string
-    from GenericSource              import GenericSource
-    from GooglePlaces               import GooglePlaces
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.GenericSource              import GenericSource
+    from libs.GooglePlaces               import GooglePlaces
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from datetime                   import datetime
     from functools                  import partial
-    from LibUtils                   import states
+    from libs.LibUtils                   import states
     from pprint                     import pformat
     from search.ScoringUtils        import *
     from search.DataQualityUtils    import *

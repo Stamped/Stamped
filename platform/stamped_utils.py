@@ -607,7 +607,7 @@ def init_db_config(config_desc):
     cfg = MongoDBConfig.getInstance()
     cfg.config = AttributeDict(config)
     
-    from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+    from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
     cfg2 = MongoDBConfig2.getInstance()
     cfg2.config = AttributeDict(config)
     

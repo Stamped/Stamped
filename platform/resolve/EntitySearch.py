@@ -23,12 +23,12 @@ from logs import report
 try:
     import logs, sys, utils
     import libs.worldcities
-    import Entity
+    from api import Entity
     
-    from Resolver                   import *
-    from ResolverObject             import *
-    from EntityProxyContainer       import EntityProxyContainer
-    from GenericSource              import generatorSource
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.EntityProxyContainer       import EntityProxyContainer
+    from resolve.GenericSource              import generatorSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from pprint                     import pprint
@@ -37,17 +37,17 @@ try:
     from datetime                   import datetime
     from optparse                   import OptionParser
     from bson                       import ObjectId
-    from iTunesSource               import iTunesSource
-    from RdioSource                 import RdioSource
-    from StampedSource              import StampedSource
-    from FactualSource              import FactualSource
-    from TMDBSource                 import TMDBSource
-    from TheTVDBSource              import TheTVDBSource
-    from SpotifySource              import SpotifySource
-    from GooglePlacesSource         import GooglePlacesSource
-    from AmazonSource               import AmazonSource
+    from resolve.iTunesSource               import iTunesSource
+    from resolve.RdioSource                 import RdioSource
+    from resolve.StampedSource              import StampedSource
+    from resolve.FactualSource              import FactualSource
+    from resolve.TMDBSource                 import TMDBSource
+    from resolve.TheTVDBSource              import TheTVDBSource
+    from resolve.SpotifySource              import SpotifySource
+    from resolve.GooglePlacesSource         import GooglePlacesSource
+    from resolve.AmazonSource               import AmazonSource
     from time                       import time
-    from Entity                     import mapCategoryToKinds, mapCategoryToTypes, mapSubcategoryToTypes, mapSubcategoryToKinds
+    from api.Entity                     import mapCategoryToKinds, mapCategoryToTypes, mapSubcategoryToTypes, mapSubcategoryToKinds
 except:
     report()
     raise

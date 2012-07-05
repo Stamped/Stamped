@@ -6,13 +6,14 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import image_utils, math, utils
+from libs import image_utils
+import math
 
 from abc            import ABCMeta, abstractmethod
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
 from api.S3ImageDB  import S3ImageDB
-from LRUCache       import lru_cache
+from libs.LRUCache       import lru_cache
 
 class AImageCollage(object):
     
@@ -231,10 +232,6 @@ class AImageCollage(object):
     def _get_output_sizes(self):
         return [
             (1024, 256), 
-            (940, 256), 
-            (640, 128), 
-            #(512, 128), 
-            #(256, 64), 
         ]
     
     def __str__(self):

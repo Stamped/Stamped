@@ -9,9 +9,9 @@ import Globals, utils
 import json, re, urllib
 
 from optparse       import OptionParser
-from AKeyBasedAPI   import AKeyBasedAPI
+from libs.AKeyBasedAPI   import AKeyBasedAPI
 from errors         import *
-from CachedFunction import cachedFn
+from libs.CachedFunction import cachedFn
 
 class AGeocoder(AKeyBasedAPI):
     """

@@ -11,19 +11,19 @@ import bson, logs, pprint, pymongo, re
 from datetime                           import datetime
 from utils                              import lazyProperty
 from api.Schemas                        import *
-from Entity                             import buildEntity
+from api.Entity                             import buildEntity
 
 from api.AStampDB                       import AStampDB
-from AMongoCollection                   import AMongoCollection
-from AMongoCollectionView               import AMongoCollectionView
-from MongoUserLikesCollection           import MongoUserLikesCollection
-from MongoUserLikesHistoryCollection    import MongoUserLikesHistoryCollection
-from MongoStampLikesCollection          import MongoStampLikesCollection
-from MongoStampViewsCollection          import MongoStampViewsCollection
-from MongoUserStampsCollection          import MongoUserStampsCollection
-from MongoInboxStampsCollection         import MongoInboxStampsCollection
-from MongoCreditGiversCollection        import MongoCreditGiversCollection
-from MongoCreditReceivedCollection      import MongoCreditReceivedCollection
+from api.db.mongodb.AMongoCollection                   import AMongoCollection
+from api.db.mongodb.AMongoCollectionView               import AMongoCollectionView
+from api.db.mongodb.MongoUserLikesCollection           import MongoUserLikesCollection
+from api.db.mongodb.MongoUserLikesHistoryCollection    import MongoUserLikesHistoryCollection
+from api.db.mongodb.MongoStampLikesCollection          import MongoStampLikesCollection
+from api.db.mongodb.MongoStampViewsCollection          import MongoStampViewsCollection
+from api.db.mongodb.MongoUserStampsCollection          import MongoUserStampsCollection
+from api.db.mongodb.MongoInboxStampsCollection         import MongoInboxStampsCollection
+from api.db.mongodb.MongoCreditGiversCollection        import MongoCreditGiversCollection
+from api.db.mongodb.MongoCreditReceivedCollection      import MongoCreditReceivedCollection
 
 class MongoStampCollection(AMongoCollectionView, AStampDB):
     

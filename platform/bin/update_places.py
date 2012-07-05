@@ -8,11 +8,11 @@ __license__   = "TODO"
 import Globals
 import utils
 
-from GooglePlacesEntityMatcher  import GooglePlacesEntityMatcher
+from crawler.GooglePlacesEntityMatcher  import GooglePlacesEntityMatcher
 from gevent.pool                import Pool
-from match.EntityMatcher        import EntityMatcher
-from GooglePlaces               import GooglePlaces
-from MongoStampedAPI            import MongoStampedAPI
+from crawler.match.EntityMatcher        import EntityMatcher
+from libs.GooglePlaces               import GooglePlaces
+from api.MongoStampedAPI            import MongoStampedAPI
 from optparse                   import OptionParser
 from pprint                     import pprint
 
