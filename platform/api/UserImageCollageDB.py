@@ -64,7 +64,7 @@ class UserImageCollageDB(object):
                 
                 break
             except Exception, e:
-                logs.warn("unexpected error processing user %s: %s" % (pprint.pformat(u), e))
+                logs.warn("unexpected error processing user %s: %s" % (str(user), e))
                 logs.warn(utils.getFormattedException())
                 
                 retries += 1
