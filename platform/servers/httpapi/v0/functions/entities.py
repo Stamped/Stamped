@@ -9,11 +9,11 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 exceptions = [
-    (StampedEntityUpdatePermissionError,   StampedHTTPError(403, kind='invalid_credentials', msg="Insufficient privileges to update entity")),
-    (StampedTombstonedEntityError,         StampedHTTPError(400, kind='invalid_credentials', msg="Sorry, this entity can no longer be updated")),
-    (StampedInvalidCategoryError,          StampedHTTPError(400, kind='bad_request',         msg="Invalid category")),
-    (StampedInvalidSubcategoryError,       StampedHTTPError(400, kind='bad_request',         msg="Invalid subcategory")),
-    (StampedMenuUnavailableError,          StampedHTTPError(404, kind='not_found',           msg="Menu is unavailable")),
+    (StampedEntityUpdatePermissionError,   403, 'invalid_credentials', "Insufficient privileges to update entity"),
+    (StampedTombstonedEntityError,         400, 'invalid_credentials', "Sorry, this entity can no longer be updated"),
+    (StampedInvalidCategoryError,          400, 'bad_request',         "Invalid category"),
+    (StampedInvalidSubcategoryError,       400, 'bad_request',         "Invalid subcategory"),
+    (StampedMenuUnavailableError,          404, 'not_found',           "Menu is unavailable"),
 ]
 
 def _convertHTTPEntity(entity,
