@@ -2038,7 +2038,9 @@ class HTTPEntityNew(Schema):
         now = datetime.utcnow()
 
         addField(entity, 'desc', self.desc, now)
-        addField(entity, 'release_date', datetime(self.year, 1, 1), timestamp=now)
+
+        if self.year is not None:
+            addField(entity, 'release_date', datetime(int(self.year), 1, 1), timestamp=now)
 
         addField(entity, 'address_street', self.address_street, timestamp=now)
         addField(entity, 'address_street_ext', self.address_street_ext, timestamp=now)

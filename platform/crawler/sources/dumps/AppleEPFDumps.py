@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from AppleEPFDump import AAppleEPFDump
-from AppleEPFRelationalDB import *
+from crawler.sources.dumps.AppleEPFDump import AAppleEPFDump
+from crawler.sources.dumps.AppleEPFRelationalDB import *
 
 class AppleEPFArtistDump(AAppleEPFDump):
     
@@ -229,7 +229,7 @@ class AppleEPFVideoDump(AAppleEPFDump):
             'v_hd_rental_price' : price_info['hd_rental_price'], 
         }
 
-import EntitySources
+from crawler import EntitySources
 
 #EntitySources.registerSource('apple', AppleEPFDumps)
 EntitySources.registerSource('apple_artists', AppleEPFArtistDump)

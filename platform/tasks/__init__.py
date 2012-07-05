@@ -36,7 +36,7 @@ def invoke(task, args=None, kwargs=None, **options):
     if not utils.is_ec2():
         global local_worker_pool
         if local_worker_pool is None:
-            local_worker_pool = Pool(16)
+            local_worker_pool = utils.LoggingThreadPool(16)
             atexit.register(local_worker_pool.join)
         if args is None:
             args = ()

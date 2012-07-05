@@ -2383,7 +2383,9 @@ class StampedAPI(AStampedAPI):
             # Asynchronously add references to the stamp in follower's inboxes and
             # add activity for credit and mentions
             tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
-            tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
+            
+            if utils.is_ec2():
+                tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
         else:
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
@@ -2543,7 +2545,9 @@ class StampedAPI(AStampedAPI):
         self._stampDB.removeStamp(stamp.stamp_id)
         
         tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits])
-        tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
+        
+        if utils.is_ec2():
+            tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
         
         return True
     

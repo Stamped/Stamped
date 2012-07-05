@@ -5,10 +5,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, CSVUtils, utils
+from crawler.sources.dumps import CSVUtils
+import Globals
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
+from crawler.AEntitySource import AExternalDumpEntitySource
 from Schemas import Entity
 
 __all__ = [ "FactualUSPlacesDump" ]

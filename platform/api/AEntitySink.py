@@ -43,7 +43,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
         #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
         stop = 0
         if async:
-            pool = Pool(poolSize)
+            pool = utils.LoggingThreadPool(poolSize)
         
         while True:
             items = []
