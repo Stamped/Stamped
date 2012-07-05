@@ -49,7 +49,7 @@ class AImageCollage(object):
             self._pool.spawn(_add_image, image_url)
         
         self._pool.join()
-        logs.info()
+        logs.info("")
         
         return images
     
