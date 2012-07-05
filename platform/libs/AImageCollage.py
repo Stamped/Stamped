@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 from libs import image_utils
-import math
+import logs, math, utils
 
 from abc            import ABCMeta, abstractmethod
 from PIL            import Image, ImageFilter
@@ -40,7 +40,7 @@ class AImageCollage(object):
         images = []
         
         def _add_image(image_url):
-            utils.log("downloading '%s'" % image_url)
+            logs.info("downloading '%s'" % image_url)
             
             image = self._db.getWebImage(image_url, "collage")
             images.append(image)
@@ -49,7 +49,7 @@ class AImageCollage(object):
             self._pool.spawn(_add_image, image_url)
         
         self._pool.join()
-        utils.log()
+        logs.info("")
         
         return images
     
@@ -110,7 +110,7 @@ class AImageCollage(object):
                 return logo
         
         for size in self._sizes:
-            utils.log("[%s] creating %sx%s collage" % (self, size[0], size[1]))
+            logs.info("[%s] creating %sx%s collage" % (self, size[0], size[1]))
             
             canvas  = Image.new("RGBA", size, (255, 255, 255, 255))
             offsets = []
