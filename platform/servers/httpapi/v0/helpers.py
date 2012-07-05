@@ -14,7 +14,7 @@ import libs.ec2_utils
 
 from pprint                         import pformat
 from errors                         import *
-from HTTPSchemas                    import *
+from api.HTTPSchemas                    import *
 from api.MongoStampedAPI            import globalMongoStampedAPI
 from api.MongoStampedAuth           import MongoStampedAuth
 

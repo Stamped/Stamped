@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from httpapi.v0.helpers import *
+from servers.httpapi.v0.helpers import *
 
 exceptions = [
     (StampedInvalidEmailError,         StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address")),

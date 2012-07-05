@@ -60,7 +60,7 @@ class KDTree():
     
         Example usage:
         
-            from kdtree import KDTree
+            from libs.kdtree import KDTree
             
             data    = <load data> # iterable of tuples, with tuple[0] being 
                                   # itself a coordinate tuple, and tuple[1] 

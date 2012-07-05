@@ -8,8 +8,8 @@ __license__   = "TODO"
 import math, os, re
 
 from pprint import pprint, pformat
-from kdtree import KDTree
-from data import CityList
+from libs.kdtree import KDTree
+from libs.data import CityList
 
 __regions = None
 __region_suffixes = None

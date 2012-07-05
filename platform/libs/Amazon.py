@@ -10,12 +10,12 @@ from logs import report
 
 try:
     import keys.aws
-    import bottlenose   
+    from libs import bottlenose
     import logs
     
-    from LibUtils       import xmlToPython
-    from LRUCache       import lru_cache
-    from CachedFunction import cachedFn
+    from libs.LibUtils       import xmlToPython
+    from libs.LRUCache       import lru_cache
+    from libs.CachedFunction import cachedFn
     from libs.CountedFunction import countedFn
 except:
     report()

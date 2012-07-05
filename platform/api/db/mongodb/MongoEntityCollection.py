@@ -14,15 +14,15 @@ try:
     from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
-    from Entity                         import getSimplifiedTitle, buildEntity
+    from api.Entity                         import getSimplifiedTitle, buildEntity
 
-    from AMongoCollection               import AMongoCollection
-    from MongoPlacesEntityCollection    import MongoPlacesEntityCollection
-    from MongoEntitySeedCollection      import MongoEntitySeedCollection
-    from MongoMenuCollection            import MongoMenuCollection
-    from AEntityDB                      import AEntityDB
+    from api.db.mongodb.AMongoCollection               import AMongoCollection
+    from api.db.mongodb.MongoPlacesEntityCollection    import MongoPlacesEntityCollection
+    from api.db.mongodb.MongoEntitySeedCollection      import MongoEntitySeedCollection
+    from api.db.mongodb.MongoMenuCollection            import MongoMenuCollection
+    from api.AEntityDB                      import AEntityDB
     from difflib                        import SequenceMatcher
-    from ADecorationDB                  import ADecorationDB
+    from api.ADecorationDB                  import ADecorationDB
     from errors                         import StampedUnavailableError
     from logs                           import log
 except:

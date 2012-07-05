@@ -15,7 +15,7 @@ from resolve.Resolver import *
 from resolve.TitleUtils import *
 from search.SearchResult import SearchResult
 from search import ScoringUtils
-from DataQualityUtils import *
+from search.DataQualityUtils import *
 
 @lru_cache()
 def cached_simplify(string):

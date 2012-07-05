@@ -11,8 +11,8 @@ import Globals, utils, logs
 from errors import *
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
-from AAuthPasswordResetDB import AAuthPasswordResetDB
+from api.db.mongodb.AMongoCollection import AMongoCollection
+from api.AAuthPasswordResetDB import AAuthPasswordResetDB
 
 class MongoAuthPasswordResetCollection(AMongoCollection, AAuthPasswordResetDB):
     

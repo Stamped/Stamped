@@ -9,10 +9,10 @@ import Globals
 import copy, json, logs, urllib2, utils
 import libs.ec2_utils
 import datetime as dt
-import settings
+from servers.web2 import settings
 
-from MongoStampedAPI            import globalMongoStampedAPI
-from HTTPSchemas                import *
+from api.MongoStampedAPI            import globalMongoStampedAPI
+from api.HTTPSchemas                import *
 from errors                     import *
 
 from django.http                import HttpResponse

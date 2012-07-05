@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, ast, pymongo
 
 from bson.objectid import ObjectId
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 
 class MongoLogsCollection(AMongoCollection):
     

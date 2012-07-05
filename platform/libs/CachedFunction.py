@@ -11,8 +11,8 @@ mongoCachedFn otherwise.
 """
 
 import datetime, functools, utils
-from Memcache import memcached_function
-from MongoCache import mongoCachedFn
+from libs.Memcache import memcached_function
+from libs.MongoCache import mongoCachedFn
 
 ONE_WEEK = 7*24*60*60
 

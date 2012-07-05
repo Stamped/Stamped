@@ -13,7 +13,7 @@ __all__ = ['Instagram', 'globalInstagram']
 
 import Globals
 import httplib
-import oauth as oauth
+from libs import oauth as oauth
 from logs   import report
 try:
     import sys
@@ -24,9 +24,9 @@ try:
     from urllib2        import HTTPError
     from gevent         import sleep
     from pprint         import pprint
-    from RateLimiter    import RateLimiter, RateException
-    from LRUCache       import lru_cache
-    from Memcache       import memcached_function
+    from libs.RateLimiter    import RateLimiter, RateException
+    from libs.LRUCache       import lru_cache
+    from libs.Memcache       import memcached_function
 except:
     report()
     raise

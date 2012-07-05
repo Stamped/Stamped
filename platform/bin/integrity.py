@@ -10,7 +10,7 @@ import bson, logs, utils
 import api.Schemas as Schemas
 
 from utils      import abstract
-from checkdb    import *
+from bin.checkdb    import *
 
 """
 Index collections
