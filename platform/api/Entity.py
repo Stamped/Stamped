@@ -9,6 +9,9 @@ import Globals, logs, re
 import unicodedata, utils
 
 try:
+    import sys, traceback # TODO FUCK GET RID OF ME
+    print '\n\nHERE I AM IN ENTITY IMPORTS\n', ''.join(traceback.format_stack()), '\n\n' # TODO FUCK GET RID OF ME
+    sys.stdout.flush()  # TODO FUCK GET RID OF ME
     from api.Schemas    import *
     from difflib        import SequenceMatcher
     from libs.LibUtils  import parseDateString

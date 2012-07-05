@@ -5,6 +5,10 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import sys, traceback # TODO FUCK GET RID OF ME
+print '\n\nHERE I AM IN SCHEMAS IMPORTS\n', ''.join(traceback.format_stack()), '\n\n' # TODO FUCK GET RID OF ME
+sys.stdout.flush()  # TODO FUCK GET RID OF ME
+
 import Globals
 import copy, re
 
