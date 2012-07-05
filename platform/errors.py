@@ -204,7 +204,15 @@ class StampedInvalidScreenNameError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
+class StampedUnsetRequiredFieldError(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
 class StampedScreenNameInUseError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedEmailInUseError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 

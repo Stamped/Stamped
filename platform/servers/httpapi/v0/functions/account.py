@@ -46,6 +46,8 @@ exceptions = [
     (StampedAccountNotFoundError,      404, 'not_found',           'There was an error retrieving account information'),
     (StampedAlreadyStampedAuthError,   400, 'bad_request',         'This account is already a Stamped account'),
     (StampedLinkedAccountMismatchError, 400, 'illegal_action',     "There was a problem verifying the third-party account"),
+    (StampedUnsetRequiredFieldError,   400, 'illegal_action',      "Cannot remove a required account field"),
+    (StampedEmailInUseError,           400, 'invalid_credentials', "Email address is already in use"),
 ]
 exceptions_create = [(StampedInternalError,  400, 'internal', 'There was a problem creating the account.  Please try again later.')]
 @handleHTTPRequest(requires_auth=False,

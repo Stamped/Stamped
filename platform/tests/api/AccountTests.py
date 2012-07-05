@@ -192,7 +192,7 @@ class StampedAPIAccountUpgradeTest(AStampedAPITestCase):
         self.assertTrue(account.password is not None)
 
     def test_upgrade_account_taken_email(self):
-        with expected_exception(DuplicateKeyError):
+        with expected_exception(StampedEmailInUseError):
             self.api.upgradeAccount(self.accountA.user_id, 'devbot2@stamped.com', '12345')
 
     def test_upgrade_account_already_stamped_auth(self):
