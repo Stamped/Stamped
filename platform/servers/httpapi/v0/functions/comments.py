@@ -16,13 +16,11 @@ def create(request, authUserId, http_schema, **kwargs):
     return transformOutput(comment.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPCommentId)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPCommentId)
 def remove(request, authUserId, http_schema, **kwargs):
-    comment = stampedAPI.removeComment(authUserId, http_schema.comment_id)
-    comment = HTTPComment().importComment(comment)
-    
-    return transformOutput(comment.dataExport())
+    stampedAPI.removeComment(authUserId, http_schema.comment_id)
+    return transformOutput(True)
 
 
 @handleHTTPRequest(http_schema=HTTPCommentSlice)

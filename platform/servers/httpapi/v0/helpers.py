@@ -103,7 +103,7 @@ def handleStampedExceptions(e, handlers=None):
     else:
         error = {
             'error' :   'stamped_error',
-            'message' : "An error occurred.  Please try again later.",
+            'message' : "An error occurred. Please try again later.",
         }
         logs.warning("500 Error: %s" % e)
         logs.warning(utils.getFormattedException())

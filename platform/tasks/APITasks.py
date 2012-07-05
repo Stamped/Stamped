@@ -82,6 +82,10 @@ retry_params = {
 def addStamp(*args, **kwargs):
     invoke(addStamp.request, *args, **kwargs)
 
+@task(queue='api', **default_params)
+def removeStamp(*args, **kwargs):
+    invoke(removeStamp.request, *args, **kwargs)
+
 @task(queue='api', **retry_params)
 def addResizedStampImages(*args, **kwargs):
     invoke(addResizedStampImages.request, *args, **kwargs)
