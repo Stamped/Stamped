@@ -886,7 +886,6 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None or linkedAccount.secret is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for netflix account")
             userInfo = self._netflix.getUserInfo(linkedAccount.token, linkedAccount.secret)
-            logs.info('### netflix userInfo: %s' % userInfo)
             if userInfo['can_instant_watch'] == False:
                 raise StampedNetflixNoInstantWatchError("Netflix account must have instant watch access")
             linkedAccount.linked_user_id = userInfo['user_id']
@@ -2357,7 +2356,7 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
-        logs.debug('### addStamp section 2: %s' % (ime.time() - t1))
+        logs.debug('### addStamp section 2: %s' % (time.time() - t1))
         t1 = time.time()
 
         if imageUrl is not None:
@@ -2373,7 +2372,7 @@ class StampedAPI(AStampedAPI):
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
         logs.info('### stampExists: %s' % stampExists)
 
-        logs.debug('### addStamp section 3: %s' % (ime.time() - t1))
+        logs.debug('### addStamp section 3: %s' % (time.time() - t1))
         t1 = time.time()
 
         if not stampExists:
@@ -2398,7 +2397,7 @@ class StampedAPI(AStampedAPI):
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
-        logs.debug('### addStamp section 4: %s' % (ime.time() - t1))
+        logs.debug('### addStamp section 4: %s' % (time.time() - t1))
         t1 = time.time()
 
         return stamp

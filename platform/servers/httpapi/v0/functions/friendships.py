@@ -8,10 +8,9 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 
 exceptions = [
-    (StampedDocumentNotFoundError, StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data.")),
-    (StampedInvalidFriendshipError, StampedHTTPError(400, kind="not_found", msg="You cannot follow yourself.")),
-    (StampedFriendshipCheckPermissionsError, StampedHTTPError(404, kind="not_found", msg="Insufficient privileges to check friendship status.")),
-    (StampedInviteExistsError, StampedHTTPError(403, kind="illegal_action", msg="Invite already sent.")),
+    (StampedInvalidFriendshipError, 400, "not_found", "You cannot follow yourself."),
+    (StampedFriendshipCheckPermissionsError, 404, "not_found", "Insufficient privileges to check friendship status."),
+    (StampedInviteExistsError, 403, "illegal_action", "Invite already sent."),
 ]
 
 @handleHTTPRequest(http_schema=HTTPUserId,

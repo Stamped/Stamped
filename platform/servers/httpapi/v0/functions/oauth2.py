@@ -9,12 +9,12 @@ from httpapi.v0.helpers import *
 
 
 exceptions = [
-    (StampedInvalidAuthTokenError,          StampedHTTPError(401, kind='invalid_credentials', msg="Invalid Access Token")),
-    (StampedInvalidRefreshTokenError,       StampedHTTPError(401, kind='invalid_credentials', msg="Invalid Refresh Token")),
-    (StampedInvalidClientError,             StampedHTTPError(401, kind='invalid_credentials', msg="Invalid client credentials")),
-    (StampedGrantTypeIncorrectError,        StampedHTTPError(400, kind='bad_request', msg="There was a problem authorizing the account")),
-    (StampedAccountNotFoundError,           StampedHTTPError(401, kind='invalid_credentials', msg='The username / password combination was incorrect')),
-    (StampedInvalidCredentialsError,        StampedHTTPError(401, kind='invalid_credentials', msg="The username / password combination was incorrect")),
+    (StampedInvalidAuthTokenError,          401, 'invalid_credentials', "Invalid Access Token"),
+    (StampedInvalidRefreshTokenError,       401, 'invalid_credentials', "Invalid Refresh Token"),
+    (StampedInvalidClientError,             401, 'invalid_credentials', "Invalid client credentials"),
+    (StampedGrantTypeIncorrectError,        400, 'bad_request', "There was a problem authorizing the account"),
+    (StampedAccountNotFoundError,           401, 'invalid_credentials', 'The username / password combination was incorrect'),
+    (StampedInvalidCredentialsError,        401, 'invalid_credentials', "The username / password combination was incorrect"),
 ]
 
 @handleHTTPRequest(requires_auth=False,
@@ -32,7 +32,7 @@ def token(request, client_id, http_schema, **kwargs):
 
 
 exceptions_login = [
-    (StampedWrongAuthServiceError,          StampedHTTPError(401, kind='invalid_credentials', msg="This account does uses a third-party service for authentication")),
+    (StampedWrongAuthServiceError,          401, 'invalid_credentials', "This account does uses a third-party service for authentication"),
 ]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
@@ -50,9 +50,9 @@ def login(request, client_id, http_schema, **kwargs):
     return transformOutput(output)
 
 exceptions_loginWithFacebook = [
-    (StampedLinkedAccountAlreadyExistsError, StampedHTTPError(409, kind='bad_request', msg="Sorry, the Facebook account is linked to multiple Stamped accounts")),
-    (StampedThirdPartyError,                 StampedHTTPError(401, kind='invalid_credentials', msg="Facebook login failed")),
-    (StampedWrongAuthServiceError,           StampedHTTPError(401, kind='invalid_credentials', msg="Account does not use Facebook authentication")),
+    (StampedLinkedAccountAlreadyExistsError, 409, 'bad_request', "Sorry, the Facebook account is linked to multiple Stamped accounts"),
+    (StampedThirdPartyError,                 401, 'invalid_credentials', "Facebook login failed"),
+    (StampedWrongAuthServiceError,           401, 'invalid_credentials', "Account does not use Facebook authentication"),
 ]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
@@ -70,9 +70,9 @@ def loginWithFacebook(request, client_id, http_schema, **kwargs):
     return transformOutput(output)
 
 exceptions_loginWithTwitter = [
-    (StampedLinkedAccountAlreadyExistsError, StampedHTTPError(401, kind='bad_request', msg="Sorry, the Facebook account is linked to multiple Twitter accounts")),
-    (StampedThirdPartyError,                 StampedHTTPError(401, kind='invalid_credentials', msg="Twitter login failed")),
-    (StampedWrongAuthServiceError,           StampedHTTPError(401, kind='invalid_credentials', msg="Account does not use Facebook authentication")),
+    (StampedLinkedAccountAlreadyExistsError, 401, 'bad_request', "Sorry, the Facebook account is linked to multiple Twitter accounts"),
+    (StampedThirdPartyError,                 401, 'invalid_credentials', "Twitter login failed"),
+    (StampedWrongAuthServiceError,           401, 'invalid_credentials', "Account does not use Facebook authentication"),
 ]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
