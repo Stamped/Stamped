@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from api import Entity
+from api import Constants, Entity
 
 from utils                      import lazyProperty
 from collections                import defaultdict
@@ -48,7 +48,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
         else:
             if category is None:
                 try:
-                    category = Entity.subcategories[subcategory]
+                    category = Constants.subcategories[subcategory]
                 except KeyError:
                     raise StampedInputError("invalid subcategory '%s'" % subcategory)
         
