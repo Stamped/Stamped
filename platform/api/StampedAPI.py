@@ -322,6 +322,15 @@ class StampedAPI(AStampedAPI):
         if account.email != email:
             email = str(email).lower().strip()
             SchemaValidation.validateEmail(email)
+
+            testAccount = None
+            try:
+                testAccount = self._accountDB.getAccountByEmail(email)
+            except StampedAccountNotFoundError:
+                pass
+            if testAccount is not None:
+                raise StampedEmailInUseError("Email is in use by another account")
+
             account.email = email
 
         if password is None:
@@ -605,7 +614,9 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
 
-        if 'screen_name' in fields and account.screen_name != fields['screen_name'] and fields['screen_name'] is not None:
+        if 'screen_name' in fields and account.screen_name != fields['screen_name']:
+            if fields['screen_name'] is None:
+                raise StampedUnsetRequiredFieldError("Cannot unset screen name")
             old_screen_name = account.screen_name
             account.screen_name = fields['screen_name']
 
@@ -631,6 +642,8 @@ class StampedAPI(AStampedAPI):
                 old_screen_name.lower(), account.screen_name.lower()])
 
         if 'name' in fields and account.name != fields['name'] and fields['name'] is not None:
+            if fields['name'] is None:
+                raise StampedUnsetRequiredFieldError("Cannot unset name")
             account.name = fields['name']
         if 'phone' in fields and account.phone != fields['phone']:
             account.phone = fields['phone']
