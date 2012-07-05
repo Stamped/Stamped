@@ -49,7 +49,7 @@ class UserImageCollageDB(object):
                         else:
                             ts['category'] = category
                     
-                    collage     = collages[category]
+                    collage     = self._collages[category]
                     stamp_slice = HTTPTimeSlice().dataImport(ts).exportTimeSlice()
                     stamps      = self.api.getStampCollection(stamp_slice)
                     entities    = map(lambda s: s.entity, stamps)
