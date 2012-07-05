@@ -9,7 +9,7 @@ import Globals, utils
 import os, re, time, urllib2
 
 from gevent.pool import Pool
-from AEntitySource import AExternalEntitySource
+from crawler.AEntitySource import AExternalEntitySource
 from Schemas import Entity
 
 __all__ = [ "LATimesCrawler" ]
@@ -124,6 +124,6 @@ class LATimesCrawler(AExternalEntitySource):
             #utils.log("Done crawling: %s" % href)
             pass
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('latimes', LATimesCrawler)
 

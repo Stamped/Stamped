@@ -6,7 +6,8 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import epf, gzip, os, sqlite3, time
+from crawler.sources.dumps import epf
+import gzip, os, sqlite3, time
 
 try:
     import psycopg2
@@ -20,7 +21,7 @@ except ImportError:
     use_sqlite = True
 
 from utils          import lazyProperty, AttributeDict, Singleton
-from AEntitySource  import AExternalDumpEntitySource
+from crawler.AEntitySource  import AExternalDumpEntitySource
 from Schemas        import Entity
 from pprint         import pprint
 

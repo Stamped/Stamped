@@ -6,11 +6,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import CSVUtils, utils
+from crawler.sources.dumps import CSVUtils
 import os, time
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
+from crawler.AEntitySource import AExternalDumpEntitySource
 from Schemas import Entity
 
 __all__ = [ "FactualiPhoneAppsDump" ]
@@ -123,6 +123,6 @@ class FactualiPhoneAppsDump(AExternalDumpEntitySource):
         
         self._output.put(entity)
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('factualiPhoneApps', FactualiPhoneAppsDump)
 

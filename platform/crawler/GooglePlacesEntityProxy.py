@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from EntityMatcher import EntityMatcher
-from AEntityProxy import AEntityProxy
+from crawler.EntityMatcher import EntityMatcher
+from crawler.AEntityProxy import AEntityProxy
 from Schemas import Entity
 from pprint import pprint
 

@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from AEntityProxy import AEntityProxy
-from Geocoder import Geocoder
+from crawler.AEntityProxy import AEntityProxy
+from libs.Geocoder import Geocoder
 
 class GeocoderEntityProxy(AEntityProxy):
     

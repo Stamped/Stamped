@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import feedparser, gevent, os, re
 
-from AEntitySource import AExternalDumpEntitySource
+from crawler.AEntitySource import AExternalDumpEntitySource
 from BeautifulSoup import BeautifulSoup
 from api.Schemas   import Entity
 from pprint        import pprint
@@ -123,6 +123,6 @@ class AmazonBookFeed(AExternalDumpEntitySource):
         
         #utils.log("[%s] done parsing feed '%s' (%s)" % (self, data.feed.title, url))
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('amazonbookfeed', AmazonBookFeed)
 

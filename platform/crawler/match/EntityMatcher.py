@@ -7,14 +7,14 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from AEntityMatcher           import AEntityMatcher
-from PlacesEntityMatcher      import PlacesEntityMatcher
-from FilmEntityMatcher        import FilmEntityMatcher
-from BookEntityMatcher        import BookEntityMatcher
-from MusicEntityMatcher       import MusicEntityMatcher
+from crawler.match.AEntityMatcher           import AEntityMatcher
+from crawler.match.PlacesEntityMatcher      import PlacesEntityMatcher
+from crawler.match.FilmEntityMatcher        import FilmEntityMatcher
+from crawler.match.BookEntityMatcher        import BookEntityMatcher
+from crawler.match.MusicEntityMatcher       import MusicEntityMatcher
 
-from TitleBasedEntityMatchers import *
-from IDBasedEntityMatchers    import *
+from crawler.match.TitleBasedEntityMatchers import *
+from crawler.match.IDBasedEntityMatchers    import *
 
 from utils import lazyProperty
 

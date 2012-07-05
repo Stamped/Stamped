@@ -8,7 +8,7 @@ __license__ = "TODO"
 import urllib, string, re, os
 import Globals, utils
 
-from AEntitySource import AExternalSiteEntitySource
+from crawler.AEntitySource import AExternalSiteEntitySource
 from threading import Lock
 
 __all__ = [ "OpenTableCrawler" ]

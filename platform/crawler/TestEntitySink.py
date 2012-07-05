@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AEntitySink import AEntitySink
+from api.AEntitySink import AEntitySink
 from Schemas import Entity
 from pprint import pprint
 

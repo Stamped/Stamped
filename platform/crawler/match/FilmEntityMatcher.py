@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
+from crawler.match.ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
 from Schemas                  import Entity
 from errors                   import Fail
 

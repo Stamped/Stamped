@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AEntityProxy import AEntityProxy
+from crawler.AEntityProxy import AEntityProxy
 
 class ASyncGatherSource(AEntityProxy):
     

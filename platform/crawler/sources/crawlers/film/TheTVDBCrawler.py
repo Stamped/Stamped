@@ -10,7 +10,7 @@ import os, re, time
 
 from datetime       import datetime
 from gevent.pool    import Pool
-from AEntitySource  import AExternalEntitySource
+from crawler.AEntitySource  import AExternalEntitySource
 from Schemas        import Entity
 from libs.TheTVDB   import TheTVDB
 
@@ -218,6 +218,6 @@ class TheTVDBCrawler(AExternalEntitySource):
         
         self._output.put(entity)
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('thetvdb', TheTVDBCrawler)
 

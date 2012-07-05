@@ -6,11 +6,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import CSVUtils, FactualUtils, utils
+from crawler.sources.dumps import CSVUtils, FactualUtils
 import os, time
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
+from crawler.AEntitySource import AExternalDumpEntitySource
 from Schemas import Entity
 
 __all__ = [ "FactualUSRestaurantsDump" ]
@@ -175,7 +175,7 @@ class FactualUSRestaurantsDump(AExternalDumpEntitySource):
         
         self._output.put(entity)
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('factualUSRestaurants', FactualUSRestaurantsDump)
 
 to_collapse = {

@@ -155,7 +155,7 @@ def parseEntity(entity):
     return entity
 
 """
-from dumps.OpenTableDump import OpenTableDump
+from crawler.sources.dumps.OpenTableDump import OpenTableDump
 dump = OpenTableDump()
 entities = dump.getAll()
 opentable = OpenTable()

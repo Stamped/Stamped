@@ -9,7 +9,7 @@ import Globals, utils
 import os, re, time, urllib2
 
 from gevent.pool import Pool
-from AEntitySource import AExternalEntitySource
+from crawler.AEntitySource import AExternalEntitySource
 from Schemas import Entity
 
 __all__ = [ "TimeOutMIACrawler" ]
@@ -98,6 +98,6 @@ class TimeOutMIACrawler(AExternalEntitySource):
         if next_page != '':
             pool.spawn(self._parseResultsPage, pool, next_page)
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('timeout_mia', TimeOutMIACrawler)
 

@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import string
 
-from AEntityMatcher import AEntityMatcher
+from crawler.match.AEntityMatcher import AEntityMatcher
 from difflib import SequenceMatcher
 
 __all__ = [ "ATitleBasedEntityMatcher" ]

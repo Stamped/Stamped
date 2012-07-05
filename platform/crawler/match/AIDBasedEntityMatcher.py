@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AEntityMatcher import AEntityMatcher
+from crawler.match.AEntityMatcher import AEntityMatcher
 
 __all__ = [
     "AIDBasedEntityMatcher", 

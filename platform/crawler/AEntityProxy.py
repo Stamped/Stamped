@@ -10,7 +10,7 @@ import Globals, utils
 from gevent.pool import Pool
 from gevent import Greenlet
 from api.AEntitySink import AEntitySink
-from AEntitySource import AEntitySource
+from crawler.AEntitySource import AEntitySource
 from api.IASyncProducer import IASyncProducer
 
 class AEntityProxy(AEntitySink, AEntitySource):

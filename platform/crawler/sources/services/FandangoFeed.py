@@ -9,8 +9,8 @@ import Globals, utils
 import feedparser, gevent, os, re
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
-from Schemas import BasicEntity
+from crawler.AEntitySource import AExternalDumpEntitySource
+from api.Schemas import BasicEntity
 
 __all__ = [ "FandangoFeed" ]
 
@@ -155,6 +155,6 @@ class FandangoFeed(AExternalDumpEntitySource):
         
         utils.log("[%s] done parsing feed '%s' (%s)" % (self, data.feed.title, url))
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('fandango', FandangoFeed)
 

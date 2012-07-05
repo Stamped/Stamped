@@ -7,10 +7,10 @@ __license__   = "TODO"
 
 import Globals, utils
 import gevent, os, time, xlrd
-import sources.OpenTableParser as OpenTableParser
+from crawler.sources import OpenTableParser as OpenTableParser
 
 from gevent.pool import Pool
-from AEntitySource import AExternalDumpEntitySource
+from crawler.AEntitySource import AExternalDumpEntitySource
 from Schemas import Entity
 
 __all__ = [ "OpenTableDump" ]
@@ -99,6 +99,6 @@ class OpenTableDump(AExternalDumpEntitySource):
             #pprint(entity.getDataAsDict())
             self._output.put(entity)
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('opentable', OpenTableDump)
 

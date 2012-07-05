@@ -10,7 +10,7 @@ import string
 
 from optparse import OptionParser
 from difflib import SequenceMatcher
-from GooglePlaces import GooglePlaces
+from libs.GooglePlaces import GooglePlaces
 
 
 
