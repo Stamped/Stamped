@@ -16,6 +16,7 @@
 #import "SignupViewController.h"
 #import "STFacebook.h"
 #import "STTwitter.h"
+#import "STStampedAPI.h"
 
 #import "PostStampShareView.h"
 

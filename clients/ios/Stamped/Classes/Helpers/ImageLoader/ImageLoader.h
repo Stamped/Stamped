@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 typedef void(^ImageLoaderCompletionHandler)(UIImage *, NSURL *);
 typedef UIImage*(^ImageLoaderStyler)(UIImage*);

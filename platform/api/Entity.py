@@ -389,6 +389,10 @@ def upgradeEntityData(entityData):
     
     kind    = deriveKindFromOldSubcategory(old['subcategory'])
     types   = deriveTypesFromOldSubcategories([old['subcategory']])
+
+    if kind == 'other' and 'coordinates' in old and 'lat' in old['coordinates'] and 'lng' in old['coordinates']:
+        kind = 'place'
+        types = [ 'establishment' ]
     
     new     = getEntityObjectFromKind(kind)()
     

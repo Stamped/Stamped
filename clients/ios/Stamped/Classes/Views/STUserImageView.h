@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STAction.h"
+#import "STActionContext.h"
 
 @interface STUserImageView : UIImageView
 

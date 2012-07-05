@@ -88,14 +88,10 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             raise Exception
 
     def getTodo(self, userId, entityId):
-        try:
-            document = self._collection.find_one(\
-                    {'entity.entity_id': entityId, 'user_id': userId})
-            todo = self._convertFromMongo(document)
-            return todo
-        except:
-            logs.warning("Cannot get document")
-            raise Exception
+        document = self._collection.find_one(\
+                {'entity.entity_id': entityId, 'user_id': userId})
+        todo = self._convertFromMongo(document)
+        return todo
 
     def getTodos(self, userId, timeSlice):
         query = { 'user_id' : userId }

@@ -18,6 +18,7 @@
 #import "STTextChunk.h"
 #import "STChunkGroup.h"
 #import "STChunksView.h"
+#import "STUserImageView.h"
 
 @interface STFastActivityCellConfiguration : NSObject
 
@@ -167,7 +168,7 @@
 }
 
 - (BOOL)hasImages {
-    return self.usersForImages.count > 0 && !(self.scope != STStampedAPIScopeYou && self.isFollow);
+    return self.usersForImages.count > 0 && (self.scope == STStampedAPIScopeYou || self.isFollow);
 }
 
 - (BOOL)useUserImage {
@@ -487,7 +488,7 @@
         return self.activity.subjects.count > 1 ? self.activity.subjects : nil;
     }
     else {
-        if (self.activity.objects.users.count > 1) {
+        if (self.activity.objects.users.count >= 1) {
             return self.activity.objects.users;
         }
         else {
@@ -518,7 +519,8 @@
     if (chunk) {
         UIView* chunkView = [[[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:chunk]] autorelease];
         [Util reframeView:chunkView withDeltas:CGRectMake(0, self.configuration.contentYOffset, 0, 0)];
-        [self addSubview:chunkView];
+        chunkView.userInteractionEnabled = NO;
+        [self.contentView addSubview:chunkView];
     }
 }
 
@@ -534,14 +536,19 @@
         if (self.configuration.hasCredit && self.scope == STStampedAPIScopeYou) {
             UIView* background = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, self.configuration.height)] autorelease];
             background.backgroundColor = [UIColor whiteColor];
-            [self addSubview:background];
+            [self.contentView addSubview:background];
         }
         if (self.configuration.useUserImage && self.activity.subjects.count > 0) {
             id<STUser> user = [self.activity.subjects objectAtIndex:0];
+//            STUserImageView* userImageView = [[[STUserImageView alloc] initWithSize:self.configuration.imageFrame.size.width] autorelease];
+//            userImageView.frame = self.configuration.imageFrame;
+//            [self addSubview:userImageView];
+//            [userImageView setupWithUser:user viewAction:YES];
+//            imageView = userImageView;
             imageView = [Util profileImageViewForUser:user withSize:self.configuration.imageFrame.size.width];
             imageView.frame = self.configuration.imageFrame;
-            [self addSubview:imageView];
-            [self addSubview:[Util tapViewWithFrame:imageView.frame target:self selector:@selector(userImageClicked:) andMessage:user]];
+            [self.contentView addSubview:imageView];
+            [self.contentView addSubview:[Util tapViewWithFrame:imageView.frame target:self selector:@selector(userImageClicked:) andMessage:user]];
         }
         else if (self.activity.image) {
             imageView = [[[UIImageView alloc] initWithFrame:self.configuration.imageFrame] autorelease];
@@ -554,7 +561,7 @@
                     [(id)imageView setImage:image]; 
                 }];
             }
-            [self addSubview:imageView];
+            [self.contentView addSubview:imageView];
         }
         [self _addChunk:self.configuration.headerChunk];
         [self _addChunk:self.configuration.bodyChunk];
@@ -596,9 +603,9 @@
                             }];
                         }
                     }
-                    [self addSubview:iconImageView];
+                    [self.contentView addSubview:iconImageView];
                 }
-                [self addSubview:[Util tapViewWithFrame:currentImage.frame target:self selector:@selector(userImageClicked:) andMessage:currentUser]];
+                [self.contentView addSubview:[Util tapViewWithFrame:currentImage.frame target:self selector:@selector(userImageClicked:) andMessage:currentUser]];
             }
             if (self.scope != STStampedAPIScopeYou && users.count == 1) {
                 id<STUser> userForDetail = [users objectAtIndex:0];
@@ -609,7 +616,7 @@
                                                  mode:UILineBreakModeTailTruncation
                                            andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
                 [Util reframeView:nameView withDeltas:CGRectMake(nameOrigin.x, nameOrigin.y, 0, 0)];
-                [self addSubview:nameView];
+                [self.contentView addSubview:nameView];
                 CGPoint screenameOrigin = CGPointMake(self.configuration.contentOffset + 61, y + 36 - self.configuration.headerFontNormal.ascender);
                 UIView* screennameView = [Util viewWithText:[NSString stringWithFormat:@"@%@", userForDetail.screenName]
                                                        font:self.configuration.headerFontNormal
@@ -617,7 +624,7 @@
                                                        mode:UILineBreakModeTailTruncation
                                                  andMaxSize:CGSizeMake(150, CGFLOAT_MAX)];
                 [Util reframeView:screennameView withDeltas:CGRectMake(screenameOrigin.x, screenameOrigin.y, 0, 0)];
-                [self addSubview:screennameView];
+                [self.contentView addSubview:screennameView];
             }
         }
         [self _addChunk:self.configuration.footerChunk];
@@ -640,7 +647,7 @@
                     }];
                 }
             }
-            [self addSubview:iconView];
+            [self.contentView addSubview:iconView];
         }
         if (self.configuration.isFollow && self.scope == STStampedAPIScopeYou) {
             
@@ -658,6 +665,7 @@
 }
 
 - (void)userImageClicked:(id<STUser>)user {
+    NSLog(@"herererere");
     STActionContext* context = [STActionContext context];
     context.user = user;
     id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];

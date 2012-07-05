@@ -25,6 +25,7 @@
 //
 
 #import "EGOHTTPRequest.h"
+#import <UIKit/UIKit.h>
 
 static NSMutableArray *__currentRequests;
 static dispatch_queue_t __queue;

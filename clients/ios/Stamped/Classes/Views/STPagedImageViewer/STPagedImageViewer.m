@@ -9,6 +9,8 @@
 #import "STPagedImageViewer.h"
 #import "STPageControl.h"
 #import "ImageLoader.h"
+#import "STPagedImageViewer.h"
+#import "UIColor+Stamped.h"
 
 #define kPageViewGap 50.0f
 

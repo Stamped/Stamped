@@ -13,6 +13,7 @@
 #import "STRestKitLoader.h"
 #import "STFacebook.h"
 #import "STTwitter.h"
+#import "STEvents.h"
 
 #define kUserLimit 20
 

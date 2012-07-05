@@ -32,6 +32,8 @@
 #import "STShareButton.h"
 #import "STCreateCommentView.h"
 #import "STHoverToolbar.h"
+#import "STNavigationItem.h"
+#import "STRootViewController.h"
 
 typedef enum {
     CommentPanDirectionUp = 0,

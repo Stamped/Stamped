@@ -7,6 +7,9 @@
 //
 
 #import "PostStampShareView.h"
+#import "Util.h"
+#import "STBlockUIView.h"
+#import "QuartzUtils.h"
 
 @interface PostStampShareCell : UIControl
 @property(nonatomic,retain) UILabel *titleLabel;

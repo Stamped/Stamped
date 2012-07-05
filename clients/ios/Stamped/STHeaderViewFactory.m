@@ -15,6 +15,9 @@
 #import "STPhotoViewController.h"
 #import "STEntityAnnotation.h"
 #import "STImageCache.h"
+#import "Util.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
 

@@ -1001,7 +1001,7 @@ static Rdio* _rdio;
             cachedImage = [[STStampedAPI sharedInstance] currentUserImageForSize:profileSize];
         }
         if (!cachedImage) {
-            [[STImageCache sharedInstance] cachedUserImageForUser:user size:profileSize];
+            cachedImage = [[STImageCache sharedInstance] cachedUserImageForUser:user size:profileSize];
         }
         if (cachedImage) {
             imageView.image = cachedImage;

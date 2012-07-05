@@ -133,19 +133,21 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
 
     @lazyProperty
     def raw_name(self):
-        return self.data['title']
+        if self.data:
+            return self.data['title']
+        return ''
 
     @lazyProperty
     def popularity(self):
-        try:
+        if self.data:
             return self.data['popularity']
-        except Exception:
-            return None
+        return ''
     
     @lazyProperty
     def imdb(self):
         try:
-            return self.full_data['imdb_id']
+            if self.full_data:
+                return self.full_data['imdb_id']
         except KeyError:
             return None
         except LookupRequiredError:
@@ -281,7 +283,7 @@ class TMDBSource(GenericSource):
                             yield movie
             except GeneratorExit:
                 pass
-        return self.generatorSource(gen(), constructor=lambda x: TMDBMovie( x['id']) )
+        return self.generatorSource(gen(), constructor=lambda x: TMDBMovie(x['id'], x, 0))
 
     def __pareOutResultsFarInFuture(self, resolverObjects):
         """
@@ -344,7 +346,7 @@ class TMDBSource(GenericSource):
                             yield movie
             except GeneratorExit:
                 pass
-        return self.generatorSource(gen(), constructor=lambda x: TMDBSearchAll(TMDBMovie( x['id'])) )
+        return self.generatorSource(gen(), constructor=lambda x: TMDBSearchAll(TMDBMovie(x['id'], x, 0)))
 
     def __release_date(self, movie):
         result = None
@@ -358,14 +360,6 @@ class TMDBSource(GenericSource):
                     except ValueError:
                         pass
         return result
-
-    def entityProxyFromKey(self, tmdb_id, **kwargs):
-        # Todo: Make sure we fail gracefully if id is invalid
-        try:
-            return TMDBMovie(tmdb_id)
-        except Exception as e:
-            logs.warning("Error: %s" % e)
-            raise
 
     # def enrichEntity(self, entity, controller, decorations, timestamps):
     #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)

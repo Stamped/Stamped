@@ -94,7 +94,6 @@ static id _sharedInstance;
 
 - (BOOL)connected {
     NSString* account = [_keychainItem objectForKey:(id)kSecAttrAccount];
-    NSLog(@"account:%@,%p", account, account);
     return account && ![account isEqualToString:@""];
 }
 

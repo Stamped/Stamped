@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STTypes.h"
+#import "STUser.h"
 
 
 @interface UserStampView : UIControl {

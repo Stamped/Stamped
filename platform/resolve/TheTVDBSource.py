@@ -202,20 +202,10 @@ class TheTVDBSource(GenericSource):
         return self.generatorSource(self.__queryGen(query=query.query_string),
                                     constructor=TheTVDBSearchAll)
     
-    def __queryGen(self, batches=(100,), **params):
-        def gen():
-            try:
-                batches = [100]
-                offset  = 0
-                
-                results = self.__thetvdb.search(transform=True, detailed=True, **params)
-                
-                for result in results:
-                    yield result
-            except GeneratorExit:
-                pass
-        
-        return gen()
+    def __queryGen(self, **params):
+        results = self.__thetvdb.search(transform=True, detailed=True, **params)
+        for result in results:
+            yield result
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         # TODO: USE TIMEOUT.

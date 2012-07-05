@@ -59,37 +59,38 @@ if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
 defaultExceptions = [
-    (StampedAuthError, StampedHTTPError(401,            kind='invalid_credentials', msg='There was an error during authentication')),
-    (StampedInputError, StampedHTTPError(400,           kind='bad_request',         msg='An error occurred. Please try again later.')),
-    (StampedIllegalActionError, StampedHTTPError(403,   kind='bad_request',         msg='An error occurred. Please try again later.')),
-    (StampedPermissionsError, StampedHTTPError(403,     kind='forbidden',           msg='Insufficient privileges')),
-    (StampedDuplicationError, StampedHTTPError(409,     kind='already_exists',      msg='An error occurred. Please try again later')),
-    (StampedUnavailableError, StampedHTTPError(404,     kind='not_found',           msg='Not found')),
-    (StampedMissingParametersError, StampedHTTPError(400, kind='bad_request',       msg='An error occurred.  Please try again later')),
-    (StampedInternalError, StampedHTTPError(500,        kind='internal',            msg='An error occurred.  Please try again later')),
+    (StampedDocumentNotFoundError, 404, 'not_found',           'There was a problem retrieving the requested data'),
+    (StampedAuthError, 401,             'invalid_credentials', 'There was an error during authentication'),
+    (StampedInputError, 400,            'bad_request',         'An error occurred. Please try again later.'),
+    (StampedIllegalActionError, 403,    'bad_request',         'An error occurred. Please try again later.'),
+    (StampedPermissionsError, 403,      'forbidden',           'Insufficient privileges'),
+    (StampedDuplicationError, 409,      'already_exists',      'An error occurred. Please try again later'),
+    (StampedUnavailableError, 404,      'not_found',           'Not found'),
+    (StampedMissingParametersError, 400,'bad_request',         'An error occurred. Please try again later'),
+    (StampedInternalError, 500,         'internal',            'An error occurred. Please try again later'),
 ]
 
 
 def handleStampedExceptions(e, handlers=None):
     if isinstance(e, StampedHTTPError):
-        exceptions =  [(StampedHTTPError, e)]
+        exceptions =  [(StampedHTTPError, e.code, e.kind, e.msg)]
     elif handlers is not None:
         exceptions = handlers + defaultExceptions
     else:
         exceptions = defaultExceptions
 
 
-    for (exception, httpexception) in exceptions:
+    for (exception, code, kind, msg) in exceptions:
         if isinstance(e, exception):
-            logs.warning("%s Error (%s): %s" % (httpexception.code, httpexception.kind, httpexception.msg))
+            logs.warning("%s Error (%s): %s" % (code, kind, msg))
             logs.warning(utils.getFormattedException())
-            logs.error(httpexception.code)
+            logs.error(code)
 
-            kind = httpexception.kind
+            kind = kind
             if kind is None:
                 kind = 'stamped_error'
 
-            message = httpexception.msg
+            message = msg
             if message is None and e.msg is not None:
                 message = e.msg
 
@@ -98,15 +99,28 @@ def handleStampedExceptions(e, handlers=None):
             if message is not None:
                 error['message'] = unicode(message)
 
-            return transformOutput(error, status=httpexception.code)
+            return transformOutput(error, status=code)
     else:
         error = {
             'error' :   'stamped_error',
-            'message' : "An error occurred.  Please try again later.",
+            'message' : "An error occurred. Please try again later.",
         }
         logs.warning("500 Error: %s" % e)
         logs.warning(utils.getFormattedException())
         logs.error(500)
+
+        # Email dev if a 500 occurs
+        if libs.ec2_utils.is_ec2():
+            try:
+                email = {}
+                email['from'] = 'Stamped <noreply@stamped.com>'
+                email['to'] = 'dev@stamped.com'
+                email['subject'] = '%s - 500 Error' % stampedAPI.node_name
+                email['body'] = logs.getHtmlFormattedLog()
+                utils.sendEmail(email, format='html')
+            except Exception as e:
+                logs.warning('UNABLE TO SEND EMAIL: %s')
+
         return transformOutput(error, status=500)
 
 def handleHTTPRequest(requires_auth=True, 

@@ -51,7 +51,7 @@ class ACollectionCache(object):
                 logs.error('Error retrieving data from memcached.  Is memcached running?')
                 prevBlock = self._updateCache(prevBlockOffset, **kwargs)
             if len(prevBlock) < self._blockSize:
-                raise Exception("Previous data block was final")
+                raise StampedCollectionCacheError("Previous data block was final")
             assert(len(prevBlock) > 0)
             lastItem = prevBlock[-1]
             before = lastItem.timestamp.modified - timedelta(microseconds=1)

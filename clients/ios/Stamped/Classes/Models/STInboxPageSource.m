@@ -9,6 +9,7 @@
 #import "STInboxPageSource.h"
 #import "STRestKitLoader.h"
 #import "STSimpleStamp.h"
+#import "Util.h"
 
 @interface STInboxPageSource ()
 

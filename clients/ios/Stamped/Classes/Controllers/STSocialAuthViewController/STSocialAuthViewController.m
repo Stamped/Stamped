@@ -11,6 +11,9 @@
 #import "STAuth.h"
 #import "STTwitter.h"
 #import "STFacebook.h"
+#import "STEvents.h"
+#import "STBlockUIView.h"
+#import "QuartzUtils.h"
 
 @interface STSocialAuthViewController ()
 @property(nonatomic,readonly) SocialAuthType authType;

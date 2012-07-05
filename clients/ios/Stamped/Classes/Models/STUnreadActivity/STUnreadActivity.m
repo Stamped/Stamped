@@ -8,6 +8,7 @@
 
 #import "STUnreadActivity.h"
 #import "STStampedAPI.h"
+#import "STEvents.h"
 
 static id __instance;
 

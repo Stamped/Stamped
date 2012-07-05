@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STUser.h"
 
 @protocol FriendTableCellDelegate;
 @class STAvatarView, FriendStatusButton, UserStampView;

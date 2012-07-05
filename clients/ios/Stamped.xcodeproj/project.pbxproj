@@ -10,9 +10,6 @@
 		0301379415668DBE00B55B47 /* NoDataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378315668DBE00B55B47 /* NoDataView.m */; };
 		0301379515668DBE00B55B47 /* NoDataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378315668DBE00B55B47 /* NoDataView.m */; };
 		0301379715668DBE00B55B47 /* NoDataView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378315668DBE00B55B47 /* NoDataView.m */; };
-		0301379815668DBE00B55B47 /* STDetailActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378715668DBE00B55B47 /* STDetailActionView.m */; };
-		0301379915668DBE00B55B47 /* STDetailActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378715668DBE00B55B47 /* STDetailActionView.m */; };
-		0301379B15668DBE00B55B47 /* STDetailActionView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378715668DBE00B55B47 /* STDetailActionView.m */; };
 		0301379C15668DBE00B55B47 /* STBlockUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378A15668DBE00B55B47 /* STBlockUIView.m */; };
 		0301379D15668DBE00B55B47 /* STBlockUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378A15668DBE00B55B47 /* STBlockUIView.m */; };
 		0301379F15668DBE00B55B47 /* STBlockUIView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0301378A15668DBE00B55B47 /* STBlockUIView.m */; };
@@ -797,9 +794,6 @@
 		0358C9111575080A00FD1597 /* ImageLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 0358C90D1575080A00FD1597 /* ImageLoader.m */; };
 		0358C92E1575121800FD1597 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0358C92D1575121800FD1597 /* ImageIO.framework */; };
 		0358C932157528D700FD1597 /* Stamped.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 0358C9291575120300FD1597 /* Stamped.entitlements */; };
-		0358C95415755EDB00FD1597 /* STStampTitleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0358C95315755EDB00FD1597 /* STStampTitleView.m */; };
-		0358C95515755EDB00FD1597 /* STStampTitleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0358C95315755EDB00FD1597 /* STStampTitleView.m */; };
-		0358C95715755EDB00FD1597 /* STStampTitleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0358C95315755EDB00FD1597 /* STStampTitleView.m */; };
 		0364A2D715630D9800F068DB /* scope_drag_inner_all.png in Resources */ = {isa = PBXBuildFile; fileRef = 0364A2D515630D9800F068DB /* scope_drag_inner_all.png */; };
 		0364A2D815630D9800F068DB /* scope_drag_inner_all.png in Resources */ = {isa = PBXBuildFile; fileRef = 0364A2D515630D9800F068DB /* scope_drag_inner_all.png */; };
 		0364A2DA15630D9800F068DB /* scope_drag_inner_all.png in Resources */ = {isa = PBXBuildFile; fileRef = 0364A2D515630D9800F068DB /* scope_drag_inner_all.png */; };
@@ -2134,9 +2128,6 @@
 		63BFCC7E1541F7AE00817EC5 /* STUserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC7C1541F7AE00817EC5 /* STUserCell.m */; };
 		63BFCC9615435B7C00817EC5 /* STRootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC9515435B7C00817EC5 /* STRootScrollView.m */; };
 		63BFCC9715435B7C00817EC5 /* STRootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC9515435B7C00817EC5 /* STRootScrollView.m */; };
-		63C4842E15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */; };
-		63C4842F15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */; };
-		63C4843015A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */; };
 		63C4843615A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
 		63C4843715A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
 		63C4843815A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
@@ -2146,6 +2137,12 @@
 		63C4844115A3A6E500CE8F25 /* STAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */; };
 		63C4844215A3A6E500CE8F25 /* STAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */; };
 		63C4844315A3A6E500CE8F25 /* STAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */; };
+		63C4844615A5CE9600CE8F25 /* STContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844515A5CE9600CE8F25 /* STContactsViewController.m */; };
+		63C4844715A5CE9600CE8F25 /* STContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844515A5CE9600CE8F25 /* STContactsViewController.m */; };
+		63C4844815A5CE9600CE8F25 /* STContactsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4844515A5CE9600CE8F25 /* STContactsViewController.m */; };
+		63C4846015A5D0B400CE8F25 /* STContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4845F15A5D0B400CE8F25 /* STContact.m */; };
+		63C4846115A5D0B400CE8F25 /* STContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4845F15A5D0B400CE8F25 /* STContact.m */; };
+		63C4846215A5D0B400CE8F25 /* STContact.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4845F15A5D0B400CE8F25 /* STContact.m */; };
 		63C9834715489F75000180DC /* todo_mini@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C9834415489F75000180DC /* todo_mini@2x.png */; };
 		63C9834815489F75000180DC /* todo_mini@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C9834415489F75000180DC /* todo_mini@2x.png */; };
 		63C9834A15489F75000180DC /* comment_mini@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63C9834515489F75000180DC /* comment_mini@2x.png */; };
@@ -2931,8 +2928,6 @@
 		0301378215668DBE00B55B47 /* NoDataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoDataView.h; sourceTree = "<group>"; };
 		0301378315668DBE00B55B47 /* NoDataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoDataView.m; sourceTree = "<group>"; };
 		0301378515668DBE00B55B47 /* STDetailActionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDetailActionItem.h; sourceTree = "<group>"; };
-		0301378615668DBE00B55B47 /* STDetailActionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STDetailActionView.h; sourceTree = "<group>"; };
-		0301378715668DBE00B55B47 /* STDetailActionView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STDetailActionView.m; sourceTree = "<group>"; };
 		0301378915668DBE00B55B47 /* STBlockUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STBlockUIView.h; sourceTree = "<group>"; };
 		0301378A15668DBE00B55B47 /* STBlockUIView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STBlockUIView.m; sourceTree = "<group>"; };
 		0301378C15668DBE00B55B47 /* STSearchView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSearchView.h; sourceTree = "<group>"; };
@@ -3080,8 +3075,6 @@
 		0358C90D1575080A00FD1597 /* ImageLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageLoader.m; sourceTree = "<group>"; };
 		0358C9291575120300FD1597 /* Stamped.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Stamped.entitlements; sourceTree = "<group>"; };
 		0358C92D1575121800FD1597 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
-		0358C95215755EDB00FD1597 /* STStampTitleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampTitleView.h; sourceTree = "<group>"; };
-		0358C95315755EDB00FD1597 /* STStampTitleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampTitleView.m; sourceTree = "<group>"; };
 		0364A2D515630D9800F068DB /* scope_drag_inner_all.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scope_drag_inner_all.png; sourceTree = "<group>"; };
 		0364A2D615630D9800F068DB /* scope_drag_inner_all@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "scope_drag_inner_all@2x.png"; sourceTree = "<group>"; };
 		0364A2DF15630F4100F068DB /* scope_track.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = scope_track.png; sourceTree = "<group>"; };
@@ -3883,14 +3876,16 @@
 		63BFCC7C1541F7AE00817EC5 /* STUserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUserCell.m; sourceTree = "<group>"; };
 		63BFCC9415435B7C00817EC5 /* STRootScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRootScrollView.h; sourceTree = "<group>"; };
 		63BFCC9515435B7C00817EC5 /* STRootScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRootScrollView.m; sourceTree = "<group>"; };
-		63C4842C15A3839200CE8F25 /* STInviteFriendsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STInviteFriendsViewController.h; sourceTree = "<group>"; };
-		63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STInviteFriendsViewController.m; sourceTree = "<group>"; };
 		63C4843415A387AC00CE8F25 /* STStampsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampsViewController.h; sourceTree = "<group>"; };
 		63C4843515A387AC00CE8F25 /* STStampsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampsViewController.m; sourceTree = "<group>"; };
 		63C4843A15A38CA900CE8F25 /* STCreditPageSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreditPageSource.h; sourceTree = "<group>"; };
 		63C4843B15A38CA900CE8F25 /* STCreditPageSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreditPageSource.m; sourceTree = "<group>"; };
 		63C4843F15A3A6E400CE8F25 /* STAttributedLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAttributedLabel.h; sourceTree = "<group>"; };
 		63C4844015A3A6E500CE8F25 /* STAttributedLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAttributedLabel.m; sourceTree = "<group>"; };
+		63C4844415A5CE9600CE8F25 /* STContactsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STContactsViewController.h; sourceTree = "<group>"; };
+		63C4844515A5CE9600CE8F25 /* STContactsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STContactsViewController.m; sourceTree = "<group>"; };
+		63C4845E15A5D0B400CE8F25 /* STContact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STContact.h; sourceTree = "<group>"; };
+		63C4845F15A5D0B400CE8F25 /* STContact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STContact.m; sourceTree = "<group>"; };
 		63C9834415489F75000180DC /* todo_mini@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "todo_mini@2x.png"; sourceTree = "<group>"; };
 		63C9834515489F75000180DC /* comment_mini@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "comment_mini@2x.png"; sourceTree = "<group>"; };
 		63C9834615489F75000180DC /* like_mini@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "like_mini@2x.png"; sourceTree = "<group>"; };
@@ -4528,7 +4523,6 @@
 				03E005C81576888800CDFEFF /* SocialSignupHeaderView */,
 				03FDC535157671DF0024A55C /* STSingleTableCell */,
 				03CF2FE415758183009423B0 /* STDetailTextCalloutView */,
-				0358C95115755ECC00FD1597 /* STStampTitleView */,
 				0358C8FD15746E6B00FD1597 /* STPagedImageViewer */,
 				0397DB9B1574200A0063F81C /* EntityHeaderView */,
 				0397DB9415741F170063F81C /* EntityActionTableCell */,
@@ -4561,8 +4555,6 @@
 			isa = PBXGroup;
 			children = (
 				0301378515668DBE00B55B47 /* STDetailActionItem.h */,
-				0301378615668DBE00B55B47 /* STDetailActionView.h */,
-				0301378715668DBE00B55B47 /* STDetailActionView.m */,
 			);
 			path = STActionView;
 			sourceTree = "<group>";
@@ -4864,15 +4856,6 @@
 				0358C90D1575080A00FD1597 /* ImageLoader.m */,
 			);
 			path = ImageLoader;
-			sourceTree = "<group>";
-		};
-		0358C95115755ECC00FD1597 /* STStampTitleView */ = {
-			isa = PBXGroup;
-			children = (
-				0358C95215755EDB00FD1597 /* STStampTitleView.h */,
-				0358C95315755EDB00FD1597 /* STStampTitleView.m */,
-			);
-			path = STStampTitleView;
 			sourceTree = "<group>";
 		};
 		0364C0E11564867B00EE18C1 /* Controllers */ = {
@@ -6292,13 +6275,15 @@
 			name = Actions;
 			sourceTree = "<group>";
 		};
-		63C4842B15A3833900CE8F25 /* Invite Friends */ = {
+		63C4842B15A3833900CE8F25 /* Friend Finder */ = {
 			isa = PBXGroup;
 			children = (
-				63C4842C15A3839200CE8F25 /* STInviteFriendsViewController.h */,
-				63C4842D15A3839200CE8F25 /* STInviteFriendsViewController.m */,
+				63C4844415A5CE9600CE8F25 /* STContactsViewController.h */,
+				63C4844515A5CE9600CE8F25 /* STContactsViewController.m */,
+				63C4845E15A5D0B400CE8F25 /* STContact.h */,
+				63C4845F15A5D0B400CE8F25 /* STContact.m */,
 			);
-			name = "Invite Friends";
+			name = "Friend Finder";
 			sourceTree = "<group>";
 		};
 		63C4843215A3878700CE8F25 /* Stamps List */ = {
@@ -7320,7 +7305,7 @@
 			isa = PBXGroup;
 			children = (
 				63C4843215A3878700CE8F25 /* Stamps List */,
-				63C4842B15A3833900CE8F25 /* Invite Friends */,
+				63C4842B15A3833900CE8F25 /* Friend Finder */,
 				638BF1CC15A0AD6F00777A3C /* Create Entity */,
 				632ECB39159CA42A0047399F /* Linked Accounts */,
 				632ECB22159BF2610047399F /* Notifications */,
@@ -9451,7 +9436,6 @@
 				0364C1001564994600EE18C1 /* EGORefreshTableFooterView.m in Sources */,
 				0364C1041564994600EE18C1 /* EGORefreshTableHeaderView.m in Sources */,
 				0301379715668DBE00B55B47 /* NoDataView.m in Sources */,
-				0301379B15668DBE00B55B47 /* STDetailActionView.m in Sources */,
 				0301379F15668DBE00B55B47 /* STBlockUIView.m in Sources */,
 				030137A315668DBE00B55B47 /* STSearchView.m in Sources */,
 				030137A715668DBE00B55B47 /* STSliderScopeView.m in Sources */,
@@ -9477,7 +9461,6 @@
 				639DAC031572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */,
 				6394407E1573BD3600234DA6 /* STSharedCaches.m in Sources */,
 				6394408A15742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
-				0358C95715755EDB00FD1597 /* STStampTitleView.m in Sources */,
 				03CF2FEA1575818E009423B0 /* STDetailTextCallout.m in Sources */,
 				03FDC52D15766FB70024A55C /* STMenuController.m in Sources */,
 				03FDC534157671840024A55C /* TwitterAccountsViewController.m in Sources */,
@@ -9587,10 +9570,11 @@
 				638BF21B15A0ADBA00777A3C /* CountriesViewController.m in Sources */,
 				638BF21E15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */,
 				638BF22115A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */,
-				63C4843015A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */,
 				63C4843815A387AC00CE8F25 /* STStampsViewController.m in Sources */,
 				63C4843E15A38CA900CE8F25 /* STCreditPageSource.m in Sources */,
 				63C4844315A3A6E500CE8F25 /* STAttributedLabel.m in Sources */,
+				63C4844815A5CE9600CE8F25 /* STContactsViewController.m in Sources */,
+				63C4846215A5D0B400CE8F25 /* STContact.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9803,7 +9787,6 @@
 				0364C0FE1564994600EE18C1 /* EGORefreshTableFooterView.m in Sources */,
 				0364C1021564994600EE18C1 /* EGORefreshTableHeaderView.m in Sources */,
 				0301379515668DBE00B55B47 /* NoDataView.m in Sources */,
-				0301379915668DBE00B55B47 /* STDetailActionView.m in Sources */,
 				0301379D15668DBE00B55B47 /* STBlockUIView.m in Sources */,
 				030137A115668DBE00B55B47 /* STSearchView.m in Sources */,
 				030137A515668DBE00B55B47 /* STSliderScopeView.m in Sources */,
@@ -9831,7 +9814,6 @@
 				639DAC011572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */,
 				6394407C1573BD3600234DA6 /* STSharedCaches.m in Sources */,
 				6394408815742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
-				0358C95515755EDB00FD1597 /* STStampTitleView.m in Sources */,
 				03CF2FE81575818E009423B0 /* STDetailTextCallout.m in Sources */,
 				03FDC52B15766FB70024A55C /* STMenuController.m in Sources */,
 				03FDC532157671840024A55C /* TwitterAccountsViewController.m in Sources */,
@@ -9942,10 +9924,11 @@
 				638BF21A15A0ADBA00777A3C /* CountriesViewController.m in Sources */,
 				638BF21D15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */,
 				638BF22015A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */,
-				63C4842F15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */,
 				63C4843715A387AC00CE8F25 /* STStampsViewController.m in Sources */,
 				63C4843D15A38CA900CE8F25 /* STCreditPageSource.m in Sources */,
 				63C4844215A3A6E500CE8F25 /* STAttributedLabel.m in Sources */,
+				63C4844715A5CE9600CE8F25 /* STContactsViewController.m in Sources */,
+				63C4846115A5D0B400CE8F25 /* STContact.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10170,7 +10153,6 @@
 				0364C0FD1564994600EE18C1 /* EGORefreshTableFooterView.m in Sources */,
 				0364C1011564994600EE18C1 /* EGORefreshTableHeaderView.m in Sources */,
 				0301379415668DBE00B55B47 /* NoDataView.m in Sources */,
-				0301379815668DBE00B55B47 /* STDetailActionView.m in Sources */,
 				0301379C15668DBE00B55B47 /* STBlockUIView.m in Sources */,
 				030137A015668DBE00B55B47 /* STSearchView.m in Sources */,
 				030137A415668DBE00B55B47 /* STSliderScopeView.m in Sources */,
@@ -10198,7 +10180,6 @@
 				639DAC001572F6AA0046C46F /* STGenericCacheConfiguration.m in Sources */,
 				6394407B1573BD3600234DA6 /* STSharedCaches.m in Sources */,
 				6394408715742E9E00234DA6 /* STEntityDetailCellFactory.m in Sources */,
-				0358C95415755EDB00FD1597 /* STStampTitleView.m in Sources */,
 				03CF2FE71575818E009423B0 /* STDetailTextCallout.m in Sources */,
 				03FDC52A15766FB70024A55C /* STMenuController.m in Sources */,
 				03FDC531157671840024A55C /* TwitterAccountsViewController.m in Sources */,
@@ -10308,10 +10289,11 @@
 				638BF21915A0ADBA00777A3C /* CountriesViewController.m in Sources */,
 				638BF21C15A0ADBA00777A3C /* CreateEntityViewController.m in Sources */,
 				638BF21F15A0ADBA00777A3C /* STMusicPickerViewController.m in Sources */,
-				63C4842E15A3839200CE8F25 /* STInviteFriendsViewController.m in Sources */,
 				63C4843615A387AC00CE8F25 /* STStampsViewController.m in Sources */,
 				63C4843C15A38CA900CE8F25 /* STCreditPageSource.m in Sources */,
 				63C4844115A3A6E500CE8F25 /* STAttributedLabel.m in Sources */,
+				63C4844615A5CE9600CE8F25 /* STContactsViewController.m in Sources */,
+				63C4846015A5D0B400CE8F25 /* STContact.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10411,8 +10393,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
+				PROVISIONING_PROFILE = "437FAEA3-31A7-4B12-ADB1-3A1B2704A33D";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "437FAEA3-31A7-4B12-ADB1-3A1B2704A33D";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -10455,8 +10437,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
+				PROVISIONING_PROFILE = "437FAEA3-31A7-4B12-ADB1-3A1B2704A33D";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "437FAEA3-31A7-4B12-ADB1-3A1B2704A33D";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -10500,8 +10482,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C1E39F9F-E541-4A6A-8C4A-DDBC57C33043";
+				PROVISIONING_PROFILE = "437FAEA3-31A7-4B12-ADB1-3A1B2704A33D";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "437FAEA3-31A7-4B12-ADB1-3A1B2704A33D";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";

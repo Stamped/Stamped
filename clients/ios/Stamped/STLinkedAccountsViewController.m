@@ -23,6 +23,8 @@
 #import "Util.h"
 #import "STSpotify.h"
 #import "STPlayer.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 static const CGFloat _headerWidth = 200;
 static const CGFloat _textOffset = 26;

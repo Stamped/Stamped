@@ -325,8 +325,6 @@ static STStampedAPI* _sharedInstance;
                                               mapping:[STSimpleStamp mapping]
                                           andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
                                               if (stamp) {
-                                                  [[self globalListByScope:STStampedAPIScopeYou] reload];
-                                                  [[self globalListByScope:STStampedAPIScopeFriends] reload];
                                                   [self.stampCache removeObjectForKey:stampID];
                                               }
                                               block(stamp != nil, error);
@@ -824,23 +822,6 @@ static STStampedAPI* _sharedInstance;
                                                          block(result, error, cancellation);
                                                      }];
     }
-}
-
-- (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope {
-    if (scope == STStampedAPIScopeYou) {
-        return [STYouStampsList sharedInstance];
-    }
-    else if (scope == STStampedAPIScopeFriends) {
-        return [STFriendsStampsList sharedInstance];
-    }
-    else if (scope == STStampedAPIScopeFriendsOfFriends) {
-        return [STFriendsOfFriendsStampsList sharedInstance];
-    }
-    else if (scope == STStampedAPIScopeEveryone) {
-        return [STEveryoneStampsList sharedInstance];
-    }
-    NSAssert1(NO, @"Bad scope value: %", scope);
-    return nil;
 }
 
 - (void)handleEndpointCallback:(id)result withError:(NSError*)error andCancellation:(STCancellation*)cancellation {
@@ -1385,6 +1366,40 @@ static STStampedAPI* _sharedInstance;
                                                       NSArray<STStamp>* stamps = (id)results;
                                                       for (id<STStamp> stamp in stamps) {
                                                           [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+                                                      }
+                                                  }
+                                                  block((id)results, error, cancellation);
+                                              }];
+}
+
+- (STCancellation*)usersWithEmails:(NSArray*)emails 
+                       andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/users/find/email.json"
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:[NSDictionary dictionaryWithObject:[emails componentsJoinedByString:@","] forKey:@"query"] 
+                                                  mapping:[STSimpleUserDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  if (results) {
+                                                      for (id<STUserDetail> user in results) {
+                                                          //TODO cache
+                                                      }
+                                                  }
+                                                  block((id)results, error, cancellation);
+                                              }];
+}
+
+- (STCancellation*)usersWithPhoneNumbers:(NSArray*)phoneNumbers 
+                             andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/users/find/phone.json"
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:[NSDictionary dictionaryWithObject:[phoneNumbers componentsJoinedByString:@","] forKey:@"query"] 
+                                                  mapping:[STSimpleUserDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  if (results) {
+                                                      for (id<STUserDetail> user in results) {
+                                                          //TODO cache
                                                       }
                                                   }
                                                   block((id)results, error, cancellation);

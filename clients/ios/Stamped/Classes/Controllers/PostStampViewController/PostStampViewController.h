@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STStamp.h"
 
 @class STStampContainerView;
 @interface PostStampViewController : UITableViewController {

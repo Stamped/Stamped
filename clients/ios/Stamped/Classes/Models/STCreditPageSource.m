@@ -7,6 +7,7 @@
 //
 
 #import "STCreditPageSource.h"
+#import "STStampedAPI.h"
 
 @interface STCreditPageSource ()
 

@@ -50,7 +50,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 try:
                     category = Entity.subcategories[subcategory]
                 except KeyError:
-                    raise StampedInputError("invalid subcategory '%s'" % subcategory)
+                    raise StampedInvalidSubcategoryError("invalid subcategory '%s'" % subcategory)
         
         if category != 'place':
             coords = None
