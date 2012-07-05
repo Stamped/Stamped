@@ -11,7 +11,7 @@ from utils import abstract
 from IASyncConsumer import IASyncConsumer
 from gevent.queue import Queue, Empty
 from gevent import Greenlet
-from utils import LoggingThreadPool
+from gevent.pool import Pool
 
 class AEntitySink(Greenlet, IASyncConsumer):
     """
@@ -43,7 +43,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
         #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
         stop = 0
         if async:
-            pool = LoggingThreadPool(poolSize)
+            pool = Pool(poolSize)
         
         while True:
             items = []

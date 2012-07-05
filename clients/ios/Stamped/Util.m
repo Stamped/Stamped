@@ -25,7 +25,9 @@
 #import "STMenuController.h"
 #import "STNavigationItem.h"
 #import "STBadgeBarButtonItem.h"
+#import "STInboxViewController.h"
 #import "STRootViewController.h"
+#import "STStampedAPI.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -456,10 +458,10 @@ static Rdio* _rdio;
 
 // Fix for long back button titles overlapping the Stamped logo.
 + (NSString*)truncateTitleForBackButton:(NSString*)title {
-    CGSize titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
-    if (titleSize.width > 87) {
+    CGSize titleSize = [title sizeWithFont:[UIFont stampedBoldFontWithSize:12]];
+    if (titleSize.width > 70) {
         BOOL firstLoop = YES;
-        while (titleSize.width > 87) {
+        while (titleSize.width > 70) {
             if (firstLoop) {
                 firstLoop = NO;
                 title = [[title substringToIndex:title.length - 1] stringByAppendingString:@"…"];
@@ -467,10 +469,14 @@ static Rdio* _rdio;
                 title = [[title substringToIndex:title.length - 2] stringByAppendingString:@"…"];
             }
             // -2 because we've already appended the ellipsis.
-            titleSize = [title sizeWithFont:[UIFont fontWithName:@"Helvetica-Bold" size:12]];
+            titleSize = [title sizeWithFont:[UIFont stampedBoldFontWithSize:12]];
         }
     }
     return title;
+}
+
++ (NSString*)truncateTitleForNavBar:(NSString*)title {
+    return [self truncateTitleForBackButton:title];
 }
 
 + (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame {
@@ -1630,8 +1636,38 @@ static Rdio* _rdio;
     }
 }
 
++ (BOOL)compareAndPushOnto:(UIViewController*)current 
+            withController:(UIViewController*)controller
+                     modal:(BOOL)modal 
+                  animated:(BOOL)animated {
+    UINavigationController* cur = [self currentNavigationController];
+    UIViewController* current2 = cur.topViewController;
+    if (current == current2) {
+        [Util pushController:controller modal:modal animated:animated];
+        return YES;
+    }
+    else {
+        return NO;
+    }
+}
+
++ (void)setRootViewController:(UIViewController*)controller animated:(BOOL)animated {
+    STRootViewController* nav = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
+    [[Util sharedMenuController] setRootController:nav animated:YES];
+}
+
++ (void)goToInboxWithScope:(STStampedAPIScope)scope animated:(BOOL)animated {
+    STInboxViewController* controller = [[[STInboxViewController alloc] init] autorelease];
+    [Util addHomeButtonToController:controller withBadge:YES];
+    [self setRootViewController:controller animated:animated];
+}
+
 + (void)warnWithAPIError:(NSError*)error andBlock:(void (^)())block {
     [self warnWithMessage:error.localizedDescription andBlock:block];
+}
+
++ (NSError*)errorWithDescription:(NSString*)description {
+    return [NSError errorWithDomain:@"" code:0 userInfo:[NSDictionary dictionaryWithObject:description forKey:NSLocalizedDescriptionKey]];
 }
 
 @end

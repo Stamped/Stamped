@@ -155,10 +155,6 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
         tableDelegate_.tableShouldReloadCallback = ^(id<STTableDelegate> tableDelegate) {
             [weak.tableView reloadData];
         };
-        STConsumptionToolbarItem* rootItem = [self setupToolbarItems];
-        consumptionToolbar_ = [[STConsumptionToolbar alloc] initWithRootItem:rootItem andScope:STStampedAPIScopeFriends];
-        consumptionToolbar_.slider.delegate = (id<STSliderScopeViewDelegate>)self;
-        consumptionToolbar_.delegate = self;
         [self update];
     }
     return self;
@@ -185,16 +181,24 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 - (void)viewDidUnload
 {
     [super viewDidUnload];
-    // Release any retained subviews of the main view.
 }
 
 - (UIView *)loadToolbar {
     if (LOGGED_IN) {
-        return self.consumptionToolbar;
+        STConsumptionToolbarItem* rootItem = [self setupToolbarItems];
+        consumptionToolbar_ = [[STConsumptionToolbar alloc] initWithRootItem:rootItem andScope:STStampedAPIScopeFriends];
+        consumptionToolbar_.slider.delegate = (id<STSliderScopeViewDelegate>)self;
+        consumptionToolbar_.delegate = self;
+        return consumptionToolbar_;
     }
     else {
         return nil;
     }
+}
+
+- (void)unloadToolbar {
+    [consumptionToolbar_ release];
+    consumptionToolbar_ = nil;
 }
 
 - (void)setScope:(STStampedAPIScope)scope {

@@ -329,6 +329,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 }
 
 - (void)refreshAtIndex:(NSInteger)index force:(BOOL)force {
+//    NSLog(@"refresh:%d,%d", index, force);
     NSNumber* numberIndex = [NSNumber numberWithInteger:index];
     [self.refreshStack removeObject:numberIndex];
     if (force) {
@@ -364,6 +365,14 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     [self saveWithAccelerator:nil andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
         
     }];
+}
+
+- (void)updateAllWithAccellerator:(id<STCacheAccelerator>)accelerator {
+    STCachePage* nextPage = [self.page pageWithUpdatesFromAccelerator:accelerator];
+    if (nextPage != self.page) {
+        self.page = nextPage;
+        [[NSNotificationCenter defaultCenter] postNotificationName:STCacheDidChangeNotification object:self];
+    }
 }
 
 

@@ -622,8 +622,7 @@ def init_db_config(config_desc):
     host, port = get_db_config(config_desc)
     config = {
         'mongodb' : {
-            'host' : host, 
-            'port' : port, 
+            'hosts' : [(host, port)],
         }
     }
     

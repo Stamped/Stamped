@@ -15,12 +15,12 @@ import Globals
 from logs import report
 
 try:
-    import logs, urllib
-    from RateLimiter            import RateLimiter, RateException
-    from urllib2                import HTTPError
-    from LRUCache               import lru_cache
-    from CachedFunction         import cachedFn
-    from libs.CountedFunction   import countedFn
+    import logs, httplib, urllib
+    from RateLimiter import RateLimiter, RateException
+    from LRUCache import lru_cache
+    from CachedFunction import cachedFn
+    from libs.CountedFunction import countedFn
+    from errors import StampedThirdPartyError
     
     try:
         import json
@@ -53,12 +53,14 @@ class Spotify(object):
                         params[k] = v.encode('utf-8')
                 url = '%s?%s' % (base_url, urllib.urlencode(params))
                 logs.info( url )
-                result = urllib.urlopen(url).read()
-            except HTTPError as e:
+                result = urllib.urlopen(url)
+            except IOError as e:
                 logs.warning("Spotify threw an exception (%s): %s" % (e.code, e.message))
                 raise
+        if result.getcode() == httplib.OK:
+            return json.loads(result.read())
+        raise StampedThirdPartyError('Spotify returned error code: ' + str(result.getcode()))
         
-        return json.loads(result)
     
     def search(self, method, **params):
         return self.method('search', method, **params)

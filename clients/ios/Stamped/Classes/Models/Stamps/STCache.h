@@ -17,8 +17,8 @@ extern NSString* const STCacheDidLoadPageNotification;
 @protocol STCachePageSource <NSObject, NSCoding>
 
 - (STCancellation*)pageStartingAtDate:(NSDate*)date
-                     withMinimumSize:(NSInteger)minimumSize
-                       preferredSize:(NSInteger)preferredSize 
+                      withMinimumSize:(NSInteger)minimumSize
+                        preferredSize:(NSInteger)preferredSize 
                           andCallback:(void (^)(STCachePage* page, NSError* error, STCancellation* cancellation))block;
 
 @end
@@ -38,15 +38,7 @@ extern NSString* const STCacheDidLoadPageNotification;
 
 @protocol STCacheAccelerator <NSObject>
 
-@optional
-- (id<STDatum>)datumForKey:(NSString*)key
-          withCurrentDatum:(id<STDatum>)datum 
-                      date:(NSDate*)date 
-                outputDate:(NSDate**)outputDate;
-
-- (NSURL*)safeURLForDatumFile:(NSString*)key
-             withCurrentDatum:(id<STDatum>)datum 
-                         date:(NSDate*)date;
+- (id<STDatum>)datumForCurrentDatum:(id<STDatum>)datum;
 
 @end
 
@@ -69,13 +61,15 @@ extern NSString* const STCacheDidLoadPageNotification;
                            andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)saveWithAccelerator:(id<STCacheAccelerator>)accel 
-                    andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+                           andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)ensureSavedSince:(NSDate*)date
                         accelerator:(id<STCacheAccelerator>)accel
                         andCallback:(void (^)(NSDate* date, NSError* error, STCancellation* cancellation))block;
 
 - (void)updateObjects:(NSArray<STDatum>*)objects;
+
+- (void)updateAllWithAccellerator:(id<STCacheAccelerator>)accelerator;
 
 - (void)clearCache;
 

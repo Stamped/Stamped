@@ -340,7 +340,7 @@
     
     if (textField.returnKeyType == UIReturnKeyDone) {
         [textField resignFirstResponder];
-        return YES;;
+        return YES;
     }
     
     NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell*)textField.superview];

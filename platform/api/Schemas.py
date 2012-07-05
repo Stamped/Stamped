@@ -491,7 +491,6 @@ class Comment(Schema):
         cls.addProperty('comment_id',                       basestring)
         cls.addNestedProperty('user',                       UserMini, required=True)
         cls.addProperty('stamp_id',                         basestring, required=True)
-        cls.addProperty('restamp_id',                       basestring)
         cls.addProperty('blurb',                            basestring, required=True)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
 

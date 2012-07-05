@@ -111,12 +111,15 @@ class LoggingContext(object):
 
 
 
-def _getLoggingContext():
-    try:
+def _getLoggingContext(forceCreate=False):
+    if not forceCreate:
         return localData.loggingContext
-    except AttributeError:
-        localData.loggingContext = LoggingContext()
-        return localData.loggingContext
+    else:
+        try:
+            return localData.loggingContext
+        except AttributeError:
+            localData.loggingContext = LoggingContext()
+            return localData.loggingContext
 
 def refresh(format=None):
     localData.loggingContext = LoggingContext(format=format)
@@ -126,10 +129,10 @@ localData = threading.local()
 refresh()
 
 def _log(level, msg, *args, **kwargs):
-    _getLoggingContext().log(level, msg, *args, **kwargs)
+    _getLoggingContext(forceCreate=True).log(level, msg, *args, **kwargs)
 
 def runInOtherLoggingContext(fn, context):
-    oldLoggingContext = _getLoggingContext()
+    oldLoggingContext = _getLoggingContext(forceCreate=True)
     localData.loggingContext = context
     try:
         return fn()

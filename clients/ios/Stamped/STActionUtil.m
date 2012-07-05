@@ -13,6 +13,7 @@
 #import "STConfiguration.h"
 #import "STPlayer.h"
 #import "STRdio.h"
+#import "STSpotify.h"
 
 @implementation STActionUtil
 
@@ -117,6 +118,7 @@ static id _sharedInstance;
         defaultSubtitle = context.entityDetail.caption;
     }
     BOOL connectedToRdio = [[STRdio sharedRdio] connected];
+    BOOL connectedToSpotify = [[STSpotify sharedInstance] connected];
     NSArray<STPlaylistItem>* potentialMatches = context.entityDetail.playlist.data;
     if (potentialMatches.count == 0 && [context.entityDetail.subcategory isEqualToString:@"song"]) {
         id<STAction> listenAction = nil;
@@ -149,7 +151,8 @@ static id _sharedInstance;
     for (id<STPlaylistItem> item in potentialMatches) {
         NSString* itemID = [STActionUtil sourceIDForItem:item withSource:@"rdio"];
         NSString* previewURL = [STActionUtil previewURLForItem:item];
-        if ((itemID && connectedToRdio) || previewURL) {
+        NSString* spotifyID = [STActionUtil sourceIDForItem:item withSource:@"spotify"];
+        if ((itemID && connectedToRdio) || previewURL || (spotifyID && connectedToSpotify)) {
             STSimplePlaylistItem* simpleItem = [[STSimplePlaylistItem playlistItemWithItem:item] retain];
             [array addObject:simpleItem];
             if (!simpleItem.images) {
@@ -165,6 +168,9 @@ static id _sharedInstance;
 
 + (BOOL)playable:(id<STPlaylistItem>)item {
     if ([[STRdio sharedRdio] connected] && [self sourceIDForItem:item withSource:@"rdio"]) {
+        return YES;
+    }
+    if ([[STSpotify sharedInstance] connected] && [self sourceIDForItem:item withSource:@"spotify"]) {
         return YES;
     }
     if ([self previewURLForItem:item]) {

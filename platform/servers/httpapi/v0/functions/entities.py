@@ -8,6 +8,10 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+exceptions = [
+    (StampedInvalidEmailError,         StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address")),
+]
+
 def _convertHTTPEntity(entity, authClientId=None):
     client = stampedAuth.getClientDetails(authClientId)
     

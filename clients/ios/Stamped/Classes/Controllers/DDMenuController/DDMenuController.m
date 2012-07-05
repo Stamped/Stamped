@@ -35,6 +35,8 @@
 #define kMenuSlideDuration .3f
 
 
+NSString* const DDMenuControllerWillShowLeftMenuNotification = @"DDMenuControllerWillShowLeftMenuNotification";
+
 @interface DDMenuController (Internal)
 - (void)showShadow:(BOOL)val;
 @end
@@ -575,6 +577,8 @@
 }
 
 - (void)showLeftController:(BOOL)animated {
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:DDMenuControllerWillShowLeftMenuNotification object:nil];
     if (!_menuFlags.canShowLeft) return;
     
     if (_right && _right.view.superview) {

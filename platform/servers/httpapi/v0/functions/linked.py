@@ -17,15 +17,14 @@ from django.http        import HttpResponseRedirect
 
 
 exceptions = [
-    (StampedDocumentNotFoundError, StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data.")),
-    (StampedAccountNotFoundError, StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information')),
-    (StampedMissingLinkedAccountTokenError, StampedHTTPError(400, kind='invalid_credentials', msg="Must provide a token for third party service")),
-    (StampedNetflixNoInstantWatchError,  StampedHTTPError(403, kind='illegal_action', msg="Netflix account must have instant watch access")),
-    (StampedLinkedAccountDoesNotExistError, StampedHTTPError(400, kind='illegal_action', msg="No such third party account linked to user")),
-    (StampedLinkedAccountIsAuthError, StampedHTTPError(403, kind='forbidden', msg="This third-party account is used for authorization and cannot be removed")),
-    (StampedThirdPartyError, StampedHTTPError(403, kind='illegal_action', msg="There was a problem communicating with the third-party service")),
-    (StampedLinkedAccountMismatchError, StampedHTTPError(400, kind='illegal_action', msg="There was a problem verifying the third-party account")),
-    (StampedFacebookTokenError, StampedHTTPError(401, kind='facebook_auth', msg="Facebook login failed. Please reauthorize your account.")),
+    (StampedAccountNotFoundError, 404, 'not_found', 'There was an error retrieving account information'),
+    (StampedMissingLinkedAccountTokenError, 400, 'invalid_credentials', "Must provide a token for third party service"),
+    (StampedNetflixNoInstantWatchError, 403, 'illegal_action', "Netflix account must have instant watch access"),
+    (StampedLinkedAccountDoesNotExistError, 400, 'illegal_action', "No such third party account linked to user"),
+    (StampedLinkedAccountIsAuthError, 403, 'forbidden', "This third-party account is used for authorization and cannot be removed"),
+    (StampedThirdPartyError, 403, 'illegal_action', "There was a problem communicating with the third-party service"),
+    (StampedLinkedAccountMismatchError, 400, 'illegal_action', "There was a problem verifying the third-party account"),
+    (StampedFacebookTokenError, 401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
 ]
 
 @handleHTTPRequest(parse_request=False,

@@ -9,7 +9,7 @@ import binascii
 # apnstoken = '01c386bff1c7b576629c3e4e3b101181d3acdfdb0947ba4ac5e513fb59775fc7' # mike
 #apnstoken = '48e3496a9fdadcc8ce8fe99020bb461a72bd0e20e1a8ee0878494133f8c23d4c' #landon
 apnstoken = '9d943f189085639bd87bac6c9dd2b89f237bee1e232041d4057f7a422f23deeb' #landon
-# apnstoken = 'df687e03345604f6b02a4c32bc7d5220ddd5f832c270645e06f22cc26f66516a' # Kevin
+apnstoken = 'df687e03345604f6b02a4c32bc7d5220ddd5f832c270645e06f22cc26f66516a' # Kevin
 
 # create wrapper
 #wrapper = APNSNotificationWrapper('apns-dev.pem', True)

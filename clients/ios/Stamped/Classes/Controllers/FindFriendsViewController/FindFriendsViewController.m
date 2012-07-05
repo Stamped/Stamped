@@ -9,6 +9,7 @@
 #import "FindFriendsViewController.h"
 #import "FindFriendsHeaderView.h"
 #import "FriendsViewController.h"
+#import "STDebug.h"
 
 
 @interface FindFriendsViewController ()
@@ -50,10 +51,7 @@
 - (void)viewDidAppear:(BOOL)animated {
     
     [super viewDidAppear:animated];
-    if (self.firstAppearance) {
         self.tableView.contentOffset = CGPointZero;
-    }
-    self.firstAppearance = NO;
 }
 
 #pragma mark - Table view data source
@@ -154,7 +152,8 @@
         [alert show];
         [alert release];
         
-    } else {
+    } 
+    else {
         
         [self showFriendsControllerWithType:type];
         
@@ -172,6 +171,9 @@
 
 }
 
+- (void)setValue:(id)value forUndefinedKey:(NSString *)key {
+    NSLog(@"Swallowed bad key:%@ withValue:%@", key, value);
+}
 
 #pragma mark - STRestController Overrides
 

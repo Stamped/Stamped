@@ -1,4 +1,4 @@
-/* index.js
+/*! index.js
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */

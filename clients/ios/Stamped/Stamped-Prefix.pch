@@ -26,6 +26,3 @@
     #import "STStampedAPI.h"
     #import "UIImageHelper.h"
 #endif
-
-#define LOGGED_IN ([[STStampedAPI sharedInstance] currentUser] != nil)
-#define IS_CURRENT_USER(user_id) [[[[STStampedAPI sharedInstance] currentUser] userID] isEqualToString:(user_id)]

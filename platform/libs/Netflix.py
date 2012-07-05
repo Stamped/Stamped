@@ -145,15 +145,15 @@ class Netflix(object):
             elif status == 412 and subcode == 710:
                 return True
             else:
-                return StampedThirdPartyError(message)
+                raise StampedThirdPartyError(message)
 
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
-    @countedFn('Netflix (before caching)')
-    @lru_cache(maxsize=64)
-    @cachedFn()
-    @countedFn('Netflix (after caching)')
+#    @countedFn('Netflix (before caching)')
+#    @lru_cache(maxsize=64)
+#    @cachedFn()
+#    @countedFn('Netflix (after caching)')
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 
@@ -315,7 +315,7 @@ class Netflix(object):
         return self.__get(
             'users/%s' % user_id,
             token = token,
-        )
+        )['user']
 
     def getUserRatings(self, user_id, user_token, user_secret, netflix_ids=None):
         # Returns a list of tuples (netflix_id, rating), where rating is an int value
@@ -383,8 +383,8 @@ def globalNetflix():
     return __globalNetflix
 
 USER_ID = 'BQAJAAEDEBt1T1psKyjyA2IphhT34icw3Nwze3KAkc232VbNA7apgZuLYhrDaHkY2dTHbhLCE1aBH2mxmhKYIbgy9mJZmHdy'
-OAUTH_TOKEN = 'BQAJAAEDED8KJJJDY_Qw_il_VdQFVFUw9r1bQHG5UauU1DMV0mSwjtr1K0-gDtWO0MoS-FF8l5tcDrfZXUEdf8T5hYMglERE'
-OAUTH_TOKEN_SECRET = 'QGFPRGVgpjPF'
+OAUTH_TOKEN = 'BQAJAAEDEDXdt6wgpbupNB2Tb9h-_hcwAdmYwRvmtwsUNtV96kMObcRjcEM4xT3Iy5rJcKY1pW3gQsQ7tGNsC3U_Bu3yuZVq'
+OAUTH_TOKEN_SECRET = 'gxpc6dxp242x'
 
 GHOSTBUSTERS2_ID = 'http://api-public.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api-public.netflix.com/catalog/titles/movies/1181532'
@@ -395,7 +395,6 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     from pprint import pprint
     netflix = Netflix()
 
-    netflix_id = BIGLEB_ID
     title = 'arrested development'
     if 'netflix_id' in params:  netflix_id  = params['netflix_id']
     if 'title' in params:       title       = params['title']
@@ -404,6 +403,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     if 'searchTitles' in methods:         pprint( netflix.searchTitles(title) )
     if 'getTitleDetails' in methods:      pprint( netflix.getTitleDetails(netflix_id) )
     if 'getUserInfo' in methods:          pprint( netflix.getUserInfo(user_token, user_secret) )
+    if 'getUserInfoWithId' in methods:    pprint( netflix.getUserInfoWithId(user_id, user_token, user_secret) )
     if 'getRentalHistory' in methods:     pprint( netflix.getRentalHistory(user_id, user_token, user_secret) )
     if 'getRecommendations' in methods:   pprint( netflix.getRecommendations(user_id, user_token, user_secret) )
     if 'getUserRatings' in methods:       pprint( netflix.getUserRatings(user_id, user_token, user_secret, netflix_id) )
@@ -412,7 +412,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'getTitleDetails'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

@@ -257,6 +257,9 @@ def _buildTextReferences(text):
     refs = []
     offsets = {}
 
+    if text is None:
+        return None, []
+
     # Mentions
     mentions = mention_re.finditer(text)
     for item in mentions:
@@ -923,7 +926,6 @@ class HTTPComment(Schema):
         cls.addProperty('comment_id',                       basestring, required=True)
         cls.addNestedProperty('user',                       HTTPUserMini, required=True)
         cls.addProperty('stamp_id',                         basestring, required=True)
-        cls.addProperty('restamp_id',                       basestring)
         cls.addProperty('blurb',                            basestring, required=True)
         cls.addNestedPropertyList('blurb_references',       HTTPTextReference)
         cls.addProperty('created',                          basestring)
@@ -1305,7 +1307,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_menu', client=client)
             sources     = []
 
-            if entity.sources.singleplatform_id is not None:
+            if entity.menu is not None and entity.menu:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
                 source.source       = 'stamped'
@@ -2534,7 +2536,6 @@ class HTTPStamp(Schema):
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
 
-            logs.info('### content.blurb: %s' % content.blurb)
             if content.blurb is not None:
                 blurb, references = _buildTextReferences(content.blurb)
                 if len(references) > 0:

@@ -257,6 +257,7 @@ static id _sharedInstance;
 }
 
 - (void)fireStateChanged {
+    [[UIApplication sharedApplication] setIdleTimerDisabled:!self.paused];
     [[NSNotificationCenter defaultCenter] postNotificationName:STPlayerStateChangedNotification object:nil];
 }
 

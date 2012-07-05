@@ -30,6 +30,7 @@ NSString* STActionManagerShowAllActionsKey = @"Actions.showAllActions";
 @property (nonatomic, readonly, retain) NSOperationQueue* operationQueue;
 @property (nonatomic, readonly, retain) NSMutableDictionary* sources;
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
+@property (nonatomic, readwrite, assign) BOOL locked;
 
 @end
 
@@ -39,6 +40,7 @@ NSString* STActionManagerShowAllActionsKey = @"Actions.showAllActions";
 @synthesize sources = _sources;
 @synthesize actionsLocked = _actionsLocked;
 @synthesize stamp = stamp_;
+@synthesize locked = _locked;
 
 static STActionManager* _singleton;
 
@@ -127,7 +129,8 @@ static STActionManager* _singleton;
     if (!context.stamp) {
         context.stamp = self.stamp;
     }
-    BOOL handled = FALSE;
+    BOOL handled = NO;
+    if (self.locked) return NO;
     //if (flag) {
     //NSLog(@"didChooseSource:%@:%@ forAction:%@", source.source, source.sourceID, action);
     //NSLog(@"%@", source.completionData);
@@ -194,6 +197,42 @@ static STActionManager* _singleton;
 
 + (void)setupConfigurations {
     [STConfiguration addFlag:NO forKey:STActionManagerShowAllActionsKey];
+}
+
+- (BOOL)lock {
+    if (self.locked) {
+        return NO;
+    }
+    else {
+        self.locked = YES;
+        return YES;
+    }
+}
+
+- (BOOL)unlock {
+    if (!self.locked) {
+        return NO;
+    }
+    else {
+        self.locked = NO;
+        return YES;
+    }
+}
+
++ (BOOL)lock {
+    BOOL result = [[STActionManager sharedActionManager] lock];
+    if (!result) {
+        [STStampedAPI logError:@"Concurrent action: could not get lock."];
+    }
+    return result;
+}
+
++ (BOOL)unlock {
+    BOOL result = [[STActionManager sharedActionManager] unlock];
+    if (!result) {
+        [STStampedAPI logError:@"Concurrent action: could not release lock."];
+    }
+    return result;
 }
 
 @end

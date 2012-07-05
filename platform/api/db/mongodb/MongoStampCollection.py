@@ -336,23 +336,23 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         except Exception:
             return None
     
-    def giveCredit(self, creditedUserId, stamp):
+    def giveCredit(self, creditedUserId, stampId, userId):
         # Add to 'credit received'
         ### TODO: Does this belong here?
-        self.credit_received_collection.addCredit(creditedUserId, stamp.stamp_id)
+        self.credit_received_collection.addCredit(creditedUserId, stampId)
         
         # Add to 'credit givers'
         ### TODO: Does this belong here?
-        self.credit_givers_collection.addGiver(creditedUserId, stamp.user.user_id)
+        self.credit_givers_collection.addGiver(creditedUserId, userId)
     
-    def removeCredit(self, creditedUserId, stamp):
+    def removeCredit(self, creditedUserId, stampId, userId):
         # Add to 'credit received'
         ### TODO: Does this belong here?
-        self.credit_received_collection.removeCredit(creditedUserId, stamp.stamp_id)
+        self.credit_received_collection.removeCredit(creditedUserId, stampId)
         
         # Add to 'credit givers'
         ### TODO: Does this belong here?
-        self.credit_givers_collection.removeGiver(creditedUserId, stamp.user.user_id)
+        self.credit_givers_collection.removeGiver(creditedUserId, userId)
 
     def checkCredit(self, creditedUserId, stamp):
         credits = self.credit_received_collection.getCredit(creditedUserId)
@@ -437,6 +437,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         return self.stamp_views_collection.getStampViews(stampId) 
     
     def removeStamps(self, stampIds):
+        if stampIds is None or len(stampIds) == 0:
+            raise Exception("Must pass stampIds to delete!")
         documentIds = []
         for stampId in stampIds:
             documentIds.append(self._getObjectIdFromString(stampId))
