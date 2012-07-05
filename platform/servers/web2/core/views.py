@@ -326,8 +326,8 @@ def test_view(request, **kwargs):
 @stamped_view(schema=HTTPStampId)
 def popup_sdetail_social(request, schema, **kwargs):
     params = schema.dataExport()
-    likes  = stampedAPIProxy.getLikes(schema['stamp_id'])
-    todos  = stampedAPIProxy.getTodos(schema['stamp_id'])
+    likes  = stampedAPIProxy.getLikes(schema.stamp_id)
+    todos  = stampedAPIProxy.getTodos(schema.stamp_id)
     users  = []
     
     for user in likes:
