@@ -11,7 +11,7 @@ import os, re, time
 from BeautifulSoup import BeautifulSoup
 from gevent.pool   import Pool
 from gevent.queue  import Queue
-from AEntitySource import AExternalEntitySource
+from crawler.AEntitySource import AExternalEntitySource
 from Schemas       import Entity
 
 __all__ = [ "AwardAnnalsCrawler" ]
@@ -116,6 +116,6 @@ class AwardAnnalsCrawler(AExternalEntitySource):
             self.seen.add(key)
             self._output.put(entity)
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('awardannals', AwardAnnalsCrawler)
 

@@ -11,13 +11,12 @@ import json, logs, string, urllib, urllib2
 from optparse       import OptionParser
 from libs.Geocoder       import Geocoder
 from libs.AKeyBasedAPI   import AKeyBasedAPI
-from crawler.AEntitySource  import AExternalServiceEntitySource
 from api.Schemas    import PlaceEntity, Coordinates
 from libs.LRUCache       import lru_cache
 from libs.CachedFunction import *
 from libs.CountedFunction import countedFn
 
-class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
+class GooglePlaces(AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
     FORMAT          = 'json'
     DEFAULT_RADIUS  = 500 # meters
@@ -80,7 +79,6 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     ])
     
     def __init__(self):
-        AExternalServiceEntitySource.__init__(self, self.NAME, self.TYPES)
         AKeyBasedAPI.__init__(self, self.API_KEYS)
         
         self._geocoder = Geocoder()

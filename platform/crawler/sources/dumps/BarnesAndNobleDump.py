@@ -8,8 +8,8 @@ __license__   = "TODO"
 import Globals, utils
 import gevent, gzip, os, re, time
 
-from Netflix import NetflixClient
-from AEntitySource import AExternalDumpEntitySource
+from crawler.sources.dumps.Netflix import NetflixClient
+from crawler.AEntitySource import AExternalDumpEntitySource
 from Schemas import Entity
 from pprint import pprint
 
@@ -124,6 +124,6 @@ class BarnesAndNobleDump(AExternalDumpEntitySource):
         f.close()
         return count
 
-import EntitySources
+from crawler import EntitySources
 EntitySources.registerSource('barnesandnoble', BarnesAndNobleDump)
 

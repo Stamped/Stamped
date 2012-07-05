@@ -8,12 +8,12 @@ __license__   = "TODO"
 import Globals, utils
 import gevent, json, math, os, sys
 
-import EntitySinks, EntitySources
-from GeocoderEntityProxy import GeocoderEntityProxy
-from AEntityProxy import AEntityProxy
-from ASyncGatherSource import ASyncGatherSource
-from TestEntitySink import TestEntitySink
-from MergeEntitySink import MergeEntitySink
+from crawler import EntitySinks, EntitySources
+from crawler.GeocoderEntityProxy import GeocoderEntityProxy
+from crawler.AEntityProxy import AEntityProxy
+from crawler.ASyncGatherSource import ASyncGatherSource
+from crawler.TestEntitySink import TestEntitySink
+from crawler.MergeEntitySink import MergeEntitySink
 
 from optparse import OptionParser
 from threading import Thread
@@ -168,7 +168,7 @@ def parseCommandLine():
     elif options.sink == "merge":
         options.sink = MergeEntitySink()
     else:
-        from MongoStampedAPI import MongoStampedAPI
+        from api.MongoStampedAPI import MongoStampedAPI
         options.sink = MongoStampedAPI(options.db)
     
     return options

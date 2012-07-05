@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals, utils
 import logs
 
-from AStampedAPI            import AStampedAPI
+from api.AStampedAPI            import AStampedAPI
 from utils                  import abstract, AttributeDict
-from GeocoderEntityProxy    import GeocoderEntityProxy
+from crawler.GeocoderEntityProxy    import GeocoderEntityProxy
 from api.Schemas            import Entity
 from Entity                 import setFields, isEqual, getSimplifiedTitle
 from datetime               import datetime
