@@ -6,8 +6,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import epf, sqlite3, string
-import CSVUtils
+from crawler.sources.dumps import epf
+import sqlite3, string
+from crawler.sources.dumps import CSVUtils
 
 try:
     import psycopg2
@@ -20,7 +21,7 @@ except ImportError:
 
 from pprint       import pprint
 from utils        import AttributeDict
-from AppleEPFDump import AAppleEPFDump
+from crawler.sources.dumps.AppleEPFDump import AAppleEPFDump
 
 class AppleEPFRelationalDB(AAppleEPFDump):
     def __init__(self, name, filename, index=None, primary=None):

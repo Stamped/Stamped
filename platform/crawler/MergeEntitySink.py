@@ -7,13 +7,13 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from match.EntityMatcher    import EntityMatcher
-from AEntitySink            import AEntitySink
+from crawler.match.EntityMatcher    import EntityMatcher
+from api.AEntitySink            import AEntitySink
 from Schemas                import Entity
 from pprint                 import pprint
-from MongoStampedAPI        import MongoStampedAPI
+from api.MongoStampedAPI        import MongoStampedAPI
 
-from match.EntityMatcher import EntityMatcher
+from crawler.match.EntityMatcher import EntityMatcher
 
 class MergeEntitySink(AEntitySink):
     
