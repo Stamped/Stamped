@@ -2383,16 +2383,16 @@ class StampedAPI(AStampedAPI):
             # Asynchronously add references to the stamp in follower's inboxes and
             # add activity for credit and mentions
             tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
-
+            tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
         else:
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         logs.debug('### addStamp section 4: %s' % (time.time() - t1))
         t1 = time.time()
-
+        
         return stamp
-
+    
     @API_CALL
     def addStampAsync(self, authUserId, stampId, imageUrl):
         stamp   = self._stampDB.getStamp(stampId)
@@ -2409,9 +2409,9 @@ class StampedAPI(AStampedAPI):
                 self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
-
+        
         creditedUserIds = set()
-
+        
         # Give credit
         if stamp.credits is not None and len(stamp.credits) > 0:
             for item in stamp.credits:
@@ -2461,8 +2461,14 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph,
                 kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
-
-
+    
+    @API_CALL
+    def updateUserImageCollageAsync(self, user_id, category):
+        user        = self._userDB.getUser(user_id)
+        categories  = [ 'default', category ]
+        
+        self._userImageCollageDB.process_user(user, categories)
+    
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, stampId, contentId):
         assert imageUrl is not None, "stamp image url unavailable!"
@@ -2528,18 +2534,19 @@ class StampedAPI(AStampedAPI):
         except StampedDocumentNotFoundError:
             logs.info("Stamp has already been deleted")
             return True
-
+        
         # Verify user has permission to delete
         if stamp.user.user_id != authUserId:
             raise StampedRemoveStampPermissionsError("Insufficient privileges to remove stamp")
-
+        
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
-
+        
         tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits])
-
+        tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
+        
         return True
-
+    
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None):
 
         # Remove from user collection

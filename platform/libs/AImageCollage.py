@@ -231,10 +231,6 @@ class AImageCollage(object):
     def _get_output_sizes(self):
         return [
             (1024, 256), 
-            (940, 256), 
-            (640, 128), 
-            #(512, 128), 
-            #(256, 64), 
         ]
     
     def __str__(self):

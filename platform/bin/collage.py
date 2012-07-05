@@ -6,18 +6,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import colorsys, math, os, pprint, sys, time, urllib2, utils
+import pprint, time, utils
 
 from S3ImageDB              import S3ImageDB
 from api.HTTPSchemas        import HTTPTimeSlice
 from api.MongoStampedAPI    import MongoStampedAPI
 from libs.ImageCollages     import *
-
-def main(image_urls):
-    collage = MusicImageCollage()
-    images  = collage.get_images(image_urls)
-    
-    collage.generate(images)
 
 def save_local_image(image, filename):
     utils.log("saving image %s" % filename)
@@ -112,7 +106,7 @@ if __name__ == '__main__':
                 user = api.getUserFromIdOrScreenName(u)
                 
                 if user is None:
-                    continue
+                    break
                 
                 for category in categories:
                     ts = { 'user_id' : user.user_id, 'scope'   : 'user' }

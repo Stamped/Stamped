@@ -146,6 +146,10 @@ def mergeEntity(*args, **kwargs):
 def mergeEntityId(*args, **kwargs):
     invoke(mergeEntityId.request, *args, **kwargs)
 
+@task(queue='enrich', **default_params)
+def updateUserImageCollage(*args, **kwargs):
+    invoke(updateUserImageCollage.request, *args, **kwargs)
+
 @task(queue='api', **default_params)
 def updateEntityStats(*args, **kwargs):
     invoke(updateEntityStats.request, *args, **kwargs)

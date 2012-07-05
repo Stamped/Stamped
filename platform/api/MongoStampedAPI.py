@@ -117,6 +117,11 @@ class MongoStampedAPI(StampedAPI):
         return S3ImageDB()
     
     @lazyProperty
+    def _userImageCollageDB(self):
+        from UserImageCollageDB import UserImageCollageDB
+        return UserImageCollageDB()
+    
+    @lazyProperty
     def _logsDB(self):
         return MongoLogsCollection()
     
