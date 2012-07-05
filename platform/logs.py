@@ -109,6 +109,7 @@ class LoggingContext(object):
         else:
             log.debug(msg, *args, **kwargs)
 
+    @property 
     def html(self):
         output = "<html>"
         if 'result' in self.__log and 'path' in self.__log:
@@ -285,4 +286,4 @@ def report(*args,**kwargs):
 
 def getHtmlFormattedLog():
     loggingContext = _getLoggingContext()
-    return loggingContext.html()
+    return loggingContext.html
