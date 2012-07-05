@@ -6,12 +6,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import time, utils
+import logs, time, utils
 
 from S3ImageDB              import S3ImageDB
 from api.HTTPSchemas        import HTTPTimeSlice
 from libs.ImageCollages     import *
-from MongoStampedAPI    import globalMongoStampedAPI
+from MongoStampedAPI        import globalMongoStampedAPI
 
 class UserImageCollageDB(object):
     
