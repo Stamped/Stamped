@@ -128,11 +128,11 @@ class MongoFriendshipCollection(AFriendshipDB):
         return list(result)
     
     def getFollowers(self, userId, limit=None):
-        # TODO: Remove limit, add cursor instead
-        return self.followers_collection.getFollowers(userId, limit)
+        if limit is None:
+            limit = 10000
         
-        # TODO (travis): what is up with this logic? either remove completely or add a comment
-        #return followers[-10000:]
+        # TODO: add proper cursor support
+        return self.followers_collection.getFollowers(userId, limit)
     
     def countFriends(self, userId):
         return len(self.friends_collection.getFriends(userId))

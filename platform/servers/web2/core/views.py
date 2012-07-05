@@ -275,6 +275,7 @@ def sdetail(request, schema, **kwargs):
         for u in likes:
             u['preview_type'] = 'like'
         
+        likes = _shuffle_split_users(likes)
         users.extend(likes)
     
     if 'todos' in previews and len(previews['todos']) > 0:
@@ -283,9 +284,10 @@ def sdetail(request, schema, **kwargs):
         for u in todos:
             u['preview_type'] = 'todo'
         
+        todos = _shuffle_split_users(todos)
         users.extend(todos)
     
-    users   = _shuffle_split_users(users)
+    #users   = _shuffle_split_users(users)
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     sdetail = stamped_render(request, 'sdetail.html', {
         'user'               : user, 

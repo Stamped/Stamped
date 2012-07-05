@@ -103,7 +103,7 @@ class StampedAPIProxy(object):
             
             return self._get_users("stamps/likes/show.json", params, limit)
     
-    def getTodos(self, params, limit=None):
+    def getTodos(self, stamp_id, limit=None):
         if self._ec2:
             user_ids = self.api.getStampTodos(None, stamp_id)
             
