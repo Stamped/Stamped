@@ -108,6 +108,19 @@ def handleStampedExceptions(e, handlers=None):
         logs.warning("500 Error: %s" % e)
         logs.warning(utils.getFormattedException())
         logs.error(500)
+
+        # Email dev if a 500 occurs
+        if libs.ec2_utils.is_ec2():
+            try:
+                email = {}
+                email['from'] = 'Stamped <noreply@stamped.com>'
+                email['to'] = 'dev@stamped.com'
+                email['subject'] = '%s - 500 Error' % stampedAPI.node_name
+                email['body'] = logs.getHtmlFormattedLog()
+                utils.sendEmail(email, format='html')
+            except Exception as e:
+                logs.warning('UNABLE TO SEND EMAIL: %s')
+
         return transformOutput(error, status=500)
 
 def handleHTTPRequest(requires_auth=True, 

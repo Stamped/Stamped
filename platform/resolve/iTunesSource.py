@@ -1128,7 +1128,7 @@ class iTunesSource(GenericSource):
                                 logs.info('Malformed iTunes output:\n%s' % pformat(value))
             except GeneratorExit:
                 pass
-        return self.generatorSource( gen(), constructor=iTunesSearchAll )
+        return self.generatorSource(gen(), constructor=iTunesSearchAll)
 
 if __name__ == '__main__':
     demo(iTunesSource(), 'Katy Perry')
