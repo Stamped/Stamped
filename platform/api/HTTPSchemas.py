@@ -2038,13 +2038,19 @@ class HTTPEntityNew(Schema):
         now = datetime.utcnow()
 
         addField(entity, 'desc', self.desc, now)
+        addField(entity, 'release_date', datetime(self.year, 1, 1), timestamp=now)
+
         addField(entity, 'address_street', self.address_street, timestamp=now)
         addField(entity, 'address_street_ext', self.address_street_ext, timestamp=now)
         addField(entity, 'address_locality', self.address_locality, timestamp=now)
         addField(entity, 'address_region', self.address_region, timestamp=now)
         addField(entity, 'address_postcode', self.address_postcode, timestamp=now)
-        addField(entity, 'address_country', self.address_country, timestamp=now)
-        addField(entity, 'release_date', datetime(self.year, 1, 1), timestamp=now)
+        # Only add country if other fields are set, too
+        if self.address_street is not None \
+            or self.address_locality is not None \
+            or self.address_region is not None \
+            or self.address_postcode is not None:
+            addField(entity, 'address_country', self.address_country, timestamp=now)
 
         addListField(entity, 'artists', self.artist, PersonEntityMini, timestamp=now)
         addListField(entity, 'collections', self.album, MediaCollectionEntityMini, timestamp=now)
