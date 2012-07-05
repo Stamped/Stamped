@@ -216,28 +216,19 @@ def handle_map(request, schema, **kwargs):
     del schema.ajax
     del schema.stamp_id
     
-    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
-        # useful debugging utility -- circumvent dev server to speed up reloads
-        user        = travis_test.user
-        user_id     = user['user_id']
-        
-        stamps      = filter(lambda s: s['entity'].get('coordinates', None) is not None, travis_test.stamps)
-        stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
-    else:
-        user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-        user_id     = user['user_id']
-        
-        # simple sanity check validation of user_id
-        if utils.tryGetObjectId(user_id) is None:
-            raise StampedInputError("invalid user_id")
-        
-        s = schema.dataExport()
-        del s['screen_name']
-        s['user_id']  = user_id
-        s['category'] = 'place'
-        
-        stamps      = stampedAPIProxy.getUserStamps(s)
+    user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+    user_id     = user['user_id']
     
+    # simple sanity check validation of user_id
+    if utils.tryGetObjectId(user_id) is None:
+        raise StampedInputError("invalid user_id")
+    
+    s = schema.dataExport()
+    del s['screen_name']
+    s['user_id']  = user_id
+    s['category'] = 'place'
+    
+    stamps = stampedAPIProxy.getUserStamps(s)
     stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
     
     for stamp in stamps:
@@ -272,11 +263,7 @@ def sdetail(request, schema, **kwargs):
     
     logs.info('SDETAIL: %s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
-    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
-        user = travis_test.user
-    else:
-        user = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-    
+    user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
     stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     
     if stamp is None:
