@@ -49,44 +49,83 @@ class StampedAPIProxy(object):
         params['scope'] = 'user'
         
         if self._ec2:
-            return self._transform(self.api.getStampCollection(HTTPTimeSlice.exportTimeSlice(params), None))
+            ts = HTTPTimeSlice.exportTimeSlice(HTTPTimeSlice().dataImport(params))
+            
+            return self._transform_stamps(self.api.getStampCollection(ts, None))
         else:
             return self._handle_get("stamps/collection.json", params)
     
-    def _transform(self, value):
-        # TODO: is this necessary?
-        return json.loads(json.dumps(value))
+    def _transform_stamps(self, stamps):
+        if stamps is None:
+            stamps = []
+        
+        result = []
+        
+        for stamp in stamps:
+            try:
+                result.append(HTTPStamp().importStamp(stamp).dataExport())
+            except Exception:
+                logs.warn(utils.getFormattedException())
+        
+        return result
     
-    def getFriends(self, params, limit=None):
-        return self._get_users("friendships/friends.json", params, limit)
+    def _transform_users(self, users):
+        output = []
+        
+        for user in users:
+            output.append(HTTPUser().importUser(user).dataExport())
+        
+        return output
     
-    def getFollowers(self, params, limit=None):
-        return self._get_users("friendships/followers.json", params, limit)
+    def getFriends(self, user_id, limit=None):
+        if self._ec2:
+            return self._transform_users(self.api.getEnrichedFriends(user_id, limit))
+        else:
+            params = { 'user_id' : user_id }
+            
+            return self._get_users("friendships/friends.json", params, limit)
     
-    def getLikes(self, params, limit=None):
-        return self._get_users("stamps/likes/show.json", params, limit)
+    def getFollowers(self, user_id, limit=None):
+        if self._ec2:
+            return self._transform_users(self.api.getEnrichedFollowers(user_id, limit))
+        else:
+            params = { 'user_id' : user_id }
+            
+            return self._get_users("friendships/followers.json", params, limit)
+    
+    def getLikes(self, stamp_id, limit=None):
+        if self._ec2:
+            user_ids = self.api.getLikes(None, stamp_id)
+            
+            return self._transform_users(self.api.getUsers(user_ids, None, None))
+        else:
+            params = { 'stamp_id' : stamp_id }
+            
+            return self._get_users("stamps/likes/show.json", params, limit)
     
     def getTodos(self, params, limit=None):
-        return self._get_users("stamps/todos/show.json", params, limit)
+        if self._ec2:
+            user_ids = self.api.getStampTodos(None, stamp_id)
+            
+            return self._transform_users(self.api.getUsers(user_ids, None, None))
+        else:
+            params = { 'stamp_id' : stamp_id }
+            
+            return self._get_users("stamps/todos/show.json", params, limit)
     
     def _get_users(self, path, params, limit=None):
-        if self._prod:
-            # TODO TODO TODO _ec2
+        response = self._handle_get(path, params)
+        
+        if 'user_ids' in response and len(response['user_ids']) > 0:
+            if limit is not None:
+                response['user_ids'] = response['user_ids'][:limit]
             
-            raise NotImplementedError
+            # TODO: PAGING -- this only returns max 100 at a time
+            return self._handle_post("users/lookup.json", {
+                'user_ids' : ",".join(response['user_ids']), 
+            })
         else:
-            response = self._handle_get(path, params)
-            
-            if 'user_ids' in response and len(response['user_ids']) > 0:
-                if limit is not None:
-                    response['user_ids'] = response['user_ids'][:limit]
-                
-                # TODO: PAGING -- this only returns max 100 at a time
-                return self._handle_post("users/lookup.json", {
-                    'user_ids' : ",".join(response['user_ids']), 
-                })
-            else:
-                return []
+            return []
     
     def getStampFromUser(self, user_id, stamp_num):
         if self._ec2:

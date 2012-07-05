@@ -25,16 +25,16 @@ def transformStamps(stamps):
     Convert stamps to HTTPStamp and return as json-formatted HttpResponse
     """
     result = []
-
+    
     if stamps is None:
         stamps = []
-
+    
     for stamp in stamps:
         try:
             result.append(HTTPStamp().importStamp(stamp).dataExport())
         except:
             logs.warn(utils.getFormattedException())
-
+    
     return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPStampNew,

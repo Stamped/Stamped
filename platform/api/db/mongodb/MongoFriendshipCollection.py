@@ -88,9 +88,9 @@ class MongoFriendshipCollection(AFriendshipDB):
         self.followers_collection.removeFollower(userId=friendId, followerId=userId)
         return True
     
-    def getFriends(self, userId):
-        return self.friends_collection.getFriends(userId)
-
+    def getFriends(self, userId, limit=None):
+        return self.friends_collection.getFriends(userId, limit)
+    
     def getFriendsOfFriends(self, userId, distance=2, inclusive=True):
         if distance <= 0:
             logs.warning('Invalid distance for friends of friends: %s' % distance)
@@ -127,10 +127,12 @@ class MongoFriendshipCollection(AFriendshipDB):
 
         return list(result)
     
-    def getFollowers(self, userId):
+    def getFollowers(self, userId, limit=None):
         # TODO: Remove limit, add cursor instead
-        followers = self.followers_collection.getFollowers(userId)
-        return followers[-10000:]
+        return self.followers_collection.getFollowers(userId, limit)
+        
+        # TODO (travis): what is up with this logic? either remove completely or add a comment
+        #return followers[-10000:]
     
     def countFriends(self, userId):
         return len(self.friends_collection.getFriends(userId))

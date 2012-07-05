@@ -102,7 +102,10 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         else:
             return []
         
-        results = self._collection.find(query).limit(limit)
+        results = self._collection.find(query)
+        if limit is not None:
+            results = results.limit(limit)
+        
         return map(self._convertFromMongo, results)
     
     @lazyProperty
