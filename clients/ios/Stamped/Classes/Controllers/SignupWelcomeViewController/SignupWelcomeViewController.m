@@ -22,6 +22,15 @@
 #import "STS3Uploader.h"
 #import "STInboxViewController.h"
 #import "STMenuController.h"
+#import "STEvents.h"
+#import "STBlockUIView.h"
+#import "QuartzUtils.h"
+#import "STNavigationItem.h"
+#import "STStampedAPI.h"
+#import "Util.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import "STRootViewController.h"
 
 @interface SignupWelcomeViewController ()
 @property(nonatomic,readonly) SignupWelcomeType signupType;
@@ -228,12 +237,8 @@
 }
 
 - (void)signupFailed:(NSNotification*)notification {
-    
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sign up failed" message:@"waiting on api error messages here.." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];
+    [Util warnWithAPIError:notification.object andBlock:nil];
     [self setLoading:NO];
-    [alert release];
-    
 }
 
 

@@ -11,7 +11,7 @@ from utils import AttributeDict, Singleton, get_db_config
 from bson import json_util
 import json
 from api.db.mongodb.AMongoCollection import MongoDBConfig
-from StampedTestUtils import *
+from tests.StampedTestUtils import *
 from libs import MongoCache
 import functools
 
@@ -24,7 +24,7 @@ class AStampedFixtureTestCase(AStampedTestCase):
     @classmethod
     def setUpClass(cls):
         MongoDBConfig.getInstance().database_name = 'stamped_fixtures'
-        from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+        from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
         MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
         MongoCache.disableStaleness = True
         
@@ -35,7 +35,7 @@ class AStampedFixtureTestCase(AStampedTestCase):
     def tearDownClass(cls):
         # Put things back the way they were in case another test needs to hit the real database.
         MongoDBConfig.getInstance().database_name = 'stamped'
-        from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+        from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
         MongoDBConfig2.getInstance().database_name = 'stamped'
         MongoCache.disableStaleness = False
 

@@ -8,6 +8,7 @@
 
 #import "STFacebook.h"
 #import "FBConnect.h"
+#import "STEvents.h"
 
 #define kFacebookUserIdentifier @"kFacebookUserIdentifier"
 

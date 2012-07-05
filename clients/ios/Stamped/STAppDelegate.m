@@ -264,6 +264,7 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {
     [[STImageCache sharedInstance] fastPurge];
     [[STStampedAPI sharedInstance] fastPurge];
+    STLog(@"memory warning");
 }
 
 - (void)applicationProtectedDataDidBecomeAvailable:(UIApplication *)application {

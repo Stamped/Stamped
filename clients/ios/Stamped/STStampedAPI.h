@@ -48,13 +48,6 @@
 #define IS_CURRENT_USER(user_id) [[[[STStampedAPI sharedInstance] currentUser] userID] isEqualToString:(user_id)]
 
 typedef enum {
-    STStampedAPIScopeYou = 0,
-    STStampedAPIScopeFriends,
-    STStampedAPIScopeEveryone,
-    STStampedAPIScopeFriendsOfFriends,
-} STStampedAPIScope;
-
-typedef enum {
     STStampedAPIErrorUnavailable,
 } STStampedAPIError;
 
@@ -76,8 +69,6 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 - (id<STUserDetail>)currentUser;
 
 @property (readwrite, retain) CLLocation* currentUserLocation;
-
-- (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope;
 
 - (id<STStamp>)cachedStampForStampID:(NSString*)stampID;
 
@@ -298,6 +289,12 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)createEntityWithParams:(NSDictionary*)params
                               andCallback:(void (^)(id<STEntityDetail> entityDetail, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)usersWithEmails:(NSArray*)emails 
+                       andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)usersWithPhoneNumbers:(NSArray*)phoneNumbers 
+                             andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block;
 
 + (void)logError:(NSString*)message;
 

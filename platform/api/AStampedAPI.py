@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 
-from AEntitySink import AEntitySink
+from api.AEntitySink import AEntitySink
 from utils       import abstract
 
 class AStampedAPI(AEntitySink):

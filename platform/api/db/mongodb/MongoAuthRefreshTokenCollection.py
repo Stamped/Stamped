@@ -11,8 +11,8 @@ import Globals, utils, logs
 from errors import *
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
-from AAuthRefreshTokenDB import AAuthRefreshTokenDB
+from api.db.mongodb.AMongoCollection import AMongoCollection
+from api.AAuthRefreshTokenDB import AAuthRefreshTokenDB
 
 class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
     

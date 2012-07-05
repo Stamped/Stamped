@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STCancellation.h"
 
 typedef enum {
     FriendsRequestTypeContacts = 0,

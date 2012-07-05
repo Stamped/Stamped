@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STUser.h"
 
 @class STAvatarView, UserStampView;
 @interface CreditUserTableCell : UITableViewCell {

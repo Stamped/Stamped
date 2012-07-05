@@ -9,6 +9,7 @@
 #import "LoginViewController.h"
 #import "STStampedAPI.h"
 #import "LoginLoadingView.h"
+#import "Util.h"
 
 #define kStampBackgroundOffset 160
 #define inOutAnimationDuration 0.45f
@@ -187,10 +188,9 @@
         [self setLoading:NO];
 
         if (error) {
-
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Couldn't Log In" message:error.localizedDescription delegate:(id<UIAlertViewDelegate>)self cancelButtonTitle:@"Reset password" otherButtonTitles:@"      OK      ", nil];
-            [alertView show];
-            [alertView release];
+            [Util warnWithAPIError:error andBlock:^{
+                [_textView setEditing:YES];  
+            }];
             
         } else {
             
@@ -344,24 +344,6 @@
     }];
     
 
-}
-
-
-#pragma mark - UIAlertViewDelegate
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
-    
-    if (alertView.cancelButtonIndex == buttonIndex) {
-        
-        // reset password
-        
-        
-    } else {
-        
-        [_textView setEditing:YES];
-        
-    }
-    
 }
 
 @end

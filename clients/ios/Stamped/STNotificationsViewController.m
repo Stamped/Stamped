@@ -13,6 +13,8 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "STChunksView.h"
+#import "Util.h"
+#import "STNavigationItem.h"
 
 static const CGFloat _apnsOffset = 213;
 static const CGFloat _emailOffset = 277;

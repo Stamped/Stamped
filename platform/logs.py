@@ -109,6 +109,54 @@ class LoggingContext(object):
         else:
             log.debug(msg, *args, **kwargs)
 
+    @property 
+    def html(self):
+        output = "<html>"
+        if 'result' in self.__log and 'path' in self.__log:
+            output += "<h3>%s: %s</h3>" % (self.__log['result'], self.__log['path'])
+        elif 'path' in self.__log:
+            output += "<h3>%s</h3>" % (self.__log['path'])
+
+        def _addValue(display, key, cast=None):
+            if key in self.__log:
+                value = self.__log[key]
+                if cast is not None:
+                    value = cast(value)
+                return "<p><i>%s:</i> %s</p>" % (display, value)
+            return ''
+
+        output += _addValue('Node', 'node')
+        output += _addValue('Begin', 'begin', cast=lambda x: x.isoformat())
+        output += _addValue('Client', 'client')
+        output += _addValue('User Id', 'user_id')
+        output += _addValue('Token', 'token')
+        output += _addValue('Form', 'form')
+        output += _addValue('Method', 'method')
+
+        if 'log' in self.__log and len(self.__log['log']) > 0:
+            output += '<table border=1 cellpadding=5>'
+            output += '<tr>'
+            labels = ['Timestamp', 'Level', 'File', 'Line', 'Function', 'Message']
+            for label in labels:
+                output += '<td style="font-weight:bold">%s</td>' % label 
+            output += '</tr>'
+            for i in self.__log['log']:
+                output += '<tr>'
+                output += '<td valign=top>%s</td>' % i[0].isoformat().split('T')[-1] # Timestamp
+                output += '<td valign=top>%s</td>' % i[1] # Level
+                output += '<td valign=top>%s</td>' % i[2] # File
+                output += '<td valign=top>%s</td>' % i[3] # Line Number
+                output += '<td valign=top>%s</td>' % i[4] # Function
+                output += '<td valign=top>%s</td>' % i[5].replace('\n', '<br>') # Text
+                output += '</tr>'
+            output += '</table>'
+
+        if 'stack_trace' in self.__log:
+            output += '<h4>Stack Trace</h4><code>%s</code>' % (self.__log['stack_trace'].replace('\n', '<br>'))
+
+        output += '</html>'
+
+        return output
 
 
 def _getLoggingContext(forceCreate=False):
@@ -235,3 +283,7 @@ def _report(caller,msg='',level=logging.ERROR):
 
 def report(*args,**kwargs):
     _report(log.findCaller(),*args,**kwargs)
+
+def getHtmlFormattedLog():
+    loggingContext = _getLoggingContext()
+    return loggingContext.html

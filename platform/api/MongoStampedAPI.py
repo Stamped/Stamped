@@ -9,41 +9,41 @@ import Globals, utils
 import json, logs, time
 import libs.ec2_utils
 
-from Entity                 import *
+from api.Entity                 import *
 from api.Schemas            import *
 from utils                  import lazyProperty
 from pprint                 import pformat
-from StampedAPI             import StampedAPI
-from S3ImageDB              import S3ImageDB
-from SimpleDB               import SimpleDB
-from StatsDSink             import StatsDSink
+from api.StampedAPI             import StampedAPI
+from api.S3ImageDB              import S3ImageDB
+from api.SimpleDB               import SimpleDB
+from api.StatsDSink             import StatsDSink
 from libs.notify            import StampedNotificationHandler
 
-from db.mongodb.MongoAccountCollection          import MongoAccountCollection
-from db.mongodb.MongoEntityCollection           import MongoEntityCollection
-from db.mongodb.MongoEntityStatsCollection      import MongoEntityStatsCollection
-from db.mongodb.MongoPlacesEntityCollection     import MongoPlacesEntityCollection
-from db.mongodb.MongoUserCollection             import MongoUserCollection
-from db.mongodb.MongoStampCollection            import MongoStampCollection
-from db.mongodb.MongoStampStatsCollection       import MongoStampStatsCollection
-from db.mongodb.MongoCommentCollection          import MongoCommentCollection
-from db.mongodb.MongoTodoCollection             import MongoTodoCollection
-from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
-from db.mongodb.MongoFriendshipCollection       import MongoFriendshipCollection
-from db.mongodb.MongoUserTodosEntitiesCollection import MongoUserTodosEntitiesCollection
-from db.mongodb.MongoActivityCollection         import MongoActivityCollection
-from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
-from db.mongodb.MongoTempEntityCollection       import MongoTempEntityCollection
-from db.mongodb.MongoMenuCollection             import MongoMenuCollection
-from db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
-from db.mongodb.MongoLogsCollection             import MongoLogsCollection
-from db.mongodb.MongoStatsCollection            import MongoStatsCollection
-from db.mongodb.MongoGuideCollection            import MongoGuideCollection
-from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
-from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
-from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
-from db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
-from db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
+from api.db.mongodb.MongoAccountCollection          import MongoAccountCollection
+from api.db.mongodb.MongoEntityCollection           import MongoEntityCollection
+from api.db.mongodb.MongoEntityStatsCollection      import MongoEntityStatsCollection
+from api.db.mongodb.MongoPlacesEntityCollection     import MongoPlacesEntityCollection
+from api.db.mongodb.MongoUserCollection             import MongoUserCollection
+from api.db.mongodb.MongoStampCollection            import MongoStampCollection
+from api.db.mongodb.MongoStampStatsCollection       import MongoStampStatsCollection
+from api.db.mongodb.MongoCommentCollection          import MongoCommentCollection
+from api.db.mongodb.MongoTodoCollection             import MongoTodoCollection
+from api.db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
+from api.db.mongodb.MongoFriendshipCollection       import MongoFriendshipCollection
+from api.db.mongodb.MongoUserTodosEntitiesCollection import MongoUserTodosEntitiesCollection
+from api.db.mongodb.MongoActivityCollection         import MongoActivityCollection
+from api.db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
+from api.db.mongodb.MongoTempEntityCollection       import MongoTempEntityCollection
+from api.db.mongodb.MongoMenuCollection             import MongoMenuCollection
+from api.db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
+from api.db.mongodb.MongoLogsCollection             import MongoLogsCollection
+from api.db.mongodb.MongoStatsCollection            import MongoStatsCollection
+from api.db.mongodb.MongoGuideCollection            import MongoGuideCollection
+from api.db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
+from api.db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
+from api.db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
+from api.db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
+from api.db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -115,6 +115,11 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _imageDB(self):
         return S3ImageDB()
+    
+    @lazyProperty
+    def _userImageCollageDB(self):
+        from UserImageCollageDB import UserImageCollageDB
+        return UserImageCollageDB()
     
     @lazyProperty
     def _logsDB(self):

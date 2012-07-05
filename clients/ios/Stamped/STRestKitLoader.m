@@ -300,8 +300,13 @@ static STRestKitLoader* _sharedInstance;
                       mapping:mapping 
                   andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
                       id result = nil;
-                      if (array && [array count] > 0) {
-                          result = [array objectAtIndex:0];
+                      if (array) {
+                          if (array.count > 0) {
+                              result = [array objectAtIndex:0];
+                          }
+                          else {
+                              result = [[[[mapping objectClass] alloc] init] autorelease];
+                          }
                       }
                       block(result, error, cancellation);
                   }];

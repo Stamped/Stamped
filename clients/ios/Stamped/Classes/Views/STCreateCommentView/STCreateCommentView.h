@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STComment.h"
 
 @protocol STCreateCommentViewDelegate;
 @interface STCreateCommentView : UIView {

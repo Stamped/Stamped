@@ -375,6 +375,13 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     }
 }
 
+- (void)removeObjectsWithIDs:(NSSet*)doomedIDs {
+    STCachePage* nextPage = [self.page pageWithoutDatumsForKeys:doomedIDs];
+    if (nextPage != self.page) {
+        self.page = nextPage;
+        [[NSNotificationCenter defaultCenter] postNotificationName:STCacheDidChangeNotification object:self];
+    }
+}
 
 @end
 

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STStampedBy.h"
 
 @protocol PostStampedByViewDelegate;
 @interface PostStampedByView : UIView {

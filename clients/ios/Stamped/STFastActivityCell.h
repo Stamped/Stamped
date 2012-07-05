@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STActivity.h"
+#import "STTypes.h"
 
 @interface STFastActivityCell : UITableViewCell
 

@@ -7,6 +7,7 @@
 //
 
 #import "StampColorPickerSliderView.h"
+#import "QuartzUtils.h"
 
 @interface StampColorPickerColorView : UIControl {
     UIView *_colorView;

@@ -16,9 +16,9 @@ from pprint                     import pformat
 from errors                     import *
 
 from api.Schemas                import *
-from AMongoCollection           import AMongoCollection
-from MongoFollowersCollection   import MongoFollowersCollection
-from MongoFriendsCollection     import MongoFriendsCollection
+from api.db.mongodb.AMongoCollection           import AMongoCollection
+from api.db.mongodb.MongoFollowersCollection   import MongoFollowersCollection
+from api.db.mongodb.MongoFriendsCollection     import MongoFriendsCollection
 from api.AUserDB                import AUserDB
 
 try:
@@ -102,7 +102,10 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         else:
             return []
         
-        results = self._collection.find(query).limit(limit)
+        results = self._collection.find(query)
+        if limit is not None:
+            results = results.limit(limit)
+        
         return map(self._convertFromMongo, results)
     
     @lazyProperty
@@ -366,12 +369,12 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         # new format find
         data = self._collection.find(
-            {"linked.twitter.user_id": {"$in": twitterIds}}
+            {"linked.twitter.linked_user_id": {"$in": twitterIds}}
         ).limit(limit)
 
         for item in data:
             user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['twitter']['user_id']
+            user.search_identifier = item['linked']['twitter']['linked_user_id']
             result.append(user)
         return result
 
@@ -390,12 +393,12 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         # new format find
         data = self._collection.find(
-                {"linked.facebook.user_id": {"$in": facebookIds}}
+                {"linked.facebook.linked_user_id": {"$in": facebookIds}}
         ).limit(limit)
 
         for item in data:
             user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['facebook']['user_id']
+            user.search_identifier = item['linked']['facebook']['linked_user_id']
             result.append(user)
         
         return result

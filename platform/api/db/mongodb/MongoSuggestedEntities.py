@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import logs, Entity
+from api import Entity
 
 from utils                      import lazyProperty
 from collections                import defaultdict
@@ -17,10 +17,10 @@ from libs.Fandango              import Fandango
 from libs.LRUCache              import lru_cache
 from libs.Memcache              import memcached_function
 
-from ASuggestedEntities         import ASuggestedEntities
-from MongoCollectionCollection  import MongoCollectionCollection
-from MongoEntityCollection      import MongoEntityCollection
-from MongoStampCollection       import MongoStampCollection
+from api.ASuggestedEntities         import ASuggestedEntities
+from api.db.mongodb.MongoCollectionCollection  import MongoCollectionCollection
+from api.db.mongodb.MongoEntityCollection      import MongoEntityCollection
+from api.db.mongodb.MongoStampCollection       import MongoStampCollection
 
 class MongoSuggestedEntities(ASuggestedEntities):
     
@@ -50,7 +50,7 @@ class MongoSuggestedEntities(ASuggestedEntities):
                 try:
                     category = Entity.subcategories[subcategory]
                 except KeyError:
-                    raise StampedInputError("invalid subcategory '%s'" % subcategory)
+                    raise StampedInvalidSubcategoryError("invalid subcategory '%s'" % subcategory)
         
         if category != 'place':
             coords = None

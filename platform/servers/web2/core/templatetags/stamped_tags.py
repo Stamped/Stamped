@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import logs, os, pystache, utils, pybars
 
-from handlebars_template_helpers import *
+from servers.web2.core.templatetags.handlebars_template_helpers import *
 
 from subprocess import Popen, PIPE
 from pprint     import pformat

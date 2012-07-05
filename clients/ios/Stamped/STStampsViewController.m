@@ -39,6 +39,7 @@
 #import "STCache.h"
 #import "STGenericCacheConfiguration.h"
 #import "STCreditPageSource.h"
+#import "STAppDelegate.h"
 
 @interface STStampsViewController ()
 

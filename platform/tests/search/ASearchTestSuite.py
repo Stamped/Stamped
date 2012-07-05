@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from StampedTestUtils           import *
-from SearchResultConstraints    import *
+from tests.StampedTestUtils           import *
+from tests.search.SearchResultConstraints    import *
 from search.EntitySearch        import EntitySearch
 from resolve.Resolver           import simplify
 from gevent.pool                import Pool

@@ -10,10 +10,10 @@ import Globals, utils
 from utils                  import lazyProperty
 from pymongo.errors          import *
 from errors                 import *
-from framework.FixtureTest  import *
-from AStampedAPITestCase    import *
-from AStampedAPIHttpTestCase import *
-from MongoStampedAPI import MongoStampedAPI
+from tests.framework.FixtureTest  import *
+from tests.AStampedAPITestCase    import *
+from tests.AStampedAPIHttpTestCase import *
+from api.MongoStampedAPI import MongoStampedAPI
 from pprint import pprint
 
 import logs
@@ -192,7 +192,7 @@ class StampedAPIAccountUpgradeTest(AStampedAPITestCase):
         self.assertTrue(account.password is not None)
 
     def test_upgrade_account_taken_email(self):
-        with expected_exception(DuplicateKeyError):
+        with expected_exception(StampedEmailInUseError):
             self.api.upgradeAccount(self.accountA.user_id, 'devbot2@stamped.com', '12345')
 
     def test_upgrade_account_already_stamped_auth(self):

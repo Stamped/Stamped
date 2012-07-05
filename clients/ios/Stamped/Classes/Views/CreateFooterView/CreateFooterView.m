@@ -9,6 +9,7 @@
 #import "CreateFooterView.h"
 #import <CoreText/CoreText.h>
 #import "STSimpleUserDetail.h"
+#import "STStampedAPI.h"
 
 @interface CreateFooterViewTextLayer : CATextLayer
 @end

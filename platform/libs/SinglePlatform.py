@@ -14,8 +14,8 @@ import json, urllib, urllib2, utils
 import datetime, logs, sys, time
 
 from pprint         import pprint
-from LRUCache       import lru_cache
-from Memcache       import memcached_function
+from libs.LRUCache       import lru_cache
+from libs.Memcache       import memcached_function
 from api.Schemas    import Menu
 from api.Schemas    import Submenu
 from api.Schemas    import MenuSection
@@ -196,7 +196,7 @@ class StampedSinglePlatform(SinglePlatform):
 if __name__ == '__main__':
     sp = StampedSinglePlatform()
     if len(sys.argv) > 1:
-        import Factual
+        from libs import Factual
         f = Factual.Factual()
         sp_id = f.singleplatform(sys.argv[1])
         print(sp_id)

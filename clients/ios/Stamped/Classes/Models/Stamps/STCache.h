@@ -69,6 +69,8 @@ extern NSString* const STCacheDidLoadPageNotification;
 
 - (void)updateObjects:(NSArray<STDatum>*)objects;
 
+- (void)removeObjectsWithIDs:(NSSet*)doomedIDs;
+
 - (void)updateAllWithAccellerator:(id<STCacheAccelerator>)accelerator;
 
 - (void)clearCache;

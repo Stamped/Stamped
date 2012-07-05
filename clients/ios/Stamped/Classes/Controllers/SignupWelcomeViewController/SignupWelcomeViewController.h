@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STAccountParameters.h"
 
 typedef enum {
     SignupWelcomeTypeEmail = 0,

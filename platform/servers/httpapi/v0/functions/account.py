@@ -8,11 +8,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from httpapi.v0.helpers import *
+from servers.httpapi.v0.helpers import *
 from errors             import *
-from HTTPSchemas        import *
-from Netflix            import *
-from Facebook           import *
+from api.HTTPSchemas        import *
+from libs.Netflix       import *
+from libs.Facebook           import *
 
 #@handleHTTPRequest(requires_auth=False,
 #                   requires_client=True,
@@ -46,8 +46,10 @@ exceptions = [
     (StampedAccountNotFoundError,      404, 'not_found',           'There was an error retrieving account information'),
     (StampedAlreadyStampedAuthError,   400, 'bad_request',         'This account is already a Stamped account'),
     (StampedLinkedAccountMismatchError, 400, 'illegal_action',     "There was a problem verifying the third-party account"),
+    (StampedUnsetRequiredFieldError,   400, 'illegal_action',      "Cannot remove a required account field"),
+    (StampedEmailInUseError,           400, 'invalid_credentials', "Email address is already in use"),
 ]
-exceptions_create = [(StampedInternalError,  400, 'internal', 'There was a problem creating the account.  Please try again later.')]
+exceptions_create = [(StampedInternalError,  400, 'internal', 'There was a problem creating the account. Please try again later.')]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
                    http_schema=HTTPAccountNew,
@@ -67,7 +69,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
 
     return transformOutput(output)
 
-exceptions_update = [(StampedInternalError, 400, 'internal', 'There was a problem upgrading the account.  Please try again later.')]
+exceptions_update = [(StampedInternalError, 400, 'internal', 'There was a problem upgrading the account. Please try again later.')]
 # upgrade account from third party auth to stamped auth
 @handleHTTPRequest(requires_client=True,
                    http_schema=HTTPAccountUpgradeForm,
@@ -159,27 +161,6 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 
     user    = HTTPUser().importUser(account)
     return transformOutput(user.dataExport())
-
-##@handleHTTPRequest(parse_request=False)
-##@require_http_methods(["POST"])
-##def update(request, authUserId, **kwargs):x
-##    ### TODO: Carve out password changes, require original password sent again?
-##
-##    ### TEMP: Generate list of changes. Need to do something better eventually..
-##    schema = parseRequest(HTTPAccountSettings(), request)
-##    data   = schema.dataExport()
-##
-##    for k, v in data.iteritems():
-##        if v == '':
-##            data[k] = None
-##
-##    ### TODO: Verify email is valid
-##    account = stampedAPI.updateAccountSettings(authUserId, data)
-##
-##    account     = HTTPAccount().importAccount(account)
-##
-##    return transformOutput(account.dataExport())
-
 
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp,
                    exceptions=exceptions)

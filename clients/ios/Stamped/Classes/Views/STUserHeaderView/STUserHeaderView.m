@@ -13,6 +13,7 @@
 #import "STUserStatsView.h"
 #import "STUserImageView.h"
 #import "STStampedActions.h"
+#import "Util.h"
 
 @interface UserHeaderTabView : UIView
 @property(nonatomic,assign) id delegate;

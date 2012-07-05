@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "STBadge.h"
 
 @protocol PostStampBadgeTableCell;
 @interface PostStampBadgeTableCell : UITableViewCell {

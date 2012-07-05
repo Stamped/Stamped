@@ -10,6 +10,8 @@
 #import "STAvatarView.h"
 #import "UserStampView.h"
 #import "STImageCache.h"
+#import "Util.h"
+#import "STStampedAPI.h"
 
 @interface EditProfileHeaderView ()
 
