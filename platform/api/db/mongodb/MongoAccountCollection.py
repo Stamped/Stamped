@@ -13,10 +13,10 @@ from api.Schemas                import *
 from errors                     import *
 from pymongo.errors             import DuplicateKeyError
 
-from AMongoCollection           import AMongoCollection
-from MongoAlertAPNSCollection   import MongoAlertAPNSCollection
-from MongoUserLinkedAlertsHistoryCollection import MongoUserLinkedAlertsHistoryCollection
-from AAccountDB                 import AAccountDB
+from api.db.mongodb.AMongoCollection           import AMongoCollection
+from api.db.mongodb.MongoAlertAPNSCollection   import MongoAlertAPNSCollection
+from api.db.mongodb.MongoUserLinkedAlertsHistoryCollection import MongoUserLinkedAlertsHistoryCollection
+from api.AAccountDB                 import AAccountDB
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     

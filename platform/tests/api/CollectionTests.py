@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils, time
-from AStampedAPIHttpTestCase import *
+from tests.AStampedAPIHttpTestCase import *
 
 # ########### #
 # COLLECTIONS #

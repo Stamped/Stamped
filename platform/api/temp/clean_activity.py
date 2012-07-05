@@ -3,7 +3,7 @@
 import Globals
 import pymongo, json, codecs, os, sys, bson, utils
 
-from MongoStampedAPI    import MongoStampedAPI
+from api.MongoStampedAPI    import MongoStampedAPI
 
 
 def main():

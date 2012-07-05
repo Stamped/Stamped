@@ -6,17 +6,18 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import time, hashlib, random, base64, struct, logs, auth, os
+from api import auth
+import time, hashlib, random, base64, struct, os
 
 from datetime               import datetime, timedelta
 from errors                 import *
 from api.Schemas            import *
 
-from AStampedAuth           import AStampedAuth
-from AAccountDB             import AAccountDB
-from AAuthAccessTokenDB     import AAuthAccessTokenDB
-from AAuthRefreshTokenDB    import AAuthRefreshTokenDB
-from AAuthEmailAlertsDB     import AAuthEmailAlertsDB
+from api.AStampedAuth           import AStampedAuth
+from api.AAccountDB             import AAccountDB
+from api.AAuthAccessTokenDB     import AAuthAccessTokenDB
+from api.AAuthRefreshTokenDB    import AAuthRefreshTokenDB
+from api.AAuthEmailAlertsDB     import AAuthEmailAlertsDB
 
 from libs.Facebook          import *
 from libs.Twitter           import *

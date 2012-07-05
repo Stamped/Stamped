@@ -7,8 +7,8 @@ __license__   = 'TODO'
 
 import Globals
 
-from AMongoCollection   import AMongoCollection
-from Schemas            import ClientLogsEntry
+from api.db.mongodb.AMongoCollection   import AMongoCollection
+from api.Schemas            import ClientLogsEntry
 
 class MongoClientLogsCollection(AMongoCollection):
     

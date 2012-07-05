@@ -9,9 +9,9 @@ import Globals, utils
 
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 from api.APlacesEntityDB import APlacesEntityDB
-from Entity import buildEntity
+from api.Entity import buildEntity
 
 class MongoPlacesEntityCollection(AMongoCollection, APlacesEntityDB):
     

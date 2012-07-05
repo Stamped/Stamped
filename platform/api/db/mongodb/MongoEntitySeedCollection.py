@@ -13,10 +13,10 @@ try:
     from utils                          import lazyProperty
 
     from api.Schemas                        import *
-    from Entity                         import getSimplifiedTitle, buildEntity
+    from api.Entity                         import getSimplifiedTitle, buildEntity
 
-    from AMongoCollection               import AMongoCollection
-    from AEntityDB                      import AEntityDB
+    from api.db.mongodb.AMongoCollection               import AMongoCollection
+    from api.AEntityDB                      import AEntityDB
     from errors                         import StampedUnavailableError
     from logs                           import log
 except:

@@ -13,8 +13,8 @@ import Globals
 from logs import log, report
 
 try:
-    from MongoStampedAPI                import MongoStampedAPI
-    from AStampedAPIHttpTestCase            import *
+    from api.MongoStampedAPI                import MongoStampedAPI
+    from tests.AStampedAPIHttpTestCase            import *
     from api.Schemas                    import Entity
     from pprint                         import pprint
     from datetime                       import datetime

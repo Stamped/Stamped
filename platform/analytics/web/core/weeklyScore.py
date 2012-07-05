@@ -11,8 +11,8 @@ import Globals
 import calendar, datetime, sys, argparse,math
 import keys.aws, logs, utils
 
-from Convert import Converter
-from MongoStampedAPI                            import MongoStampedAPI
+from analytics.web.core.Convert import Converter
+from api.MongoStampedAPI                            import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool

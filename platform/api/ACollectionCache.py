@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, logs, time
 from utils import abstract
 from datetime import timedelta
-from Memcache import globalMemcache
+from libs.Memcache import globalMemcache
 
 class ACollectionCache(object):
 

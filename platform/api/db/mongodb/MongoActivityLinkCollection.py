@@ -8,7 +8,7 @@ __license__   = 'TODO'
 import Globals
 import pymongo
 
-from AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 from api.Schemas import *
 from datetime import datetime
 

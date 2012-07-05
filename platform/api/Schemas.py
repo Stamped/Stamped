@@ -14,7 +14,7 @@ from schema             import *
 from utils              import lazyProperty
 from pprint             import pformat
 
-from SchemaValidation   import *
+from api.SchemaValidation   import *
 
 import libs.CountryData
 

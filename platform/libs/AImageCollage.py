@@ -6,13 +6,14 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import image_utils, math, utils
+from libs import image_utils
+import math
 
 from abc            import ABCMeta, abstractmethod
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
 from api.S3ImageDB  import S3ImageDB
-from LRUCache       import lru_cache
+from libs.LRUCache       import lru_cache
 
 class AImageCollage(object):
     

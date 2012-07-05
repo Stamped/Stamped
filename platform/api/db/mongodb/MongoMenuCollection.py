@@ -11,9 +11,9 @@ from logs   import report
 try:
     import logs, time
 
-    from Schemas import *
+    from api.Schemas import *
 
-    from AMongoCollection import AMongoCollection
+    from api.db.mongodb.AMongoCollection import AMongoCollection
 
     from api.AMenuDB import AMenuDB
 except:

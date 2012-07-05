@@ -10,7 +10,7 @@ from logs import report
 
 try:
     import pymongo, logs
-    from AMongoCollection               import AMongoCollection
+    from api.db.mongodb.AMongoCollection               import AMongoCollection
     from api.Schemas                        import *
 except:
     report()

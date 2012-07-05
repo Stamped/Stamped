@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import inspect, time
 
-from StampedTestUtils       import *
+from tests.StampedTestUtils       import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
 
 from libs.Amazon            import Amazon
