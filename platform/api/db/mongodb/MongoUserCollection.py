@@ -374,7 +374,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         for item in data:
             user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['twitter']['user_id']
+            user.search_identifier = item['linked']['twitter']['linked_user_id']
             result.append(user)
         return result
 
@@ -398,7 +398,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         for item in data:
             user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['facebook']['user_id']
+            user.search_identifier = item['linked']['facebook']['linked_user_id']
             result.append(user)
         
         return result
