@@ -210,7 +210,10 @@ class MongoCollectionProxy(object):
                 if storeLog:
                     logs.info("Retrying delete (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
-        
+            except Exception as e:
+                raise StampedSaveDocumentError("Unable to update document")
+
+
     def update(self, spec, document, upsert=False, manipulate=False,
                safe=False, multi=False, **kwargs):
         if self._debug:
@@ -233,7 +236,10 @@ class MongoCollectionProxy(object):
                     raise
                 logs.info("Retrying update (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
-    
+            except Exception as e:
+                raise StampedUpdateDocumentError("Unable to update document")
+
+
     def remove(self, spec_or_id=None, safe=False, **kwargs):
         if self._debug:
             print("Mongo 'remove'")
@@ -255,6 +261,8 @@ class MongoCollectionProxy(object):
                     raise
                 logs.info("Retrying remove (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
+            except Exception as e:
+                raise StampedRemoveDocumentError("Unable to remove document")
     
     def ensure_index(self, key_or_list, **kwargs):
         if self._debug:

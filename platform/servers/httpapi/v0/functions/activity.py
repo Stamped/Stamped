@@ -7,8 +7,12 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
+exceptions = [
+    (StampedInvalidUniversalNewsItemError, 400, "bad_request", "There was an error adding the activity item."),
+]
 
-@handleHTTPRequest(http_schema=HTTPActivitySlice)
+@handleHTTPRequest(http_schema=HTTPActivitySlice,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def collection(request, authUserId, http_schema, **kwargs):
     import time
@@ -26,7 +30,7 @@ def collection(request, authUserId, http_schema, **kwargs):
     logs.debug("### importEnrichedActivity for all HTTPActivity: %s" % (time.time() - t0))
     return transformOutput(result)
 
-@handleHTTPRequest()
+@handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["GET"])
 def unread(request, authUserId, **kwargs):
     count   = stampedAPI.getUnreadActivityCount(authUserId)

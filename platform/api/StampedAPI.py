@@ -1466,7 +1466,7 @@ class StampedAPI(AStampedAPI):
         email = SchemaValidation.validateEmail(email)
 
         if self._inviteDB.checkInviteExists(email, authUserId):
-            raise StampedInviteExistsError("Invite already exists")
+            raise StampedInviteAlreadyExistsError("Invite already exists")
 
         # Store email address linked to auth user id
         tasks.invoke(tasks.APITasks.inviteFriend, args=[authUserId, email])
@@ -1555,7 +1555,7 @@ class StampedAPI(AStampedAPI):
 
         # Check if user has access to this entity
         if entity.generated_by != authUserId or entity.generated_by is None:
-            raise StampedPermissionsError("Insufficient privileges to update custom entity")
+            raise StampedEntityUpdatePermissionError("Insufficient privileges to update custom entity")
 
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -1572,8 +1572,7 @@ class StampedAPI(AStampedAPI):
 
         # Assert that it's the same one (i.e. hasn't been tombstoned)
         if entity.entity_id != data['entity_id']:
-            logs.warning('Cannot update entity %s - old entity has been tombstoned' % entity.entity_id)
-            raise Exception
+            raise StampedTombstonedEntityError('Cannot update entity %s - old entity has been tombstoned' % entity.entity_id)
 
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -2861,11 +2860,11 @@ class StampedAPI(AStampedAPI):
         # Check if stamp is private; if so, must be a follower
         if stamp.user.privacy == True:
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsError("Insufficient privileges to add comment")
+                raise StampedAddCommentPermissionsError("Insufficient privileges to add comment")
 
         # Check if block exists between user and stamp owner
         if self._friendshipDB.blockExists(friendship) == True:
-            raise StampedIllegalActionError("Block exists")
+            raise StampedBlockedUserError("Block exists")
 
         # Build comment
         comment                     = Comment()
@@ -3857,7 +3856,6 @@ class StampedAPI(AStampedAPI):
             friendIds = self._todoDB.getTodosFromUsersForEntity(friendIds, entity.entity_id)
             users = self._userDB.lookupUsers(friendIds, limit=10)
             users =  map(lambda x: x.minimize(), users)
-            logs.info('### after: %s' % users)
             previews.todos = users
 
 
@@ -3957,7 +3955,7 @@ class StampedAPI(AStampedAPI):
         RawTodo = self._todoDB.getTodo(authUserId, entityId)
 
         if not RawTodo or not RawTodo.todo_id:
-            raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
+            raise StampedTodoNotFoundError('Invalid todo: %s' % RawTodo)
 
         self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
@@ -4354,7 +4352,7 @@ class StampedAPI(AStampedAPI):
             except Exception:
                 pass
         if menu is None:
-            raise StampedUnavailableError()
+            raise StampedMenuUnavailableError("Menu unavailable")
         else:
             return menu
 

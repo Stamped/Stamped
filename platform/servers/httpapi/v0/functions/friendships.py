@@ -10,7 +10,8 @@ from httpapi.v0.helpers import *
 exceptions = [
     (StampedInvalidFriendshipError, 400, "not_found", "You cannot follow yourself."),
     (StampedFriendshipCheckPermissionsError, 404, "not_found", "Insufficient privileges to check friendship status."),
-    (StampedInviteExistsError, 403, "illegal_action", "Invite already sent."),
+    (StampedInviteAlreadyExistsError, 403, "illegal_action", "Invite already sent."),
+    (StampedUnknownSourceError, 400, "bad_request", "Unknown source name"),
 ]
 
 @handleHTTPRequest(http_schema=HTTPUserId,
@@ -23,7 +24,8 @@ def create(request, authUserId, http_schema, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(http_schema=HTTPUserId,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.removeFriendship(authUserId, http_schema)
@@ -81,7 +83,7 @@ def blocksCheck(request, authUserId, http_schema, **kwargs):
     return transformOutput(result)
 
 
-@handleHTTPRequest()
+@handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["GET"])
 def blocking(request, authUserId, **kwargs):
     userIds = stampedAPI.getBlocks(authUserId)
@@ -90,7 +92,8 @@ def blocking(request, authUserId, **kwargs):
     return transformOutput(output)
 
 
-@handleHTTPRequest(http_schema=HTTPUserId)
+@handleHTTPRequest(http_schema=HTTPUserId,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def blocksRemove(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.removeBlock(authUserId, http_schema)
@@ -99,7 +102,8 @@ def blocksRemove(request, authUserId, http_schema, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEmail)
+@handleHTTPRequest(http_schema=HTTPEmail,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def invite(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.inviteFriend(authUserId, http_schema.email)

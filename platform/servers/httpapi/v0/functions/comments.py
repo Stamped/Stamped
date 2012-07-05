@@ -7,7 +7,16 @@ __license__   = "TODO"
 
 from httpapi.v0.helpers import *
 
-@handleHTTPRequest(http_schema=HTTPCommentNew)
+
+exceptions = [
+    (StampedAddCommentPermissionsError, 403, "forbidden", "Insufficient privileges to add comment"),
+    (StampedRemoveCommentPermissionsError, 403, "forbidden", "Insufficient privileges to remove comment"),
+    (StampedViewCommentPermissionsError, 403, "forbidden", "Insufficient privileges to view comment"),
+    (StampedBlockedUserError,           403, 'forbidden', "User is blocked"),
+]
+
+@handleHTTPRequest(http_schema=HTTPCommentNew,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def create(request, authUserId, http_schema, **kwargs):
     comment = stampedAPI.addComment(authUserId, http_schema.stamp_id, http_schema.blurb)
@@ -16,7 +25,8 @@ def create(request, authUserId, http_schema, **kwargs):
     return transformOutput(comment.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPCommentId)
+@handleHTTPRequest(http_schema=HTTPCommentId,
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     comment = stampedAPI.removeComment(authUserId, http_schema.comment_id)
@@ -25,7 +35,8 @@ def remove(request, authUserId, http_schema, **kwargs):
     return transformOutput(comment.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPCommentSlice)
+@handleHTTPRequest(http_schema=HTTPCommentSlice,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def collection(request, authUserId, http_schema, **kwargs):
     comments = stampedAPI.getComments(http_schema.stamp_id, authUserId,
