@@ -369,7 +369,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         # new format find
         data = self._collection.find(
-            {"linked.twitter.user_id": {"$in": twitterIds}}
+            {"linked.twitter.linked_user_id": {"$in": twitterIds}}
         ).limit(limit)
 
         for item in data:
@@ -393,7 +393,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         # new format find
         data = self._collection.find(
-                {"linked.facebook.user_id": {"$in": facebookIds}}
+                {"linked.facebook.linked_user_id": {"$in": facebookIds}}
         ).limit(limit)
 
         for item in data:
