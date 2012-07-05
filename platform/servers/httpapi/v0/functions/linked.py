@@ -11,7 +11,7 @@ __license__   = "TODO"
 from httpapi.v0.helpers import *
 from errors             import *
 from HTTPSchemas        import *
-from Netflix            import *
+from libs.Netflix       import *
 from Facebook           import *
 from django.http        import HttpResponseRedirect
 

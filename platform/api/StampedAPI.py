@@ -60,7 +60,7 @@ try:
     # TODO (travis): we should NOT be importing * here -- it's okay in limited
     # situations, but in general, this is very bad practice.
 
-    from Netflix                    import *
+    from libs.Netflix               import *
     from Facebook                   import *
     from Twitter                    import *
     from GooglePlaces               import *
