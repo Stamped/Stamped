@@ -1986,14 +1986,22 @@ class HTTPEntityNew(Schema):
         cls.addProperty('subcategory',                      basestring, required=True)
         cls.addProperty('subtitle',                         basestring, cast=validateString)
         cls.addProperty('desc',                             basestring, cast=validateString)
-        cls.addProperty('address',                          basestring)
-        cls.addProperty('coordinates',                      basestring)
-        cls.addProperty('cast',                             basestring)
-        cls.addProperty('director',                         basestring)
-        cls.addProperty('release_date',                     basestring)
+
+        cls.addProperty('address_street',                   basestring)
+        cls.addProperty('address_street_ext',               basestring)
+        cls.addProperty('address_locality',                 basestring)
+        cls.addProperty('address_region',                   basestring)
+        cls.addProperty('address_postcode',                 basestring)
+        cls.addProperty('address_country',                  basestring) ### TODO: Add cast to check ISO code
+
+        cls.addProperty('coordinates',                      basestring, cast=validateCoordinates)
+        cls.addProperty('year',                             int) 
         cls.addProperty('artist',                           basestring)
         cls.addProperty('album',                            basestring)
         cls.addProperty('author',                           basestring)
+        cls.addProperty('network',                          basestring)
+        cls.addProperty('director',                         basestring)
+        cls.addProperty('genre',                            basestring)
 
     def exportEntity(self, authUserId):
 
@@ -2030,8 +2038,20 @@ class HTTPEntityNew(Schema):
         now = datetime.utcnow()
 
         addField(entity, 'desc', self.desc, now)
-        addField(entity, 'formatted_address', self.address, now)
-        addField(entity, 'release_date', self.release_date, now)
+        addField(entity, 'address_street', self.address_street, timestamp=now)
+        addField(entity, 'address_street_ext', self.address_street_ext, timestamp=now)
+        addField(entity, 'address_locality', self.address_locality, timestamp=now)
+        addField(entity, 'address_region', self.address_region, timestamp=now)
+        addField(entity, 'address_postcode', self.address_postcode, timestamp=now)
+        addField(entity, 'address_country', self.address_country, timestamp=now)
+        addField(entity, 'release_date', datetime(self.year, 1, 1), timestamp=now)
+
+        addListField(entity, 'artists', self.artist, PersonEntityMini, timestamp=now)
+        addListField(entity, 'collections', self.album, MediaCollectionEntityMini, timestamp=now)
+        addListField(entity, 'authors', self.author, PersonEntityMini, timestamp=now)
+        addListField(entity, 'networks', self.network, BasicEntityMini, timestamp=now)
+        addListField(entity, 'directors', self.director, PersonEntityMini, timestamp=now)
+        addListField(entity, 'genres', self.genre, timestamp=now)
 
         if _coordinatesFlatToDict(self.coordinates) is not None:
             coords = Coordinates().dataImport(_coordinatesFlatToDict(self.coordinates))
@@ -2041,12 +2061,6 @@ class HTTPEntityNew(Schema):
         entity.sources.user_generated_timestamp = now
         if self.subtitle is not None and self.subtitle != '':
             entity.sources.user_generated_subtitle = self.subtitle
-
-        addListField(entity, 'directors', self.director, PersonEntityMini, now)
-        addListField(entity, 'cast', self.cast, PersonEntityMini, now)
-        addListField(entity, 'authors', self.author, PersonEntityMini, now)
-        addListField(entity, 'artists', self.artist, PersonEntityMini, now)
-        addListField(entity, 'collections', self.album, MediaCollectionEntityMini, now)
 
         return entity
 
