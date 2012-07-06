@@ -9,11 +9,13 @@ import Globals
 import copy, json, logs, urllib2, utils
 import libs.ec2_utils
 import datetime as dt
-from servers.web2 import settings
 
-from api.MongoStampedAPI            import globalMongoStampedAPI
-from api.HTTPSchemas                import *
 from errors                     import *
+
+from api.HTTPSchemas            import *
+from api.MongoStampedAPI        import globalMongoStampedAPI
+
+from servers.web2               import settings
 
 from django.http                import HttpResponse
 from django.shortcuts           import render_to_response
@@ -29,6 +31,7 @@ _baseurl = "https://dev.stamped.com/v0"
 STAMPED_SETTINGS = filter(lambda s: s.startswith('STAMPED_'), dir(settings))
 STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETTINGS))
 
+# TODO (travis): move StampedAPIProxy to its own file!
 class StampedAPIProxy(object):
     
     def __init__(self):
@@ -320,7 +323,7 @@ def stamped_render(request, template, context, **kwargs):
 def get_stamped_context(context, preload=None):
     context = copy.copy(context)
     
-    context["DEBUG"]   = not IS_PROD
+    context["DEBUG"]   = settings.DEBUG
     context["IS_PROD"] = IS_PROD
     
     # only preload global STAMPED_PRELOAD javscript variable if desired by the 

@@ -1600,25 +1600,25 @@ body.sdetail_popup {
     }
 }
 
-@-webkit-keyframes map-profile-inner-bounce {
+@-webkit-keyframes -webkit-map-profile-inner-bounce {
     0%   { -webkit-transform: perspective(600px) translate(0, 0); }
     50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
     100% { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
-@-webkit-keyframes map-profile-inner-shadow-bounce {
+@-webkit-keyframes -webkit-map-profile-inner-bounce-shadow {
     0%   { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
     50%  { -webkit-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
     100% { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
 }
 
-@-moz-keyframes map-profile-inner-bounce {
+@-moz-keyframes -moz-map-profile-inner-bounce {
     0%   { -moz-transform: perspective(600px) translate(0, 0); }
     50%  { -moz-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
     100% { -moz-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
-@-moz-keyframes map-profile-inner-shadow-bounce {
+@-moz-keyframes -moz-map-profile-inner-bounce-shadow {
     0%   { -moz-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
     50%  { -moz-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
     100% { -moz-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
@@ -1708,12 +1708,33 @@ a.map-profile-link {
                 @timing: easeInOutCubic;
                 
                 .inner {
-                    // TODO: tie this animation start to hover
-                    .animation(map-profile-inner-bounce, 1, @timing, @duration);
+                    /*.animation(map-profile-inner-bounce, 1, @timing, @duration);*/
+                    
+                    // TODO: use shorthand
+                    -webkit-animation-name:             -webkit-map-profile-inner-bounce;
+                    -webkit-animation-iteration-count:  1;
+                    -webkit-animation-timing-function:  @timing;
+                    -webkit-animation-duration:         @duration;
+                    
+                    // TODO: test on FF
+                    -moz-animation-name:                -moz-map-profile-inner-bounce;
+                    -moz-animation-iteration-count:     1;
+                    -moz-animation-timing-function:     @timing;
+                    -moz-animation-duration:            @duration;
                 }
                 
                 .inner-shadow {
-                    .animation(map-profile-inner-shadow-bounce, 1, @timing, @duration);
+                    /*.animation(map-profile-inner-bounce-shadow, 1, @timing, @duration);*/
+                    
+                    -webkit-animation-name:             -webkit-map-profile-inner-bounce-shadow;
+                    -webkit-animation-iteration-count:  1;
+                    -webkit-animation-timing-function:  @timing;
+                    -webkit-animation-duration:         @duration;
+                    
+                    -moz-animation-name:                -moz-map-profile-inner-bounce-shadow;
+                    -moz-animation-iteration-count:     1;
+                    -moz-animation-timing-function:     @timing;
+                    -moz-animation-duration:            @duration;
                 }
             }
         }
@@ -1725,14 +1746,6 @@ a.map-profile-link {
                                 POPUP VIEWS
    ************************************************************************** */
 
-
-.fancybox-wrap {
-    .close-button {
-        position: absolute;
-        top:   -18px;
-        right: -18px;
-    }
-}
 
 .popup {
     position: relative;
@@ -1787,10 +1800,10 @@ a.map-profile-link {
     }
     
     .popup-body {
-        overflow: scroll;
         max-height: 300px;
-        width: 366px;
-        min-width: 366px;
+        width:      366px;
+        min-width:  366px;
+        overflow: scroll;
         
         &:focus {
             outline: none;
@@ -1897,6 +1910,14 @@ a.map-profile-link {
     background-position: -152px 0 !important;
 }
 
+.fancybox-wrap {
+    .close-button {
+        position: absolute;
+        top:   -18px;
+        right: -18px;
+    }
+}
+
 .user-preview-icon {
     background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
     position: absolute;
@@ -1909,7 +1930,6 @@ a.map-profile-link {
     height: 17px;
     pointer-events: none;
 }
-
 
 .like .user-preview-icon {
     background-position: 0 0;
