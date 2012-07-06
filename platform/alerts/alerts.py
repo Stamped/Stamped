@@ -32,7 +32,7 @@ IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether-prod.pem')
 
 IS_PROD = libs.ec2_utils.is_prod_stack()
 
-admins = set(['kevin','robby','bart','travis','ml','landon','anthony','lizwalton','jstaehle'])
+admins = set(['kevin','robby','bart','travis','ml','landon','anthony','lizwalton','jstaehle','geoffliu'])
 
 
 stampedAPI = MongoStampedAPI()

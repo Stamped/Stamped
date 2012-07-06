@@ -8,15 +8,13 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-
-<<<<<<< HEAD
 import keys.aws, logs, utils, math
 
-from analytics_utils        import *
-from MongoStampedAPI        import MongoStampedAPI
-from logsQuery              import logsQuery
+from analytics.web.core.analytics_utils        import *
+from api.MongoStampedAPI        import MongoStampedAPI
+from analytics.web.core.logsQuery              import logsQuery
+from analytics.web.core.statWriter             import statWriter
 from gevent.pool            import Pool
-from statWriter             import statWriter
 from boto.sdb.connection    import SDBConnection
 
 class Dashboard(object):
@@ -28,55 +26,6 @@ class Dashboard(object):
         self.writer = statWriter('dashboard')
         conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domain = conn.get_domain('dashboard')
-=======
-import keys.aws, logs, utils
-
-from analytics.web.core.logsQuery                          import logsQuery
-from api.MongoStampedAPI                    import MongoStampedAPI
-from boto.sdb.connection                import SDBConnection
-from boto.exception                     import SDBResponseError
-from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
-from datetime                           import datetime, timedelta
-from analytics.web.core.topStamped                         import getTopStamped
-
-
-utils.init_db_config('peach.db2')
-
-api = MongoStampedAPI()
-stamp_collection = api._stampDB._collection
-acct_collection = api._userDB._collection
-
-query = logsQuery()
-
-v1_init = datetime(2011,11,21)
-
-def now():
-    return datetime.utcnow()
-
-def today():
-    now = datetime.utcnow()
-    diff = timedelta(days=0,hours=now.hour,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
-    return now - diff
-
-def yesterday(date):
-    return date - timedelta(days=1)
-
-def weekAgo(date):
-    return date - timedelta(days=6)
-
-def newStamps():
-    todays = stamp_collection.find({'timestamp.created': {'$gte': today()}}).count()
-    
-    yesterdays = stamp_collection.find({'timestamp.created': {'$gte': yesterday(today()), '$lt': yesterday(now())}}).count()
-    
-    weeklyAgg = yesterdays
-    bgn = yesterday(today())
-    end = yesterday(now())
-    for i in range (0,5):
-        bgn = yesterday(bgn)
-        end = yesterday(end)
-        weeklyAgg += stamp_collection.find({'timestamp.created': {'$gte': bgn, '$lt': end}}).count()
->>>>>>> 94513bd8d4cb04bbe26209c9ffce1c2ba4455dd8
         
     def getStats(self,stat,fun,unique=False):
         total_today = 0
@@ -161,13 +110,12 @@ def newStamps():
         try:
             deltaDay = float(total_today - yest_hourly[int(math.floor(est().hour))])/(yest_hourly[int(math.floor(est().hour))])*100.0
         except ZeroDivisionError:
-            deltaDay = 'N/A'
+            deltaDay = 0.0
         
         try: 
             deltaWeek = float(total_today - weeklyAvg[int(math.floor(est().hour))])/(weeklyAvg[int(math.floor(est().hour))])*100
         except ZeroDivisionError:
-            deltaWeek = 'N/A'
-        
+            deltaWeek = 0.0
         
         return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(now().hour))],weeklyAvg,weeklyAvg[int(math.floor(now().hour))],deltaDay,deltaWeek
     

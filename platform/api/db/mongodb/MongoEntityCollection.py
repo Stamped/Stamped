@@ -84,6 +84,19 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self.seed_collection.addEntity(entity)
         return entity
 
+    def getEntityMini(self, entityId):
+        documentId  = self._getObjectIdFromString(entityId)
+        params = {'_id' : entityId}
+        fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
+
+        documents = self._collection.find(params, fields)
+        if len(documents) == 0:
+            raise StampedDocumentNotFoundError("Unable to find entity (id = %s)" % entityId)
+        entity = self._convertFromMongo(documents[0])
+        entity = entity.minimize()
+
+        return entity
+
     def getEntity(self, entityId):
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId)
@@ -100,7 +113,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         documentIds = []
         for entityId in entityIds:
             documentIds.append(self._getObjectIdFromString(entityId))
-        data = self._getMongoDocumentsFromIds(documentIds)
         params = {'_id': {'$in': documentIds}}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
 

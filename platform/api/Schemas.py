@@ -886,6 +886,7 @@ class BasicEntity(BasicEntityMini):
                 logs.warning('Unable to minimize attribute "%s"' % attribute)
 
         mini.subtitle = self.subtitle
+        logs.info('### mini.subtitle: %s   self.subtitle: %s' % (mini.subtitle, self.subtitle))
         return mini
 
 def getEntityObjectFromKind(kind):

@@ -16,14 +16,9 @@ from boto.sdb.connection                import SDBConnection
 from boto.exception                     import SDBResponseError
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                        import Pool
-<<<<<<< HEAD
-from logsQuery                          import logsQuery
-from mongoQuery                         import mongoQuery
-from analytics_utils                    import v1_init
-=======
 from analytics.web.core.logsQuery                          import logsQuery
 from analytics.web.core.mongoQuery                         import mongoQuery
->>>>>>> 94513bd8d4cb04bbe26209c9ffce1c2ba4455dd8
+from analytics.web.core.analytics_utils                    import v1_init
  
 class Stats():
     
