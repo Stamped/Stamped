@@ -887,7 +887,7 @@ class BasicEntity(BasicEntityMini):
 
         mini.subtitle = self.subtitle
         logs.info('### mini.subtitle: %s   self.subtitle: %s' % (mini.subtitle, self.subtitle))
-        if (self.subtitle is None or self.subtitle is ""):
+        if (self.subtitle is None or self.subtitle == ""):
             logs.info('### empty subtitle for entity: %s' % self)
         return mini
 
