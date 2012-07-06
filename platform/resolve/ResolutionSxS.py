@@ -51,13 +51,17 @@ DIFF_FILE_HEADER = """
     <body>
 """
 
+
+def __formatProxyList(proxies):
+    return '\n\n'.join(str(proxy) for proxy in proxies)
+
 def writeComparisons(oldResults, newResults, outputDir):
     oldKeys = oldResults.viewkeys()
     newKeys = newResults.viewkeys()
     if oldKeys ^ newKeys:
         print 'WARNING: old and new results have mismatched keys:'
-        print 'OLD KEYS:', oldKeys - newKeys
-        print 'NEW KEYS:', newKeys - oldKeys
+        print '%d OLD KEYS:' % len(oldKeys - newKeys), oldKeys - newKeys
+        print '%d NEW KEYS:' % len(newKeys - oldKeys), newKeys - oldKeys
 
     changedRows = []
     allRows = []
@@ -79,7 +83,7 @@ def writeComparisons(oldResults, newResults, outputDir):
             print >> fout, '<h1>%s</h1>' % 'Resolve output'
             print >> fout, __createDiffTable(pprint.pformat(oldData), pprint.pformat(newData))
             print >> fout, '<h1>%s</h1>' % 'List of resolver objects:'
-            print >> fout, __createDiffTable(pprint.pformat(oldProxyList), pprint.pformat(newProxyList))
+            print >> fout, __createDiffTable(__formatProxyList(oldProxyList), __formatProxyList(newProxyList))
             print >> fout, '</body></html>'
         diffLink = '<td><a href="%s">show diffs</a></td>' % filename
 
