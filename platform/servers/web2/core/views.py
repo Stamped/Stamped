@@ -217,7 +217,7 @@ def handle_map(request, schema, **kwargs):
     url             = request.build_absolute_uri(uri)
     
     if mobile:
-        redirect_uri = "/%s?category=place" % screen_name
+        redirect_uri = "/mobile/%s?category=place" % screen_name
         redirect_url = request.build_absolute_uri(redirect_uri)
         logs.info("redirecting mobile map '%s' to: '%s'" % (uri, redirect_uri))
         
