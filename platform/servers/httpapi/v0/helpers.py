@@ -395,7 +395,7 @@ def checkOAuth(oauth_token, required=True):
         raise
     except Exception, e:
         logs.warning("Error: %s" % e)
-        raise StampedAuthError("invalid_token", "Invalid access token")
+        raise StampedHTTPError(401, "invalid_token", "Invalid access token")
 
 def parseRequest(schema, request, **kwargs):
     data = { }
