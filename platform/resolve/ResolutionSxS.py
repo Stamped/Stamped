@@ -63,8 +63,8 @@ def writeComparisons(oldResults, newResults, outputDir):
     allRows = []
     commonKeys = oldKeys & newKeys
     for key in commonKeys:
-        original, oldResolved, oldProxy = oldResults[key]
-        _, newResolved, _ = newResults[key]
+        original, oldResolved, oldProxy, oldProxyList = oldResults[key]
+        _, newResolved, _, newProxyList = newResults[key]
 
         filename = key + '.html'
         oldData = __stripEntity(oldResolved.dataExport())
@@ -78,6 +78,8 @@ def writeComparisons(oldResults, newResults, outputDir):
             print >> fout, '<pre class="diff">%s</pre>' % str(oldProxy)
             print >> fout, '<h1>%s</h1>' % 'Resolve output'
             print >> fout, __createDiffTable(pprint.pformat(oldData), pprint.pformat(newData))
+            print >> fout, '<h1>%s</h1>' % 'List of resolver objects:'
+            print >> fout, __createDiffTable(pprint.pformat(oldProxyList), pprint.pformat(newProxyList))
             print >> fout, '</body></html>'
         diffLink = '<td><a href="%s">show diffs</a></td>' % filename
 
