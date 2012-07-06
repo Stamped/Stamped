@@ -354,6 +354,7 @@ var g_update_stamps = null;
         
         // relayout the stamp gallery using isotope
         var update_gallery_layout = function(is_visible, callback, recur) {
+            var style  = { visibility : 'visible' };
             is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
             recur      = (typeof(recur)      === 'undefined' ? false : recur);
             
@@ -368,12 +369,7 @@ var g_update_stamps = null;
             };
             
             var set_gallery_visible = function() {
-                var style = {
-                    visibility : 'visible'
-                };
-                
                 $('#main-content').css(style);
-                $('#stamp-category-nav-bar').css(style);
             };
             
             update_gallery(function() {
@@ -1227,14 +1223,17 @@ var g_update_stamps = null;
                 
                 // resize user's stamp logo
                 var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width - 166);
-                var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_width - 166);
-                var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_height + 'px';
+                //var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_width - 166);
+                var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_width + 'px';
                 //var cur_logo_top    = user_logo_top  + (user_logo_width  - cur_logo_height) / 2.0;
                 //var cur_logo_left   = user_logo_left + (user_logo_height - cur_logo_width)  / 2.0;
                 
+                // TODO: clamp logo size when sdetail is animating
+                // TODO: does logo collapsing only repro on chrome? or is it FF as well?
+                
                 $user_logo.css({
                     width               : cur_logo_width, 
-                    height              : cur_logo_height, 
+                    height              : cur_logo_width, 
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size, 
                     //top                 : cur_logo_top, 
@@ -1548,6 +1547,7 @@ var g_update_stamps = null;
         var fixed_padding   = 80;
         var min_col_width   = 305;
         var last_nav_pos_x  = null;
+        var update_navbar_count = 0;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
@@ -1679,6 +1679,12 @@ var g_update_stamps = null;
                     style['right'] = 'auto';
                 }
                 
+                ++update_navbar_count;
+                if (gallery || update_navbar_count >= 3) {
+                    style['visibility'] = 'visible';
+                }
+                
+                console.debug(pos);
                 last_nav_pos_x = pos;
                 $nav_bar.css(style);
             }
@@ -1928,7 +1934,7 @@ var g_update_stamps = null;
                             var link_type = 'ajax';
                             var link_href = '/entities/menu?entity_id=' + entity_id;
                             
-                            // TODO: possibly embed singleplatform page directly if one exists!
+                            // TODO: possibly embed singleplatform page directly if one exists
                             //link_type = 'iframe';
                             //link_href = 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped';
                             
@@ -2129,7 +2135,6 @@ var g_update_stamps = null;
             open_sdetail(null, STAMPED_PRELOAD.sdetail);
         }
         
-        g_init_social_sharing();
         update_dynamic_header();
         init_header_subsections();
         
@@ -2142,6 +2147,7 @@ var g_update_stamps = null;
             if (!__init || $('#main-content').css('visibility') !== 'visible') {
                 __init = true;
                 
+                g_init_social_sharing();
                 update_gallery_layout(true, null, true);
                 setTimeout(show_initial_gallery, 500);
             }

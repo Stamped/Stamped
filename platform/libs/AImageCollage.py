@@ -36,20 +36,23 @@ class AImageCollage(object):
         
         return self.get_images(image_urls)
     
+    @lru_cache(maxsize=256):
+    def _get_image(self, image_url):
+        logs.info("downloading '%s'" % image_url)
+        
+        return self._db.getWebImage(image_url, "collage")
+    
     def get_images(self, image_urls):
         images = []
         
         def _add_image(image_url):
-            logs.info("downloading '%s'" % image_url)
-            
-            image = self._db.getWebImage(image_url, "collage")
-            images.append(image)
+            images.append(self._get_image(image_url))
         
         for image_url in image_urls:
             self._pool.spawn(_add_image, image_url)
         
         self._pool.join()
-        logs.info("")
+        utils.log("")
         
         return images
     
