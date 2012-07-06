@@ -9,13 +9,13 @@ __license__   = "TODO"
 import Globals
 import keys.aws, logs, utils
 
-from api.MongoStampedAPI        import MongoStampedAPI
+from api.MongoStampedAPI    import MongoStampedAPI
 from boto.sdb.connection    import SDBConnection
 from boto.exception         import SDBResponseError
 from bson.code              import Code
 
 
-
+#Not backwards compatible for pre-v2 yet
 def getTopStamped(kinds,date,collection):
     
     if kinds == None:
@@ -25,16 +25,18 @@ def getTopStamped(kinds,date,collection):
                        }
                   } """ % (date)
     else:
+        kinds = kinds.split(',')
         query = """function () {
                        if (this.timestamp.created > ISODate("%s") && (this.entity.types == "%s" """ % (date,kinds[0])
                        
-        for kind in kinds [1:]:
+        for kind in kinds[1:]:
             query = """ %s || this.entity.types == "%s" """ % (query,kind)
         
         query = """%s)){
                            emit(this.entity.title, 1);
                        }
                   } """ % (query)
+    
     
     map = Code(query)
     reduce = Code("function (key, values) {"

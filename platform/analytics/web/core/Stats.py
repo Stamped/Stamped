@@ -42,6 +42,7 @@ class Stats():
                  'actions': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v0/actions/complete.json')),
                  }
     
+    
     def perUser(self,computed):
         output = computed
         for i in range (0,len(computed)):
