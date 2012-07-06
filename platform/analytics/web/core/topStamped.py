@@ -37,7 +37,6 @@ def getTopStamped(kinds,date,collection):
                   } """ % (query)
     
     map = Code(query)
-    
     reduce = Code("function (key, values) {"
                   "  var total = 0;"
                   "  for (var i = 0; i < values.length; i++) {"
@@ -47,11 +46,9 @@ def getTopStamped(kinds,date,collection):
                   "}")
     
     result = collection.inline_map_reduce(map, reduce)
-    
     sortedResult = sorted(result, key=lambda k: k['value'],reverse=True) 
     
     return sortedResult
-    
-        
+
         
 

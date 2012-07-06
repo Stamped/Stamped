@@ -9,7 +9,7 @@ __license__   = "TODO"
 import Globals
 
 import calendar, pprint, datetime, sys, argparse
-import logs, utils
+import logs, utils, math
 
 
 from boto.sdb.connection                import SDBConnection
@@ -18,6 +18,7 @@ from db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                        import Pool
 from logsQuery                          import logsQuery
 from mongoQuery                         import mongoQuery
+from analytics_utils                    import v1_init
  
 class Stats():
     
@@ -27,9 +28,18 @@ class Stats():
         
         self.evals = {
                  'stamps': self.mongoQ.newStamps,
+                 'agg_stamps': (lambda t0,t1: self.mongoQ.newStamps(v1_init(),t1)),
                  'accounts': self.mongoQ.newAccounts,
+                 'agg_accts': (lambda t0,t1: self.mongoQ.newAccounts(v1_init(),t1)),
                  'friendships': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/friendships/create.json')),
-                 'users': self.logsQ.activeUsers
+                 'users': self.logsQ.activeUsers,
+                 'comments': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/comments/create.json')),
+                 'todos': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/todos/create.json')),
+                 'todos_c': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/todos/complete.json')),
+                 'likes': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/stamps/likes/create.json')),
+                 'entities': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/entities/create.json')),
+                 'friends': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v0/friendships/create.json')),
+                 'actions': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v0/actions/complete.json')),
                  }
     
     def perUser(self,computed):
@@ -38,7 +48,7 @@ class Stats():
             t0,t1 = computed[i][0], computed[i][1]
             users = self.evals['users'](t0,t1)
             if users == 0:
-                output[i][2] = "N/A"
+                output[i][2] = 0
             else:
                 output[i][2] = float(output[i][2])/users
         return output
@@ -114,10 +124,35 @@ class Stats():
         
         if perUser:
             output = self.perUser(output)
-        else:
-            output.append([bgn,end,agg])
+
         
         return output
+    
+    def setupGraph(self,output):
+        bgns = []
+        ends = []
+        values = []
+        base = []
+        
+        count=0
+        for entry in output:
+            t0 = entry[0].date()
+            t1 = (entry[1] + datetime.timedelta(microseconds=1)).date()
+            
+            try:
+                if math.floor(entry[2]) != math.ceil(entry[2]):
+                    value = '%.3f' % entry[2]
+                else: 
+                    value = int(entry[2])
+            except:
+                    value = entry[2]
+
+            bgns.append("%s/%s" % (t0.month,t0.day))
+            ends.append("%s/%s" % (t1.month,t1.day))
+            values.append(value)
+            base.append(count)
+            count += 1
+        return bgns,ends,values,base
     
         
         

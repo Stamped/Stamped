@@ -115,7 +115,7 @@ class logsQuery(object):
                     except KeyError:
                         self.statDict[key] = [diff]
             
-    def latencyReport(self,t0,t1,uri,blacklist,whitelist):
+    def latencyReport(self,t0,t1,uri=None,blacklist=[],whitelist=[]):
         self.statDict = {}
         self.errDict = {}
         

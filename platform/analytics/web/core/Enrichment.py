@@ -98,10 +98,7 @@ def kindEnrichRate(kind, enrich_srcs,collection):
     return output
 
 
-def getEnrichmentStats():
-    
-    api = MongoStampedAPI()
-    collection = api._entityDB._collection
+def getEnrichmentStats(collection):
     
     #Media items
     media_items = 'Total Media Items: %s' % (collection.find({'kind': 'media_item'}).count())
