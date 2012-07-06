@@ -62,7 +62,8 @@ def _coordinatesDictToFlat(coordinates):
             raise
 
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
-    except Exception:
+    except Exception as e:
+        logs.warning('coordinates: %s   error converting coordinates: %s' % (coordinates, e))
         return None
 
 def _coordinatesFlatToDict(coordinates):
@@ -1082,7 +1083,9 @@ class HTTPEntityMini(Schema):
         _addImages(self, entity.images)
 
         try:
+            logs.info('### entity title: %s' % entity.title)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
+            logs.info('### coordinates: %s' % entity.coordinates)
         except AttributeError:
             pass
 
