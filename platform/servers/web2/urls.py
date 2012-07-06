@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -65,17 +66,19 @@ urlpatterns = patterns('',
     url(r'^(?P<screen_name>[\w-]{1,20})/s/(?P<stamp_num>\d+)', 
                                                 'core.views.sdetail'), 
     
+    
     # --------------------------------------------------------------------------
     # ------------------------------ MOBILE ------------------------------------
     # --------------------------------------------------------------------------
     
+    
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
-    #url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',   'mobile.views.profile'), 
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',   'mobile.views.profile'), 
     
     # ------------------------------- MAP --------------------------------------
     # e.g., stamped.com/mobile/travis/map
-    #url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$', 'mobile.views.map'), 
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$', 'mobile.views.map'), 
 )
 
 #from django.conf.urls.static    import static
