@@ -57,7 +57,7 @@ endef
 define ADD_JS_TARGET
 $(JS_BASE_DIR)/$1.generated.js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(call REST,$$^)$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break 120 > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'."
-	@cat $$(call REST,$$^) | java -jar bin/compressor.jar --type js --line-break 120 > $$@
+	@cat $$(call REST,$$^) | java -jar bin/compressor.jar --type js --nomunge --line-break 120 > $$@
 	@echo
 endef
 

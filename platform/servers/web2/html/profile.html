@@ -410,7 +410,23 @@
     {{ block.super }}
      
     <!-- Stamped profile scripts -->
-    <script src="{{ STATIC_URL }}js/profile.generated.js"></script>
+    {% if DEBUG %}
+        <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.isotope.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        
+        <script src="{{ STATIC_URL }}js/libs/moment.js"></script>
+        
+        <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
+        <script src="{{ STATIC_URL }}js/profile.js"></script>
+    {% else %}
+        <script src="{{ STATIC_URL }}js/profile.generated.js"></script>
+    {% endif %}
     
     <!-- Social sharing plugins -->
     <script src="//platform.twitter.com/widgets.js"></script>

@@ -521,18 +521,24 @@ var g_update_stamps = null;
             var $map  = $elem.find('.stamp-map');
             var $icon = $elem.find('.stamp-icon');
             
+            var push_images = function($elems) {
+                $elems.each(function(i, $elem) {
+                    images.push($elem);
+                });
+            };
+            
             if (is_sdetail) {
-                images.push.apply(images, $map);
-                images.push.apply(images, $stamp_entity_images);
-                images.push.apply(images, $icon);
+                push_images($map);
+                push_images($stamp_entity_images);
+                push_images($icon);
                 
-                // note: user image is included in stamp-card
-                images.push.apply(images, $stamp_user_images);
+                // note: user images are included in the main stamp-card, so we deprioritize them here
+                push_images($stamp_user_images);
             } else {
-                images.push.apply(images, $stamp_user_images);
-                images.push.apply(images, $stamp_entity_images);
-                images.push.apply(images, $map);
-                images.push.apply(images, $icon);
+                push_images($stamp_user_images);
+                push_images($map);
+                push_images($stamp_entity_images);
+                push_images($icon);
             }
             
             if (images.length > 0) {
@@ -1684,7 +1690,6 @@ var g_update_stamps = null;
                     style['visibility'] = 'visible';
                 }
                 
-                console.debug(pos);
                 last_nav_pos_x = pos;
                 $nav_bar.css(style);
             }
