@@ -10,7 +10,7 @@ APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
 USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
@@ -234,8 +234,22 @@ class Facebook(object):
 
     def postToOpenGraph(self, action, access_token, object_type, object_url, message=None, imageUrl=None):
         logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
+        path = "me/stampedapp:%s" % action
+        args = {}
+        args[object_type] = object_url
+        if message is not None:
+            args['message'] = message
+        if imageUrl is not None:
+            args['image[0][url]'] = imageUrl
+            args['image[0][user_generated]'] = "true"
+        return self._post(
+            access_token,
+            path,
+            **args
+        )
 
-
+    def deleteFromOpenGraph(self, action, access_token, object_type, object_url, message=None, imageUrl=None):
+        logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
         path = "me/stampedapp:%s" % action
         args = {}
         args[object_type] = object_url
@@ -243,14 +257,11 @@ class Facebook(object):
             args['message'] = message
         if imageUrl is not None:
             args['image'] = imageUrl
-        try:
-            return self._post(
-                access_token,
-                path,
-                **args
-            )
-        except Exception as e:
-            print('EXCEPTION: %s' % e)
+        return self._post(
+            access_token,
+            path,
+            **args
+        )
 
     def getNewsFeed(self, user_id, access_token):
         path = '%s/feed' % user_id
@@ -296,7 +307,8 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
     if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('stamp', access_token,
-                                                   'restaurant', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/ml/s/2'))
+                                                   'movie', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/ml/s/10',
+                                                   message="Test message", imageUrl='http://static.stamped.com/users/ml.jpg'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())
     if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
@@ -304,7 +316,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getFriendData'
+    methods = 'postToOpenGraph'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
