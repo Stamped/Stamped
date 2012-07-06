@@ -1045,8 +1045,6 @@ class StampedSource(GenericSource):
         mongoQueries = []
         queryPairs = []
         for source, key in sourcesAndKeys:
-            if not isinstance(source, str):
-                source = source.sourceName
             source_name = source.lower().strip()
             sourceIdField = source_name + '_id'
             queryPairs.append((sourceIdField, key))

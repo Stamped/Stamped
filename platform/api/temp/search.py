@@ -122,7 +122,7 @@ for stub in album.tracks:
                     source_id = stub.sources['%s_id' % sourceName]
 
                     # Attempt to resolve against the Stamped DB (quick)
-                    entity_id = stamped.resolve_fast(source, source_id)
+                    entity_id = stamped.resolve_fast(sourceName, source_id)
 
                     if entity_id is None:
                         # Attempt to resolve against the Stamped DB (full)
