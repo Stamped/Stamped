@@ -4367,7 +4367,7 @@ class StampedAPI(AStampedAPI):
         # Attempt to resolve against the Stamped DB
         source    = sources[source_name.lower()]()
         stamped   = StampedSource(stamped_api=self)
-        entity_id = stamped.resolve_fast(source, source_id)
+        entity_id = stamped.resolve_fast(source.sourceName, source_id)
 
         if entity_id is None:
             try:
@@ -4589,7 +4589,7 @@ class StampedAPI(AStampedAPI):
                         source = musicSources[sourceName]()
                         source_id = getattr(stub.sources, '%s_id' % sourceName)
                         # Attempt to resolve against the Stamped DB (quick)
-                        entity_id = stampedSource.resolve_fast(source, source_id)
+                        entity_id = stampedSource.resolve_fast(sourceName, source_id)
                         if entity_id is None and not quickResolveOnly:
                             # Attempt to resolve against the Stamped DB (full)
                             proxy = source.entityProxyFromKey(source_id, entity=stub)
