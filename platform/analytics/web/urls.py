@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls.defaults import patterns, include, url
 from django.conf.urls.static    import static
 import settings
 
@@ -21,9 +21,7 @@ urlpatterns = patterns('',
     url(r'^segmentation/$', 'core.views.segmentation'),
     url(r'^trending/$', 'core.views.trending'),
     url(r'^custom/$','core.views.custom'),
-    
-    # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^/?$', 'core.views.index'), 
 )
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)

@@ -17,9 +17,7 @@ from bson.objectid import ObjectId
 
 class Converter(object):
     
-    def __init__(self):
-        utils.init_db_config('peach.db2')
-        api = MongoStampedAPI()
+    def __init__(self,api):
         self.collection = api._userDB._collection
     
     def convert(self,uid):

@@ -44,7 +44,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def seed_collection(self):
         return MongoEntitySeedCollection()
 
-    def _convertFromMongo(self, document):
+    def _convertFromMongo(self, document, mini=False):
         if document is None:
             return None
 
@@ -63,7 +63,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         document.pop('titlel')
 
-        entity = buildEntity(document)
+        entity = buildEntity(document, mini=mini)
 
         return entity
 
@@ -84,6 +84,19 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self.seed_collection.addEntity(entity)
         return entity
 
+    def getEntityMini(self, entityId):
+        documentId  = self._getObjectIdFromString(entityId)
+        params = {'_id' : documentId}
+        fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
+
+        documents = self._collection.find(params, fields)
+        if documents.count() == 0:
+            raise StampedDocumentNotFoundError("Unable to find entity (id = %s)" % documentId)
+        entity = self._convertFromMongo(documents[0])
+        entity = entity.minimize()
+
+        return entity
+
     def getEntity(self, entityId):
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId)
@@ -95,6 +108,25 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         #     entity      = self._convertFromMongo(document)
 
         return entity
+
+    def getEntityMinis(self, entityIds):
+        documentIds = []
+        for entityId in entityIds:
+            documentIds.append(self._getObjectIdFromString(entityId))
+        params = {'_id': {'$in': documentIds}}
+        fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
+
+        documents = self._collection.find(params, fields)
+
+        result = []
+        for doc in documents:
+            entity = self._convertFromMongo(doc, mini=False)
+            entity = entity.minimize()
+            # if entity.tombstone_id is not None:
+            #     entity = self.getEntity(entity.tombstone_id)
+            result.append(entity)
+
+        return result
 
     def getEntities(self, entityIds):
         documentIds = []
