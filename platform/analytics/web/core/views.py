@@ -6,13 +6,8 @@ import keys.aws, logs, utils
 
 from django.http import HttpResponse
 from django.template import Context, loader
-<<<<<<< HEAD
-from Dashboard import Dashboard
-from topStamped import getTopStamped
-=======
-from analytics.web.core.Dashboard import *
+from analytics.web.core.Dashboard import Dashboard
 from analytics.web.core.topStamped import getTopStamped
->>>>>>> 94513bd8d4cb04bbe26209c9ffce1c2ba4455dd8
 from datetime import *
 from analytics.web.core.Enrichment import getEnrichmentStats
 from analytics.web.core import Stats
@@ -59,6 +54,8 @@ def index(request):
         hours.append(i)
     
     t = loader.get_template('../html/index.html')
+    
+    
     c = Context({
         'hour': est().hour,
         'minute': est().minute,
