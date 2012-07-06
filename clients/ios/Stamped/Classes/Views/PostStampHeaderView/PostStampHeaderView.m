@@ -9,6 +9,9 @@
 #import "PostStampHeaderView.h"
 #import "STAvatarView.h"
 #import "UserStampView.h"
+#import "STStampedAPI.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 @implementation PostStampHeaderView
 @synthesize titleLabel=_titleLabel;

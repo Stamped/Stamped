@@ -4,9 +4,9 @@
 <html class="ie" lang="en">
 <![endif]-->
 <!--[if gt IE 9]><!-->
-<html lang="en">
+<html lang="en" {% block html_tags %}{% endblock %}>
 <!--<![endif]-->
-
+    
     {% block pre_head %}
     <head>
         {% endblock pre_head %}
@@ -65,12 +65,13 @@
                     <a class='button' href='#'></a>
                 </p>
                 
-                <div class="user-logo-large"></div>
+                <a href="/{{user.screen_name}}" class="user-logo-large"></a>
             </div>
             {% endblock header %}
             
             {% block post_header %}
             <div class="post-header">
+                <div class="post-header-overlay"></div>
                 <div class="ribbon-top"></div>
             </div>
         </header>
@@ -109,11 +110,6 @@
             <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
             <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
             <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
-            
-            <script src="{{ STATIC_URL }}js/script.js"></script>
-            <script src="{{ STATIC_URL }}js/libs/persist{% if IS_PROD %}.min{% endif %}.js"></script>
-            <script src="{{ STATIC_URL }}js/libs/underscore{% if IS_PROD %}.min{% endif %}.js"></script>
-            <script src="{{ STATIC_URL }}js/libs/backbone{% if IS_PROD %}.min{% endif %}.js"></script>
             
             <script>
                 var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];

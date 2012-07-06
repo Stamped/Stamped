@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <CoreText/CoreText.h>
 #import "UIColor+Stamped.h"
+#import "Util.h"
 
 @interface STNavigationBar ()
 - (void)initialize;
@@ -76,8 +77,9 @@
         
         UIFont *font = [UIFont boldSystemFontOfSize:18];
         [[UIColor colorWithRed:0.0f green:0.333f blue:0.8f alpha:1.0f] setFill];
-        CGSize size = [self.topItem.title sizeWithFont:font];
-        [self.topItem.title drawInRect:CGRectMake(floorf((self.bounds.size.width-size.width)/2), floorf((self.bounds.size.height-size.height)/2), size.width, size.height) withFont:font lineBreakMode:UILineBreakModeWordWrap];
+        NSString* title = self.topItem.title;
+        CGSize size = [title sizeWithFont:font];
+        [title drawInRect:CGRectMake(floorf((self.bounds.size.width-size.width)/2), floorf((self.bounds.size.height-size.height)/2), size.width, size.height) withFont:font lineBreakMode:UILineBreakModeWordWrap];
         
     }
 }
@@ -111,6 +113,8 @@
   if (!self.topItem.title)
     return nil;
 
+    NSString* title = self.topItem.title;
+
   CGContextRef ctx = UIGraphicsGetCurrentContext(); 
   
   // Flip the coordinate system for right-reading text.
@@ -129,7 +133,7 @@
                               nil];
   NSAssert(attributes != nil, @"Font attributes are nil!");
   
-  NSAttributedString* nsAttStr = [[[NSAttributedString alloc] initWithString:self.topItem.title
+  NSAttributedString* nsAttStr = [[[NSAttributedString alloc] initWithString:title
                                                                   attributes:attributes] autorelease];
   attStr = (CFAttributedStringRef)nsAttStr; 
   

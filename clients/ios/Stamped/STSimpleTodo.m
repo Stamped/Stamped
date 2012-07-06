@@ -51,7 +51,7 @@
 }
 
 - (NSString*)key {
-    return self.todoID;
+    return self.source.entity.entityID;
 }
 
 - (NSDate*)timestamp {

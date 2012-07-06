@@ -19,6 +19,11 @@
 #import "STActionManager.h"
 #import "STStampedActions.h"
 #import "PostStampShareView.h"
+#import "STBlockUIView.h"
+#import "Util.h"
+#import "STStampedAPI.h"
+#import "QuartzUtils.h"
+#import "STNavigationItem.h"
 
 @interface PostStampViewController ()
 @property(nonatomic,strong) PostStampHeaderView *headerView;

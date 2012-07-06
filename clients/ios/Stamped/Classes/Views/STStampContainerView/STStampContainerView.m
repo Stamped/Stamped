@@ -7,6 +7,10 @@
 //
 
 #import "STStampContainerView.h"
+#import "STBlockUIView.h"
+#import "STUser.h"
+#import "Util.h"
+#import "STStampedAPI.h"
 
 @implementation STStampContainerView
 

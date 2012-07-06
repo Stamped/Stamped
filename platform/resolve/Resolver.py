@@ -37,7 +37,7 @@ try:
     import unicodedata
     # from EntityProxyContainer import EntityProxyContainer
     
-    from BasicSource                import BasicSource
+    from resolve.BasicSource                import BasicSource
     from utils                      import lazyProperty
     from pprint                     import pprint, pformat
     from gevent.pool                import Pool
@@ -46,7 +46,7 @@ try:
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
     from time                       import time
-    from ResolverObject             import *
+    from resolve.ResolverObject             import *
 except:
     report()
     raise
@@ -912,40 +912,7 @@ class Resolver(object):
 
         self.genericCheck(tests, weights, results, query, match, options, order)
 
-    
-    def checkSearchAll(self, results, query, match, options, order):
-        if match.target is None:
-            logs.info("Aborted match for %s due to None target" % type(match))
-            return
-        
-        tests = [
-            ('query_string',        self.__queryStringTest),
-            ('name',                self.__nameTest),
-            ('location',            self.__locationTest),
-            ('classification',      self.__classificationTest), 
-            ('priority',            lambda q, m, s, o: m.priority), 
-            ('popularity',          self.__popularityTest), 
-            ('recency',             self.__recencyTest),
-            ('source_priority',     self.__sourceTest),
-            ('keywords',            self.__keywordsTest),
-            ('related_terms',       self.__relatedTermsTest),
-        ]
-        
-        weights = {
-            'query_string':         lambda q, m, s, o: 0, 
-            'name':                 lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=50.0), 
-            'location':             lambda q, m, s, o: self.__locationWeightBoost(q, m, s, o, boost=40), 
-            'classification':       lambda q, m, s, o: 1, 
-            'priority':             lambda q, m, s, o: 1, 
-            'popularity':           self.__popularityWeight, 
-            'recency':              lambda q, m, s, o: self.__recencyWeight(q, m, s, o, boost=5),
-            'source_priority':      lambda q, m, s, o: 1.0, #self.__sourceWeight(m.source),
-            'keywords':             self.__keywordsWeight,
-            'related_terms':        self.__relatedTermsWeight,
-        }
-        
-        self.genericCheck(tests, weights, results, query, match, options, order)
-    
+
     def genericCheck(self, tests, weights, results, query, match, options, order):
         try:
             mins = options['mins']
@@ -1110,24 +1077,7 @@ class Resolver(object):
                 'types': 0.01
             }
         if 'groups' not in options:
-            groups = [options['count']]
-            if query.kind == 'person':
-                groups.extend([4, 20, 30])
-            elif query.kind == 'media_collection':
-                if query.isType('album'):
-                    groups.extend([5, 10, 50]) # Album
-            elif query.kind == 'media_item':
-                if query.isType('track'):
-                    groups.extend([20, 50, 100]) # Track
-                elif query.isType('movie'):
-                    groups.extend([10, 20, 50]) # Movie
-                elif query.isType('book'):
-                    groups.extend([20, 50, 100]) # Book
-            elif query.kind == 'search':
-                groups.extend([])
-            else:
-                #generic
-                groups.extend([10, 20, 50]) 
+            groups = [options['count'], 4, 10]
             options['groups'] = groups
         if 'check' not in options:
             if query.kind == 'person':
@@ -1140,8 +1090,6 @@ class Resolver(object):
                 options['check'] = self.checkMediaItem
             elif query.kind == 'software':
                 options['check'] = self.checkSoftware
-            elif query.kind == 'search':
-                options['check'] = self.checkSearchAll
             else:
                 #no generic test
                 raise ValueError("no test for %s (%s)" % (query.name, query.kind))
@@ -1156,73 +1104,10 @@ class Resolver(object):
 
     def __typesWeight(self, query, match, similarities, options):
         return 0
-    
-    def __sourceTest(self, query, match, similarities, options):
-        source_name = match.source.lower()
-        
-        weights = {
-            'stamped'       : 1.0, 
-            'itunes'        : 0.8, 
-            'rdio'          : 0.6, 
-            'spotify'       : 0.6, 
-            'factual'       : 0.6, 
-            'tmdb'          : 0.8, 
-            'amazon'        : 0.6, 
-            'netflix'       : 0.8, 
-            'googleplaces'  : 0.8, 
-            'thetvdb'       : 0.8, 
-        }
-        
-        try:
-            return weights[source_name]
-        except KeyError:
-            logs.warn("ERROR: unrecognized source '%s'" % source_name)
-        
-        return 0
-    
+
     def __sourceWeight(self, source):
         return 1
-    
-    def __queryStringTest(self, query, match, similarities, options):
-        return 0
-    
-    def __nameTest(self, query, match, similarities, options):
-        value = stringComparison(query.query_string, match.name)
-        
-        a = simplify(query.name)
-        b = simplify(match.name)
-        
-        #utils.log("__nameTest: '%s' vs '%s'" % (a, b))
-        if a == b:
-            return 1.0
-        
-        if len(a) > len(b):
-            a, b = b, a
-        
-        if a in b:
-            if b.startswith(a):
-                c = b[len(a):].strip()
-                
-                if len(c) > 0 and c[0] in _prefix_delimeters:
-                    value = 0.995
-                else:
-                    value = min(0.99, value * 1.2)
-            else:
-                value = min(0.99, value * 1.1)
-        
-        return value
-    
-    def __popularityTest(self, query, match, similarities, options):
-        try:
-            popularity = math.log(float(match.target.popularity) + 1)
-            
-            if popularity > 3:
-                return 1.0
-        except AttributeError:
-            pass
-        
-        return 0
-    
+
     def __locationTest(self, query, match, similarities, options):
         if query.kind != 'place' or match.kind != 'place':
             return 0
@@ -1242,17 +1127,6 @@ class Resolver(object):
         # Simple parabolic curve to weight closer distances
         return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
     
-    def __locationWeightBoost(self, query, match, similarities, options, boost=1):
-        if query.kind != 'place' or match.target.kind != 'place':
-            return 0
-            
-        weight = 1.0
-        
-        if 'location' in similarities:
-            weight = (similarities['location'] ** 2)
-        
-        return weight * boost
-    
     def __locationWeight(self, query, match, similarities, options):
         if query.kind != 'place' or match.kind != 'place':
             return 0
@@ -1268,55 +1142,6 @@ class Resolver(object):
                 weight = 1.0 / (5 * location)
         
         return max(0, min(1000.0, weight))
-    
-    def __classificationTest(self, query, match, similarities, options):
-        try:
-            weight = 0.0
-            for i in match.types:
-                weight = max(weight, _types_weights[i])
-            return weight / 100.0
-        except Exception:
-            return 0.0
-        return 1
-    
-    def __keywordsTest(self, query, match, similarities, options):
-        query_keywords = None
-        
-        if len(query.keywords) > 0:
-            query_keywords = set(query.keywords)
-        else:
-            query_keywords = set(query.query_string.split())
-        
-        ret = setComparison(query_keywords, set(match.keywords), symmetric=False)
-        
-        return ret
-    
-    def __keywordsWeight(self, query, match, similarities, options):
-        if len(query.keywords) > 0:
-            if len(match.keywords) == 0:
-                return 1
-            return 5
-        else:
-            if len(match.keywords) == 0 or query.query_string == '':
-                return 0
-            
-            string = query.query_string
-            for term in match.keywords:
-                if string.find(term) != -1:
-                    string.replace(term,' ')
-            
-            string = simplify(string)
-            return len(string) / max(1, len(query.query_string))
-    
-    def __relatedTermsTest(self, query, match, similarities, options):
-        return self.termComparison(query.query_string, match.related_terms, options)
-    
-    def __relatedTermsWeight(self, query, match, similarities, options):
-        if len(match.related_terms) == 0:
-            if match.target.kind == 'place' and similarities['related_terms'] < similarities['name']:
-                return 0
-            return 1
-        return 5
     
     def __nameWeightBoost(self, query, match, similarities, options, boost=1):
         try:
@@ -1334,18 +1159,7 @@ class Resolver(object):
         weight = weight + (1.0 - weight) / 1.5
         
         return boost * weight
-    
-    def __popularityWeight(self, query, match, similarities, options):
-        try:
-            popularity = math.log(float(match.target.popularity) + 1)
-            
-            if popularity > 3:
-                return popularity
-        except AttributeError:
-            pass
-        
-        return 2.0
-    
+
     def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
         if a is None or b is None or a == '' or b == '':
             return 1
@@ -1410,36 +1224,7 @@ class Resolver(object):
         if q == m:
             weight = exact_boost * weight
         return weight
-    
-    def __recencyTest(self, query, match, similarities, options):
-        factor = 0.9
-        
-        if match.isType('movie'):
-            factor = 1
-        
-        try:
-            diff = (datetime.utcnow() - match.release_date).days
-            if diff <= 90 and diff > -60:
-                return factor
-        except:
-            pass
-        
-        return 0
-    
-    def __recencyWeight(self, query, match, similarities, options, boost=1):
-        if match.isType('movie'):
-            boost *= 3
-        
-        try:
-            diff = (datetime.utcnow() - match.release_date).days
-            
-            if diff <= 90 and diff > -60:
-                return boost
-        except:
-            pass
-        
-        return boost
-    
+
     def __setWeight(self, query_set, match_set, exact_boost=None, q_empty=None, m_empty=None, both_empty=None):
         if len(query_set) == 0:
             if len(match_set) == 0 and both_empty is not None:
@@ -1610,8 +1395,8 @@ def demo(generic_source, default_title, subcategory=None):
     """
     _verbose = True
     import sys
-    import StampedSource
-    import Schemas
+    from resolve import StampedSource
+    from api import Schemas
 
     title = default_title
     count = 1
@@ -1630,7 +1415,7 @@ def demo(generic_source, default_title, subcategory=None):
     if len(sys.argv) > 4:
         index = int(sys.argv[3])
 
-    from MongoStampedAPI import MongoStampedAPI
+    from api.MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
     query = {'titlel':title.lower()}

@@ -15,11 +15,11 @@ from logs import report
 
 try:
     import logs
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from libs.Rdio                  import Rdio, globalRdio
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat
     from search.ScoringUtils        import *
@@ -361,27 +361,21 @@ class   RdioSource(GenericSource):
             constructor=RdioSearchAll)
     
     def __queryGen(self, batches=(100,), **params):
-        def gen():
-            try:
-                batches = [100]
-                offset  = 0
-                
-                for batch in batches:
-                    response = self.__rdio.method('search',
-                        start=offset,
-                        count=batch,
-                        **params
-                    )
-                    if response['status'] == 'ok':
-                        entries = response['result']['results']
-                        for entry in entries:
-                            yield entry
-                    else:
-                        break
-                    offset += batch
-            except GeneratorExit:
-                pass
-        return gen()
+        offset  = 0
+        
+        for batch in batches:
+            response = self.__rdio.method('search',
+                start=offset,
+                count=batch,
+                **params
+            )
+            if response['status'] == 'ok':
+                entries = response['result']['results']
+                for entry in entries:
+                    yield entry
+            else:
+                return
+            offset += batch
 
     class RequestFailedError(Exception):
         pass

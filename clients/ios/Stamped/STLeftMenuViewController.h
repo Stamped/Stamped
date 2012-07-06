@@ -8,21 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface STLeftMenuViewController : UIViewController {
-    NSArray *_dataSource;
-    NSArray *_anchorDataSource;
-    
-    NSDictionary *_controllerStore;
-    NSDictionary *_anchorControllerStore;
-    
-    NSIndexPath *_selectedIndexPath;
-    BOOL _anchorSelected;
-    
-}
+@interface STLeftMenuViewController : UIViewController
 
 + (void)setupConfigurations;
-
-@property(nonatomic,retain) UITableView *tableView;
-@property(nonatomic,retain) UITableView *anchorTableView;
 
 @end

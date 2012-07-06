@@ -153,6 +153,18 @@ class StampedDocumentNotFoundError(StampedUnavailableError):
     def __init__(self, msg=None):
         StampedUnavailableError.__init__(self, msg)
 
+class StampedRemoveDocumentError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+class StampedUpdateDocumentError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+class StampedSaveDocumentError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
 class StampedInvalidObjectIdError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
@@ -162,13 +174,45 @@ class StampedInvalidRelationshipError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)
 
+class StampedInvalidTypeSchemaImportError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
 
-    # Accounts
+class StampedActivityMissingRecipientError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+class StampedUnknownSourceError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+class StampedMissingRequiredLinkedAccountError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+class StampedCollectionCacheError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
+
+
+        # Accounts
 class StampedInvalidPasswordError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
 class StampedInvalidScreenNameError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedUnsetRequiredFieldError(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+class StampedScreenNameInUseError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedEmailInUseError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
@@ -205,21 +249,36 @@ class StampedAlreadyStampedAuthError(StampedIllegalActionError):
         StampedIllegalActionError.__init__(self, msg)
 
 
-        # Users
+    # Users
 class StampedViewUserPermissionsError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
 
 
     # Auth
+class StampedInvalidAuthTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedInvalidRefreshTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedGrantTypeIncorrectError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
 class StampedInvalidClientError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
-class StampedInvalidCredentialsError(StampedInputError):
+class StampedInvalidCredentialsError(StampedAuthError):
     def __init__(self, msg=None):
-        StampedInputError.__init__(self, msg)
+        StampedAuthError.__init__(self, msg)
 
+class StampedWrongAuthServiceError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
 
     # Linked Accounts
 class StampedLinkedAccountAlreadyExistsError(StampedIllegalActionError):
@@ -233,6 +292,10 @@ class StampedLinkedAccountDoesNotExistError(StampedIllegalActionError):
 class StampedLinkedAccountError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
+
+class StampedLinkedAccountMismatchError(StampedIllegalActionError):
+    def __init(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
 
 class StampedMissingLinkedAccountTokenError(StampedInputError):
     def __init__(self, msg=None):
@@ -259,6 +322,10 @@ class StampedThirdPartyError(StampedInputError):
 class StampedThirdPartyInvalidCredentialsError(StampedInvalidCredentialsError):
     def __init__(self, msg=None):
         StampedInvalidCredentialsError.__init__(self, msg)
+
+class StampedFacebookTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self,msg)
 
     # Stamps
 class StampedOutOfStampsError(StampedIllegalActionError):
@@ -289,7 +356,28 @@ class StampedBlockedUserError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
 
-    # Friendships
+    # Entities
+class StampedEntityUpdatePermissionError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
+
+class StampedTombstonedEntityError(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+class StampedInvalidCategoryError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidSubcategoryError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedMenuUnavailableError(StampedUnavailableError):
+    def __init__(self, msg=None):
+        StampedUnavailableError.__init__(self, msg)
+
+        # Friendships
 class StampedInvalidFriendshipError(StampedIllegalActionError):
     def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
@@ -297,3 +385,22 @@ class StampedInvalidFriendshipError(StampedIllegalActionError):
 class StampedFriendshipCheckPermissionsError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
+
+class StampedInviteAlreadyExistsError(StampedIllegalActionError):
+    def __init__(self, msg=None):
+        StampedIllegalActionError.__init__(self, msg)
+
+    # Todos
+class StampedTodoNotFoundError(StampedDocumentNotFoundError):
+    def __init__(self, msg=None):
+        StampedDocumentNotFoundError.__init__(self, msg)
+
+    # Comments
+class StampedAddCommentPermissionsError(StampedPermissionsError):
+    def __init__(self, msg=None):
+        StampedPermissionsError.__init__(self, msg)
+
+    # Activity
+class StampedInvalidUniversalNewsItemError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)

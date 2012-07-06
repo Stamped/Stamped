@@ -13,6 +13,11 @@
 #import <AddressBookUI/AddressBookUI.h>
 #import "STAuth.h"
 #import "LoginLoadingView.h"
+#import "STEvents.h"
+#import "STNavigationItem.h"
+#import "STBlockUIView.h"
+#import "Util.h"
+#import "QuartzUtils.h"
 
 @interface SignupViewController ()
 
@@ -149,12 +154,8 @@
 }
 
 - (void)signupFailed:(NSNotification*)notification {
-    
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Sign up failed" message:@"waiting on api error messages here.." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];
-    
+    [Util warnWithAPIError:notification.object andBlock:nil];
     [self setLoading:NO];
-    [alert release];
     
 }
 
@@ -340,7 +341,7 @@
     
     if (textField.returnKeyType == UIReturnKeyDone) {
         [textField resignFirstResponder];
-        return YES;;
+        return YES;
     }
     
     NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell*)textField.superview];

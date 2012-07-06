@@ -9,14 +9,14 @@ import Globals, utils
 import json, logs, string, urllib, urllib2
 
 from optparse       import OptionParser
-from Geocoder       import Geocoder
-from AKeyBasedAPI   import AKeyBasedAPI
-from AEntitySource  import AExternalServiceEntitySource
+from libs.Geocoder       import Geocoder
+from libs.AKeyBasedAPI   import AKeyBasedAPI
 from api.Schemas    import PlaceEntity, Coordinates
-from LRUCache       import lru_cache
-from CachedFunction import *
+from libs.LRUCache       import lru_cache
+from libs.CachedFunction import *
+from libs.CountedFunction import countedFn
 
-class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
+class GooglePlaces(AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
     FORMAT          = 'json'
     DEFAULT_RADIUS  = 500 # meters
@@ -79,7 +79,6 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     ])
     
     def __init__(self):
-        AExternalServiceEntitySource.__init__(self, self.NAME, self.TYPES)
         AKeyBasedAPI.__init__(self, self.API_KEYS)
         
         self._geocoder = Geocoder()
@@ -200,8 +199,10 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
     # and also cached remotely via memcached with a TTL of 7 days
+    @countedFn(name='GooglePlaces (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn(name='GooglePlaces (after caching)')
     def getSearchResultsByLatLng(self, latLng, params=None):
         (offset, count) = self._initAPIKeyIndices()
         
@@ -237,8 +238,10 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
     # and also cached remotely via memcached with a TTL of 7 days
+    @countedFn(name='GooglePlaces (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn(name='GooglePlaces (after caching)')
     def getAutocompleteResults(self, latLng, query, params=None):
         (offset, count) = self._initAPIKeyIndices()
         
@@ -326,7 +329,14 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             return None
         
         return None
-    
+
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached remotely via memcached with a TTL of 7 days
+    @countedFn(name='GooglePlaces (before caching)')
+    @lru_cache(maxsize=64)
+    @cachedFn()
+    @countedFn(name='GooglePlaces (after caching)')
     def getPlaceDetailsResponse(self, reference, apiKey, optionalParams=None):
         params = {
             'reference' : reference, 
@@ -348,7 +358,7 @@ class GooglePlaces(AExternalServiceEntitySource, AKeyBasedAPI):
             utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
         
         return None
-    
+
     def addPlaceReport(self, entity):
         params = {
             'sensor' : 'false', 

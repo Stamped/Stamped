@@ -8,8 +8,8 @@ __license__   = "TODO"
 import Globals, utils
 import sys
 
-from match.EntityMatcher import EntityMatcher
-from MongoStampedAPI     import MongoStampedAPI
+from crawler.match.EntityMatcher import EntityMatcher
+from api.MongoStampedAPI     import MongoStampedAPI
 from Schemas             import Entity
 from optparse            import OptionParser
 

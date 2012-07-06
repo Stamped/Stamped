@@ -17,7 +17,7 @@
                                 <div class="entity-header">
                                     <div class="title clearfix">
                                         <div class="pronounced-title">
-                                            <a href="{{stamp.url}}" title="{{stamp.entity.title}}">{{stamp.entity.title}}</a>
+                                            <a href="" title="{{stamp.entity.title}}">{{stamp.entity.title}}</a>
                                         </div>
                                         <span class="user-logo-small"></span>
                                     </div>
@@ -38,13 +38,7 @@
                                     {% if stamp.contents.0.blurb and stamp.contents.0.blurb|length > 0 %}
                                     said:
                                     {% else %}
-                                    stamped a 
-                                        {% if entity.subcategory %}
-                                            {{entity.subcategory}}
-                                        {% else %}
-                                            {{entity.category}}
-                                        {% endif %}
-                                        .
+                                    stamped a {% if entity.subcategory %}{{entity.subcategory}}{% else %}{{entity.category}}{% endif %}.
                                     {% endif %}
                                 </div>
                                 

@@ -13,6 +13,8 @@
 #import "STTwitter.h"
 #import "STAuth.h"
 #import "SignupWelcomeViewController.h"
+#import "STEvents.h"
+#import "STNavigationItem.h"
 
 
 @interface TwitterAccountsViewController ()

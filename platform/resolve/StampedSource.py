@@ -19,16 +19,18 @@ import re
 try:
     import logs
     
-    from Resolver                   import *
-    from ResolverObject             import *
-    from GenericSource              import GenericSource
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat
     from libs.LibUtils              import parseDateString
     from api.Schemas                import BasicEntity
+    from api.Schemas                    import BasicEntityMini as BasicEntityMini1
+    from api.Schemas                import BasicEntityMini as BasicEntityMini2
     from datetime                   import datetime
     from bson                       import ObjectId
-    from Entity                     import buildEntity
+    from api.Entity                     import buildEntity
 
     # TODO GET RID OF SEARCH IMPORTS
     from search.SearchResult import SearchResult
@@ -172,16 +174,19 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
 
 def _fixCast(cast):
     newcast = []
-    if cast is None:
+    if not cast:
         return newcast
     try:
+        if (isinstance(cast, list) or isinstance(cast, tuple)) and \
+           (isinstance(cast[0], BasicEntityMini1) or isinstance(cast[0], BasicEntityMini2)):
+            return [{'name': person.title} for person in cast]
         # if it's just a string, construct a list of dictionaries with 'title' keys
         if isinstance(cast, basestring):
             print('converting cast from string')
             names = cast.split(',')
             cast = list()
             for name in names:
-                cast.append( {'title': name} )
+                cast.append( {'name': name} )
             print('converted cast: %s' % cast)
         for item in cast:
             name = item.get('title', None)
@@ -198,7 +203,9 @@ def _fixCast(cast):
                 newitem['character'] = character
             newcast.append(newitem)
     except Exception as e:
-        print('ERROR: %s' % e)
+        print('FIXCAST ERROR: %s' % e)
+        import traceback
+        traceback.print_stack()
     return newcast
 
 
@@ -436,7 +443,7 @@ class StampedSource(GenericSource):
     @lazyProperty
     def __entityDB(self):
         if not self._stamped_api:
-            import MongoStampedAPI
+            from api import MongoStampedAPI
             self._stamped_api = MongoStampedAPI.globalMongoStampedAPI()
         
         return self._stamped_api._entityDB

@@ -8,22 +8,24 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from httpapi.v0.helpers import *
+from servers.httpapi.v0.helpers import *
 from errors             import *
-from HTTPSchemas        import *
-from Netflix            import *
-from Facebook           import *
+from api.HTTPSchemas        import *
+from libs.Netflix       import *
+from libs.Facebook           import *
 from django.http        import HttpResponseRedirect
 
 
-exceptions = {
-    'StampedDocumentNotFoundError'      : StampedHTTPError(404, kind="not_found", msg="There was a problem retrieving the requested data."),
-    'StampedAccountNotFoundError'       : StampedHTTPError(404, kind='not_found', msg='There was an error retrieving account information'),
-    'StampedMissingLinkedAccountTokenError' : StampedHTTPError(400, kind='invalid_credentials', msg="Must provide a token for third party service"),
-    'StampedNetflixNoInstantWatchError'     : StampedHTTPError(403, kind='illegal_action', msg="Netflix account must have instant watch access"),
-    'StampedLinkedAccountDoesNotExistError' : StampedHTTPError(400, kind='illegal_action', msg="No such third party account linked to user"),
-    'StampedLinkedAccountIsAuthError'       : StampedHTTPError(403, kind='forbidden', msg="This third-party account is used for authorization and cannot be removed"),
-}
+exceptions = [
+    (StampedAccountNotFoundError, 404, 'not_found', 'There was an error retrieving account information'),
+    (StampedMissingLinkedAccountTokenError, 400, 'invalid_credentials', "Must provide a token for third party service"),
+    (StampedNetflixNoInstantWatchError, 403, 'illegal_action', "Netflix account must have instant watch access"),
+    (StampedLinkedAccountDoesNotExistError, 400, 'illegal_action', "No such third party account linked to user"),
+    (StampedLinkedAccountIsAuthError, 403, 'forbidden', "This third-party account is used for authorization and cannot be removed"),
+    (StampedThirdPartyError, 403, 'illegal_action', "There was a problem communicating with the third-party service"),
+    (StampedLinkedAccountMismatchError, 400, 'illegal_action', "There was a problem verifying the third-party account"),
+    (StampedFacebookTokenError, 401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
+]
 
 @handleHTTPRequest(parse_request=False,
                    exceptions=exceptions)
@@ -37,12 +39,9 @@ def show(request, authUserId, **kwargs):
 
     return transformOutput(result)
 
-exceptions_add = {
-    'StampedMissingParametersError'       : StampedHTTPError(400, kind='bad_request', msg='Missing third party service name'),
-}
 @handleHTTPRequest(http_schema=HTTPLinkedAccount,
                    conversion=HTTPLinkedAccount.exportLinkedAccount,
-                   exceptions=exceptions.update(exceptions_add))
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def add(request, authUserId, http_schema, schema, **kwargs):
     if http_schema.service_name is None:
@@ -56,7 +55,7 @@ def add(request, authUserId, http_schema, schema, **kwargs):
     return transformOutput(True)
 
 @handleHTTPRequest(http_schema=HTTPServiceNameForm,
-                   exceptions=exceptions.update(exceptions_add))
+                   exceptions=exceptions)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
     if http_schema.service_name is None:

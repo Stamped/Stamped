@@ -9,6 +9,8 @@
 #import "STUserCellFactory.h"
 #import "STErrorCellFactory.h"
 #import "STUserCell.h"
+#import "STUserDetail.h"
+#import "STStampPreview.h"
 
 @implementation STUserCellFactory
 

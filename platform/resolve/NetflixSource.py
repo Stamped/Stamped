@@ -16,13 +16,14 @@ from logs import report
 try:
     import logs
     from libs.Netflix               import globalNetflix
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from pprint                     import pformat
     from datetime                   import datetime
-    from Resolver                   import *
-    from ResolverObject             import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
 except:
     report()
     raise
@@ -89,9 +90,11 @@ class _NetflixObject(object):
         except Exception as e:
             return None
 
+    def _cleanName(self, title):
+        return cleanTvTitle(title)
 
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self._titleObj['title']['regular']
 
     @lazyProperty

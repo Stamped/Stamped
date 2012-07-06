@@ -22,9 +22,10 @@ try:
     from urllib2         import HTTPError
     from gevent          import sleep
     from pprint          import pprint
-    from RateLimiter     import RateLimiter, RateException
-    from LRUCache        import lru_cache
-    from CachedFunction  import cachedFn
+    from libs.RateLimiter     import RateLimiter, RateException
+    from libs.LRUCache        import lru_cache
+    from libs.CachedFunction  import cachedFn
+    from libs.CountedFunction import countedFn
 except:
     report()
     raise
@@ -86,8 +87,10 @@ class TMDB(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn(name='TMDB (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn(name='TMDB (after caching)')
     def __tmdb(self, service, max_retries=3, **params):
         if 'api_key' not in params:
             params['api_key'] = self.__key

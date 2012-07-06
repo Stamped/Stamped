@@ -17,13 +17,13 @@ try:
     import logs
     from libs.Spotify               import globalSpotify
     from copy                       import copy
-    from GenericSource              import GenericSource, multipleSource, listSource
+    from resolve.GenericSource              import GenericSource, multipleSource, listSource
     from utils                      import lazyProperty
     from pprint                     import pformat
     from gevent.pool                import Pool
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from search.ScoringUtils        import *
 except:
     report()
@@ -129,7 +129,7 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
     @lazyProperty
     def albums(self):
         try:
-            album_list = self.full_data['albums']
+            album_list = self.full_data.get('albums', [])
         except LookupRequiredError:
             return []
         return [

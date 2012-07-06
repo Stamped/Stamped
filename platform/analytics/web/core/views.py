@@ -6,22 +6,27 @@ import keys.aws, logs, utils
 
 from django.http import HttpResponse
 from django.template import Context, loader
+<<<<<<< HEAD
 from Dashboard import Dashboard
 from topStamped import getTopStamped
+=======
+from analytics.web.core.Dashboard import *
+from analytics.web.core.topStamped import getTopStamped
+>>>>>>> 94513bd8d4cb04bbe26209c9ffce1c2ba4455dd8
 from datetime import *
-from Enrichment import getEnrichmentStats
-import Stats
+from analytics.web.core.Enrichment import getEnrichmentStats
+from analytics.web.core import Stats
 
 
 from django.contrib.auth.decorators     import login_required
-from logsQuery                          import logsQuery
-from MongoStampedAPI                    import MongoStampedAPI
+from analytics.web.core.logsQuery                          import logsQuery
+from api.MongoStampedAPI                    import MongoStampedAPI
 from boto.sdb.connection                import SDBConnection
 from boto.exception                     import SDBResponseError
-from db.mongodb.MongoStatsCollection    import MongoStatsCollection
+from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                        import Pool
 from django.contrib.auth                import authenticate, login
-from weeklyScore                        import weeklyScore
+from analytics.web.core.weeklyScore                        import weeklyScore
 from django import forms
 from analytics_utils import *
 

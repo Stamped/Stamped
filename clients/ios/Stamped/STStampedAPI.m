@@ -325,8 +325,6 @@ static STStampedAPI* _sharedInstance;
                                               mapping:[STSimpleStamp mapping]
                                           andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
                                               if (stamp) {
-                                                  [[self globalListByScope:STStampedAPIScopeYou] reload];
-                                                  [[self globalListByScope:STStampedAPIScopeFriends] reload];
                                                   [self.stampCache removeObjectForKey:stampID];
                                               }
                                               block(stamp != nil, error);
@@ -418,16 +416,24 @@ static STStampedAPI* _sharedInstance;
                                                  }];
 }
 
-- (STCancellation*)_activitiesWithParams:(NSDictionary*)params
-                             andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-    return [[STRestKitLoader sharedInstance] loadWithPath:@"/activity/collection.json" 
+- (STCancellation*)activitiesForScope:(STStampedAPIScope)scope
+                               offset:(NSInteger)offset 
+                                limit:(NSInteger)limit 
+                          andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error, STCancellation* cancellation))block {
+    NSMutableDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
+                                   scope == STStampedAPIScopeYou ? @"me" : @"friends", @"scope",
+                                   [NSNumber numberWithInteger:offset], @"offset",
+                                   [NSNumber numberWithInteger:limit], @"limit",
+                                   nil];
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/activity/collection.json"
                                                      post:NO
                                             authenticated:YES
                                                    params:params
                                                   mapping:[STSimpleActivity mapping]
-                                              andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
-                                                  if (array) {
-                                                      for (id<STActivity> activity in array) {
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  
+                                                  if (results) {
+                                                      for (id<STActivity> activity in results) {
                                                           if (activity.objects.stamps.count > 0) {
                                                               for (id<STStamp> stamp in activity.objects.stamps) {
                                                                   [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
@@ -436,23 +442,8 @@ static STStampedAPI* _sharedInstance;
                                                           }
                                                       }
                                                   }
-                                                  block((NSArray<STActivity>*)array, error);
+                                                  block((id)results, error, cancellation);
                                               }];
-}
-
-- (void)activitiesForYouWithGenericSlice:(STGenericSlice*)slice 
-                             andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-    self.lastCount = nil;
-    NSMutableDictionary* params = [slice asDictionaryParams];
-    [params setObject:@"me" forKey:@"scope"];
-    [self _activitiesWithParams:params andCallback:block];
-}
-
-- (void)activitiesForFriendsWithGenericSlice:(STGenericSlice*)slice 
-                                 andCallback:(void(^)(NSArray<STActivity>* activities, NSError* error))block {
-    NSMutableDictionary* params = slice.asDictionaryParams;
-    [params setObject:@"friends" forKey:@"scope"];
-    [self _activitiesWithParams:params andCallback:block];
 }
 
 - (STCancellation*)menuForEntityID:(NSString*)entityID 
@@ -831,23 +822,6 @@ static STStampedAPI* _sharedInstance;
                                                          block(result, error, cancellation);
                                                      }];
     }
-}
-
-- (id<STLazyList>)globalListByScope:(STStampedAPIScope)scope {
-    if (scope == STStampedAPIScopeYou) {
-        return [STYouStampsList sharedInstance];
-    }
-    else if (scope == STStampedAPIScopeFriends) {
-        return [STFriendsStampsList sharedInstance];
-    }
-    else if (scope == STStampedAPIScopeFriendsOfFriends) {
-        return [STFriendsOfFriendsStampsList sharedInstance];
-    }
-    else if (scope == STStampedAPIScopeEveryone) {
-        return [STEveryoneStampsList sharedInstance];
-    }
-    NSAssert1(NO, @"Bad scope value: %", scope);
-    return nil;
 }
 
 - (void)handleEndpointCallback:(id)result withError:(NSError*)error andCancellation:(STCancellation*)cancellation {
@@ -1315,19 +1289,121 @@ static STStampedAPI* _sharedInstance;
 - (STCancellation*)removeLinkedAccountWithService:(NSString*)service
                                       andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
     
-    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/remove.json"
-                                                 post:YES 
-                                        authenticated:YES
-                                               params:[NSDictionary dictionaryWithObject:service forKey:@"service_name"]
-                                              mapping:[STSimpleBooleanResponse mapping]
-                                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                              BOOL success = NO;
-                                              if (result) {
-                                                  id<STBooleanResponse> response = result;
-                                                  success = [response result].boolValue; 
-                                              }
-                                              block(success, error, cancellation);
-                                          }];
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:[NSString stringWithFormat:@"/account/linked/%@/remove.json", service]
+                                                        post:YES 
+                                               authenticated:YES
+                                                      params:[NSDictionary dictionary]
+                                                     mapping:[STSimpleBooleanResponse mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     BOOL success = NO;
+                                                     if (result) {
+                                                         id<STBooleanResponse> response = result;
+                                                         success = [response result].boolValue; 
+                                                     }
+                                                     block(success, error, cancellation);
+                                                 }];
+}
+
+
+- (STCancellation*)createEntityWithParams:(NSDictionary*)params
+                              andCallback:(void (^)(id<STEntityDetail> entityDetail, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/entities/create.json"
+                                                        post:YES
+                                               authenticated:YES
+                                                      params:params
+                                                     mapping:[STSimpleEntityDetail mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     if (result) {
+                                                         [self.entityDetailCache setObject:result forKey:[result entityID]];
+                                                     }
+                                                     block(result, error, cancellation);
+                                                 }];
+}
+
++ (void)logError:(NSString*)message {
+    [[self sharedInstance] createLogWithKey:@"error"
+                                      value:message
+                                    stampID:nil
+                                   entityID:nil
+                                     todoID:nil
+                                  commentID:nil
+                                 activityID:nil
+                                andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                                    
+                                }];
+}
+
+- (id<STDatum>)datumForCurrentDatum:(id<STDatum>)datum {
+    if ([datum conformsToProtocol:@protocol(STStamp)]) {
+        id<STStamp> stamp = (id)datum;
+        id<STStamp> local = [self cachedStampForStampID:stamp.stampID];
+        if (local && local != stamp) {
+            return local;
+        }
+    }
+    return nil;
+}
+
+- (STCancellation*)creditingStampsWithUserID:(NSString*)userID 
+                                        date:(NSDate*)date 
+                                       limit:(NSInteger)limit 
+                                      offset:(NSInteger)offset
+                                 andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
+    NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
+                            userID, @"user_id",
+                            @"credit", @"scope",
+                            [NSNumber numberWithInteger:[date timeIntervalSince1970]], @"before",
+                            [NSNumber numberWithInteger:limit], @"limit",
+                            [NSNumber numberWithInteger:offset], @"offset",
+                            nil];
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/stamps/collection.json"
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:params
+                                                  mapping:[STSimpleStamp mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  if (results) {
+                                                      NSArray<STStamp>* stamps = (id)results;
+                                                      for (id<STStamp> stamp in stamps) {
+                                                          [self.stampCache setObject:(id)stamp forKey:stamp.stampID];
+                                                      }
+                                                  }
+                                                  block((id)results, error, cancellation);
+                                              }];
+}
+
+- (STCancellation*)usersWithEmails:(NSArray*)emails 
+                       andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/users/find/email.json"
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:[NSDictionary dictionaryWithObject:[emails componentsJoinedByString:@","] forKey:@"query"] 
+                                                  mapping:[STSimpleUserDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  if (results) {
+                                                      for (id<STUserDetail> user in results) {
+                                                          //TODO cache
+                                                      }
+                                                  }
+                                                  block((id)results, error, cancellation);
+                                              }];
+}
+
+- (STCancellation*)usersWithPhoneNumbers:(NSArray*)phoneNumbers 
+                             andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/users/find/phone.json"
+                                                     post:NO
+                                            authenticated:YES
+                                                   params:[NSDictionary dictionaryWithObject:[phoneNumbers componentsJoinedByString:@","] forKey:@"query"] 
+                                                  mapping:[STSimpleUserDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  if (results) {
+                                                      for (id<STUserDetail> user in results) {
+                                                          //TODO cache
+                                                      }
+                                                  }
+                                                  block((id)results, error, cancellation);
+                                              }];
 }
 
 - (void)fastPurge {

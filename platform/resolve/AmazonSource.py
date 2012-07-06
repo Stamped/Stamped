@@ -15,10 +15,10 @@ from logs import report
 
 try:
     import logs, re
-    from GenericSource              import GenericSource, multipleSource
-    from TitleUtils                 import *
-    from Resolver                   import *
-    from ResolverObject             import *
+    from resolve.GenericSource              import GenericSource, multipleSource
+    from resolve.TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
     from datetime                   import datetime
     from libs.LibUtils              import months, parseDateString, xp
     from libs.AmazonAPI             import AmazonAPI
@@ -666,6 +666,23 @@ class AmazonSource(GenericSource):
 
         return self.emptySource
 
+
+    def __getSearchResults(self, results):
+        return self.__getResults('ItemSearchResponse', results)
+
+    def __getLookupResult(self, results):
+        # TODO(geoff): log a warning if we get more than one?
+        results = self.__getResults('ItemLookupResponse', results)
+        if len(results) > 1:
+            logs.warn("Received more than one result for lookup: " + str(results))
+        return results[0] if results else None
+
+    def __getResults(self, firstLayer, results):
+        items = xp(results, firstLayer, 'Items')['c']
+        if 'Item' in items:
+            return list(items['Item'])
+        return []
+
     def __searchGen(self, proxy, *queries):
         def gen():
             try:
@@ -676,21 +693,17 @@ class AmazonSource(GenericSource):
                     if 'ResponseGroup' not in params:
                         params['ResponseGroup'] = "ItemAttributes"
                     results = globalAmazon().item_search(**params)
-                    items = xp(results, 'ItemSearchResponse', 'Items')['c']
-                    
-                    if 'Item' in items:
-                        items = items['Item']
-                        
-                        for item in items:
-                            try:
-                                if test == None or test(item):
-                                    yield xp(item, 'ASIN')['v']
-                            except Exception:
-                                pass
+
+                    for item in self.__getSearchResults(results):
+                        try:
+                            if test == None or test(item):
+                                yield xp(item, 'ASIN')['v'], item
+                        except Exception:
+                            pass
             except GeneratorExit:
                 pass
 
-        return self.generatorSource(gen(), constructor=lambda x: proxy( x ), unique=True)
+        return self.generatorSource(gen(), constructor=lambda x: proxy(*x, maxLookupCalls=0), unique=True)
     
     def albumSource(self, query=None, query_string=None):
         if query_string is None:
@@ -810,16 +823,12 @@ class AmazonSource(GenericSource):
         #print "\n\n\n\nAMAZON\n\n\n\n\n"
         #pprint(searchResults)
         #print "\n\n\n\nENDMAZON\n\n\n\n\n"
-        items = xp(searchResults, 'ItemSearchResponse', 'Items')['c']
-
-        if 'Item' in items:
-            items = items['Item']
-            indexResults = []
-            for item in items:
-                parsedItem = searchIndexData.proxyConstructor(item, maxLookupCalls=0)
-                if parsedItem:
-                    indexResults.append(parsedItem)
-            results[searchIndexData.searchIndexName] = indexResults
+        indexResults = []
+        for item in self.__getSearchResults(searchResults):
+            parsedItem = searchIndexData.proxyConstructor(item, maxLookupCalls=0)
+            if parsedItem:
+                indexResults.append(parsedItem)
+        results[searchIndexData.searchIndexName] = indexResults
 
     def __searchIndexesLite(self, searchIndexes, queryText, timeout=None, logRawResults=False):
         """
@@ -1299,23 +1308,17 @@ class AmazonSource(GenericSource):
     def entityProxyFromKey(self, key, **kwargs):
         try:
             lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key)
-            kind = xp(lookupData, 'ItemLookupResponse','Items','Item','ItemAttributes','ProductGroup')['v'].lower()
+            result = self.__getLookupResult(lookupData)
+            kind = xp(result, 'ItemAttributes', 'ProductGroup')['v'].lower()
             logs.debug(kind)
 
-            # TODO: Avoid additional API calls here.
-            
-            if kind == 'book':
-                return AmazonBook(key)
-            if kind == 'digital music album':
-                return AmazonAlbum(key)
-            if kind == 'digital music track':
-                return AmazonTrack(key)
+            if kind == 'book' or kind == 'ebooks':
+                return AmazonBook(key, result, 0)
             if kind == 'video games':
-                return AmazonVideoGame(key)
-            
-            raise Exception("unsupported amazon product type: %s" % kind)
+                return AmazonVideoGame(key, result, 0)
+            return self.__constructMusicObjectFromResult(result, 0)
         except KeyError:
-            pass
+            logs.report()
         return None
     
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):

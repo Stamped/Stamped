@@ -319,10 +319,8 @@
                                         height: 1em;
                                         
                                         .bargraph-row-value {
-                                            /*.transition(all, .5s, easeOutCubic);*/
                                             .rounded(1em);
                                             
-                                            //background-color: #000;
                                             @c0: lighten(@b0, 10%);
                                             @c1: lighten(@b1, 15%);
                                             
@@ -330,6 +328,15 @@
                                             
                                             width:  0%;
                                             height: 100%;
+                                        }
+                                        
+                                        .bargraph-row-value-inner {
+                                            .rounded(1em);
+                                            
+                                            width:  100%;
+                                            height: 100%;
+                                            
+                                            background: url(/assets/img/progress.png) repeat-x;
                                         }
                                     }
                                     
@@ -595,7 +602,7 @@ body.app {
 .stamp-gallery-header {
     margin: 1em 24px;
     
-    .stamp-gallery-sort {
+    /*.stamp-gallery-sort {
         position: relative;
         z-index: 80;
         left: -23px;
@@ -628,41 +635,16 @@ body.app {
                 display: inline;
             }
         }
-    }
+    }*/
     
     .stamp-gallery-view-map {
-        float: right;
+        position: relative;
+        float: left;
+        left: -8px;
         
-        /*a {
-            //display: block;
-            //-moz-box-align: center;
-            //-webkit-box-align: center;
-            
-            .icon {
-                background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
-                display: inline-block;
-                
-                width:  39px;
-                height: 33px;
-            }
-            
-            &:hover, &:active {
-                color: #23a2f9 !important;
-                text-decoration: none !important;
-            }
-            
-            &:hover {
-                .icon {
-                    background-position: -41px 0;
-                }
-            }
-            
-            &:active {
-                .icon {
-                    background-position: -82px 0;
-                }
-            }
-        }*/
+        .desc {
+            margin-left: .5em;
+        }
     }
     
     .expanded {
@@ -970,12 +952,9 @@ body.music, body.book, body.film, body.app {
     position: relative;
     z-index: 20;
     
-    .transform-style(preserve-3d);
-    .backface-visibility(hidden);
-    
     .preview-image {
         position: relative;
-        display: block;
+        display:  block;
         width: 100%;
         
         .transition-transform(0.5s, ease-out);
@@ -991,10 +970,9 @@ body.music, body.book, body.film, body.app {
         img {
             // TODO: resolve these changes
             //width: 85%;
-            //.box-shadow(0, 1px, 3px, -1px, rgba(0,0,0,0.3));
+            .box-shadow(0, 2px, 3px, -1px, rgba(0,0,0,0.3));
             //border: 10px solid #fbfbfb;
-            //.rounded(0px);
-           
+            .rounded(4px);
         }
     }
     
@@ -1060,7 +1038,7 @@ body.music, body.book, body.film, body.app {
     quotes: "\201C" "\201D";
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
-    color: #999999;    
+    color: #666;    
     line-height: 140%;
     letter-spacing: 0.02em;
     margin: 0px 0px 9px 0px;
@@ -1075,10 +1053,10 @@ body.music, body.book, body.film, body.app {
     text-overflow: ellipsis;
 }
 
-/*
-.blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
-.blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
-*/
+.stamp-inner-content {
+    .normal_blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
+    .normal_blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
+}
 
 .subtitle-line {
     position: relative;
@@ -1099,7 +1077,7 @@ body.music, body.book, body.film, body.app {
         top: -4.5px;
         font-family: 'helvetica', sans-serif;
         font-weight: 200;
-        color: #999999;
+        color: #999;
     }
     
     .icon {
@@ -1588,15 +1566,14 @@ ul.user-category-distribution {
     }
 }
 
-
 .post-header {
     .transition(background, .6s, ease-out);
 }
 
 body.sdetail_popup_animation, body.sdetail_popup {
     #main-page-content-body {
-        display: block;
         visibility: visible !important;
+        display: block;
         
         #stamp-category-nav-bar {
             opacity: 0;

@@ -6,9 +6,11 @@
 
 {% if sdetail %}
     <meta property="og:title"               content="{{entity.title}}"/>
+    <meta itemprop="name"                   content="{{entity.title}}"/>
     
     {% if entity.desc %}
         <meta property="og:description"     content="{{entity.desc}}"/>
+        <meta itemprop="description"        content="{{entity.desc}}"/>
     {% endif %}
     
     {% if entity.subtitle %}
@@ -18,12 +20,15 @@
     {% with img=stamp.contents.0.images.0.sizes.0.url %}
         {% if img %}
             <meta property="og:image"       content="{{img}}"/>
+            <meta itemprop="image"          content="{{img}}"/>
         {% else %}
             {% with img2=entity.images.0.sizes.0.url %}
                 {% if img2 %}
                     <meta property="og:image"   content="{{img2}}"/>
+                    <meta itemprop="image"      content="{{img2}}"/>
                 {% else %}
                     <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped-logo.png"/>
+                    <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped-logo.png"/>
                 {% endif %}
             {% endwith %}
         {% endif %}
@@ -55,6 +60,9 @@
         {% if entity.coordinates|length > 0 %}
             <meta property="stampedapp:location:latitude"   content='{{entity.coordinates|split0:","}}'/>
             <meta property="stampedapp:location:longitude"  content='{{entity.coordinates|split1:","}}'/>
+            
+            <meta itemprop="latitude"                       content='{{entity.coordinates|split0:","}}'/>
+            <meta itemprop="longitude"                      content='{{entity.coordinates|split1:","}}'/>
         {% endif %}
     {% else %}{% if entity.category == "music" %}
         {% if entity.subcategory == "artist" %}
@@ -91,8 +99,11 @@
     
     {% if user.image_url == "http://static.stamped.com/users/default.jpg" %}
         <meta property="og:image"           content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
+        
+        <meta itemprop="image"              content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
     {% else %}
         <meta property="og:image"           content="{{user.image_url}}"/>
+        <meta itemprop="image"              content="{{user.image_url}}"/>
     {% endif %}
     
     <meta property="stampedapp:user_id"     content="{{user.user_id}}"/>

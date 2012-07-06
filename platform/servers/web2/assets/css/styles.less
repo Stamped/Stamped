@@ -98,11 +98,13 @@ header {
             a.button {
                 background: url(/assets/img/join_signup_sprite.png) no-repeat;
                 display: inline-block;
+                
+                position: relative;
+                top: .5em;
+                
                 width:  86px;
                 height: 31px;
                 margin-left: .5em;
-                position: relative;
-                top: .5em;
             }
         }
         
@@ -172,6 +174,17 @@ a.follow-button {
     display:  block;
     
     height: 15px;
+}
+
+.post-header-overlay {
+    position: absolute;
+    background: #fff;
+    
+    width:  100%;
+    height: 100%;
+    
+    opacity: 0;
+    .transition(opacity, .5s, ease);
 }
 
 .user-logo-large {
@@ -349,8 +362,8 @@ a.follow-button {
         height: @size;
         
         /*.perspective(@perspective);*/
-        .transform-style(preserve-3d);
-        .backface-visibility(hidden);
+        /*.transform-style(preserve-3d);
+        .backface-visibility(hidden);*/
         
         ._section(@x) {
             background: url('https://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=12&sensor=false&scale=1&format=png&maptype=roadmap&size=144x144');
@@ -362,8 +375,7 @@ a.follow-button {
             width:  @colsize;
             height: @size;
             
-            top:  0;
-            
+            top: 0;
             border: @b solid #fff;
             
             //.box-shadow(0, 0, @b * 2, 0, @shadow);
@@ -387,12 +399,14 @@ a.follow-button {
         
         .r0 {
             .section(0);
+            
             border-width: @b 0 @b @b;
             .transform(perspective(@perspective) translate(12px, 0) rotateY(-@angle));
         }
         
         .r1 {
             .section(1);
+            
             border-width: @b 0;
             .transform(perspective(@perspective) translate(7px,  0) rotateY(@angle));
 
@@ -400,12 +414,14 @@ a.follow-button {
         
         .r2 {
             .section(2);
+            
             border-width: @b 0;
             .transform(perspective(@perspective) translate(-1px, 0) rotateY(-@angle));
         }
         
         .r3 {
             .section(3);
+            
             border-width: @b @b @b 0;
             .transform(perspective(@perspective) translate(-6px, 0) rotateY(@angle));
         }
@@ -448,16 +464,16 @@ a.follow-button {
                 height: 36px;
             }
             
-            .transition(all, .1s, linear);
             .transform(perspective(@perspective) translate(-2px, 0) scale(.8, .8));
+            .transition-transform(.1s, linear);
         }
     }
     
     &:hover {
-        /*cursor: pointer;*/
         .r0, .r1, .r2, .r3, .pin {
             .transform(perspective(@perspective));
         }
+        
         .dark-layer {
             opacity: 0;
         }
@@ -503,7 +519,7 @@ a.follow-button {
     }
 }
 
-.blur_0   { .blurred('blur.svg#gaussian_blur_0',   0  );   } .ie { .blur_0   { .blurred_ie(0,   0  );   } }
+.blur_0   { .blurred('blur.svg#gaussian_blur_0',   0);     } .ie { .blur_0   { .blurred_ie(0,   0);     } }
 .blur_1   { .blurred('blur.svg#gaussian_blur_1',   1px);   } .ie { .blur_1   { .blurred_ie(1,   1px);   } }
 .blur_2   { .blurred('blur.svg#gaussian_blur_2',   2px);   } .ie { .blur_2   { .blurred_ie(2,   2px);   } }
 .blur_3   { .blurred('blur.svg#gaussian_blur_3',   3px);   } .ie { .blur_3   { .blurred_ie(3,   3px);   } }
@@ -559,6 +575,7 @@ a.follow-button {
        supported.
     */
     display: none;
+    .transition-rounded(0.3s, ease-out);
     
     .desc {
         font-size: 80%;
@@ -567,17 +584,21 @@ a.follow-button {
         color: #333;
     }
     
-    .transition-rounded(0.3s, ease-out);
-    overflow: hidden;
-    
     .share-buttons {
         display: none;
         white-space: nowrap;
         
-        margin: 7px 0px 5px 0px;
+        margin: 7px 0 5px;
         
         .share-button {
-            display: inline-block;
+            display:  inline-block;
+            position: relative;
+            
+            min-width: 90px;
+        }
+        
+        .facebook {
+            top: -4px;
         }
     }
     
@@ -612,19 +633,22 @@ a.sdetail, .pronounced-title a {
 }
 
 .brand {
-    background: url(/assets/img/stamped-logo.png) left top no-repeat;
-    width: 180px;
-    height: 180px;
-    margin: -180px auto 0;
-    float: none;
     position: relative;
+    float: none;
+    
     bottom: -197px;
+    margin: -180px auto 0;
+    
+    background: url(/assets/img/stamped-logo.png) left top no-repeat;
+    width:  180px;
+    height: 180px;
 }
 
 .card {
     margin: 45px auto 0;
     padding: 0;
     width: @fixed-width;
+    
     background: none repeat scroll 0 0 #FFFFFF;
     border: 0 none;
     
@@ -683,9 +707,90 @@ footer .copyright a, footer .copyright a {
     position: absolute;
     left: 50%;
     top:  50%;
+    
     margin-left: -470px;
     margin-top:  -405px;
 }
+
+.screen-name {
+    text-transform: lowercase;
+    letter-spacing: .05em;
+    font: 85% "StampedScreenNameFont", helvetica, sans-serif;
+}
+
+.pronounced-title a, a.pronounced-title {
+    color: #262626;
+}
+
+.pronounced-title {
+    position: relative;
+    
+    .stamped-font();
+    
+    font-size: 2.8em;
+    letter-spacing: .05em;
+    color: #262626;
+}
+
+.context-popup {
+    position: absolute;
+    display:  none;
+    z-index:  10001;
+    
+    top:  -32px;
+    left: -16px;
+    
+    font: bold .9em;
+    padding: 8px;
+    line-height: 100%;
+    white-space: nowrap;
+    
+    background: rgba(10, 10, 10, 0.75);
+    color: #fff;
+    
+    .rounded(4px);
+}
+
+.close-button {
+    position: relative;
+    display:  block;
+    
+    /* NOTE: with the rounded corners, this ends up being roughly 36x36px */
+    /* TODO: possibly replace these rounded corners with static images?   */
+    width:  28px;
+    height: 28px;
+    
+    border: 4px solid #bfbfbf;
+    background: #fff;
+    
+    .rounded(36px);
+    .box-shadow(0, 0, 6px, 0, @shadow);
+    
+    .close-button-inner {
+        background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+        position: absolute;
+        top:  7px;
+        left: 7px;
+        
+        width:  14px;
+        height: 14px;
+    }
+    
+    &:hover {
+        border-color: #666;
+        cursor: pointer;
+        
+        .close-button-inner {
+            background-position: -48px 0;
+        }
+    }
+}
+
+
+/* **************************************************************************
+                        ENTITY / STAMP CATEGORY ICONS
+   ************************************************************************** */
+
 
 .icon {
     background: url('/assets/img/categoryicons18px.png') no-repeat;
@@ -748,79 +853,5 @@ footer .copyright a, footer .copyright a {
 
 .stamp-subcategory-app .icon {
     background-position: -60px -20px;
-}
-
-
-.screen-name {
-    text-transform: lowercase;
-    font-family: "StampedScreenNameFont", helvetica, sans-serif;
-    letter-spacing: .05em;
-    font-size: 85%;
-}
-
-.pronounced-title a, a.pronounced-title {
-    color: #262626;
-}
-
-.pronounced-title {
-    position: relative;
-    
-    .stamped-font();
-    
-    font-size: 2.8em;
-    letter-spacing: .05em;
-    color: #262626;
-}
-
-.context-popup {
-    position: absolute;
-    top:  -32px;
-    left: -16px;
-    font-size: .9em;
-    font-weight: 700;
-    padding: 8px;
-    z-index: 10001;
-    
-    line-height: 100%;
-    display:  none;
-    background: rgba(10, 10, 10, 0.75);
-    color: #fff;
-    white-space: nowrap;
-    
-    .rounded(4px);
-}
-
-.close-button {
-    position: relative;
-    display:  block;
-    
-    /* NOTE: with the rounded corners, this ends up being 36x36px */
-    /* TODO: possibly replace these rounded corners with static images? */
-    width:  28px;
-    height: 28px;
-    
-    border: 4px solid #bfbfbf;
-    background: #fff;
-    .rounded(36px);
-    .box-shadow(0, 0, 6px, 0, @shadow);
-    
-    .close-button-inner {
-        background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
-        position: absolute;
-        top:  7px;
-        left: 7px;
-        
-        width:  14px;
-        height: 14px;
-    }
-    
-    &:hover {
-        border-color: #666;
-        cursor: pointer;
-        
-        .close-button-inner {
-            background-position: -48px 0;
-        }
-    }
 }
 

@@ -13,7 +13,7 @@ from utils      import lazyProperty
 from datetime   import *
 from errors     import Fail
 
-from db.mongodb.MongoLogsCollection import MongoLogsCollection
+from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"

@@ -7,6 +7,8 @@
 //
 
 #import "StampColorPickerView.h"
+#import "STBlockUIView.h"
+#import "QuartzUtils.h"
 
 #define kStampSize 57.0f
 #define kStampGap 2.5

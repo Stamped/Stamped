@@ -11,10 +11,12 @@ import Globals
 from logs import report
 
 try:
-    from BasicSourceContainer   import BasicSourceContainer
-    from EntityGroups           import *
-    from ResolverSources        import *
+    from resolve.BasicSourceContainer   import BasicSourceContainer
+    from resolve.EntityGroups           import *
+    from resolve.ResolverSources        import *
     from pprint                 import pformat
+
+    import re
 except:
     report()
     raise
@@ -46,68 +48,97 @@ class FullResolveContainer(BasicSourceContainer):
         # Allow itunes to overwrite seed for iTunes id (necessary because ids can deprecate)
         self.setGroupPriority('itunes', 'itunes', seedPriority + 1)
 
-def demo(default_title='Katy Perry', object_id=None):
-    import bson, sys
-    
-    title = default_title.lower()
-    subcategory = None
-    index = 0
-    
-    print(sys.argv)
-    if len(sys.argv) > 1:
-        title = sys.argv[1]
-    if len(sys.argv) > 2:
-        subcategory = sys.argv[2]
-    if len(sys.argv) > 3:
-        index = int(sys.argv[3])
-    
-    from MongoStampedAPI import MongoStampedAPI
-    api = MongoStampedAPI()
-    db  = api._entityDB
-    if object_id is not None:
-        query = {'_id':  bson.ObjectId(object_id)}
-    else:
-        query = {'titlel':title}
-    
+
+def buildQueryFromArgs(args):
+    title = args[0]
+    subcategory = args[1] if len(args) > 1 else None
+
+    query = {'titlel':title.lower()}
     if subcategory is not None:
         query['subcategory'] = subcategory
-    
-    print("Query: %s" % query)
-    cursor = db._collection.find(query)
-    
-    if cursor.count() == 0:
-        print("Could not find a matching entity for %s" % title)
-        return
-    
-    result = cursor[index]
-    entity = db._convertFromMongo(result)
+
+    return query
+
+
+def getEntityFromSearchId(searchId):
+    source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', searchId).groups()
+
+    sources = {
+        'amazon':       AmazonSource,
+        'factual':      FactualSource,
+        'googleplaces': GooglePlacesSource,
+        'itunes':       iTunesSource,
+        'rdio':         RdioSource,
+        'spotify':      SpotifySource,
+        'tmdb':         TMDBSource,
+        'thetvdb':      TheTVDBSource,
+    }
+
+    if source_name.lower() not in sources:
+        raise Exception('Source not found: %s (%s)' % (source_name, searchId))
+
+    source = sources[source_name.lower()]()
+    proxy = source.entityProxyFromKey(source_id)
+
+    from resolve.EntityProxyContainer import EntityProxyContainer
+    return EntityProxyContainer(proxy).buildEntity()
+
+
+import sys
+from optparse import OptionParser
+
+def main():
+    usage = "Usage: %prog --entity_id=<id>  OR  %prod --search_id=<id> OR %prod <query> <subcategory?> <index?>"
+    version = "%prog " + __version__
+    parser = OptionParser(usage=usage, version=version)
+    parser.add_option('--entity_id', action='store', dest='entity_id', default=None)
+    parser.add_option('--search_id', action='store', dest='search_id', default=None)
+    (options, args) = parser.parse_args()
+
+    if options.entity_id and options.search_id:
+        print '--entity_id and --search_id are mutually exclusive!'
+    id_provided = options.entity_id or options.search_id
+    if id_provided and len(args) > 1:
+        print '--entity_id and --search_id cannot be used with query arguments!'
+
+    if options.entity_id:
+        from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
+        entity = MongoEntityCollection().getEntity(options.entity_id)
+    elif options.search_id:
+        entity = getEntityFromSearchId(options.search_id)
+    else:
+        query = buildQueryFromArgs(args)
+        from api.MongoStampedAPI import MongoStampedAPI
+        cursor = MongoStampedAPI()._entityDB._collection.find(query)
+        if cursor.count() == 0:
+            print("Could not find a matching entity for query: %s" % query)
+            return
+
+        entity =  MongoStampedAPI()._entityDB._convertFromMongo(cursor[0])
+
 
     print( "Before:\n%s" % pformat( entity.dataExport() ) )
-    
+
     container = FullResolveContainer()
-    
+
     decorations = {}
     container.enrichEntity( entity, decorations )
-    
+
     print( "After:\n%s" % pformat( entity.dataExport() ) )
     if len(decorations) > 0:
         print( "With decorations:")
-        
+
         for k,v in decorations.items():
             print( "%s decoration:" % k )
-            
+
             try:
                 print( "%s" % pformat(v.dataExport()) )
             except Exception:
                 print( "%s" % pformat(v) )
 
+    from libs.CountedFunction import printFunctionCounts
+    printFunctionCounts()
+
+
 if __name__ == "__main__":
-    import sys
-    params = {}
-    if len(sys.argv) == 2 and sys.argv[1].find('=') == -1:
-        params['default_title'] = sys.argv[1]
-    else:
-        for arg in sys.argv[1:]:
-            pair = arg.split('=')
-            params[pair[0]] = pair[1]
-    demo(**params)
+    main()

@@ -8,18 +8,18 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'TheTVDBSource', 'TheTVDBArtist', 'TheTVDBAlbum', 'TheTVDBTrack', 'TheTVDBSearchAll' ]
+__all__ = [ 'TheTVDBSource', 'TheTVDBShow', 'TheTVDBSearchAll' ]
 
 import Globals
 from logs import report
 
 try:
     import logs, utils
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from libs.TheTVDB               import TheTVDB, globalTheTVDB
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat, pprint
     from search.ScoringUtils        import *
@@ -165,20 +165,8 @@ class TheTVDBSource(GenericSource):
         return globalTheTVDB()
     
     def entityProxyFromKey(self, key, **kwargs):
-        try:
-            if key.startswith('t'):
-                return TheTVDBTrack(rdio_id=key)
-            if key.startswith('a'):
-                return TheTVDBAlbum(rdio_id=key)
-            if key.startswith('r'):
-                return TheTVDBArtist(rdio_id=key)
-            raise KeyError
-        except KeyError:
-            logs.warning('Unable to find TVDB item for key: %s' % key)
-            raise
-        
-        return None
-    
+        return TheTVDBShow(thetvdb_id=key)
+
     def entityProxyFromData(self, data):
         return TheTVDBSource(data=data)
     
@@ -198,7 +186,7 @@ class TheTVDBSource(GenericSource):
     
     def tvSource(self, query):
         return self.generatorSource(self.__queryGen(query=query.name), 
-                                    constructor=TheTVDBTrack)
+                                    constructor=TheTVDBShow)
     
     def searchAllSource(self, query, timeout=None):
         if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
@@ -214,20 +202,10 @@ class TheTVDBSource(GenericSource):
         return self.generatorSource(self.__queryGen(query=query.query_string),
                                     constructor=TheTVDBSearchAll)
     
-    def __queryGen(self, batches=(100,), **params):
-        def gen():
-            try:
-                batches = [100]
-                offset  = 0
-                
-                results = self.__thetvdb.search(transform=True, detailed=True, **params)
-                
-                for result in results:
-                    yield result
-            except GeneratorExit:
-                pass
-        
-        return gen()
+    def __queryGen(self, **params):
+        results = self.__thetvdb.search(transform=True, detailed=True, **params)
+        for result in results:
+            yield result
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         # TODO: USE TIMEOUT.

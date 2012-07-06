@@ -7,6 +7,7 @@
 //
 
 #import "STUniversalNewsController.h"
+#import <UIKit/UIKit.h>
 #import "STStampedAPI.h"
 #import "STActivity.h"
 #import "STActionManager.h"
@@ -14,28 +15,138 @@
 #import "Util.h"
 #import "STSliderScopeView.h"
 #import "STUnreadActivity.h"
+#import "STEvents.h"
+#import "STBlockUIView.h"
+#import <QuartzCore/QuartzCore.h>
+#import "QuartzUtils.h"
+
+static NSString* const STUniversalNewWasUpdatedNotification = @"STUniversalNewsWasUpdatedNotification";
 
 @interface STUniversalNewsController ()
 
++ (STCancellation*)cancellationForScope:(STStampedAPIScope)scope;
++ (void)setCancellation:(STCancellation*)cancellation forScope:(STStampedAPIScope)scope;
++ (BOOL)isDirtyForScope:(STStampedAPIScope)scope;
++ (void)setIsDirty:(BOOL)dirty forScope:(STStampedAPIScope)scope;
++ (BOOL)hasMoreForScope:(STStampedAPIScope)scope;
++ (void)setHasMore:(BOOL)dirty forScope:(STStampedAPIScope)scope;
++ (void)cancelAll;
++ (void)dirtyAll;
+
 @property (nonatomic, retain, readonly) STSliderScopeView *slider;
-@property (nonatomic, readonly, retain) NSMutableArray* newsItems;
 @property (nonatomic, readwrite, assign) STStampedAPIScope scope;
-@property (nonatomic, readwrite, assign) BOOL reloading;
+@property (nonatomic, readonly, retain) NSMutableArray* newsItems;
 
 @end
 
 @implementation STUniversalNewsController
 
-@synthesize newsItems = newsItems_;
 @synthesize scope = scope_;
-@synthesize reloading = _reloading;
 @synthesize slider=_slider;
+
+static NSMutableArray* _youActivity;
+static NSMutableArray* _friendsActivity;
+static STCancellation* _youCancellation = nil;
+static STCancellation* _friendsCancellation = nil;
+static BOOL _youDirty = YES;
+static BOOL _friendsDirty = YES;
+static BOOL _youHasMore = YES;
+static BOOL _friendsHasMore = YES;
+
++ (void)initialize {
+    _youActivity = [[NSMutableArray alloc] init];
+    _friendsActivity = [[NSMutableArray alloc] init];
+}
+
++ (NSMutableArray*)activityForScope:(STStampedAPIScope)scope {
+    if (scope == STStampedAPIScopeYou) {
+        return _youActivity;
+    }
+    else {
+        return _friendsActivity;
+    }
+}
+
++ (STCancellation *)cancellationForScope:(STStampedAPIScope)scope {
+    if (scope == STStampedAPIScopeYou) {
+        return _youCancellation;
+    }
+    else {
+        return _friendsCancellation;
+    }
+}
+
++ (void)setCancellation:(STCancellation *)cancellation forScope:(STStampedAPIScope)scope {
+    if (scope == STStampedAPIScopeYou) {
+        [_youCancellation cancel];
+        [_youCancellation release];
+        _youCancellation = [cancellation retain];
+    }
+    else {
+        [_friendsCancellation cancel];
+        [_friendsCancellation release];
+        _friendsCancellation = [cancellation retain];
+    }
+}
+
++ (BOOL)hasMoreForScope:(STStampedAPIScope)scope {
+    if (scope == STStampedAPIScopeYou) {
+        return _youHasMore;
+    }
+    else {
+        return _friendsHasMore;
+    }
+}
+
++ (void)setHasMore:(BOOL)hasMore forScope:(STStampedAPIScope)scope {
+    if (scope == STStampedAPIScopeYou) {
+        _youHasMore = hasMore;
+    }
+    else {
+        _friendsHasMore = hasMore;
+    }
+}
+
++ (BOOL)isDirtyForScope:(STStampedAPIScope)scope {
+    if (scope == STStampedAPIScopeYou) {
+        return _youDirty;
+    }
+    else {
+        return _friendsDirty;
+    }
+}
+
++ (void)setIsDirty:(BOOL)dirty forScope:(STStampedAPIScope)scope {
+    if (scope == STStampedAPIScopeYou) {
+        _youDirty = dirty;
+    }
+    else {
+        _friendsDirty = dirty;
+    }
+}
+
++ (void)dirtyAll {
+    [self setIsDirty:YES forScope:STStampedAPIScopeYou];
+    [self setIsDirty:YES forScope:STStampedAPIScopeFriends];
+}
+
++ (void)cancelAll {
+    [self setCancellation:nil forScope:STStampedAPIScopeYou];
+    [self setCancellation:nil forScope:STStampedAPIScopeFriends];
+}
 
 - (id)init {
     if ((self = [super init])) {
         scope_ = STStampedAPIScopeYou;
     }
     return self;    
+}
+
+- (void)dealloc
+{
+    [STEvents removeObserver:self];
+    [_slider release], _slider=nil;
+    [super dealloc];
 }
 
 - (void)countUpdated:(id)notImportant {
@@ -46,6 +157,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [STUniversalNewsController dirtyAll];
     [STEvents addObserver:self selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
     if (!self.tableView.backgroundView) {
         STBlockUIView *background = [[STBlockUIView alloc] initWithFrame:self.tableView.bounds];
@@ -75,47 +187,43 @@
 - (void)viewDidAppear:(BOOL)animated {
     if (scope_ == STStampedAPIScopeYou) {
         [STUnreadActivity sharedInstance].count = 0;
+        [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
     }
     NSIndexPath* selection = [self.tableView indexPathForSelectedRow];
     if (selection) {
         [self.tableView deselectRowAtIndexPath:selection animated:YES];
     }
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(newsWasUpdated:) name:STUniversalNewWasUpdatedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    [super viewDidAppear:animated];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [STUniversalNewsController cancelAll];
+    [super viewDidDisappear:animated];
 }
-
-- (void)viewDidUnload {
-    [STEvents removeObserver:self];
-    [_slider release], _slider=nil;
-    [super viewDidUnload];
-}
-
-- (void)dealloc {
-    [newsItems_ release], newsItems_=nil;
-    [_slider release], _slider=nil;
-    [super dealloc];
-}
-
 
 #pragma mark - Setters
 
 - (void)setScope:(STStampedAPIScope)scope {
     if (scope_==scope) return; 
     scope_ = scope;
-    [self reloadDataSource];
+    [self.tableView setContentOffset:CGPointMake(0, 0)];
+    if ([STUniversalNewsController isDirtyForScope:scope]) {
+        [self reloadDataSource];
+    }
+    else {
+        [self.tableView reloadData];
+    }
 }
 
 
 #pragma mark - STSliderScopeViewDelegate
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
-    
     [self setScope:scope];
-    
 }
 
 
@@ -158,10 +266,7 @@
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (self.newsItems) {
-        return self.newsItems.count;
-    }
-    return 0;
+    return self.newsItems.count;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -194,26 +299,44 @@
 
 #pragma mark - DataSource Reloading
 
-- (void)reloadStampedData {
-    STGenericSlice* slice = [[[STGenericSlice alloc] init] autorelease];
-    slice.limit = [NSNumber numberWithInteger:100];
-    if (self.scope == STStampedAPIScopeYou) {
-        [[STStampedAPI sharedInstance] activitiesForYouWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
-            if (activities) {
-                newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
-                [self.tableView reloadData];
-            }
-            [self dataSourceDidFinishLoading];
-        }];
++ (void)loadWithScope:(STStampedAPIScope)scope {
+    BOOL dirty = [self isDirtyForScope:scope];
+    NSMutableArray* array = [self activityForScope:scope];
+    NSInteger offset;
+    if (dirty) {
+        [[self cancellationForScope:scope] cancel];
+        [self setCancellation:nil forScope:scope];
+        [self setHasMore:YES forScope:scope];
+        offset = 0;
     }
     else {
-        [[STStampedAPI sharedInstance] activitiesForFriendsWithGenericSlice:slice andCallback:^(NSArray<STActivity> *activities, NSError *error) {
-            if (activities) {
-                newsItems_ = [[NSMutableArray arrayWithArray:activities] retain];
-                [self.tableView reloadData];
-            }
-            [self dataSourceDidFinishLoading];
-        }];
+        offset = array.count;
+    }
+    [self setIsDirty:NO forScope:scope];
+    STCancellation* cancellation = [self cancellationForScope:scope];
+    NSInteger limit = 20;
+    if (!cancellation) {
+        cancellation = [[STStampedAPI sharedInstance] activitiesForScope:scope
+                                                                  offset:offset
+                                                                   limit:limit
+                                                             andCallback:^(NSArray<STActivity> *activities, NSError *error, STCancellation *cancellation) {
+                                                                 [self setCancellation:nil forScope:scope];
+                                                                 if (activities) {
+                                                                     if (offset < array.count) {
+                                                                         [array removeObjectsInRange:NSMakeRange(offset, array.count - offset)];
+                                                                     }
+                                                                     [array addObjectsFromArray:activities];
+                                                                     if (activities.count < limit) {
+                                                                         [self setHasMore:NO forScope:scope];
+                                                                     }
+                                                                 }
+                                                                 else {
+                                                                     [self setHasMore:NO forScope:scope];
+                                                                     [Util warnWithAPIError:error andBlock:nil];
+                                                                 }
+                                                                 [[NSNotificationCenter defaultCenter] postNotificationName:STUniversalNewWasUpdatedNotification object:nil];
+                                                             }];
+        [self setCancellation:cancellation forScope:scope];
     }
 }
 
@@ -221,25 +344,28 @@
 #pragma mark - STRestViewController Methods
 
 - (BOOL)dataSourceReloading {
-    return self.reloading;
+    return [STUniversalNewsController cancellationForScope:self.scope] != nil;
 }
 
 - (void)loadNextPage {
-    //[self.cache refreshAtIndex:self.snapshot.count force:NO];
+    if ([STUniversalNewsController hasMoreForScope:self.scope]) {
+        [STUniversalNewsController loadWithScope:self.scope];
+    }
 }
 
+
 - (BOOL)dataSourceHasMoreData {
-    return self.reloading;
+    return [STUniversalNewsController hasMoreForScope:self.scope];
 }
 
 - (void)reloadDataSource {
-    self.reloading = YES;
-    [self reloadStampedData];
+    [STUniversalNewsController setIsDirty:YES forScope:self.scope];
+    [STUniversalNewsController loadWithScope:self.scope];
+    [self.tableView reloadData];
     [super reloadDataSource];
 }
 
 - (void)dataSourceDidFinishLoading {
-    self.reloading = NO;
     [super dataSourceDidFinishLoading];
 }
 
@@ -252,9 +378,7 @@
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
-    
     [view setupWithTitle:@"No news" detailTitle:@"No news found."];
-    
 }
 
 
@@ -267,5 +391,15 @@
     [self reloadDataSource];
 }
 
+- (void)newsWasUpdated:(NSNotification*)notification {
+    [self dataSourceDidFinishLoading];
+    [self.tableView reloadData];
+}
+
+#pragma mark - Getters
+
+- (NSMutableArray *)newsItems {
+    return [STUniversalNewsController activityForScope:self.scope];
+}
 
 @end

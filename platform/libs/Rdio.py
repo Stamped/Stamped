@@ -29,13 +29,14 @@ import Globals
 from logs   import report
 try:
     import urllib2, urllib
-    import TwitterOAuth as oauth
+    from libs import TwitterOAuth as oauth
     import urllib
     import logs
     
-    from RateLimiter            import RateLimiter, RateException
-    from LRUCache               import lru_cache
-    from CachedFunction         import cachedFn
+    from libs.RateLimiter            import RateLimiter, RateException
+    from libs.LRUCache               import lru_cache
+    from libs.CachedFunction         import cachedFn
+    from libs.CountedFunction   import countedFn
     from urlparse               import parse_qsl
     from urllib2                import HTTPError
     from urllib                 import quote_plus
@@ -59,7 +60,7 @@ def urlencode_utf8(params):
     """
 
 class Rdio(object):
-    
+
     def __init__(self, key='bzj2pmrs283kepwbgu58aw47', secret='xJSZwBZxFp', cps=5, cpd=15000):
         self.__key      = key
         self.__secret   = secret
@@ -69,8 +70,10 @@ class Rdio(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('Rdio (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn('Rdio (after caching)')
     def method(self, method, **kwargs):
         # create the OAuth consumer credentials
         client = oauth.Client(self.__consumer)

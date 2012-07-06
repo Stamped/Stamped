@@ -8,8 +8,8 @@ __license__   = "TODO"
 import Globals, utils
 
 from abc            import ABCMeta, abstractmethod
-from ElasticSearch  import ElasticSearch
-from MongoMonitor   import *
+from libs.ElasticSearch  import ElasticSearch
+from libs.MongoMonitor   import *
 
 # TODO: utilize mappings to convert / strip newly added documents
 # TODO: enforce required mappings and type checking of newly added documents

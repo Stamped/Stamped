@@ -15,11 +15,12 @@ import Globals
 from logs import report
 
 try:
-    import logs, urllib
-    from RateLimiter            import RateLimiter, RateException
-    from urllib2                import HTTPError
-    from LRUCache               import lru_cache
-    from CachedFunction         import cachedFn
+    import logs, httplib, urllib
+    from libs.RateLimiter import RateLimiter, RateException
+    from libs.LRUCache import lru_cache
+    from libs.CachedFunction import cachedFn
+    from libs.CountedFunction import countedFn
+    from errors import StampedThirdPartyError
     
     try:
         import json
@@ -37,8 +38,10 @@ class Spotify(object):
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('Spotify (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn('Spotify (after caching)')
     def method(self, service, method, **params):
         with self.__limiter:
             try:
@@ -50,12 +53,14 @@ class Spotify(object):
                         params[k] = v.encode('utf-8')
                 url = '%s?%s' % (base_url, urllib.urlencode(params))
                 logs.info( url )
-                result = urllib.urlopen(url).read()
-            except HTTPError as e:
+                result = urllib.urlopen(url)
+            except IOError as e:
                 logs.warning("Spotify threw an exception (%s): %s" % (e.code, e.message))
                 raise
+        if result.getcode() == httplib.OK:
+            return json.loads(result.read())
+        raise StampedThirdPartyError('Spotify returned error code: ' + str(result.getcode()))
         
-        return json.loads(result)
     
     def search(self, method, **params):
         return self.method('search', method, **params)

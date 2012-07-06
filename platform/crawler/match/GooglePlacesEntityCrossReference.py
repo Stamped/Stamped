@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
-from GooglePlaces             import GooglePlaces
+from crawler.match.ATitleBasedEntityMatcher import ATitleBasedEntityMatcher
+from libs.GooglePlaces             import GooglePlaces
 from Schemas                  import Entity
 from errors                   import Fail
 

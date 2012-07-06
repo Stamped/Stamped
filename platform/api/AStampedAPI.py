@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 
-from AEntitySink import AEntitySink
+from api.AEntitySink import AEntitySink
 from utils       import abstract
 
 class AStampedAPI(AEntitySink):
@@ -186,23 +186,7 @@ class AStampedAPI(AEntitySink):
     @abstract
     def getComments(self, stampId, authUserId, **kwargs): 
         raise NotImplementedError
-    
-    # ########### #
-    # Collections #
-    # ########### #
-    
-    @abstract
-    def getInboxStamps(self, authUserId, **kwargs):
-        raise NotImplementedError
-    
-    @abstract
-    def getUserStamps(self, userRequest, authUserId, **kwargs):
-        raise NotImplementedError
-    
-    @abstract
-    def getUserMentions(self, params):
-        raise NotImplementedError
-    
+
     # ##### #
     # Todos #
     # ##### #

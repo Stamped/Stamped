@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import math
 
-from StampedTestUtils   import *
+from tests.StampedTestUtils   import *
 from libs.MongoMonitor  import *
 from pymongo.errors     import AutoReconnect
 

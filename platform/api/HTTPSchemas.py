@@ -9,13 +9,13 @@ __license__   = "TODO"
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
 import libs.ec2_utils
-import Entity
+from api import Entity
 
 from errors             import *
 from schema             import *
 from api.Schemas        import *
-from Entity             import *
-from SchemaValidation   import *
+from api.Entity             import *
+from api.SchemaValidation   import *
 
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
@@ -257,6 +257,9 @@ def _buildTextReferences(text):
     refs = []
     offsets = {}
 
+    if text is None:
+        return None, []
+
     # Mentions
     mentions = mention_re.finditer(text)
     for item in mentions:
@@ -317,7 +320,7 @@ def _buildTextReferences(text):
     # Sort by index
     refs.sort(key=lambda x: x.indices[0])
 
-    return refs
+    return text, refs
 
 
 # ######### #
@@ -428,7 +431,7 @@ class HTTPAccount(Schema):
         cls.addProperty('user_id',                          basestring, required=True, cast=validateUserId)
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('auth_service',                     basestring, required=True)
-        cls.addProperty('email',                            basestring, required=True, cast=validateEmail)
+        cls.addProperty('email',                            basestring, required=True)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('privacy',                          bool, required=True)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
@@ -515,9 +518,8 @@ class HTTPTwitterAccountNew(Schema):
 
     def convertToTwitterAccountNew(self):
         data = self.dataExport()
-        phone = _phoneToInt(data.pop('phone', None))
-        if phone is not None:
-            data['phone'] = phone
+        if 'phone' in data:
+            data['phone'] = _phoneToInt(data['phone'])
 
         return TwitterAccountNew().dataImport(data, overflow=True)
 
@@ -538,9 +540,8 @@ class HTTPAccountUpdateForm(Schema):
 
     def convertToAccountUpdateForm(self):
         data = self.dataExport()
-        phone = _phoneToInt(data.pop('phone', None))
-        if phone is not None:
-            data['phone'] = phone
+        if 'phone' in data:
+            data['phone'] = _phoneToInt(data['phone'])
 
         return AccountUpdateForm().dataImport(data, overflow=True)
 
@@ -732,6 +733,12 @@ class HTTPFindFacebookUser(Schema):
     def setSchema(cls):
         cls.addProperty('user_token',                       basestring)
 
+class HTTPFacebookFriendsCollectionForm(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('limit',                            int)
+        cls.addProperty('offset',                           int)
+
 class HTTPFacebookLoginResponse(Schema):
     @classmethod
     def setSchema(cls):
@@ -919,7 +926,6 @@ class HTTPComment(Schema):
         cls.addProperty('comment_id',                       basestring, required=True)
         cls.addNestedProperty('user',                       HTTPUserMini, required=True)
         cls.addProperty('stamp_id',                         basestring, required=True)
-        cls.addProperty('restamp_id',                       basestring)
         cls.addProperty('blurb',                            basestring, required=True)
         cls.addNestedPropertyList('blurb_references',       HTTPTextReference)
         cls.addProperty('created',                          basestring)
@@ -928,8 +934,9 @@ class HTTPComment(Schema):
         self.dataImport(comment.dataExport(), overflow=True)
         self.created = comment.timestamp.created
         self.user = HTTPUserMini().importUserMini(comment.user)
-        references = _buildTextReferences(self.blurb)
+        blurb, references = _buildTextReferences(self.blurb)
         if len(references) > 0:
+            self.blurb = blurb
             self.blurb_references = references
         return self
 
@@ -1300,7 +1307,7 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_menu', client=client)
             sources     = []
 
-            if entity.sources.singleplatform_id is not None:
+            if entity.menu is not None and entity.menu:
                 source              = HTTPActionSource()
                 source.name         = 'View menu'
                 source.source       = 'stamped'
@@ -1979,14 +1986,22 @@ class HTTPEntityNew(Schema):
         cls.addProperty('subcategory',                      basestring, required=True)
         cls.addProperty('subtitle',                         basestring, cast=validateString)
         cls.addProperty('desc',                             basestring, cast=validateString)
-        cls.addProperty('address',                          basestring)
-        cls.addProperty('coordinates',                      basestring)
-        cls.addProperty('cast',                             basestring)
-        cls.addProperty('director',                         basestring)
-        cls.addProperty('release_date',                     basestring)
+
+        cls.addProperty('address_street',                   basestring)
+        cls.addProperty('address_street_ext',               basestring)
+        cls.addProperty('address_locality',                 basestring)
+        cls.addProperty('address_region',                   basestring)
+        cls.addProperty('address_postcode',                 basestring)
+        cls.addProperty('address_country',                  basestring) ### TODO: Add cast to check ISO code
+
+        cls.addProperty('coordinates',                      basestring, cast=validateCoordinates)
+        cls.addProperty('year',                             int) 
         cls.addProperty('artist',                           basestring)
         cls.addProperty('album',                            basestring)
         cls.addProperty('author',                           basestring)
+        cls.addProperty('network',                          basestring)
+        cls.addProperty('director',                         basestring)
+        cls.addProperty('genre',                            basestring)
 
     def exportEntity(self, authUserId):
 
@@ -2023,8 +2038,28 @@ class HTTPEntityNew(Schema):
         now = datetime.utcnow()
 
         addField(entity, 'desc', self.desc, now)
-        addField(entity, 'formatted_address', self.address, now)
-        addField(entity, 'release_date', self.release_date, now)
+
+        if self.year is not None:
+            addField(entity, 'release_date', datetime(int(self.year), 1, 1), timestamp=now)
+
+        addField(entity, 'address_street', self.address_street, timestamp=now)
+        addField(entity, 'address_street_ext', self.address_street_ext, timestamp=now)
+        addField(entity, 'address_locality', self.address_locality, timestamp=now)
+        addField(entity, 'address_region', self.address_region, timestamp=now)
+        addField(entity, 'address_postcode', self.address_postcode, timestamp=now)
+        # Only add country if other fields are set, too
+        if self.address_street is not None \
+            or self.address_locality is not None \
+            or self.address_region is not None \
+            or self.address_postcode is not None:
+            addField(entity, 'address_country', self.address_country, timestamp=now)
+
+        addListField(entity, 'artists', self.artist, PersonEntityMini, timestamp=now)
+        addListField(entity, 'collections', self.album, MediaCollectionEntityMini, timestamp=now)
+        addListField(entity, 'authors', self.author, PersonEntityMini, timestamp=now)
+        addListField(entity, 'networks', self.network, BasicEntityMini, timestamp=now)
+        addListField(entity, 'directors', self.director, PersonEntityMini, timestamp=now)
+        addListField(entity, 'genres', self.genre, timestamp=now)
 
         if _coordinatesFlatToDict(self.coordinates) is not None:
             coords = Coordinates().dataImport(_coordinatesFlatToDict(self.coordinates))
@@ -2034,12 +2069,6 @@ class HTTPEntityNew(Schema):
         entity.sources.user_generated_timestamp = now
         if self.subtitle is not None and self.subtitle != '':
             entity.sources.user_generated_subtitle = self.subtitle
-
-        addListField(entity, 'directors', self.director, PersonEntityMini, now)
-        addListField(entity, 'cast', self.cast, PersonEntityMini, now)
-        addListField(entity, 'authors', self.author, PersonEntityMini, now)
-        addListField(entity, 'artists', self.artist, PersonEntityMini, now)
-        addListField(entity, 'collections', self.album, MediaCollectionEntityMini, now)
 
         return entity
 
@@ -2529,9 +2558,11 @@ class HTTPStamp(Schema):
             item.blurb              = content.blurb
             item.created            = content.timestamp.created
 
-            references = _buildTextReferences(content.blurb)
-            if len(references) > 0:
-                item.blurb_references = references
+            if content.blurb is not None:
+                blurb, references = _buildTextReferences(content.blurb)
+                if len(references) > 0:
+                    item.blurb = blurb
+                    item.blurb_references = references
 
             if content.images is not None:
                 newImages = []

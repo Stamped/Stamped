@@ -2,9 +2,10 @@
 
 from utils              import lazyProperty
 from libs.Instagram     import globalInstagram
-from GenericSource      import GenericSource
-from Resolver           import *
-from ResolverObject     import ResolverPlace
+from resolve.GenericSource      import GenericSource
+from resolve.Resolver           import *
+from resolve.ResolverObject     import ResolverPlace
+from resolve.TitleUtils         import *
 
 #class InstagramObject(object):
 #
@@ -27,8 +28,11 @@ class InstagramPlace(ResolverPlace):
     def key(self):
         return self.__instagram_id
 
+    def _cleanName(self, rawName):
+        return cleanPlaceTitle(rawName)
+
     @lazyProperty
-    def name(self):
+    def raw_name(self):
         return self.__data['name']
 
     @property
@@ -48,10 +52,14 @@ class InstagramPlace(ResolverPlace):
             gallery_item['url']                 = item['images']['standard_resolution']['url']
             gallery_item['height']              = item['images']['standard_resolution']['height']
             gallery_item['width']               = item['images']['standard_resolution']['width']
-#            gallery_item['thumb_url']           = item['images']['thumbnail']['url']
-#            gallery_item['thumb_height']        = item['images']['thumbnail']['height']
-#            gallery_item['thumb_width']         = item['images']['thumbnail']['width']
-            gallery_item['caption']             = item['caption']['text']
+#           gallery_item['thumb_url']           = item['images']['thumbnail']['url']
+#           gallery_item['thumb_height']        = item['images']['thumbnail']['height']
+#           gallery_item['thumb_width']         = item['images']['thumbnail']['width']
+            if item.get('caption', None) and 'text' in item['caption']:
+                gallery_item['caption']         = item['caption']['text']
+            else:
+                gallery_item['caption']         = None
+
             gallery_item['source']              = 'instagram'
             gallery.append(gallery_item)
         #construct a list of dicts containing 'url' and 'caption'

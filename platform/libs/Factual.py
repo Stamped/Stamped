@@ -56,7 +56,7 @@ import Globals
 import utils
 import json
 import urllib
-import oauth
+from libs import oauth
 import urllib2
 import sys
 import time
@@ -64,10 +64,11 @@ import random
 import logs
 
 from urlparse               import urlparse, parse_qsl
-from LRUCache               import lru_cache
-from CachedFunction         import cachedFn
+from libs.LRUCache               import lru_cache
+from libs.CachedFunction         import cachedFn
+from libs.CountedFunction   import countedFn
 from api.Schemas            import BasicEntity
-from SinglePlatform         import StampedSinglePlatform
+from libs.SinglePlatform         import StampedSinglePlatform
 from pprint                 import pprint
 from pymongo                import Connection
 from gevent.queue           import Queue
@@ -81,7 +82,7 @@ from threading              import Lock
 from datetime               import datetime
 from datetime               import timedelta
 from utils                  import lazyProperty
-from RateLimiter            import RateLimiter
+from libs.RateLimiter            import RateLimiter
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
@@ -552,8 +553,10 @@ class Factual(object):
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn(name='Factual (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
+    @countedFn(name='Factual (after caching)')
     def __rawFactual(self, service, prefix='places', **args):
         """
         Helper method for making OAuth Factual API calls.
@@ -682,7 +685,7 @@ def resolveEntities(size=None, log=None):
     Resolve a random batch of entities, and output accuracy stats
     """
     f = Factual(log=sys.stdout)
-    import MongoStampedAPI
+    from api import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
@@ -808,7 +811,7 @@ def demo():
     print("Finished")
 
 def enrichAll():
-    import MongoStampedAPI
+    from api import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
@@ -824,7 +827,7 @@ def enrichAll():
         stampedAPI.factualEnrich(entity)
 
 def populateMenus():
-    import MongoStampedAPI
+    from api import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
@@ -840,7 +843,7 @@ def populateMenus():
         stampedAPI.updateMenus(entity.entity_id)
 
 def resolveAll():
-    import MongoStampedAPI
+    from api import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     f = Factual()
@@ -860,7 +863,7 @@ def resolveAll():
 
 
 def sourceAndTimestamp():
-    import MongoStampedAPI
+    from api import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     

@@ -6,6 +6,11 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ 
+ 2012.07.03: removed anchor view and consolidated settings and todo into main list.
+ */
+
 #import "STLeftMenuViewController.h"
 #import "Util.h"
 #import "STMenuController.h"
@@ -27,6 +32,9 @@
 #import "STAvatarView.h"
 #import "STPlayer.h"
 #import "STPlayerPopUp.h"
+#import "STEvents.h"
+#import "UIFont+Stamped.h"
+#import "STAppDelegate.h"
 
 #define kAvatarViewTag 101
 
@@ -41,19 +49,27 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 @interface STLeftMenuViewController ()
 
+@property (nonatomic, readonly, retain) UITableView *tableView;
 @property (nonatomic, readonly, retain) UIView* titleView;
 @property (nonatomic, readonly, retain) UIView* playerView;
 @property (nonatomic, readonly, retain) UILabel* playerTitleView;
+
+@property (nonatomic, readwrite, retain) NSArray* dataSource;
+@property (nonatomic, readwrite, retain) NSDictionary* controllerStore;
+@property (nonatomic, readwrite, retain) NSIndexPath* selectedIndexPath;
 
 @end
 
 @implementation STLeftMenuViewController
 
 @synthesize tableView=_tableView;
-@synthesize anchorTableView=_anchorTableView;
 @synthesize titleView = _titleView;
 @synthesize playerView = _playerView;
 @synthesize playerTitleView = _playerTitleView;
+
+@synthesize dataSource = _dataSource;
+@synthesize controllerStore = _controllerStore;
+@synthesize selectedIndexPath = _selectedIndexPath;
 
 - (id)init {
     if ((self = [super init])) {
@@ -65,12 +81,11 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 }
 
 - (void)dealloc {
-    self.tableView = nil;
-    [_selectedIndexPath release], _selectedIndexPath=nil;
-    [_dataSource release], _dataSource=nil;;
-    [_controllerStore release], _controllerStore=nil;
-    [_anchorDataSource release], _anchorDataSource=nil;
-    [_anchorControllerStore release], _anchorControllerStore=nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_tableView release];
+    [_selectedIndexPath release];
+    [_dataSource release];
+    [_controllerStore release];
     [_titleView release];
     [super dealloc];
 }
@@ -78,121 +93,67 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    if (!_tableView) {
-        
-        UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
-        tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        tableView.rowHeight = 48.0f;
-        tableView.scrollEnabled = NO;
-        tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        tableView.delegate = (id<UITableViewDelegate>)self;
-        tableView.dataSource = (id<UITableViewDataSource>)self;
-        [self.view addSubview:tableView];
-        self.tableView = tableView;
-        [tableView release];
-        
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"menu_background"]];
-        tableView.backgroundView = imageView;
-        [imageView release];
-        
-        imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"left_logo.png"]] autorelease];
-        UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 50.0f)] autorelease];
-        [view addSubview:imageView];
-        self.tableView.tableHeaderView = view;
-        _titleView = imageView;
-        
-        _playerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 100)];
-        _playerTitleView = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 180, 50)];
-        _playerTitleView.backgroundColor = [UIColor clearColor];
-        _playerTitleView.textColor = [UIColor whiteColor];
-        _playerTitleView.font = [UIFont stampedBoldFontWithSize:16];
-        _playerTitleView.lineBreakMode = UILineBreakModeTailTruncation;
-        
-        UIButton* playerButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        [playerButton setImage:[UIImage imageNamed:@"menu_icon-viewplaylist"] forState:UIControlStateNormal];
-         [playerButton addTarget:self action:@selector(showPlaylist:) forControlEvents:UIControlEventTouchUpInside];
-        playerButton.frame = CGRectMake(10, 10, 30, 30);
-        [_playerView addSubview:playerButton];
-        [_playerView addSubview:_playerTitleView];
-        [view addSubview:_playerView];
-        
-        CGRect frame = imageView.frame;
-        frame.origin.x = 14.0f;
-        frame.origin.y = (view.bounds.size.height-imageView.bounds.size.height)/2;
-        imageView.frame = frame;
-        
-        UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
-        [self.view addSubview:corner];
-        [corner release];
-        
-        corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
-        corner.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
-        corner.layer.transform = CATransform3DMakeScale(1.0f, -1.0f, 0.0f);
-        [self.view addSubview:corner];
-        [corner release];
-        
-        frame = corner.frame;
-        frame.origin.y = (self.view.bounds.size.height-corner.bounds.size.height);
-        corner.frame = frame;
-        
-    }
     
-    if (!_anchorTableView) {
-        
-        CGRect frame = self.view.bounds;
-        frame.size.height = 48.0f * [_anchorDataSource count];
-        frame.origin.y = (self.view.bounds.size.height - frame.size.height);
-        
-        UITableView *tableView = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
-        tableView.backgroundColor = [UIColor clearColor];
-        tableView.scrollEnabled = NO;
-        tableView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
-        tableView.rowHeight = 48.0f;
-        tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        tableView.delegate = (id<UITableViewDelegate>)self;
-        tableView.dataSource = (id<UITableViewDataSource>)self;
-        [self.view insertSubview:tableView aboveSubview:self.tableView];
-        self.anchorTableView = tableView;
-        
-        UIImage *image = [UIImage imageNamed:@"left_menu_anchor_shadow.png"];
-        UIImageView *shadow = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
-        shadow.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
-        [self.view addSubview:shadow];
-        [shadow release];
-        
-        frame = shadow.bounds;
-        frame.size.width = self.view.bounds.size.width;
-        frame.origin.y = (tableView.frame.origin.y - frame.size.height);
-        shadow.frame = frame;
-        
-        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:tableView.bounds];
-        view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-        view.contentMode = UIViewContentModeRedraw;
-        view.alpha = 0.1f;
-        view.backgroundColor = [UIColor clearColor];
-        [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
-            
-            drawGradient([UIColor colorWithRed:0.851f green:0.851f blue:0.851f alpha:1.0f].CGColor, [UIColor colorWithRed:0.651f green:0.651f blue:0.651f alpha:1.0f].CGColor, ctx);
-            
-        }];
-        tableView.backgroundView = view;
-        [view release];
-        [tableView release];
-        
-    }
+    UITableView *tableView = [[[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain] autorelease];
+    tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    tableView.rowHeight = 48.0f;
+    tableView.scrollEnabled = NO;
+    tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    tableView.delegate = (id<UITableViewDelegate>)self;
+    tableView.dataSource = (id<UITableViewDataSource>)self;
+    [self.view addSubview:tableView];
+    _tableView = [tableView retain];
+    
+    UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"menu_background"]] autorelease];
+    tableView.backgroundView = imageView;
+    
+    imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"left_logo.png"]] autorelease];
+    UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 50.0f)] autorelease];
+    [view addSubview:imageView];
+    self.tableView.tableHeaderView = view;
+    _titleView = imageView;
+    
+    _playerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 100)];
+    _playerTitleView = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 180, 50)];
+    _playerTitleView.backgroundColor = [UIColor clearColor];
+    _playerTitleView.textColor = [UIColor whiteColor];
+    _playerTitleView.font = [UIFont stampedBoldFontWithSize:16];
+    _playerTitleView.lineBreakMode = UILineBreakModeTailTruncation;
+    
+    UIButton* playerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [playerButton setImage:[UIImage imageNamed:@"menu_icon-viewplaylist"] forState:UIControlStateNormal];
+    [playerButton addTarget:self action:@selector(showPlaylist:) forControlEvents:UIControlEventTouchUpInside];
+    playerButton.frame = CGRectMake(10, 10, 30, 30);
+    [_playerView addSubview:playerButton];
+    [_playerView addSubview:_playerTitleView];
+    [view addSubview:_playerView];
+    
+    CGRect frame = imageView.frame;
+    frame.origin.x = 14.0f;
+    frame.origin.y = (view.bounds.size.height-imageView.bounds.size.height)/2;
+    imageView.frame = frame;
+    
+    UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
+    [self.view addSubview:corner];
+    [corner release];
+    
+    corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
+    corner.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
+    corner.layer.transform = CATransform3DMakeScale(1.0f, -1.0f, 0.0f);
+    [self.view addSubview:corner];
+    [corner release];
+    
+    frame = corner.frame;
+    frame.origin.y = (self.view.bounds.size.height-corner.bounds.size.height);
+    corner.frame = frame;
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILoginNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerStateChanged:) name:STPlayerStateChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemChanged:) name:STPlayerItemChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:DDMenuControllerWillShowLeftMenuNotification object:nil];
     [self playerStateChanged:nil];
-}
-
-- (void)viewDidUnload {
-    self.tableView = nil;
-    self.anchorTableView = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [super viewDidUnload];
 }
 
 - (void)showPlaylist:(id)notImportant {
@@ -222,7 +183,6 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    [self.anchorTableView deselectRowAtIndexPath:self.anchorTableView.indexPathForSelectedRow animated:YES];
     
     if (_selectedIndexPath) {
         [self.tableView selectRowAtIndexPath:_selectedIndexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
@@ -234,44 +194,31 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 #pragma mark - Icon Helper
 
 - (NSString*)iconTitleForTableView:(UITableView*)tableView atIndex:(NSInteger)index {
-    
-    if (tableView == _tableView) {
-        
-        switch (index) {
-            case 0:
-                return @"left_menu_icon_stamps.png";
-                break;
-            case 1:
-                return @"left_menu_icon_iwantto.png";
-                break;
-            case 2:
-                return @"left_menu_icon_news.png";
-                break;
-            case 3:
-                return @"left_menu_icon_friends.png";
-                break;
-            case 4:
-                return @"left_menu_icon_stamps.png";
-                break;
-            default:
-                break;
-        }
-        
-    } else {
-        
-        switch (index) {
-            case 0:
-                return @"left_menu_icon_to-do.png";
-                break;
-            case 1:
-                return @"left_menu_icon_settings.png";
-                break;                
-            default:
-                break;
-        }
-        
+    switch (index) {
+        case 0:
+            return @"left_menu_icon_stamps.png";
+            break;
+        case 1:
+            return @"left_menu_icon_iwantto.png";
+            break;
+        case 2:
+            return @"left_menu_icon_news.png";
+            break;
+        case 3:
+            return @"left_menu_icon_friends.png";
+            break;
+        case 4:
+            return @"left_menu_icon_stamps.png";
+            break;
+        case 5:
+            return @"left_menu_icon_to-do.png";
+            break;
+        case 6:
+            return @"left_menu_icon_settings.png";
+            break;                
+        default:
+            break;
     }
-    
     return nil;
     
 }
@@ -280,82 +227,64 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    return (tableView==self.tableView) ? [_dataSource count] : [_anchorDataSource count];
+    return self.dataSource.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if (tableView==self.tableView) {
-        
-        static NSString *CellIdentifier = @"CellIdentifier";
-        
-        LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-        if (cell == nil) {
-            cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-            cell.selectionStyle = UITableViewCellSelectionStyleNone;
-            cell.delegate = (id<LeftMenuTableCellDelegate>)self;
-        }
-        
-        [STEvents removeObserver:cell];
-        cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
-        cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
-        [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
-        
-        if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
-            [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
-            [cell countUpdated:nil];
-        } 
-        
-        if ([indexPath isEqual:_selectedIndexPath]) {
-            cell.selected = YES;
-        }
-        
-        if (indexPath.row == 4 && LOGGED_IN) {
-            
-            // user row
-            id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
-            cell.titleLabel.text = [user name];
-            
-            if (![cell viewWithTag:kAvatarViewTag]) {
-                
-                cell.icon = nil;
-                
-                STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(12.0f, (cell.bounds.size.height-24.0f)/2, 24.0f, 24.0f)];
-                view.userInteractionEnabled = NO;
-                view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-                [cell addSubview:view];
-                view.imageURL = [NSURL URLWithString:[user imageURL]];
-                
-                view.backgroundView.layer.shadowOffset = CGSizeMake(0.0f, -1.0f);
-                view.backgroundView.layer.shadowRadius = 0.0f;
-                view.backgroundView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
-                
-                [view release];
-            }
-            
-        } else {
-            
-            if ([cell viewWithTag:kAvatarViewTag]) {
-                [[cell viewWithTag:kAvatarViewTag] removeFromSuperview];
-            }
-            
-        }
-        
-        return cell;
-        
-    }
+    static NSString *CellIdentifier = @"CellIdentifier";
     
-    static NSString *AnchorCellIdentifier = @"AnchorCellIdentifier";
-    
-    LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:AnchorCellIdentifier];
+    LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-        cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:AnchorCellIdentifier] autorelease];
+        cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+        cell.delegate = (id<LeftMenuTableCellDelegate>)self;
     }
     
-    cell.titleLabel.textColor = [UIColor colorWithRed:0.4f green:0.4f blue:0.4f alpha:1.0f];
-    [cell setTop:(indexPath.row!=0) bottom:YES];
-    cell.titleLabel.text = [STConfiguration value:[_anchorDataSource objectAtIndex:indexPath.row]];
+    [STEvents removeObserver:cell];
+    cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
     cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
+    [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
+    
+    if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
+        [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
+        [cell countUpdated:nil];
+    } 
+    
+    if ([indexPath isEqual:_selectedIndexPath]) {
+        cell.selected = YES;
+    }
+    
+    if (indexPath.row == 4 && LOGGED_IN) {
+        
+        // user row
+        id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
+        cell.titleLabel.text = [user name];
+        
+        if (![cell viewWithTag:kAvatarViewTag]) {
+            
+            cell.icon = nil;
+            
+            STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(12.0f, (cell.bounds.size.height-24.0f)/2, 24.0f, 24.0f)];
+            view.userInteractionEnabled = NO;
+            view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+            [cell addSubview:view];
+            view.imageURL = [NSURL URLWithString:[user imageURL]];
+            
+            view.backgroundView.layer.shadowOffset = CGSizeMake(0.0f, -1.0f);
+            view.backgroundView.layer.shadowRadius = 0.0f;
+            view.backgroundView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
+            
+            [view release];
+        }
+        
+    } else {
+        
+        if ([cell viewWithTag:kAvatarViewTag]) {
+            [[cell viewWithTag:kAvatarViewTag] removeFromSuperview];
+        }
+        
+    }
     
     return cell;
     
@@ -367,7 +296,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     
     
-    if (!_anchorSelected && self.tableView == tableView  && _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
+    if ( _selectedIndexPath && [_selectedIndexPath isEqual:indexPath]) {
         
         // controller is already root, lets just pop it to root like a tab bar
         STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
@@ -380,9 +309,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     }
     
-    
-    NSString *key = (tableView == self.tableView) ? [_dataSource objectAtIndex:indexPath.row] : [_anchorDataSource objectAtIndex:indexPath.row];
-    NSString *value = (tableView == self.tableView) ? [_controllerStore objectForKey:key] : [_anchorControllerStore objectForKey:key];
+    NSString *key = [_dataSource objectAtIndex:indexPath.row];
+    NSString *value = [_controllerStore objectForKey:key];
     
     UIViewController *controller = nil;
     
@@ -397,39 +325,24 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         
     }
     
-    _anchorSelected = (self.anchorTableView == tableView);
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
     STMenuController *menuController = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
     
-    if (self.tableView == tableView || YES) {
-        
-        [menuController setRootController:navController animated:YES];
-        [Util addHomeButtonToController:controller withBadge:![controller isKindOfClass:[STUniversalNewsController class]]];
-        
-    } 
-    else {
-        
-        STNavigationItem *item = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
-        controller.navigationItem.rightBarButtonItem = item;
-        [item release];
-        
-        [menuController presentModalViewController:navController animated:YES];
-        
-    }
+    [menuController setRootController:navController animated:YES];
+    [Util addHomeButtonToController:controller withBadge:![controller isKindOfClass:[STUniversalNewsController class]]];
+    
     [controller release];
     [navController release];
     
-    if (tableView == self.tableView) {
-        
-        if (![indexPath isEqual:_selectedIndexPath]) {
-            UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:_selectedIndexPath];
-            [cell setSelected:NO];
-        }
-        
-        [_selectedIndexPath release], _selectedIndexPath=nil;
-        _selectedIndexPath = [indexPath retain];
-        
+    
+    if (![indexPath isEqual:_selectedIndexPath]) {
+        UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:_selectedIndexPath];
+        [cell setSelected:NO];
     }
+    
+    [_selectedIndexPath release], _selectedIndexPath=nil;
+    _selectedIndexPath = [indexPath retain];
+    
     [self performSelector:@selector(loginStatusChanged:) withObject:nil afterDelay:.3];
 }
 
@@ -481,23 +394,29 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     
     [_dataSource release];
     [_controllerStore release];
-    [_anchorControllerStore release];
-    [_anchorDataSource release];
-    if (LOGGED_IN || YES) {
+    if (LOGGED_IN) {
         NSDictionary *navigators = [NSDictionary dictionaryWithObjectsAndKeys:
                                     @"Root.inbox", _inboxNameKey,
                                     @"Root.iWantTo", _iWantToNameKey,
                                     @"Root.news", _newsNameKey,
                                     @"Root.findFriends", _addFriendsNameKey,
                                     @"Root.user", _userNameKey,
+                                    @"Root.todo", _todoNameKey,
+                                    @"Root.settings", _settingsNameKey,
                                     @"Root.debug", _debugNameKey,
                                     nil];
-        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _newsNameKey, _addFriendsNameKey, _userNameKey, _debugNameKey, nil] retain];
+        _dataSource = [[NSArray arrayWithObjects:
+                        _inboxNameKey,
+                        _iWantToNameKey,
+                        _newsNameKey,
+                        _addFriendsNameKey,
+                        _userNameKey,
+                        _todoNameKey,
+                        _settingsNameKey,
+                        _debugNameKey,
+                        nil] retain];
         _controllerStore = [navigators retain];
         
-        _anchorControllerStore = [[NSDictionary dictionaryWithObjectsAndKeys:@"Root.todo", _todoNameKey, @"Root.settings", _settingsNameKey,
-                                   nil] retain];
-        _anchorDataSource = [[NSArray arrayWithObjects:_todoNameKey, _settingsNameKey, nil] retain];
     }
     else {
         NSDictionary *navigators = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -507,12 +426,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
                                     nil];
         _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _debugNameKey, nil] retain];
         _controllerStore = [navigators retain];
-        
-        _anchorControllerStore = [[NSDictionary dictionary] retain];
-        _anchorDataSource = [[NSArray array] retain];
     }
     [self.tableView reloadData];
-    [self.anchorTableView reloadData];
 }
 
 

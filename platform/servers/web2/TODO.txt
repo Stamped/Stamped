@@ -44,9 +44,13 @@
 TODO:
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
     
+    * incorporate versioning into asset management
+        * TODO: lookup how this is commonly done
+    
     * optimization:
         * http://developer.yahoo.com/performance/rules.html
         * combine & minify JS, CSS, & HTML
+        * test hosting assets on cloudfront
         * gzip components
         * configure ETags and cache expiration headers
         * ensure favicon.ico is optimized and cacheable
@@ -221,6 +225,7 @@ OLD:
     * user stamp category distribution
     * fix broken thetvdb images
     * fix infinite scroll after returning to default category
+    * clicking on header stamp logo should bring you back to your default profile page
 
 
 ChangeList 6/8/2012:

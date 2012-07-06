@@ -7,9 +7,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 import bson
-from AStampedAPIHttpTestCase import *
+from tests.AStampedAPIHttpTestCase import *
 from libs.Facebook import *
 from libs.Twitter import *
 
@@ -309,12 +309,14 @@ class StampedAPIHttpOldLinkedAccountRemove(AStampedAPIHttpTestCase):
                 "facebook" : {
                     "facebook_alerts_sent" : True,
                     "facebook_id" : "1234567",
-                    "facebook_name" : "Test User"
+                    "facebook_name" : "Test User",
+                    "facebook_alerts_sent" : True,
                 },
                 "twitter" : {
                     "twitter_alerts_sent" : True,
                     "twitter_id" : "12345678",
-                    "twitter_screen_name" : "testusera0"
+                    "twitter_screen_name" : "testusera0",
+                    "twitter_alerts_sent" : True,
                 },
                 "netflix" : {
                     "netflix_token" : "abcdefghijkl_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0",
@@ -343,7 +345,20 @@ class StampedAPIHttpOldLinkedAccountRemove(AStampedAPIHttpTestCase):
         self._accountDB._updateMongoDocument(testuser)
         testAccount = self.showAccount(self.token)
         linkedAccounts = self.showLinkedAccounts(self.token)
-        self.assertEqual(linkedAccounts, {})
+
+        self.assertEqual(linkedAccounts['twitter'], { 'service_name': 'twitter', 'linked_screen_name' : 'testusera0', 'linked_user_id': '12345678'})
+        self.assertEqual(linkedAccounts['facebook'], { 'service_name': 'facebook', 'linked_user_id' : '1234567', 'linked_name': 'Test User'})
+        self.assertEqual(linkedAccounts['netflix'],
+                {
+                'service_name' : 'netflix',
+                'token' : 'abcdefghijkl_7mon6p9zdWyDB_-9QU4w4jcAn4WZA3HotKLMrG4oBT2CsB_Mum6N24aXCrmqRxnBSrNNuxKkhF8sZE6BtSh0',
+                'secret' : 'abcdefghijkl',
+                'linked_user_id': 'abcdefghijsQujGoAtBtnwbTBpSjBx00o2PE2ASmO9kgw-',
+                }
+        )
+
+        self.assertEqual(self._accountDB.checkLinkedAccountAlertHistory(self.user['user_id'], 'facebook', '1234567'), True)
+        self.assertEqual(self._accountDB.checkLinkedAccountAlertHistory(self.user['user_id'], 'twitter', '12345678'), True)
 
     def tearDown(self):
         self.deleteAccount(self.token)
@@ -462,6 +477,16 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
         self.async(lambda: self.showActivity(self.fUserAToken), [
             lambda x: self.assertEqual(len(x), 1),
             ])
+
+class StampedAPIFacebookFind(StampedAPIFacebookTest):
+    def test_invite_facebook_collection(self):
+        path = "v0/users/invite/facebook/collection.json"
+        data = {
+            "oauth_token"   : self.fUserAToken['access_token'],
+            }
+        result = self.handlePOST(path, data)
+        from pprint import pprint
+        pprint(result)
 
 
 class StampedAPITwitterHttpTest(AStampedAPIHttpTestCase):

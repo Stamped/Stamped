@@ -14,6 +14,9 @@
 #import "STImageCache.h"
 #import "STTableViewSectionHeader.h"
 #import "CreateStampViewController.h"
+#import "CreateEntityViewController.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 #define kAddEntityCellTag 101
 
@@ -26,6 +29,13 @@ static const CGFloat _offscreenCancelPadding = 5;
 @property(nonatomic,retain) STCancellation *iconCancellation;
 @property(nonatomic,retain) UIImageView *iconView;
 - (void)setSearchResult:(id<STEntitySearchResult>)searchResult;
+@end
+
+@interface STEntitySearchCreateCell : UITableViewCell
+
+- (id)initWithReuseIdentifier:(NSString *)reuseIdentifier;
+- (void)setupWithCategory:(NSString*)category andTitle:(NSString*)title;
+
 @end
 
 @interface STEntitySearchController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, CLLocationManagerDelegate>
@@ -196,10 +206,10 @@ static const CGFloat _offscreenCancelPadding = 5;
         
         if (self.searchSections) {
             id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:section];
-            return sectionObject.entities.count; // + 1; // plus one to add 'add' cell
+            return sectionObject.entities.count + 1; // plus one to add 'add' cell
         }
         
-        return 0; //1;
+        return 1; //1;
         
     }
     
@@ -221,7 +231,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             return 1;
         }
         
-        return self.searchSections ? self.searchSections.count : 0;
+        return self.searchSections ? self.searchSections.count : 1;
         
     }
     
@@ -234,26 +244,22 @@ static const CGFloat _offscreenCancelPadding = 5;
     if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
         NSInteger count = 0;
         if (self.searchSections) {
-            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
-            count = sectionObject.entities.count;
-        }
-        
-        if (indexPath.row == count) {
-            static NSString *AddCellIdentifier = @"AddCellIdentfier";
-            UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:AddCellIdentifier];
-            if (cell == nil) {
-                cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:AddCellIdentifier] autorelease];
-                cell.tag = kAddEntityCellTag;
-                cell.textLabel.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
-                cell.detailTextLabel.textColor = [UIColor colorWithWhite:0.749f alpha:1.0f];
+            id<STEntitySearchSection> sectionObject;
+            if (self.searchSections.count) {
+                sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             }
-            
-            cell.indentationWidth = 4.0f;
-            cell.indentationLevel = 9;
-            cell.textLabel.text = @"Not found?";
-            cell.detailTextLabel.text = [NSString stringWithFormat:@"add the %@ \"%@\"", self.category, [self.searchView text]];
-            
-            return cell;
+            if (sectionObject && indexPath.row < sectionObject.entities.count) {
+                count = sectionObject.entities.count;
+            }
+            else {
+                NSString *AddCellIdentifier = @"AddCellIdentfier";
+                STEntitySearchCreateCell* cell = [tableView dequeueReusableCellWithIdentifier:AddCellIdentifier];
+                if (!cell) {
+                    cell = [[[STEntitySearchCreateCell alloc] initWithReuseIdentifier:AddCellIdentifier] autorelease];
+                }
+                [cell setupWithCategory:self.category andTitle:self.searchView.text];
+                return cell;
+            }
         }
         
     }
@@ -348,21 +354,35 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     
-    
+    BOOL add = NO;
     if (tableView == self.searchResultsTableView) {
         
-#warning this should take the user to create entity, not implemented yet
         NSInteger count = 0;
         if (self.autoCompleteResults.count) {
             count = self.autoCompleteResults.count;
         } else if (self.searchSections && indexPath.section < self.searchSections.count) {
-            id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
-            count = sectionObject.entities.count;
+            if (indexPath.section < self.searchSections.count) {
+                id<STEntitySearchSection> sectionObject = [self.searchSections objectAtIndex:indexPath.section];
+                if ([sectionObject entities].count == 0) {
+                    add = YES;
+                }
+                else if (indexPath.row >= [sectionObject entities].count) {
+                    add = YES;
+                }
+            }
+            else {
+                add = YES;
+            }
         }
-        if (indexPath.row == count) {
-            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        else {
+            add = YES;
         }
         
+    }
+    if (add) {
+        CreateEntityViewController *controller = [[[CreateEntityViewController alloc] initWithEntityCategory:self.category entityTitle:self.searchView.text] autorelease];
+        [Util pushController:controller modal:NO animated:YES];
+        return;
     }
     
     if (self.autoCompleteResults.count) {
@@ -373,15 +393,6 @@ static const CGFloat _offscreenCancelPadding = 5;
             [self.searchView resignKeyboard];
             [self performSearchWithText:autoCompleteResult.completion];
         }
-        else {
-#warning former crasher, needs fix
-        }
-        /*
-        id<STEntityAutoCompleteResult> autoCompleteResult = [self.autoCompleteResults objectAtIndex:indexPath.row];
-        [self.searchView setText:autoCompleteResult.completion];
-        [self.searchView resignKeyboard];
-        [self performSearchWithText:autoCompleteResult.completion];
-         */
     } else {
         
         id<STEntitySearchResult> result = nil;
@@ -644,6 +655,27 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
     }
     
+}
+
+@end
+
+@implementation STEntitySearchCreateCell
+
+- (id)initWithReuseIdentifier:(NSString *)reuseIdentifier {
+    self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:reuseIdentifier];
+    if (self) {
+        
+    }
+    return self;
+}
+
+- (void)setupWithCategory:(NSString *)category andTitle:(NSString *)title {
+    self.textLabel.text = @"Not found?";
+    self.textLabel.font = [UIFont stampedBoldFontWithSize:12];
+    self.textLabel.textColor = [UIColor stampedGrayColor];
+    self.detailTextLabel.text = [NSString stringWithFormat:@"Add \"%@\"", title];
+    self.detailTextLabel.font = [UIFont stampedFontWithSize:12];
+    self.detailTextLabel.textColor = [UIColor stampedLightGrayColor];
 }
 
 @end

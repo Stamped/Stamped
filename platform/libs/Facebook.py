@@ -10,9 +10,10 @@ APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
 USER_ID = '100003940534060'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAHFsDl0pZBPZC171zpuZCBl7wsvVWJFtVZBDuZC62YH1ZBd0oefWwDtK9UCyVgRaHDrbmDIsSBaaDllOj8VC6I0cPXLdHKQgZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-ACCESS_TOKEN = 'AAACEdEose0cBACLv4pWaqGHBuZBtjlGLBLeK0ohqfp7zyrLG8n4jLFfGrdB7tkbZAYcnqEA4Kmw1rAmzBfA20bv37ZBYPZB2CJ0COu2bPphMU5pCU05V'
+#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
+#ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -57,6 +58,10 @@ class Facebook(object):
                 result = json.load(e)
                 logs.info('result: %s' % result)
                 if 'error' in result:
+                    if 'code' in result['error']:
+                        code = result['error']['code']
+                        if code == 190:
+                            raise StampedFacebookTokenError('Invalid Facebook token')
 #                    if 'code' in result['error']:
 #                        # if a code is provided, then we can reauth the user
 #                        logs.info('### hit error in FB with code')
@@ -105,6 +110,34 @@ class Facebook(object):
             result = self._get(access_token, path)
             access_token = None
             friends.extend([ d['id'] for d in result['data']] )
+            if 'paging' in result and 'next' in result['paging']:
+                path = result['paging']['next']
+                url = urlparse.urlparse(result['paging']['next'])
+                params = dict([part.split('=') for part in url[4].split('&')])
+                if 'offset' in params and int(params['offset']) == len(friends):
+                    continue
+            break
+        return friends
+
+    def getFriendData(self, access_token, offset=0, limit=30):
+        path = 'me/friends'
+        logs.info('#### offset: %s  limit: %s' % (offset, limit))
+
+        friends = []
+        while True:
+            print path
+            result = self._get(access_token, path, limit=limit, offset=offset, fields='id,name,picture')
+            access_token = None
+            logs.info('### result: %s' % result)
+            for d in result['data']:
+                friends.append(
+                    {
+                        'user_id' : d['id'],
+                        'name' : d['name'],
+                        'image_url' : d['picture'],
+                    }
+                )
+#            friends.extend([ d for d in result['data']] )
             if 'paging' in result and 'next' in result['paging']:
                 path = result['paging']['next']
                 url = urlparse.urlparse(result['paging']['next'])
@@ -258,6 +291,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
     if 'getFriendIds' in methods:           pprint(facebook.getFriendIds(access_token))
+    if 'getFriendData' in methods:          pprint(facebook.getFriendData(access_token))
     if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
@@ -270,7 +304,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'getFriendData'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

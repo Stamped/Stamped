@@ -14,7 +14,7 @@ import libs.ec2_utils
 
 from pprint                         import pformat
 from errors                         import *
-from HTTPSchemas                    import *
+from api.HTTPSchemas                    import *
 from api.MongoStampedAPI            import globalMongoStampedAPI
 from api.MongoStampedAuth           import MongoStampedAuth
 
@@ -58,28 +58,39 @@ logs.info("INIT: %s sec" % duration)
 if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
-#defaultExceptions = [
-#    (StampedAuthError, StampedHTTPError(401, kind='blah blah', msg='blah blah')),
-#]
-#
+defaultExceptions = [
+    (StampedDocumentNotFoundError, 404, 'not_found',           'There was a problem retrieving the requested data'),
+    (StampedAuthError, 401,             'invalid_credentials', 'There was an error during authentication'),
+    (StampedInputError, 400,            'bad_request',         'An error occurred. Please try again later.'),
+    (StampedIllegalActionError, 403,    'bad_request',         'An error occurred. Please try again later.'),
+    (StampedPermissionsError, 403,      'forbidden',           'Insufficient privileges'),
+    (StampedDuplicationError, 409,      'already_exists',      'An error occurred. Please try again later'),
+    (StampedUnavailableError, 404,      'not_found',           'Not found'),
+    (StampedMissingParametersError, 400,'bad_request',         'An error occurred. Please try again later'),
+    (StampedInternalError, 500,         'internal',            'An error occurred. Please try again later'),
+]
+
 
 def handleStampedExceptions(e, handlers=None):
+    if isinstance(e, StampedHTTPError):
+        exceptions =  [(StampedHTTPError, e.code, e.kind, e.msg)]
+    elif handlers is not None:
+        exceptions = handlers + defaultExceptions
+    else:
+        exceptions = defaultExceptions
 
-#    exceptions = handlers + defaultExceptions
 
-    logs.info('### handleStampedExceptions: %s' % handlers)
-    if handlers is not None:
-        if e.__class__.__name__ in handlers:
-            exception = handlers[e.__class__.__name__]
-            logs.warning("%s Error (%s): %s" % (exception.code, exception.kind, exception.msg))
+    for (exception, code, kind, msg) in exceptions:
+        if isinstance(e, exception):
+            logs.warning("%s Error (%s): %s" % (code, kind, msg))
             logs.warning(utils.getFormattedException())
-            logs.error(exception.code)
+            logs.error(code)
 
-            kind = exception.kind
+            kind = kind
             if kind is None:
                 kind = 'stamped_error'
 
-            message = exception.msg
+            message = msg
             if message is None and e.msg is not None:
                 message = e.msg
 
@@ -88,106 +99,29 @@ def handleStampedExceptions(e, handlers=None):
             if message is not None:
                 error['message'] = unicode(message)
 
-            return transformOutput(error, status=exception.code)
-
-    if isinstance(e, StampedHTTPError):
-        if e.kind is None:
-            e.kind = 'stamped_error'
-
-        logs.warning("%s Error (%s): %s" % (e.code, e.kind, e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(e.code)
-
-        error = {'error': e.kind}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-
-        return transformOutput(error, status=e.code)
-
-    if isinstance(e, StampedAuthError):
-        logs.warning("401 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(401)
-
-        error = {'error': e.msg}
-        return transformOutput(error, status=401)
-
-    if isinstance(e, StampedInputError):
-        logs.warning("400 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(400)
-
-        error = {'error': 'invalid_request'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=400)
-
-    if isinstance(e, StampedIllegalActionError):
-        logs.warning("403 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(403)
-
-        error = {'error': 'illegal_action'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=403)
-
-    if isinstance(e, StampedPermissionsError):
-        logs.warning("403 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(403)
-
-        error = {'error': 'insufficient_privileges'}
-        return transformOutput(error, status=403)
-
-    if isinstance(e, StampedDuplicationError):
-        logs.warning("409 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(409)
-
-        error = {'error': 'already_exists'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=409)
-
-    if isinstance(e, StampedUnavailableError):
-        logs.warning("404 Error: %s" % (e.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(404)
-
-        error = {'error': 'not_found'}
-        if e.msg is not None:
-            error['message'] = unicode(e.msg)
-        return transformOutput(error, status=404)
-
-    logs.info('### exception: %s' % e)
-    logs.info('%s %s' % (handlers is not None, handlers))
-    if handlers is not None and "InternalError" in handlers:
-        exception = handlers['InternalError']
-        logs.warning("%s Error (%s): %s" % (exception.code, exception.kind, exception.msg))
-        logs.warning(utils.getFormattedException())
-        logs.error(exception.code)
-
-        kind = exception.kind
-        if kind is None:
-            kind = 'internal'
-
-        message = exception.msg
-        if message is None and e.msg is not None:
-            message = "An error occurred.  Please try again later."
-
-        error = {
-            'error' : kind,
-            'message' : unicode(message),
-        }
+            return transformOutput(error, status=code)
     else:
+        error = {
+            'error' :   'stamped_error',
+            'message' : "An error occurred. Please try again later.",
+        }
         logs.warning("500 Error: %s" % e)
         logs.warning(utils.getFormattedException())
         logs.error(500)
 
-        error = {'error': 'internal_server_error'}
-    return transformOutput(error, status=500)
+        # Email dev if a 500 occurs
+        if libs.ec2_utils.is_ec2():
+            try:
+                email = {}
+                email['from'] = 'Stamped <noreply@stamped.com>'
+                email['to'] = 'dev@stamped.com'
+                email['subject'] = '%s - 500 Error' % stampedAPI.node_name
+                email['body'] = logs.getHtmlFormattedLog()
+                utils.sendEmail(email, format='html')
+            except Exception as e:
+                logs.warning('UNABLE TO SEND EMAIL: %s')
 
+        return transformOutput(error, status=500)
 
 def handleHTTPRequest(requires_auth=True, 
                       requires_client=False,
@@ -236,8 +170,6 @@ def handleHTTPRequest(requires_auth=True,
                              to require a valid client_id and client_secret, it must 
                              set requires_client to True.
     """
-    logs.info('### http_schema %s' % http_schema)
-    logs.info('### exceptions: %s' % exceptions)
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -310,14 +242,16 @@ def handleHTTPRequest(requires_auth=True,
                 return ret
 
             except Exception as e:
-                logs.info('### calling handleStampedExceptions: %s' % exceptions)
                 return handleStampedExceptions(e, exceptions)
             finally:
                 try:
                     logs.save()
                 except Exception:
                     print 'Unable to save logs'
-        
+                    import traceback
+                    traceback.print_exc()
+                    logs.warning(traceback.format_exc())
+
         return wrapper
     return decorator
 
@@ -477,11 +411,13 @@ def parseRequest(schema, request, **kwargs):
 
         # Build the dict because django sucks
         for k, v in rawData.iteritems():
+            if v == '':
+                v = None
             data[k] = v
 
         if not kwargs.get('allow_oauth_token', False):
-            data.pop('oauth_token',   None)
-        data.pop('client_id',     None)
+            data.pop('oauth_token', None)
+        data.pop('client_id', None)
         data.pop('client_secret', None)
         
         logData = data.copy()

@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, logs, time
 from utils import abstract
 from datetime import timedelta
-from Memcache import globalMemcache
+from libs.Memcache import globalMemcache
 
 class ACollectionCache(object):
 
@@ -51,7 +51,7 @@ class ACollectionCache(object):
                 logs.error('Error retrieving data from memcached.  Is memcached running?')
                 prevBlock = self._updateCache(prevBlockOffset, **kwargs)
             if len(prevBlock) < self._blockSize:
-                raise Exception("Previous data block was final")
+                raise StampedCollectionCacheError("Previous data block was final")
             assert(len(prevBlock) > 0)
             lastItem = prevBlock[-1]
             before = lastItem.timestamp.modified - timedelta(microseconds=1)

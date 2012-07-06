@@ -17,7 +17,7 @@
 // Test account
 // 1235969194
 
-extern NSString* const STSpotifyTrackEndedNotification = @"STSpotifyTrackEndedNotification";
+NSString* const STSpotifyTrackEndedNotification = @"STSpotifyTrackEndedNotification";
 
 static const uint8_t g_appkey[] = {
 	0x01, 0xD2, 0x04, 0x53, 0x59, 0x3A, 0x72, 0x17, 0xB8, 0x32, 0xA1, 0x90, 0xA3, 0xD1, 0x21, 0x54,
@@ -43,11 +43,11 @@ static const uint8_t g_appkey[] = {
 	0x24,
 };
 
-static NSString* const _spotifyKeychainItemID = @"SpotifyCredentials";
-
 static const size_t g_appkey_size = sizeof(g_appkey);
 
-@interface STSpotify () <SPSessionDelegate>
+static NSString* const _spotifyKeychainItemID = @"SpotifyCredentials";
+
+@interface STSpotify () <SPSessionDelegate, SPLoginViewControllerDelegate>
 
 @property (nonatomic, readwrite, assign) BOOL startedSession;
 @property (nonatomic, readonly, retain) KeychainItemWrapper* keychainItem;
@@ -94,7 +94,6 @@ static id _sharedInstance;
 
 - (BOOL)connected {
     NSString* account = [_keychainItem objectForKey:(id)kSecAttrAccount];
-    NSLog(@"account:%@,%p", account, account);
     return account && ![account isEqualToString:@""];
 }
 
@@ -124,7 +123,7 @@ static id _sharedInstance;
         }
         else {
             SPLoginViewController *controller = [SPLoginViewController loginControllerForSession:[SPSession sharedSession]];
-            controller.allowsCancel = NO;
+            controller.loginDelegate = self;
             [[Util sharedMenuController] presentModalViewController:controller animated:YES];
         }
         return self.cancellation;
@@ -145,7 +144,8 @@ static id _sharedInstance;
 
 - (void)startSession {    
     if (!self.startedSession) {
-        [SPSession initializeSharedSessionWithApplicationKey:[NSData dataWithBytes:&g_appkey length:g_appkey_size] 
+        [SPSession initializeSharedSessionWithApplicationKey:[NSData dataWithBytes:&g_appkey 
+                                                                            length:g_appkey_size] 
                                                    userAgent:@"com.stamped.iOS" 
                                                loadingPolicy:SPAsyncLoadingManual
                                                        error:nil];
@@ -208,6 +208,21 @@ static id _sharedInstance;
 										  cancelButtonTitle:@"OK"
 										  otherButtonTitles:nil];
 	[alert show];
+}
+
+#pragma mark LoginCallback
+
+
+-(void)loginViewController:(SPLoginViewController *)controller didCompleteSuccessfully:(BOOL)didLogin {
+    if (!didLogin) {
+        if (self.block && self.cancellation) {
+            if (!self.cancellation.cancelled) {
+                self.block(NO, nil, self.cancellation);
+            }
+        }
+        self.cancellation = nil;
+        self.block = nil;
+    }
 }
 
 @end

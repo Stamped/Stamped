@@ -14,12 +14,12 @@ from utils                      import lazyProperty
 from pprint                     import pprint
 from api.Schemas                import *
 
-from AMongoCollection           import AMongoCollection
-from MongoUserCollection        import MongoUserCollection
-from MongoFriendsCollection     import MongoFriendsCollection
-from MongoFollowersCollection   import MongoFollowersCollection
-from MongoStampCollection       import MongoStampCollection
-from MongoBlockCollection       import MongoBlockCollection
+from api.db.mongodb.AMongoCollection           import AMongoCollection
+from api.db.mongodb.MongoUserCollection        import MongoUserCollection
+from api.db.mongodb.MongoFriendsCollection     import MongoFriendsCollection
+from api.db.mongodb.MongoFollowersCollection   import MongoFollowersCollection
+from api.db.mongodb.MongoStampCollection       import MongoStampCollection
+from api.db.mongodb.MongoBlockCollection       import MongoBlockCollection
 
 from api.AFriendshipDB          import AFriendshipDB
 
@@ -53,7 +53,7 @@ class MongoFriendshipCollection(AFriendshipDB):
     
     @lazyProperty
     def collection_collection(self):
-        from MongoCollectionCollection  import MongoCollectionCollection
+        from api.db.mongodb.MongoCollectionCollection  import MongoCollectionCollection
         
         return MongoCollectionCollection()
     
@@ -88,9 +88,9 @@ class MongoFriendshipCollection(AFriendshipDB):
         self.followers_collection.removeFollower(userId=friendId, followerId=userId)
         return True
     
-    def getFriends(self, userId):
-        return self.friends_collection.getFriends(userId)
-
+    def getFriends(self, userId, limit=None):
+        return self.friends_collection.getFriends(userId, limit)
+    
     def getFriendsOfFriends(self, userId, distance=2, inclusive=True):
         if distance <= 0:
             logs.warning('Invalid distance for friends of friends: %s' % distance)
@@ -127,10 +127,12 @@ class MongoFriendshipCollection(AFriendshipDB):
 
         return list(result)
     
-    def getFollowers(self, userId):
-        # TODO: Remove limit, add cursor instead
-        followers = self.followers_collection.getFollowers(userId)
-        return followers[-10000:]
+    def getFollowers(self, userId, limit=None):
+        if limit is None:
+            limit = 10000
+        
+        # TODO: add proper cursor support
+        return self.followers_collection.getFollowers(userId, limit)
     
     def countFriends(self, userId):
         return len(self.friends_collection.getFriends(userId))

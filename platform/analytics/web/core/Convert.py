@@ -11,7 +11,7 @@ import Globals
 import calendar, pprint, datetime, sys, argparse,math
 import keys.aws, logs, utils
 
-from MongoStampedAPI                            import MongoStampedAPI
+from api.MongoStampedAPI                            import MongoStampedAPI
 from bson.objectid import ObjectId
 
 

@@ -11,8 +11,8 @@ import Globals, utils, logs
 from errors import *
 from api.Schemas import *
 
-from AMongoCollection import AMongoCollection
-from AAuthEmailAlertsDB import AAuthEmailAlertsDB
+from api.db.mongodb.AMongoCollection import AMongoCollection
+from api.AAuthEmailAlertsDB import AAuthEmailAlertsDB
 
 class MongoAuthEmailAlertsCollection(AMongoCollection, AAuthEmailAlertsDB):
     

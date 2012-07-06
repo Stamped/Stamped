@@ -7,15 +7,13 @@ __license__   = "TODO"
 
 import Globals
 import api.HTTPSchemas
-import os, utils
+import os, pprint, utils
 
 from django.http    import HttpResponse, HttpResponseRedirect
-from schemas        import *
-from helpers        import *
+from servers.web2.core.schemas        import *
+from servers.web2.core.helpers        import *
 
-import travis_test
-
-ENABLE_TRAVIS_TEST = (False and not IS_PROD)
+from servers.web2.core import travis_test
 
 # TODO: stricter input schema validation
 
@@ -102,66 +100,46 @@ def handle_profile(request, schema, **kwargs):
     friends       = []
     followers     = []
     
-    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis' and (schema.sort is None or schema.sort == 'modified'):
-        # useful debugging utility -- circumvent dev server to speed up reloads
-        user        = travis_test.user
-        user_id     = user['user_id']
-        
-        stamps      = travis_test.stamps
-        
-        if schema.category is not None:
-            stamps  = filter(lambda s: s['entity']['category'] == schema.category or ('coordinates' in s['entity'] and s['entity']['coordinates'] is not None and schema.category == 'place'), stamps)
-        
-        if schema.subcategory is not None:
-            stamps  = filter(lambda s: s['entity']['subcategory'] == schema.subcategory, stamps)
-        
-        stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
+    if ajax and schema.user_id is not None:
+        user        = None
+        user_id     = schema.user_id
     else:
-        if ajax and schema.user_id is not None:
-            user        = None
-            user_id     = schema.user_id
-        else:
-            user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
-            user_id     = user['user_id']
+        user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
+        user_id     = user['user_id']
+    
+    # simple sanity check validation of user_id
+    if utils.tryGetObjectId(user_id) is None:
+        raise StampedInputError("invalid user_id")
+    
+    #utils.log(pprint.pformat(schema.dataExport()))
+    schema_data = schema.dataExport()
+    del schema_data['screen_name']
+    schema_data['user_id'] = user_id
+    
+    stamps = stampedAPIProxy.getUserStamps(schema_data)
+    
+    if user is None:
+        user = {
+            'user_id' : user_id
+        }
         
-        # simple sanity check validation of user_id
-        if utils.tryGetObjectId(user_id) is None:
-            raise StampedInputError("invalid user_id")
-        
-        #utils.log(pprint.pformat(schema.dataExport()))
-        schema_data = schema.dataExport()
-        del schema_data['screen_name']
-        schema_data['user_id'] = user_id
-        
-        stamps = stampedAPIProxy.getUserStamps(schema_data)
-        
-        if user is None:
-            user = {
-                'user_id' : user_id
-            }
+        if len(stamps) > 0:
+            user2    = stamps[0]['user']
+            user2_id = user2['user_id']
             
-            if len(stamps) > 0:
-                user2    = stamps[0]['user']
-                user2_id = user2['user_id']
-                
-                if user2_id is None or user2_id != user_id:
-                    raise StampedInputError("mismatched user_id")
-                else:
-                    user.update(user2)
+            if user2_id is None or user2_id != user_id:
+                raise StampedInputError("mismatched user_id")
             else:
-                user = stampedAPIProxy.getUser(dict(user_id=user_id))
-                
-                if user['user_id'] is None or user['user_id'] != user_id:
-                    raise StampedInputError("mismatched user_id")
+                user.update(user2)
+        else:
+            user = stampedAPIProxy.getUser(dict(user_id=user_id))
+            
+            if user['user_id'] is None or user['user_id'] != user_id:
+                raise StampedInputError("mismatched user_id")
     
     if not ajax:
-        if ENABLE_TRAVIS_TEST:
-            friends     = travis_test.friends
-            followers   = travis_test.followers
-        else:
-            params      = dict(user_id=user_id, screen_name=screen_name)
-            friends     = stampedAPIProxy.getFriends  (params, limit=10)
-            followers   = stampedAPIProxy.getFollowers(params, limit=10)
+        friends     = stampedAPIProxy.getFriends  (user_id, limit=3)
+        followers   = stampedAPIProxy.getFollowers(user_id, limit=3)
         
         friends   = _shuffle_split_users(friends)
         followers = _shuffle_split_users(followers)
@@ -235,28 +213,19 @@ def handle_map(request, schema, **kwargs):
     del schema.ajax
     del schema.stamp_id
     
-    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
-        # useful debugging utility -- circumvent dev server to speed up reloads
-        user        = travis_test.user
-        user_id     = user['user_id']
-        
-        stamps      = filter(lambda s: s['entity'].get('coordinates', None) is not None, travis_test.stamps)
-        stamps      = stamps[schema.offset : (schema.offset + schema.limit if schema.limit is not None else len(stamps))]
-    else:
-        user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-        user_id     = user['user_id']
-        
-        # simple sanity check validation of user_id
-        if utils.tryGetObjectId(user_id) is None:
-            raise StampedInputError("invalid user_id")
-        
-        s = schema.dataExport()
-        del s['screen_name']
-        s['user_id']  = user_id
-        s['category'] = 'place'
-        
-        stamps      = stampedAPIProxy.getUserStamps(s)
+    user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+    user_id     = user['user_id']
     
+    # simple sanity check validation of user_id
+    if utils.tryGetObjectId(user_id) is None:
+        raise StampedInputError("invalid user_id")
+    
+    s = schema.dataExport()
+    del s['screen_name']
+    s['user_id']  = user_id
+    s['category'] = 'place'
+    
+    stamps = stampedAPIProxy.getUserStamps(s)
     stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
     
     for stamp in stamps:
@@ -289,13 +258,9 @@ def sdetail(request, schema, **kwargs):
     #import time
     #time.sleep(2)
     
-    logs.info('%s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
+    logs.info('SDETAIL: %s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
-    if ENABLE_TRAVIS_TEST and schema.screen_name == 'travis':
-        user = travis_test.user
-    else:
-        user = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-    
+    user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
     stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     
     if stamp is None:
@@ -307,20 +272,22 @@ def sdetail(request, schema, **kwargs):
     if 'likes' in previews and len(previews['likes']) > 0:
         likes = previews['likes']
         
-        for user in likes:
-            user['preview_type'] = 'like'
+        for u in likes:
+            u['preview_type'] = 'like'
         
+        likes = _shuffle_split_users(likes)
         users.extend(likes)
     
     if 'todos' in previews and len(previews['todos']) > 0:
         todos = previews['todos']
         
-        for user in todos:
-            user['preview_type'] = 'todo'
+        for u in todos:
+            u['preview_type'] = 'todo'
         
+        todos = _shuffle_split_users(todos)
         users.extend(todos)
     
-    users   = _shuffle_split_users(users)
+    #users   = _shuffle_split_users(users)
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     sdetail = stamped_render(request, 'sdetail.html', {
         'user'               : user, 
@@ -333,8 +300,7 @@ def sdetail(request, schema, **kwargs):
         return sdetail
     else:
         return handle_profile(request, HTTPWebTimeSlice().dataImport({
-            'screen_name'   : schema.screen_name, 
-            'user_id'       : user['user_id']
+            'screen_name'   : schema.screen_name
         }), user=user, sdetail=sdetail.content, stamp=stamp, entity=entity)
 
 @stamped_view(schema=HTTPEntityId)
@@ -351,13 +317,19 @@ def menu(request, schema, **kwargs):
 
 @stamped_view()
 def test_view(request, **kwargs):
-    return stamped_render(request, 'test.html', { })
+    user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
+    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
+    
+    return stamped_render(request, 'test.html', {
+        'user'  : user, 
+        'stamp' : stamp
+    })
 
 @stamped_view(schema=HTTPStampId)
 def popup_sdetail_social(request, schema, **kwargs):
     params = schema.dataExport()
-    likes  = stampedAPIProxy.getLikes(params)
-    todos  = stampedAPIProxy.getTodos(params)
+    likes  = stampedAPIProxy.getLikes(schema.stamp_id)
+    todos  = stampedAPIProxy.getTodos(schema.stamp_id)
     users  = []
     
     for user in likes:
@@ -394,7 +366,7 @@ def popup_sdetail_social(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPUserId)
 def popup_followers(request, schema, **kwargs):
-    users = stampedAPIProxy.getFollowers(schema.dataExport())
+    users = stampedAPIProxy.getFollowers(schema.user_id)
     num_users = len(users)
     
     return stamped_render(request, 'popup.html', {
@@ -405,7 +377,7 @@ def popup_followers(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPUserId)
 def popup_following(request, schema, **kwargs):
-    users = stampedAPIProxy.getFriends(schema.dataExport())
+    users = stampedAPIProxy.getFriends(schema.user_id)
     num_users = len(users)
     
     return stamped_render(request, 'popup.html', {

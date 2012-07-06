@@ -36,6 +36,8 @@
 #import "STMenuController.h"
 #import "STUserViewController.h"
 #import "STUnreadActivity.h"
+#import "STNavigationItem.h"
+#import "STAppDelegate.h"
 
 @interface STInboxViewController ()
 
@@ -195,13 +197,13 @@
 
 - (void)cacheWillLoadPage:(NSNotification *)notification {
     self.reloading = YES;
-    [self.tableView reloadData];
+   // [self.tableView reloadData];
 }
 
 - (void)cacheDidLoadPage:(NSNotification *)notification {
     self.reloading = NO;
     [self dataSourceDidFinishLoading];
-    [self.tableView reloadData];
+   // [self.tableView reloadData];
 }
 
 - (void)cacheUpdate:(NSNotification *)notification {
@@ -387,6 +389,9 @@
 }
 
 - (void)reloadDataSource {
+    if (self.dirty) {
+        [self.cache updateAllWithAccellerator:[STStampedAPI sharedInstance]];
+    }
     self.dirty = NO;
     [self.cache refreshAtIndex:-1 force:YES];
     [[STUnreadActivity sharedInstance] update];

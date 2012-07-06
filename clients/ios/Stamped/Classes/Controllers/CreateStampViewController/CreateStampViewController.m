@@ -17,6 +17,11 @@
 #import "STS3Uploader.h"
 #import "STStampContainerView.h"
 #import "CreateEditView.h"
+#import "STBlockUIView.h"
+#import "STNavigationItem.h"
+#import "QuartzUtils.h"
+#import "STRootViewController.h"
+#import "UIImageHelper.h"
 
 #define kEditContainerViewTag 101
 #define kRemovePhotoActionSheetTag 201

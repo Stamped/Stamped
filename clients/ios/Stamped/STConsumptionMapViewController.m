@@ -17,6 +17,7 @@
 #import "STActionManager.h"
 #import "STEntityAnnotation.h"
 #import "STPreviewsView.h"
+#import "UIColor+Stamped.h"
 
 static NSString* const _cacheOverlayKey = @"Consumption.food.cacheOverlay";
 
@@ -84,7 +85,6 @@ NSInteger zoom;
                   filter:(NSString**)filter 
                    query:(NSString**)query;
 
-@property (nonatomic, readonly, copy) NSString* key;
 @property (nonatomic, readonly, assign) STStampedAPIScope scope;
 @property (nonatomic, readonly, retain) NSString* subcategory;
 @property (nonatomic, readonly, retain) NSString* query;
@@ -103,7 +103,6 @@ NSInteger zoom;
 @property (nonatomic, readonly, retain) STPreviewsView* previews;
 @property (nonatomic, readonly, retain) MKMapView* mapView;
 @property (nonatomic, readwrite, assign) BOOL zoomToUserLocation;
-@property (nonatomic, readwrite, assign) MKMapRect lastMapRect;
 @property (nonatomic, readonly, retain) NSMutableDictionary* caches;
 @property (nonatomic, readwrite, assign) STStampedAPIScope scope;
 @property (nonatomic, readwrite, copy) NSString* subcategory;
@@ -115,6 +114,9 @@ NSInteger zoom;
 @property (nonatomic, readwrite, assign) BOOL cachingDisabled;
 @property (nonatomic, readonly, assign) CGRect previewContainerFrameHidden;
 @property (nonatomic, readonly, assign) CGRect previewContainerFrameShown;
+@property (nonatomic, readwrite, assign) BOOL dirty;
+@property (nonatomic, readwrite, assign) MKCoordinateRegion lastRegion;
+@property (nonatomic, readwrite, assign) BOOL hasShown;
 
 @end
 
@@ -124,7 +126,6 @@ NSInteger zoom;
 @synthesize searchField = searchField_;
 @synthesize mapView = mapView_;
 @synthesize zoomToUserLocation = zoomToUserLocation_;
-@synthesize lastMapRect = lastMapRect_;
 @synthesize caches = caches_;
 @synthesize scope = scope_;
 @synthesize subcategory = subcategory_;
@@ -138,6 +139,9 @@ NSInteger zoom;
 @synthesize previews = _previews;
 @synthesize previewContainerFrameShown = _previewContainerFrameShown;
 @synthesize previewContainerFrameHidden = _previewContainerFrameHidden;
+@synthesize dirty = _dirty;
+@synthesize lastRegion = _lastRegion;
+@synthesize hasShown = _hasShown;
 
 - (STConsumptionToolbarItem*)rootItem {
     STConsumptionToolbarItem* item = [[STConsumptionToolbarItem alloc] init];
@@ -170,7 +174,6 @@ NSInteger zoom;
 {
     self = [super init];
     if (self) {
-        consumptionToolbar_ = [[STConsumptionToolbar alloc] initWithRootItem:[self rootItem] andScope:STStampedAPIScopeFriends];
         caches_ = [[NSMutableDictionary alloc] init];
         if (LOGGED_IN) {
             scope_ = STStampedAPIScopeFriends;
@@ -181,12 +184,15 @@ NSInteger zoom;
         annotations_ = [[NSMutableArray alloc] init];
         cancellations_ = [[NSMutableArray alloc] init];
         tileOverlays_ = [[NSMutableArray alloc] init];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
+        self.dirty = YES;
     }
     return self;
 }
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     // Release any retained subviews of the main view.
     consumptionToolbar_.slider.delegate = nil;
     searchField_.delegate = nil;
@@ -199,6 +205,11 @@ NSInteger zoom;
     [filter_ release];
     [query_ release];
     [tileOverlays_ release];
+    if (cancellations_.count) {
+        for (STCancellation* cancellation in cancellations_) {
+            [cancellation cancel];
+        }
+    }
     [cancellations_ release];
     [annotations_ release];
     [_previews release];
@@ -206,76 +217,120 @@ NSInteger zoom;
     [super dealloc];
 }
 
+/*
+ Styled and memory checked on 2012-07-04 -Landon
+ */
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    //additional toolbar setup
     self.consumptionToolbar.slider.delegate = (id<STSliderScopeViewDelegate>)self;
     self.consumptionToolbar.delegate = self;
-    self.zoomToUserLocation = YES;
-    UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)] autorelease];
-    searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 300, 30)];
-    searchField_.placeholder = @"Search for places";
-    searchField_.enablesReturnKeyAutomatically = NO;
-    searchField_.delegate = self;
-    [searchBar addSubview:searchField_];
-    searchBar.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
-    [self.scrollView appendChildView:searchBar];
-	// Do any additional setup after loading the view.
-    mapView_ = [[MKMapView alloc] initWithFrame:CGRectMake(0,
-                                                           0,
-                                                           self.scrollView.frame.size.width,
-                                                           self.scrollView.contentSize.height - CGRectGetMaxY(searchBar.frame))];
-    mapView_.showsUserLocation = YES;
-    [self.scrollView appendChildView:mapView_];
-    _previewContainerFrameHidden = CGRectMake(0, CGRectGetMaxY(mapView_.frame), 320, 44);
-    _previewContainerFrameShown = CGRectOffset(_previewContainerFrameHidden, 0, -_previewContainerFrameHidden.size.height);
-    _previewContainer = [[UIView alloc] initWithFrame:_previewContainerFrameHidden];
-    [Util addGradientToLayer:_previewContainer.layer withColors:[UIColor stampedLightGradient] vertical:YES];
-    _previews = [[STPreviewsView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
-    [_previewContainer addSubview:_previews];
-    [self.scrollView addSubview:_previewContainer];
-    mapView_.delegate = self;
-    //[Util addConfigurationButtonToController:self];
-    
-    CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
-    locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
-    locationManager.distanceFilter = kCLDistanceFilterNone; 
-    [locationManager startUpdatingLocation];
-    [locationManager stopUpdatingLocation];
-    CLLocation *location = [locationManager location];
-    if (location) {
-        [STStampedAPI sharedInstance].currentUserLocation = location;
-        MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
-        MKCoordinateRegion region = MKCoordinateRegionMake(location.coordinate, mapSpan);
-        [mapView_ setRegion:region animated:NO];
+    if (!searchField_) {
+        //Setup search bar
+        UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)] autorelease];
+        searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 300, 30)];
+        searchField_.placeholder = @"Search for places";
+        searchField_.enablesReturnKeyAutomatically = NO;
+        searchField_.delegate = self;
+        [searchBar addSubview:searchField_];
+        searchBar.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
+        [self.scrollView appendChildView:searchBar];
+        
+        //Map view setup
+        self.zoomToUserLocation = YES;
+        mapView_ = [[MKMapView alloc] initWithFrame:CGRectMake(0,
+                                                               0,
+                                                               self.scrollView.frame.size.width,
+                                                               self.scrollView.contentSize.height - CGRectGetMaxY(searchBar.frame))];
+        mapView_.showsUserLocation = YES;
+        [self.scrollView appendChildView:mapView_];
+        mapView_.delegate = self;
+        
+        //Preview setup
+        _previewContainerFrameHidden = CGRectMake(0, CGRectGetMaxY(mapView_.frame), 320, 44);
+        _previewContainerFrameShown = CGRectOffset(_previewContainerFrameHidden, 0, -_previewContainerFrameHidden.size.height);
+        _previewContainer = [[UIView alloc] initWithFrame:_previewContainerFrameHidden];
+        [Util addGradientToLayer:_previewContainer.layer withColors:[UIColor stampedLightGradient] vertical:YES];
+        _previews = [[STPreviewsView alloc] initWithFrame:CGRectMake(0, 0, 0, 0)];
+        [_previewContainer addSubview:_previews];
+        [self.scrollView addSubview:_previewContainer];
+        
+        //if (!self.hasShown) {
+            //Request current location
+            CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
+            locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
+            locationManager.distanceFilter = kCLDistanceFilterNone; 
+            [locationManager startUpdatingLocation];
+            [locationManager stopUpdatingLocation];
+            CLLocation *location = [locationManager location];
+            if (location) {
+                [STStampedAPI sharedInstance].currentUserLocation = location; //update global last known location
+                MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
+                MKCoordinateRegion region = MKCoordinateRegionMake(location.coordinate, mapSpan);
+                [mapView_ setRegion:region animated:NO];
+                self.lastRegion = region;
+            }
+            mapView_.showsUserLocation = YES;
+        //}
     }
-    [self update:NO];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
-    mapView_.showsUserLocation = YES;
+    //TODO restore user location
+    //if (!self.hasShown && self.dirty) {
+        //[mapView_ setRegion:self.lastRegion animated:NO];
+    //}
+    //Load initial entities
+    self.dirty = NO;
+    [self update:self.dirty];
+    [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+    self.hasShown = YES;
     for (STCancellation* cancellation in self.cancellations) {
         [cancellation cancel];
     }
-}
-
-- (void)viewDidUnload
-{
-    [super viewDidUnload];
+    [self.cancellations removeAllObjects];
+    [super viewWillDisappear:animated];
 }
 
 - (UIView *)loadToolbar {
     if (LOGGED_IN) {
-        return self.consumptionToolbar;
+        consumptionToolbar_ = [[STConsumptionToolbar alloc] initWithRootItem:[self rootItem] andScope:STStampedAPIScopeFriends];
+        return consumptionToolbar_;
     }
     else {
         return nil;
     }
 }
 
+- (void)viewDidUnload {
+    [searchField_ release];
+    searchField_ = nil;
+    [mapView_ release];
+    mapView_ = nil;
+    [_previews release];
+    _previews = nil;
+    [_previewContainer release];
+    _previewContainer = nil;
+    [self.annotations removeAllObjects];
+}
+
+- (void)unloadToolbar {
+    [consumptionToolbar_ release];
+    consumptionToolbar_ = nil;
+}
+
+- (void)receivedMemoryWarning:(NSNotification*)notification {
+    self.dirty = YES;
+    [self.caches removeAllObjects];
+}
 
 #pragma mark - MKMapViewDelegate Methods
 
@@ -285,6 +340,8 @@ NSInteger zoom;
         MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
         MKCoordinateRegion region = MKCoordinateRegionMake(currentLocation, mapSpan);
         [mapView_ setRegion:region animated:animated];
+        self.lastRegion = region;
+        [self update:NO];
         return YES;
     }
     else {
@@ -293,6 +350,7 @@ NSInteger zoom;
 }
 
 - (void)mapView:(MKMapView*)mapView didUpdateUserLocation:(MKUserLocation*)userLocation {
+    //Only zoom once
     if (self.zoomToUserLocation) {
         self.zoomToUserLocation = ![self zoomToCurrentLocation:YES];
     }
@@ -382,30 +440,9 @@ NSInteger zoom;
 }
 
 - (void)mapView:(MKMapView*)mapView regionDidChangeAnimated:(BOOL)animated {
-    
-    // Calculate delta of origins across longitudinal distance.
-    //CGFloat originDelta = MKMetersBetweenMapPoints(lastMapRect_.origin, mapView.visibleMapRect.origin);
-    //MKMapPoint upperRight = MKMapPointMake(MKMapRectGetMaxX(lastMapRect_), MKMapRectGetMinY(lastMapRect_));
-    //CGFloat span = MKMetersBetweenMapPoints(lastMapRect_.origin, upperRight);
-    
-    //NSLog(@"%d",[self zoomLevel]);
-    //if ((originDelta / span) < kMapSpanHysteresisPercentage)
-    //return;
-    
-    //if (searchField_.text.length > 0)
-    //return;
-    //lastMapRect_ = mapView.visibleMapRect;
-    //MKCoordinateRegion region = self.mapView.region;
-    //NSLog(@"%f,%f,%f,%f",region.center.latitude, region.center.longitude, region.span.latitudeDelta, region.span.longitudeDelta);
-    
-    //CGRect frame = [self tileFrame];
-    ///NSLog(@"frame:%f,%f,%f,%f", frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
-    //[self resetCaches];
-    //[self loadDataFromNetwork];
+    self.lastRegion = self.mapView.region;
     [self update:NO]; 
 }
-
-
 
 - (void)mapDisclosureTapped:(id)sender {
     UIButton* disclosureButton = sender;
@@ -556,9 +593,9 @@ NSInteger zoom;
 #pragma mark - UITextFieldDelegate Methods.
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-    [Util executeOnMainThread:^{
-        self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
-    }];
+//    [Util executeOnMainThread:^{
+//        self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
+//    }];
     return YES;
 }
 
@@ -627,7 +664,6 @@ NSInteger zoom;
 
 @implementation STConsumptionMapCache
 
-@synthesize key = key_;
 @synthesize scope = scope_;
 @synthesize subcategory = subcategory_;
 @synthesize filter = filter_;
@@ -647,6 +683,15 @@ NSInteger zoom;
         cache_ = [[NSCache alloc] init];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [subcategory_ release];
+    [filter_ release];
+    [query_ release];
+    [cache_ release];
+    [super dealloc];
 }
 
 - (void)handleResponseWithEntities:(NSArray<STEntityDetail>*)entities

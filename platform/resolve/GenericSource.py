@@ -15,17 +15,17 @@ from logs import report
 
 try:
     import logs, sys
-    from BasicSource                import BasicSource
+    from resolve.BasicSource                import BasicSource
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from pprint                     import pprint, pformat
     from abc                        import ABCMeta, abstractmethod
-    from Resolver                   import *
-    from ResolverObject             import *
-    from ASourceController          import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.ASourceController          import *
     from api.Schemas                import *
-    from EntityGroups               import *
-    from Entity                     import buildEntity
+    from resolve.EntityGroups               import *
+    from api.Entity                     import buildEntity
 except Exception:
     report()
     raise
@@ -66,13 +66,7 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
     return source
 
 def listSource(items, **kwargs):
-    def gen():
-        try:
-            for item in items:
-                yield item
-        except Exception:
-            pass
-    return generatorSource(gen(), **kwargs)
+    return generatorSource(iter(items), **kwargs)
 
 def multipleSource(source_functions, initial_timeout=None, final_timeout=None, **kwargs):
     def gen():
@@ -123,7 +117,7 @@ class GenericSource(BasicSource):
 
     @lazyProperty
     def stamped(self):
-        import StampedSource
+        from resolve import StampedSource
         return StampedSource.StampedSource()
 
     @abstractmethod

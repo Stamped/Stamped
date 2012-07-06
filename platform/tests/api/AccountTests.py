@@ -10,10 +10,10 @@ import Globals, utils
 from utils                  import lazyProperty
 from pymongo.errors          import *
 from errors                 import *
-from framework.FixtureTest  import *
-from AStampedAPITestCase    import *
-from AStampedAPIHttpTestCase import *
-from MongoStampedAPI import MongoStampedAPI
+from tests.framework.FixtureTest  import *
+from tests.AStampedAPITestCase    import *
+from tests.AStampedAPIHttpTestCase import *
+from api.MongoStampedAPI import MongoStampedAPI
 from pprint import pprint
 
 import logs
@@ -192,7 +192,7 @@ class StampedAPIAccountUpgradeTest(AStampedAPITestCase):
         self.assertTrue(account.password is not None)
 
     def test_upgrade_account_taken_email(self):
-        with expected_exception(DuplicateKeyError):
+        with expected_exception(StampedEmailInUseError):
             self.api.upgradeAccount(self.accountA.user_id, 'devbot2@stamped.com', '12345')
 
     def test_upgrade_account_already_stamped_auth(self):
@@ -226,6 +226,26 @@ class StampedAPIAccountSettings(StampedAPIAccountHttpTest):
             }
         with expected_exception():
             self.handlePOST(path, data)
+
+    def test_set_no_phone(self):
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "phone": "1234567",
+            }
+        self.handlePOST(path, data)
+        account = self.showAccount(self.token)
+        self.assertEqual(account['phone'], '1234567')
+
+        path = "account/update.json"
+        data = {
+            "oauth_token": self.token['access_token'],
+            "phone": "",
+            }
+        self.handlePOST(path, data)
+        account = self.showAccount(self.token)
+        self.assertEqual(account['phone'], None)
+
 
 """
 # Disabled for now - Mike is rewriting due to implementation changes

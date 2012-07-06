@@ -16,6 +16,8 @@
 #import "STConfiguration.h"
 #import "STConsumptionMapViewController.h"
 #import "STMenuController.h"
+#import "STAppDelegate.h"
+#import "STNavigationItem.h"
 
 @interface STIWantToViewController ()
 

@@ -11,7 +11,7 @@ import Globals
 import calendar, pprint, datetime, sys, argparse,math
 import keys.aws, logs, utils
 
-from MongoStampedAPI                            import MongoStampedAPI
+from api.MongoStampedAPI                            import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool

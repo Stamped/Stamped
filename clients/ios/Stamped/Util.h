@@ -19,6 +19,7 @@
 #import "STCancellation.h"
 #import <QuartzCore/QuartzCore.h>
 #import "STMenuController.h"
+#import "STStampedAPI.h"
 
 @class User;
 @class Entity;
@@ -48,6 +49,9 @@ typedef enum STGradientStyle {
 } STGradientStyle;
 
 @interface Util : NSObject
+
++ (NSError*)errorWithDescription:(NSString*)description;
+
 + (NSString*)floatToHex:(CGFloat)value;
 + (BOOL)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
 + (BOOL)splitHexString:(NSString*)hexString toRGB:(CGFloat*)rgb;
@@ -75,6 +79,7 @@ typedef enum STGradientStyle {
 + (NSString*)sanitizedPhoneNumberFromString:(NSString*)originalNum;
 + (CGRect)frameForImage:(UIImage*)image inImageViewAspectFit:(UIImageView*)imageView;
 + (NSString*)truncateTitleForBackButton:(NSString*)title;
++ (NSString*)truncateTitleForNavBar:(NSString*)title;
 
 + (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame;
 + (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame;
@@ -237,6 +242,14 @@ typedef enum STGradientStyle {
                                            indent:(CGFloat)indent 
                                           kerning:(CGFloat)kerning;
 
++ (NSAttributedString *)attributedStringForString:(NSString*)aString 
+                                             font:(UIFont*)aFont 
+                                            color:(UIColor*)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent 
+                                          kerning:(CGFloat)kerning;
+
+
 + (CGFloat)endForString:(NSAttributedString*)string withSize:(CGSize)bounds;
 
 + (void)drawAttributedString:(NSAttributedString*)string atPoint:(CGPoint)origin withWidth:(CGFloat)width andMaxHeight:(CGFloat)height;
@@ -258,6 +271,15 @@ typedef enum STGradientStyle {
 + (void)popControllerAnimated:(BOOL)animated;
 
 + (BOOL)compareAndPopController:(UIViewController*)controller animated:(BOOL)animated;
+
++ (BOOL)compareAndPushOnto:(UIViewController*)current 
+            withController:(UIViewController*)controller
+                     modal:(BOOL)modal 
+                  animated:(BOOL)animated;
+
++ (void)setRootViewController:(UIViewController*)controller animated:(BOOL)animated;
+
++ (void)goToInboxWithScope:(STStampedAPIScope)scope animated:(BOOL)animated;
 
 + (void)warnWithAPIError:(NSError*)error andBlock:(void (^)())block;
 

@@ -14,14 +14,14 @@ import Globals
 from logs import report
 
 try:
-    from BasicSource    import BasicSource
+    from resolve.BasicSource    import BasicSource
     import logs
     import re
     from datetime       import datetime
     from libs.LibUtils  import months
-    from Resolver       import *
+    from resolve.Resolver       import *
     from utils          import lazyProperty
-    from Geocoder       import Geocoder
+    from libs.Geocoder       import Geocoder
     from libs.Factual   import globalFactual
     from pprint         import pprint
 except:

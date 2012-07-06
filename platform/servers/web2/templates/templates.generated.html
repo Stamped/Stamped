@@ -123,7 +123,7 @@
             </div>
             
             <div class='share-button twitter'>
-                <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-hashtags="stamped">Tweet</a>
+                <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp">Tweet</a>
             </div>
             
             <div class='share-button google'>
@@ -136,11 +136,11 @@
 <!-- stamp-card-image.template.html -->
 <script id='stamp-card-image' type='text/html' class='handlebars-template'>
     <div class="stamp-preview stamp-category-{{entity.category}} stamp-subcategory-{{entity.subcategory}}">
-        <div class='preview-image stamp-user-image'>
-            {{#contents}}
+        {{#contents}}
+            <div class='preview-image stamp-user-image'>
                 {{entity_image}}
-            {{/contents}}
-        </div>
+            </div>
+        {{/contents}}
     </div>
 </script>
 
@@ -149,6 +149,7 @@
     <div class="stamp-gallery wide-gallery">
         
         <div class='stamp-gallery-header clearfix'>
+            <!--
             <div class='stamp-gallery-sort'>
                 <a href="#" class='item selected sort-modified' title='Sort stamps by most recent'>
                     Newest<span class='arrow'> &#x25BC</span>
@@ -158,9 +159,10 @@
                     Popular<span class='arrow'> &#x25BC</span>
                 </a>
             </div>
+            -->
             
             <div class='stamp-gallery-view-map'>
-                <a class="map-profile-link" href="/{{user.screen_name}}/map"><span class="desc">View Map </span><div class='map-profile-icon-wrapper map-icon'><div class='map-profile-icon'><div class='inner-shadow'></div><div class='inner'></div></div></div></a>
+                <a class="map-profile-link" href="/{{user.screen_name}}/map"><div class='map-profile-icon-wrapper map-icon'><div class='map-profile-icon'><div class='inner-shadow'></div><div class='inner'></div></div></div><span class="desc"> View Map</span></a>
             </div>
         </div>
         
@@ -207,7 +209,7 @@
                         <div class="stamp-category-{{entity.category}} stamp-subcategory-{{entity.subcategory}}">
                             <div class='title clearfloat'>
                                 <div class="pronounced-title">
-                                    <a class='sdetail' href="{{url}}" title="{{entity.title}}">{{entity.title}}</a>
+                                    <a class='sdetail' href="{{url}}" data-title="{{entity.title}}" title="{{entity.title}}">{{entity.title}}</a>
                                 </div>
                                 <span class='user-logo-small'></span>
                             </div>

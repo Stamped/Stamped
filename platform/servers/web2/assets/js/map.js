@@ -1,4 +1,4 @@
-/* map.js
+/*! map.js
  * 
  * Copyright (c) 2011-2012 Stamped Inc.
  */
@@ -89,10 +89,6 @@
         var stamp_map_popups            = {};
         var marker_clusterer            = null;
         var marker_clusterer_enabled    = false;
-        
-        /*var popup  = new google.maps.InfoWindow({
-            maxWidth : 340
-        });*/
         
         var popup = new InfoBox({
             disableAutoPan: false, 

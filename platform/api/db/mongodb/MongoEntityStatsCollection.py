@@ -9,7 +9,7 @@ import Globals
 from logs import report
 
 try:
-    from AMongoCollection               import AMongoCollection
+    from api.db.mongodb.AMongoCollection               import AMongoCollection
     from api.Schemas                        import *
 except:
     report()

@@ -9,6 +9,7 @@ import Globals, logs, re
 import unicodedata, utils
 
 try:
+    from api.Constants  import *
     from api.Schemas    import *
     from difflib        import SequenceMatcher
     from libs.LibUtils  import parseDateString
@@ -18,138 +19,6 @@ try:
 except:
     logs.report()
     raise
-
-kinds = set([
-    'place',
-    'person',
-    'media_collection',
-    'media_item',
-    'software',
-    'other',
-])
-
-types = set([
-    # PEOPLE
-    'artist',
-
-    # MEDIA COLLECTIONS
-    'tv',
-    'album',
-
-    # MEDIA ITEMS
-    'track',
-    'movie',
-    'book',
-
-    # SOFTWARE
-    'app',
-
-    # PLACES
-    'restaurant',
-    'bar',
-    'bakery',
-    'cafe',
-    'market',
-    'food',
-    'night_club',
-    'amusement_park',
-    'aquarium',
-    'art_gallery',
-    'beauty_salon',
-    'book_store',
-    'bowling_alley',
-    'campground',
-    'casino',
-    'clothing_store',
-    'department_store',
-    'establishment',
-    'florist',
-    'gym',
-    'home_goods_store',
-    'jewelry_store',
-    'library',
-    'liquor_store',
-    'lodging',
-    'movie_theater',
-    'museum',
-    'park',
-    'school',
-    'shoe_store',
-    'shopping_mall',
-    'spa',
-    'stadium',
-    'store',
-    'university',
-    'zoo',
-])
-
-categories = set([
-    'place', 
-    'music', 
-    'film', 
-    'book', 
-    'app',
-    'other',
-])
-
-subcategoryData = {
-    # Subcategory           Category        Kind                        Type
-    'restaurant'        : ( 'place',        [ 'place' ],                [ 'restaurant' ] ),
-    'bar'               : ( 'place',        [ 'place' ],                [ 'bar' ] ),
-    'bakery'            : ( 'place',        [ 'place' ],                [ 'bakery' ] ),
-    'cafe'              : ( 'place',        [ 'place' ],                [ 'cafe' ] ),
-    'market'            : ( 'place',        [ 'place' ],                [ 'market' ] ),
-    'food'              : ( 'place',        [ 'place' ],                [ 'food' ] ),
-    'night_club'        : ( 'place',        [ 'place' ],                [ 'night_club' ] ),
-    'amusement_park'    : ( 'place',        [ 'place' ],                [ 'amusement_park' ] ),
-    'aquarium'          : ( 'place',        [ 'place' ],                [ 'aquarium' ] ),
-    'art_gallery'       : ( 'place',        [ 'place' ],                [ 'art_gallery' ] ),
-    'beauty_salon'      : ( 'place',        [ 'place' ],                [ 'beauty_salon' ] ),
-    'book_store'        : ( 'place',        [ 'place' ],                [ 'book_store' ] ),
-    'bowling_alley'     : ( 'place',        [ 'place' ],                [ 'bowling_alley' ] ),
-    'campground'        : ( 'place',        [ 'place' ],                [ 'campground' ] ),
-    'casino'            : ( 'place',        [ 'place' ],                [ 'casino' ] ),
-    'clothing_store'    : ( 'place',        [ 'place' ],                [ 'clothing_store' ] ),
-    'department_store'  : ( 'place',        [ 'place' ],                [ 'department_store' ] ),
-    'establishment'     : ( 'place',        [ 'place' ],                [ 'establishment' ] ),
-    'florist'           : ( 'place',        [ 'place' ],                [ 'florist' ] ),
-    'gym'               : ( 'place',        [ 'place' ],                [ 'gym' ] ),
-    'home_goods_store'  : ( 'place',        [ 'place' ],                [ 'home_goods_store' ] ),
-    'jewelry_store'     : ( 'place',        [ 'place' ],                [ 'jewelry_store' ] ),
-    'library'           : ( 'place',        [ 'place' ],                [ 'library' ] ),
-    'liquor_store'      : ( 'place',        [ 'place' ],                [ 'liquor_store' ] ),
-    'lodging'           : ( 'place',        [ 'place' ],                [ 'lodging' ] ),
-    'movie_theater'     : ( 'place',        [ 'place' ],                [ 'movie_theater' ] ),
-    'museum'            : ( 'place',        [ 'place' ],                [ 'museum' ] ),
-    'park'              : ( 'place',        [ 'place' ],                [ 'park' ] ),
-    'school'            : ( 'place',        [ 'place' ],                [ 'school' ] ),
-    'shoe_store'        : ( 'place',        [ 'place' ],                [ 'shoe_store' ] ),
-    'shopping_mall'     : ( 'place',        [ 'place' ],                [ 'shopping_mall' ] ),
-    'spa'               : ( 'place',        [ 'place' ],                [ 'spa' ] ),
-    'stadium'           : ( 'place',        [ 'place' ],                [ 'stadium' ] ),
-    'store'             : ( 'place',        [ 'place' ],                [ 'store' ] ),
-    'university'        : ( 'place',        [ 'place' ],                [ 'university' ] ),
-    'zoo'               : ( 'place',        [ 'place' ],                [ 'zoo' ] ),
-
-    # Subcategory           Category        Kind                        Type
-    'book'              : ( 'book',         [ 'media_item' ],           [ 'book' ] ),
-
-    # Subcategory           Category        Kind                        Type
-    'movie'             : ( 'film',         [ 'media_item' ],           [ 'movie' ] ),
-    'tv'                : ( 'film',         [ 'media_collection' ],     [ 'tv' ] ),
-
-    # Subcategory           Category        Kind                        Type
-    'artist'            : ( 'music',        [ 'person' ],               [ 'artist' ] ),
-    'album'             : ( 'music',        [ 'media_collection' ],     [ 'album' ] ),
-    'track'             : ( 'music',        [ 'media_item' ],           [ 'track' ] ),
-
-    # Subcategory           Category        Kind                        Type
-    'app'               : ( 'app',          [ 'software' ],             [ 'app' ] ),
-    
-    # Subcategory           Category        Kind                        Type
-    'other'             : ( 'other',        [ 'other' ],                [ 'other' ] ),
-    'video_game'        : ( 'other',        [ 'software' ],             [ 'video_game' ] ),
-}
 
 def mapSubcategoryToCategory(subcategory):
     try:
@@ -386,18 +255,22 @@ def buildEntity(data=None, kind=None, mini=False):
 def upgradeEntityData(entityData):
     # Just to be explicit..
     old     = entityData
-    
+
     kind    = deriveKindFromOldSubcategory(old['subcategory'])
     types   = deriveTypesFromOldSubcategories([old['subcategory']])
-    
+
+    if kind == 'other' and 'coordinates' in old and 'lat' in old['coordinates'] and 'lng' in old['coordinates']:
+        kind = 'place'
+        types = [ 'establishment' ]
+
     new     = getEntityObjectFromKind(kind)()
-    
+
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time.replace(tzinfo=None)
     except Exception:
         logs.warning("Unable to convert ObjectId to timestamp")
         seedTimestamp = datetime.utcnow()
-    
+
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None, seed=True):
         if newName is None:
             newName = oldName
@@ -405,7 +278,7 @@ def upgradeEntityData(entityData):
             item = source.pop(oldName, None)
         else:
             item = source.pop('%s_%s' % (oldName, oldSuffix), None)
-        
+
         if item is not None:
             # Manual conversions...
             if oldName == 'track_length':
@@ -433,7 +306,7 @@ def upgradeEntityData(entityData):
                     t = source.pop('%s_%s' % (oldName, s), None)
                     if t is not None:
                         setattr(target, '%s_%s' % (newName, s), t)
-    
+
     def setListGroup(source, target, oldName, newName=None, delimiter=',', wrapper=None, seed=True):
         if newName is None:
             newName = oldName
@@ -457,7 +330,7 @@ def upgradeEntityData(entityData):
 
             setattr(target, '%s_source' % newName, source.pop('%s_source' % oldName, sourceName))
             setattr(target, '%s_timestamp' % newName, source.pop('%s_timestamp' % oldName, seedTimestamp))
-    
+
     sources                 = old.pop('sources', {})
     details                 = old.pop('details', {})
     timestamp               = old.pop('timestamp', {'created' : seedTimestamp})
@@ -472,7 +345,7 @@ def upgradeEntityData(entityData):
     book                    = details.pop('book', {})
     netflix                 = sources.pop('netflix', {})
     thetvdb                 = sources.pop('thetvdb', {})
-    
+
     # General
     new.schema_version      = 0
     new.entity_id           = old.pop('entity_id', None)
@@ -498,7 +371,7 @@ def upgradeEntityData(entityData):
     if new.images is not None and len(new.images) > 0:
         new.images_source = 'seed'
         new.images_timestamp = seedTimestamp
-    
+
     setBasicGroup(old, new, 'desc')
     subcategory = old['subcategory']
     if subcategory == 'song':
@@ -514,21 +387,21 @@ def upgradeEntityData(entityData):
     setBasicGroup(sources.pop('factual', {}), new.sources, 'factual', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     # TODO: Add factual_crosswalk
     setBasicGroup(sources.pop('singleplatform', {}), new.sources, 'singleplatform', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    
+
     # Apple / iTunes
     setBasicGroup(sources, new.sources, 'itunes', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.itunes_id is None:
         apple = sources.pop('apple', {})
         setBasicGroup(apple, new.sources, 'aid', 'itunes', newSuffix='id')
         setBasicGroup(apple, new.sources, 'view_url', 'itunes', newSuffix='url')
-    
+
     # Amazon
     setBasicGroup(sources, new.sources, 'amazon', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.amazon_id is None:
         amazon = sources.pop('amazon', {})
         setBasicGroup(amazon, new.sources, 'asin', 'amazon', newSuffix='id')
         setBasicGroup(amazon, new.sources, 'amazon_link', 'amazon', newSuffix='url')
-    
+
     # Netflix
     if netflix:
         setBasicGroup(netflix, new.sources, 'nid', 'netflix', newSuffix='id')
@@ -542,13 +415,13 @@ def upgradeEntityData(entityData):
     setBasicGroup(sources, new.sources, 'opentable', oldSuffix='id', newSuffix='id', additionalSuffixes=['nickname', 'url'])
     if new.sources.opentable_id is None:
         setBasicGroup(sources.pop('openTable', {}), new.sources, 'rid', 'opentable', newSuffix='id', additionalSuffixes=['url'])
-    
+
     # Google Places
     googleplaces = sources.pop('googlePlaces', {})
     setBasicGroup(googleplaces, new.sources, 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
     if new.sources.googleplaces_id is None:
         setBasicGroup(googleplaces, new.sources, 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
-    
+
     # User Generated
     userGenerated = sources.pop('userGenerated', {}).pop('generated_by', None)
     if userGenerated is not None:
@@ -562,17 +435,17 @@ def upgradeEntityData(entityData):
             new.sources.user_generated_subtitle = subtitle
 
         # Bug fix: Some custom entities had country passed from client w/out intentional user input. Delete!
-        if 'address' in place and place['address'] == ', US': 
+        if 'address' in place and place['address'] == ', US':
             del(place['address'])
             if 'coordinates' in old:
                 del(old['coordinates'])
-    
+
     # Contacts
     setBasicGroup(contact, new, 'phone')
     setBasicGroup(contact, new, 'site')
     setBasicGroup(contact, new, 'email')
     setBasicGroup(contact, new, 'fax')
-    
+
     # Places
     if kind == 'place':
         coordinates = old.pop('coordinates', None)
@@ -590,9 +463,9 @@ def upgradeEntityData(entityData):
         setBasicGroup(restaurant, new, 'menu', seed=False)
         setBasicGroup(restaurant, new, 'price_range', seed=False)
         setBasicGroup(restaurant, new, 'alcohol_flag', seed=False)
-        
+
         setListGroup(restaurant, new, 'cuisine', seed=False)
-    
+
     # Artist
     if kind == 'person':
         songs = artist.pop('songs', [])
@@ -633,7 +506,7 @@ def upgradeEntityData(entityData):
             new.albums_timestamp = artist.pop('albums_timestamp', seedTimestamp)
 
         setListGroup(media, new, 'genre', 'genres', seed=False)
-    
+
     # General Media
     if kind in ['media_collection', 'media_item']:
 
@@ -652,7 +525,7 @@ def upgradeEntityData(entityData):
             new.release_date = originalReleaseDate
             new.release_date_source = 'seed'
             new.release_date_timestamp = seedTimestamp
-    
+
     # Book
     if 'book' in types:
         setBasicGroup(book, new, 'isbn')
@@ -661,7 +534,7 @@ def upgradeEntityData(entityData):
 
         setListGroup(book, new, 'author', 'authors', wrapper=PersonEntityMini, seed=False)
         setListGroup(book, new, 'publishers', 'publisher', wrapper=PersonEntityMini, seed=False)
-    
+
     # Album
     if 'album' in types:
         songs = album.pop('tracks', [])
@@ -674,7 +547,7 @@ def upgradeEntityData(entityData):
             new.tracks = newSongs
             new.tracks_source = album.pop('songs_source', 'format')
             new.tracks_timestamp = album.pop('songs_timestamp', seedTimestamp)
-    
+
     # Track
     if 'track' in types:
         albumName = song.pop('album_name', media.pop('album_name', None))
@@ -683,13 +556,13 @@ def upgradeEntityData(entityData):
             entityMini.title = albumName
             albumId = song.pop('song_album_id', None)
             if albumId is not None:
-                entityMini.sources.itunes_id = albumId 
+                entityMini.sources.itunes_id = albumId
                 entityMini.sources.itunes_source = 'seed'
                 entityMini.sources.itunes_timestamp = seedTimestamp
             new.albums = [ entityMini ]
             new.albums_source = song.pop('album_name_source', 'format')
             new.albums_timestamp = song.pop('album_name_timestamp', seedTimestamp)
-    
+
     # Apps
     if 'app' in types:
         setBasicGroup(media, new, 'release_date', seed=False)
