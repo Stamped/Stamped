@@ -1289,7 +1289,7 @@ class StampedAPI(AStampedAPI):
 
         self._friendshipDB.removeFriendship(friendship)
 
-        # Asynchronously remove stamps and activity for this friendship
+        # Asynchronously remove stamps for this friendship
         tasks.invoke(tasks.APITasks.removeFriendship, args=[authUserId, user.user_id])
 
         return user
@@ -1303,9 +1303,6 @@ class StampedAPI(AStampedAPI):
         # Remove stamps from Inbox
         stampIds = self._collectionDB.getUserStampIds(userId)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
-
-        # Remove activity
-        #self._activityDB.removeFollowActivity(authUserId, userId)
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -1696,6 +1693,10 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def completeAction(self, authUserId, **kwargs):
+        tasks.invoke(tasks.APITasks.completeAction, args=[authUserId], kwargs=kwargs)
+        return True
+
+    def completeActionAsync(self, authUserId, **kwargs):
         action      = kwargs.pop('action', None)
         source      = kwargs.pop('source', None)
         sourceId    = kwargs.pop('source_id', None)
@@ -2552,7 +2553,6 @@ class StampedAPI(AStampedAPI):
         return True
     
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None):
-
         # Remove from user collection
         self._stampDB.removeUserStampReference(authUserId, stampId)
 
@@ -2727,9 +2727,6 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-#            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
-#                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
-#                return 'store'
             return 'place'
 
         elif kind == 'person':
@@ -2915,20 +2912,16 @@ class StampedAPI(AStampedAPI):
         for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
             repliedUserId = prevComment.user.user_id
 
-            if repliedUserId not in commentedUserIds \
-                and repliedUserId not in mentionedUserIds \
-                and repliedUserId not in repliedUserIds \
+            if repliedUserId not in commentedUserIds.union(mentionedUserIds).union(repliedUserIds) \
                 and repliedUserId != authUserId:
-                logs.info('\n### passed first test round')
-                replied_user_id = prevComment.user.user_id
 
                 # Check if block exists between user and previous commenter
                 friendship              = Friendship()
                 friendship.user_id      = authUserId
-                friendship.friend_id    = replied_user_id
+                friendship.friend_id    = repliedUserId
 
                 if self._friendshipDB.blockExists(friendship) == False:
-                    repliedUserIds.add(replied_user_id)
+                    repliedUserIds.add(repliedUserId)
 
         if len(repliedUserIds) > 0:
             self._addReplyActivity(authUserId, list(repliedUserIds), stamp.stamp_id, comment.comment_id)
@@ -2952,14 +2945,10 @@ class StampedAPI(AStampedAPI):
         # Remove activity?
         self._activityDB.removeCommentActivity(authUserId, comment.comment_id)
 
-        # Add user object
-        user = self._userDB.getUser(comment.user.user_id)
-        comment.user = user.minimize()
-
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[comment.stamp_id])
 
-        return comment
+        return True
 
     @API_CALL
     def getComments(self, stampId, authUserId, before=None, limit=20, offset=0):
@@ -3898,20 +3887,30 @@ class StampedAPI(AStampedAPI):
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.todos')
 
+        # Enrich todo
+        todo = self._enrichTodo(todo, user=user, entity=entity, stamp=users_stamp, friendIds=friendIds, authUserId=authUserId)
 
-        #stamp
+        tasks.invoke(tasks.APITasks.addTodo, 
+                        args=[authUserId, entity.entity_id], 
+                        kwargs={'stampId': stampId, 'previouslyTodoed': previouslyTodoed})
+
+        return todo
+
+    def addTodoAsync(self, authUserId, entityId, stampId=None, previouslyTodoed=False):
+        
+        # Friends
+        friendIds = self._friendshipDB.getFriends(authUserId)
+
+        # Stamp
         if stampId is not None:
             stamp = self._stampDB.getStamp(stampId)
             stampOwner = stamp.user.user_id
-
-        # Enrich todo
-        todo = self._enrichTodo(todo, user=user, entity=entity, stamp=users_stamp, friendIds=friendIds, authUserId=authUserId)
 
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
 
         # Add activity to all of your friends who stamped the entity
-        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entity.entity_id)
+        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
         recipientIds = [stamp.user.user_id for stamp in friendStamps]
         if authUserId in recipientIds:
             recipientIds.remove(authUserId)
@@ -3924,7 +3923,7 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Verify user isn't being blocked
         if not previouslyTodoed and len(recipientIds) > 0:
-            self._addTodoActivity(authUserId, recipientIds, entity.entity_id)
+            self._addTodoActivity(authUserId, recipientIds, entityId)
 
         # Update stamp stats
         if stampId is not None:
@@ -3935,9 +3934,7 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         # for now, we only post to OpenGraph if the Todo was off of a stamp
         if stampId is not None:
-            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoStampId':stampId})
-
-        return todo
+            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId, 'todoStampId':stampId})
 
     @API_CALL
     def completeTodo(self, authUserId, entityId, complete):
@@ -3969,25 +3966,20 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeTodo(self, authUserId, entityId):
         ### TODO: Fail gracefully if todo doesn't exist
-        RawTodo = self._todoDB.getTodo(authUserId, entityId)
+        rawTodo = self._todoDB.getTodo(authUserId, entityId)
 
-        if not RawTodo or not RawTodo.todo_id:
+        if not rawTodo or not rawTodo.todo_id:
             return True
-            #raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
 
         self._todoDB.removeTodo(authUserId, entityId)
 
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=-1)
 
-        # Enrich todo
-        todo = self._enrichTodo(RawTodo, authUserId=authUserId)
+        if rawTodo.stamp_id is not None:
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[rawTodo.stamp_id])
 
-        ### TODO: Verify user isn't being blocked
-        if todo.stamp is not None and todo.stamp.stamp_id is not None:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
-
-        return todo
+        return True
 
     @API_CALL
     def getTodos(self, authUserId, timeSlice):

@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import sys, datetime, logs, gevent, utils, math
-from api                        import Entity
+from api                        import Constants
 from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
@@ -53,12 +53,12 @@ class EntitySearch(object):
     def __registerSource(self, source, **categoriesToPriorities):
         self.__all_sources.append(source)
         for (category, priority) in categoriesToPriorities.items():
-            if category not in Entity.categories:
+            if category not in Constants.categories:
                 raise Exception("unrecognized category: %s" % category)
             self.__categories_to_sources_and_priorities[category].append((source, priority))
 
     def __init__(self):
-        allCategories = Entity.categories
+        allCategories = Constants.categories
         self.__all_sources = []
         # Within each category, we have a number of sources and each is assigned a priority. The priority is used to
         # determine how long to wait for results from that source.
@@ -168,7 +168,7 @@ class EntitySearch(object):
             resultsDict[source] = []
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
-        if category not in Entity.categories:
+        if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
         start = datetime.datetime.now()
@@ -382,8 +382,8 @@ def main():
     elif options.address:
         queryParams['coords'] = Geocoder().addressToLatLng(options.address)
 
-    if len(args) < 2 or args[0] not in Entity.categories:
-        categories = '[ %s ]' % (', '.join(Entity.categories))
+    if len(args) < 2 or args[0] not in Constants.categories:
+        categories = '[ %s ]' % (', '.join(Constants.categories))
         print '\nUSAGE:\n\nEntitySearch.py <category> <search terms>\n\nwhere <category> is one of:', categories, '\n'
         return 1
     searcher = EntitySearch()

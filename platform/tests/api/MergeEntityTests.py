@@ -6,7 +6,6 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from api import Entity
 from tests.framework.FixtureTest import *
 import datetime
 from libs.MongoCache import mongoCachedFn
