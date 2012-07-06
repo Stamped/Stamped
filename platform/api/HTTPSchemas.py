@@ -1085,6 +1085,7 @@ class HTTPEntityMini(Schema):
         try:
             logs.info('### entity title: %s' % entity.title)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
+            logs.info('### coordinates: %s' % entity.coordinates)
         except AttributeError:
             pass
 
