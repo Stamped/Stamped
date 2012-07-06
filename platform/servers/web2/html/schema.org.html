@@ -1,0 +1,40 @@
+itemscope 
+
+{% if sdetail %}
+    {% if entity.category == "film" %}
+        {% if entity.subcategory == "movie" %}
+            itemtype="http://schema.org/Movie"
+        {% else %}{% if entity.subcategory == "tv" %}
+            itemtype="http://schema.org/TVSeries"
+        {% endif %}{% endif %}
+    {% else %}{% if entity.category == "place" %}
+        {% if entity.subcategory == "restaurant" %}
+            itemtype="http://schema.org/Restaurant"
+        {% else %}{% if entity.subcategory == "bar" %}
+            itemtype="http://schema.org/BarOrPub"
+        {% else %}{% if entity.subcategory == "cafe" %}
+            itemtype="http://schema.org/CafeOrCoffeeShop"
+        {% else %}
+            itemtype="http://schema.org/Place"
+        {% endif %}{% endif %}{% endif %}
+    {% else %}{% if entity.category == "music" %}
+        {% if entity.subcategory == "artist" %}
+            itemtype="http://schema.org/MusicGroup"
+        {% else %}{% if entity.subcategory == "album" %}
+            itemtype="http://schema.org/MusicAlbum"
+        {% else %}{% if entity.subcategory == "song" %}
+            itemtype="http://schema.org/MusicRecording"
+        {% endif %}{% endif %}{% endif %}
+    {% else %}{% if entity.category == "book" %}
+        itemtype="http://schema.org/Book"
+    {% else %}
+        {% if entity.subcategory == "app" %}
+            itemtype="http://schema.org/MobileApplication"
+        {% else %}
+            itemtype="http://schema.org/Thing"
+        {% endif %}
+    {% endif %}{% endif %}{% endif %}{% endif %}
+{% else %}
+    itemtype="http://schema.org/Person"
+{% endif %}
+
