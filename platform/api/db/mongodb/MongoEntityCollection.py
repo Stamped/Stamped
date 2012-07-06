@@ -86,12 +86,12 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
     def getEntityMini(self, entityId):
         documentId  = self._getObjectIdFromString(entityId)
-        params = {'_id' : entityId}
+        params = {'_id' : documentId}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
 
         documents = self._collection.find(params, fields)
-        if len(documents) == 0:
-            raise StampedDocumentNotFoundError("Unable to find entity (id = %s)" % entityId)
+        if documents.count() == 0:
+            raise StampedDocumentNotFoundError("Unable to find entity (id = %s)" % documentId)
         entity = self._convertFromMongo(documents[0])
         entity = entity.minimize()
 
