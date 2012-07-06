@@ -79,5 +79,5 @@ urlpatterns = patterns('',
 
 # static assets
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
-urlpatterns += static("^mobile%s" % settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
+#urlpatterns += static("^mobile%s" % settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
 
