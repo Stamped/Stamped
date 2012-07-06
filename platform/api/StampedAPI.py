@@ -3149,7 +3149,7 @@ class StampedAPI(AStampedAPI):
         stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
         logs.debug('Time for _getStampCollectionSlice: %s' % (time.time() - t0))
 
-        stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
+        stamps = self._enrichStampObjects(stampData, authUserId=authUserId, mini=True)
         stamps = stamps[:limit]
 
         if len(stampData) >= limit and len(stamps) < limit:
@@ -4255,7 +4255,7 @@ class StampedAPI(AStampedAPI):
         t1 = time.time()
 
         ########
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=False)
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=True)
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
@@ -4263,8 +4263,7 @@ class StampedAPI(AStampedAPI):
         t1 = time.time()
 
         # Enrich entities
-        entities = self._entityDB.getEntities(entityIds.keys())
-        #entities = self._entityDB.getEntityMinis(entityIds.keys())
+        entities = self._entityDB.getEntityMinis(entityIds.keys())
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
