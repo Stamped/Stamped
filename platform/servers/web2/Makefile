@@ -10,14 +10,22 @@
 override PROJECT_BASE_DIR	= .
 override PROJECT_BASE_LIB	= $(PROJECT_BASE_DIR)/.make
 
-LESS_CSS_DIRS				= assets/css assets/css/libs
-LESS_CSS_SOURCE_SUFFIX		= less
-LESS_CSS_TARGET_SUFFIX		= css
-GET_LESS_CSS_PROG			= $(if $(call EXISTS,$(1)),$(1),$(2))
-LESS_CSS_PROG				= $(call GET_LESS_CSS_PROG,/stamped/node/node_modules/less/bin/lessc,lessc)
-LESS_CSS_SOURCES			= $(strip \
-	$(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
-LESS_CSS_TARGETS			= $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS_TARGET_SUFFIX))
+# Sanity-check PROJECT_BASE_DIR and PROJECT_BASE_LIB
+$(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                                     \
+   $(shell "Could not find PROJECT_BASE_LIB '$(PROJECT_BASE_LIB)'")                             \
+   $(shell "You need to point PROJECT_BASE_DIR to the directory containing the .make library")  \
+   $(error "Invalid PROJECT_BASE_LIB"))
+
+include $(PROJECT_BASE_LIB)/defines.mk
+
+LESS_CSS_DIRS               = assets/css assets/css/libs
+LESS_CSS_SOURCE_SUFFIX      = less
+LESS_CSS_TARGET_SUFFIX      = css
+LESS_CSS_PROG_EC2           = /stamped/node/node_modules/less/bin/lessc
+LESS_CSS_PROG               = $(if $(call EXISTS,$(LESS_CSS_PROG_EC2)),$(LESS_CSS_PROG_EC2),lessc)
+LESS_CSS_SOURCES            = $(strip \
+    $(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
+LESS_CSS_TARGETS            = $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS_TARGET_SUFFIX))
 
 JS_BASE_DIR					= assets/js
 CSS_BASE_DIR				= assets/css
@@ -82,12 +90,4 @@ help::
 	@$(CECHO) "$(FR_COLOR_RED)Usage:$(END_COLOR) make [target1 ...]"
 	@echo "   * the default target is 'all'"
 	@echo
-
-# Sanity-check PROJECT_BASE_DIR and PROJECT_BASE_LIB
-$(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),, 									\
-   $(shell "Could not find PROJECT_BASE_LIB '$(PROJECT_BASE_LIB)'") 							\
-   $(shell "You need to point PROJECT_BASE_DIR to the directory containing the .make library") 	\
-   $(error "Invalid PROJECT_BASE_LIB"))
-
-include $(PROJECT_BASE_LIB)/defines.mk
 
