@@ -1035,6 +1035,9 @@ class PlaceEntity(BasicEntity):
         # Fallback to generic
         return self._genericSubtitle()
 
+    def minimize(self, *args):
+        return BasicEntity.minimize(self, 'coordinates')
+
     @property
     def category(self):
         return 'place'
@@ -1381,6 +1384,11 @@ class Menu(Schema):
 # Stamps #
 # ###### #
 
+class StampLinks(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('og_id',                            basestring)
+
 class Badge(Schema):
     @classmethod
     def setSchema(cls):
@@ -1445,6 +1453,7 @@ class Stamp(Schema):
         cls.addNestedPropertyList('badges',                 Badge)
         cls.addProperty('via',                              basestring)
         cls.addNestedProperty('previews',                   Previews)
+        cls.addNestedProperty('links',                      StampLinks)
 
     def __init__(self):
         Schema.__init__(self)
