@@ -4,26 +4,23 @@ import Globals
 
 import keys.aws, logs, utils
 
-from django.http import HttpResponse
-from django.template import Context, loader
-from analytics.web.core.Dashboard import Dashboard
-from analytics.web.core.topStamped import getTopStamped
-from datetime import *
-from analytics.web.core.Enrichment import getEnrichmentStats
-from analytics.web.core import Stats
+from django.http                            import HttpResponse
+from django.template                        import Context, loader
+from boto.sdb.connection                    import SDBConnection
+from boto.exception                         import SDBResponseError
+from gevent.pool                            import Pool
+from django                                 import forms
 
+from analytics.web.core.Dashboard           import Dashboard
+from analytics.web.core.topStamped          import getTopStamped
+from analytics.web.core.Enrichment          import getEnrichmentStats
+from analytics.web.core                     import Stats
+from analytics.web.core.logsQuery           import logsQuery
+from analytics.web.core.weeklyScore         import weeklyScore
+from analytics.web.core.analytics_utils     import *
 
-from django.contrib.auth.decorators     import login_required
-from analytics.web.core.logsQuery                          import logsQuery
 from api.MongoStampedAPI                    import MongoStampedAPI
-from boto.sdb.connection                import SDBConnection
-from boto.exception                     import SDBResponseError
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
-from gevent.pool                        import Pool
-from django.contrib.auth                import authenticate, login
-from analytics.web.core.weeklyScore                        import weeklyScore
-from django import forms
-from analytics_utils import *
 
 
 utils.init_db_config('peach.db3')
@@ -140,20 +137,15 @@ def latency(request):
 def segmentation(request):
     scorer = weeklyScore(api)
     
-    if today().month > 1:
-        monthAgo = datetime(today().year, today().month - 1, today().day)
-    else:
-        monthAgo = datetime(today().year - 1, 12,today(),day)
-    
     
     usersW,powerW,avgW,lurkerW,dormantW,mean_scoreW = scorer.segmentationReport(weekAgo(today()),now(),False)
-    usersM,powerM,avgM,lurkerM,dormantM,mean_scoreM = scorer.segmentationReport(monthAgo,now(),True)
+    usersM,powerM,avgM,lurkerM,dormantM,mean_scoreM = scorer.segmentationReport(monthAgo(today()),now(),True)
     
     t = loader.get_template('../html/segmentation.html')
     c = Context({
                  'hour': est().hour,
                  'minute': est().minute,
-                 'monthAgo': monthAgo,
+                 'monthAgo': monthAgo(today()),
                  'weekAgo': weekAgo(today()),
                  'usersW': '%s' % usersW,
                  'powerW': '%.2f' % powerW,
@@ -174,7 +166,7 @@ def segmentation(request):
 def trending(request):
     
     class trendForm(forms.Form):
-        quantities =[("25","Top 25"),("10","Top 10"),("50","Top 50"),("100","Top 100"),("200","Top 200")]
+        quantities =[("25","Top 25"),("50","Top 50"),("100","Top 100"),("200","Top 200")]
         stats = [("stamped","Stamped"),("todod","Todo'd")]
         scopes = [("today","Today"),("week","This Week"),("month","This Month"),("all-time","All Time")]
         verticals = [("all","All Entities"),("restaurant,bar,cafe","Restaurants & Bars"),("book","Books"),("track,album,artist","Music"),("tv,movie","Film & TV"),('app',"Software")]
@@ -188,15 +180,13 @@ def trending(request):
                 widget=forms.Select(choices=verticals))
  
  
-    if today().month > 1:
-        monthAgo = datetime(today().year, today().month - 1, today().day)
-    else:
-        monthAgo = datetime(today().year - 1, 12,today(),day)
+
     
     bgn = today().isoformat()  
     kinds=None
     quant = 25
-    scope = 'today'       
+    scope = 'today'
+    stat = 'stamped'       
     if request.method == 'POST': 
         form = trendForm(request.POST) # A form bound to the POST data
         if form.is_valid():
@@ -210,14 +200,13 @@ def trending(request):
             elif stat == 'todod':
                 collection = todo_collection
             
-            print kinds
             if kinds == 'all':
                 kinds = None
             
             bgns = {
                     'today': today().isoformat(),
                     'week': weekAgo(today()).isoformat(),
-                    'month': monthAgo.isoformat(),
+                    'month': monthAgo(today()).isoformat(),
                     'all-time':v1_init().isoformat()
                     }
             quant = int(quant)
@@ -239,9 +228,10 @@ def trending(request):
                  'weekAgo': weekAgo(today()),
                  'results': results,
                  'form': form,
-                 'bgn': bgn,
+                 'bgn': bgn.split('T')[0],
                  'quantity': quant,
-                 'scope': scope
+                 'scope': scope,
+                 'stat': stat
 
     })
     return HttpResponse(t.render(c))
@@ -249,14 +239,19 @@ def trending(request):
 def custom(request):
 
     class inputForm(forms.Form):
-        stat_choices =[("stamps","Stamps Created"),("agg_stamps","Aggregate Stamps"),("accounts","Accounts Created"),("agg_accts","Aggregate Accounts"),("users","Active Users"),("friendships","Friendships Created"),("friends","Number of Friends"),
-                       ("comments","Comments Posted"),("todos","Todos Created"),("todos_c","Todos Completed"),("likes","Likes"),("entities","Entities Created"),("actions","Entity Actions")]
+        stat_choices =[("stamps","Stamps Created"),("agg_stamps","Aggregate Stamps"),
+                       ("accounts","Accounts Created"),("agg_accts","Aggregate Accounts"),
+                       ("users","Active Users"),("friendships","Friendships Created"),
+                       ("friends","Number of Friends"),("comments","Comments Posted"),
+                       ("todos","Todos Created"),("todos_c","Todos Completed"),
+                       ("likes","Likes"),("entities","Entities Created"),
+                       ("actions","Entity Actions")]
         stat = forms.CharField(max_length=30,
                 widget=forms.Select(choices=stat_choices))
         start_date = forms.DateTimeField()
         end_date = forms.DateTimeField(required=False)
         scope = forms.CharField(max_length=10,
-                widget = forms.Select(choices=[("day","By Day"),("Week","By Week"),("Month","By Month"),("total","Total")]))
+                widget = forms.Select(choices=[("day","By Day"),("week","By Week"),("month","By Month"),("total","Total")]))
         filter = forms.CharField(max_length=20,
                 widget = forms.Select(choices=[("false","Overall"),("true","Per User")]))
         
