@@ -62,7 +62,8 @@ def _coordinatesDictToFlat(coordinates):
             raise
 
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
-    except Exception:
+    except Exception as e:
+        logs.warning('error converting coordinates: %s' % e)
         return None
 
 def _coordinatesFlatToDict(coordinates):
