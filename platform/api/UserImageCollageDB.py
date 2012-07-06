@@ -41,18 +41,23 @@ class UserImageCollageDB(object):
         while retries < 3:
             try:
                 for category in categories:
-                    ts = { 'user_id' : user.user_id, 'scope'  : 'user' }
+                    ts = {
+                        'user_id' : user.user_id, 
+                        'scope'   : 'user'
+                    }
                     
                     if category != 'default':
                         if category == 'app':
                             ts['subcategory'] = 'app'
                         else:
-                            ts['category'] = category
+                            ts['category']    = category
                     
+                    ts['limit'] = 100
                     collage     = self._collages[category]
                     stamp_slice = HTTPTimeSlice().dataImport(ts).exportTimeSlice()
                     stamps      = self.api.getStampCollection(stamp_slice)
                     entities    = map(lambda s: s.entity, stamps)
+                    entities    = utils.shuffle(entities)[:30]
                     
                     logs.info("creating collage for user '%s' w/ category '%s' and %d entities" % (user.screen_name, category, len(entities)))
                     images = collage.generate_from_user(user, entities)

@@ -43,6 +43,8 @@
         stylesheet: sdetail.less
 -->
 
+{% block html_tags %} {{ block.super }} {% include "schema.org.html" %} {% endblock html_tags %}
+
 {% block styles %}
     {{ block.super }}
     

@@ -10,9 +10,9 @@ import Globals
 import logs
 import re
 from errors             import *
-import Entity
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from api          import Constants
 
 from bson.objectid          import ObjectId
 
@@ -131,7 +131,7 @@ def validateCategory(category):
         return None
     try:
         category = category.lower()
-        assert(category in Entity.categories)
+        assert(category in Constants.categories)
         return category
     except Exception as e:
         logs.warning("Category check failed for '%s': %s" % (category, e))
@@ -142,7 +142,7 @@ def validateSubcategory(subcategory):
         return None
     try:
         subcategory = subcategory.lower()
-        assert(subcategory in Entity.subcategories)
+        assert(subcategory in Constants.subcategories)
         return subcategory
     except Exception as e:
         logs.warning("Subcategory check failed for '%s': %s" % (subcategory, e))

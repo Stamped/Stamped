@@ -53,6 +53,12 @@ $(JS_BASE_DIR)/$1.generated.js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS
 	@echo
 endef
 
+define ADD_CSS_TARGET
+$(CSS_BASE_DIR)/$1.generated.css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
+	cat $$(call REST,$$^) | java -jar bin/compressor.jar --type css --line-break 120 > $$@
+	@echo
+endef
+
 all: $(ALL_TARGETS)
 
 .PHONY: $(TEMPLATE_DEST) all clean help
@@ -65,6 +71,8 @@ $(TEMPLATE_DEST): $(DEPENDENCIES)
 $(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_LESS_CSS_TARGET,$(DIR))))
 
 $(foreach PAGE,$(HTML_PAGES),$(eval $(call ADD_JS_TARGET,$(PAGE))))
+
+#$(foreach PAGE,$(HTML_PAGES),$(eval $(call ADD_CSS_TARGET,$(PAGE))))
 
 clean:
 	$(RM) -f $(ALL_TARGETS)

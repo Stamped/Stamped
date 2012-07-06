@@ -4,9 +4,9 @@
 <html class="ie" lang="en">
 <![endif]-->
 <!--[if gt IE 9]><!-->
-<html lang="en">
+<html lang="en" {% block html_tags %}{% endblock %}>
 <!--<![endif]-->
-
+    
     {% block pre_head %}
     <head>
         {% endblock pre_head %}

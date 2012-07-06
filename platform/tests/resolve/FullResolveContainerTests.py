@@ -9,7 +9,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import sys
+print 'hi'
+sys.stdout.flush()
 import Globals
+print 'try again'
 from logs import report
 
 try:

@@ -11,7 +11,7 @@ from api.IASyncProducer import IASyncProducer
 from gevent import Greenlet
 from gevent.queue import Queue
 from utils import abstract
-import Entity
+from api import Constants, Entity
 
 class AEntitySource(Greenlet, IASyncProducer):
     """
@@ -33,7 +33,7 @@ class AEntitySource(Greenlet, IASyncProducer):
         
         # validate the types
         for t in types:
-            if not t in Entity.subcategories:
+            if not t in Constants.subcategories:
                 raise AttributeError("Source subcategory '%s' not supported" % t)
             
             self.categories.add(Entity.mapSubcategoryToCategory(t))
