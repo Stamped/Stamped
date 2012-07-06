@@ -647,6 +647,7 @@ class BasicEntityMini(Schema):
         cls.addProperty('schema_version',                   int, required=True)
         cls.addProperty('entity_id',                        basestring)
         cls.addProperty('title',                            basestring)
+        cls.addProperty('subtitle',                         basestring)
         cls.addProperty('kind',                             basestring)
         cls.addPropertyList('types',                        basestring)
         cls.addNestedProperty('sources',                    EntitySources, required=True)
@@ -802,6 +803,8 @@ class BasicEntity(BasicEntityMini):
             except AttributeError:
                 logs.warning('Unable to minimize attribute "%s"' % attribute)
 
+        mini.subtitle = self.subtitle
+        logs.info('### mini.subtitle: %s   self.subtitle: %s' % (mini.subtitle, self.subtitle))
         return mini
 
     def isType(self, t):
@@ -1337,7 +1340,7 @@ class StampMini(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamp_id',                         basestring)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addNestedProperty('user',                       UserMini, required=True)
         cls.addNestedPropertyList('credits',                StampPreview)
         cls.addNestedPropertyList('contents',               StampContent, required=True)
@@ -1358,7 +1361,7 @@ class Stamp(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamp_id',                         basestring)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addNestedProperty('user',                       UserMini, required=True)
         cls.addNestedPropertyList('credits',                StampPreview)
         cls.addNestedPropertyList('contents',               StampContent, required=True)

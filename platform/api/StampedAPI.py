@@ -1933,7 +1933,7 @@ class StampedAPI(AStampedAPI):
 
         return []
 
-    def _enrichStampObjects(self, stampObjects, **kwargs):
+    def _enrichStampObjects(self, stampObjects, mini=False, **kwargs):
         t0 = time.time()
         t1 = t0
 
@@ -1970,7 +1970,10 @@ class StampedAPI(AStampedAPI):
 
         # Enrich missing entity ids
         missingEntityIds = allEntityIds.difference(set(entityIds.keys()))
-        entities = self._entityDB.getEntities(list(missingEntityIds))
+        if mini:
+            entities = self._entityDB.getEntityMinis(list(missingEntityIds))
+        else:
+            entities = self._entityDB.getEntities(list(missingEntityIds))
 
         for entity in entities:
             if entity.sources.tombstone_id is not None:
@@ -3950,7 +3953,7 @@ class StampedAPI(AStampedAPI):
         self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
         # Enrich todo
-        RawTodo.complete = True
+        RawTodo.complete = complete
         todo = self._enrichTodo(RawTodo, authUserId=authUserId)
 
         # TODO: Add activity item
@@ -4259,17 +4262,17 @@ class StampedAPI(AStampedAPI):
         logs.debug("### getActivity section 2a: %s" % (time.time() - t1))
         t1 = time.time()
 
-
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
+        ########
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=True)
         for stamp in stamps:
-
             stampIds[str(stamp.stamp_id)] = stamp
 
         logs.debug("### getActivity section 2b: %s" % (time.time() - t1))
         t1 = time.time()
 
         # Enrich entities
-        entities = self._entityDB.getEntities(entityIds.keys())
+        #entities = self._entityDB.getEntities(entityIds.keys())
+        entities = self._entityDB.getEntityMinis(entityIds.keys())
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
@@ -4652,3 +4655,23 @@ class StampedAPI(AStampedAPI):
 
 
 
+    def testFunction(self, authUserId, scope, limit, offset):
+        activity = self.getActivity(authUserId, scope, limit, offset)
+        print ('### activity blah!')
+        from pprint import pprint
+        for act in activity:
+            pprint(act.objects.stamps)
+
+        return
+
+
+        result = []
+        t0 = time.time()
+        for item in activity:
+            try:
+                result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
+            except Exception as e:
+                logs.warning("Failed to enrich activity: %s" % e)
+                logs.debug("Activity: %s" % item)
+        logs.debug("### importEnrichedActivity for all HTTPActivity: %s" % (time.time() - t0))
+        return result

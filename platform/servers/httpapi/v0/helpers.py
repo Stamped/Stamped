@@ -242,7 +242,6 @@ def handleHTTPRequest(requires_auth=True,
                 return ret
 
             except Exception as e:
-                logs.info('### calling handleStampedExceptions: %s' % exceptions)
                 return handleStampedExceptions(e, exceptions)
             finally:
                 try:
