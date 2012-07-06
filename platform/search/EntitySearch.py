@@ -349,6 +349,12 @@ class EntitySearch(object):
 from optparse import OptionParser
 from libs.Geocoder import Geocoder
 
+def format_for_print(string):
+    if isinstance(string, unicode):
+        return string.encode('utf-8')
+    else:
+        return string
+
 def main():
     usage = "Usage: %prog [options]"
     version = "%prog " + __version__
@@ -390,11 +396,11 @@ def main():
     results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
     for result in results:
         print "\n\n"
-        print "TITLE:", result.title
+        print "TITLE:", format_for_print(result.title)
         subtitle = result.subtitle
         if isinstance(result, PlaceEntity) and result.formatAddress():
             subtitle = result.formatAddress()
-        print "SUBTITLE", subtitle
+        print "SUBTITLE", format_for_print(subtitle)
         print result
 
     from libs.CountedFunction import printFunctionCounts
