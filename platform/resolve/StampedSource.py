@@ -1054,7 +1054,7 @@ class StampedSource(GenericSource):
         query = mongoQueries[0] if len(mongoQueries) == 1 else {'$or' : mongoQueries}
         results = self.__entityDB._collection.find(query, fields=['sources'])
 
-        # TODO(geoff): check for tombstone ids here.
+        # TODO PRELAUNCH FUCK FUCK FUCK CHECK FOR TOMBSTONE IDS
         sourceIdsToEntityId = {}
         for result in results:
             sourceIds = result['sources']
