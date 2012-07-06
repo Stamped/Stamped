@@ -4255,7 +4255,7 @@ class StampedAPI(AStampedAPI):
         t1 = time.time()
 
         ########
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=True)
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=False)
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
@@ -4263,8 +4263,8 @@ class StampedAPI(AStampedAPI):
         t1 = time.time()
 
         # Enrich entities
-        #entities = self._entityDB.getEntities(entityIds.keys())
-        entities = self._entityDB.getEntityMinis(entityIds.keys())
+        entities = self._entityDB.getEntities(entityIds.keys())
+        #entities = self._entityDB.getEntityMinis(entityIds.keys())
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
