@@ -21,10 +21,10 @@
 						<td> Today: {{todayStamps}}</td>
 					</tr><tr>
 						<td> Yesterday: {{yestStamps}}</td>
-						<td> {%if deltaStampsDay == 'N/A'%} N/A {% elif todayStamps > yestStamps %} +{{deltaStampsDay}}% {% else %} {{deltaStampsDay}}% {%endif%} </td>
+						<td> {%if deltaStampsDay == 'N/A'%} N/A {% else %} {{deltaStampsDay}}% {%endif%} </td>
 					</tr><tr>
 						<td> Weekly Avg: {{weekStamps}}</td>
-						<td> {%if deltaStampsWeek == 'N/A'%} N/A {% elif todayStamps > weekStamps %} +{{deltaStampsWeek}}% {% else %} {{deltaStampsWeek}}% {%endif%} </td>
+						<td> {%if deltaStampsWeek == 'N/A'%} N/A {% else %} {{deltaStampsWeek}}% {%endif%} </td>
 					</tr>
 				</table>
 			</div>
@@ -35,10 +35,10 @@
 						<td> Today: {{todayAccts}}</td>
 					</tr><tr>
 						<td> Yesterday: {{yestAccts}}</td>
-						<td> {%if deltaAcctsDay == '0.00'%} -- {% elif todayAccts > yestAccts %} +{{deltaAcctsDay}}% {% else %} {{deltaAcctsDay}}% {%endif%} </td>
+						<td> {%if deltaAcctsDay == '0.00'%} -- {% else %} {{deltaAcctsDay}}% {%endif%} </td>
 					</tr><tr>
 						<td> Weekly Avg: {{weekAccts}}</td>
-						<td> {%if deltaAcctsWeek == '0.00'%} -- {% elif todayAccts > weekAccts %} +{{deltaAcctsWeek}}% {% else %} {{deltaAcctsWeek}}% {%endif%} </td>
+						<td> {%if deltaAcctsWeek == '0.00'%} -- {% else %} {{deltaAcctsWeek}}% {%endif%} </td>
 					</tr>
 				</table>
 			</div>
@@ -49,10 +49,10 @@
 						<td> Today: {{todayUsers}}</td>
 					</tr><tr>
 						<td> Yesterday: {{yestUsers}}</td>
-						<td> {%if deltaUsersDay == '0.00'%} -- {% elif todayUsers > yestUsers %} +{{deltaUsersDay}}% {% else %} {{deltaUsersDay}}% {%endif%} </td>
+						<td> {%if deltaUsersDay == '0.00'%} -- {% else %} {{deltaUsersDay}}% {%endif%} </td>
 					</tr><tr>
 						<td> Weekly Avg: {{weekUsers}}</td>
-						<td> {%if deltaUsersWeek == '0.00'%} -- {% elif todayUsers > weekUsers %} +{{deltaUsersWeek}}% {% else %} {{deltaUsersWeek}}% {%endif%} </td>
+						<td> {%if deltaUsersWeek == '0.00'%} -- {% else %} {{deltaUsersWeek}}% {%endif%} </td>
 					</tr>
 				</table>
 			</div>
