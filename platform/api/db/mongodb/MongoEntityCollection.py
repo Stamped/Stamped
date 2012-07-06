@@ -126,6 +126,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
 
+        logs.info('### getEntityMinis result: %s' % result)
         return result
 
     def getEntities(self, entityIds):
