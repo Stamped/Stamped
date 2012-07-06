@@ -1083,6 +1083,7 @@ class HTTPEntityMini(Schema):
         _addImages(self, entity.images)
 
         try:
+            logs.info('### entity title: %s' % entity.title)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
         except AttributeError:
             pass
