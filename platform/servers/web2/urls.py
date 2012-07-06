@@ -5,10 +5,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from django.conf.urls.defaults  import patterns, include, url
-from django.conf.urls.static    import static
-
+import re
 import settings
+
+from django.conf.urls.defaults  import patterns, include, url
+from django.core.exceptions     import ImproperlyConfigured
 
 urlpatterns = patterns('',
     # ------------------------------- BLOG -------------------------------------
@@ -70,14 +71,35 @@ urlpatterns = patterns('',
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
-    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',   'mobile.views.profile'), 
+    #url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',   'mobile.views.profile'), 
     
     # ------------------------------- MAP --------------------------------------
     # e.g., stamped.com/mobile/travis/map
-    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$', 'mobile.views.map'), 
+    #url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$', 'mobile.views.map'), 
 )
 
+#from django.conf.urls.static    import static
+def custom_static(prefix, view='django.views.static.serve', **kwargs):
+    """
+        Helper function to return a URL pattern for serving files.
+        
+        from django.conf import settings
+        from django.conf.urls.static import static
+        
+        urlpatterns = patterns('',
+            # ... the rest of your URLconf goes here ...
+        ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    """
+    
+    if prefix and '://' in prefix:
+        return []
+    elif not prefix:
+        raise ImproperlyConfigured("Empty static prefix not permitted")
+    else:
+        return patterns('', 
+            url(r'^%s(?P<path>.*)$' % re.escape(prefix.lstrip('/')), view, kwargs=kwargs), 
+        )
+
 # static assets
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
-#urlpatterns += static("^mobile%s" % settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
+urlpatterns += custom_static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
 

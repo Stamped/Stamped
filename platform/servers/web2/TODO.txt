@@ -54,6 +54,7 @@ TODO:
         * TODO: lookup how this is commonly done
     
     * optimization:
+        * !!! Get static assets working when DEBUG=False !!!
         * http://developer.yahoo.com/performance/rules.html
         * combine & minify JS, CSS, & HTML
         * test hosting assets on cloudfront
