@@ -12,13 +12,13 @@ import calendar, pprint, datetime, sys, argparse
 import logs, utils, math
 
 
-from boto.sdb.connection                import SDBConnection
-from boto.exception                     import SDBResponseError
+from boto.sdb.connection                    import SDBConnection
+from boto.exception                         import SDBResponseError
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
-from gevent.pool                        import Pool
-from analytics.web.core.logsQuery                          import logsQuery
-from analytics.web.core.mongoQuery                         import mongoQuery
-from analytics.web.core.analytics_utils                    import v1_init
+from gevent.pool                            import Pool
+from analytics.web.core.logsQuery           import logsQuery
+from analytics.web.core.mongoQuery          import mongoQuery
+from analytics.web.core.analytics_utils     import v1_init
  
 class Stats():
     
@@ -86,11 +86,11 @@ class Stats():
             return output
         
         elif scope == 'day': 
-            interval = int((end.date() - bgn.date()).total_seconds()/(60*60*24)+1)
+            interval = int((end.date() - bgn.date()).days+1)
             succ = bgn + _day
             
         elif scope == 'week': 
-            interval = int((end.date() - bgn.date()).total_seconds()/(60*60*24*7)+1)
+            interval = int((end.date() - bgn.date()).days/(7)+1)
             succ = bgn + datetime.timedelta(days= (6-bgn.weekday())) + _day
             
         elif scope == 'month': 
