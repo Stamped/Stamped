@@ -6,8 +6,13 @@ import keys.aws, logs, utils
 
 from django.http import HttpResponse
 from django.template import Context, loader
+<<<<<<< HEAD
+from Dashboard import Dashboard
+from topStamped import getTopStamped
+=======
 from analytics.web.core.Dashboard import *
 from analytics.web.core.topStamped import getTopStamped
+>>>>>>> 94513bd8d4cb04bbe26209c9ffce1c2ba4455dd8
 from datetime import *
 from analytics.web.core.Enrichment import getEnrichmentStats
 from analytics.web.core import Stats
@@ -23,31 +28,40 @@ from gevent.pool                        import Pool
 from django.contrib.auth                import authenticate, login
 from analytics.web.core.weeklyScore                        import weeklyScore
 from django import forms
+from analytics_utils import *
 
 
-utils.init_db_config('peach.db2')
+utils.init_db_config('peach.db3')
 
 api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
 acct_collection = api._userDB._collection
 entity_collection = api._entityDB._collection
+todo_collection = api._todoDB._collection
 
 conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+dash = Dashboard(api)
 
 def index(request):
     
-    
-    todayStamps,yestStamps,weekStamps,deltaStampsDay,deltaStampsWeek = newStamps()
+    today_stamps_hourly,todayStamps,yest_stamps_hourly,yestStamps,week_stamps_hourly,weekStamps,deltaStampsDay,deltaStampsWeek = dash.newStamps()
 
-    todayAccts,yestAccts,weekAccts,deltaAcctsDay,deltaAcctsWeek = newAccounts()
+    today_accts_hourly,todayAccts,yest_accts_hourly,yestAccts,week_accts_hourly,weekAccts,deltaAcctsDay,deltaAcctsWeek = dash.newAccounts()
     
-    todayUsrs,yestUsrs,weekUsrs,deltaUsrsDay,deltaUsrsWeek = todaysUsers()
+    today_users_hourly,todayUsers,yest_users_hourly,yestUsers,week_users_hourly,weekUsers,deltaUsersDay,deltaUsersWeek = dash.todaysUsers()
     
+    stamp_graph = [today_stamps_hourly,yest_stamps_hourly,week_stamps_hourly]
+    acct_graph = [today_accts_hourly,yest_accts_hourly,week_accts_hourly]
+    users_graph = [today_users_hourly,yest_users_hourly,week_users_hourly]
+    
+    hours = []
+    for i in range (0,24):
+        hours.append(i)
     
     t = loader.get_template('../html/index.html')
     c = Context({
-        'hour': now().hour,
-        'minute': now().minute,
+        'hour': est().hour,
+        'minute': est().minute,
         'todayStamps': todayStamps,
         'yestStamps': yestStamps,
         'weekStamps': '%.2f' % weekStamps,
@@ -58,11 +72,15 @@ def index(request):
         'weekAccts': '%.2f' % weekAccts,
         'deltaAcctsDay': '%.2f' % deltaAcctsDay,
         'deltaAcctsWeek': '%.2f' %deltaAcctsWeek,
-        'todayUsrs': todayUsrs,
-        'yestUsrs': yestUsrs,
-        'weekUsrs': '%.2f' % weekUsrs,
-        'deltaUsrsDay': '%.2f' % deltaUsrsDay,
-        'deltaUsrsWeek': '%.2f' % deltaUsrsWeek,
+        'todayUsers': todayUsers,
+        'yestUsers': yestUsers,
+        'weekUsers': '%.2f' % weekUsers,
+        'deltaUsersDay': '%.2f' % deltaUsersDay,
+        'deltaUsersWeek': '%.2f' % deltaUsersWeek,
+        'stamp_graph': stamp_graph,
+        'acct_graph': acct_graph,
+        'user_graph': users_graph,
+        'hours': hours
 
         
     })
@@ -70,7 +88,7 @@ def index(request):
 
 def enrichment(request):
     
-    media_items,songs,movies,books,media_colls,shows,albums,places,percentSingle,artists,app = getEnrichmentStats()
+    media_items,songs,movies,books,media_colls,shows,albums,places,percentSingle,artists,app = getEnrichmentStats(entity_collection)
     
     t = loader.get_template('../html/enrichment.html')
     c = Context({
@@ -108,7 +126,7 @@ def latency(request):
     is_blacklist = len(blacklist) > 0
     is_whitelist = len(whitelist) > 0
     
-    latency = query.latencyReport(weekAgo(today()),now(),blacklist,whitelist)
+    latency = query.latencyReport(weekAgo(today()),now(),None,blacklist,whitelist)
         
     t = loader.get_template('../html/latency.html')
     c = Context({
@@ -123,7 +141,7 @@ def latency(request):
     return HttpResponse(t.render(c))
 
 def segmentation(request):
-    scorer = weeklyScore()
+    scorer = weeklyScore(api)
     
     if today().month > 1:
         monthAgo = datetime(today().year, today().month - 1, today().day)
@@ -136,8 +154,8 @@ def segmentation(request):
     
     t = loader.get_template('../html/segmentation.html')
     c = Context({
-                 'hour': now().hour,
-                 'minute': now().minute,
+                 'hour': est().hour,
+                 'minute': est().minute,
                  'monthAgo': monthAgo,
                  'weekAgo': weekAgo(today()),
                  'usersW': '%s' % usersW,
@@ -158,22 +176,63 @@ def segmentation(request):
 
 def trending(request):
     
+    class trendForm(forms.Form):
+        quantities =[("25","Top 25"),("10","Top 10"),("50","Top 50"),("100","Top 100"),("200","Top 200")]
+        stats = [("stamped","Stamped"),("todod","Todo'd")]
+        scopes = [("today","Today"),("week","This Week"),("month","This Month"),("all-time","All Time")]
+        verticals = [("all","All Entities"),("restaurant,bar,cafe","Restaurants & Bars"),("book","Books"),("track,album,artist","Music"),("tv,movie","Film & TV"),('app',"Software")]
+        quantity = forms.CharField(max_length=30,
+                widget=forms.Select(choices=quantities))
+        stat = forms.CharField(max_length=30,
+                widget=forms.Select(choices=stats))
+        scope = forms.CharField(max_length=30,
+                widget=forms.Select(choices=scopes))
+        vertical = forms.CharField(max_length=30,
+                widget=forms.Select(choices=verticals))
+ 
+ 
     if today().month > 1:
         monthAgo = datetime(today().year, today().month - 1, today().day)
     else:
         monthAgo = datetime(today().year - 1, 12,today(),day)
     
-    try:
-        kinds = request.POST['vertical'].split(',')
-    except KeyError:
-        kinds = None
-        
-    if kinds == 'all':
-        kinds = None
+    bgn = today().isoformat()  
+    kinds=None
+    quant = 25
+    scope = 'today'       
+    if request.method == 'POST': 
+        form = trendForm(request.POST) # A form bound to the POST data
+        if form.is_valid():
+            stat = form.cleaned_data['stat']
+            scope = form.cleaned_data['scope']
+            kinds = form.cleaned_data['vertical']
+            quant = form.cleaned_data['quantity']
+            
+            if stat == 'stamped':    
+                collection = stamp_collection
+            elif stat == 'todod':
+                collection = todo_collection
+            
+            print kinds
+            if kinds == 'all':
+                kinds = None
+            
+            bgns = {
+                    'today': today().isoformat(),
+                    'week': weekAgo(today()).isoformat(),
+                    'month': monthAgo.isoformat(),
+                    'all-time':v1_init().isoformat()
+                    }
+            quant = int(quant)
+            bgn = bgns[scope]
+            results = getTopStamped(kinds,bgn,collection)
+            results = results[0:quant]
+            
     
-    todayTop = getTopStamped(kinds,today().isoformat(),stamp_collection)
-    weekTop = getTopStamped(kinds,weekAgo(today()).isoformat(),stamp_collection)
-    monthTop = getTopStamped(kinds,monthAgo.isoformat(),stamp_collection)
+    else: 
+        form = trendForm()
+        results = getTopStamped(kinds,today().isoformat(),stamp_collection)
+        results = results[0:quant]
     
     t = loader.get_template('../html/trending.html')
     c = Context({
@@ -181,9 +240,11 @@ def trending(request):
                  'minute': now().minute,
                  'monthAgo': monthAgo,
                  'weekAgo': weekAgo(today()),
-                 'today': todayTop,
-                 'week': weekTop,
-                 'month': monthTop,
+                 'results': results,
+                 'form': form,
+                 'bgn': bgn,
+                 'quantity': quant,
+                 'scope': scope
 
     })
     return HttpResponse(t.render(c))
@@ -191,18 +252,19 @@ def trending(request):
 def custom(request):
 
     class inputForm(forms.Form):
-        stat_choices =[("stamps","Stamps Created"),("accounts","Accounts Created"),("users","Active Users"),("friendships","Friendships Created")]
+        stat_choices =[("stamps","Stamps Created"),("agg_stamps","Aggregate Stamps"),("accounts","Accounts Created"),("agg_accts","Aggregate Accounts"),("users","Active Users"),("friendships","Friendships Created"),("friends","Number of Friends"),
+                       ("comments","Comments Posted"),("todos","Todos Created"),("todos_c","Todos Completed"),("likes","Likes"),("entities","Entities Created"),("actions","Entity Actions")]
         stat = forms.CharField(max_length=30,
                 widget=forms.Select(choices=stat_choices))
         start_date = forms.DateTimeField()
         end_date = forms.DateTimeField(required=False)
         scope = forms.CharField(max_length=10,
-                widget = forms.Select(choices=[("day","By Day"),("week","By Week"),("month","By Month"),("total","Total")]))
+                widget = forms.Select(choices=[("day","By Day"),("Week","By Week"),("Month","By Month"),("total","Total")]))
         filter = forms.CharField(max_length=20,
-                widget = forms.Select(choices=[("false","None"),("true","Per User")]))
+                widget = forms.Select(choices=[("false","Overall"),("true","Per User")]))
         
    
-    output = []
+    bgns,ends,values,base = [],[],[],[]
     if request.method == 'POST': 
         form = inputForm(request.POST) # A form bound to the POST data
         if form.is_valid():
@@ -211,13 +273,14 @@ def custom(request):
             scope = form.cleaned_data['scope']
             per = form.cleaned_data['filter']
             end = form.cleaned_data['end_date']
-
+            if end is not None and end > today():
+                end = today()
             stats = Stats.Stats()
             perUser = False
             if per == "true":
                 perUser = True
             output = stats.query(scope, stat, bgn, end, perUser)
-            
+            bgns,ends,values,base = stats.setupGraph(output)
             
             
     else: form = inputForm()
@@ -227,7 +290,10 @@ def custom(request):
                  'hour': now().hour,
                  'minute': now().minute,
                  'form': form,
-                 'output': output,
+                 'bgns': bgns,
+                 'ends': ends,
+                 'values': values,
+                 'base': base
 
     })
     return HttpResponse(t.render(c))

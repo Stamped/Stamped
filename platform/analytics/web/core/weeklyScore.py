@@ -56,7 +56,8 @@ def score(uri):
 
 class weeklyScore(object):
     
-    def __init__(self):
+    def __init__(self,api):
+        self.api = api
         self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domains = {}
         self.statDict = {}
@@ -98,7 +99,7 @@ class weeklyScore(object):
             
         pool.join()
         
-        convert = Converter()
+        convert = Converter(self.api)
         output = []
         
         for uid in self.statDict:
