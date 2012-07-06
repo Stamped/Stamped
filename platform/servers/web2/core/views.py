@@ -219,7 +219,7 @@ def handle_map(request, schema, **kwargs):
     if mobile:
         redirect_uri = "/%s?category=place" % screen_name
         redirect_url = request.build_absolute_uri(redirect_uri)
-        logs.info("redirecting mobile map '%s' to: '%s'" % (uri, redirect_uri))
+        logs.info("redirecting mobile map from '%s' to: '%s'" % (uri, redirect_uri))
         
         return HttpResponseRedirect(redirect_url)
     
@@ -236,6 +236,7 @@ def handle_map(request, schema, **kwargs):
     
     s = schema.dataExport()
     del s['screen_name']
+    
     s['user_id']  = user_id
     s['category'] = 'place'
     
