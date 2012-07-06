@@ -668,10 +668,32 @@ class PlaceEntityMini(BasicEntityMini):
         BasicEntityMini.__init__(self)
         self.kind = 'place'
 
+    @property
+    def category(self):
+        return 'place'
+
+    @property
+    def subcategory(self):
+        for t in self.types:
+            return t
+        return 'place'
+
 class PersonEntityMini(BasicEntityMini):
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.kind = 'person'
+
+    @property
+    def category(self):
+        if self.isType('artist'):
+            return 'music'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('artist'):
+            return 'artist'
+        return 'other'
 
 class MediaCollectionEntityMini(BasicEntityMini):
     def __init__(self):
@@ -687,10 +709,45 @@ class MediaItemEntityMini(BasicEntityMini):
         BasicEntityMini.__init__(self)
         self.kind = 'media_item'
 
+    @property
+    def category(self):
+        if self.isType('movie'):
+            return 'film'
+        if self.isType('track'):
+            return 'music'
+        if self.isType('book'):
+            return 'book'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('movie'):
+            return 'movie'
+        if self.isType('track'):
+            return 'song'
+        if self.isType('book'):
+            return 'book'
+        return 'other'
+
 class SoftwareEntityMini(BasicEntityMini):
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.kind = 'software'
+
+    @property
+    def category(self):
+        if self.isType('app'):
+            return 'app'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('app'):
+            return 'app'
+        elif 'video_game' in self.types:
+            return 'video_game'
+
+        return 'other'
 
 class BasicEntity(BasicEntityMini):
     @classmethod
