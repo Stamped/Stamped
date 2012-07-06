@@ -919,7 +919,7 @@ class iTunesSource(GenericSource):
         supportedProxyTypes = {
             'music': (iTunesArtist, iTunesAlbum, iTunesTrack),
             'film': (iTunesMovie, iTunesTVShow),
-            'app': (iTunesTrack,),
+            'app': (iTunesApp,),
             'book': (iTunesBook,),
         }[queryCategory]
 

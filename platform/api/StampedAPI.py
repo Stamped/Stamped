@@ -1979,7 +1979,7 @@ class StampedAPI(AStampedAPI):
         for entity in entities:
             if entity.sources.tombstone_id is not None:
                 # Convert to newer entity
-                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                replacement = self._entityDB.getEntityMini(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
                 # Call async process to update references
                 tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
@@ -3813,12 +3813,12 @@ class StampedAPI(AStampedAPI):
             user = self._userDB.getUser(rawTodo.user_id).minimize()
 
         if entity is None or entity.entity_id != rawTodo.entity.entity_id:
-            entity = self._entityDB.getEntity(rawTodo.entity.entity_id)
+            entity = self._entityDB.getEntityMini(rawTodo.entity.entity_id)
 
         if sourceStamps is None and rawTodo.source_stamp_ids is not None:
             # Enrich stamps
             sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids)
-            sourceStamps = self._enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
+            sourceStamps = self._enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId, mini=True)
 
         # If Stamp is completed, check if the user has stamped it to populate todo.stamp_id value.
         # this is necessary only for backward compatability.  The new RawTodo schema includes the stamp_id val
@@ -4011,14 +4011,14 @@ class StampedAPI(AStampedAPI):
         user = self._userDB.getUser(authUserId).minimize()
 
         # Enrich entities
-        entities = self._entityDB.getEntities(entityIds.keys())
+        entities = self._entityDB.getEntityMinis(entityIds.keys())
 
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
         # Enrich stamps
         stamps = self._stampDB.getStamps(sourceStampIds.keys())
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds)
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds, mini=True)
 
         for stamp in stamps:
             sourceStampIds[str(stamp.stamp_id)] = stamp
@@ -4367,7 +4367,7 @@ class StampedAPI(AStampedAPI):
         # Attempt to resolve against the Stamped DB
         source    = sources[source_name.lower()]()
         stamped   = StampedSource(stamped_api=self)
-        entity_id = stamped.resolve_fast(source, source_id)
+        entity_id = stamped.resolve_fast(source.sourceName, source_id)
 
         if entity_id is None:
             try:
@@ -4589,7 +4589,7 @@ class StampedAPI(AStampedAPI):
                         source = musicSources[sourceName]()
                         source_id = getattr(stub.sources, '%s_id' % sourceName)
                         # Attempt to resolve against the Stamped DB (quick)
-                        entity_id = stampedSource.resolve_fast(source, source_id)
+                        entity_id = stampedSource.resolve_fast(sourceName, source_id)
                         if entity_id is None and not quickResolveOnly:
                             # Attempt to resolve against the Stamped DB (full)
                             proxy = source.entityProxyFromKey(source_id, entity=stub)

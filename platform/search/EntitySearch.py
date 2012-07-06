@@ -226,17 +226,17 @@ class EntitySearch(object):
 
     def __getEntityIdForCluster(self, cluster):
         idsFromClusteredEntities = []
-        fastResolvedIds = []
+        fastResolveQueries = []
         for result in cluster.results:
             if result.dataQuality < MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
                 continue
             if result.resolverObject.source == 'stamped':
                 idsFromClusteredEntities.append(result.resolverObject.key)
             else:
-                # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
-                entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
-                if entityId:
-                    fastResolvedIds.append(entityId)
+                fastResolveQueries.append((result.resolverObject.source, result.resolverObject.key))
+
+        # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
+        fastResolvedIds = filter(None, self.__stampedSource.resolve_fast_batch(fastResolveQueries)) if fastResolveQueries else []
 
         allIds = idsFromClusteredEntities + fastResolvedIds
         if len(idsFromClusteredEntities) > 2:
@@ -349,6 +349,12 @@ class EntitySearch(object):
 from optparse import OptionParser
 from libs.Geocoder import Geocoder
 
+def format_for_print(string):
+    if isinstance(string, unicode):
+        return string.encode('utf-8')
+    else:
+        return string
+
 def main():
     usage = "Usage: %prog [options]"
     version = "%prog " + __version__
@@ -390,11 +396,11 @@ def main():
     results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
     for result in results:
         print "\n\n"
-        print "TITLE:", result.title
+        print "TITLE:", format_for_print(result.title)
         subtitle = result.subtitle
         if isinstance(result, PlaceEntity) and result.formatAddress():
             subtitle = result.formatAddress()
-        print "SUBTITLE", subtitle
+        print "SUBTITLE", format_for_print(subtitle)
         print result
 
     from libs.CountedFunction import printFunctionCounts
