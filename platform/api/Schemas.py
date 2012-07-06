@@ -659,6 +659,14 @@ class BasicEntityMini(Schema):
         self.kind = 'other'
         self.sources = EntitySources()
 
+    def isType(self, t):
+        try:
+            if t in self.types:
+                return True
+        except Exception as e:
+            logs.warning("isType error (%s): %s" % (self, e))
+        return False
+
 class PlaceEntityMini(BasicEntityMini):
     @classmethod
     def setSchema(cls):
@@ -863,14 +871,6 @@ class BasicEntity(BasicEntityMini):
         mini.subtitle = self.subtitle
         logs.info('### mini.subtitle: %s   self.subtitle: %s' % (mini.subtitle, self.subtitle))
         return mini
-
-    def isType(self, t):
-        try:
-            if t in self.types:
-                return True
-        except Exception as e:
-            logs.warning("isType error (%s): %s" % (self, e))
-        return False
 
 def getEntityObjectFromKind(kind):
     if kind == 'place':
