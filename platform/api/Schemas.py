@@ -667,6 +667,15 @@ class BasicEntityMini(Schema):
             logs.warning("isType error (%s): %s" % (self, e))
         return False
 
+    @property
+    def category(self):
+        return 'other'
+
+    @property
+    def subcategory(self):
+        return 'other'
+
+
 class PlaceEntityMini(BasicEntityMini):
     @classmethod
     def setSchema(cls):
@@ -707,6 +716,22 @@ class MediaCollectionEntityMini(BasicEntityMini):
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.kind = 'media_collection'
+
+    @property
+    def category(self):
+        if self.isType('album'):
+            return 'music'
+        if self.isType('tv'):
+            return 'film'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('album'):
+            return 'album'
+        if self.isType('tv'):
+            return 'tv'
+        return 'other'
 
 class MediaItemEntityMini(BasicEntityMini):
     @classmethod
@@ -808,14 +833,6 @@ class BasicEntity(BasicEntityMini):
     @property
     def subtitle(self):
         return self._genericSubtitle()
-
-    @property
-    def category(self):
-        return 'other'
-
-    @property
-    def subcategory(self):
-        return 'other'
 
     @lazyProperty
     def search_id(self):
