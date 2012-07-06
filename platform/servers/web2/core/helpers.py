@@ -29,6 +29,7 @@ _baseurl = "https://dev.stamped.com/v0"
 STAMPED_SETTINGS = filter(lambda s: s.startswith('STAMPED_'), dir(settings))
 STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETTINGS))
 
+# TODO (travis): move StampedAPIProxy to its own file!
 class StampedAPIProxy(object):
     
     def __init__(self):

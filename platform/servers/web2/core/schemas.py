@@ -14,7 +14,8 @@ from api.HTTPSchemas    import *
 class HTTPWebTimeSlice(Schema):
     def __init__(self, *args, **kwargs):
         Schema.__init__(self, *args, **kwargs)
-        self.ajax = False
+        self.ajax   = False
+        self.mobile = False
     
     @classmethod
     def setSchema(cls):
@@ -35,11 +36,13 @@ class HTTPWebTimeSlice(Schema):
         
         # Web-specific
         cls.addProperty('ajax',                             bool)
+        cls.addProperty('mobile',                           bool)
 
 class HTTPWebTimeMapSlice(Schema):
     def __init__(self, *args, **kwargs):
         Schema.__init__(self, *args, **kwargs)
-        self.ajax = False
+        self.ajax   = False
+        self.mobile = False
     
     @classmethod
     def setSchema(cls):
@@ -61,6 +64,7 @@ class HTTPWebTimeMapSlice(Schema):
         
         # Web-specific
         cls.addProperty('ajax',                             bool)
+        cls.addProperty('mobile',                           bool)
 
 class HTTPObjectId(Schema):
     

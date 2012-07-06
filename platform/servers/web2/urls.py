@@ -63,6 +63,18 @@ urlpatterns = patterns('',
     # e.g., stamped.com/travis/1
     url(r'^(?P<screen_name>[\w-]{1,20})/s/(?P<stamp_num>\d+)', 
                                                 'core.views.sdetail'), 
+    
+    # --------------------------------------------------------------------------
+    # ------------------------------ MOBILE ------------------------------------
+    # --------------------------------------------------------------------------
+    
+    # ----------------------------- PROFILE ------------------------------------
+    # e.g., stamped.com/mobile/travis
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',   'mobile.views.profile'), 
+    
+    # ------------------------------- MAP --------------------------------------
+    # e.g., stamped.com/mobile/travis/map
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$', 'mobile.views.map'), 
 )
 
 # static assets

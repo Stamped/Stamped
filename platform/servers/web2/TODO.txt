@@ -43,6 +43,12 @@
 
 TODO:
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
+    * MOBILE
+        * lookup best approach; options:
+            * redirect to m.stamped.com
+            * sniff user-agent and include mobile param as a view decorator
+        * incorporate mobile browser sniffing and redirection
+            * http://minidetector.googlecode.com/svn/trunk/minidetector/search_strings.txt
     
     * incorporate versioning into asset management
         * TODO: lookup how this is commonly done
@@ -273,4 +279,10 @@ ChangeList 6/22/2012:
     
     * sDetail:
         * Opening sDetail and closing now properly remembers the window's scroll offset
+
+
+            if ($http_user_agent ~* '(2\.0 MMP|240x320|400X240|AvantGo|BlackBerry|Blazer|Cellphone|Danger|DoCoMo|Elaine\/3\.0|EudoraWeb|Googlebot-Mobile|hiptop|IEMobile|KYOCERA\/WX310K|LG\/U990|MIDP-2\.|MMEF20|MOT-V|NetFront|Newt|Nintendo Wii|Nitro|Nokia|Opera Mini|Palm|PlayStation Portable|portalmmm|Proxinet|ProxiNet|SHARP-TQ-GX10|SHG-i900|Small|SonyEricsson|Symbian OS|SymbianOS|TS21i-10|UP\.Browser|UP\.Link|webOS|Windows CE|WinWAP|YahooSeeker\/M1A1-R2D2|NF-Browser|iPhone|iPod|Android|BlackBerry9530|G-TU915 Obigo|LGE VX|webOS|Nokia5800)') {
+                rewrite ^/(.*)$ /mobile/$1 break;
+            }
+            
 
