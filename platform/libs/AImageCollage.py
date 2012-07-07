@@ -36,7 +36,7 @@ class AImageCollage(object):
         
         return self.get_images(image_urls)
     
-    @lru_cache(maxsize=256):
+    @lru_cache(maxsize=256)
     def _get_image(self, image_url):
         logs.info("downloading '%s'" % image_url)
         
