@@ -97,6 +97,7 @@ urlpatterns = patterns('',
     (r'v0/users/find/twitter.json',                         'v0.functions.users.findTwitter'),
     (r'v0/users/find/facebook.json',                        'v0.functions.users.findFacebook'),
     (r'v0/users/invite/facebook/collection.json',           'v0.functions.users.inviteFacebookCollection'),
+    (r'v0/users/invite/email.json',                         'v0.functions.friendships.invite'),
 
     ### FRIENDS
     (r'v0/friendships/create.json',                         'v0.functions.friendships.create'),

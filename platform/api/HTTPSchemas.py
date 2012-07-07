@@ -721,7 +721,7 @@ class HTTPUserRelationship(Schema):
 class HTTPFindUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('query',                            basestring) # Comma delimited
+        cls.addProperty('query',                            basestring, required=True) # Comma delimited
 
 class HTTPFindTwitterUser(Schema):
     @classmethod
@@ -915,6 +915,11 @@ class HTTPEmail(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('email',                            basestring, cast=validateEmail)
+
+class HTTPEmails(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('emails',                           basestring, cast=validateEmails)
 
 
 # ######## #
