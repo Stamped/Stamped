@@ -120,7 +120,7 @@ def removeFriendship(*args, **kwargs):
 
 @task(queue='api', **default_params)
 def inviteFriends(*args, **kwargs):
-    invoke(inviteFriend.request, *args, **kwargs)
+    invoke(inviteFriends.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
 def updateEntityStats(*args, **kwargs):

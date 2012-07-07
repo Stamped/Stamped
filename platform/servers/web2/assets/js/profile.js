@@ -1366,7 +1366,7 @@ var g_update_stamps = null;
                             g_category = category;
                             
                             console.debug("NEW CATEGORY: " + category);
-                            History.log(state.data, state.title, state.url);
+                            //History.log(state.data, state.title, state.url);
                             
                             if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
                                 var completion_func = function() {

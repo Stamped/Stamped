@@ -209,7 +209,7 @@ class InviteEmail(Email):
 
         params = HTTPUser().importUser(self._subject).dataExport()
 
-        return parseTemplate(template, params)
+        return self._parseTemplate(template, params)
 
 
 class PushNotification(object):
@@ -285,7 +285,7 @@ class PushNotification(object):
 class NotificationQueue(object):
     def __init__(self, sandbox=True, admins=None):
         self._admins = set()
-        self._adminEmails = set()
+        self._adminEmails = set(['test-invite@stamped.com'])
         self._adminTokens = set()
 
         if admins is not None:
@@ -552,7 +552,7 @@ class NotificationQueue(object):
                         break
 
                     try:
-                        logs.debug("Email activityId '%s' to address '%s'" % (email.activityId, emailAddress))
+                        logs.debug("Send email: %s" % (email))
                         if not noop:
                             ses.send_email(email.sender, email.title, email.body, emailAddress, format='html')
 
