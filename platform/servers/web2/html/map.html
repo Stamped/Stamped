@@ -28,6 +28,18 @@
     {{ block.super }}
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
+    
+    <!--[if lte IE 9]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/map.lte.ie.9.css">
+    <![endif]-->
+    
+    <!--[if lte IE 8]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/map.lte.ie.8.css">
+    <![endif]-->
+    
+    <!--[if lte IE 7]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/map.lte.ie.7.css">
+    <![endif]-->
 {% endblock styles %}
 
 {% block profile-header %}
