@@ -69,8 +69,15 @@ footer, .fixedwidth {
     margin: 0 auto;
 }
 
+@font-face {
+    font-family: StampedFallbackFont;
+    font-style: normal;
+    font-weight: 200;
+    src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+}
+
 .stamped-font() {
-    font-family: "TitlingGothicFB LightComp", helvetica, sans-serif;
+    font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
     font-style:  normal;
     font-weight: 200;
 }
