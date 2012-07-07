@@ -1,23 +1,28 @@
 # Create your views here.
 
 import Globals
-
 import keys.aws, logs, utils
 
-from django.http                            import HttpResponse
-from django.template                        import Context, loader
+from datetime                               import *
+
 from boto.sdb.connection                    import SDBConnection
 from boto.exception                         import SDBResponseError
-from gevent.pool                            import Pool
-from django                                 import forms
 
-from analytics.web.core.Dashboard           import Dashboard
-from analytics.web.core.topStamped          import getTopStamped
-from analytics.web.core.Enrichment          import getEnrichmentStats
-from analytics.web.core                     import Stats
-from analytics.web.core.logsQuery           import logsQuery
-from analytics.web.core.weeklyScore         import weeklyScore
-from analytics.web.core.analytics_utils     import *
+from gevent.pool                            import Pool
+
+from django                                 import forms
+from django.http                            import HttpResponse
+from django.template                        import Context, loader
+from django.contrib.auth                    import authenticate, login
+from django.contrib.auth.decorators         import login_required
+
+from servers.analytics.core                 import Stats
+from servers.analytics.core.Dashboard       import Dashboard
+from servers.analytics.core.topStamped      import getTopStamped
+from servers.analytics.core.Enrichment      import getEnrichmentStats
+from servers.analytics.core.logsQuery       import logsQuery
+from servers.analytics.core.weeklyScore     import weeklyScore
+from servers.analytics.core.analytics_utils import *
 
 from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection

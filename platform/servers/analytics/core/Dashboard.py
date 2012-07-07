@@ -10,10 +10,10 @@ import Globals
 
 import keys.aws, logs, utils, math
 
-from analytics.web.core.analytics_utils        import *
+from servers.analytics.core.analytics_utils        import *
 from api.MongoStampedAPI        import MongoStampedAPI
-from analytics.web.core.logsQuery              import logsQuery
-from analytics.web.core.statWriter             import statWriter
+from servers.analytics.core.logsQuery              import logsQuery
+from servers.analytics.core.statWriter             import statWriter
 from gevent.pool            import Pool
 from boto.sdb.connection    import SDBConnection
 

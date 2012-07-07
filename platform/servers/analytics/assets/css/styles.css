@@ -1,3 +1,38 @@
+html {
+  overflow-y: scroll;
+}
+body,
+html {
+  width: 100%;
+  height: 100%;
+}
+body {
+  font-family: 'helvetica', sans-serif;
+  font-size: 1em;
+  background: #fff;
+  color: #333;
+}
+a,
+a:link {
+  font-style: inherit;
+}
+a,
+a:focus {
+  outline: 0;
+}
+a,
+a:visited {
+  color: #666;
+  /* #3366cc; */
+
+  text-decoration: none;
+}
+a:visited {
+  color: #444;
+}
+a:hover {
+  color: black;
+}
 
 .header_wrapper {
 	text_align: center;
@@ -72,3 +107,20 @@
 	height: 700px;
 	width: 750px;
 }
+
+
+
+.sortable thead td {
+    font-weight: bold;
+}
+
+.sortable td {
+    padding: 2px 6px;
+    margin: 2px 0;
+}
+
+.sortable td + td {
+    text-align: right;
+}
+
+.sortable tbody tr:nth-child(odd)    { background-color:#eee; }
