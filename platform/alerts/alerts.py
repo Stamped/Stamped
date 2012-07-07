@@ -552,7 +552,7 @@ class NotificationQueue(object):
                         break
 
                     try:
-                        logs.debug("Email activityId '%s' to address '%s'" % (email.activityId, emailAddress))
+                        logs.debug("Send email: %s" % (email))
                         if not noop:
                             ses.send_email(email.sender, email.title, email.body, emailAddress, format='html')
 
