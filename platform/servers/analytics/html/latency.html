@@ -24,11 +24,13 @@
 	    <input type='submit' />
 	    </form>
 	    
-	    {%if is_blacklist %}
+	    {% if is_blacklist %}
 	    Omitting calls from {{ blacklist }}
-	    {%elif is_whitelist %}
+	    {% else %}
+	    {% if is_whitelist %}
 	    Only registering calls from {{ whitelist }}
-	    {%endif%}
+	    {% endif %}
+	    {% endif %}
 	    <table class="sortable">
 	    	<tr>
 	    		<td>API</td><td>Successes</td><td>Mean &nbsp</td><td>Median &nbsp</td><td>90th Percentile</td><td>Max</td><td>Errors(400)</td><td>Errors(500)</td>

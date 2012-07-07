@@ -10,12 +10,12 @@ import Globals
 
 import keys.aws, logs, utils, math
 
-from analytics.web.core.analytics_utils        import *
-from api.MongoStampedAPI        import MongoStampedAPI
-from analytics.web.core.logsQuery              import logsQuery
-from analytics.web.core.statWriter             import statWriter
-from gevent.pool            import Pool
-from boto.sdb.connection    import SDBConnection
+from boto.sdb.connection                            import SDBConnection
+from api.MongoStampedAPI                            import MongoStampedAPI
+from servers.analytics.core.analytics_utils         import *
+from servers.analytics.core.logsQuery               import logsQuery
+from servers.analytics.core.statWriter              import statWriter
+from gevent.pool                                    import Pool
 
 class Dashboard(object):
     
@@ -47,7 +47,7 @@ class Dashboard(object):
         total_yest = 0
         yest_hourly = []
         
-        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,yesterday(today()).date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat, dayAgo(today()).date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 try:
@@ -58,10 +58,10 @@ class Dashboard(object):
         if len(yest_hourly) == 0:
             for hour in range (0,24):
                 if unique:
-                    bgn = yesterday(today())
+                    bgn = dayAgo(today())
                 else:
-                    bgn = yesterday(today()) + timedelta(hours=hour)
-                end = yesterday(today()) + timedelta(hours=hour+1)
+                    bgn = dayAgo(today()) + timedelta(hours=hour)
+                end = dayAgo(today()) + timedelta(hours=hour+1)
                 num = fun(bgn,end)
                 if not unique:
                     total_yest += num
@@ -69,7 +69,7 @@ class Dashboard(object):
                     total_yest = num
                 yest_hourly.append(total_yest)
             print yest_hourly
-            self.writer.write({'stat': stat,'time':'day','bgn':yesterday(today()).date().isoformat(),'hours':str(yest_hourly)})
+            self.writer.write({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
         
         
         

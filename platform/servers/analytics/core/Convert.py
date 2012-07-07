@@ -8,10 +8,10 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import calendar, pprint, datetime, sys, argparse,math
+import calendar, pprint, datetime, sys, math
 import keys.aws, logs, utils
 
-from api.MongoStampedAPI                            import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 from bson.objectid import ObjectId
 
 
