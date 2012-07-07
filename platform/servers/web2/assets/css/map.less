@@ -264,7 +264,9 @@ footer {
                     
                     .nav-header-title {
                         float: left;
-                        margin: 0 (.75 * @map_nav_space);
+                        margin-left: (@map_nav_space / 2);
+                        
+                        max-width: @map_nav_width - (@map_nav_space * 2.75);
                         
                         .name {
                             color: #333;
