@@ -915,7 +915,8 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        $('.stamp-gallery-sort a.item').click(function(event) {
+        // NOTE: disabling stamp-gallery-sort temporarily for V2 launch
+        /*$('.stamp-gallery-sort a.item').click(function(event) {
             event.preventDefault();
             var $this   = $(this);
             var $parent = $this.parent('.stamp-gallery-sort');
@@ -952,7 +953,7 @@ var g_update_stamps = null;
             }
             
             return false;
-        });
+        });*/
         
         
         // ---------------------------------------------------------------------
