@@ -185,7 +185,7 @@ exceptions_inviteFacebookCollection = exceptions_findFacebook
 @handleHTTPRequest(http_schema=HTTPFacebookFriendsCollectionForm,
     parse_request_kwargs={'obfuscate':['user_token' ]},
     exceptions=exceptions + exceptions_inviteFacebookCollection)
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
 def inviteFacebookCollection(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'facebook')
     if linked.token is None:
