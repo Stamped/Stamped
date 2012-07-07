@@ -8,10 +8,10 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import calendar, datetime, sys, argparse,math
+import calendar, datetime, sys, math
 import keys.aws, logs, utils
 
-from analytics.web.core.Convert import Converter
+from servers.analytics.core.Convert import Converter
 from api.MongoStampedAPI                            import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError

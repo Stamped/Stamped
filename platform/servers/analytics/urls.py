@@ -1,10 +1,10 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.conf.urls.static    import static
-import settings
+import servers.analytics.settings
 
 # Uncomment the next two lines to enable the admin:
-from django.contrib import admin
-admin.autodiscover()
+# from django.contrib import admin
+# admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
@@ -24,4 +24,4 @@ urlpatterns = patterns('',
     url(r'^/?$', 'core.views.index'), 
 )
 
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
+urlpatterns += static(servers.analytics.settings.STATIC_URL, document_root=servers.analytics.settings.STATIC_DOC_ROOT)

@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-LESS_CSS_DIRS               = assets/css assets/css/libs
+LESS_CSS_DIRS               = assets/css assets/css/libs assets/css/ie
 LESS_CSS_SOURCE_SUFFIX      = less
 LESS_CSS_TARGET_SUFFIX      = css
 LESS_CSS_PROG_EC2           = /stamped/node/node_modules/less/bin/lessc

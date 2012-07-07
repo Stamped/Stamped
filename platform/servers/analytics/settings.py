@@ -114,7 +114,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware', 
 )
 
-ROOT_URLCONF = 'analytics.web.urls'
+ROOT_URLCONF = 'servers.analytics.urls'
 
 STAMPED_TEMPLATE_DIR  = os.path.join(PROJ_ROOT, "html")
 STAMPED_TEMPLATE_DIR2 = os.path.join(PROJ_ROOT, "templates")
@@ -180,4 +180,3 @@ LOGGING = {
         },
     }
 }
-

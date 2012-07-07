@@ -2148,6 +2148,7 @@ var g_update_stamps = null;
         update_navbar_layout();
         
         var __init = false;
+        
         var show_initial_gallery = function() {
             if (!__init || $('#main-content').css('visibility') !== 'visible') {
                 __init = true;

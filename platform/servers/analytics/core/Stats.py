@@ -8,7 +8,7 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import calendar, pprint, datetime, sys, argparse
+import calendar, pprint, datetime, sys
 import logs, utils, math
 
 
@@ -16,9 +16,9 @@ from boto.sdb.connection                    import SDBConnection
 from boto.exception                         import SDBResponseError
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                            import Pool
-from analytics.web.core.logsQuery           import logsQuery
-from analytics.web.core.mongoQuery          import mongoQuery
-from analytics.web.core.analytics_utils     import v1_init
+from servers.analytics.core.logsQuery           import logsQuery
+from servers.analytics.core.mongoQuery          import mongoQuery
+from servers.analytics.core.analytics_utils     import v1_init
  
 class Stats():
     

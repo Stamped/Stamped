@@ -38,6 +38,19 @@
         {% block styles %}
         <!-- styles -->
         <link rel="stylesheet"          href="{{ STATIC_URL }}css/styles.css">
+        
+        <!--[if lte IE 9]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.9.css">
+        <![endif]-->
+        
+        <!--[if lte IE 8]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.8.css">
+        <![endif]-->
+        
+        <!--[if lte IE 7]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.7.css">
+        <![endif]-->
+        
         {% endblock styles %}
         
         {% block post_head %}
