@@ -24,4 +24,4 @@ urlpatterns = patterns('',
     url(r'^/?$', 'core.views.index'), 
 )
 
-urlpatterns += static(servers.analytics.settings.STATIC_URL, document_root=servers.analytics.settings.STATIC_DOC_ROOT)
+urlpatterns += static(servers.analytics.settings.STATIC_URL, document_root=servers.analytics.settings.STATICFILES_DIRS)
