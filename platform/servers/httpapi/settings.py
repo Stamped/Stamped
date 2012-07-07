@@ -1,12 +1,5 @@
 # Django settings for httpapi project.
-"""
-Django settings for httpapi project.
 
-DOCUMENTED SAMPLE PATH MODULE
-prev:   Django?
-next: ./urls.py
-see: ROOT_URLCONF, INSTALLED_APPS
-"""
 import Globals
 import logs
 from libs.ec2_utils import is_ec2

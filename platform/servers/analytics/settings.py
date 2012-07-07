@@ -114,7 +114,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware', 
 )
 
-ROOT_URLCONF = 'analytics.urls'
+ROOT_URLCONF = 'servers.analytics.urls'
 
 STAMPED_TEMPLATE_DIR  = os.path.join(PROJ_ROOT, "html")
 STAMPED_TEMPLATE_DIR2 = os.path.join(PROJ_ROOT, "templates")
@@ -124,8 +124,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    "templates",
-    "/stamped/stamped/platform/servers/analytics/templates"
+    STAMPED_TEMPLATE_DIR, 
 )
 
 # A tuple of strings representing allowed prefixes for the {% ssi %} template 
@@ -181,4 +180,3 @@ LOGGING = {
         },
     }
 }
-
