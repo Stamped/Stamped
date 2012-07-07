@@ -721,7 +721,7 @@ class HTTPUserRelationship(Schema):
 class HTTPFindUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('query',                            basestring) # Comma delimited
+        cls.addProperty('query',                            basestring, required=True) # Comma delimited
 
 class HTTPFindTwitterUser(Schema):
     @classmethod
@@ -915,6 +915,11 @@ class HTTPEmail(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('email',                            basestring, cast=validateEmail)
+
+class HTTPEmails(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('emails',                           basestring, cast=validateEmails)
 
 
 # ######## #
@@ -2630,19 +2635,6 @@ class HTTPStamp(Schema):
 
     def minimize(self):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
-
-class HTTPStampDetail(Schema):
-    
-    def __init__(self, *args, **kwargs):
-        Schema.__init__(self, *args, **kwargs)
-        self.ajax = False
-    
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('stamp_num',                        int)
-        cls.addProperty('stamp_title',                      basestring)
-        cls.addProperty('ajax',                             bool)
 
 class HTTPStampNew(Schema):
     @classmethod
