@@ -2631,19 +2631,6 @@ class HTTPStamp(Schema):
     def minimize(self):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
 
-class HTTPStampDetail(Schema):
-    
-    def __init__(self, *args, **kwargs):
-        Schema.__init__(self, *args, **kwargs)
-        self.ajax = False
-    
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('stamp_num',                        int)
-        cls.addProperty('stamp_title',                      basestring)
-        cls.addProperty('ajax',                             bool)
-
 class HTTPStampNew(Schema):
     @classmethod
     def setSchema(cls):
