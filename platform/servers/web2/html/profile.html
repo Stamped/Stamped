@@ -58,6 +58,21 @@
     <style>
         {% custom_css "profile" %}
     </style>
+    
+    <!--[if lte IE 9]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
+    <![endif]-->
+    
+    <!--[if lte IE 8]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
+    <![endif]-->
+    
+    <!--[if lte IE 7]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
+    <![endif]-->
 {% endblock styles %}
 
 {% block opengraph %}
