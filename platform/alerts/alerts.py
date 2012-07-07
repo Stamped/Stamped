@@ -531,7 +531,7 @@ class NotificationQueue(object):
 
             finally:
                 if not noop:
-                    inviteDB.removeInvite(invite.invite_id)
+                    self._inviteDB.removeInvite(invite.invite_id)
 
     def sendEmails(self, noop=False):
         logs.info("Submitting emails to %s users" % len(self._emailQueue))
