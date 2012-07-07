@@ -123,6 +123,9 @@ class Facebook(object):
         path = 'me/friends'
         logs.info('#### offset: %s  limit: %s' % (offset, limit))
 
+        #May want to order by name using FQL:
+        #http://developers.facebook.com/tools/explorer?fql=SELECT%20uid%2C%20name%20FROM%20user%20WHERE%20uid%20IN%20(SELECT%20uid2%20FROM%20friend%20WHERE%20uid1%20%3D%20me())%20ORDER%20BY%20last_name
+
         friends = []
         while True:
             print path

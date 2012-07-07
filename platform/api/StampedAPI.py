@@ -458,6 +458,8 @@ class StampedAPI(AStampedAPI):
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
         tw_acct.service_name                = 'twitter'
+        tw_acct.token                       = new_tw_account.user_token
+        tw_acct.secret                      = new_tw_account.user_secret
         tw_acct.linked_user_id              = twitterUser['id']
         tw_acct.linked_screen_name          = twitterUser['screen_name']
         tw_acct.linked_name                 = twitterUser.pop('name', None)

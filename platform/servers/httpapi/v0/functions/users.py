@@ -151,13 +151,18 @@ def findPhone(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
-exceptions_findTwitter = [(StampedThirdPartyInvalidCredentialsError, 403, 'invalid_credentials', 'Invalid Twitter credentials') ]
-@handleHTTPRequest(http_schema=HTTPFindTwitterUser, 
-                   parse_request_kwargs={'obfuscate':['user_token', 'user_secret' ]},
-                   exceptions=exceptions + exceptions_findTwitter)
-@require_http_methods(["POST"])
+exceptions_findTwitter = [
+    (StampedThirdPartyInvalidCredentialsError, 403, 'invalid_credentials', 'Invalid Twitter credentials'),
+    (StampedMissingLinkedAccountTokenError, 400, "bad_request", "No Twitter login information associated with account"),
+]
+@handleHTTPRequest(exceptions=exceptions + exceptions_findTwitter)
+@require_http_methods(["POST", "GET"])
 def findTwitter(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.findUsersByTwitter(authUserId, http_schema.user_token, http_schema.user_secret)
+    linked = stampedAPI.getLinkedAccount(authUserId, 'twitter')
+    if linked.token is None or linked.secret is None:
+        raise StampedMissingLinkedAccountTokenError("No twitter access token associated with linked account")
+
+    users = stampedAPI.findUsersByTwitter(authUserId, linked.token, linked.secret)
     output = []
     for user in users:
         if user.user_id != authUserId:
@@ -169,13 +174,16 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
 exceptions_findFacebook = [
     (StampedThirdPartyInvalidCredentialsError, 403, 'invalid_credentials', 'Invalid Facebook credentials'),
     (StampedFacebookTokenError, 401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
+    (StampedMissingLinkedAccountTokenError, 400, "bad_request", "No Facebook login information associated with account"),
 ]
-@handleHTTPRequest(http_schema=HTTPFindFacebookUser, 
-                   parse_request_kwargs={'obfuscate':['user_token' ]},
-                   exceptions=exceptions + exceptions_findFacebook)
-@require_http_methods(["POST"])
+@handleHTTPRequest(exceptions=exceptions + exceptions_findFacebook)
+@require_http_methods(["POST", "GET"])
 def findFacebook(request, authUserId, http_schema, **kwargs):
-    users = stampedAPI.findUsersByFacebook(authUserId, http_schema.user_token)
+    linked = stampedAPI.getLinkedAccount(authUserId, 'facebook')
+    if linked.token is None:
+        raise StampedMissingLinkedAccountTokenError("No facebook access token associated with linked account")
+
+    users = stampedAPI.findUsersByFacebook(authUserId, linked.token)
 
     output = [HTTPSuggestedUser().importUser(user).dataExport() for user in users if user.user_id != authUserId]
     return transformOutput(output)
@@ -183,8 +191,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
 
 exceptions_inviteFacebookCollection = exceptions_findFacebook
 @handleHTTPRequest(http_schema=HTTPFacebookFriendsCollectionForm,
-    parse_request_kwargs={'obfuscate':['user_token' ]},
-    exceptions=exceptions + exceptions_inviteFacebookCollection)
+                   exceptions=exceptions + exceptions_inviteFacebookCollection)
 @require_http_methods(["GET"])
 def inviteFacebookCollection(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'facebook')
@@ -192,7 +199,7 @@ def inviteFacebookCollection(request, authUserId, http_schema, **kwargs):
         raise StampedMissingLinkedAccountTokenError("No facebook access token associated with linked account")
 
     offset = 0 if http_schema.offset is None else http_schema.offset
-    limit = 30 if http_schema.offset is None else http_schema.offset
-    logs.info('### linked.token: %s    offset: %s   limit: %s' % (linked.token, offset, limit))
+    limit = 30 if http_schema.limit is None else http_schema.limit
+
     result = stampedAPI.getFacebookFriendData(linked.token, offset, limit)
     return transformOutput(result)
