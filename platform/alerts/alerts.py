@@ -497,7 +497,7 @@ class NotificationQueue(object):
                 self._users[str(invite.user_id)] = None
         
         missingAccounts = set()
-        for k, v in self._users:
+        for k, v in self._users.iteritems():
             if v is None:
                 missingAccounts.add(k)
         accounts = self._accountDB.getAccounts(list(missingAccounts))
