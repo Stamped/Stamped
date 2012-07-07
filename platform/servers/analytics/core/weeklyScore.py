@@ -8,7 +8,7 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import calendar, datetime, sys, argparse,math
+import calendar, datetime, sys, math
 import keys.aws, logs, utils
 
 from servers.analytics.core.Convert import Converter

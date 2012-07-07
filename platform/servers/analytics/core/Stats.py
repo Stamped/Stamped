@@ -8,7 +8,7 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import calendar, pprint, datetime, sys, argparse
+import calendar, pprint, datetime, sys
 import logs, utils, math
 
 
