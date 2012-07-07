@@ -209,7 +209,7 @@ class InviteEmail(Email):
 
         params = HTTPUser().importUser(self._subject).dataExport()
 
-        return parseTemplate(template, params)
+        return self._parseTemplate(template, params)
 
 
 class PushNotification(object):
