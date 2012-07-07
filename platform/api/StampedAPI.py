@@ -1462,7 +1462,8 @@ class StampedAPI(AStampedAPI):
         email = SchemaValidation.validateEmail(email)
 
         if self._inviteDB.checkInviteExists(email, authUserId):
-            raise StampedInviteAlreadyExistsError("Invite already exists")
+            logs.info("Invite already exists")
+            return
 
         self._inviteDB.inviteUser(email, authUserId)
 
