@@ -124,7 +124,8 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    STAMPED_TEMPLATE_DIR, 
+    "templates",
+    "/stamped/stamped/platform/servers/analytics/templates"
 )
 
 # A tuple of strings representing allowed prefixes for the {% ssi %} template 
