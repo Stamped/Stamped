@@ -3333,6 +3333,7 @@ class HTTPActivity(Schema):
                     self.image = _getIconURL('news_%s_group' % (self.verb[7:]))
                 else:
                     logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
+                    self.image = None
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)
