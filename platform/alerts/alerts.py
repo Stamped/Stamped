@@ -497,7 +497,7 @@ class NotificationQueue(object):
                 self._users[str(invite.user_id)] = None
         
         missingAccounts = set()
-        for k, v in self._users:
+        for k, v in self._users.iteritems():
             if v is None:
                 missingAccounts.add(k)
         accounts = self._accountDB.getAccounts(list(missingAccounts))
@@ -531,7 +531,7 @@ class NotificationQueue(object):
 
             finally:
                 if not noop:
-                    inviteDB.removeInvite(invite.invite_id)
+                    self._inviteDB.removeInvite(invite.invite_id)
 
     def sendEmails(self, noop=False):
         logs.info("Submitting emails to %s users" % len(self._emailQueue))
