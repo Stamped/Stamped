@@ -2789,6 +2789,8 @@ class StampedAPI(AStampedAPI):
         url = None
 
         kwargs = {}
+        stamp = None
+        user = None
         if imageUrl is not None:
             kwargs['imageUrl'] = imageUrl
         if stampId is not None and share_settings.share_stamps == True:
@@ -2823,8 +2825,13 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
+        result = self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
+
+#        links = stamp.links
+#        if links is None:
+#            links = StampLinks()
+#        links.og_id =
 
 
     """
@@ -4023,7 +4030,7 @@ class StampedAPI(AStampedAPI):
         for stamp in stamps:
             sourceStampIds[str(stamp.stamp_id)] = stamp
 
-        followerIds = self._friendshipDB.getFollowers(user.user_id)
+        friendIds = self._friendshipDB.getFriends(user.user_id)
 
         result = []
         for rawTodo in todoData:
@@ -4032,7 +4039,7 @@ class StampedAPI(AStampedAPI):
                 stamps       = None
                 if rawTodo.source_stamp_ids is not None:
                     stamps = [sourceStampIds[sid] for sid in rawTodo.source_stamp_ids]
-                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=followerIds, authUserId=authUserId)
+                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=friendIds, authUserId=authUserId)
                 result.append(todo)
             except Exception as e:
                 logs.debug("RAW TODO: %s" % rawTodo)

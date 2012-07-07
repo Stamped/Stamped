@@ -285,7 +285,7 @@ class PushNotification(object):
 class NotificationQueue(object):
     def __init__(self, sandbox=True, admins=None):
         self._admins = set()
-        self._adminEmails = set()
+        self._adminEmails = set(['test-invite@stamped.com'])
         self._adminTokens = set()
 
         if admins is not None:
