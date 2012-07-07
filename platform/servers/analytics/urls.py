@@ -14,14 +14,14 @@ urlpatterns = patterns('',
     # Uncomment the admin/doc line below to enable admin documentation:
     #url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     
-    url(r'^dashboard$',         'core.views.index'),
-    url(r'^accounts/login$',    'django.contrib.auth.views.login'),
-    url(r'^enrichment$',        'core.views.enrichment'),
-    url(r'^latency$',           'core.views.latency'),
-    url(r'^segmentation$',      'core.views.segmentation'),
-    url(r'^trending$',          'core.views.trending'),
-    url(r'^custom$',            'core.views.custom'),
-    url(r'^/?$',                'core.views.index'), 
+    url(r'^dashboard/$', 'core.views.index'),
+    url(r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    url(r'^enrichment/$', 'core.views.enrichment'),
+    url(r'^latency/$', 'core.views.latency'),
+    url(r'^segmentation/$', 'core.views.segmentation'),
+    url(r'^trending/$', 'core.views.trending'),
+    url(r'^custom/$','core.views.custom'),
+    url(r'^/?$', 'core.views.index'), 
 )
 
 urlpatterns += static(servers.analytics.settings.STATIC_URL, document_root=servers.analytics.settings.STATIC_DOC_ROOT)
