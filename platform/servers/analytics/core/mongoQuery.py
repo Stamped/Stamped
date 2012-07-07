@@ -24,7 +24,7 @@ from bson.code import Code
 class mongoQuery(object):
     
     def __init__(self):
-        utils.init_db_config('peach.db3')
+        # utils.init_db_config('peach.db3')
         self.api = MongoStampedAPI()
     
     def totalFriends(self):

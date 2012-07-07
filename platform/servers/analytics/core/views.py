@@ -28,7 +28,7 @@ from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 
 
-utils.init_db_config('peach.db3')
+# utils.init_db_config('peach.db3')
 
 api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
