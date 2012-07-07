@@ -1449,7 +1449,14 @@ class StampedAPI(AStampedAPI):
         return user
 
     @API_CALL
-    def inviteFriend(self, authUserId, email):
+    def inviteFriends(self, authUserId, emails):
+        for email in emails:
+            # Store email address linked to auth user id
+            tasks.invoke(tasks.APITasks.inviteFriends, args=[authUserId, email])
+        return True
+
+    @API_CALL
+    def inviteFriendsAsync(self, authUserId, email):
         # Validate email address
         email = str(email).lower().strip()
         email = SchemaValidation.validateEmail(email)
@@ -1457,13 +1464,6 @@ class StampedAPI(AStampedAPI):
         if self._inviteDB.checkInviteExists(email, authUserId):
             raise StampedInviteAlreadyExistsError("Invite already exists")
 
-        # Store email address linked to auth user id
-        tasks.invoke(tasks.APITasks.inviteFriend, args=[authUserId, email])
-
-        return True
-
-    @API_CALL
-    def inviteFriendAsync(self, authUserId, email):
         self._inviteDB.inviteUser(email, authUserId)
 
     """

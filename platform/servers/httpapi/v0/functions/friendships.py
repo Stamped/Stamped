@@ -102,11 +102,12 @@ def blocksRemove(request, authUserId, http_schema, **kwargs):
     return transformOutput(user.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEmail,
+@handleHTTPRequest(http_schema=HTTPEmails,
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def invite(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.inviteFriend(authUserId, http_schema.email)
+    emails = http_schema.emails.split(',')
+    result = stampedAPI.inviteFriends(authUserId, emails)
 
     return transformOutput(True)
 
