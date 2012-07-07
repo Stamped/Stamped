@@ -11,7 +11,7 @@ PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 utils.log("Django DEBUG=%s ROOT=%s" % (DEBUG, PROJ_ROOT))
 
 ADMINS = (
-    ('Stamped Dev', 'dev@stamped.com'), 
+    ('Travis', 'travis@stamped.com'), 
 )
 
 MANAGERS  = ADMINS
