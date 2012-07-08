@@ -44,6 +44,10 @@
         stylesheet: sdetail.less
 -->
 
+<!-- HTML Template Dependencies => profile.generated.html
+     - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
 {% block html_tags %} {{ block.super }} {% include "schema.org.html" %} {% endblock html_tags %}
 
 {% block styles %}
@@ -188,7 +192,7 @@
                             <div class="rhs">
                                 {% handlebars_template "share-widget" %}
                                 
-                                <div class="subnav">
+                                <div id="subnav">
                                     <a class="subnav_button subnav_button-0" title="Profile default"></a>
                                     <a class="subnav_button subnav_button-1" title="Profile details"></a>
                                     <a class="subnav_button subnav_button-2" title="Stamp distribution"></a>
@@ -450,6 +454,6 @@
     <script src="//connect.facebook.net/en_US/all.js"></script>
     <script src="https://apis.google.com/js/plusone.js"></script>
     
-    {% ssi STAMPED_TEMPLATE_FILE %}
+    {% ssi STAMPED_PROFILE_TEMPLATE_FILE %}
 {% endblock scripts %}
 

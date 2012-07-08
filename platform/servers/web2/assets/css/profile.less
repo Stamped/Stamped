@@ -351,7 +351,7 @@
                     .rhs {
                         float: right;
                         
-                        .subnav {
+                        #subnav {
                             width: 256px;
                             
                             .subnav_button {
@@ -714,13 +714,13 @@ body.music, body.book, body.film, body.app {
     left: -24px;
     
     .top-wave {
-        background: url(/assets/img/main-topcap.png) left top repeat-x;
+        background: url(/assets/img/main-topcap.png) repeat-x;
         height: 8px;
         margin: 0;
     }
     
     .bottom-wave {
-        background: url(/assets/img/main-botcap.png) left top repeat-x;
+        background: url(/assets/img/main-botcap.png) repeat-x;
         height: 8px;
         margin: 0;
     }
@@ -1456,53 +1456,6 @@ body.app        #stamp-category-nav-bar ol li.app {
                              PROFILE NAVIGATION
    ************************************************************************** */
 
-
-.profile-nav {
-    position: absolute;
-    top:   0;
-    right: 0;
-    
-    a {
-        display: block;
-    }
-    
-    a:focus {
-        text-decoration: none;
-        border: 0 none;
-        outline: none;
-    }
-    
-    /* TODO: 20x19 version */
-    a.up-arrow {
-        background: url(/assets/img/navupdownarrows.png) no-repeat 0 0;
-        width:  21px;
-        height: 21px;
-        margin: 0 0 .5em;
-        
-        &:hover {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -24px 0;
-        }
-        
-        &:active {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -48px 0;
-        }
-    }
-    
-    a.down-arrow {
-        background: url(/assets/img/navupdownarrows.png) left bottom no-repeat;
-        
-        width:  21px;
-        height: 21px;
-        
-        &:hover {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -24px -29px;
-        }
-        
-        &:active {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
-        }
-    }
-}
 
 /* TODO: fix height issues */
 ul.user-category-distribution {

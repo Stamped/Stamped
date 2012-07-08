@@ -118,6 +118,9 @@ STAMPED_TEMPLATE_DIR  = os.path.join(PROJ_ROOT, "html")
 STAMPED_TEMPLATE_DIR2 = os.path.join(PROJ_ROOT, "templates")
 STAMPED_TEMPLATE_FILE = os.path.join(STAMPED_TEMPLATE_DIR2, "templates.generated.html")
 
+STAMPED_PROFILE_TEMPLATE_FILE = os.path.join(STAMPED_TEMPLATE_DIR2, "profile.generated.html")
+STAMPED_MAP_TEMPLATE_FILE     = os.path.join(STAMPED_TEMPLATE_DIR2, "map.generated.html")
+
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
