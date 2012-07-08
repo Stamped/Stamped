@@ -78,16 +78,20 @@ class StampedAuth(AStampedAuth):
     
     def verifyClientCredentials(self, clientId, clientSecret):
         ### TODO: remove hardcoded id / secret in plaintext!'
-        try:
-            if clientId == 'stampedtest' and clientSecret == 'august1ftw':
-                logs.info("Client approved")
-                return True
-            if (clientId == 'iphone8' or clientId == 'iphone8@2x') and clientSecret == 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu':
-                logs.info("Client approved: iphone8")
-                return True
-            raise
-        except Exception:
-            raise StampedInvalidClientError("Invalid client credentials")
+        clientIds = {
+            'stampedtest'       : 'august1ftw',
+            'iphone8'           : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
+            'iphone8@2x'        : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
+        }
+
+        if clientId not in clientIds:
+            raise StampedInvalidClientError("Invalid client id: %s" % clientId)
+
+        if clientSecret != clientIds[clientId]:
+            raise StampedInvalidClientError("Invalid client secret: %s" % clientId)
+
+        logs.info("Client approved: %s" % clientId)
+        return True
     
     def removeClient(self, params):
         raise NotImplementedError
@@ -104,7 +108,7 @@ class StampedAuth(AStampedAuth):
         elif utils.validate_screen_name(userIdentifier):
             account = self._accountDB.getAccountByScreenName(userIdentifier)
         else:
-            raise
+            raise StampedInvalidCredentialsError("Account not found: %s" % userIdentifier)
 
         if account.auth_service != 'stamped':
             raise StampedWrongAuthServiceError("Attempting a stamped login for an account that doesn't use stamped for auth")
@@ -451,8 +455,11 @@ class StampedAuth(AStampedAuth):
             
             logs.warning("Invalid access token... deleting")
             self._accessTokenDB.removeAccessToken(token.token_id)
+            raise StampedInvalidAuthTokenError("Invalid access token")
+        except StampedInvalidAuthTokenError:
             raise
-        except Exception:
+        except Exception as e:
+            logs.warning("Exception raised: %s" % e)
             raise StampedInvalidAuthTokenError("Invalid Access Token")
     
     def removeAccessToken(self, tokenId):

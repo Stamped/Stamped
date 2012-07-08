@@ -31,32 +31,37 @@ JS_BASE_DIR					= assets/js
 CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
+TEMPLATE_BASE_DIR		    = templates
 HTML_PAGES					= profile map
+TEMPLATE_PROG				= bin/process_templates.py
+
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
 GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^[ \t]*stylesheet:[ \t]*' $1 | sed 's/[ \t]*stylesheet:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
+GET_TEMPLATE_DEPENDENCIES	= $(foreach FILE,$(shell grep '^[ \t]*template:[ \t]*' $1 | sed 's/[ \t]*template:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(TEMPLATE_BASE_DIR)/$(FILE))
+
 JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE).generated.js)
 CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(CSS_BASE_DIR)/$(PAGE).generated.css)
+TEMPLATE_TARGETS			= $(foreach PAGE,$(HTML_PAGES),$(TEMPLATE_BASE_DIR)/$(PAGE).generated.html)
 
-TEMPLATE_DIRS				= templates
-TEMPLATE_SUFFIX				= template.html
-TEMPLATE_DEST				= $(strip $(call FIRST,$(TEMPLATE_DIRS)))/templates.generated.html
-TEMPLATE_PROG				= bin/process_templates.py
+#TEMPLATE_DIRS				= templates
+#TEMPLATE_SUFFIX				= template.html
+#TEMPLATE_DEST				= $(strip $(call FIRST,$(TEMPLATE_DIRS)))/templates.generated.html
 TEMPLATES 					= $(strip \
 	$(foreach DIR,$(TEMPLATE_DIRS),$(wildcard $(DIR)/*.$(TEMPLATE_SUFFIX))))
 
 DEPENDENCIES				= $(TEMPLATES) $(TEMPLATE_PROG) $(wildcard core/templatetags/*.py)
-ALL_TARGETS					= $(TEMPLATE_DEST) $(LESS_CSS_TARGETS) $(JS_TARGETS)
+ALL_TARGETS					= $(LESS_CSS_TARGETS) $(JS_TARGETS) $(TEMPLATE_TARGETS)
 
 define ADD_LESS_CSS_TARGET
 $1/%.$(LESS_CSS_TARGET_SUFFIX): $1/%.$(LESS_CSS_SOURCE_SUFFIX)
-	@$$(CECHO) "$(LESS_CSS_PROG) '$$(BOLD_COLOR)$$(FR_COLOR_RED)$$<$$(END_COLOR)' > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'."
+	@$$(CECHO) "$(LESS_CSS_PROG) $$(BOLD_COLOR)$$(FR_COLOR_RED)$$<$$(END_COLOR) > $$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)"
 	@$(LESS_CSS_PROG) $$< > $$@
 	@echo
 endef
 
 define ADD_JS_TARGET
 $(JS_BASE_DIR)/$1.generated.js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
-	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(call REST,$$^)$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break 120 > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'."
+	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(call REST,$$^)$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break 120 > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
 	@cat $$(call REST,$$^) | java -jar bin/compressor.jar --type js --nomunge --line-break 120 > $$@
 	@echo
 endef
@@ -67,18 +72,25 @@ $(CSS_BASE_DIR)/$1.generated.css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_
 	@echo
 endef
 
+define ADD_TEMPLATE_TARGET
+$(TEMPLATE_BASE_DIR)/$1.generated.html: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_TEMPLATE_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
+	@$$(CECHO) "$(TEMPLATE_PROG) $$(foreach FILE,$$(call REST,$$^),-t $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(notdir $$(FILE))$$(END_COLOR)) -o $$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)"
+	@$(TEMPLATE_PROG) $$(foreach FILE,$$(call REST,$$^),-t $$(notdir $$(FILE))) -o $$@
+	@echo
+endef
+
 all: $(ALL_TARGETS)
 
 .PHONY: $(TEMPLATE_DEST) all clean help
 
-$(TEMPLATE_DEST): $(DEPENDENCIES)
-	$(TEMPLATE_PROG) -o $(TEMPLATE_DEST)
-	@$(CECHO) "Created '$(BOLD_COLOR)$(FR_COLOR_RED)$(TEMPLATE_DEST)$(END_COLOR)'."
-	@echo
+#$(TEMPLATE_DEST): $(DEPENDENCIES)
+#	$(TEMPLATE_PROG) -o $(TEMPLATE_DEST)
+#	@$(CECHO) "Created '$(BOLD_COLOR)$(FR_COLOR_RED)$(TEMPLATE_DEST)$(END_COLOR)'."
+#	@echo
 
 $(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_LESS_CSS_TARGET,$(DIR))))
-
-$(foreach PAGE,$(HTML_PAGES),$(eval $(call ADD_JS_TARGET,$(PAGE))))
+$(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_JS_TARGET,$(PAGE))))
+$(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_TEMPLATE_TARGET,$(PAGE))))
 
 #$(foreach PAGE,$(HTML_PAGES),$(eval $(call ADD_CSS_TARGET,$(PAGE))))
 

@@ -24,6 +24,13 @@
         stylesheet: map.less
 -->
 
+<!-- HTML Template Dependencies => map.generated.html
+     - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     
+     template: stamp-map-item.template.html
+     template: social-feedback.template.html
+-->
+
 {% block styles %}
     {{ block.super }}
     
@@ -131,5 +138,7 @@
      
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD4uiuKac5adB9_bwQK9fgJx3SyZVzQsSc&sensor=true"></script>
     <script src="{{ STATIC_URL }}js/map.generated.js"></script>
+    
+    {% ssi STAMPED_MAP_TEMPLATE_FILE %}
 {% endblock scripts %}
 
