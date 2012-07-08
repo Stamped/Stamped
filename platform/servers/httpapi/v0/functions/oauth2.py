@@ -9,12 +9,12 @@ from servers.httpapi.v0.helpers import *
 
 
 exceptions = [
-    (StampedInvalidAuthTokenError,          401, 'invalid_credentials', "Invalid Access Token"),
-    (StampedInvalidRefreshTokenError,       401, 'invalid_credentials', "Invalid Refresh Token"),
-    (StampedInvalidClientError,             401, 'invalid_credentials', "Invalid client credentials"),
-    (StampedGrantTypeIncorrectError,        400, 'bad_request', "There was a problem authorizing the account"),
-    (StampedAccountNotFoundError,           401, 'invalid_credentials', 'The username / password combination was incorrect'),
-    (StampedInvalidCredentialsError,        401, 'invalid_credentials', "The username / password combination was incorrect"),
+    (StampedInvalidAuthTokenError,          401,    'invalid_token', None),
+    (StampedInvalidRefreshTokenError,       401,    'invalid_token', None),
+    (StampedInvalidClientError,             401,    'invalid_client', None),
+    (StampedGrantTypeIncorrectError,        400,    'invalid_grant', None),
+    (StampedAccountNotFoundError,           401,    'invalid_credentials',  "The username / password combination was incorrect"),
+    (StampedInvalidCredentialsError,        401,    'invalid_credentials',  "The username / password combination was incorrect"),
 ]
 
 @handleHTTPRequest(requires_auth=False,
@@ -50,9 +50,9 @@ def login(request, client_id, http_schema, **kwargs):
     return transformOutput(output)
 
 exceptions_loginWithFacebook = [
-    (StampedLinkedAccountAlreadyExistsError, 409, 'bad_request', "Sorry, the Facebook account is linked to multiple Stamped accounts"),
+    (StampedLinkedAccountAlreadyExistsError, 409, 'bad_request', "The Facebook account is linked to multiple Stamped accounts"),
     (StampedThirdPartyError,                 401, 'invalid_credentials', "Facebook login failed"),
-    (StampedWrongAuthServiceError,           401, 'invalid_credentials', "Account does not use Facebook authentication"),
+    (StampedWrongAuthServiceError,           400, 'invalid_request', "Account does not use Facebook authentication"),
 ]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
@@ -70,9 +70,9 @@ def loginWithFacebook(request, client_id, http_schema, **kwargs):
     return transformOutput(output)
 
 exceptions_loginWithTwitter = [
-    (StampedLinkedAccountAlreadyExistsError, 401, 'bad_request', "Sorry, the Facebook account is linked to multiple Twitter accounts"),
+    (StampedLinkedAccountAlreadyExistsError, 409, 'bad_request', "Sorry, the Twitter account is linked to multiple Stamped accounts"),
     (StampedThirdPartyError,                 401, 'invalid_credentials', "Twitter login failed"),
-    (StampedWrongAuthServiceError,           401, 'invalid_credentials', "Account does not use Facebook authentication"),
+    (StampedWrongAuthServiceError,           400, 'invalid_request', "Account does not use Twitter authentication"),
 ]
 @handleHTTPRequest(requires_auth=False,
                    requires_client=True,
