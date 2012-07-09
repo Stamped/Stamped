@@ -424,3 +424,30 @@ class AMongoCollection(object):
         
         return True
 
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, noop=False):
+        raise NotImplementedError
+
+    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, noop=False):
+        try:
+            keyCheck(key)
+        except AssertionError:
+            logs.warning("Key '%s' does not exist" % key)
+            if not noop:
+                ### TODO: Delete item
+                pass
+            raise Exception
+
+        current = self._collection.find_one({'_id' : key})
+        new = regenerate(key)
+
+        if set(current['ref_ids']) != set(new['ref_ids']):
+            logs.warning("Reference has changed for key '%s'" % key)
+            if not noop:
+                ### TODO: Update item
+                pass
+            raise Exception
+
+        return True
+
