@@ -115,6 +115,8 @@ def suggested(request, authUserId, http_schema, **kwargs):
         try:
             group = HTTPEntitySearchResultsGroup()
             group.title = 'Suggested'
+            if http_schema.category == 'place':
+                group.image_url = 'http://static.stamped.com/assets/icons/default/search_google.png'
             if 'name' in section and section['name'] is not None:
                 group.title = section['name']
             group.entities = map(convert, section['entities'])
