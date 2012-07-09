@@ -17,6 +17,7 @@ try:
     from libs.LRUCache       import lru_cache
     from libs.CachedFunction import cachedFn
     from libs.CountedFunction import countedFn
+    from libs.RateLimiter            import RateLimiter, RateException
 except:
     report()
     raise
@@ -31,8 +32,9 @@ class Amazon(object):
     
     def __init__(self):
         self.amazon = bottlenose.Amazon(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY, ASSOCIATE_ID)
+        self.__limiter = RateLimiter(cps=5)
 
-    # note: these decorators add tiered caching to this function, such that 
+    # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items 
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @countedFn(name='Amazon (before caching)')
@@ -55,12 +57,14 @@ class Amazon(object):
         return self._item_helper(self.amazon.ItemLookup, **kwargs)
     
     def _item_helper(self, func, **kwargs):
-        string = func(**kwargs)
+        with self.__limiter:
+            string = func(**kwargs)
         
         """# useful for debugging amazon queries
         if 'ItemId' in kwargs:
             f = open('amazon.%s.xml' % kwargs['ItemId'], 'w')
-            f.write(string)
+            f.write(string)n
+            n
             f.close()
         """
         
