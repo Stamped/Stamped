@@ -21,6 +21,9 @@ class MongoInboxStampsCollection(AMongoCollection):
 
         def regenerate(key):
             friends = self._collection._database['friends'].find_one({'_id' : key})
+            if friends is None:
+                return None
+                
             friendIds = friends['ref_ids']
 
             stampIds = set()
