@@ -267,8 +267,8 @@ def upgradeEntityData(entityData):
 
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time.replace(tzinfo=None)
-    except Exception:
-        logs.warning("Unable to convert ObjectId to timestamp")
+    except Exception as e:
+        logs.warning("Unable to convert ObjectId to timestamp: %s" % e)
         seedTimestamp = datetime.utcnow()
 
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None, seed=True):
