@@ -1691,6 +1691,14 @@ var g_update_stamps = null;
             
             var $this = $(this);
             var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+            if ($link.length <= 0) {
+                $link = $target.find('a.sdetail');
+            }
+            
+            if ($link.length <= 0) {
+                return;
+            }
+            
             var href  = $link.attr('href');
             var title = $link.data("title");
             
