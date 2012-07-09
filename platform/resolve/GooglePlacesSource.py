@@ -273,9 +273,6 @@ class GooglePlacesAutocompletePlace(ResolverPlace):
             del address_components[-1]
         return string.joinfields(address_components, ', ')
 
-    def __repr__(self):
-        return pformat(self.data)
-
 
 class GooglePlacesSearchAll(ResolverProxy, ResolverSearchAll):
 
