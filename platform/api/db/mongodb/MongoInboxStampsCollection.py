@@ -20,15 +20,15 @@ class MongoInboxStampsCollection(AMongoCollection):
     def checkIntegrity(self, key, noop=False):
 
         def regenerate(key):
-            friends = self._collection._database['friends'].find_one({'_id' : key})
-            if friends is None:
-                return None
-                
-            friendIds = friends['ref_ids']
+            userIds = set([ key ])
 
+            friends = self._collection._database['friends'].find_one({'_id' : key})
+            if friends is not None:
+                userIds = userIds.union(set(friends['ref_ids']))
+            
             stampIds = set()
-            for friendId in friendIds:
-                stamps = self._collection._database['stamps'].find({'user.user_id': friendId}, fields=['_id'])
+            for userId in userIds:
+                stamps = self._collection._database['stamps'].find({'user.user_id': userId}, fields=['_id'])
                 for stamp in stamps:
                     stampIds.add(str(stamp['_id']))
 

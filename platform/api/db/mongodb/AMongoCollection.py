@@ -458,11 +458,20 @@ class AMongoCollection(object):
             newRefIds = set(new['ref_ids'])
 
         if newRefIds != oldRefIds:
-            if not noop:
-                if new is not None and len(newRefIds) > 0:
-                    self._collection.save({'_id' : key}, new)
-                else:
-                    self._collection.remove({'_id' : key})
+            # Add ref ids
+            addRefIds = newRefIds.difference(oldRefIds)
+            if len(addRefIds) > 0:
+                logs.debug("Adding ref ids: %s" % addRefIds)
+                if not noop:
+                    self._collection.update({'_id' : key}, {'$addToSet' : { 'ref_ids' : { '$each' : list(addRefIds)}}})
+
+            # Delete ref ids
+            delRefIds = oldRefIds.difference(newRefIds)
+            if len(delRefIds) > 0:
+                logs.debug("Removing ref ids: %s" % delRefIds)
+                if not noop:
+                    self._collection.update({'_id' : key}, {'$pullAll' : { 'ref_ids' : list(delRefIds)}})
+
             raise StampedStaleRelationshipDataError("Relationships have changed for key '%s'" % key)
 
         return True
