@@ -446,11 +446,23 @@ class AMongoCollection(object):
         Verify that the existing value is equal to the "generated" one. If not, replace the existing value. 
         """
         current = self._collection.find_one({'_id' : key})
-        new = regenerate(key)
+        if current is None:
+            oldRefIds = set()
+        else:
+            oldRefIds = set(current['ref_ids'])
 
-        if set(current['ref_ids']) != set(new['ref_ids']):
+        new = regenerate(key)
+        if new is not None:
+            newRefIds = set()
+        else:
+            newRefIds = set(new['ref_ids'])
+
+        if newRefIds != oldRefIds:
             if not noop:
-                self._collection.update({'_id' : key}, new)
+                if new is not None and len(newRefIds) > 0:
+                    self._collection.save({'_id' : key}, new)
+                else:
+                    self._collection.remove({'_id' : key})
             raise StampedStaleRelationshipDataError("Relationships have changed for key '%s'" % key)
 
         return True
