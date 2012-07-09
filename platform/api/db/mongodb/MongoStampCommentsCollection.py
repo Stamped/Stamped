@@ -13,6 +13,27 @@ class MongoStampCommentsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='stampcomments')
+
+    """
+    Stamp Id -> Comment Ids 
+    """
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, noop=False):
+
+        def regenerate(key):
+            commentIds = set()
+            comments = self._collection._database['comments'].find({'stamp_id': key}, fields=['_id'])
+            for comment in comments:
+                commentIds.add(str(comments['_id']))
+
+            return { '_id' : key, 'ref_ids' : list(commentIds) }
+
+        def keyCheck(key):
+            assert self._collection._database['stamps'].find({'_id': self._getObjectIdFromString(key)}).count() == 1
+
+        return self._checkRelationshipIntegrity(key, keyCheck, regenerate, noop=noop)
     
     ### PUBLIC
     

@@ -365,6 +365,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
     def getCreditedStamps(self, userId, entityId, limit=0):
         try:
+            ### TODO: User credit_received_collection?
             query = {
                 'entity.entity_id'      : entityId,
                 'credits.user.user_id'  : userId,
