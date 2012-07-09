@@ -52,11 +52,16 @@
         .stamp-body {
             padding: 12px 32px 12px;
             
+            .stamp-inner-content {
+                position: relative;
+                z-index: 2;
+            }
+            
             .profile-image-large-ish {
                 margin: 0 0 12px 0;
                 float: left;
             }
-
+            
             .entity-header {
                 position: relative;
                 display:  block;
@@ -223,6 +228,9 @@
                 padding: .5em @space;
                 margin: 0;
                 
+                position: relative;
+                z-index: 2;
+                
                 .stamp_0 {
                     display: inline-block;
                     width:  18px;
@@ -243,7 +251,7 @@
             .comments {
                 overflow-y: hidden;
                 position: relative;
-                z-index: 496;
+                z-index: 1;
                 
                 display: block;
                 height:  auto;
@@ -253,11 +261,10 @@
                     text-align: center;
                     
                     position: relative;
-                    z-index: 498;
+                    z-index: 3;
                     background: #fff;
                     
-                    margin:  0 @space;
-                    padding: .8em 0;
+                    padding: .8em @space;
                     
                     font-size: 80%;
                     
