@@ -26,7 +26,7 @@ class MongoStampCommentsCollection(AMongoCollection):
             commentIds = set()
             comments = self._collection._database['comments'].find({'stamp_id': key}, fields=['_id'])
             for comment in comments:
-                commentIds.add(str(comments['_id']))
+                commentIds.add(str(comment['_id']))
 
             return { '_id' : key, 'ref_ids' : list(commentIds) }
 
