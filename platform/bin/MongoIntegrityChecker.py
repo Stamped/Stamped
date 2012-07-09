@@ -61,11 +61,11 @@ def main():
                 logs.warning("WARNING: Collection '%s' not implemented" % collection.__name__)
                 break
             except StampedStaleRelationshipKeyError:
-                print ['_id'], 'FAIL: Key deleted'
+                print i['_id'], 'FAIL: Key deleted'
             except StampedStaleRelationshipDataError:
-                print ['_id'], 'FAIL: References updated'
+                print i['_id'], 'FAIL: References updated'
             except Exception as e:
-                print ['_id'], 'FAIL: %s' % e
+                print i['_id'], 'FAIL: %s' % e
 
         logs.info("Done running %s" % collection.__name__)
 
