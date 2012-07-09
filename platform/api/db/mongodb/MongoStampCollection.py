@@ -66,7 +66,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                             {
                                 'width'     : document['image_dimensions'].split(',')[0],
                                 'height'    : document['image_dimensions'].split(',')[1],
-                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['stamp_id'],
+                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['_id'],
                             }
                         ]
                     }
