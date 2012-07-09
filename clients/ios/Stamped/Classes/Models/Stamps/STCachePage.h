@@ -35,5 +35,6 @@
 - (STCachePage*)pageWithAddedPage:(STCachePage*)page;
 - (STCachePage*)pageWithUpdatesFromAccelerator:(id<STCacheAccelerator>)accelerator;
 - (STCachePage*)pageWithoutDatumsForKeys:(NSSet*)doomedIDs;
+- (STCachePage*)pageWithDatums:(NSArray<STDatum>*)datums;
 
 @end

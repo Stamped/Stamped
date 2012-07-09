@@ -20,6 +20,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import "STMenuController.h"
 #import "STStampedAPI.h"
+#import "STActivityReference.h"
 
 @class User;
 @class Entity;
@@ -243,6 +244,7 @@ typedef enum STGradientStyle {
                                           kerning:(CGFloat)kerning;
 
 + (NSAttributedString *)attributedStringForString:(NSString*)aString 
+                                       references:(NSArray<STActivityReference>*)references 
                                              font:(UIFont*)aFont 
                                             color:(UIColor*)aColor 
                                        lineHeight:(CGFloat)lineHeight 

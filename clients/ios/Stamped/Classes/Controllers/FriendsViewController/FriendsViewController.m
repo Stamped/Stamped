@@ -339,9 +339,7 @@
 #pragma mark - Actions
 
 - (void)done:(id)sender {
-    
     [self.navigationController dismissModalViewControllerAnimated:YES];
-    
 }
 
 

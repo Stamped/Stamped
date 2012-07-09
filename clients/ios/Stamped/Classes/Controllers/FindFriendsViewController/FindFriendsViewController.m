@@ -9,6 +9,10 @@
 #import "FindFriendsViewController.h"
 #import "FindFriendsHeaderView.h"
 #import "FriendsViewController.h"
+#import "STFindFacebookViewController.h"
+#import "STContactsViewController.h"
+#import "Util.h"
+
 #import "STDebug.h"
 
 
@@ -153,6 +157,10 @@
         [alert release];
         
     } 
+    else if (type == FindFriendsSelectionTypeFacebook) {
+        STFindFacebookViewController* controller = [[[STFindFacebookViewController alloc] init] autorelease];
+        [Util pushController:controller modal:NO animated:YES];
+    }
     else {
         
         [self showFriendsControllerWithType:type];
@@ -167,7 +175,9 @@
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (alertView.cancelButtonIndex==buttonIndex) return;
 
-    [self showFriendsControllerWithType:FindFriendsSelectionTypeContacts];
+    STContactsViewController* controller = [[[STContactsViewController alloc] init] autorelease];
+    [Util compareAndPushOnto:self withController:controller modal:NO animated:YES];
+//    [self showFriendsControllerWithType:FindFriendsSelectionTypeContacts];
 
 }
 

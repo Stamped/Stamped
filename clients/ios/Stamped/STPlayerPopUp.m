@@ -223,12 +223,16 @@
 }
 
 - (void)exit:(id)notImportant {
+    STPlayerService service = self.player.currentTrackService;
+    if (service == STPlayerServicePreview) {
+        self.player.paused = YES;
+    }
     [Util setFullScreenPopUp:nil dismissible:YES withBackground:[UIColor clearColor]];
 }
 
 + (void)present {
     STPlayerPopUp* popUp = [[[STPlayerPopUp alloc] init] autorelease];
-    [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithWhite:0 alpha:.5]];
+    [Util setFullScreenPopUp:popUp dismissible:NO withBackground:[UIColor colorWithWhite:0 alpha:.5]];
 }
 
 + (void)presentWithItems:(NSArray<STPlaylistItem>*)playlist clear:(BOOL)clear startIndex:(NSInteger)index {

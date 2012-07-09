@@ -82,7 +82,7 @@ static STStampedActions* _sharedInstance;
                                                                          animated:YES];
                         }
                         else {
-                            [Util warnWithMessage:[NSString stringWithFormat:@"Stamp loading failed for stamp %@!\n%@", source.sourceID, error] andBlock:nil];
+                            [Util warnWithAPIError:error andBlock:nil];
                         }
                     }];
                 }
@@ -238,7 +238,7 @@ static STStampedActions* _sharedInstance;
                         }
                     }
                     else {
-                        [Util warnWithMessage:[NSString stringWithFormat:@"Menu loading failed.\n%@", error] andBlock:^{
+                        [Util warnWithAPIError:error andBlock:^{
                             if (context.completionBlock) {
                                 context.completionBlock(nil, error); 
                             }

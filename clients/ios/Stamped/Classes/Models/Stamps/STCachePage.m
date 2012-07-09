@@ -303,6 +303,25 @@
     }
 }
 
+//TODO
+- (STCachePage*)pageWithDatums:(NSArray<STDatum>*)datums {
+    if (datums.count == 0) {
+        return self;
+    }
+    NSMutableArray* local = [NSMutableArray array];
+    NSMutableArray* notLocal = [NSMutableArray array];
+    for (id<STDatum> datum in datums) {
+        NSDate* date = [datum timestamp];
+        if ([date earlierDate:self.end] == date) {
+            [notLocal addObject:datum];
+        }
+        else {
+            [local addObject:datum];
+        }
+    }
+    return nil;
+}
+
 /*
  - (NSArray<STDatum>*)localObjectsAfterDate:(NSDate*)date {
  //TODO

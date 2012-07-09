@@ -22,6 +22,17 @@
 @synthesize string = _string;
 @synthesize font = _font;
 
++ (NSString*)firstWord:(NSString*)string {
+    NSArray* comps = [string componentsSeparatedByString:@" "];
+    NSLog(@"comps:%@", comps);
+    if (comps.count) {
+        return [comps objectAtIndex:0];
+    }
+    else {
+        return string;
+    }
+}
+
 - (id)initWithPrev:(STChunk *)chunk text:(NSString *)text font:(UIFont *)font color:(UIColor *)color {
     return [self initWithPrev:chunk text:text font:font color:color kerning:0.0];
 }
@@ -33,6 +44,15 @@
     CGFloat end;
     NSInteger lineCount;
     NSInteger lineLimit = chunk.lineLimit - (chunk.lineCount - 1);
+    //TODO add fix
+//    BOOL goToNextLine = NO;
+//    NSString* firstWord = [STTextChunk firstWord:text];
+//    if (firstWord.length) {
+//        CGSize firstWordSize = [firstWord sizeWithFont:font];
+//        if (firstWordSize.width >= chunk.frame.size.width - chunk.end) {
+//            goToNextLine = YES;
+//        }
+//    }
     NSAttributedString* string = [Util attributedStringForString:text font:font color:color lineHeight:chunk.lineHeight indent:chunk.end kerning:kerning];
     CGSize size = [Util sizeForString:string thatFits:CGSizeMake(chunk.frame.size.width, chunk.lineHeight * lineLimit)];
     lineCount = roundf(size.height / chunk.lineHeight);

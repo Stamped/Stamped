@@ -15,6 +15,10 @@
 #import <QuartzCore/QuartzCore.h>
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
+#import "STPreviewsView.h"
+#import "STSimplePreviews.h"
+#import "STSharedCaches.h"
+#import "STObjectSetAccelerator.h"
 
 typedef enum STTodoState {
 STTodoStateDone,
@@ -33,11 +37,12 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 
 @interface STTodoViewController () <UITableViewDelegate, UITableViewDataSource, STTodoCellDelegate, UIActionSheetDelegate>
 
-@property (nonatomic, readonly, retain) NSMutableArray* todos;
-@property (nonatomic, readwrite, retain) STCancellation* pending;
-@property (nonatomic, readwrite, assign) BOOL finished;
+@property (nonatomic, readwrite, retain) STCache* cache;
+@property (nonatomic, readwrite, retain) STCacheSnapshot* snapshot;
+@property (nonatomic, readwrite, assign) BOOL reloading;
+@property (nonatomic, readwrite, assign) BOOL dirty;
 @property (nonatomic, readwrite, retain) id<STTodo> actionSheetTodo;
-@property (nonatomic, readonly, retain) NSMutableSet* cancellations;
+@property (nonatomic, readwrite, retain) NSMutableArray* cancellations;
 
 + (STTodoState)todoState:(id<STTodo>)todo;
 
@@ -47,27 +52,44 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 
 - (void)setupWithTodo:(id<STTodo>)todo;
 
+@property (nonatomic, readonly, retain) UIImageView* backgroundGradient;
 @property (nonatomic, readonly, retain) UIImageView* checkView;
+@property (nonatomic, readonly, retain) UIView* crossOutLine;
+@property (nonatomic, readonly, retain) UIImageView* stampImage;
 @property (nonatomic, readonly, retain) UILabel* titleView;
 @property (nonatomic, readonly, retain) UIImageView* categoryImageView;
 @property (nonatomic, readonly, retain) UILabel* subtitleView;
+@property (nonatomic, readonly, retain) UIView* todoDots;
+@property (nonatomic, readonly, retain) STPreviewsView* previews;
 @property (nonatomic, readwrite, retain) id<STTodo> todo;
 @property (nonatomic, readwrite, assign) id<STTodoCellDelegate> delegate;
+@property (nonatomic, readwrite, assign) BOOL hasPreviews;
 
 @end
 
 @implementation STTodoCell
 
+@synthesize backgroundGradient = _backgroundGradient;
 @synthesize checkView = _checkView;
+@synthesize crossOutLine = _crossOutLine;
+@synthesize stampImage = _stampImage;
 @synthesize titleView = _titleView;
 @synthesize categoryImageView = _categoryImageView;
 @synthesize subtitleView = _subtitleView;
+@synthesize todoDots = _todoDots;
+@synthesize previews = _previews;
 @synthesize todo = _todo;
 @synthesize delegate = _delegate;
+@synthesize hasPreviews = _hasPreviews;
 
 - (id)init {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:_todoReuseIdentifier];
     if (self) {
+        _backgroundGradient = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"todo_bg"]];
+        CGRect bgFrame = _backgroundGradient.frame;
+        bgFrame.size.width = 320;
+        _backgroundGradient.frame = bgFrame;
+        
         CGFloat xOffset = 69;
         _checkView = [[UIImageView alloc] initWithFrame:CGRectMake(15, 8, 44, 44)];
         CGFloat shadowRadius = 1;
@@ -81,6 +103,9 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         _titleView.textAlignment = UITextAlignmentLeft;
         _titleView.lineBreakMode = UILineBreakModeTailTruncation;
         
+        _crossOutLine = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 2)];
+        _crossOutLine.backgroundColor = [UIColor colorWithWhite:191./255. alpha:1];
+        
         CGFloat yOffset = 39;
         _categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(xOffset, yOffset, 10, 10)];
         
@@ -91,21 +116,50 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         _subtitleView.textAlignment = UITextAlignmentLeft;
         _subtitleView.lineBreakMode = UILineBreakModeTailTruncation;
         
+        _stampImage = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, STStampImageSize18, STStampImageSize18)];
+        
+        _todoDots = [[UIView alloc] initWithFrame:CGRectMake(xOffset, 59, 235, 1)];
+        
+        CAShapeLayer *layer = [CAShapeLayer layer];
+        layer.contentsScale = [[UIScreen mainScreen] scale];
+        layer.fillColor = [UIColor clearColor].CGColor;
+        layer.strokeColor = [UIColor colorWithRed:0.8509f green:0.8509f blue:0.8509f alpha:1.0f].CGColor;
+        layer.lineDashPattern = [NSArray arrayWithObjects:[NSNumber numberWithFloat:1], [NSNumber numberWithFloat:2], nil];
+        layer.frame = CGRectMake(0, 0, _todoDots.frame.size.width, _todoDots.frame.size.height);
+        layer.path = [UIBezierPath bezierPathWithRect:layer.bounds].CGPath;
+        layer.strokeEnd = .5;
+        [_todoDots.layer addSublayer:layer];
+        
+        _previews = [[STPreviewsView alloc] init];
+        [Util reframeView:_previews withDeltas:CGRectMake(xOffset, 66, 0, 0)];
+        
+        [self.contentView addSubview:_backgroundGradient];
         [self.contentView addSubview:_checkView];
         [self.contentView addSubview:_titleView];
+        [self.contentView addSubview:_stampImage];
+        [self.contentView addSubview:_crossOutLine];
         [self.contentView addSubview:_categoryImageView];
         [self.contentView addSubview:_subtitleView];
+        [self.contentView addSubview:_todoDots];
+        [self.contentView addSubview:_previews];
         [self.contentView addSubview:tapButton];
+        
     }
     return self;
-}
+}   
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_backgroundGradient release];
     [_checkView release];
     [_titleView release];
+    [_stampImage release];
+    [_crossOutLine release];
     [_categoryImageView release];
     [_subtitleView release];
+    [_todoDots release];
+    [_previews release];
     [_todo release];
     [super dealloc];
 }
@@ -115,14 +169,26 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)setupWithTodo:(id<STTodo>)todo {
+    _hasPreviews = NO;
     id<STEntity> entity = todo.source.entity;
     _titleView.text = entity.title;
+    _titleView.textColor = [UIColor stampedBlackColor];
     [_titleView sizeToFit];
     if (_titleView.frame.size.width > 225) {
         CGRect frame = _titleView.frame;
         frame.size.width = 225;
         _titleView.frame = frame;
     }
+    _stampImage.frame = CGRectMake(CGRectGetMaxX(_titleView.frame)- 5, 
+                                   _titleView.frame.origin.y - 5,
+                                   _stampImage.frame.size.width,
+                                   _stampImage.frame.size.height);
+    
+    _crossOutLine.frame = CGRectMake(_titleView.frame.origin.x,
+                                     _titleView.frame.origin.y + 12,
+                                     _titleView.frame.size.width,
+                                     2);
+    
     _subtitleView.text = entity.subtitle;
     _subtitleView.textColor = [todo.complete boolValue] ? [UIColor stampedLightGrayColor] : [UIColor stampedGrayColor];
     [_subtitleView sizeToFit];
@@ -134,26 +200,69 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     _categoryImageView.image = [Util imageForCategory:entity.category];
     NSString* imageName = nil;
     STTodoState state = [STTodoViewController todoState:todo];
+    _stampImage.hidden = YES;
+    _crossOutLine.hidden = YES;
+    _todoDots.hidden = YES;
+    _backgroundGradient.hidden = YES;
+    _previews.hidden = YES;
+    _stampImage.image = nil;
     if (state == STTodoStateStamped) {
         imageName = @"TEMP_todo_done";
+        _stampImage.hidden = NO;
+        _stampImage.image = [Util stampImageForUser:[STStampedAPI sharedInstance].currentUser withSize:STStampImageSize18];
     }
     else if (state == STTodoStateDone) {
-        imageName = @"TEMP_todo_finished";
+        imageName = @"todo_markedasdone";
+        _crossOutLine.hidden = NO;
+        _titleView.textColor = [UIColor colorWithWhite:191./255. alpha:1];
     }
     else {
         imageName = @"TEMP_todo_not_done";
     }
     _checkView.image = [UIImage imageNamed:imageName];
+    
+    STSimplePreviews* previews = [[[STSimplePreviews alloc] init] autorelease];
+    previews.todos = todo.previews.todos;
+    if (previews.todos.count) {
+        _hasPreviews = YES;
+        _backgroundGradient.hidden = NO;
+        _todoDots.hidden = NO;
+        _previews.hidden = NO;
+        [_previews setupWithPreview:previews maxRows:1];
+    }
+    
     self.todo = todo;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    if (selected) {
+        _backgroundGradient.hidden = YES;
+    }
+    else {
+        _backgroundGradient.hidden = !self.hasPreviews;
+    }
+    [super setSelected:selected animated:animated];
+}
+
+- (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
+    if (highlighted) {
+        _backgroundGradient.hidden = YES;
+    }
+    else {
+        _backgroundGradient.hidden = !self.hasPreviews;
+    }    
+    [super setHighlighted:highlighted animated:animated];
+    _crossOutLine.backgroundColor = [UIColor colorWithWhite:191./255. alpha:1];
 }
 
 @end
 
 @implementation STTodoViewController
 
-@synthesize todos = todos_;
-@synthesize pending = _pending;
-@synthesize finished = _finished;
+@synthesize cache = _cache;
+@synthesize snapshot = _snapshot;
+@synthesize reloading = _reloading;
+@synthesize dirty = _dirty;
 @synthesize actionSheetTodo = _actionSheetTodo;
 @synthesize cancellations = _cancellations;
 
@@ -161,28 +270,46 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 {
     self = [super init];
     if (self) {
-        todos_ = [[NSMutableArray alloc] init];
-        _cancellations = [[NSMutableSet alloc] init];
+        _cancellations = [[NSMutableArray alloc] init];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheUpdate:) name:STCacheDidChangeNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(localTodoModification:) name:STStampedAPILocalTodoModificationNotification object:nil];
+        _cache = [[STSharedCaches cacheForTodos] retain];
+        if (_cache) {
+            _snapshot = [[_cache snapshot] retain];
+        }
+        else {
+            [STSharedCaches cacheForTodosWithCallback:^(STCache *cache, NSError *error, STCancellation *cancellation) {
+                _cache = [cache retain];
+                _snapshot = [[_cache snapshot] retain];
+            }];
+        }
     }
     return self;
 }
 
-- (void)cancelPendingOps {
-    [_pending cancel];
-    for (STCancellation* cancellation in _cancellations) {
-        [cancellation cancel];
-    }
-    [_cancellations removeAllObjects];
+- (void)localTodoModification:(id)notImportant {
+    self.dirty = YES;
 }
 
 - (void)dealloc
 {
-    [self cancelPendingOps];
-    [todos_ release];
-    [_pending release];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_cache release];
+    [_snapshot release];
     [_actionSheetTodo release];
+    [self cancelPendingOps];
     [_cancellations release];
     [super dealloc];
+}
+
+- (void)cancelPendingOps {
+    for (STCancellation* cancellation in self.cancellations) {
+        [cancellation cancel];
+    }
+    [self.cancellations removeAllObjects];
 }
 
 - (void)viewDidLoad
@@ -193,8 +320,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     [Util addHomeButtonToController:self withBadge:YES];
     [Util addCreateStampButtonToController:self];
     
-    [self reloadDataSource];
-    //self.showsSearchBar = NO;
+    self.dirty = YES;
 }
 
 - (void)viewDidUnload
@@ -203,11 +329,15 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)viewDidAppear:(BOOL)animated {
+    if (self.dirty) {
+        [self reloadDataSource];
+    }
+    self.dirty = NO;
     [super viewDidAppear:animated];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
-    [self cancelPendingOps];
+    [super viewWillDisappear:animated];
 }
 
 + (STTodoState)todoState:(id<STTodo>)todo {
@@ -223,10 +353,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    if (self.todos) {
-        return self.todos.count;
-    }
-    return 0;
+    return self.snapshot.count;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -234,12 +361,16 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    id<STTodo> todo = [self.snapshot objectAtIndex:indexPath.row];
+    if (todo.previews.todos.count) {
+        return 107;
+    }
     return 64;
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    id<STTodo> todo = [self.todos objectAtIndex:indexPath.row];
+    id<STTodo> todo = [self.snapshot objectAtIndex:indexPath.row];
     STTodoCell* cell = [tableView dequeueReusableCellWithIdentifier:_todoReuseIdentifier];
     if (!cell) {
         cell = [[[STTodoCell alloc] init] autorelease];
@@ -250,72 +381,84 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-    id<STTodo> todo = [self.todos objectAtIndex:indexPath.row];
+    id<STTodo> todo = [self.snapshot objectAtIndex:indexPath.row];
     STActionContext* context = [STActionContext context];
     id<STAction> action = [STStampedActions actionViewEntity:todo.source.entity.entityID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
 
+#pragma mark - Cache Methods
 
-- (void)loadMore {
-    if (self.pending || self.finished) {
-        return;
+- (void)reloadTableView:(BOOL)preserveOffset {
+    if (preserveOffset) {
+        CGPoint offset = self.tableView.contentOffset;
+        [self.tableView reloadData];
+        self.tableView.contentOffset = offset;
+        
+    } else {
+        [self.tableView reloadData];
     }
-    STGenericCollectionSlice* slice = [[[STGenericCollectionSlice alloc] init] autorelease];
-    slice.offset = [NSNumber numberWithInteger:self.todos.count];
-    slice.limit = [NSNumber numberWithInteger:20];
-    self.pending = [[STStampedAPI sharedInstance] todosWithGenericCollectionSlice:slice andCallback:^(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation) {
-        self.pending = nil;
-        if (todos.count > 0) {
-            [self.todos addObjectsFromArray:todos];
-            [self.tableView reloadData];
-            [self loadNextPage];
-        }
-        else {
-            self.finished = YES;
-            [self dataSourceDidFinishLoading];
-        }
-    }];
+}
+
+- (void)cacheWillLoadPage:(NSNotification *)notification {
+    self.reloading = YES;
+    //[self.tableView reloadData];
+}
+
+- (void)cacheDidLoadPage:(NSNotification *)notification {
+    self.reloading = NO;
+    [self dataSourceDidFinishLoading];
+    //[self.tableView reloadData];
+}
+
+- (void)cacheUpdate:(NSNotification *)notification {
+    if (self.cache) {
+        self.snapshot = self.cache.snapshot;
+        [self reloadTableView:YES];
+    }
 }
 
 #pragma mark - STRestController 
 
 - (BOOL)dataSourceReloading {
-    return self.pending != nil;
+    return self.reloading;
 }
 
 - (void)loadNextPage {
-    [self loadMore];
+    NSLog(@"loadNextPage");
+    [self.cache refreshAtIndex:self.snapshot.count force:NO];
 }
 
 - (BOOL)dataSourceHasMoreData {
-    return !self.finished;
+    return self.cache.hasMore;
 }
 
 - (void)reloadDataSource {
-    [self.pending cancel];
-    self.pending = nil;
-    self.finished = NO;
-    [self.todos removeAllObjects];
-    [self loadMore];
-    [self.tableView reloadData];
+    NSLog(@"reloading");
+    if (self.dirty) {
+        [self.cache updateAllWithAccellerator:[STStampedAPI sharedInstance]];
+    }
+    self.dirty = NO;
+    [self.cache refreshAtIndex:-1 force:YES];
     [super reloadDataSource];
 }
 
 - (BOOL)dataSourceIsEmpty {
-    return self.todos.count == 0 && self.finished;
+    return self.snapshot.count == 0;
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
-    UILabel* text = [Util viewWithText:@"No todos" 
-                                  font:[UIFont stampedBoldFont]
-                                 color:[UIColor stampedGrayColor]
-                                  mode:UILineBreakModeTailTruncation
-                            andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-    text.frame = [Util centeredAndBounded:text.frame.size inFrame:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
-    //[view addSubview:view];
+    CGRect frame = view.frame;
+    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
+    frame.origin.y = height;
+    frame.size.height -= height;
+    view.frame = frame;
+    [view setupWithTitle:@"No todos" detailTitle:@""];
 }
 
+- (void)applicationDidBecomeActive:(id)notImportant {
+    [self reloadDataSource];
+}
 
 #pragma mark - UIActionSheetDelegate
 
@@ -339,7 +482,8 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
                                                                                      complete:complete
                                                                                   andCallback:^(id<STTodo> todo, NSError *error, STCancellation *cancellation) {
                                                                                       if (todo) {
-                                                                                          [self reloadDataSource];
+                                                                                          STObjectSetAccelerator* accel = [STObjectSetAccelerator acceleratorForObjects:[NSArray arrayWithObject:todo]];
+                                                                                          [self.cache updateAllWithAccellerator:accel];
                                                                                       }
                                                                                       else {
                                                                                           [Util warnWithMessage:@"Could not complete operation" andBlock:nil];
@@ -378,6 +522,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         }
     }
 }
+
 
 #pragma mark - STTodoCellDelegate
 

@@ -48,6 +48,8 @@ extern NSString* const STCacheDidLoadPageNotification;
 
 @property (nonatomic, readonly, assign) NSInteger count;
 
+@property (nonatomic, readonly, retain) STCachePage* page;
+
 @end
 
 @interface STCache : NSObject <STCacheConfiguration>
@@ -67,7 +69,7 @@ extern NSString* const STCacheDidLoadPageNotification;
                         accelerator:(id<STCacheAccelerator>)accel
                         andCallback:(void (^)(NSDate* date, NSError* error, STCancellation* cancellation))block;
 
-- (void)updateObjects:(NSArray<STDatum>*)objects;
+//- (void)updateObjects:(NSArray<STDatum>*)objects;
 
 - (void)removeObjectsWithIDs:(NSSet*)doomedIDs;
 

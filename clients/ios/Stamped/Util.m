@@ -1405,6 +1405,48 @@ static Rdio* _rdio;
     return result;
 }
 
++ (NSAttributedString *)attributedStringForString:(NSString*)aString 
+                                       references:(NSArray<STActivityReference>*)references 
+                                             font:(UIFont*)aFont 
+                                            color:(UIColor*)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent 
+                                          kerning:(CGFloat)kerning {
+    
+    if (!aString)
+        return nil;
+    
+    id fontAttr = [NSMakeCollectable(CTFontCreateWithName((CFStringRef)aFont.fontName, aFont.pointSize, NULL)) autorelease];
+    id foregroundColorAttr = (id)(aColor ? aColor.CGColor : [UIColor blackColor].CGColor);
+    id paragraphStyleAttr = ((^ {
+        
+        CTParagraphStyleSetting paragraphStyles[] = (CTParagraphStyleSetting[]){
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineHeightMultiple, sizeof(float_t), (float_t[]){ 0.01f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierFirstLineHeadIndent, sizeof(float_t), (float_t[]){ indent } },
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineBreakMode, sizeof(CTLineBreakMode), (CTLineBreakMode[]){ kCTLineBreakByWordWrapping } },
+        };
+        
+        CTParagraphStyleRef paragraphStyleRef = CTParagraphStyleCreate(paragraphStyles, sizeof(paragraphStyles) / sizeof(CTParagraphStyleSetting));
+        return [NSMakeCollectable(paragraphStyleRef) autorelease];
+        
+    })());
+    
+    NSMutableDictionary* attrs = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                  fontAttr, kCTFontAttributeName,
+                                  foregroundColorAttr, kCTForegroundColorAttributeName,
+                                  paragraphStyleAttr, kCTParagraphStyleAttributeName,
+                                  [NSNumber numberWithFloat:kerning], (id)kCTKernAttributeName,
+                                  nil];
+    NSAttributedString *returnedString = [[[NSAttributedString alloc] initWithString:aString attributes:attrs] autorelease];
+    return returnedString;
+    
+}
+
 + (NSAttributedString *)attributedStringForString:(NSString *)aString 
                                              font:(UIFont *)aFont 
                                             color:(UIColor *)aColor 

@@ -11,6 +11,7 @@
 #import "STActionManager.h"
 #import "Util.h"
 #import "STStampedAPI.h"
+#import "STSharedCaches.h"
 
 @interface STTodoButton ()
 
@@ -33,8 +34,17 @@
         self.normalOnImage = [UIImage imageNamed:@"sDetailBar_btn_todo_selected"];
         self.touchedOffImage = [UIImage imageNamed:@"sDetailBar_btn_todo_active"];
         self.touchedOnImage = [UIImage imageNamed:@"sDetailBar_btn_todo_active"];
-        if (stamp) {
-            self.on = [[self.stamp isTodod] boolValue];
+        if (stamp.isTodod.boolValue) {
+            self.on = YES;
+        }
+        else {
+            STCache* todos = [STSharedCaches cacheForTodos];
+            if (todos) {
+                STCacheSnapshot* snapshot = todos.snapshot;
+                if ([snapshot.page indexForKey:entityID]) {
+                    self.on = YES;
+                }
+            }
         }
         _entityID = [entityID retain];
     }

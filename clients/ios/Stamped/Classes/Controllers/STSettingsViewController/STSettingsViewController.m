@@ -20,6 +20,7 @@
 #import "Util.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
+#import "STDebugViewController.h"
 
 @interface STSettingsViewController ()
 
@@ -274,7 +275,8 @@
         
         // feedback
         
-        [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        //[tableView deselectRowAtIndexPath:indexPath animated:YES];
+        [Util pushController:[[[STDebugViewController alloc] init] autorelease] modal:NO animated:YES];
 
         
     } else if (indexPath.section == 3) {

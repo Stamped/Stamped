@@ -28,7 +28,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 
 - (id)initWithCachePage:(STCachePage*)page;
 
-@property (nonatomic, readonly, retain) STCachePage* page;
+//@property (nonatomic, readonly, retain) STCachePage* page;
 
 @end
 

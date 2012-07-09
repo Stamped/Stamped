@@ -56,6 +56,7 @@ extern NSString* const STStampedAPILogoutNotification;
 extern NSString* const STStampedAPIRefreshedTokenNotification;
 extern NSString* const STStampedAPIUserUpdatedNotification;
 extern NSString* const STStampedAPILocalStampModificationNotification;
+extern NSString* const STStampedAPILocalTodoModificationNotification;
 
 @interface STStampedAPI : NSObject <STCacheAccelerator>
 
@@ -181,6 +182,11 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 - (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
                                        andCallback:(void(^)(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)todosWithDate:(NSDate*)date 
+                           limit:(NSInteger)limit 
+                          offset:(NSInteger)offset
+                     andCallback:(void(^)(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation))block;
+
 - (STCancellation*)stampsWithScope:(STStampedAPIScope)scope
                               date:(NSDate*)date 
                              limit:(NSInteger)limit 
@@ -295,6 +301,10 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)usersWithPhoneNumbers:(NSArray*)phoneNumbers 
                              andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)deleteAccountWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)usersFromFacebookWithCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block;
 
 + (void)logError:(NSString*)message;
 

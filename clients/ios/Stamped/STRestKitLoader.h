@@ -12,6 +12,26 @@
 #import "STLoginResponse.h"
 #import "STAccountParameters.h"
 
+typedef enum {
+    //Auth queue
+    STRestKitAuthPolicyStampedAuth,
+    //Shared queue
+    STRestKitAuthPolicyOptional,
+    STRestKitAuthPolicyNone,
+    STRestKitAuthPolicyFail,
+    //Wait queue
+    STRestKitAuthPolicyWait,
+} STRestKitAuthPolicy;
+
+typedef enum {
+    STRestKitLoaderErrorRefreshing,
+    STRestKitLoaderErrorLoggedOut,
+    STRestKitLoaderErrorNotConnected,
+    STRestKitLoaderErrorTimeout,
+} STRestKitLoaderError;
+
+extern NSString* const STRestKitLoaderErrorDomain;
+
 @interface STRestKitLoader : NSObject
 
 - (STCancellation*)loadWithPath:(NSString*)path
@@ -24,6 +44,20 @@
 - (STCancellation*)loadOneWithPath:(NSString*)path
                               post:(BOOL)post 
                      authenticated:(BOOL)authenticated
+                            params:(NSDictionary*)params 
+                           mapping:(RKObjectMapping*)mapping 
+                       andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)loadWithPath:(NSString*)path
+                           post:(BOOL)post
+                     authPolicy:(STRestKitAuthPolicy)policy
+                         params:(NSDictionary*)params 
+                        mapping:(RKObjectMapping*)mapping 
+                    andCallback:(void(^)(NSArray* results, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)loadOneWithPath:(NSString*)path
+                              post:(BOOL)post 
+                        authPolicy:(STRestKitAuthPolicy)policy
                             params:(NSDictionary*)params 
                            mapping:(RKObjectMapping*)mapping 
                        andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block;
@@ -58,6 +92,7 @@
 - (void)logout;
 - (void)updateCurrentUser:(id<STUserDetail>)currentUser;
 
+@property (nonatomic, readonly, assign) BOOL loggedIn;
 @property (nonatomic, readonly, retain) id<STUserDetail> currentUser;
 
 + (STRestKitLoader*)sharedInstance;
