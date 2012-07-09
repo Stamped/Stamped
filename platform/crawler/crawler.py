@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import gevent, json, math, os, sys
 
-from crawler import EntitySinks, EntitySources
+from crawler import EntitySources
 from crawler.GeocoderEntityProxy import GeocoderEntityProxy
 from crawler.AEntityProxy import AEntityProxy
 from crawler.ASyncGatherSource import ASyncGatherSource
