@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from httpapi.v0.helpers import *
+from servers.httpapi.v0.helpers import *
 
 exceptions = [
     (StampedAccountNotFoundError, 404, 'not_found', 'There was an error retrieving account information'),
@@ -25,16 +25,16 @@ def transformStamps(stamps):
     Convert stamps to HTTPStamp and return as json-formatted HttpResponse
     """
     result = []
-
+    
     if stamps is None:
         stamps = []
-
+    
     for stamp in stamps:
         try:
             result.append(HTTPStamp().importStamp(stamp).dataExport())
         except:
             logs.warn(utils.getFormattedException())
-
+    
     return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPStampNew,
@@ -55,8 +55,10 @@ def create(request, authUserId, data, **kwargs):
     return transformOutput(stamp.dataExport())
 
 exceptions_share = [
-    (StampedMissingParametersError, StampedHTTPError(400, 'bad_request', 'Missing third party service name')),
-    (StampedFacebookTokenError, StampedHTTPError(401, 'facebook_auth', "Facebook login failed. Please reauthorize your account.")),
+    (StampedMissingParametersError, 400, 'bad_request', 'Missing third party service name'),
+    (StampedFacebookTokenError,     401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
+    (StampedLinkedAccountError,     401, 'invalid_credentials', "Missing credentials for linked account."),
+    (StampedThirdPartyError,        400, 'third_party', "There was an error connecting to the third-party service."),
 ]
 @handleHTTPRequest(http_schema=HTTPStampShare,
                    exceptions=exceptions + exceptions_share)
@@ -68,13 +70,7 @@ def share(request, authUserId, http_schema, data, **kwargs):
         else:
             http_schema.service_name = kwargs['service_name']
 
-    try:
-        stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
-    except StampedLinkedAccountError:
-        raise StampedHTTPError(401, "Missing credentials for linked account")
-    except StampedThirdPartyError:
-        raise StampedHTTPError(400, "There was an error connecting to the third-party service")
-
+    stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
     stamp = HTTPStamp().importStamp(stamp)
     return transformOutput(stamp.dataExport())
 
@@ -86,7 +82,7 @@ def remove(request, authUserId, http_schema, **kwargs):
     return transformOutput(True)
 
 
-exceptions_show = [ (StampedPermissionsError, StampedHTTPError(403, "forbidden", "Insufficient privileges to view stamp")) ]
+exceptions_show = [ (StampedPermissionsError, 403, "forbidden", "Insufficient privileges to view stamp") ]
 @handleHTTPRequest(requires_auth=False,
                   http_schema=HTTPStampRef,
                   exceptions=exceptions + exceptions_show)

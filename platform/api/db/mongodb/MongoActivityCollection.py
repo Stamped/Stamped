@@ -11,10 +11,10 @@ from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
 from api.Schemas                            import *
 
-from AActivityDB                        import AActivityDB
-from MongoAlertQueueCollection          import MongoAlertQueueCollection
-from MongoActivityItemCollection        import MongoActivityItemCollection
-from MongoActivityLinkCollection        import MongoActivityLinkCollection
+from api.AActivityDB                        import AActivityDB
+from api.db.mongodb.MongoAlertQueueCollection          import MongoAlertQueueCollection
+from api.db.mongodb.MongoActivityItemCollection        import MongoActivityItemCollection
+from api.db.mongodb.MongoActivityLinkCollection        import MongoActivityLinkCollection
 
 class MongoActivityCollection(AActivityDB):
     
@@ -85,8 +85,6 @@ class MongoActivityCollection(AActivityDB):
         return self.activity_links_collection.countActivityIdsForUser(userId, since=timestamp)
     
     def addActivity(self, verb, **kwargs):
-        logs.debug('ADDING ACTIVITY ITEM in addActivity verb %s kwargs %s' % (verb, kwargs))
-
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
         benefit         = kwargs.pop('benefit', None)

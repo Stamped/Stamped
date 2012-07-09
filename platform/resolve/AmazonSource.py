@@ -15,13 +15,12 @@ from logs import report
 
 try:
     import logs, re
-    from GenericSource              import GenericSource, multipleSource
-    from TitleUtils                 import *
-    from Resolver                   import *
-    from ResolverObject             import *
+    from resolve.GenericSource              import GenericSource, multipleSource
+    from resolve.TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
     from datetime                   import datetime
     from libs.LibUtils              import months, parseDateString, xp
-    from libs.AmazonAPI             import AmazonAPI
     from libs.Amazon                import Amazon, globalAmazon
     from utils                      import lazyProperty, basicNestedObjectToString
     from json                       import loads
@@ -1230,14 +1229,6 @@ class AmazonSource(GenericSource):
         else:
             raise NotImplementedError('AmazonSource.searchLite() does not handle category (%s)' % queryCategory)
 
-    
-    @lazyProperty
-    def __amazon_api(self):
-        return AmazonAPI()
-    
-    @lazyProperty
-    def __amazon(self):
-        return self.__amazon_api.amazon
     
     # def __enrichSong(self, entity, asin):
     #     track = AmazonTrack(asin)

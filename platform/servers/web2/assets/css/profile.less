@@ -351,7 +351,7 @@
                     .rhs {
                         float: right;
                         
-                        .subnav {
+                        #subnav {
                             width: 256px;
                             
                             .subnav_button {
@@ -602,7 +602,7 @@ body.app {
 .stamp-gallery-header {
     margin: 1em 24px;
     
-    .stamp-gallery-sort {
+    /*.stamp-gallery-sort {
         position: relative;
         z-index: 80;
         left: -23px;
@@ -635,41 +635,16 @@ body.app {
                 display: inline;
             }
         }
-    }
+    }*/
     
     .stamp-gallery-view-map {
-        float: right;
+        position: relative;
+        float: left;
+        left: -8px;
         
-        /*a {
-            //display: block;
-            //-moz-box-align: center;
-            //-webkit-box-align: center;
-            
-            .icon {
-                background: url(/assets/img/viewmapicon_sprite.png) no-repeat 0 0;
-                display: inline-block;
-                
-                width:  39px;
-                height: 33px;
-            }
-            
-            &:hover, &:active {
-                color: #23a2f9 !important;
-                text-decoration: none !important;
-            }
-            
-            &:hover {
-                .icon {
-                    background-position: -41px 0;
-                }
-            }
-            
-            &:active {
-                .icon {
-                    background-position: -82px 0;
-                }
-            }
-        }*/
+        .desc {
+            margin-left: .5em;
+        }
     }
     
     .expanded {
@@ -739,13 +714,13 @@ body.music, body.book, body.film, body.app {
     left: -24px;
     
     .top-wave {
-        background: url(/assets/img/main-topcap.png) left top repeat-x;
+        background: url(/assets/img/main-topcap.png) repeat-x;
         height: 8px;
         margin: 0;
     }
     
     .bottom-wave {
-        background: url(/assets/img/main-botcap.png) left top repeat-x;
+        background: url(/assets/img/main-botcap.png) repeat-x;
         height: 8px;
         margin: 0;
     }
@@ -1026,17 +1001,17 @@ body.music, body.book, body.film, body.app {
         .rounded(2px);
     }
     
-    .stamp-category-music .stamp-subcategory-artist .stamp-icon {
+    .stamp-subcategory-artist .stamp-icon {
         background: url(/assets/img/entity_fallbacks/artist.png) no-repeat;
         height: 140px;
     }
     
-    .stamp-category-music .stamp-subcategory-album .stamp-icon {
+    .stamp-subcategory-album .stamp-icon {
         background: url(/assets/img/entity_fallbacks/album.png) no-repeat;
         height: 132px;
     }
     
-    .stamp-category-music .stamp-subcategory-song .stamp-icon {
+    .stamp-subcategory-song .stamp-icon {
         background: url(/assets/img/entity_fallbacks/song.png) no-repeat;
         height: 118px;
     }
@@ -1051,9 +1026,14 @@ body.music, body.book, body.film, body.app {
         height: 208px;
     }
     
-    .stamp-category-app .stamp-subcategory-app .stamp-icon {
+    .stamp-category-app .stamp-icon, .stamp-subcategory-app .stamp-icon {
         background: url(/assets/img/entity_fallbacks/app.png) no-repeat;
         height: 212px;
+    }
+    
+    .stamp-category-place .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/place.png) no-repeat;
+        height: 140px;
     }
 }
 
@@ -1064,11 +1044,13 @@ body.music, body.book, body.film, body.app {
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
     color: #666;    
+    
     line-height: 140%;
     letter-spacing: 0.02em;
-    margin: 0px 0px 9px 0px;
-    top: -8px;
+    margin: 0 0 9px;
+    
     position: relative;
+    top: -8px;
 }
 
 .blurb {
@@ -1475,53 +1457,6 @@ body.app        #stamp-category-nav-bar ol li.app {
    ************************************************************************** */
 
 
-.profile-nav {
-    position: absolute;
-    top:   0;
-    right: 0;
-    
-    a {
-        display: block;
-    }
-    
-    a:focus {
-        text-decoration: none;
-        border: 0 none;
-        outline: none;
-    }
-    
-    /* TODO: 20x19 version */
-    a.up-arrow {
-        background: url(/assets/img/navupdownarrows.png) no-repeat 0 0;
-        width:  21px;
-        height: 21px;
-        margin: 0 0 .5em;
-        
-        &:hover {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -24px 0;
-        }
-        
-        &:active {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -48px 0;
-        }
-    }
-    
-    a.down-arrow {
-        background: url(/assets/img/navupdownarrows.png) left bottom no-repeat;
-        
-        width:  21px;
-        height: 21px;
-        
-        &:hover {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -24px -29px;
-        }
-        
-        &:active {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
-        }
-    }
-}
-
 /* TODO: fix height issues */
 ul.user-category-distribution {
     li {
@@ -1591,7 +1526,6 @@ ul.user-category-distribution {
     }
 }
 
-
 .post-header {
     .transition(background, .6s, ease-out);
 }
@@ -1626,25 +1560,25 @@ body.sdetail_popup {
     }
 }
 
-@-webkit-keyframes map-profile-inner-bounce {
+@-webkit-keyframes -webkit-map-profile-inner-bounce {
     0%   { -webkit-transform: perspective(600px) translate(0, 0); }
     50%  { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
     100% { -webkit-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
-@-webkit-keyframes map-profile-inner-shadow-bounce {
+@-webkit-keyframes -webkit-map-profile-inner-bounce-shadow {
     0%   { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
     50%  { -webkit-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
     100% { -webkit-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
 }
 
-@-moz-keyframes map-profile-inner-bounce {
+@-moz-keyframes -moz-map-profile-inner-bounce {
     0%   { -moz-transform: perspective(600px) translate(0, 0); }
     50%  { -moz-transform: perspective(600px) rotateY(180deg) translate(0, -12px); }
     100% { -moz-transform: perspective(600px) rotateY(180deg) translate(0, 0); }
 }
 
-@-moz-keyframes map-profile-inner-shadow-bounce {
+@-moz-keyframes -moz-map-profile-inner-bounce-shadow {
     0%   { -moz-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
     50%  { -moz-transform: perspective(600px) scale(0.8, 0.8); opacity: .75; }
     100% { -moz-transform: perspective(600px) scale(1.0, 1.0); opacity: 1.0; }
@@ -1734,12 +1668,33 @@ a.map-profile-link {
                 @timing: easeInOutCubic;
                 
                 .inner {
-                    // TODO: tie this animation start to hover
-                    .animation(map-profile-inner-bounce, 1, @timing, @duration);
+                    /*.animation(map-profile-inner-bounce, 1, @timing, @duration);*/
+                    
+                    // TODO: use shorthand
+                    -webkit-animation-name:             -webkit-map-profile-inner-bounce;
+                    -webkit-animation-iteration-count:  1;
+                    -webkit-animation-timing-function:  @timing;
+                    -webkit-animation-duration:         @duration;
+                    
+                    // TODO: test on FF
+                    -moz-animation-name:                -moz-map-profile-inner-bounce;
+                    -moz-animation-iteration-count:     1;
+                    -moz-animation-timing-function:     @timing;
+                    -moz-animation-duration:            @duration;
                 }
                 
                 .inner-shadow {
-                    .animation(map-profile-inner-shadow-bounce, 1, @timing, @duration);
+                    /*.animation(map-profile-inner-bounce-shadow, 1, @timing, @duration);*/
+                    
+                    -webkit-animation-name:             -webkit-map-profile-inner-bounce-shadow;
+                    -webkit-animation-iteration-count:  1;
+                    -webkit-animation-timing-function:  @timing;
+                    -webkit-animation-duration:         @duration;
+                    
+                    -moz-animation-name:                -moz-map-profile-inner-bounce-shadow;
+                    -moz-animation-iteration-count:     1;
+                    -moz-animation-timing-function:     @timing;
+                    -moz-animation-duration:            @duration;
                 }
             }
         }
@@ -1751,14 +1706,6 @@ a.map-profile-link {
                                 POPUP VIEWS
    ************************************************************************** */
 
-
-.fancybox-wrap {
-    .close-button {
-        position: absolute;
-        top:   -18px;
-        right: -18px;
-    }
-}
 
 .popup {
     position: relative;
@@ -1813,10 +1760,10 @@ a.map-profile-link {
     }
     
     .popup-body {
-        overflow: scroll;
         max-height: 300px;
-        width: 366px;
-        min-width: 366px;
+        width:      366px;
+        min-width:  366px;
+        overflow: scroll;
         
         &:focus {
             outline: none;
@@ -1923,6 +1870,14 @@ a.map-profile-link {
     background-position: -152px 0 !important;
 }
 
+.fancybox-wrap {
+    .close-button {
+        position: absolute;
+        top:   -18px;
+        right: -18px;
+    }
+}
+
 .user-preview-icon {
     background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
     position: absolute;
@@ -1935,7 +1890,6 @@ a.map-profile-link {
     height: 17px;
     pointer-events: none;
 }
-
 
 .like .user-preview-icon {
     background-position: 0 0;

@@ -11,7 +11,7 @@ PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 utils.log("Django DEBUG=%s ROOT=%s" % (DEBUG, PROJ_ROOT))
 
 ADMINS = (
-    ('Stamped Dev', 'dev@stamped.com'), 
+    ('Travis', 'travis@stamped.com'), 
 )
 
 MANAGERS  = ADMINS
@@ -117,6 +117,9 @@ ROOT_URLCONF = 'web2.urls'
 STAMPED_TEMPLATE_DIR  = os.path.join(PROJ_ROOT, "html")
 STAMPED_TEMPLATE_DIR2 = os.path.join(PROJ_ROOT, "templates")
 STAMPED_TEMPLATE_FILE = os.path.join(STAMPED_TEMPLATE_DIR2, "templates.generated.html")
+
+STAMPED_PROFILE_TEMPLATE_FILE = os.path.join(STAMPED_TEMPLATE_DIR2, "profile.generated.html")
+STAMPED_MAP_TEMPLATE_FILE     = os.path.join(STAMPED_TEMPLATE_DIR2, "map.generated.html")
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".

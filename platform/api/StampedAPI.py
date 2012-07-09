@@ -13,14 +13,14 @@ try:
     import utils
     import os, logs, re, time, urlparse, math, pylibmc, gevent
 
-    import Blacklist
+    from api import Blacklist
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
-    import Entity
-    import SchemaValidation
+    from api import Entity
+    from api import SchemaValidation
 
-    from auth                       import convertPasswordForStorage
+    from api.auth                       import convertPasswordForStorage
     from utils                      import lazyProperty
     from functools                  import wraps
     from errors                     import *
@@ -28,43 +28,43 @@ try:
     from pprint                     import pprint, pformat
     from operator                   import itemgetter, attrgetter
 
-    from AStampedAPI                import AStampedAPI
-    from AAccountDB                 import AAccountDB
-    from AEntityDB                  import AEntityDB
-    from APlacesEntityDB            import APlacesEntityDB
-    from AUserDB                    import AUserDB
-    from AStampDB                   import AStampDB
-    from ACommentDB                 import ACommentDB
-    from ATodoDB                    import ATodoDB
-    from ACollectionDB              import ACollectionDB
-    from AFriendshipDB              import AFriendshipDB
-    from AActivityDB                import AActivityDB
+    from api.AStampedAPI                import AStampedAPI
+    from api.AAccountDB                 import AAccountDB
+    from api.AEntityDB                  import AEntityDB
+    from api.APlacesEntityDB            import APlacesEntityDB
+    from api.AUserDB                    import AUserDB
+    from api.AStampDB                   import AStampDB
+    from api.ACommentDB                 import ACommentDB
+    from api.ATodoDB                    import ATodoDB
+    from api.ACollectionDB              import ACollectionDB
+    from api.AFriendshipDB              import AFriendshipDB
+    from api.AActivityDB                import AActivityDB
     from api.Schemas                import *
-    from ActivityCollectionCache    import ActivityCollectionCache
-    from Memcache                   import globalMemcache
-    from HTTPSchemas                import generateStampUrl
+    from api.ActivityCollectionCache    import ActivityCollectionCache
+    from libs.Memcache                   import globalMemcache
+    from api.HTTPSchemas                import generateStampUrl
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
-    from AmazonSource               import AmazonSource
-    from FactualSource              import FactualSource
-    from GooglePlacesSource         import GooglePlacesSource
-    from iTunesSource               import iTunesSource
-    from RdioSource                 import RdioSource
-    from SpotifySource              import SpotifySource
-    from TMDBSource                 import TMDBSource
-    from TheTVDBSource              import TheTVDBSource
-    from StampedSource              import StampedSource
+    from resolve.AmazonSource               import AmazonSource
+    from resolve.FactualSource              import FactualSource
+    from resolve.GooglePlacesSource         import GooglePlacesSource
+    from resolve.iTunesSource               import iTunesSource
+    from resolve.RdioSource                 import RdioSource
+    from resolve.SpotifySource              import SpotifySource
+    from resolve.TMDBSource                 import TMDBSource
+    from resolve.TheTVDBSource              import TheTVDBSource
+    from resolve.StampedSource              import StampedSource
 
     # TODO (travis): we should NOT be importing * here -- it's okay in limited
     # situations, but in general, this is very bad practice.
 
-    from Netflix                    import *
-    from Facebook                   import *
-    from Twitter                    import *
-    from GooglePlaces               import *
-    from Rdio                       import *
+    from libs.Netflix               import *
+    from libs.Facebook                   import *
+    from libs.Twitter                    import *
+    from libs.GooglePlaces               import *
+    from libs.Rdio                       import *
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -322,6 +322,15 @@ class StampedAPI(AStampedAPI):
         if account.email != email:
             email = str(email).lower().strip()
             SchemaValidation.validateEmail(email)
+
+            testAccount = None
+            try:
+                testAccount = self._accountDB.getAccountByEmail(email)
+            except StampedAccountNotFoundError:
+                pass
+            if testAccount is not None:
+                raise StampedEmailInUseError("Email is in use by another account")
+
             account.email = email
 
         if password is None:
@@ -420,7 +429,7 @@ class StampedAPI(AStampedAPI):
         #profile_image = 'http://graph.facebook.com/%s/picture?type=large' % user['id']
 
         account = self.addAccount(account, tempImageUrl=tempImageUrl)
-        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[account.user_id, new_fb_account.user_token])
+        tasks.invoke(tasks.APITasks.alertFollowersFromFacebook, args=[account.user_id, fb_acct.token])
         return account
 
     @API_CALL
@@ -449,6 +458,8 @@ class StampedAPI(AStampedAPI):
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
         tw_acct.service_name                = 'twitter'
+        tw_acct.token                       = new_tw_account.user_token
+        tw_acct.secret                      = new_tw_account.user_secret
         tw_acct.linked_user_id              = twitterUser['id']
         tw_acct.linked_screen_name          = twitterUser['screen_name']
         tw_acct.linked_name                 = twitterUser.pop('name', None)
@@ -605,7 +616,9 @@ class StampedAPI(AStampedAPI):
         account = self._accountDB.getAccount(authUserId)
         fields = updateAcctForm.dataExport()
 
-        if 'screen_name' in fields and account.screen_name != fields['screen_name'] and fields['screen_name'] is not None:
+        if 'screen_name' in fields and account.screen_name != fields['screen_name']:
+            if fields['screen_name'] is None:
+                raise StampedUnsetRequiredFieldError("Cannot unset screen name")
             old_screen_name = account.screen_name
             account.screen_name = fields['screen_name']
 
@@ -631,6 +644,8 @@ class StampedAPI(AStampedAPI):
                 old_screen_name.lower(), account.screen_name.lower()])
 
         if 'name' in fields and account.name != fields['name'] and fields['name'] is not None:
+            if fields['name'] is None:
+                raise StampedUnsetRequiredFieldError("Cannot unset name")
             account.name = fields['name']
         if 'phone' in fields and account.phone != fields['phone']:
             account.phone = fields['phone']
@@ -642,12 +657,14 @@ class StampedAPI(AStampedAPI):
             account.website = url
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
-        if 'color_primary' in fields and 'color_secondary' in fields:
-            if account.color_primary != fields['color_primary'] or account.color_secondary != fields['color_secondary']:
-                account.color_secondary = fields['color_secondary']
-                account.color_primary = fields['color_primary']
-                # Asynchronously generate stamp file
-                tasks.invoke(tasks.APITasks.customizeStamp, args=[account.color_primary, account.color_secondary])
+        if 'color_primary' in fields and account.color_primary != fields['color_primary']:
+            account.color_primary = fields['color_primary']
+        if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
+            account.color_secondary = fields['color_secondary']
+        if ('color_primary' in fields and account.color_primary != fields['color_primary']) or \
+           ('color_secondary' in fields and account.color_secondary != fields['color_secondary']):
+            # Asynchronously generate stamp image
+            tasks.invoke(tasks.APITasks.customizeStamp, args=[account.color_primary, account.color_secondary])
         if 'temp_image_url' in fields:
             image_cache_timestamp = datetime.utcnow()
             account.timestamp.image_cache = image_cache_timestamp
@@ -1274,7 +1291,7 @@ class StampedAPI(AStampedAPI):
 
         self._friendshipDB.removeFriendship(friendship)
 
-        # Asynchronously remove stamps and activity for this friendship
+        # Asynchronously remove stamps for this friendship
         tasks.invoke(tasks.APITasks.removeFriendship, args=[authUserId, user.user_id])
 
         return user
@@ -1288,9 +1305,6 @@ class StampedAPI(AStampedAPI):
         # Remove stamps from Inbox
         stampIds = self._collectionDB.getUserStampIds(userId)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
-
-        # Remove activity
-        #self._activityDB.removeFollowActivity(authUserId, userId)
 
     @API_CALL
     def approveFriendship(self, data, auth):
@@ -1332,6 +1346,7 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getFriends(self, userRequest):
+        # TODO (travis): optimization - no need to query DB for user here if userRequest already contains user_id!
         user = self.getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
@@ -1342,20 +1357,39 @@ class StampedAPI(AStampedAPI):
         friends.reverse()
 
         return friends
-
+    
+    @API_CALL
+    def getEnrichedFriends(self, user_id, limit=100):
+        user_ids = self._friendshipDB.getFriends(user_id, limit=limit)
+        
+        # Return data in reverse-chronological order
+        user_ids.reverse()
+        
+        return self._userDB.lookupUsers(user_ids, None, limit=limit)
+    
     @API_CALL
     def getFollowers(self, userRequest):
+        # TODO (travis): optimization - no need to query DB for user here if userRequest already contains user_id!
         user = self.getUserFromIdOrScreenName(userRequest)
-
+        
         # Note: This function returns data even if user is private
-
+        
         followers = self._friendshipDB.getFollowers(user.user_id)
-
+        
         # Return data in reverse-chronological order
         followers.reverse()
-
+        
         return followers
-
+    
+    @API_CALL
+    def getEnrichedFollowers(self, user_id, limit=100):
+        user_ids = self._friendshipDB.getFollowers(user_id, limit=limit)
+        
+        # Return data in reverse-chronological order
+        user_ids.reverse()
+        
+        return self._userDB.lookupUsers(user_ids, None, limit=limit)
+    
     @API_CALL
     def addBlock(self, authUserId, userRequest):
         user = self.getUserFromIdOrScreenName(userRequest)
@@ -1417,21 +1451,22 @@ class StampedAPI(AStampedAPI):
         return user
 
     @API_CALL
-    def inviteFriend(self, authUserId, email):
+    def inviteFriends(self, authUserId, emails):
+        for email in emails:
+            # Store email address linked to auth user id
+            tasks.invoke(tasks.APITasks.inviteFriends, args=[authUserId, email])
+        return True
+
+    @API_CALL
+    def inviteFriendsAsync(self, authUserId, email):
         # Validate email address
         email = str(email).lower().strip()
         email = SchemaValidation.validateEmail(email)
 
         if self._inviteDB.checkInviteExists(email, authUserId):
-            raise StampedInviteExistsError("Invite already exists")
+            logs.info("Invite already exists")
+            return
 
-        # Store email address linked to auth user id
-        tasks.invoke(tasks.APITasks.inviteFriend, args=[authUserId, email])
-
-        return True
-
-    @API_CALL
-    def inviteFriendAsync(self, authUserId, email):
         self._inviteDB.inviteUser(email, authUserId)
 
     """
@@ -1512,7 +1547,7 @@ class StampedAPI(AStampedAPI):
 
         # Check if user has access to this entity
         if entity.generated_by != authUserId or entity.generated_by is None:
-            raise StampedPermissionsError("Insufficient privileges to update custom entity")
+            raise StampedEntityUpdatePermissionError("Insufficient privileges to update custom entity")
 
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -1529,8 +1564,7 @@ class StampedAPI(AStampedAPI):
 
         # Assert that it's the same one (i.e. hasn't been tombstoned)
         if entity.entity_id != data['entity_id']:
-            logs.warning('Cannot update entity %s - old entity has been tombstoned' % entity.entity_id)
-            raise Exception
+            raise StampedTombstonedEntityError('Cannot update entity %s - old entity has been tombstoned' % entity.entity_id)
 
         # Try to import as a full entity
         for k, v in data.iteritems():
@@ -1656,12 +1690,16 @@ class StampedAPI(AStampedAPI):
             except Exception:
                 pass
         if menu is None:
-            raise StampedUnavailableError()
+            raise StampedMenuUnavailableError()
         else:
             return menu
 
     @API_CALL
     def completeAction(self, authUserId, **kwargs):
+        tasks.invoke(tasks.APITasks.completeAction, args=[authUserId], kwargs=kwargs)
+        return True
+
+    def completeActionAsync(self, authUserId, **kwargs):
         action      = kwargs.pop('action', None)
         source      = kwargs.pop('source', None)
         sourceId    = kwargs.pop('source_id', None)
@@ -1899,7 +1937,7 @@ class StampedAPI(AStampedAPI):
 
         return []
 
-    def _enrichStampObjects(self, stampObjects, **kwargs):
+    def _enrichStampObjects(self, stampObjects, mini=False, **kwargs):
         t0 = time.time()
         t1 = t0
 
@@ -1936,12 +1974,15 @@ class StampedAPI(AStampedAPI):
 
         # Enrich missing entity ids
         missingEntityIds = allEntityIds.difference(set(entityIds.keys()))
-        entities = self._entityDB.getEntities(list(missingEntityIds))
+        if mini:
+            entities = self._entityDB.getEntityMinis(list(missingEntityIds))
+        else:
+            entities = self._entityDB.getEntities(list(missingEntityIds))
 
         for entity in entities:
             if entity.sources.tombstone_id is not None:
                 # Convert to newer entity
-                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
+                replacement = self._entityDB.getEntityMini(entity.sources.tombstone_id)
                 entityIds[entity.entity_id] = replacement
                 # Call async process to update references
                 tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
@@ -2349,16 +2390,18 @@ class StampedAPI(AStampedAPI):
             # Asynchronously add references to the stamp in follower's inboxes and
             # add activity for credit and mentions
             tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
-
+            
+            if utils.is_ec2():
+                tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
         else:
             # Update stamp stats
             tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         logs.debug('### addStamp section 4: %s' % (time.time() - t1))
         t1 = time.time()
-
+        
         return stamp
-
+    
     @API_CALL
     def addStampAsync(self, authUserId, stampId, imageUrl):
         stamp   = self._stampDB.getStamp(stampId)
@@ -2375,9 +2418,9 @@ class StampedAPI(AStampedAPI):
                 self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
         except Exception:
             pass
-
+        
         creditedUserIds = set()
-
+        
         # Give credit
         if stamp.credits is not None and len(stamp.credits) > 0:
             for item in stamp.credits:
@@ -2427,8 +2470,14 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph,
                 kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
-
-
+    
+    @API_CALL
+    def updateUserImageCollageAsync(self, user_id, category):
+        user        = self._userDB.getUser(user_id)
+        categories  = [ 'default', category ]
+        
+        self._userImageCollageDB.process_user(user, categories)
+    
     @API_CALL
     def addResizedStampImagesAsync(self, imageUrl, stampId, contentId):
         assert imageUrl is not None, "stamp image url unavailable!"
@@ -2494,20 +2543,22 @@ class StampedAPI(AStampedAPI):
         except StampedDocumentNotFoundError:
             logs.info("Stamp has already been deleted")
             return True
-
+        
         # Verify user has permission to delete
         if stamp.user.user_id != authUserId:
             raise StampedRemoveStampPermissionsError("Insufficient privileges to remove stamp")
-
+        
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
-
+        
         tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits])
-
+        
+        if utils.is_ec2():
+            tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
+        
         return True
-
+    
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None):
-
         # Remove from user collection
         self._stampDB.removeUserStampReference(authUserId, stampId)
 
@@ -2682,9 +2733,6 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-#            elif types in ['bakery', 'market', 'beauty_salon', 'book_store', 'clothing_store', 'department_store', 'florist', 'home_goods_store',
-#                           'jewelry_store', 'liquor_store', 'shoe_store', 'spa', 'store' ]:
-#                return 'store'
             return 'place'
 
         elif kind == 'person':
@@ -2744,6 +2792,8 @@ class StampedAPI(AStampedAPI):
         url = None
 
         kwargs = {}
+        stamp = None
+        user = None
         if imageUrl is not None:
             kwargs['imageUrl'] = imageUrl
         if stampId is not None and share_settings.share_stamps == True:
@@ -2778,8 +2828,13 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
+        result = self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
+
+#        links = stamp.links
+#        if links is None:
+#            links = StampLinks()
+#        links.og_id =
 
 
     """
@@ -2807,11 +2862,11 @@ class StampedAPI(AStampedAPI):
         # Check if stamp is private; if so, must be a follower
         if stamp.user.privacy == True:
             if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedPermissionsError("Insufficient privileges to add comment")
+                raise StampedAddCommentPermissionsError("Insufficient privileges to add comment")
 
         # Check if block exists between user and stamp owner
         if self._friendshipDB.blockExists(friendship) == True:
-            raise StampedIllegalActionError("Block exists")
+            raise StampedBlockedUserError("Block exists")
 
         # Build comment
         comment                     = Comment()
@@ -2870,20 +2925,16 @@ class StampedAPI(AStampedAPI):
         for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
             repliedUserId = prevComment.user.user_id
 
-            if repliedUserId not in commentedUserIds \
-                and repliedUserId not in mentionedUserIds \
-                and repliedUserId not in repliedUserIds \
+            if repliedUserId not in commentedUserIds.union(mentionedUserIds).union(repliedUserIds) \
                 and repliedUserId != authUserId:
-                logs.info('\n### passed first test round')
-                replied_user_id = prevComment.user.user_id
 
                 # Check if block exists between user and previous commenter
                 friendship              = Friendship()
                 friendship.user_id      = authUserId
-                friendship.friend_id    = replied_user_id
+                friendship.friend_id    = repliedUserId
 
                 if self._friendshipDB.blockExists(friendship) == False:
-                    repliedUserIds.add(replied_user_id)
+                    repliedUserIds.add(repliedUserId)
 
         if len(repliedUserIds) > 0:
             self._addReplyActivity(authUserId, list(repliedUserIds), stamp.stamp_id, comment.comment_id)
@@ -2907,14 +2958,10 @@ class StampedAPI(AStampedAPI):
         # Remove activity?
         self._activityDB.removeCommentActivity(authUserId, comment.comment_id)
 
-        # Add user object
-        user = self._userDB.getUser(comment.user.user_id)
-        comment.user = user.minimize()
-
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[comment.stamp_id])
 
-        return comment
+        return True
 
     @API_CALL
     def getComments(self, stampId, authUserId, before=None, limit=20, offset=0):
@@ -3112,7 +3159,7 @@ class StampedAPI(AStampedAPI):
         stampData = self._stampDB.getStampCollectionSlice(stampIds, timeSlice)
         logs.debug('Time for _getStampCollectionSlice: %s' % (time.time() - t0))
 
-        stamps = self._enrichStampObjects(stampData, authUserId=authUserId)
+        stamps = self._enrichStampObjects(stampData, authUserId=authUserId, mini=True)
         stamps = stamps[:limit]
 
         if len(stampData) >= limit and len(stamps) < limit:
@@ -3776,12 +3823,12 @@ class StampedAPI(AStampedAPI):
             user = self._userDB.getUser(rawTodo.user_id).minimize()
 
         if entity is None or entity.entity_id != rawTodo.entity.entity_id:
-            entity = self._entityDB.getEntity(rawTodo.entity.entity_id)
+            entity = self._entityDB.getEntityMini(rawTodo.entity.entity_id)
 
         if sourceStamps is None and rawTodo.source_stamp_ids is not None:
             # Enrich stamps
             sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids)
-            sourceStamps = self._enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId)
+            sourceStamps = self._enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId, mini=True)
 
         # If Stamp is completed, check if the user has stamped it to populate todo.stamp_id value.
         # this is necessary only for backward compatability.  The new RawTodo schema includes the stamp_id val
@@ -3799,7 +3846,6 @@ class StampedAPI(AStampedAPI):
             friendIds = self._todoDB.getTodosFromUsersForEntity(friendIds, entity.entity_id)
             users = self._userDB.lookupUsers(friendIds, limit=10)
             users =  map(lambda x: x.minimize(), users)
-            logs.info('### after: %s' % users)
             previews.todos = users
 
 
@@ -3854,20 +3900,30 @@ class StampedAPI(AStampedAPI):
         # Increment stats
         self._statsSink.increment('stamped.api.stamps.todos')
 
+        # Enrich todo
+        todo = self._enrichTodo(todo, user=user, entity=entity, stamp=users_stamp, friendIds=friendIds, authUserId=authUserId)
 
-        #stamp
+        tasks.invoke(tasks.APITasks.addTodo, 
+                        args=[authUserId, entity.entity_id], 
+                        kwargs={'stampId': stampId, 'previouslyTodoed': previouslyTodoed})
+
+        return todo
+
+    def addTodoAsync(self, authUserId, entityId, stampId=None, previouslyTodoed=False):
+        
+        # Friends
+        friendIds = self._friendshipDB.getFriends(authUserId)
+
+        # Stamp
         if stampId is not None:
             stamp = self._stampDB.getStamp(stampId)
             stampOwner = stamp.user.user_id
-
-        # Enrich todo
-        todo = self._enrichTodo(todo, user=user, entity=entity, stamp=users_stamp, friendIds=friendIds, authUserId=authUserId)
 
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
 
         # Add activity to all of your friends who stamped the entity
-        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entity.entity_id)
+        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
         recipientIds = [stamp.user.user_id for stamp in friendStamps]
         if authUserId in recipientIds:
             recipientIds.remove(authUserId)
@@ -3880,7 +3936,7 @@ class StampedAPI(AStampedAPI):
 
         ### TODO: Verify user isn't being blocked
         if not previouslyTodoed and len(recipientIds) > 0:
-            self._addTodoActivity(authUserId, recipientIds, entity.entity_id)
+            self._addTodoActivity(authUserId, recipientIds, entityId)
 
         # Update stamp stats
         if stampId is not None:
@@ -3891,9 +3947,7 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         # for now, we only post to OpenGraph if the Todo was off of a stamp
         if stampId is not None:
-            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'todoStampId':stampId})
-
-        return todo
+            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId, 'todoStampId':stampId})
 
     @API_CALL
     def completeTodo(self, authUserId, entityId, complete):
@@ -3901,12 +3955,12 @@ class StampedAPI(AStampedAPI):
         RawTodo = self._todoDB.getTodo(authUserId, entityId)
 
         if not RawTodo or not RawTodo.todo_id:
-            raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
+            raise StampedTodoNotFoundError('Invalid todo: %s' % RawTodo)
 
         self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
         # Enrich todo
-        RawTodo.complete = True
+        RawTodo.complete = complete
         todo = self._enrichTodo(RawTodo, authUserId=authUserId)
 
         # TODO: Add activity item
@@ -3925,25 +3979,20 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def removeTodo(self, authUserId, entityId):
         ### TODO: Fail gracefully if todo doesn't exist
-        RawTodo = self._todoDB.getTodo(authUserId, entityId)
+        rawTodo = self._todoDB.getTodo(authUserId, entityId)
 
-        if not RawTodo or not RawTodo.todo_id:
+        if not rawTodo or not rawTodo.todo_id:
             return True
-            #raise StampedUnavailableError('Invalid todo: %s' % RawTodo)
 
         self._todoDB.removeTodo(authUserId, entityId)
 
         # Decrement user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=-1)
 
-        # Enrich todo
-        todo = self._enrichTodo(RawTodo, authUserId=authUserId)
+        if rawTodo.stamp_id is not None:
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[rawTodo.stamp_id])
 
-        ### TODO: Verify user isn't being blocked
-        if todo.stamp is not None and todo.stamp.stamp_id is not None:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
-
-        return todo
+        return True
 
     @API_CALL
     def getTodos(self, authUserId, timeSlice):
@@ -3972,19 +4021,19 @@ class StampedAPI(AStampedAPI):
         user = self._userDB.getUser(authUserId).minimize()
 
         # Enrich entities
-        entities = self._entityDB.getEntities(entityIds.keys())
+        entities = self._entityDB.getEntityMinis(entityIds.keys())
 
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
         # Enrich stamps
         stamps = self._stampDB.getStamps(sourceStampIds.keys())
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds)
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds, mini=True)
 
         for stamp in stamps:
             sourceStampIds[str(stamp.stamp_id)] = stamp
 
-        followerIds = self._friendshipDB.getFollowers(user.user_id)
+        friendIds = self._friendshipDB.getFriends(user.user_id)
 
         result = []
         for rawTodo in todoData:
@@ -3993,7 +4042,7 @@ class StampedAPI(AStampedAPI):
                 stamps       = None
                 if rawTodo.source_stamp_ids is not None:
                     stamps = [sourceStampIds[sid] for sid in rawTodo.source_stamp_ids]
-                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=followerIds, authUserId=authUserId)
+                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=friendIds, authUserId=authUserId)
                 result.append(todo)
             except Exception as e:
                 logs.debug("RAW TODO: %s" % rawTodo)
@@ -4215,8 +4264,8 @@ class StampedAPI(AStampedAPI):
         logs.debug("### getActivity section 2a: %s" % (time.time() - t1))
         t1 = time.time()
 
-
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId)
+        ########
+        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=True)
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 
@@ -4224,7 +4273,7 @@ class StampedAPI(AStampedAPI):
         t1 = time.time()
 
         # Enrich entities
-        entities = self._entityDB.getEntities(entityIds.keys())
+        entities = self._entityDB.getEntityMinis(entityIds.keys())
         for entity in entities:
             entityIds[str(entity.entity_id)] = entity
 
@@ -4328,7 +4377,7 @@ class StampedAPI(AStampedAPI):
         # Attempt to resolve against the Stamped DB
         source    = sources[source_name.lower()]()
         stamped   = StampedSource(stamped_api=self)
-        entity_id = stamped.resolve_fast(source, source_id)
+        entity_id = stamped.resolve_fast(source.sourceName, source_id)
 
         if entity_id is None:
             try:
@@ -4550,7 +4599,7 @@ class StampedAPI(AStampedAPI):
                         source = musicSources[sourceName]()
                         source_id = getattr(stub.sources, '%s_id' % sourceName)
                         # Attempt to resolve against the Stamped DB (quick)
-                        entity_id = stampedSource.resolve_fast(source, source_id)
+                        entity_id = stampedSource.resolve_fast(sourceName, source_id)
                         if entity_id is None and not quickResolveOnly:
                             # Attempt to resolve against the Stamped DB (full)
                             proxy = source.entityProxyFromKey(source_id, entity=stub)
@@ -4604,3 +4653,26 @@ class StampedAPI(AStampedAPI):
         entry.created = datetime.utcnow()
 
         return self._clientLogsDB.addEntry(entry)
+
+
+
+    def testFunction(self, authUserId, scope, limit, offset):
+        activity = self.getActivity(authUserId, scope, limit, offset)
+        print ('### activity blah!')
+        from pprint import pprint
+        for act in activity:
+            pprint(act.objects.stamps)
+
+        return
+
+
+        result = []
+        t0 = time.time()
+        for item in activity:
+            try:
+                result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
+            except Exception as e:
+                logs.warning("Failed to enrich activity: %s" % e)
+                logs.debug("Activity: %s" % item)
+        logs.debug("### importEnrichedActivity for all HTTPActivity: %s" % (time.time() - t0))
+        return result

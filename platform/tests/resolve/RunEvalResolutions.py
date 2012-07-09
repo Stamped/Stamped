@@ -43,7 +43,9 @@ class RunEvalResolutions(AStampedFixtureTestCase):
                 item.importEntity(entity)
                 converted = self.__convertSearchId(item.search_id, resolver)
                 if converted:
-                    resolutionResult[item.search_id] = (item,) + converted
+                    entity, proxy = converted
+                    proxyList = self.__getResolverObjects(entity)
+                    resolutionResult[item.search_id] = (item, entity, proxy, proxyList)
 
         outputMessage = """
         /---------------------------------------------
@@ -56,6 +58,25 @@ class RunEvalResolutions(AStampedFixtureTestCase):
             print outputMessage % output.name
 
         printFunctionCounts()
+
+
+    def __getResolverObjects(self, entity):
+        sources = {
+            'amazon_id':       AmazonSource(),
+            'factual_id':      FactualSource(),
+            'googleplaces_id': GooglePlacesSource(),
+            'itunes_id':       iTunesSource(),
+            'rdio_id':         RdioSource(),
+            'spotify_id':      SpotifySource(),
+            'tmdb_id':         TMDBSource(),
+            'thetvdb_id':      TheTVDBSource(),
+        }
+        result = []
+        for sourceName, sourceObj in sources.iteritems():
+            sourceId = getattr(entity.sources, sourceName, None)
+            if sourceId:
+                result.append(sourceObj.entityProxyFromKey(sourceId))
+        return result
 
 
     def __convertSearchId(self, searchId, fullResolver):

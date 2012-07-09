@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from AStampedAPIHttpTestCase import *
+from tests.AStampedAPIHttpTestCase import *
 
 CLIENT_ID = DEFAULT_CLIENT_ID
 CLIENT_SECRET = CLIENT_SECRETS[CLIENT_ID]
@@ -258,6 +258,31 @@ class StampedAPISuggested(StampedAPIUserHttpTest):
         }
         result = self.handleGET(path, data)
         self.assertIsInstance(result, list)
+
+class StampedAPIInviteFriend(StampedAPIUserHttpTest):
+    def test_invite_friend(self):
+        path = "users/invite/email.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "emails": "sample123@stamped.com"
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+        
+        (userC, tokenC) = self.createAccount('sample123')
+        self.deleteAccount(tokenC)
+
+    def test_invite_friends(self):
+        path = "users/invite/email.json"
+        data = { 
+            "oauth_token": self.tokenA['access_token'],
+            "emails": "sample123@stamped.com,sample456@stamped.com"
+        }
+        result = self.handlePOST(path, data)
+        self.assertTrue(result)
+        
+        (userC, tokenC) = self.createAccount('sample123')
+        self.deleteAccount(tokenC)
 
 if __name__ == '__main__':
     main()

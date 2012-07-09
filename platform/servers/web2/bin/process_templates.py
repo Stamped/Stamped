@@ -8,16 +8,28 @@ __license__   = "TODO"
 import Globals
 import os, utils
 
-from core.templatetags.stamped_tags import global_handlebars_template_library
+from servers.web2.core.templatetags.stamped_tags import global_handlebars_template_library
 
-def process_templates(output_path):
+def process_templates(output_path, target=None):
     library   = global_handlebars_template_library()
     templates = library.templates
     
     scripts   = []
     indent    = "    "
     
-    for template in sorted(templates.keys()):
+    if target is None:
+        target_templates = sorted(templates.keys())
+    else:
+        target_templates = []
+        
+        for template in target:
+            if template not in templates:
+                template = template.split('.')[0]
+            
+            assert template in templates
+            target_templates.append(template)
+    
+    for template in target_templates:
         path, source = templates[template]
         path_comment = "<!-- %s -->" % os.path.basename(path)
         
@@ -39,7 +51,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-o', '--output', type=str, default='templates/templates.generated.html')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
+    parser.add_argument('-t', '--template', action='append', default=[])
     args = parser.parse_args()
     
-    process_templates(args.output)
+    process_templates(args.output, args.template)
 

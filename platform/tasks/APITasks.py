@@ -78,13 +78,7 @@ retry_params = {
     'max_retries'           : 3,
 }
 
-@task(queue='api', **default_params)
-def addStamp(*args, **kwargs):
-    invoke(addStamp.request, *args, **kwargs)
-
-@task(queue='api', **default_params)
-def removeStamp(*args, **kwargs):
-    invoke(removeStamp.request, *args, **kwargs)
+# Image Manipulation
 
 @task(queue='api', **retry_params)
 def addResizedStampImages(*args, **kwargs):
@@ -97,6 +91,8 @@ def customizeStamp(*args, **kwargs):
 @task(queue='api', **retry_params)
 def updateProfileImage(*args, **kwargs):
     invoke(updateProfileImage.request, *args, **kwargs)
+
+# Stamped API
 
 @task(queue='api', **default_params)
 def addAccount(*args, **kwargs):
@@ -123,8 +119,28 @@ def removeFriendship(*args, **kwargs):
     invoke(removeFriendship.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
-def inviteFriend(*args, **kwargs):
-    invoke(inviteFriend.request, *args, **kwargs)
+def inviteFriends(*args, **kwargs):
+    invoke(inviteFriends.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
+def updateEntityStats(*args, **kwargs):
+    invoke(updateEntityStats.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
+def completeAction(*args, **kwargs):
+    invoke(completeAction.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
+def addStamp(*args, **kwargs):
+    invoke(addStamp.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
+def removeStamp(*args, **kwargs):
+    invoke(removeStamp.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
+def updateStampStats(*args, **kwargs):
+    invoke(updateStampStats.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
 def addComment(*args, **kwargs):
@@ -138,21 +154,9 @@ def addLike(*args, **kwargs):
 def getComments(*args, **kwargs):
     invoke(getComments.request, *args, **kwargs)
 
-@task(queue='enrich', **default_params)
-def mergeEntity(*args, **kwargs):
-    invoke(mergeEntity.request, *args, **kwargs)
-
-@task(queue='enrich', **default_params)
-def mergeEntityId(*args, **kwargs):
-    invoke(mergeEntityId.request, *args, **kwargs)
-
 @task(queue='api', **default_params)
-def updateEntityStats(*args, **kwargs):
-    invoke(updateEntityStats.request, *args, **kwargs)
-
-@task(queue='api', **default_params)
-def updateStampStats(*args, **kwargs):
-    invoke(updateStampStats.request, *args, **kwargs)
+def addTodo(*args, **kwargs):
+    invoke(addTodo.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
 def postToOpenGraph(*args, **kwargs):
@@ -165,6 +169,24 @@ def buildGuide(*args, **kwargs):
 @task(queue='api', **default_params)
 def updateTombstonedEntityReferences(*args, **kwargs):
     invoke(updateTombstonedEntityReferences.request, *args, **kwargs)
+
+# Enrichment
+
+@task(queue='enrich', **default_params)
+def mergeEntity(*args, **kwargs):
+    invoke(mergeEntity.request, *args, **kwargs)
+
+@task(queue='enrich', **default_params)
+def mergeEntityId(*args, **kwargs):
+    invoke(mergeEntityId.request, *args, **kwargs)
+
+# Collage
+
+@task(queue='enrich', **default_params)
+def updateUserImageCollage(*args, **kwargs):
+    invoke(updateUserImageCollage.request, *args, **kwargs)
+
+
 
 def parseCommandLine():
     usage   = "Usage: %prog [options]"

@@ -10,7 +10,7 @@ import math, pprint, utils
 
 import api.HTTPSchemas
 
-from AImageCollage import AImageCollage
+from libs.AImageCollage import AImageCollage
 
 # NOTE (travis): the use of rounding functions (e.g., round, floor, and ceil) 
 # throughout the layout functions in this file is very precise, though it may 

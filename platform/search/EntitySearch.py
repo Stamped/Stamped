@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import sys, datetime, logs, gevent, utils, math
-from api                        import Entity
+from api                        import Constants
 from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
@@ -21,8 +21,8 @@ from resolve.StampedSource      import StampedSource
 from resolve.EntityProxyContainer   import EntityProxyContainer
 from resolve.EntityProxySource  import EntityProxySource
 from api.Schemas                import PlaceEntity
-from SearchResultDeduper        import SearchResultDeduper
-from DataQualityUtils           import *
+from search.SearchResultDeduper        import SearchResultDeduper
+from search.DataQualityUtils           import *
 
 
 def total_seconds(timedelta):
@@ -53,12 +53,12 @@ class EntitySearch(object):
     def __registerSource(self, source, **categoriesToPriorities):
         self.__all_sources.append(source)
         for (category, priority) in categoriesToPriorities.items():
-            if category not in Entity.categories:
+            if category not in Constants.categories:
                 raise Exception("unrecognized category: %s" % category)
             self.__categories_to_sources_and_priorities[category].append((source, priority))
 
     def __init__(self):
-        allCategories = Entity.categories
+        allCategories = Constants.categories
         self.__all_sources = []
         # Within each category, we have a number of sources and each is assigned a priority. The priority is used to
         # determine how long to wait for results from that source.
@@ -168,7 +168,7 @@ class EntitySearch(object):
             resultsDict[source] = []
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
-        if category not in Entity.categories:
+        if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
         start = datetime.datetime.now()
@@ -226,17 +226,17 @@ class EntitySearch(object):
 
     def __getEntityIdForCluster(self, cluster):
         idsFromClusteredEntities = []
-        fastResolvedIds = []
+        fastResolveQueries = []
         for result in cluster.results:
             if result.dataQuality < MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
                 continue
             if result.resolverObject.source == 'stamped':
                 idsFromClusteredEntities.append(result.resolverObject.key)
             else:
-                # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
-                entityId = self.__stampedSource.resolve_fast(result.resolverObject.source, result.resolverObject.key)
-                if entityId:
-                    fastResolvedIds.append(entityId)
+                fastResolveQueries.append((result.resolverObject.source, result.resolverObject.key))
+
+        # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
+        fastResolvedIds = filter(None, self.__stampedSource.resolve_fast_batch(fastResolveQueries)) if fastResolveQueries else []
 
         allIds = idsFromClusteredEntities + fastResolvedIds
         if len(idsFromClusteredEntities) > 2:
@@ -305,6 +305,7 @@ class EntitySearch(object):
 
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
+        searchDoneTime = datetime.datetime.now()
         entityResults = []
 
         entityIdsToNewClusterIdxs = {}
@@ -338,7 +339,13 @@ class EntitySearch(object):
         # TODO: Reorder according to final scores that incorporate dataQuality and a richness score (presence of stamps,
         # presence of enriched entity, etc.)
 
+        convertedToEntitiesTime = datetime.datetime.now()
+        logTimingData('CONVERTING TO ENTITIES TOOK: %s' % (convertedToEntitiesTime - searchDoneTime))
+
         self.rescoreFinalResults(entitiesAndClusters)
+        rescoredTime = datetime.datetime.now()
+        logTimingData('RESCORING TOOK: %s' % (rescoredTime - convertedToEntitiesTime))
+
         return entitiesAndClusters
 
 
@@ -348,6 +355,12 @@ class EntitySearch(object):
 
 from optparse import OptionParser
 from libs.Geocoder import Geocoder
+
+def format_for_print(string):
+    if isinstance(string, unicode):
+        return string.encode('utf-8')
+    else:
+        return string
 
 def main():
     usage = "Usage: %prog [options]"
@@ -382,19 +395,19 @@ def main():
     elif options.address:
         queryParams['coords'] = Geocoder().addressToLatLng(options.address)
 
-    if len(args) < 2 or args[0] not in Entity.categories:
-        categories = '[ %s ]' % (', '.join(Entity.categories))
+    if len(args) < 2 or args[0] not in Constants.categories:
+        categories = '[ %s ]' % (', '.join(Constants.categories))
         print '\nUSAGE:\n\nEntitySearch.py <category> <search terms>\n\nwhere <category> is one of:', categories, '\n'
         return 1
     searcher = EntitySearch()
     results = searcher.searchEntities(args[0], ' '.join(args[1:]), **queryParams)
     for result in results:
         print "\n\n"
-        print "TITLE:", result.title
+        print "TITLE:", format_for_print(result.title)
         subtitle = result.subtitle
         if isinstance(result, PlaceEntity) and result.formatAddress():
             subtitle = result.formatAddress()
-        print "SUBTITLE", subtitle
+        print "SUBTITLE", format_for_print(subtitle)
         print result
 
     from libs.CountedFunction import printFunctionCounts

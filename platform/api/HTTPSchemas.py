@@ -9,13 +9,13 @@ __license__   = "TODO"
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
 import libs.ec2_utils
-import Entity
+from api import Entity
 
 from errors             import *
 from schema             import *
 from api.Schemas        import *
-from Entity             import *
-from SchemaValidation   import *
+from api.Entity             import *
+from api.SchemaValidation   import *
 
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
@@ -62,7 +62,8 @@ def _coordinatesDictToFlat(coordinates):
             raise
 
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
-    except Exception:
+    except Exception as e:
+        logs.warning('coordinates: %s   error converting coordinates: %s' % (coordinates, e))
         return None
 
 def _coordinatesFlatToDict(coordinates):
@@ -720,18 +721,7 @@ class HTTPUserRelationship(Schema):
 class HTTPFindUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('query',                            basestring) # Comma delimited
-
-class HTTPFindTwitterUser(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_token',                       basestring)
-        cls.addProperty('user_secret',                      basestring)
-
-class HTTPFindFacebookUser(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_token',                       basestring)
+        cls.addProperty('query',                            basestring, required=True) # Comma delimited
 
 class HTTPFacebookFriendsCollectionForm(Schema):
     @classmethod
@@ -915,6 +905,11 @@ class HTTPEmail(Schema):
     def setSchema(cls):
         cls.addProperty('email',                            basestring, cast=validateEmail)
 
+class HTTPEmails(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('emails',                           basestring, cast=validateEmails)
+
 
 # ######## #
 # Comments #
@@ -1082,7 +1077,9 @@ class HTTPEntityMini(Schema):
         _addImages(self, entity.images)
 
         try:
+            logs.info('### entity title: %s' % entity.title)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
+            logs.info('### coordinates: %s' % entity.coordinates)
         except AttributeError:
             pass
 
@@ -1986,14 +1983,22 @@ class HTTPEntityNew(Schema):
         cls.addProperty('subcategory',                      basestring, required=True)
         cls.addProperty('subtitle',                         basestring, cast=validateString)
         cls.addProperty('desc',                             basestring, cast=validateString)
-        cls.addProperty('address',                          basestring)
-        cls.addProperty('coordinates',                      basestring)
-        cls.addProperty('cast',                             basestring)
-        cls.addProperty('director',                         basestring)
-        cls.addProperty('release_date',                     basestring)
+
+        cls.addProperty('address_street',                   basestring)
+        cls.addProperty('address_street_ext',               basestring)
+        cls.addProperty('address_locality',                 basestring)
+        cls.addProperty('address_region',                   basestring)
+        cls.addProperty('address_postcode',                 basestring)
+        cls.addProperty('address_country',                  basestring) ### TODO: Add cast to check ISO code
+
+        cls.addProperty('coordinates',                      basestring, cast=validateCoordinates)
+        cls.addProperty('year',                             int) 
         cls.addProperty('artist',                           basestring)
         cls.addProperty('album',                            basestring)
         cls.addProperty('author',                           basestring)
+        cls.addProperty('network',                          basestring)
+        cls.addProperty('director',                         basestring)
+        cls.addProperty('genre',                            basestring)
 
     def exportEntity(self, authUserId):
 
@@ -2030,8 +2035,28 @@ class HTTPEntityNew(Schema):
         now = datetime.utcnow()
 
         addField(entity, 'desc', self.desc, now)
-        addField(entity, 'formatted_address', self.address, now)
-        addField(entity, 'release_date', self.release_date, now)
+
+        if self.year is not None:
+            addField(entity, 'release_date', datetime(int(self.year), 1, 1), timestamp=now)
+
+        addField(entity, 'address_street', self.address_street, timestamp=now)
+        addField(entity, 'address_street_ext', self.address_street_ext, timestamp=now)
+        addField(entity, 'address_locality', self.address_locality, timestamp=now)
+        addField(entity, 'address_region', self.address_region, timestamp=now)
+        addField(entity, 'address_postcode', self.address_postcode, timestamp=now)
+        # Only add country if other fields are set, too
+        if self.address_street is not None \
+            or self.address_locality is not None \
+            or self.address_region is not None \
+            or self.address_postcode is not None:
+            addField(entity, 'address_country', self.address_country, timestamp=now)
+
+        addListField(entity, 'artists', self.artist, PersonEntityMini, timestamp=now)
+        addListField(entity, 'collections', self.album, MediaCollectionEntityMini, timestamp=now)
+        addListField(entity, 'authors', self.author, PersonEntityMini, timestamp=now)
+        addListField(entity, 'networks', self.network, BasicEntityMini, timestamp=now)
+        addListField(entity, 'directors', self.director, PersonEntityMini, timestamp=now)
+        addListField(entity, 'genres', self.genre, timestamp=now)
 
         if _coordinatesFlatToDict(self.coordinates) is not None:
             coords = Coordinates().dataImport(_coordinatesFlatToDict(self.coordinates))
@@ -2041,12 +2066,6 @@ class HTTPEntityNew(Schema):
         entity.sources.user_generated_timestamp = now
         if self.subtitle is not None and self.subtitle != '':
             entity.sources.user_generated_subtitle = self.subtitle
-
-        addListField(entity, 'directors', self.director, PersonEntityMini, now)
-        addListField(entity, 'cast', self.cast, PersonEntityMini, now)
-        addListField(entity, 'authors', self.author, PersonEntityMini, now)
-        addListField(entity, 'artists', self.artist, PersonEntityMini, now)
-        addListField(entity, 'collections', self.album, MediaCollectionEntityMini, now)
 
         return entity
 
@@ -2606,19 +2625,6 @@ class HTTPStamp(Schema):
     def minimize(self):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
 
-class HTTPStampDetail(Schema):
-    
-    def __init__(self, *args, **kwargs):
-        Schema.__init__(self, *args, **kwargs)
-        self.ajax = False
-    
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('stamp_num',                        int)
-        cls.addProperty('stamp_title',                      basestring)
-        cls.addProperty('ajax',                             bool)
-
 class HTTPStampNew(Schema):
     @classmethod
     def setSchema(cls):
@@ -2631,8 +2637,8 @@ class HTTPStampNew(Schema):
 class HTTPStampShare(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',                     basestring)
-        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('temp_image_url',                   basestring)
 
 class HTTPStampEdit(Schema):
@@ -2788,6 +2794,8 @@ class HTTPActivity(Schema):
         self.dataImport(data, overflow=True)
 
         self.created = activity.timestamp.created
+        if activity.timestamp.modified is not None:
+            self.created = activity.timestamp.modified
 
         if self.icon is not None:
             self.icon = _getIconURL(self.icon)
@@ -3308,6 +3316,7 @@ class HTTPActivity(Schema):
                     self.image = _getIconURL('news_%s_group' % (self.verb[7:]))
                 else:
                     logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
+                    self.image = None
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

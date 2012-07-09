@@ -14,7 +14,7 @@ from schema             import *
 from utils              import lazyProperty
 from pprint             import pformat
 
-from SchemaValidation   import *
+from api.SchemaValidation   import *
 
 import libs.CountryData
 
@@ -647,6 +647,7 @@ class BasicEntityMini(Schema):
         cls.addProperty('schema_version',                   int, required=True)
         cls.addProperty('entity_id',                        basestring)
         cls.addProperty('title',                            basestring)
+        cls.addProperty('subtitle',                         basestring)
         cls.addProperty('kind',                             basestring)
         cls.addPropertyList('types',                        basestring)
         cls.addNestedProperty('sources',                    EntitySources, required=True)
@@ -658,6 +659,23 @@ class BasicEntityMini(Schema):
         self.kind = 'other'
         self.sources = EntitySources()
 
+    def isType(self, t):
+        try:
+            if t in self.types:
+                return True
+        except Exception as e:
+            logs.warning("isType error (%s): %s" % (self, e))
+        return False
+
+    @property
+    def category(self):
+        return 'other'
+
+    @property
+    def subcategory(self):
+        return 'other'
+
+
 class PlaceEntityMini(BasicEntityMini):
     @classmethod
     def setSchema(cls):
@@ -667,15 +685,53 @@ class PlaceEntityMini(BasicEntityMini):
         BasicEntityMini.__init__(self)
         self.kind = 'place'
 
+    @property
+    def category(self):
+        return 'place'
+
+    @property
+    def subcategory(self):
+        for t in self.types:
+            return t
+        return 'place'
+
 class PersonEntityMini(BasicEntityMini):
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.kind = 'person'
 
+    @property
+    def category(self):
+        if self.isType('artist'):
+            return 'music'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('artist'):
+            return 'artist'
+        return 'other'
+
 class MediaCollectionEntityMini(BasicEntityMini):
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.kind = 'media_collection'
+
+    @property
+    def category(self):
+        if self.isType('album'):
+            return 'music'
+        if self.isType('tv'):
+            return 'film'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('album'):
+            return 'album'
+        if self.isType('tv'):
+            return 'tv'
+        return 'other'
 
 class MediaItemEntityMini(BasicEntityMini):
     @classmethod
@@ -686,10 +742,45 @@ class MediaItemEntityMini(BasicEntityMini):
         BasicEntityMini.__init__(self)
         self.kind = 'media_item'
 
+    @property
+    def category(self):
+        if self.isType('movie'):
+            return 'film'
+        if self.isType('track'):
+            return 'music'
+        if self.isType('book'):
+            return 'book'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('movie'):
+            return 'movie'
+        if self.isType('track'):
+            return 'song'
+        if self.isType('book'):
+            return 'book'
+        return 'other'
+
 class SoftwareEntityMini(BasicEntityMini):
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.kind = 'software'
+
+    @property
+    def category(self):
+        if self.isType('app'):
+            return 'app'
+        return 'other'
+
+    @property
+    def subcategory(self):
+        if self.isType('app'):
+            return 'app'
+        elif 'video_game' in self.types:
+            return 'video_game'
+
+        return 'other'
 
 class BasicEntity(BasicEntityMini):
     @classmethod
@@ -743,14 +834,6 @@ class BasicEntity(BasicEntityMini):
     def subtitle(self):
         return self._genericSubtitle()
 
-    @property
-    def category(self):
-        return 'other'
-
-    @property
-    def subcategory(self):
-        return 'other'
-
     @lazyProperty
     def search_id(self):
         _is_valid_id = lambda x: x is not None and len(x) > 0
@@ -802,15 +885,9 @@ class BasicEntity(BasicEntityMini):
             except AttributeError:
                 logs.warning('Unable to minimize attribute "%s"' % attribute)
 
+        mini.subtitle = self.subtitle
+        logs.info('### mini.subtitle: %s   self.subtitle: %s' % (mini.subtitle, self.subtitle))
         return mini
-
-    def isType(self, t):
-        try:
-            if t in self.types:
-                return True
-        except Exception as e:
-            logs.warning("isType error (%s): %s" % (self, e))
-        return False
 
 def getEntityObjectFromKind(kind):
     if kind == 'place':
@@ -957,6 +1034,9 @@ class PlaceEntity(BasicEntity):
 
         # Fallback to generic
         return self._genericSubtitle()
+
+    def minimize(self, *args):
+        return BasicEntity.minimize(self, 'coordinates')
 
     @property
     def category(self):
@@ -1304,6 +1384,11 @@ class Menu(Schema):
 # Stamps #
 # ###### #
 
+class StampLinks(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('og_id',                            basestring)
+
 class Badge(Schema):
     @classmethod
     def setSchema(cls):
@@ -1337,7 +1422,7 @@ class StampMini(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamp_id',                         basestring)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addNestedProperty('user',                       UserMini, required=True)
         cls.addNestedPropertyList('credits',                StampPreview)
         cls.addNestedPropertyList('contents',               StampContent, required=True)
@@ -1358,7 +1443,7 @@ class Stamp(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamp_id',                         basestring)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addNestedProperty('user',                       UserMini, required=True)
         cls.addNestedPropertyList('credits',                StampPreview)
         cls.addNestedPropertyList('contents',               StampContent, required=True)
@@ -1368,6 +1453,7 @@ class Stamp(Schema):
         cls.addNestedPropertyList('badges',                 Badge)
         cls.addProperty('via',                              basestring)
         cls.addNestedProperty('previews',                   Previews)
+        cls.addNestedProperty('links',                      StampLinks)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1431,7 +1517,7 @@ class Todo(Schema):
     def setSchema(cls):
         cls.addProperty('todo_id',                          basestring)
         cls.addNestedProperty('user',                       UserMini, required=True)
-        cls.addNestedProperty('entity',                     BasicEntity, required=True)
+        cls.addNestedProperty('entity',                     BasicEntityMini, required=True)
         cls.addNestedPropertyList('source_stamps',          Stamp)
         cls.addNestedProperty('stamp',                      Stamp)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)

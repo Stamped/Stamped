@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+	{% extends 'base.html' %}
+    {% block head %}
+
+		{{ block.super }}
+		<meta http-equiv="refresh" content="10" >
+		
+		<script src="/assets/js/raphael.js"></script>
+		<script src="/assets/js/g.raphael.js"></script>
+		<script src="/assets/js/g.line.js"></script>
+
+	{% endblock head %}
+		
+	{% block content %}
+		<div class='index_wrapper'>
+			<div class='index_content'>
+				<h2>New Stamps</h2>
+				<table>
+					<tr>
+						<td> Today: {{todayStamps}}</td>
+					</tr><tr>
+						<td> Yesterday: {{yestStamps}}</td>
+						<td> {%if deltaStampsDay == 'N/A'%} N/A {% else %} {{deltaStampsDay}}% {%endif%} </td>
+					</tr><tr>
+						<td> Weekly Avg: {{weekStamps}}</td>
+						<td> {%if deltaStampsWeek == 'N/A'%} N/A {% else %} {{deltaStampsWeek}}% {%endif%} </td>
+					</tr>
+				</table>
+			</div>
+			<div class='index_content'>
+				<h2>Accounts Created</h2>
+				<table>
+					<tr>
+						<td> Today: {{todayAccts}}</td>
+					</tr><tr>
+						<td> Yesterday: {{yestAccts}}</td>
+						<td> {%if deltaAcctsDay == '0.00'%} -- {% else %} {{deltaAcctsDay}}% {%endif%} </td>
+					</tr><tr>
+						<td> Weekly Avg: {{weekAccts}}</td>
+						<td> {%if deltaAcctsWeek == '0.00'%} -- {% else %} {{deltaAcctsWeek}}% {%endif%} </td>
+					</tr>
+				</table>
+			</div>
+			<div class='index_content'>
+				<h2>Active Users</h2>
+				<table>
+					<tr>
+						<td> Today: {{todayUsers}}</td>
+					</tr><tr>
+						<td> Yesterday: {{yestUsers}}</td>
+						<td> {%if deltaUsersDay == '0.00'%} -- {% else %} {{deltaUsersDay}}% {%endif%} </td>
+					</tr><tr>
+						<td> Weekly Avg: {{weekUsers}}</td>
+						<td> {%if deltaUsersWeek == '0.00'%} -- {% else %} {{deltaUsersWeek}}% {%endif%} </td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<div class='index_wrapper'>
+			<div id='stamp_graph' class='graph'>
+			</div>
+			<div id='acct_graph' class='graph'>
+			</div>
+			<div id='user_graph' class='graph'>
+			</div>
+		</div>
+		<script>
+			var r = Raphael(document.getElementById("stamp_graph"));
+			r.linechart(10,0,300,300,{{hours}}, {{stamp_graph}}, {axis: "0 0 1 1"});
+			var r = new Raphael(document.getElementById("acct_graph"));
+			r.linechart(10,0,300,300,{{hours}}, {{acct_graph}}, {axis: "0 0 1 1"});
+			var r = new Raphael(document.getElementById("user_graph"));
+			r.linechart(10,0,300,300,{{hours}}, {{user_graph}}, {axis: "0 0 1 1"});
+		</script>
+	{% endblock content %}

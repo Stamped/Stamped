@@ -10,9 +10,9 @@ import Globals
 import logs
 import re
 from errors             import *
-import Entity
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from api          import Constants
 
 from bson.objectid          import ObjectId
 
@@ -76,6 +76,29 @@ def validateUserId(userId):
 def validateStampId(stampId):
     return validateObjectId(stampId)
 
+def validateCoordinates(string):
+    # Structure: "lat0,lng0"
+    if string is None or string == '':
+        return None
+    try:
+        coords = string.split(',')
+        assert(len(coords) == 2)
+
+        lat = float(coords[0])
+        lng = float(coords[1])
+
+        # Latitude between -90 and 90
+        assert(lat >= -90.0 or lat <= 90.0)
+
+        # Longitude between -180 and 180
+        assert(lng >= -180.0 or lng <- 180.0)
+
+        return string
+    except Exception as e:
+        logs.warning("Coordinates check failed: %s" % string)
+
+    raise StampedInputError("Invalid coordinates: %s" % string)
+
 def validateViewport(string):
     # Structure: "lat0,lng0,lat1,lng1"
     if string is None or string == '':
@@ -108,7 +131,7 @@ def validateCategory(category):
         return None
     try:
         category = category.lower()
-        assert(category in Entity.categories)
+        assert(category in Constants.categories)
         return category
     except Exception as e:
         logs.warning("Category check failed for '%s': %s" % (category, e))
@@ -119,7 +142,7 @@ def validateSubcategory(subcategory):
         return None
     try:
         subcategory = subcategory.lower()
-        assert(subcategory in Entity.subcategories)
+        assert(subcategory in Constants.subcategories)
         return subcategory
     except Exception as e:
         logs.warning("Subcategory check failed for '%s': %s" % (subcategory, e))
@@ -177,3 +200,14 @@ def validateEmail(email):
         pass
 
     raise StampedInvalidEmailError("Invalid format for email address: %s" % email)
+
+def validateEmails(emails):
+    emails = validateString(emails)
+
+    if emails is None or emails == '':
+        return None
+
+    for email in emails.split(','):
+        r = validateEmail(email)
+
+    return emails

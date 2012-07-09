@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import logs, os, pystache, utils, pybars
 
-from handlebars_template_helpers import *
+from servers.web2.core.templatetags.handlebars_template_helpers import *
 
 from subprocess import Popen, PIPE
 from pprint     import pformat
@@ -73,7 +73,7 @@ class MustacheTemplateLibrary(object):
             self.templates[name] = (path, text)
         
         self.partials = dict(((k, v[1]) for k, v in self.templates.iteritems()))
-        logs.info("[%s] loaded %d custom templates" % (self, len(self.templates)))
+        logs.debug("[%s] loaded %d custom templates" % (self, len(self.templates)))
     
     def render(self, template_name, context):
         return self._renderer.render(self.templates[template_name][1], context)
@@ -138,7 +138,7 @@ class HandlebarsTemplateLibrary(object):
             name = template[:-len(suffix)]
             self.templates[name] = (path, text)
         
-        logs.info("[%s] loaded %d custom templates" % (self, len(self.templates)))
+        #logs.debug("[%s] loaded %d custom templates" % (self, len(self.templates)))
     
     def render(self, template_name, context):
         pad = "-" * 20
@@ -195,7 +195,7 @@ class CustomCSSTemplateLibrary(object):
                 self.templates[name] = (path, text)
         
         self.partials = dict(((k, v[1]) for k, v in self.templates.iteritems()))
-        logs.info("[%s] loaded %d custom templates" % (self, len(self.templates)))
+        logs.debug("[%s] loaded %d custom templates" % (self, len(self.templates)))
     
     def render(self, template_name, context):
         less    = self._renderer.render(self.templates[template_name][1], context)

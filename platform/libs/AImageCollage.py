@@ -6,13 +6,14 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import image_utils, math, utils
+from libs import image_utils
+import logs, math, utils
 
 from abc            import ABCMeta, abstractmethod
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
 from api.S3ImageDB  import S3ImageDB
-from LRUCache       import lru_cache
+from libs.LRUCache       import lru_cache
 
 class AImageCollage(object):
     
@@ -35,20 +36,23 @@ class AImageCollage(object):
         
         return self.get_images(image_urls)
     
+    @lru_cache(maxsize=256)
+    def _get_image(self, image_url):
+        logs.info("downloading '%s'" % image_url)
+        
+        return self._db.getWebImage(image_url, "collage")
+    
     def get_images(self, image_urls):
         images = []
         
         def _add_image(image_url):
-            utils.log("downloading '%s'" % image_url)
-            
-            image = self._db.getWebImage(image_url, "collage")
-            images.append(image)
+            images.append(self._get_image(image_url))
         
         for image_url in image_urls:
             self._pool.spawn(_add_image, image_url)
         
         self._pool.join()
-        utils.log()
+        utils.log("")
         
         return images
     
@@ -109,7 +113,7 @@ class AImageCollage(object):
                 return logo
         
         for size in self._sizes:
-            utils.log("[%s] creating %sx%s collage" % (self, size[0], size[1]))
+            logs.info("[%s] creating %sx%s collage" % (self, size[0], size[1]))
             
             canvas  = Image.new("RGBA", size, (255, 255, 255, 255))
             offsets = []
@@ -231,10 +235,6 @@ class AImageCollage(object):
     def _get_output_sizes(self):
         return [
             (1024, 256), 
-            (940, 256), 
-            (640, 128), 
-            #(512, 128), 
-            #(256, 64), 
         ]
     
     def __str__(self):

@@ -65,21 +65,6 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        $('.profile-nav a').each(function () {
-            $(this).click(function(event) {
-                event.preventDefault();
-                var $link = $(this);
-                
-                $link.parents(".profile-sections").each(function() {
-                    var elems = $(this).find(".profile-section");
-                    
-                    $(elems).slideToggle('fast', function() { });
-                });
-                
-                return false;
-            });
-        });
-        
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
@@ -156,7 +141,7 @@ var g_update_stamps = null;
             });
         };
         
-        $(".subnav_button").click(function(event) {
+        $("#subnav").on("click", ".subnav_button", function(event) {
             event.preventDefault();
             
             var $this    = $(this);
@@ -231,7 +216,7 @@ var g_update_stamps = null;
             return false;
         });
         
-        $(".expand-friends").click(function(event) {
+        $(".friends-wrapper").on("click", ".expand-friends", function(event) {
             event.preventDefault();
             
             var $this = $(this);
@@ -354,6 +339,7 @@ var g_update_stamps = null;
         
         // relayout the stamp gallery using isotope
         var update_gallery_layout = function(is_visible, callback, recur) {
+            var style  = { visibility : 'visible' };
             is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
             recur      = (typeof(recur)      === 'undefined' ? false : recur);
             
@@ -368,12 +354,7 @@ var g_update_stamps = null;
             };
             
             var set_gallery_visible = function() {
-                var style = {
-                    visibility : 'visible'
-                };
-                
                 $('#main-content').css(style);
-                $('#stamp-category-nav-bar').css(style);
             };
             
             update_gallery(function() {
@@ -525,18 +506,24 @@ var g_update_stamps = null;
             var $map  = $elem.find('.stamp-map');
             var $icon = $elem.find('.stamp-icon');
             
+            var push_images = function($elems) {
+                $elems.each(function(i, $elem) {
+                    images.push($elem);
+                });
+            };
+            
             if (is_sdetail) {
-                images.push.apply(images, $map);
-                images.push.apply(images, $stamp_entity_images);
-                images.push.apply(images, $icon);
+                push_images($map);
+                push_images($stamp_entity_images);
+                push_images($icon);
                 
-                // note: user image is included in stamp-card
-                images.push.apply(images, $stamp_user_images);
+                // note: user images are included in the main stamp-card, so we deprioritize them here
+                push_images($stamp_user_images);
             } else {
-                images.push.apply(images, $stamp_user_images);
-                images.push.apply(images, $stamp_entity_images);
-                images.push.apply(images, $map);
-                images.push.apply(images, $icon);
+                push_images($stamp_user_images);
+                push_images($map);
+                push_images($stamp_entity_images);
+                push_images($icon);
             }
             
             if (images.length > 0) {
@@ -612,18 +599,16 @@ var g_update_stamps = null;
         //   2) enforce predence of rhs stamp preview images
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
         var update_stamps = function($scope) {
-            var $items = $scope;
-            
-            /*if (!!$items) {
-                console.debug("update_stamps: " + $items.length);
-            }*/
-            
             if (typeof($scope) === 'undefined') {
-                $scope = $(document);
-                $items = $scope.find('.stamp-gallery-item');
-            } else if ($scope.hasClass(sdetail_wrapper)) {
-                $items = null;
+                $scope = $gallery;
                 
+                if (!$scope) {
+                    return;
+                }
+                
+                // convert iOS emoji unicode characters to inline images in the stamp blurbs
+                $scope.find('.blurb').emoji();
+            } else if ($scope.hasClass(sdetail_wrapper)) {
                 // convert iOS emoji unicode characters to inline images in the sdetail stamp blurb
                 $scope.find('.normal_blurb').emoji();
             }
@@ -644,45 +629,9 @@ var g_update_stamps = null;
                 //update_images();
             });
             
-            if (!!$items) {
-                $items.click(function(event) {
-                    var $target = $(event.target);
-                    if ($target.is('a') && $target.hasClass('zoom')) {
-                        // override the sdetail popup if a lightbox target was clicked
-                        return true;
-                    }
-                    
-                    event.preventDefault();
-                    
-                    var $this = $(this);
-                    var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
-                    var href  = $link.attr('href');
-                    var title = $link.data("title");
-                    
-                    href = href.replace('http://www.stamped.com', '');
-                    //href = href + "&" + new Date().getTime();
-                    
-                    if (History && History.enabled) {
-                        History.pushState(null, title, href);
-                    } else {
-                        open_sdetail(href);
-                    }
-                    
-                    return false;
-                });
-                
-                // convert iOS emoji unicode characters to inline images in the stamp blurbs
-                $items.find('.blurb').emoji();
-            }
-            
             $scope.find("a.lightbox").fancybox(get_fancybox_options({
                 closeClick : true
             }));
-            
-            /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
-                var $this = $(this);
-                $this.fitText();
-            });*/
         };
         
         // handle sizing / layout of sdetail popup, including opening / closing animations
@@ -729,6 +678,7 @@ var g_update_stamps = null;
                                 });*/
                                 
                                 $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
+                                $window.scrollTop(0);
                                 
                                 if (!!anim_callback) {
                                     anim_callback();
@@ -872,6 +822,33 @@ var g_update_stamps = null;
                     }*/
                 });
                 
+                $gallery.on("click", ".stamp-gallery-item", function(event) {
+                    var $target = $(event.target);
+                    
+                    if ($target.is('a') && $target.hasClass('zoom')) {
+                        // override the sdetail popup if a lightbox target was clicked
+                        return true;
+                    }
+                    
+                    event.preventDefault();
+                    
+                    var $this = $(this);
+                    var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+                    var href  = $link.attr('href');
+                    var title = $link.data("title");
+                    
+                    href = href.replace('http://www.stamped.com', '');
+                    //href = href + "&" + new Date().getTime();
+                    
+                    if (History && History.enabled) {
+                        History.pushState(null, title, href);
+                    } else {
+                        open_sdetail(href);
+                    }
+                    
+                    return false;
+                });
+                
                 init_infinite_scroll();
             }
         };
@@ -912,7 +889,8 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        $('.stamp-gallery-sort a.item').click(function(event) {
+        // NOTE: disabling stamp-gallery-sort temporarily for V2 launch
+        /*$('.stamp-gallery-sort a.item').click(function(event) {
             event.preventDefault();
             var $this   = $(this);
             var $parent = $this.parent('.stamp-gallery-sort');
@@ -949,7 +927,7 @@ var g_update_stamps = null;
             }
             
             return false;
-        });
+        });*/
         
         
         // ---------------------------------------------------------------------
@@ -1226,14 +1204,17 @@ var g_update_stamps = null;
                 
                 // resize user's stamp logo
                 var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width - 166);
-                var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_width - 166);
-                var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_height + 'px';
+                //var cur_logo_height = user_logo_height - inv_cur_ratio * (user_logo_width - 166);
+                var cur_logo_size   = cur_logo_width + 'px ' + cur_logo_width + 'px';
                 //var cur_logo_top    = user_logo_top  + (user_logo_width  - cur_logo_height) / 2.0;
                 //var cur_logo_left   = user_logo_left + (user_logo_height - cur_logo_width)  / 2.0;
                 
+                // TODO: clamp logo size when sdetail is animating
+                // TODO: does logo collapsing only repro on chrome? or is it FF as well?
+                
                 $user_logo.css({
                     width               : cur_logo_width, 
-                    height              : cur_logo_height, 
+                    height              : cur_logo_width, 
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size, 
                     //top                 : cur_logo_top, 
@@ -1360,7 +1341,7 @@ var g_update_stamps = null;
                             g_category = category;
                             
                             console.debug("NEW CATEGORY: " + category);
-                            History.log(state.data, state.title, state.url);
+                            //History.log(state.data, state.title, state.url);
                             
                             if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
                                 var completion_func = function() {
@@ -1490,7 +1471,7 @@ var g_update_stamps = null;
         }
         
         // handle nav bar click routing
-        $nav_bar.find('a.active').click(function(event) {
+        $nav_bar.on("click", "a.active", function(event) {
             event.preventDefault();
             
             var $link    = $(this);
@@ -1547,6 +1528,7 @@ var g_update_stamps = null;
         var fixed_padding   = 80;
         var min_col_width   = 305;
         var last_nav_pos_x  = null;
+        var update_navbar_count = 0;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
@@ -1678,6 +1660,11 @@ var g_update_stamps = null;
                     style['right'] = 'auto';
                 }
                 
+                ++update_navbar_count;
+                if (gallery || update_navbar_count >= 3) {
+                    style['visibility'] = 'visible';
+                }
+                
                 last_nav_pos_x = pos;
                 $nav_bar.css(style);
             }
@@ -1772,22 +1759,20 @@ var g_update_stamps = null;
                 
                 // reenable gallery animations
                 enable_gallery_animations(true);
+                update_gallery_layout(true);
                 
                 if (!href) {
-                    update_gallery_layout(true);
                     init_header_subsections();
                 }
                 
                 resize_sdetail_wrapper($target, 'closing', function() {
                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
                     
-                    if (!href) {
-                        update_gallery_layout(true);
-                        
-                        setTimeout(function() {
-                            update_gallery_layout(true, null, true);
-                        }, 150);
-                    }
+                    update_gallery_layout(true);
+                    
+                    setTimeout(function() {
+                        update_gallery_layout(true, null, true);
+                    }, 150);
                 });
             };
             
@@ -1833,7 +1818,7 @@ var g_update_stamps = null;
                 var comments_height  = $comments_div.height();
                 var comments_initted = false;
                 
-                $comments_nav.find('a').click(function(event) {
+                $comments_nav.on("click", "a", function(event) {
                     event.preventDefault();
                     
                     $comments.show();
@@ -1929,7 +1914,7 @@ var g_update_stamps = null;
                             var link_type = 'ajax';
                             var link_href = '/entities/menu?entity_id=' + entity_id;
                             
-                            // TODO: possibly embed singleplatform page directly if one exists!
+                            // TODO: possibly embed singleplatform page directly if one exists
                             //link_type = 'iframe';
                             //link_href = 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped';
                             
@@ -2130,19 +2115,20 @@ var g_update_stamps = null;
             open_sdetail(null, STAMPED_PRELOAD.sdetail);
         }
         
-        g_init_social_sharing();
         update_dynamic_header();
         init_header_subsections();
         
-        update_stamps();
         init_gallery();
+        update_stamps();
         update_navbar_layout();
         
         var __init = false;
+        
         var show_initial_gallery = function() {
             if (!__init || $('#main-content').css('visibility') !== 'visible') {
                 __init = true;
                 
+                g_init_social_sharing();
                 update_gallery_layout(true, null, true);
                 setTimeout(show_initial_gallery, 500);
             }

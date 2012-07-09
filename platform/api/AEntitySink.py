@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 from utils import abstract
 
-from IASyncConsumer import IASyncConsumer
+from api.IASyncConsumer import IASyncConsumer
 from gevent.queue import Queue, Empty
 from gevent import Greenlet
 from gevent.pool import Pool
@@ -43,7 +43,7 @@ class AEntitySink(Greenlet, IASyncConsumer):
         #utils.log("[%s] >>> AEntitySink.processQueue" % (self, ))
         stop = 0
         if async:
-            pool = Pool(poolSize)
+            pool = utils.LoggingThreadPool(poolSize)
         
         while True:
             items = []

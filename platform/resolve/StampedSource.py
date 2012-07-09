@@ -19,18 +19,18 @@ import re
 try:
     import logs
     
-    from Resolver                   import *
-    from ResolverObject             import *
-    from GenericSource              import GenericSource
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat
     from libs.LibUtils              import parseDateString
     from api.Schemas                import BasicEntity
-    from Schemas                    import BasicEntityMini as BasicEntityMini1
+    from api.Schemas                    import BasicEntityMini as BasicEntityMini1
     from api.Schemas                import BasicEntityMini as BasicEntityMini2
     from datetime                   import datetime
     from bson                       import ObjectId
-    from Entity                     import buildEntity
+    from api.Entity                     import buildEntity
 
     # TODO GET RID OF SEARCH IMPORTS
     from search.SearchResult import SearchResult
@@ -443,7 +443,7 @@ class StampedSource(GenericSource):
     @lazyProperty
     def __entityDB(self):
         if not self._stamped_api:
-            import MongoStampedAPI
+            from api import MongoStampedAPI
             self._stamped_api = MongoStampedAPI.globalMongoStampedAPI()
         
         return self._stamped_api._entityDB
@@ -1038,41 +1038,34 @@ class StampedSource(GenericSource):
     def urlField(self):
         return None
     
+    def resolve_fast_batch(self, sourcesAndKeys):
+        SOURCES = set(['amazon', 'spotify', 'rdio', 'opentable', 'tmdb', 'factual', 'instagram',
+                'singleplatform', 'foursquare', 'fandango', 'googleplaces', 'itunes', 'netflix',
+                'thetvdb'])
+        mongoQueries = []
+        queryPairs = []
+        for source, key in sourcesAndKeys:
+            source_name = source.lower().strip()
+            sourceIdField = source_name + '_id'
+            queryPairs.append((sourceIdField, key))
+            if source_name in SOURCES:
+                mongoQueries.append({'sources.' + sourceIdField : key})
+        
+        query = mongoQueries[0] if len(mongoQueries) == 1 else {'$or' : mongoQueries}
+        results = self.__entityDB._collection.find(query, fields=['sources'])
+
+        # TODO PRELAUNCH FUCK FUCK FUCK CHECK FOR TOMBSTONE IDS
+        sourceIdsToEntityId = {}
+        for result in results:
+            sourceIds = result['sources']
+            for k, v in sourceIds.iteritems():
+                if k.endswith('_id'):
+                    sourceIdsToEntityId[k,v] = str(result['_id'])
+
+        return [sourceIdsToEntityId.get(query, None) for query in queryPairs]
+
     def resolve_fast(self, source, key):
-        source_keys = {
-            'amazon'            : 'sources.amazon_id', 
-            'spotify'           : 'sources.spotify_id', 
-            'rdio'              : 'sources.rdio_id', 
-            'opentable'         : 'sources.opentable_id', 
-            'tmdb'              : 'sources.tmdb_id', 
-            'factual'           : 'sources.factual_id',
-            'instagram'         : 'sources.instagram_id',
-            'singleplatform'    : 'sources.singleplatform_id',
-            'foursquare'        : 'sources.foursquare_id',
-            'fandango'          : 'sources.fandango_id', 
-            'googleplaces'      : 'sources.googleplaces_id', 
-            'itunes'            : 'sources.itunes_id', 
-            'netflix'           : 'sources.netflix_id',
-            'thetvdb'           : 'sources.thetvdb_id', 
-        }
-        
-        try:
-            source_name = source.sourceName.lower().strip()
-            mongo_key   = source_keys[source_name]
-        except Exception:
-            return None
-        
-        query       = { mongo_key : key }
-        entity_id   = None
-        logs.debug(str(query))
-        
-        ret         = self.__entityDB._collection.find_one(query, fields=['_id'] )
-        
-        if ret:
-            entity_id = str(ret['_id'])
-            logs.info("Resolved '%s' key '%s' to existing entity_id '%s'" % (source_name, key, entity_id))
-        
-        return entity_id
+        return self.resolve_fast_batch([(source, key)])[0]
 
 if __name__ == '__main__':
     demo(StampedSource(), 'Katy Perry')

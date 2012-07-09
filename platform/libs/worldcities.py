@@ -8,37 +8,37 @@ __license__   = "TODO"
 import math, os, re
 
 from pprint import pprint, pformat
-from kdtree import KDTree
-import data.CityList
+from libs.kdtree import KDTree
+from libs.data import CityList
 
 __regions = None
 __region_suffixes = None
 
 def parse_worldcities():
     filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data/worldcities.txt")
-    
+
     return parse_file(filename)
 
 def parse_file(filename):
     f = open(filename, 'r')
     f.readline() # header
-    
+
     for l in f:
         if l.startswith('#'):
             continue
-        
+
         try:
             row  = l.replace('\n', '').split(',')
             assert len(row) >= 7
-            
+
             yield {
-                'country'       : row[0], 
-                'cityl'         : row[1], 
-                'city'          : row[2], 
-                'region'        : row[3], 
-                'population'    : int(row[4]) if row[4] else None, 
-                'lat'           : float(row[5]), 
-                'lng'           : float(row[6]), 
+                'country'       : row[0],
+                'cityl'         : row[1],
+                'city'          : row[2],
+                'region'        : row[3],
+                'population'    : int(row[4]) if row[4] else None,
+                'lat'           : float(row[5]),
+                'lng'           : float(row[6]),
             }
         except:
             pass
@@ -47,36 +47,36 @@ def get_world_cities_kdtree():
     cities = list(((city['lat'], city['lng']), city) for city in parse_worldcities())
     cities = filter(lambda city: city[1]['population'] > 100000, cities)
     kdtree = KDTree(cities)
-    
+
     return kdtree
 
 def __init_regions():
     """
         Initialize the list of regions used to guide searches with location hints.
     """
-    
+
     global __regions, __region_suffixes
-    
+
     city_in_state = {}
     __regions     = {}
-    
-    for k, v in data.CityList.popular_cities.iteritems():
+
+    for k, v in CityList.popular_cities.iteritems():
         if 'synonyms' in v:
             for synonym in v['synonyms']:
                 __regions[synonym.lower()] = v
-        
+
         v['name'] = k
         __regions[k.lower()] = v
-        
+
         state = v['state'].lower()
         if not state in city_in_state or v['population'] > city_in_state[state]['population']:
             city_in_state[state] = v
-    
+
     # push lat/lng as best candidate for state
     for state, v in city_in_state.iteritems():
         __regions[state] = v
-        
-        abbreviation = data.CityList.state_abbreviations[state]
+
+        abbreviation = CityList.state_abbreviations[state]
         if abbreviation not in __regions:
             __regions[abbreviation] = v
     

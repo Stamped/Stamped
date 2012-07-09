@@ -15,11 +15,11 @@ from logs import report
 
 try:
     import logs, utils
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from libs.TheTVDB               import TheTVDB, globalTheTVDB
-    from GenericSource              import GenericSource
+    from resolve.GenericSource              import GenericSource
     from utils                      import lazyProperty
     from pprint                     import pformat, pprint
     from search.ScoringUtils        import *

@@ -7,22 +7,22 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from MongoStampedAPI import MongoStampedAPI
-from HTTPSchemas import *
+from api.MongoStampedAPI import MongoStampedAPI
+from api.HTTPSchemas import *
 from api.Schemas import *
 from pprint import pprint
-import Entity
+from api import Entity
 
 from resolve.EntitySource   import EntitySource
 from resolve                import FullResolveContainer
-from AmazonSource           import AmazonSource
-from FactualSource          import FactualSource
-from GooglePlacesSource     import GooglePlacesSource
-from iTunesSource           import iTunesSource
-from RdioSource             import RdioSource
-from SpotifySource          import SpotifySource
-from TMDBSource             import TMDBSource
-from StampedSource          import StampedSource
+from resolve.AmazonSource           import AmazonSource
+from resolve.FactualSource          import FactualSource
+from resolve.GooglePlacesSource     import GooglePlacesSource
+from resolve.iTunesSource           import iTunesSource
+from resolve.RdioSource             import RdioSource
+from resolve.SpotifySource          import SpotifySource
+from resolve.TMDBSource             import TMDBSource
+from resolve.StampedSource          import StampedSource
 
 stampedAPI = MongoStampedAPI()
 
@@ -122,7 +122,7 @@ for stub in album.tracks:
                     source_id = stub.sources['%s_id' % sourceName]
 
                     # Attempt to resolve against the Stamped DB (quick)
-                    entity_id = stamped.resolve_fast(source, source_id)
+                    entity_id = stamped.resolve_fast(sourceName, source_id)
 
                     if entity_id is None:
                         # Attempt to resolve against the Stamped DB (full)

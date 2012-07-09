@@ -16,18 +16,18 @@ from logs import report
 try:
     import logs, urllib2, datetime
     from libs.iTunes                import globaliTunes
-    from GenericSource              import GenericSource, listSource
+    from resolve.GenericSource              import GenericSource, listSource
     from utils                      import lazyProperty, basicNestedObjectToString
     from gevent.pool                import Pool
     from pprint                     import pprint, pformat
-    from Resolver                   import *
-    from ResolverObject             import *
-    from TitleUtils                 import *
+    from resolve.Resolver                   import *
+    from resolve.ResolverObject             import *
+    from resolve.TitleUtils                 import *
     from libs.LibUtils              import parseDateString
-    from StampedSource              import StampedSource
-    from Entity                     import mapCategoryToTypes
+    from resolve.StampedSource              import StampedSource
+    from api.Entity                     import mapCategoryToTypes
     from search.ScoringUtils        import *
-    from Resolver                   import trackSimplify
+    from resolve.Resolver                   import trackSimplify
 except Exception:
     report()
     raise
@@ -919,7 +919,7 @@ class iTunesSource(GenericSource):
         supportedProxyTypes = {
             'music': (iTunesArtist, iTunesAlbum, iTunesTrack),
             'film': (iTunesMovie, iTunesTVShow),
-            'app': (iTunesTrack,),
+            'app': (iTunesApp,),
             'book': (iTunesBook,),
         }[queryCategory]
 

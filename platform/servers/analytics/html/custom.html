@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+	{% extends 'base.html' %}
+	
+	{% block head %}
+
+		{{ block.super }}
+		
+		<script src="/assets/js/raphael.js"></script>
+		<script src="/assets/js/g.raphael.js"></script>
+		<script src="/assets/js/g.line.js"></script>
+
+	{% endblock head %}
+	
+	{% block content %}
+	    <div class="custom_wrapper" style="text-align:center">
+	    
+	    	<h2>Custom Database Query </h2> 
+	    	   
+		    <div id="custom_form" class="custom_form">
+			    <form action="/custom/" method="post">
+					{% csrf_token %}
+					{{ form }}
+					<input type ="submit"/>
+				</form>
+			</div>
+			
+			
+			<div id='custom_graph' class="custom_graph">
+				<!-- This gets filled in via javascript -->
+			</div>
+		</div>
+		
+		<script>
+			if ({{base}}.length > 1){
+				var r = Raphael(document.getElementById("custom_graph"));
+				lines = r.linechart(50,50,500,500,{{base}}, {{values|safe}}, {axis: "0 0 1 1", axisxstep: {{ base|length}} - 1, symbol:"circle"}).hoverColumn(function () {
+	                    this.tags = r.set();
+	
+	                    for (var i = 0, ii = this.y.length; i < ii; i++) {
+	                        this.tags.push(r.tag(this.x, this.y[i], this.values[i], 160, 10).insertBefore(this).attr([{ fill: "#fff" }, { fill: this.symbols[i].attr("fill") }]));
+	                    }
+	                }, function () {
+	                    this.tags && this.tags.remove();
+	                });
+				// Modify the x axis labels
+		  			var xText = lines.axis[0].text.items;      
+		  			
+		  			for(var i in xText){
+		        		_label = {{bgns|safe}}[i];
+		    			xText[i].attr({'text': _label}); 
+		  			}
+		  	}
+		  	else if ({{base}}.length ==1)  {
+		  		document.getElementById("custom_graph").innerHTML = "<h2>Total for {{bgns.0}} thru {{ends.0}}: {{values.0}}</h2>"
+		  	}
+		</script>
+    	
+    {% endblock content %}
+
+
+

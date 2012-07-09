@@ -6,13 +6,18 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from httpapi.v0.helpers import *
+from servers.httpapi.v0.helpers import *
 
-exceptions = [
-    (StampedInvalidEmailError,         StampedHTTPError(400, kind='invalid_credentials', msg="Invalid email address")),
+entityExceptions = [
+    (StampedEntityUpdatePermissionError,   403, 'invalid_credentials', "Insufficient privileges to update entity"),
+    (StampedTombstonedEntityError,         400, 'invalid_credentials', "Sorry, this entity can no longer be updated"),
+    (StampedInvalidCategoryError,          400, 'bad_request',         "Invalid category"),
+    (StampedInvalidSubcategoryError,       400, 'bad_request',         "Invalid subcategory"),
+    (StampedMenuUnavailableError,          404, 'not_found',           "Menu is unavailable"),
 ]
 
-def _convertHTTPEntity(entity, authClientId=None):
+def _convertHTTPEntity(entity,
+                       authClientId=None):
     client = stampedAuth.getClientDetails(authClientId)
     
     if authClientId is not None and client.api_version < 1:
@@ -21,8 +26,9 @@ def _convertHTTPEntity(entity, authClientId=None):
         return HTTPEntity().importEntity(entity, client)
 
 
-@handleHTTPRequest(http_schema=HTTPEntityNew)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPEntityNew,
+                   exceptions=entityExceptions)
 def create(request, authUserId, authClientId, http_schema, **kwargs):
     entity          = http_schema.exportEntity(authUserId)
     
@@ -32,8 +38,10 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.dataExport())
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityIdSearchId)
 @require_http_methods(["GET"])
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPEntityIdSearchId,
+                   exceptions=entityExceptions)
 def show(request, authUserId, authClientId, http_schema, **kwargs):
     entity      = stampedAPI.getEntity(http_schema, authUserId)
     entity      = _convertHTTPEntity(entity, authClientId)
@@ -41,8 +49,9 @@ def show(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEntityId)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPEntityId,
+                   exceptions=entityExceptions)
 def remove(request, authUserId, authClientId, http_schema, **kwargs):
     entity = stampedAPI.removeCustomEntity(authUserId, http_schema.entity_id)
     entity = _convertHTTPEntity(entity, authClientId)
@@ -50,8 +59,9 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
     return transformOutput(entity.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEntitySearchRequest)
 @require_http_methods(["GET"])
+@handleHTTPRequest(http_schema=HTTPEntitySearchRequest,
+                   exceptions=entityExceptions)
 def autosuggest(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.getEntityAutoSuggestions(authUserId=authUserId, 
                                                  query=http_schema.query, 
@@ -61,8 +71,9 @@ def autosuggest(request, authUserId, http_schema, **kwargs):
     return transformOutput(result)
 
 
-@handleHTTPRequest(http_schema=HTTPEntitySearchRequest)
 @require_http_methods(["GET"])
+@handleHTTPRequest(http_schema=HTTPEntitySearchRequest,
+                   exceptions=entityExceptions)
 def search(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.searchEntities(authUserId=authUserId, 
                                        query=http_schema.query, 
@@ -71,6 +82,8 @@ def search(request, authUserId, http_schema, **kwargs):
     
     group = HTTPEntitySearchResultsGroup()
     group.title = 'Search results'
+    if http_schema.category == 'place':
+        group.image_url = 'http://static.stamped.com/assets/icons/default/search_google.png'
 
     entities = []
     for entity, distance in result:
@@ -84,8 +97,9 @@ def search(request, authUserId, http_schema, **kwargs):
     return transformOutput(group.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPEntitySuggestionRequest)
 @require_http_methods(["GET"])
+@handleHTTPRequest(http_schema=HTTPEntitySuggestionRequest,
+                   exceptions=entityExceptions)
 def suggested(request, authUserId, http_schema, **kwargs):
     sections    = stampedAPI.getSuggestedEntities(authUserId=authUserId, 
                                                   category=http_schema.category,
@@ -100,6 +114,8 @@ def suggested(request, authUserId, http_schema, **kwargs):
         try:
             group = HTTPEntitySearchResultsGroup()
             group.title = 'Suggested'
+            if http_schema.category == 'place':
+                group.image_url = 'http://static.stamped.com/assets/icons/default/search_google.png'
             if 'name' in section and section['name'] is not None:
                 group.title = section['name']
             group.entities = map(convert, section['entities'])
@@ -111,8 +127,10 @@ def suggested(request, authUserId, http_schema, **kwargs):
     return transformOutput(result)
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityId)
 @require_http_methods(["GET"])
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPEntityId,
+                   exceptions=entityExceptions)
 def menu(request, authUserId, http_schema, **kwargs):
     menu        = stampedAPI.getMenu(http_schema.entity_id)
     http_menu   = HTTPMenu().importMenu(menu)
@@ -120,7 +138,9 @@ def menu(request, authUserId, http_schema, **kwargs):
     return transformOutput(http_menu.dataExport())
 
 
-@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityId)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPEntityId,
+                   exceptions=entityExceptions)
 @require_http_methods(["GET"])
 def stampedBy(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
@@ -128,8 +148,9 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
     return transformOutput(result.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPActionComplete)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPActionComplete,
+                   exceptions=entityExceptions)
 def completeAction(request, authUserId, http_schema, **kwargs):
     # Hack for Python 2.6 where unicode keys aren't valid...
     data = {}

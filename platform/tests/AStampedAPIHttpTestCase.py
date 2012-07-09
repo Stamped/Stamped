@@ -10,7 +10,7 @@ import Globals, utils
 import atexit, os, json, mimetools, sys, urllib, urllib2
 
 from pprint           import pprint
-from StampedTestUtils import *
+from tests.StampedTestUtils import *
 
 
 DEFAULT_CLIENT_ID       = "iphone8"
@@ -385,7 +385,6 @@ class AStampedAPIHttpTestCase(AStampedTestCase):
             data = {
                 "oauth_token": token['access_token'],
                 "title": "Kanye West",
-                "subtitle": "Hubristic Rapper",
                 "desc": "Hip-hop artist", 
                 "category": "music",
                 "subcategory": "artist",
@@ -403,11 +402,14 @@ class AStampedAPIHttpTestCase(AStampedTestCase):
             data = {
                 "oauth_token": token['access_token'],
                 "title": "Good Food",
-                "subtitle": "Peoria, IL",
                 "desc": "American food in America", 
                 "category": "place",
                 "subcategory": "restaurant",
-                "address": "123 Main Street, Peoria, IL",
+                "address_street": "63 E Lake St",
+                "address_country": "US",
+                "address_locality": "Chicago",
+                "address_region": "IL",
+                "address_postcode": "60601",
                 "coordinates": "40.714623,-74.006605"
             }
         

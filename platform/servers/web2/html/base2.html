@@ -4,9 +4,9 @@
 <html class="ie" lang="en">
 <![endif]-->
 <!--[if gt IE 9]><!-->
-<html lang="en">
+<html lang="en" {% block html_tags %}{% endblock %}>
 <!--<![endif]-->
-
+    
     {% block pre_head %}
     <head>
         {% endblock pre_head %}
@@ -38,6 +38,19 @@
         {% block styles %}
         <!-- styles -->
         <link rel="stylesheet"          href="{{ STATIC_URL }}css/styles.css">
+        
+        <!--[if lte IE 9]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.9.css">
+        <![endif]-->
+        
+        <!--[if lte IE 8]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.8.css">
+        <![endif]-->
+        
+        <!--[if lte IE 7]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.7.css">
+        <![endif]-->
+        
         {% endblock styles %}
         
         {% block post_head %}
@@ -65,7 +78,7 @@
                     <a class='button' href='#'></a>
                 </p>
                 
-                <div class="user-logo-large"></div>
+                <a href="/{{user.screen_name}}" class="user-logo-large"></a>
             </div>
             {% endblock header %}
             

@@ -7,9 +7,9 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-from MongoStampedAPI import MongoStampedAPI
+from api.MongoStampedAPI import MongoStampedAPI
 import bson
-from AStampedAPIHttpTestCase import *
+from tests.AStampedAPIHttpTestCase import *
 from libs.Facebook import *
 from libs.Twitter import *
 
@@ -454,7 +454,6 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
         path = "users/find/facebook.json"
         data = {
             "oauth_token"   : self.fUserAToken['access_token'],
-            "user_token"    : self.fb_user_token_a,
         }
 
         logs.info("self.fb_user_token_a %s" % self.fb_user_token_a)
@@ -479,12 +478,23 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
             ])
 
 class StampedAPIFacebookFind(StampedAPIFacebookTest):
+
+    def test_find_by_facebook(self):
+        path = "users/find/facebook.json"
+        data = {
+            "oauth_token"   : self.fUserAToken['access_token']
+        }
+        self.async(lambda: self.handleGET(path, data), [
+            lambda x: self.assertEqual(len(x), 1),
+            lambda x: self.assertEqual(x[0]['user_id'], self.fUserB['user_id']),
+            ])
+
     def test_invite_facebook_collection(self):
         path = "v0/users/invite/facebook/collection.json"
         data = {
             "oauth_token"   : self.fUserAToken['access_token'],
             }
-        result = self.handlePOST(path, data)
+        result = self.handleGET(path, data)
         from pprint import pprint
         pprint(result)
 
@@ -571,11 +581,9 @@ class StampedAPITwitterFind(StampedAPITwitterHttpTest):
     def test_find_by_twitter(self):
         path = "users/find/twitter.json"
         data = {
-            "oauth_token"   : self.twUserAToken['access_token'],
-            "user_token"    : TWITTER_USER_A0_TOKEN,
-            "user_secret"   : TWITTER_USER_A0_SECRET,
+            "oauth_token"   : self.twUserAToken['access_token']
             }
-        self.async(lambda: self.handlePOST(path, data), [
+        self.async(lambda: self.handleGET(path, data), [
                 lambda x: self.assertEqual(len(x), 1),
                 lambda x: self.assertEqual(x[0]['user_id'], self.twUserB['user_id']),
             ])

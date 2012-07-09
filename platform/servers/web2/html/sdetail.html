@@ -38,7 +38,7 @@
                                     {% if stamp.contents.0.blurb and stamp.contents.0.blurb|length > 0 %}
                                     said:
                                     {% else %}
-                                    stamped a {% if entity.subcategory %}{{entity.subcategory}}{% else %}{{entity.category}}{% endif %}.
+                                    stamped a {% if entity.subcategory %}{% if entity.subcategory == "tv" %}TV Show{% else %}{{entity.subcategory}}{% endif %}{% else %}{{entity.category}}{% endif %}.
                                     {% endif %}
                                 </div>
                                 

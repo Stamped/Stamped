@@ -15,7 +15,7 @@ from logs import log, report
 try:
     from libs.FactualSource				import FactualSource
     from libs.ExternalSourceController 	import ExternalSourceController
-    from AStampedAPIHttpTestCase 			import *
+    from tests.AStampedAPIHttpTestCase 			import *
     from api.Schemas					import Entity
     from pprint							import pformat
     from datetime                       import datetime
