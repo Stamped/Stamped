@@ -723,7 +723,7 @@ class HTTPFindUser(Schema):
     def setSchema(cls):
         cls.addProperty('query',                            basestring, required=True) # Comma delimited
 
-class HTTPFacebookFriendsCollectionForm(Schema):
+class HTTPFriendsCollectionForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('limit',                            int)

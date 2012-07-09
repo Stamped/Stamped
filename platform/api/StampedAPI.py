@@ -1184,6 +1184,15 @@ class StampedAPI(AStampedAPI):
         return self._facebook.getFriendData(user_token, offset, limit)
 
     @API_CALL
+    def getTwitterFriendData(self, user_token=None, user_secret=None, offset=0, limit=30):
+        ### TODO: Add check for privacy settings?
+        if user_token is None or user_secret is None:
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Twitter requires a valid token/secret")
+
+        # Grab friend list from Twitter API
+        return self._twitter.getFriendData(user_token, user_secret, offset, limit)
+
+    @API_CALL
     def searchUsers(self, authUserId, query, limit, relationship):
         if limit <= 0 or limit > 20:
             limit = 20
