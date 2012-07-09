@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ block.super }}
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+{% endblock head %}
+
+{% block pre_body %}
+    <body id="home">
+{% endblock pre_body %}
+
+{% block main %}
+    {{ block.super }}
+    
+    <p class="pitch replaced">Put your stamp of approval on the world</p>
+    <p class="intro">
+        Stamped is a new way to recommend only what you like best&mdash;restaurants, books, movies, music and more.
+        <span>No noise, no strangers, just the people you trust and the things they love. <a href="#" class="video-launcher">Watch the video</a>.</span>
+    </p>
+    
+    <a class="itunes replaced" href="http://itunes.apple.com/us/app/stamped/id467924760?ls=1&mt=8">Free Download. Available in the App Store</a>
+    
+    <div id="tool-tipper">
+        <span class="tip-1 tooltip active" rel="1">
+            <div class="imager image-rest">
+                <img src="{{ STATIC_URL }}img/public-home/intro-stamp-is-five-star.png" alt="intro-stamp-is-five-star" />
+            </div>
+            <div class="imager image-active">
+                <img src="{{ STATIC_URL }}img/public-home/intro-stamp-is-five-star-active.png" alt="intro-stamp-is-five-star" />
+            </div>
+            <div class="text">
+                <p class="main">A stamp is a five-star recommendation.</p>
+                <p class="minor">It's only for the things you like best.</p>
+            </div>
+        </span>
+        <span class="tip-2 tooltip" rel="2">
+            <div class="imager image-rest">
+                <img src="{{ STATIC_URL }}img/public-home/intro-stamp-is-shared.png" alt="intro-stamp-is-five-star" />
+            </div>
+            <div class="imager image-active">
+                <img src="{{ STATIC_URL }}img/public-home/intro-stamp-is-shared-active.png" alt="intro-stamp-is-five-star" />
+            </div>
+            <div class="text">
+                <p class="main">A stamp is shared with your friends.</p>
+                <p class="minor">It can start a conversation and inspire them to try something new.</p>
+            </div>
+        </span>
+        <span class="tip-3 tooltip" rel="3">
+            <div class="imager image-rest">
+                <img src="{{ STATIC_URL }}img/public-home/intro-stamp-is-useful.png" alt="intro-stamp-is-five-star" />
+            </div>
+            <div class="imager image-active">
+                <img src="{{ STATIC_URL }}img/public-home/intro-stamp-is-useful-active.png" alt="intro-stamp-is-five-star" />
+            </div>
+            <div class="text">
+                <p class="main">A stamp is useful.</p>
+                <p class="minor">It's easy to try the great things your friends have stamped.</p>
+            </div>
+        </span>
+        
+        <div id="iphone">
+            <div class="screen active">
+                <img src="{{ STATIC_URL }}img/public-home/screen-five-star.png"/>
+            </div>
+            
+            <div class="screen">
+                <img src="{{ STATIC_URL }}img/public-home/screen-shared-stamp.png"/>
+            </div>
+            
+            <div class="screen">
+                <img src="{{ STATIC_URL }}img/public-home/screen-stamp-useful.png"/>
+            </div>
+        </div>
+        
+        <a class="video-block video-launcher" href="#">
+            <span class="thumbnail replaced">Video Thumbnail</span>
+            <span>Watch the video</span>
+        </a>
+    </div>
+    
+    <div id="press">
+        <h3>AS FEATURED IN</h3>
+        <ul>
+            <li><a href="http://techcrunch.com/2011/11/21/stamped-approval/" class="techcrunch replaced">TechCrunch</a></li>
+            <li><a href="http://blogs.wsj.com/digits/2011/11/22/new-ratings-app-takes-on-a-chef/" class="wsj replaced">The Wall Street Journal</a></li>
+            <li><a href="http://daringfireball.net/linked/2011/11/21/stamped" class="daringfireball replaced">Daring Fireball</a></li>
+        </ul>
+        <ul>
+            <li><a href="http://mashable.com/2011/11/25/stamped-iphone-recommendation-app/" class="mashable replaced">Mashable</a></li>
+            <li><a href="http://gigaom.com/2011/11/21/stamped-recommendation-app/" class="gigaom replaced">GigaOm</a></li>
+        </ul>
+    </div>
+{% endblock main %}
+
+{% block scripts %}
+    {{ block.super }}
+    
+    <script src="{{ STATIC_URL }}/js/index.js"></script>
+    
+    <script>
+        stamped.init();
+        {% if autoplay_video %}
+        stamped.showVideo();
+        {% endif %}
+    </script>
+{% endblock scripts %}
+
