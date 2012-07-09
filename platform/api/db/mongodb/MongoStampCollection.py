@@ -176,6 +176,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         else:
             entityMini = buildEntity(entity).minimize().dataExport()
             if stamp['entity'] != entityMini:
+                logs.warning("Updating embedded entity")
                 stamp['entity'] = entityMini
                 modified = True
 
@@ -186,7 +187,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             raise Exception("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
 
         if modified and repair:
-            pass
+            print "UPDATED: %s" % stamp
             # self._collection.update({'_id' : key}, stamp)
 
         return True
