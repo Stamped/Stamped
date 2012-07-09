@@ -22,7 +22,6 @@ from libs.notify            import StampedNotificationHandler
 from api.db.mongodb.MongoAccountCollection          import MongoAccountCollection
 from api.db.mongodb.MongoEntityCollection           import MongoEntityCollection
 from api.db.mongodb.MongoEntityStatsCollection      import MongoEntityStatsCollection
-from api.db.mongodb.MongoPlacesEntityCollection     import MongoPlacesEntityCollection
 from api.db.mongodb.MongoUserCollection             import MongoUserCollection
 from api.db.mongodb.MongoStampCollection            import MongoStampCollection
 from api.db.mongodb.MongoStampStatsCollection       import MongoStampStatsCollection
@@ -67,10 +66,6 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _entityDB(self):
         return MongoEntityCollection()
-    
-    @lazyProperty
-    def _placesEntityDB(self):
-        return MongoPlacesEntityCollection()
     
     @lazyProperty
     def _accountDB(self):
@@ -313,9 +308,6 @@ class MongoStampedAPI(StampedAPI):
         stats = {
             'entities' : {
                 'count' : self._entityDB._collection.count(), 
-                'places' : {
-                    'count' : self._placesEntityDB._collection.count(), 
-                }, 
             }, 
             'users' : {
                 'count'  : self._userDB._collection.count(), 

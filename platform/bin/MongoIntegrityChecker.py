@@ -18,14 +18,19 @@ from api.db.mongodb.MongoUserLikesCollection            import MongoUserLikesCol
 from api.db.mongodb.MongoUserTodosEntitiesCollection    import MongoUserTodosEntitiesCollection
 from api.db.mongodb.MongoStampCommentsCollection        import MongoStampCommentsCollection
 
+from api.db.mongodb.MongoStampCollection                import MongoStampCollection
+
 collections = [
     # Indexes 
-    MongoInboxStampsCollection, 
-    MongoCreditReceivedCollection, 
-    MongoStampCommentsCollection, 
-    MongoUserLikesCollection, 
-    MongoUserStampsCollection, 
-    MongoUserTodosEntitiesCollection, 
+    # MongoInboxStampsCollection, 
+    # MongoCreditReceivedCollection, 
+    # MongoStampCommentsCollection, 
+    # MongoUserLikesCollection, 
+    # MongoUserStampsCollection, 
+    # MongoUserTodosEntitiesCollection, 
+
+    # Documents
+    MongoStampCollection,
 ]
 
 
@@ -63,12 +68,12 @@ def main():
 
     # Verify that existing documents are valid
     for collection in collections:
-        logs.info("Running %s" % collection.__name__)
+        logs.info("Running checks for %s" % collection.__name__)
         db = collection()
         begin = time.time()
         for i in db._collection.find(fields=['_id']).limit(1000):
             try:
-                result = db.checkIntegrity(i['_id'], noop=options.noop)
+                result = db.checkIntegrity(i['_id'], repair=(not options.noop))
                 print i['_id'], 'PASS'
             except NotImplementedError:
                 logs.warning("WARNING: Collection '%s' not implemented" % collection.__name__)
@@ -81,7 +86,7 @@ def main():
                 print i['_id'], 'FAIL: %s' % e
                 raise
 
-        logs.info("Done running %s (%s seconds)" % (collection.__name__, (time.time() - begin)))
+        logs.info("Completed checks for %s (%s seconds)" % (collection.__name__, (time.time() - begin)))
 
     # TODO: Repopulate missing documents
 
