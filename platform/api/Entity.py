@@ -256,6 +256,10 @@ def upgradeEntityData(entityData):
     # Just to be explicit..
     old     = entityData
 
+    if '_id' in old:
+        old['entity_id'] = str(old['_id'])
+        del(old['_id'])
+
     kind    = deriveKindFromOldSubcategory(old['subcategory'])
     types   = deriveTypesFromOldSubcategories([old['subcategory']])
 
