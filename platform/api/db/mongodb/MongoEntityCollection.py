@@ -36,6 +36,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', overflow=True)
         AEntityDB.__init__(self)
 
+        fast_resolve_fields = ('sources.amazon_id', 'sources.spotify_id', 'sources.rdio_id',
+                'sources.opentable_id', 'sources.tmdb_id', 'sources.factual_id',
+                'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
+                'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
+                'sources.netflix_id', 'sources.thetvdb_id')
+        for field in fast_resolve_fields:
+            self._collection.ensure_index(field)
+
     @lazyProperty
     def places_collection(self):
         return MongoPlacesEntityCollection()
