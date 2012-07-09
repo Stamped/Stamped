@@ -452,7 +452,7 @@ class AMongoCollection(object):
             oldRefIds = set(current['ref_ids'])
 
         new = regenerate(key)
-        if new is not None:
+        if new is None:
             newRefIds = set()
         else:
             newRefIds = set(new['ref_ids'])

@@ -66,6 +66,7 @@ def main():
                 print i['_id'], 'FAIL: References updated'
             except Exception as e:
                 print i['_id'], 'FAIL: %s' % e
+                raise
 
         logs.info("Done running %s" % collection.__name__)
 
