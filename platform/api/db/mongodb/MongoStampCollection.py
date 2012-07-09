@@ -138,7 +138,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         # Verify that user exists
         userId = stamp['user']['user_id']
-        assert self._collection._database['users'].find({'_id' : self._getObjectIdFromString(userId)}).count() == 1
+        if self._collection._database['users'].find({'_id' : self._getObjectIdFromString(userId)}).count() != 1:
+            raise Exception("User '%s' not found" % userId)
 
         # Verify that any credited users exist
         if 'credits' in stamp:
@@ -158,14 +159,16 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         # Verify that entity exists
         entityId = stamp['entity']['entity_id']
         entity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(entityId)})
-        assert entity is not None
+        if entity is None:
+            raise Exception("Entity '%s' not found" % entityId)
 
         # Check if entity has been tombstoned; update entity if so
         if 'tombstone_id' in entity['sources'] and entity['sources']['tombstone_id'] is not None:
             logs.warning("Stamp is tombstoned")
             newEntityId = entity['sources']['tombstone_id']
             newEntity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(newEntityId)})
-            assert newEntity is not None
+            if newEntity is None:
+                raise Exception("Entity '%s' not found" % newEntityId)
 
             stamp['entity'] = buildEntity(newEntity).minimize().dataExport()
             modified = True
