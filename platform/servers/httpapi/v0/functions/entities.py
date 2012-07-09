@@ -83,6 +83,8 @@ def search(request, authUserId, http_schema, **kwargs):
     
     group = HTTPEntitySearchResultsGroup()
     group.title = 'Search results'
+    if http_schema.category == 'place':
+        group.image_url = 'http://static.stamped.com/assets/icons/search_google.png'
 
     entities = []
     for entity, distance in result:
