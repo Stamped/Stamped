@@ -723,17 +723,6 @@ class HTTPFindUser(Schema):
     def setSchema(cls):
         cls.addProperty('query',                            basestring, required=True) # Comma delimited
 
-class HTTPFindTwitterUser(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_token',                       basestring)
-        cls.addProperty('user_secret',                      basestring)
-
-class HTTPFindFacebookUser(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_token',                       basestring)
-
 class HTTPFacebookFriendsCollectionForm(Schema):
     @classmethod
     def setSchema(cls):
@@ -2648,8 +2637,8 @@ class HTTPStampNew(Schema):
 class HTTPStampShare(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',                     basestring)
-        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('temp_image_url',                   basestring)
 
 class HTTPStampEdit(Schema):
@@ -2805,6 +2794,8 @@ class HTTPActivity(Schema):
         self.dataImport(data, overflow=True)
 
         self.created = activity.timestamp.created
+        if activity.timestamp.modified is not None:
+            self.created = activity.timestamp.modified
 
         if self.icon is not None:
             self.icon = _getIconURL(self.icon)

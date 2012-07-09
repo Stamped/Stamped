@@ -305,6 +305,7 @@ class EntitySearch(object):
 
     def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
+        searchDoneTime = datetime.datetime.now()
         entityResults = []
 
         entityIdsToNewClusterIdxs = {}
@@ -338,7 +339,13 @@ class EntitySearch(object):
         # TODO: Reorder according to final scores that incorporate dataQuality and a richness score (presence of stamps,
         # presence of enriched entity, etc.)
 
+        convertedToEntitiesTime = datetime.datetime.now()
+        logTimingData('CONVERTING TO ENTITIES TOOK: %s' % (convertedToEntitiesTime - searchDoneTime))
+
         self.rescoreFinalResults(entitiesAndClusters)
+        rescoredTime = datetime.datetime.now()
+        logTimingData('RESCORING TOOK: %s' % (rescoredTime - convertedToEntitiesTime))
+
         return entitiesAndClusters
 
 

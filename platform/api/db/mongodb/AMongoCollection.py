@@ -123,6 +123,7 @@ class AMongoCollection(object):
         self._primary_key = primary_key
         self._obj = obj
         self._overflow = overflow
+        self._collection_name = collection
     
     def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
@@ -421,5 +422,32 @@ class AMongoCollection(object):
                     
             self._collection.remove({'_id': keyId})
         
+        return True
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, noop=False):
+        raise NotImplementedError
+
+    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, noop=False):
+        try:
+            keyCheck(key)
+        except AssertionError:
+            logs.warning("Key '%s' does not exist" % key)
+            if not noop:
+                ### TODO: Delete item
+                pass
+            raise Exception
+
+        current = self._collection.find_one({'_id' : key})
+        new = regenerate(key)
+
+        if set(current['ref_ids']) != set(new['ref_ids']):
+            logs.warning("Reference has changed for key '%s'" % key)
+            if not noop:
+                ### TODO: Update item
+                pass
+            raise Exception
+
         return True
 

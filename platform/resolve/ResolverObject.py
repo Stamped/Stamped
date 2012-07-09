@@ -170,9 +170,7 @@ class ResolverObject(object):
         return []
 
     def isType(self, t):
-        if t in self.types:
-            return True
-        return False
+        return t in self.types
 
 
 ### KINDS
