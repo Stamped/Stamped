@@ -426,28 +426,59 @@ class AMongoCollection(object):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, noop=False):
+    def checkIntegrity(self, key, repair=True):
         raise NotImplementedError
 
-    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, noop=False):
+    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, repair=True):
+
+        """
+        Verify that the key exists in the referenced table. If not, remove the key.
+        """
         try:
             keyCheck(key)
         except AssertionError:
-            logs.warning("Key '%s' does not exist" % key)
-            if not noop:
+            if repair:
                 ### TODO: Delete item
-                pass
-            raise Exception
+                self._collection.remove({'_id' : key})
+            raise StampedStaleRelationshipKeyError("Stale key '%s'" % key)
 
-        current = self._collection.find_one({'_id' : key})
+        """
+        Verify that the existing value is equal to the "generated" one. If not, replace the existing value. 
+        """
+        old = self._collection.find_one({'_id' : key})
+        if old is None:
+            oldRefIds = set()
+        else:
+            oldRefIds = set(old['ref_ids'])
+
         new = regenerate(key)
+        if new is None:
+            newRefIds = set()
+        else:
+            newRefIds = set(new['ref_ids'])
 
-        if set(current['ref_ids']) != set(new['ref_ids']):
-            logs.warning("Reference has changed for key '%s'" % key)
-            if not noop:
-                ### TODO: Update item
-                pass
-            raise Exception
+        if newRefIds != oldRefIds:
+            if old is None:
+                logs.debug("Creating ref ids")
+                if repair:
+                    self._collection.insert(new)
+
+            else:
+                # Add ref ids
+                addRefIds = newRefIds.difference(oldRefIds)
+                if len(addRefIds) > 0:
+                    logs.debug("Adding ref ids: %s" % addRefIds)
+                    if repair:
+                        self._collection.update({'_id' : key}, {'$addToSet' : { 'ref_ids' : { '$each' : list(addRefIds)}}})
+
+                # Delete ref ids
+                delRefIds = oldRefIds.difference(newRefIds)
+                if len(delRefIds) > 0:
+                    logs.debug("Removing ref ids: %s" % delRefIds)
+                    if repair:
+                        self._collection.update({'_id' : key}, {'$pullAll' : { 'ref_ids' : list(delRefIds)}})
+
+            raise StampedStaleRelationshipDataError("Relationships have changed for key '%s'" % key)
 
         return True
 

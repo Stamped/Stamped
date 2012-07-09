@@ -256,6 +256,10 @@ def upgradeEntityData(entityData):
     # Just to be explicit..
     old     = entityData
 
+    if '_id' in old:
+        old['entity_id'] = str(old['_id'])
+        del(old['_id'])
+
     kind    = deriveKindFromOldSubcategory(old['subcategory'])
     types   = deriveTypesFromOldSubcategories([old['subcategory']])
 
@@ -267,8 +271,8 @@ def upgradeEntityData(entityData):
 
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time.replace(tzinfo=None)
-    except Exception:
-        logs.warning("Unable to convert ObjectId to timestamp")
+    except Exception as e:
+        logs.warning("Unable to convert ObjectId to timestamp: %s" % e)
         seedTimestamp = datetime.utcnow()
 
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None, seed=True):

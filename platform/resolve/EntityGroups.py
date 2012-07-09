@@ -96,6 +96,9 @@ class FandangoGroup(AMovieGroup):
         self.addField(['sources', 'fandango_id'])
         self.addField(['sources', 'fandango_url'])
 
+        self.addKind('media_item')
+        self.addType('movie')
+
 class NetflixGroup(AKindTypeGroup):
 
     def __init__(self, *args, **kwargs):

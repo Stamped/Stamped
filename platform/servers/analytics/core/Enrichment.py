@@ -76,10 +76,10 @@ def typeEnrichRate(ent, enrich_srcs,collection):
     cumulative = {'types': ent}
     for src in enrich_srcs:
         enriched = collection.find({'types': ent, 'sources.'+src+'_id': {'$exists': True}}).count()
-        output.append('%s %s enrich success rate: %s' % (src, ent, float(enriched)/total*100))
+        output.append('%s %s enrich success rate: %.2f%%' % (src, ent, float(enriched)/total*100))
         cumulative['sources.'+src+'_id'] = {'$exists': False}
     non_enriched = collection.find(cumulative).count()
-    output.append('%% of %s entities with some enrichment: %s' % (ent,float(total - non_enriched)/total*100))
+    output.append('%% of %s entities with some enrichment: %.2f%%' % (ent,float(total - non_enriched)/total*100))
     return output
 
 
@@ -91,45 +91,69 @@ def kindEnrichRate(kind, enrich_srcs,collection):
     cumulative = {'kind': kind}
     for src in enrich_srcs:
         enriched = collection.find({'kind': kind, 'sources.'+src+'_id': {'$exists': True}}).count()
-        output.append('%s %s enrich success rate: %s' % (src, kind, float(enriched)/total*100))
+        output.append('%s %s enrich success rate: %.2f%%' % (src, kind, float(enriched)/total*100))
         cumulative['sources.'+src+'_id'] = {'$exists': False}
     non_enriched = collection.find(cumulative).count()
-    output.append('%% of %s entities with some enrichment: %s' % (kind,float(total - non_enriched)/total*100))
+    output.append('%% of %s entities with some enrichment: %.2f%%' % (kind,float(total - non_enriched)/total*100))
     return output
 
 
-def getEnrichmentStats(collection):
+def getEnrichmentStats(collection,subset):
     
     #Media items
-    media_items = 'Total Media Items: %s' % (collection.find({'kind': 'media_item'}).count())
-    songs = typeEnrichRate('track',['itunes','spotify','rdio','amazon'],collection)
-    movies = typeEnrichRate('movie',['itunes','netflix','tmdb','amazon'],collection)
-    books = typeEnrichRate('book',['itunes','amazon'],collection)
-
+    if subset == 'media_items':
+        unattempted = collection.find({'subcategory': {'$in': ['book','track','movie']}}).count()
+        attempted = collection.find({'kind': 'media_item'}).count()
+        breakdown = []
+        breakdown.append(typeEnrichRate('track',['itunes','spotify','rdio','amazon'],collection))
+        breakdown.append(typeEnrichRate('movie',['itunes','netflix','tmdb','amazon'],collection))
+        breakdown.append(typeEnrichRate('book',['itunes','amazon'],collection))
+                 
+        return unattempted, attempted, breakdown
 
     #Media Collections
-    media_colls = 'Total Media Collections: %s' % (collection.find({'kind': 'media_collection'}).count())
-    shows = typeEnrichRate('tv',['itunes','amazon','netflix',],collection)
-    albums = typeEnrichRate('album',['itunes','spotify','rdio','amazon'],collection)
+    elif subset == 'media_colls':
+        unattempted = collection.find({'subcategory': {'$in': ['tv','album']}}).count()
+        attempted = collection.find({'kind': 'media_collection'}).count()
+        breakdown=[]
+        breakdown.append(typeEnrichRate('tv',['itunes','amazon','netflix',],collection))
+        breakdown.append(typeEnrichRate('album',['itunes','spotify','rdio','amazon'],collection))
 
+        return unattempted, attempted, breakdown
 
     #Places
-    places = kindEnrichRate('place',['opentable','foursquare','instagram','googleplaces','factual','singleplatform'],collection)
-
+    elif subset == "places":
+        unattempted = collection.find({'category': 'food'}).count()
+        unattempted += collection.find({'category': 'other','subcategory': {'$nin': ['app','other']}}).count()
+        attempted = collection.find({'kind': 'place'}).count()
+        breakdown = []
+        breakdown.append(kindEnrichRate('place',['opentable','foursquare','instagram','googleplaces','factual','singleplatform'],collection))
     
-    #Special Request via landon
-    single_factual = collection.find({'kind': 'place', 'sources.singleplatform_id': {'$exists': True}, 'sources.factual_id': {'$exists': True}}).count()
-    factual = collection.find({'kind': 'place','sources.factual_id': {'$exists': True}}).count()
-    percentSingle = '%% of factual ids with singleplatform ids: %s' % (float(single_factual)/factual*100)
+        #Special Request via landon
+        single_factual = collection.find({'kind': 'place', 'sources.singleplatform_id': {'$exists': True}, 'sources.factual_id': {'$exists': True}}).count()
+        factual = collection.find({'kind': 'place','sources.factual_id': {'$exists': True}}).count()
+        breakdown.append(['%% of factual ids with singleplatform ids: %s%%' % (float(single_factual)/factual*100)])
     
+        return unattempted, attempted, breakdown
 
     #People
-    artists = typeEnrichRate('artist',['itunes','rdio','spotify'],collection)
+    elif subset == 'people':
+        unattempted = collection.find({'subcategory': 'artist'}).count()
+        attempted = collection.find({'kind': 'person'}).count()
+        breakdown = [typeEnrichRate('artist',['itunes','rdio','spotify'],collection)]
 
-    #Software    
-    app = typeEnrichRate('app',['itunes'],collection)
+        return unattempted, attempted, breakdown
+    
+    #Software
+    elif subset == 'software':    
+        unattempted = collection.find({'subcategory': 'app'}).count()
+        attempted = collection.find({'kind': 'software'}).count()
+        breakdown=[typeEnrichRate('app',['itunes'],collection)]
 
+        return unattempted, attempted, breakdown
 
-    return media_items,songs,movies,books,media_colls,shows,albums,places,percentSingle,artists,app
+    else:
+        print "input error"
+        return 
 
 

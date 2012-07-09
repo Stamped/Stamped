@@ -14,6 +14,27 @@ class MongoUserTodosEntitiesCollection(AMongoCollection):
     def __init__(self):
         AMongoCollection.__init__(self, collection='userfaventities')
 
+    """
+    User Id -> Entity Ids 
+    """
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+
+        def regenerate(key):
+            entityIds = set()
+            todos = self._collection._database['favorites'].find({'user_id': key}, fields=['entity.entity_id'])
+            for todo in todos:
+                entityIds.add(str(todo['entity']['entity_id']))
+
+            return { '_id' : key, 'ref_ids' : list(entityIds) }
+
+        def keyCheck(key):
+            assert self._collection._database['users'].find({'_id': self._getObjectIdFromString(key)}).count() == 1
+
+        return self._checkRelationshipIntegrity(key, keyCheck, regenerate, repair=repair)
+
     ### PUBLIC
 
     def addUserTodosEntity(self, userId, entityId):

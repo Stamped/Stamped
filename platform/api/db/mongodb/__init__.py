@@ -20,7 +20,6 @@ import MongoUserCollection
 import MongoUserTodosEntitiesCollection
 import MongoUserStampsCollection
 # import MongoEntitySearcher
-import MongoPlacesEntityCollection
 import MongoCollectionProxy
 import MongoSearchCacheCollection
 # import MongoSuggestedEntities

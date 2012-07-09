@@ -31,7 +31,6 @@ try:
     from api.AStampedAPI                import AStampedAPI
     from api.AAccountDB                 import AAccountDB
     from api.AEntityDB                  import AEntityDB
-    from api.APlacesEntityDB            import APlacesEntityDB
     from api.AUserDB                    import AUserDB
     from api.AStampDB                   import AStampDB
     from api.ACommentDB                 import ACommentDB
@@ -1182,6 +1181,15 @@ class StampedAPI(AStampedAPI):
 
         # Grab friend list from Facebook API
         return self._facebook.getFriendData(user_token, offset, limit)
+
+    @API_CALL
+    def getTwitterFriendData(self, user_token=None, user_secret=None, offset=0, limit=30):
+        ### TODO: Add check for privacy settings?
+        if user_token is None or user_secret is None:
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Twitter requires a valid token/secret")
+
+        # Grab friend list from Twitter API
+        return self._twitter.getFriendData(user_token, user_secret, offset, limit)
 
     @API_CALL
     def searchUsers(self, authUserId, query, limit, relationship):

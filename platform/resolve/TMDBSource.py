@@ -95,9 +95,6 @@ class _TMDBObject(object):
     def tmdb(self):
         return globalTMDB()
 
-    def __repr__(self):
-        return pformat( self.info )
-
 
 # Note that TMDB results have two image sources -- backdrop_path and poster_path -- that we're currently not using,
 # Kevin says because they won't let us directly hotlink.

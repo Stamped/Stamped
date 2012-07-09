@@ -24,24 +24,28 @@ class Twitter(object):
         url     = "%s%s?%s" % (baseurl, service, encoded_params)
 
         # Generate the oauth token from the user_token and user_secret
-        token = oauth.OAuthToken(
-            user_token,
-            user_secret,
-        )
+        if user_token is not None and user_secret is not None:
+            token = oauth.OAuthToken(
+                user_token,
+                user_secret,
+            )
 
-        # Prepare the oauth request
-        oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
-            http_url=url,
-            parameters=params,
-            token=token,
-            http_method=verb)
-        oauthRequest.sign_request(  self.__signature_method, self.__consumer, token)
+            # Prepare the oauth request
+            oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
+                http_url=url,
+                parameters=params,
+                token=token,
+                http_method=verb)
+            oauthRequest.sign_request(  self.__signature_method, self.__consumer, token)
 
-        headers = oauthRequest.to_header()
+            headers = oauthRequest.to_header()
+        else:
+            headers = None
 #        body = oauthRequest.to_postdata() if verb == 'POST' else None
         body = None
         logs.debug(url)
 
+        print('### url: %s  method: %s  body: %s  headers: %s' % (url, verb, body, headers))
         # Send the http request
         response, content = self.__httpObj.request(url, method=verb, body=body, headers=headers)
         result = json.loads(content)
@@ -49,10 +53,10 @@ class Twitter(object):
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
         return result
 
-    def __get(self, service, user_token, user_secret, **params):
+    def __get(self, service, user_token=None, user_secret=None, **params):
         return self.__http('GET', service, user_token, user_secret, **params)
 
-    def __post(self, service, user_token, user_secret, **params):
+    def __post(self, service, user_token=None, user_secret=None, **params):
         return self.__http('POST', service, user_token, user_secret, **params)
 
     def getUserInfo(self, user_token, user_secret):
@@ -82,6 +86,7 @@ class Twitter(object):
 
         while True:
             result = self.__get(baseurl, user_token, user_secret, cursor=cursor)
+            print('### result: %s' % result)
             if 'ids' in result:
                 twitterIds = twitterIds + result['ids']
 
@@ -91,6 +96,31 @@ class Twitter(object):
             cursor = result['next_cursor']
         twitterIds = map(lambda id: str(id), twitterIds)
         return twitterIds
+
+
+    def getFriendData(self, user_token, user_secret, offset=0, limit=30):
+        logs.info('### user_token %s   user_secret: %s' % (user_token, user_secret))
+        if limit > 100:
+            raise StampedInputError("Limit must be <= 100")
+        ids = self._getUserIds(user_token, user_secret, 'friends')
+        if offset >= len(ids):
+            return []
+
+        url = '1/users/lookup.json'
+        friends = []
+
+        idset = ','.join(ids[offset:offset+limit])
+        results = self.__get(url, user_token, user_secret, user_id=idset)
+        for result in results:
+            friends.append(
+                {
+                    'user_id'   : result['id'],
+                    'name'      : result['name'],
+                    'screen_name' : result['screen_name'],
+                    'image_url' : result['profile_image_url'],
+                }
+            )
+        return friends
 
 
     def getFriendIds(self, user_token, user_secret):
@@ -117,11 +147,15 @@ def globalTwitter():
     return __globalTwitter
 
 
-TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
-TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
+#TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
+#TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
+TWITTER_USER_A0_TOKEN      = "558345111-gsOAXPBGrvjOaWNmTyCtivPcEoH6yHVh627IynHU"
+TWITTER_USER_A0_SECRET     = "NpWLdSOrvHrtTpy2SALH4Ty1T5QUWdMZQhAMcW6Jp4"
 
 TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW"
 TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
+
+
 
 def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_SECRET, **params):
     from pprint import pprint
@@ -133,6 +167,7 @@ def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_S
     if 'user_secret' in params:             user_secret = params['user_secret']
 
     #headers = utils.getTwitter('https://api.twitter.com/account/verify_credentials.json', user_token, user_secret)
+    if 'getFriendData' in methods:          pprint(twitter.getFriendData(user_token, user_secret))
     if 'getUserInfo' in methods:            pprint(twitter.getUserInfo(user_token, user_secret))
     if 'getFriendIds' in methods:           pprint(twitter.getFriendIds(user_token, user_secret))
     if 'getFollowerIds' in methods:         pprint(twitter.getFollowerIds(user_token, user_secret))
@@ -140,7 +175,7 @@ def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_S
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'getFriendData'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:
