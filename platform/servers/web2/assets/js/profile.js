@@ -18,6 +18,8 @@ var g_update_stamps = null;
         
         var screen_name             = STAMPED_PRELOAD.user.screen_name;
         var user_id                 = STAMPED_PRELOAD.user.user_id;
+        var mobile                  = STAMPED_PRELOAD.mobile;
+        
         var $body                   = $('body');
         var selected                = 'selected';
         var selected_sel            = '.' + selected;
@@ -1458,7 +1460,10 @@ var g_update_stamps = null;
             
             var params   = { category : category };
             
-            if (History && History.enabled) {
+            if (mobile) {
+                var href = get_custom_url(params);
+                window.location = href;
+            } else if (History && History.enabled) {
                 var params_str = get_custom_params_string(params);
                 
                 //console.debug(params);
@@ -1654,7 +1659,7 @@ var g_update_stamps = null;
         // cleanly closes the current sdetail popup if one exists
         var close_sdetail = function() {
             if (!!close_sdetail_func) {
-                if (History && History.enabled) {
+                if (!mobile && History && History.enabled) {
                     var options = { };
                     
                     // restore original URL options beneath sdetail popup
@@ -1705,7 +1710,9 @@ var g_update_stamps = null;
             href = href.replace('http://www.stamped.com', '');
             //href = href + "&" + new Date().getTime();
             
-            if (History && History.enabled) {
+            if (mobile) {
+                window.location = href;
+            } else if (History && History.enabled) {
                 History.pushState(null, title, href);
             } else {
                 open_sdetail(href);

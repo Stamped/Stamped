@@ -158,7 +158,8 @@ def handle_profile(request, schema, **kwargs):
         'entity'                : entity, 
         'title'                 : title, 
         'URL'                   : url, 
-    }, preload=[ 'user', 'sdetail' ])
+        'mobile'                : mobile, 
+    }, preload=[ 'user', 'sdetail', 'mobile' ])
 
 def handle_map(request, schema, **kwargs):
     schema.offset   = schema.offset or 0
