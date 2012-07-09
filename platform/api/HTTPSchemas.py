@@ -2794,6 +2794,8 @@ class HTTPActivity(Schema):
         self.dataImport(data, overflow=True)
 
         self.created = activity.timestamp.created
+        if activity.timestamp.modified is not None:
+            self.created = activity.timestamp.modified
 
         if self.icon is not None:
             self.icon = _getIconURL(self.icon)
