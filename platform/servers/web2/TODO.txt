@@ -42,6 +42,9 @@
 
 
 TODO:
+    * customize favicon.ico per profile
+        * in addition to png, will need to generate 16x16 (and possibly 32x32?) .ico's
+    
     * MOBILE
         * lookup best approach; options:
             * redirect to m.stamped.com

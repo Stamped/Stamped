@@ -279,6 +279,9 @@
                         if (!!g_update_stamps) {
                             setTimeout(function() {
                                 var $s = $('.stamp-map-item');
+                                $s.click(function(event) {
+                                    g_open_sdetail_click(event);
+                                });
                                 
                                 $s.find('.stamp-map-item-close-button').click(function(event) {
                                     event.preventDefault();

@@ -822,33 +822,7 @@ var g_update_stamps = null;
                     }*/
                 });
                 
-                $gallery.on("click", ".stamp-gallery-item", function(event) {
-                    var $target = $(event.target);
-                    
-                    if ($target.is('a') && $target.hasClass('zoom')) {
-                        // override the sdetail popup if a lightbox target was clicked
-                        return true;
-                    }
-                    
-                    event.preventDefault();
-                    
-                    var $this = $(this);
-                    var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
-                    var href  = $link.attr('href');
-                    var title = $link.data("title");
-                    
-                    href = href.replace('http://www.stamped.com', '');
-                    //href = href + "&" + new Date().getTime();
-                    
-                    if (History && History.enabled) {
-                        History.pushState(null, title, href);
-                    } else {
-                        open_sdetail(href);
-                    }
-                    
-                    return false;
-                });
-                
+                $gallery.on("click", ".stamp-gallery-item", open_sdetail_click);
                 init_infinite_scroll();
             }
         };
@@ -1661,7 +1635,8 @@ var g_update_stamps = null;
                 }
                 
                 ++update_navbar_count;
-                if (gallery || update_navbar_count >= 3) {
+                
+                if (gallery || update_navbar_count >= 2) {
                     style['visibility'] = 'visible';
                 }
                 
@@ -1703,6 +1678,43 @@ var g_update_stamps = null;
                 }
             }
         };
+        
+        var open_sdetail_click = function(event) {
+            var $target = $(event.target);
+            
+            if ($target.is('a') && $target.hasClass('zoom')) {
+                // override the sdetail popup if a lightbox target was clicked
+                return true;
+            }
+            
+            event.preventDefault();
+            
+            var $this = $(this);
+            var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+            if ($link.length <= 0) {
+                $link = $target.find('a.sdetail');
+            }
+            
+            if ($link.length <= 0) {
+                return;
+            }
+            
+            var href  = $link.attr('href');
+            var title = $link.data("title");
+            
+            href = href.replace('http://www.stamped.com', '');
+            //href = href + "&" + new Date().getTime();
+            
+            if (History && History.enabled) {
+                History.pushState(null, title, href);
+            } else {
+                open_sdetail(href);
+            }
+            
+            return false;
+        };
+        
+        window.g_open_sdetail_click = open_sdetail_click;
         
         // loads and opens the specified sdetail popup
         var open_sdetail = function(href, html) {

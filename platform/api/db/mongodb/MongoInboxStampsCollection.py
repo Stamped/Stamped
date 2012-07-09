@@ -6,6 +6,7 @@ __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
 import Globals
+import logs
 
 from api.db.mongodb.AMongoCollection import AMongoCollection
 
@@ -13,6 +14,30 @@ class MongoInboxStampsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='inboxstamps')
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, noop=False):
+
+        def regenerate(key):
+            userIds = set([ key ])
+
+            friends = self._collection._database['friends'].find_one({'_id' : key})
+            if friends is not None:
+                userIds = userIds.union(set(friends['ref_ids']))
+            
+            stampIds = set()
+            for userId in userIds:
+                stamps = self._collection._database['stamps'].find({'user.user_id': userId}, fields=['_id'])
+                for stamp in stamps:
+                    stampIds.add(str(stamp['_id']))
+
+            return { '_id' : key, 'ref_ids' : list(stampIds) }
+
+        def keyCheck(key):
+            assert self._collection._database['users'].find({'_id': self._getObjectIdFromString(key)}).count() == 1
+
+        return self._checkRelationshipIntegrity(key, keyCheck, regenerate, noop=noop)
     
     ### PUBLIC
     

@@ -424,3 +424,55 @@ class AMongoCollection(object):
         
         return True
 
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, noop=False):
+        raise NotImplementedError
+
+    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, noop=False):
+
+        """
+        Verify that the key exists in the referenced table. If not, remove the key.
+        """
+        try:
+            keyCheck(key)
+        except AssertionError:
+            if not noop:
+                ### TODO: Delete item
+                self._collection.remove({'_id' : key})
+            raise StampedStaleRelationshipKeyError("Stale key '%s'" % key)
+
+        """
+        Verify that the existing value is equal to the "generated" one. If not, replace the existing value. 
+        """
+        current = self._collection.find_one({'_id' : key})
+        if current is None:
+            oldRefIds = set()
+        else:
+            oldRefIds = set(current['ref_ids'])
+
+        new = regenerate(key)
+        if new is None:
+            newRefIds = set()
+        else:
+            newRefIds = set(new['ref_ids'])
+
+        if newRefIds != oldRefIds:
+            # Add ref ids
+            addRefIds = newRefIds.difference(oldRefIds)
+            if len(addRefIds) > 0:
+                logs.debug("Adding ref ids: %s" % addRefIds)
+                if not noop:
+                    self._collection.update({'_id' : key}, {'$addToSet' : { 'ref_ids' : { '$each' : list(addRefIds)}}})
+
+            # Delete ref ids
+            delRefIds = oldRefIds.difference(newRefIds)
+            if len(delRefIds) > 0:
+                logs.debug("Removing ref ids: %s" % delRefIds)
+                if not noop:
+                    self._collection.update({'_id' : key}, {'$pullAll' : { 'ref_ids' : list(delRefIds)}})
+
+            raise StampedStaleRelationshipDataError("Relationships have changed for key '%s'" % key)
+
+        return True
+
