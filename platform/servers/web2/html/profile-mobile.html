@@ -1,0 +1,440 @@
+{% extends "base-mobile.html" %}
+{% load stamped_tags %}
+
+<!-- 
+    NOTE: this is a workaround because the built-in ssi tag doesn't support 
+    context variables as arguments. We use ssi to include other html files 
+    which contain non-django templates that the django templating system 
+    should not attempt to parse. Note that we would use the built-in include 
+    tag if we wanted to parse an external template before inclusion.
+-->
+{% load ssi from future %}
+
+<!-- Javascript Dependencies => profile.mobile.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    jQuery plugin dependencies:
+        script: libs/jquery.infinitescroll.js
+        script: libs/jquery.isotope.js
+        script: libs/jquery.emoji.js
+        script: libs/jquery-easing.js
+        script: libs/history/jquery.history.js
+        script: libs/jquery.fancybox.js
+        script: libs/jquery.mousewheel.js
+        script: libs/jquery.jscrollpane.js
+    
+    Third-party library dependencies:
+        script: libs/moment.js
+    
+    Core stamped dependencies:
+        script: utils.js
+        script: social_sharing.js
+        script: profile.js
+-->
+
+<!-- CSS Dependencies => profile.mobile.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        stylesheet: libs/jquery.fancybox.css?v=2.0.6
+        stylesheet: libs/jquery.jscrollpane.less
+    
+    Core stamped dependencies:
+        stylesheet: profile.less
+        stylesheet: sdetail.less
+-->
+
+{% block html_tags %} {{ block.super }} {% include "schema.org.html" %} {% endblock html_tags %}
+
+{% block styles %}
+    {{ block.super }}
+    
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.mobile.generated.css">-->
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
+    
+    <style>
+        {% custom_css "profile" %}
+    </style>
+{% endblock styles %}
+
+{% block opengraph %}
+    {% include "opengraph.html" %}
+{% endblock opengraph %}
+
+{% block main %}
+    {{ block.super }}
+    
+    {% block profile-header %}
+    <div class="profile-header-wrapper">
+        <div class="profile-header">
+            <div class="profile-content-page">
+                
+                {% with share_widget_desc="Share this collection" %}
+                {% with collage_root="http://s3.amazonaws.com/stamped.com.static.images" %}
+                {# {% with collage_root="http://static.stamped.com" %} #}
+                    
+                    <!-- DEFAULT HEADER -->
+                    <div class="profile-header-body header-category-default">
+                        <!--<div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
+                        <div class="header-overlay"></div>
+                        
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix profile-header-subnav subnav-active-0">
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
+                            
+                            <div class="lhs">
+                                <div class="header-subsection header-subsection-0">
+                                    <p class='profile-title'>{{user.name}}</p>
+                                    
+                                    <p>
+                                        <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
+                                    </p>
+                                </div>
+                                
+                                <div class="header-subsection header-subsection-1 clearfix">
+                                    <div class="inner-lhs">
+                                        <p class='profile-title'>{{user.name}}</p>
+                                        
+                                        <p>
+                                            <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
+                                        </p>
+                                        
+                                        {% if user.bio %}
+                                        <p class='bio'>
+                                            {{ user.bio }}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="inner-rhs">
+                                        <div class='friends-wrapper followers-wrapper'>
+                                            <div class='friends-desc'>Followers</div>
+                                            <div class="clearfix">
+                                                <span class='friend-count'>{{user.num_followers}}</span>
+                                                
+                                                {% with users=followers %}
+                                                {% with title="followers" %}
+                                                    {% include "user-gallery.html" %}
+                                                {% endwith %}
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class='friends-wrapper following-wrapper'>
+                                            <div class='friends-desc'>Following</div>
+                                            <div class="clearfix">
+                                                <span class='friend-count'>{{user.num_friends}}</span>
+                                                
+                                                {% with users=friends %}
+                                                {% with title="following" %}
+                                                    {% include "user-gallery.html" %}
+                                                {% endwith %}
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="header-subsection header-subsection-2">
+                                    <p class='profile-title'>{{user.name}}</p>
+                                    
+                                    <div class="user-stamp-distribution">
+                                        {% for section in user.distribution %}
+                                            <div class="section stamp-category-{{section.category}} stamp-subcategory-{{section.category}} clearfix">
+                                                <div class="category-name">
+                                                    {% if section.category == "place" %}Places{% endif %}
+                                                    {% if section.category == "music" %}Music{% endif %}
+                                                    {% if section.category == "book" %}Books{% endif %}
+                                                    {% if section.category == "film" %}Film &amp; TV{% endif %}
+                                                    {% if section.category == "app" %}Apps{% endif %}
+                                                    {% if section.category == "other" %}Other{% endif %}
+                                                </div>
+                                                
+                                                <div class='icon dark-icon'></div>
+                                                
+                                                <div class="bargraph-row">
+                                                    <div class="bargraph-row-value" data-count="{{section.count}}">
+                                                        <div class="bargraph-row-value-inner"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                                
+                                <div class="subnav">
+                                    <a class="subnav_button subnav_button-0" title="Profile default"></a>
+                                    <a class="subnav_button subnav_button-1" title="Profile details"></a>
+                                    <a class="subnav_button subnav_button-2" title="Stamp distribution"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- PLACE HEADER -->
+                    <div class="profile-header-body header-category-place">
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-place-640x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
+
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Place Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- MUSIC HEADER -->
+                    <div class="profile-header-body header-category-music">
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-music-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Music Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- BOOK HEADER -->
+                    <div class="profile-header-body header-category-book">
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-book-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Book Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FILM & TV HEADER -->
+                    <div class="profile-header-body header-category-film">
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-film-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>Film &amp; TV Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- OTHER HEADER -->
+                    <div class="profile-header-body header-category-app">
+                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-app-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
+                        <div class="header-overlay"></div>
+                        
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
+                            
+                            <div class="profile-image-column">
+                                {% handlebars_template "profile-image-large" user %}
+                                
+                                <a class="follow-button"></a>
+                            </div>
+                            
+                            <div class="lhs">
+                                <p class='name'>{{user.screen_name}}'s</p>
+                                <p class='title'>App Stamps</p>
+                            </div>
+                            
+                            <div class="rhs">
+                                {% handlebars_template "share-widget" %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-header-post">
+                        <div class="user-gradient">
+                            <div class="ribbon-bottom"></div>
+                        </div>
+                        
+                        <div class="inset-stamp">
+                            <div class="stamp-count-dependent stamp-count-default">
+                                <div class="stamp-count user-primary">
+                                    {{user.num_stamps}}
+                                </div>
+                                
+                                <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                            </div>
+                            
+                            {% for distro in user.distribution %}
+                                <div class="stamp-count-dependent stamp-count-{{distro.category}}">
+                                    <div class="stamp-count user-primary">
+                                        {{distro.count}}
+                                    </div>
+                                    
+                                    <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endwith %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+    {% endblock profile-header %}
+    
+    {% block stamp_category_nav_bar %}
+    <nav id="stamp-category-nav-bar" style="display: block;">
+        <div class='stamp-category-nav-bar-pre'></div>
+        
+        <ol>
+            <li class="default">
+                <a class="replaced active" href="/{{user.screen_name}}">
+                    <div class='desc'>All Stamps ({{user.num_stamps}})</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
+            </li>
+            <li class="place">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "place" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=place">
+                    <div class='desc'>Places{% for d in user.distribution %}{% if d.category == "place" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
+            </li>
+            <li class="music">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "music" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=music">
+                    <div class='desc'>Music{% for d in user.distribution %}{% if d.category == "music" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
+            </li>
+            <li class="book">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "book" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=book">
+                    <div class='desc'>Books{% for d in user.distribution %}{% if d.category == "book" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
+            </li>
+            <li class="film">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "film" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=film">
+                    <div class='desc'>Film & TV{% for d in user.distribution %}{% if d.category == "film" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
+            </li>
+            <li class="app">
+                <a class="replaced {% for d in user.distribution %}{% if d.category == "app" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?subcategory=app">
+                    <div class='desc'>Apps{% for d in user.distribution %}{% if d.category == "app" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                    <div class='desc-overlay'></div>
+                    <div class='selection'></div>
+                    <div class='icon'></div>
+                </a>
+            </li>
+        </ol>
+        
+        <div class='stamp-category-nav-bar-post'></div>
+    </nav>
+    {% endblock stamp_category_nav_bar %}
+    
+    {% block pre_profile_main_content %}
+    <div id="main-content" class="fixedwidth">
+        {% endblock pre_profile_main_content %}
+        
+        {% block profile_main_content %}
+            {% handlebars_template "stamp-gallery" %}
+        {% endblock profile_main_content %}
+        
+        {% block post_profile_main_content %}
+    </div>
+    {% endblock post_profile_main_content %}
+{% endblock main %}
+
+{% block scripts %}
+    {{ block.super }}
+     
+    <!-- Stamped profile scripts -->
+    {% if DEBUG %}
+        <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.isotope.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        
+        <script src="{{ STATIC_URL }}js/libs/moment.js"></script>
+        
+        <script src="{{ STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
+        <script src="{{ STATIC_URL }}js/profile.js"></script>
+    {% else %}
+        <script src="{{ STATIC_URL }}js/profile.generated.js"></script>
+    {% endif %}
+    
+    <!-- Social sharing plugins -->
+    <script src="//platform.twitter.com/widgets.js"></script>
+    <script src="//connect.facebook.net/en_US/all.js"></script>
+    <script src="https://apis.google.com/js/plusone.js"></script>
+    
+    {% ssi STAMPED_TEMPLATE_FILE %}
+{% endblock scripts %}
+
