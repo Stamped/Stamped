@@ -351,7 +351,7 @@
                     .rhs {
                         float: right;
                         
-                        .subnav {
+                        #subnav {
                             width: 256px;
                             
                             .subnav_button {
@@ -714,13 +714,13 @@ body.music, body.book, body.film, body.app {
     left: -24px;
     
     .top-wave {
-        background: url(/assets/img/main-topcap.png) left top repeat-x;
+        background: url(/assets/img/main-topcap.png) repeat-x;
         height: 8px;
         margin: 0;
     }
     
     .bottom-wave {
-        background: url(/assets/img/main-botcap.png) left top repeat-x;
+        background: url(/assets/img/main-botcap.png) repeat-x;
         height: 8px;
         margin: 0;
     }
@@ -1001,17 +1001,17 @@ body.music, body.book, body.film, body.app {
         .rounded(2px);
     }
     
-    .stamp-category-music .stamp-subcategory-artist .stamp-icon {
+    .stamp-subcategory-artist .stamp-icon {
         background: url(/assets/img/entity_fallbacks/artist.png) no-repeat;
         height: 140px;
     }
     
-    .stamp-category-music .stamp-subcategory-album .stamp-icon {
+    .stamp-subcategory-album .stamp-icon {
         background: url(/assets/img/entity_fallbacks/album.png) no-repeat;
         height: 132px;
     }
     
-    .stamp-category-music .stamp-subcategory-song .stamp-icon {
+    .stamp-subcategory-song .stamp-icon {
         background: url(/assets/img/entity_fallbacks/song.png) no-repeat;
         height: 118px;
     }
@@ -1026,9 +1026,14 @@ body.music, body.book, body.film, body.app {
         height: 208px;
     }
     
-    .stamp-category-app .stamp-subcategory-app .stamp-icon {
+    .stamp-category-app .stamp-icon, .stamp-subcategory-app .stamp-icon {
         background: url(/assets/img/entity_fallbacks/app.png) no-repeat;
         height: 212px;
+    }
+    
+    .stamp-category-place .stamp-icon {
+        background: url(/assets/img/entity_fallbacks/place.png) no-repeat;
+        height: 140px;
     }
 }
 
@@ -1039,11 +1044,13 @@ body.music, body.book, body.film, body.app {
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
     color: #666;    
+    
     line-height: 140%;
     letter-spacing: 0.02em;
-    margin: 0px 0px 9px 0px;
-    top: -8px;
+    margin: 0 0 9px;
+    
     position: relative;
+    top: -8px;
 }
 
 .blurb {
@@ -1449,53 +1456,6 @@ body.app        #stamp-category-nav-bar ol li.app {
                              PROFILE NAVIGATION
    ************************************************************************** */
 
-
-.profile-nav {
-    position: absolute;
-    top:   0;
-    right: 0;
-    
-    a {
-        display: block;
-    }
-    
-    a:focus {
-        text-decoration: none;
-        border: 0 none;
-        outline: none;
-    }
-    
-    /* TODO: 20x19 version */
-    a.up-arrow {
-        background: url(/assets/img/navupdownarrows.png) no-repeat 0 0;
-        width:  21px;
-        height: 21px;
-        margin: 0 0 .5em;
-        
-        &:hover {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -24px 0;
-        }
-        
-        &:active {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -48px 0;
-        }
-    }
-    
-    a.down-arrow {
-        background: url(/assets/img/navupdownarrows.png) left bottom no-repeat;
-        
-        width:  21px;
-        height: 21px;
-        
-        &:hover {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -24px -29px;
-        }
-        
-        &:active {
-            background: url(/assets/img/navupdownarrows.png) no-repeat -48px -29px;
-        }
-    }
-}
 
 /* TODO: fix height issues */
 ul.user-category-distribution {

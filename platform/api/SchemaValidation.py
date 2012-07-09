@@ -200,3 +200,14 @@ def validateEmail(email):
         pass
 
     raise StampedInvalidEmailError("Invalid format for email address: %s" % email)
+
+def validateEmails(emails):
+    emails = validateString(emails)
+
+    if emails is None or emails == '':
+        return None
+
+    for email in emails.split(','):
+        r = validateEmail(email)
+
+    return emails

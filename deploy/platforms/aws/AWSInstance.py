@@ -266,6 +266,8 @@ class AWSInstance(AInstance):
                 self._validate_port(80, desc="server", timeout=100)
             elif 'apiServer' in self.roles:
                 self._validate_port(5000, desc="server", timeout=100)
+            elif 'analytics' in self.roles:
+                self._validate_port(5000, desc="server", timeout=100)
             elif 'monitor' in self.roles:
                 self._validate_port(8080, desc="monitor",  timeout=100)
             else:

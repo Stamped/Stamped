@@ -187,7 +187,9 @@ def handle_profile(request, schema, **kwargs):
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
     
-    return stamped_render(request, 'profile.html', {
+    template = 'profile-mobile.html' if mobile else 'profile.html'
+    
+    return stamped_render(request, template, {
         'user'                  : user, 
         'stamps'                : stamps, 
         
@@ -219,7 +221,7 @@ def handle_map(request, schema, **kwargs):
     if mobile:
         redirect_uri = "/%s?category=place" % screen_name
         redirect_url = request.build_absolute_uri(redirect_uri)
-        logs.info("redirecting mobile map '%s' to: '%s'" % (uri, redirect_uri))
+        logs.info("redirecting mobile map from '%s' to: '%s'" % (uri, redirect_uri))
         
         return HttpResponseRedirect(redirect_url)
     
@@ -236,6 +238,7 @@ def handle_map(request, schema, **kwargs):
     
     s = schema.dataExport()
     del s['screen_name']
+    
     s['user_id']  = user_id
     s['category'] = 'place'
     
@@ -266,7 +269,10 @@ def handle_map(request, schema, **kwargs):
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax
+    mobile       = schema.mobile
+    
     del schema.ajax
+    del schema.mobile
     
     #import time
     #time.sleep(2)
@@ -300,9 +306,11 @@ def sdetail(request, schema, **kwargs):
         todos = _shuffle_split_users(todos)
         users.extend(todos)
     
+    template = 'sdetail-mobile.html' if mobile else 'sdetail.html'
+    
     #users   = _shuffle_split_users(users)
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
-    sdetail = stamped_render(request, 'sdetail.html', {
+    sdetail = stamped_render(request, template, {
         'user'               : user, 
         'feedback_users'     : users, 
         'stamp'              : stamp, 

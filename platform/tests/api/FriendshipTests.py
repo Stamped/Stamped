@@ -89,24 +89,6 @@ class StampedAPIFollowers(StampedAPIFriendshipHttpTest):
         self.async(lambda: self.handleGET(path, data), 
                    lambda x: self.assertEqual(len(x['user_ids']), 1))
 
-class StampedAPIInviteFriend(StampedAPIFriendshipHttpTest):
-    def test_invite_friend(self):
-        path = "friendships/invite.json"
-        data = { 
-            "oauth_token": self.tokenA['access_token'],
-            "email": "sample123@stamped.com"
-        }
-        result = self.handlePOST(path, data)
-        self.assertTrue(result)
-
-        # Subsequent attempts should fail
-        with expected_exception():
-            result = self.handlePOST(path, data)
-            print result
-        
-        (userC, tokenC) = self.createAccount('sample123')
-        self.deleteAccount(tokenC)
-
 if __name__ == '__main__':
     main()
 

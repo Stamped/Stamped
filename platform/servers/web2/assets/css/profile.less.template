@@ -34,6 +34,7 @@
 
 
 .user-gradient-func2(@angle: 135deg, @c0, @c1) {
+    background: @c0;
     background: -webkit-linear-gradient(@angle, @c0, @c1);
     background: -moz-linear-gradient(@angle, @c0, @c1);
     background: -o-linear-gradient(@angle, @c0, @c1);

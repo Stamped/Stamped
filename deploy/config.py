@@ -67,6 +67,16 @@ __stack = {
         }, 
     }, 
     
+    # stats nodes display internal analytics
+    'stat' : {
+        'count' : 1, 
+        
+        'template' : {
+            'roles' : [ 'analytics', ], 
+            'replSet' : __replSetName, 
+        }, 
+    }, 
+    
     # generic worker nodes handle stateless, asynchronous tasks
     'work' : {
         'count' : 0, 

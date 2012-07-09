@@ -59,15 +59,15 @@ if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
 defaultExceptions = [
-    (StampedDocumentNotFoundError, 404, 'not_found',           'There was a problem retrieving the requested data'),
-    (StampedAuthError, 401,             'invalid_credentials', 'There was an error during authentication'),
-    (StampedInputError, 400,            'bad_request',         'An error occurred. Please try again later.'),
-    (StampedIllegalActionError, 403,    'bad_request',         'An error occurred. Please try again later.'),
-    (StampedPermissionsError, 403,      'forbidden',           'Insufficient privileges'),
-    (StampedDuplicationError, 409,      'already_exists',      'An error occurred. Please try again later'),
-    (StampedUnavailableError, 404,      'not_found',           'Not found'),
-    (StampedMissingParametersError, 400,'bad_request',         'An error occurred. Please try again later'),
-    (StampedInternalError, 500,         'internal',            'An error occurred. Please try again later'),
+    (StampedDocumentNotFoundError,      404,    'not_found',            'There was a problem retrieving the requested data'),
+    (StampedAuthError,                  401,    'invalid_credentials',  'There was an error during authentication'),
+    (StampedInputError,                 400,    'invalid_request',      'An error occurred. Please try again later.'),
+    (StampedIllegalActionError,         403,    'invalid_request',      'An error occurred. Please try again later.'),
+    (StampedMissingParametersError,     400,    'invalid_request',      'An error occurred. Please try again later'),
+    (StampedPermissionsError,           403,    'forbidden',            'Insufficient privileges'),
+    (StampedDuplicationError,           409,    'already_exists',       'An error occurred. Please try again later'),
+    (StampedUnavailableError,           404,    'not_found',            'Not found'),
+    (StampedInternalError,              500,    'internal',             'An error occurred. Please try again later'),
 ]
 
 
@@ -78,7 +78,6 @@ def handleStampedExceptions(e, handlers=None):
         exceptions = handlers + defaultExceptions
     else:
         exceptions = defaultExceptions
-
 
     for (exception, code, kind, msg) in exceptions:
         if isinstance(e, exception):
@@ -327,29 +326,27 @@ def checkClient(request, required=True):
     ### Parse Request for Client Credentials
     try:
         if request.method == 'GET':
-            client_id       = request.GET['client_id']
-            client_secret   = request.GET['client_secret']
+            clientId        = request.GET['client_id']
+            clientSecret    = request.GET['client_secret']
         elif request.method == 'POST':
-            client_id       = request.POST['client_id']
-            client_secret   = request.POST['client_secret']
+            clientId        = request.POST['client_id']
+            clientSecret    = request.POST['client_secret']
     except Exception:
         if not required:
             return None 
-        raise StampedInputError("Client credentials not included")
+        raise StampedHTTPError(400, "invalid_request")
     
     ### Validate Client Credentials
     try:
-        logs.client(client_id)
-        if not stampedAuth.verifyClientCredentials(client_id, client_secret):
-            raise 
+        logs.client(clientId)
+        stampedAuth.verifyClientCredentials(clientId, clientSecret)
 
-        client = stampedAuth.getClientDetails(client_id)
+        client = stampedAuth.getClientDetails(clientId)
         stampedAPI.setVersion(client.api_version)
         
-        return client_id
-    except Exception, e:
-        logs.warning("Invalid client credentials (%s)" % e)
-        raise StampedAuthError("access_denied", "Invalid client credentials")
+        return clientId
+    except StampedInvalidClientError:
+        raise StampedHTTPError(400, "invalid_client")
 
 def optionalOAuth(request):
     try:
@@ -367,11 +364,11 @@ def checkOAuthWithRequest(request, required=True):
         elif request.method == 'POST':
             oauth_token = request.POST['oauth_token']
         else:
-            raise Exception
+            raise StampedHTTPError(400, "invalid_request")
     except Exception:
         if not required:
             return None, None
-        raise StampedInputError("Access token not found")
+        raise StampedHTTPError(400, "invalid_request")
 
     return checkOAuth(oauth_token, required)
 
@@ -382,7 +379,7 @@ def checkOAuth(oauth_token, required=True):
     try:
         authenticated_user_id, client_id = stampedAuth.verifyAccessToken(oauth_token)
         if authenticated_user_id is None:
-            raise StampedAuthError("invalid_request", "User not found")
+            raise StampedAuthUserNotFoundError("User not found")
         
         logs.user(authenticated_user_id)
         logs.client(client_id)
@@ -391,11 +388,14 @@ def checkOAuth(oauth_token, required=True):
         stampedAPI.setVersion(client.api_version)
         
         return authenticated_user_id, client_id
-    except StampedHTTPError:
-        raise
+
+    except StampedAuthUserNotFoundError:
+        raise StampedHTTPError(401, "access_denied", "User not found")
+    except StampedInvalidAuthTokenError:
+        raise StampedHTTPError(401, "invalid_token")
     except Exception, e:
         logs.warning("Error: %s" % e)
-        raise StampedHTTPError(401, "invalid_token", "Invalid access token")
+        raise StampedHTTPError(401, "invalid_token")
 
 def parseRequest(schema, request, **kwargs):
     data = { }
@@ -445,7 +445,7 @@ def parseRequest(schema, request, **kwargs):
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
         
-        raise StampedHTTPError(400, kind="invalid_form")
+        raise StampedHTTPError(400, "invalid_form")
 
 def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
@@ -503,7 +503,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         logs.warning(msg)
         utils.printException()
         
-        raise StampedHTTPError(400, kind="invalid_form")
+        raise StampedHTTPError(400, "invalid_form")
 
 def transformOutput(value, **kwargs):
     """

@@ -65,21 +65,6 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        $('.profile-nav a').each(function () {
-            $(this).click(function(event) {
-                event.preventDefault();
-                var $link = $(this);
-                
-                $link.parents(".profile-sections").each(function() {
-                    var elems = $(this).find(".profile-section");
-                    
-                    $(elems).slideToggle('fast', function() { });
-                });
-                
-                return false;
-            });
-        });
-        
         $(".stamp-gallery-nav a").each(function() {
             var href = $(this).attr('href');
             var limit_re = /([?&])limit=[\d]+/;
@@ -156,7 +141,7 @@ var g_update_stamps = null;
             });
         };
         
-        $(".subnav_button").click(function(event) {
+        $("#subnav").on("click", ".subnav_button", function(event) {
             event.preventDefault();
             
             var $this    = $(this);
@@ -231,7 +216,7 @@ var g_update_stamps = null;
             return false;
         });
         
-        $(".expand-friends").click(function(event) {
+        $(".friends-wrapper").on("click", ".expand-friends", function(event) {
             event.preventDefault();
             
             var $this = $(this);
@@ -614,18 +599,16 @@ var g_update_stamps = null;
         //   2) enforce predence of rhs stamp preview images
         //   3) relayout the stamp gallery lazily whenever a new image is loaded
         var update_stamps = function($scope) {
-            var $items = $scope;
-            
-            /*if (!!$items) {
-                console.debug("update_stamps: " + $items.length);
-            }*/
-            
             if (typeof($scope) === 'undefined') {
-                $scope = $(document);
-                $items = $scope.find('.stamp-gallery-item');
-            } else if ($scope.hasClass(sdetail_wrapper)) {
-                $items = null;
+                $scope = $gallery;
                 
+                if (!$scope) {
+                    return;
+                }
+                
+                // convert iOS emoji unicode characters to inline images in the stamp blurbs
+                $scope.find('.blurb').emoji();
+            } else if ($scope.hasClass(sdetail_wrapper)) {
                 // convert iOS emoji unicode characters to inline images in the sdetail stamp blurb
                 $scope.find('.normal_blurb').emoji();
             }
@@ -646,45 +629,9 @@ var g_update_stamps = null;
                 //update_images();
             });
             
-            if (!!$items) {
-                $items.click(function(event) {
-                    var $target = $(event.target);
-                    if ($target.is('a') && $target.hasClass('zoom')) {
-                        // override the sdetail popup if a lightbox target was clicked
-                        return true;
-                    }
-                    
-                    event.preventDefault();
-                    
-                    var $this = $(this);
-                    var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
-                    var href  = $link.attr('href');
-                    var title = $link.data("title");
-                    
-                    href = href.replace('http://www.stamped.com', '');
-                    //href = href + "&" + new Date().getTime();
-                    
-                    if (History && History.enabled) {
-                        History.pushState(null, title, href);
-                    } else {
-                        open_sdetail(href);
-                    }
-                    
-                    return false;
-                });
-                
-                // convert iOS emoji unicode characters to inline images in the stamp blurbs
-                $items.find('.blurb').emoji();
-            }
-            
             $scope.find("a.lightbox").fancybox(get_fancybox_options({
                 closeClick : true
             }));
-            
-            /*$('.stamp-gallery-item .pronounced-title').each(function(i, elem) {
-                var $this = $(this);
-                $this.fitText();
-            });*/
         };
         
         // handle sizing / layout of sdetail popup, including opening / closing animations
@@ -875,6 +822,33 @@ var g_update_stamps = null;
                     }*/
                 });
                 
+                $gallery.on("click", ".stamp-gallery-item", function(event) {
+                    var $target = $(event.target);
+                    
+                    if ($target.is('a') && $target.hasClass('zoom')) {
+                        // override the sdetail popup if a lightbox target was clicked
+                        return true;
+                    }
+                    
+                    event.preventDefault();
+                    
+                    var $this = $(this);
+                    var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+                    var href  = $link.attr('href');
+                    var title = $link.data("title");
+                    
+                    href = href.replace('http://www.stamped.com', '');
+                    //href = href + "&" + new Date().getTime();
+                    
+                    if (History && History.enabled) {
+                        History.pushState(null, title, href);
+                    } else {
+                        open_sdetail(href);
+                    }
+                    
+                    return false;
+                });
+                
                 init_infinite_scroll();
             }
         };
@@ -915,7 +889,8 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        $('.stamp-gallery-sort a.item').click(function(event) {
+        // NOTE: disabling stamp-gallery-sort temporarily for V2 launch
+        /*$('.stamp-gallery-sort a.item').click(function(event) {
             event.preventDefault();
             var $this   = $(this);
             var $parent = $this.parent('.stamp-gallery-sort');
@@ -952,7 +927,7 @@ var g_update_stamps = null;
             }
             
             return false;
-        });
+        });*/
         
         
         // ---------------------------------------------------------------------
@@ -1366,7 +1341,7 @@ var g_update_stamps = null;
                             g_category = category;
                             
                             console.debug("NEW CATEGORY: " + category);
-                            History.log(state.data, state.title, state.url);
+                            //History.log(state.data, state.title, state.url);
                             
                             if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
                                 var completion_func = function() {
@@ -1496,7 +1471,7 @@ var g_update_stamps = null;
         }
         
         // handle nav bar click routing
-        $nav_bar.find('a.active').click(function(event) {
+        $nav_bar.on("click", "a.active", function(event) {
             event.preventDefault();
             
             var $link    = $(this);
@@ -1843,7 +1818,7 @@ var g_update_stamps = null;
                 var comments_height  = $comments_div.height();
                 var comments_initted = false;
                 
-                $comments_nav.find('a').click(function(event) {
+                $comments_nav.on("click", "a", function(event) {
                     event.preventDefault();
                     
                     $comments.show();
@@ -2143,11 +2118,12 @@ var g_update_stamps = null;
         update_dynamic_header();
         init_header_subsections();
         
-        update_stamps();
         init_gallery();
+        update_stamps();
         update_navbar_layout();
         
         var __init = false;
+        
         var show_initial_gallery = function() {
             if (!__init || $('#main-content').css('visibility') !== 'visible') {
                 __init = true;

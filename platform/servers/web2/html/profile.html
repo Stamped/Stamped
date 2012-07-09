@@ -27,6 +27,7 @@
         script: libs/moment.js
     
     Core stamped dependencies:
+        script: utils.js
         script: social_sharing.js
         script: profile.js
 -->
@@ -41,6 +42,10 @@
     Core stamped dependencies:
         stylesheet: profile.less
         stylesheet: sdetail.less
+-->
+
+<!-- HTML Template Dependencies => profile.generated.html
+     - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -->
 
 {% block html_tags %} {{ block.super }} {% include "schema.org.html" %} {% endblock html_tags %}
@@ -58,6 +63,21 @@
     <style>
         {% custom_css "profile" %}
     </style>
+    
+    <!--[if lte IE 9]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
+    <![endif]-->
+    
+    <!--[if lte IE 8]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
+    <![endif]-->
+    
+    <!--[if lte IE 7]>
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
+    <![endif]-->
 {% endblock styles %}
 
 {% block opengraph %}
@@ -172,7 +192,7 @@
                             <div class="rhs">
                                 {% handlebars_template "share-widget" %}
                                 
-                                <div class="subnav">
+                                <div id="subnav">
                                     <a class="subnav_button subnav_button-0" title="Profile default"></a>
                                     <a class="subnav_button subnav_button-1" title="Profile details"></a>
                                     <a class="subnav_button subnav_button-2" title="Stamp distribution"></a>
@@ -422,6 +442,7 @@
         
         <script src="{{ STATIC_URL }}js/libs/moment.js"></script>
         
+        <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
         <script src="{{ STATIC_URL }}js/profile.js"></script>
     {% else %}
@@ -433,6 +454,6 @@
     <script src="//connect.facebook.net/en_US/all.js"></script>
     <script src="https://apis.google.com/js/plusone.js"></script>
     
-    {% ssi STAMPED_TEMPLATE_FILE %}
+    {% ssi STAMPED_PROFILE_TEMPLATE_FILE %}
 {% endblock scripts %}
 
