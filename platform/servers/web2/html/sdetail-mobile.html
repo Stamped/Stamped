@@ -203,47 +203,49 @@
             
             <div class="edetail entity-id entity-id-{{stamp.entity.entity_id}}">
                 <div class='entity-data'>
-                    <div class="entity-actions">
-                        {% for a in entity.actions %}
-                            {% with action=a.action %}
-                                {% if action.sources.0.link and action.sources|length == 1 %}
-                                    <a class='action-link' href="{{action.sources.0.link}}">
-                                {% else %}
-                                    <a class='action-link' href="">
-                                {% endif %}
-                                    
-                                    <div class="action action-{{action.type}} clearfix">
-                                        <div class='entity-title' style="display: none;">
-                                            {{stamp.entity.title}}
-                                        </div>
+                    {% if entity.actions and entity.actions|length >= 1 %}
+                        <div class="entity-actions">
+                            {% for a in entity.actions %}
+                                {% with action=a.action %}
+                                    {% if action.sources.0.link and action.sources|length == 1 %}
+                                        <a class='action-link' href="{{action.sources.0.link}}">
+                                    {% else %}
+                                        <a class='action-link' href="">
+                                    {% endif %}
                                         
-                                        <div class='lhs'>
-                                            <div class='action-icon action-icon-{{action.type}}'></div>
-                                            
-                                            <!--{% if a.icon %}
-                                                <img class='action-icon' src="{{a.icon}}" />
-                                            {% endif %}-->
-                                            
-                                            <div class='action-name'>{{a.name}}</div>
-                                        </div>
-                                        
-                                        {% if action.sources.0 %}
-                                            <div class="rhs">
-                                                {% for source in action.sources %}
-                                                    <div class="source source-{{source.source}}">
-                                                        <!--{% if source.icon %}
-                                                            <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
-                />
-                                                        {% endif %}-->
-                                                    </div>
-                                                {% endfor %}
+                                        <div class="action action-{{action.type}} clearfix">
+                                            <div class='entity-title' style="display: none;">
+                                                {{stamp.entity.title}}
                                             </div>
-                                        {% endif %}
-                                    </div>
-                                </a>
-                            {% endwith %}
-                        {% endfor %}
-                    </div>
+                                            
+                                            <div class='lhs'>
+                                                <div class='action-icon action-icon-{{action.type}}'></div>
+                                                
+                                                <!--{% if a.icon %}
+                                                    <img class='action-icon' src="{{a.icon}}" />
+                                                {% endif %}-->
+                                                
+                                                <div class='action-name'>{{a.name}}</div>
+                                            </div>
+                                            
+                                            {% if action.sources.0 %}
+                                                <div class="rhs">
+                                                    {% for source in action.sources %}
+                                                        <div class="source source-{{source.source}}">
+                                                            <!--{% if source.icon %}
+                                                                <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
+                    />
+                                                            {% endif %}-->
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </a>
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                     
                     {% handlebars_template "stamp-image-sdetail-mobile" stamp %}
                     
