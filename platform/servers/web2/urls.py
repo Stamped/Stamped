@@ -74,11 +74,20 @@ urlpatterns = patterns('',
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
-    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',   'mobile.views.profile'), 
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',    'mobile.views.profile'), 
     
     # ------------------------------- MAP --------------------------------------
     # e.g., stamped.com/mobile/travis/map
-    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$', 'mobile.views.map'), 
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$',  'mobile.views.map'), 
+    
+    # ----------------------------- SDETAIL ------------------------------------
+    # e.g., stamped.com/travis/1/nobu
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
+                                                        'mobile.views.sdetail'), 
+    # e.g., stamped.com/travis/1
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})/s/(?P<stamp_num>\d+)', 
+                                                        'mobile.views.sdetail'), 
+
 )
 
 #from django.conf.urls.static    import static

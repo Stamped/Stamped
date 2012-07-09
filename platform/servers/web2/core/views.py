@@ -15,53 +15,6 @@ from servers.web2.core.helpers  import *
 
 # TODO: stricter input schema validation
 
-def _is_static_profile_image(url):
-    return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
-
-def _get_body_classes(base, schema):
-    has_category    = False
-    has_subcategory = False
-    body_classes    = base
-    
-    try:
-        has_category    = (schema.category is not None)
-        has_subcategory = (schema.subcategory is not None)
-    except:
-        pass
-    
-    if has_category:
-        body_classes += " %s" % schema.category
-    else:
-        body_classes += " default"
-    
-    if has_subcategory:
-        body_classes += " %s" % schema.subcategory
-    
-    return body_classes
-
-# ensure friends and followers are randomly shuffled s.t. different users will 
-# appear every page refresh, with preferential treatment always going to users 
-# who have customized their profile image away from the default.
-def _shuffle_split_users(users):
-    has_image        = (lambda a: a.get('image_url', None) is not None)
-    has_custom_image = (lambda a: has_image(a) and not _is_static_profile_image(a['image_url']))
-    
-    # find all users who have a custom profile image
-    a0 = filter(has_custom_image, users)
-    
-    # find all users who have the default profile image
-    a1 = filter(lambda a: not has_custom_image(a), users)
-    
-    # shuffle them both independently
-    a0 = utils.shuffle(a0)
-    a1 = utils.shuffle(a1)
-    
-    # and combine the results s.t. all users with custom profile images precede 
-    # all those without custom profile images
-    a0.extend(a1)
-    
-    return a0
-
 @stamped_view()
 def index(request):
     autoplay_video = bool(request.GET.get('video', False))
@@ -142,8 +95,8 @@ def handle_profile(request, schema, **kwargs):
         friends     = stampedAPIProxy.getFriends  (user_id, limit=3)
         followers   = stampedAPIProxy.getFollowers(user_id, limit=3)
         
-        friends   = _shuffle_split_users(friends)
-        followers = _shuffle_split_users(followers)
+        friends   = shuffle_split_users(friends)
+        followers = shuffle_split_users(followers)
     
     #utils.log("USER:")
     #utils.log(pprint.pformat(user))
@@ -180,7 +133,7 @@ def handle_profile(request, schema, **kwargs):
     entity  = kwargs.get('entity',  None)
     url     = request.build_absolute_uri(request.get_full_path())
     
-    body_classes = _get_body_classes('profile', schema)
+    body_classes = get_body_classes('profile', schema)
     if sdetail is not None:
         body_classes += " sdetail_popup";
     
@@ -251,7 +204,7 @@ def handle_map(request, schema, **kwargs):
         if '_' in subcategory:
             stamp['entity']['subcategory'] = subcategory.replace('_', ' ')
     
-    body_classes = _get_body_classes('map collapsed-header', schema)
+    body_classes = get_body_classes('map collapsed-header', schema)
     
     title = "Stamped - %s map" % user['screen_name']
     
@@ -267,12 +220,10 @@ def handle_map(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):
-    body_classes = _get_body_classes('sdetail collapsed-header', schema)
+    body_classes = get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax
-    mobile       = schema.mobile
     
     del schema.ajax
-    del schema.mobile
     
     #import time
     #time.sleep(2)
@@ -294,7 +245,7 @@ def sdetail(request, schema, **kwargs):
         for u in likes:
             u['preview_type'] = 'like'
         
-        likes = _shuffle_split_users(likes)
+        likes = shuffle_split_users(likes)
         users.extend(likes)
     
     if 'todos' in previews and len(previews['todos']) > 0:
@@ -303,12 +254,12 @@ def sdetail(request, schema, **kwargs):
         for u in todos:
             u['preview_type'] = 'todo'
         
-        todos = _shuffle_split_users(todos)
+        todos = shuffle_split_users(todos)
         users.extend(todos)
     
-    template = 'sdetail-mobile.html' if mobile else 'sdetail.html'
+    template = 'sdetail.html'
     
-    #users   = _shuffle_split_users(users)
+    #users   = shuffle_split_users(users)
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     sdetail = stamped_render(request, template, {
         'user'               : user, 
@@ -362,7 +313,7 @@ def popup_sdetail_social(request, schema, **kwargs):
     users.extend(likes)
     users.extend(todos)
     
-    users = _shuffle_split_users(users)
+    users = shuffle_split_users(users)
     num_users = len(users)
     
     title = ""
