@@ -12,9 +12,11 @@ from errors                 import *
 from optparse               import OptionParser
 
 from api.db.mongodb.MongoInboxStampsCollection          import MongoInboxStampsCollection
+from api.db.mongodb.MongoUserStampsCollection           import MongoUserStampsCollection
 
 collections = [
-    MongoInboxStampsCollection
+    MongoInboxStampsCollection,
+    MongoUserStampsCollection,
 ]
 
 
