@@ -7,28 +7,28 @@ __license__   = "TODO"
 
 from servers.httpapi.v0.helpers import *
 
-defaultExceptions = [
+userExceptions = [
     (StampedMissingParametersError, 400, 'bad_request', "Missing parameters: user ids or screen names required"),
     (StampedAccountNotFoundError, 404, 'not_found', 'There was an error retrieving account information'),
     (StampedViewUserPermissionsError, 403, 'forbidden', 'Insufficient privileges to view user'),
 ]
 
-twitterExceptions = [
+twitterUserExceptions = [
     (StampedThirdPartyInvalidCredentialsError, 403, 'invalid_credentials', 'Invalid Twitter credentials'),
     (StampedMissingLinkedAccountTokenError, 400, "bad_request", "No Twitter login information associated with account"),
-] + defaultExceptions
+] + userExceptions
 
-facebookExceptions = [
+facebookUserExceptions = [
     (StampedThirdPartyInvalidCredentialsError, 403, 'invalid_credentials', 'Invalid Facebook credentials'),
     (StampedFacebookTokenError, 401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
     (StampedMissingLinkedAccountTokenError, 400, "bad_request", "No Facebook login information associated with account"),
-] + defaultExceptions
+] + userExceptions
 
 
 @require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPUserId,
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def show(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)
     user = HTTPUser().importUser(user)
@@ -39,7 +39,7 @@ def show(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPUserIds,
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def lookup(request, authUserId, http_schema, **kwargs):
     if http_schema.user_ids is not None:
         users = stampedAPI.getUsers(http_schema.user_ids.split(','), None, authUserId)
@@ -58,7 +58,7 @@ def lookup(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPUserId,
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def images(request, authUserId, http_schema, **kwargs):
     user = stampedAPI.getUser(http_schema, authUserId)
     images = HTTPUserImages().importUser(user)
@@ -67,7 +67,7 @@ def images(request, authUserId, http_schema, **kwargs):
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserSearch,
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def search(request, authUserId, http_schema, **kwargs):
     users  = stampedAPI.searchUsers(authUserId, 
                                     http_schema.query, 
@@ -84,7 +84,7 @@ def search(request, authUserId, http_schema, **kwargs):
 
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPSuggestedUserRequest,
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def suggested(request, authUserId, http_schema, **kwargs):
     users = stampedAPI.getSuggestedUsers(authUserId, limit=http_schema.limit, offset=http_schema.offset)
     output  = []
@@ -98,7 +98,7 @@ def suggested(request, authUserId, http_schema, **kwargs):
 
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPUserId,
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def privacy(request, authUserId, http_schema, **kwargs):
     privacy = stampedAPI.getPrivacy(http_schema)
     
@@ -108,7 +108,7 @@ def privacy(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPFindUser,
                    parse_request_kwargs={'obfuscate':['query']},
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def findEmail(request, authUserId, http_schema, **kwargs):
     q = http_schema.query.split(',')
     emails = []
@@ -133,7 +133,7 @@ def findEmail(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPFindUser,
                    parse_request_kwargs={'obfuscate':['query']},
-                   exceptions=defaultExceptions)
+                   exceptions=userExceptions)
 def findPhone(request, authUserId, http_schema, **kwargs):
     q = http_schema.query.split(',')
     phoneNumbers = []
@@ -164,7 +164,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
 
 
 @require_http_methods(["POST", "GET"])
-@handleHTTPRequest(exceptions=twitterExceptions)
+@handleHTTPRequest(exceptions=twitterUserExceptions)
 def findTwitter(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'twitter')
     if linked.token is None or linked.secret is None:
@@ -180,7 +180,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
 
 
 @require_http_methods(["POST", "GET"])
-@handleHTTPRequest(exceptions=facebookExceptions)
+@handleHTTPRequest(exceptions=facebookUserExceptions)
 def findFacebook(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'facebook')
     if linked.token is None:
@@ -194,7 +194,7 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
 
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPFacebookFriendsCollectionForm,
-                   exceptions=facebookExceptions)
+                   exceptions=facebookUserExceptions)
 def inviteFacebookCollection(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'facebook')
     if linked.token is None:

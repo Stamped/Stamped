@@ -123,6 +123,7 @@ class AMongoCollection(object):
         self._primary_key = primary_key
         self._obj = obj
         self._overflow = overflow
+        self._collection_name = collection
     
     def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
