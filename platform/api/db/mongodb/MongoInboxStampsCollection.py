@@ -15,6 +15,10 @@ class MongoInboxStampsCollection(AMongoCollection):
     def __init__(self):
         AMongoCollection.__init__(self, collection='inboxstamps')
 
+    """
+    User Id -> Stamp Ids 
+    """
+
     ### INTEGRITY
 
     def checkIntegrity(self, key, noop=False):
@@ -25,7 +29,7 @@ class MongoInboxStampsCollection(AMongoCollection):
             friends = self._collection._database['friends'].find_one({'_id' : key})
             if friends is not None:
                 userIds = userIds.union(set(friends['ref_ids']))
-            
+
             stampIds = set()
             for userId in userIds:
                 stamps = self._collection._database['stamps'].find({'user.user_id': userId}, fields=['_id'])
