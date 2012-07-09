@@ -2060,7 +2060,7 @@ var g_update_stamps = null;
                 var $this = $(this);
                 var href  = $this.attr('href');
                 
-                alert(href);
+                console.log(href);
                 var popup_options = get_fancybox_popup_options({
                     href  : href
                 });
