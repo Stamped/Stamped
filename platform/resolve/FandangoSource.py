@@ -27,75 +27,73 @@ except:
     report()
     raise
 
-class _FandangoObject(object):
-    __metaclass__ = ABCMeta
-    """
-    Abstract superclass (mixin) for Fandango objects.
+class DumbFandangoMovie(ResolverMediaItem):
+    def __init__(self):
+        ResolverMediaItem.__init__(self, types=['movie'])
 
-    _FandangoObjects must be instantiated with their fandango_id.
-
-    Attributes:
-
-    fandango - an instance of Fandango (API wrapper)
-    info (abstract) - the type-specific Fandango data for the object
-    """
-    def __init__(self, fandango_id):
-        self.__key = int(fandango_id)
-
-    @property
-    def key(self):
-        return self.__key
-
-    @property
+    @lazyProperty
     def source(self):
-        return "fandango"
-
-    def __repr__(self):
-        return "%s %s %s" % (self.name, self.source, self.date)
-
-
-class FandangoMovie(_FandangoObject, ResolverMediaItem):
-    """
-    Fandango movie wrapper
-    """
-    def __init__(self, fandango_id, title, date):
-        _FandangoObject.__init__(self, fandango_id)
-        ResolverMovie.__init__(self)        
-        self.__date = date
-        self.__title = title
+        return 'fandango'
 
     @lazyProperty
-    def name(self):
-        return self.__title
+    def raw_name(self):
+        return None
+
+    def _cleanName(self, name):
+        return name
 
     @lazyProperty
-    def date(self):
-        return self.__date
+    def key(self):
+        return None
+
+
+class FandangoMovie(ResolverMediaItem):
+    @classmethod
+    def createMovieFromData(cls, data):
+        if hasattr(data, 'id'):
+            return cls(data)
+
+    def __init__(self, data):
+        ResolverMediaItem.__init__(self, types=['movie'])
+        self.__data = data
+
+    @lazyProperty
+    def source(self):
+        return 'fandango'
+
+    @lazyProperty
+    def raw_name(self):
+        return self.__data.title
+
+    def _cleanName(self, name):
+        return name
+
+    @lazyProperty
+    def key(self):
+        return self.__data.id
+
+    @lazyProperty
+    def url(self):
+        return self.__data.link
 
 
 class FandangoSource(GenericSource):
     def __init__(self):
-        GenericSource.__init__(self, 'fandango',
-            'release_date',
-        )
+        GenericSource.__init__(self, 'fandango', groups=['url'], kinds=['media_item'], types=['movie'])
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.sources.fandango_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        if proxy.key:
+            entity.sources.fandango_id = proxy.key
+        if proxy.url:
+            entity.sources.fandango_url = proxy.url
         return True
 
+    # At the time of writing, Fandango doesn't have good API, so we can't exactly do lookups using
+    # any key or query. The next two methods are just dumb implementations.
+    def entityProxyFromKey(self, key, **kwargs):
+        return DumbFandangoMovie()
 
-def testFandango(fandango_id, title, release_date):
-    from resolve import TMDBSource
-    tmdb = TMDBSource.TMDBSource()
-
-    source = tmdb.matchSource(movie)
-
-    results = resolver.resolve(movie, source)
-
-    pprint(results)
-
-
-if __name__ == '__main__':
-    testFandango('1234', '21 Jump Street', parseDateString('2012-03-12'))
+    def matchSource(self, query):
+        return lambda start, end: []
 

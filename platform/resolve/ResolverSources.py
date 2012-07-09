@@ -23,6 +23,7 @@ try:
     from resolve.TheTVDBSource          import TheTVDBSource
     from resolve.NetflixSource          import NetflixSource
     from resolve.InstagramSource        import InstagramSource
+    from resolve.FandangoSource         import FandangoSource
 except:
     report()
     raise
@@ -31,6 +32,7 @@ allSources = [
     SeedSource,
     FormatSource,
     FactualSource,
+    FandangoSource,
     GooglePlacesSource,
     SinglePlatformSource,
     InstagramSource,
