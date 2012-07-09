@@ -31,7 +31,6 @@ try:
     from api.AStampedAPI                import AStampedAPI
     from api.AAccountDB                 import AAccountDB
     from api.AEntityDB                  import AEntityDB
-    from api.APlacesEntityDB            import APlacesEntityDB
     from api.AUserDB                    import AUserDB
     from api.AStampDB                   import AStampDB
     from api.ACommentDB                 import ACommentDB

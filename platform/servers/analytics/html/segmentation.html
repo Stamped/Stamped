@@ -2,40 +2,168 @@
 <html lang="en">
 	{% extends 'base.html' %}
 	
-	{% block content %}
-		<h3>User Segmentation </h3>
+	{% block head %}
+
+		{{ block.super }}
 		
-		<p>A user's activity score is calculated by counting their corresponding actions of the following type and calculating their score: <br>
-		    Liking a Stamp: +2 points (Removing a like: -2) <br>
-		    Adding a Todo: +2 (Removing: -2) <br>
-            Adding a comment: +3 (Removing: -3) <br>
-            Adding a friend: +3 (Removing: -3) <br>
-			Taking an entity-based action: +2 <br>
-			Adding a stamp: +5 (Removing: -5) <br>
-            Inviting a new User: +5 </p>
-        
-        <p>Based on these scores a User is classified into one of the following four user groups: <br>
-           Power User: 100+ points in a month (25+ points in a week) <br>
-           Active User: Between 10 and 99 points in a month (between 5 and 24 points in a week)<br>
-           Inactive User: Between 1 and 9 points in a month (Between 1 and 4 points in a week)<br>
-           Dormant User: 0 or less points in a week/month </p>
-           
-        <div>
-        	Current Breakdown this week (Since {{weekAgo}}):<br>
-        	Total Users: {{usersW}} <br>
-        	Mean Score: {{ meanW }} <br>
-        	Power Users: {{ powerW }}% <br>
-        	Average Users: {{avgW}}% <br>
-        	Inactive Users: {{lurkerW}}% <br>
-        	Dormant Users: {{dormantW}}% <br><br>
-              
-       		Current Breakdown this month (Since {{monthAgo}}): <br>
-       		Total Users: {{usersM}} <br>
-        	Mean Score: {{ meanM }} <br>
-        	Power Users: {{ powerM }}% <br>
-        	Average Users: {{avgM}}% <br>
-        	Inactive Users: {{lurkerM}}% <br>
-        	Dormant Users: {{dormantM}}% <br><br>
-        </div>
-        
+		<script src="/assets/js/raphael.js"></script>
+		<script src="/assets/js/g.raphael.js"></script>
+		<script src="/assets/js/g.bar.js"></script>
+		<script src="/assets/js/g.pie.js"></script>
+		<script language="javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.0/jquery.min.js" type="text/javascript"></script>
+		<script src="/assets/js/highcharts.js"></script>
+		
+		<script>
+            window.onload = function () {
+                var r = Raphael("december2011"),
+                pie = r.piechart(300, 200, 100, [310, 8780, 7096, 296], 
+                	{ legend: ["%%.%% - Power Users", "%%.%% - Active Users","%%.%% - Irregular Users","%%.%% - Dormant Users"], legendpos: "west", colors: ['#4572A7','#AA4643','#89A54E','#80699B']});
+
+                r.text(300, 50, "December 2011 (16482 Users, Mean Score: 19.247)").attr({ font: "20px sans-serif" });
+                pie.hover(function () {
+                    this.sector.stop();
+                    this.sector.scale(1.1, 1.1, this.cx, this.cy);
+
+                    if (this.label) {
+                        this.label[0].stop();
+                        this.label[0].attr({ r: 7.5 });
+                        this.label[1].attr({ "font-weight": 800 });
+                    }
+                }, function () {
+                    this.sector.animate({ transform: 's1 1 ' + this.cx + ' ' + this.cy }, 500, "bounce");
+
+                    if (this.label) {
+                        this.label[0].animate({ r: 5 }, 500, "bounce");
+                        this.label[1].attr({ "font-weight": 400 });
+                    }
+                });
+
+                var r = Raphael("monthlyPie"),
+                pie = r.piechart(300, 200, 100, [{{powerM}}, {{avgM}}, {{lurkerM}}, {{dormantM}}], 
+                	{ legend: ["%%.%% - Power Users", "%%.%% - Active Users","%%.%% - Irregular Users","%%.%% - Dormant Users"], legendpos: "west", colors: ['#4572A7','#AA4643','#89A54E','#80699B']});
+
+                r.text(300, 50, "Previous Month Breakdown ({{usersM}} Users, Mean Score: {{ meanM }})").attr({ font: "20px sans-serif" });
+                pie.hover(function () {
+                    this.sector.stop();
+                    this.sector.scale(1.1, 1.1, this.cx, this.cy);
+
+                    if (this.label) {
+                        this.label[0].stop();
+                        this.label[0].attr({ r: 7.5 });
+                        this.label[1].attr({ "font-weight": 800 });
+                    }
+                }, function () {
+                    this.sector.animate({ transform: 's1 1 ' + this.cx + ' ' + this.cy }, 500, "bounce");
+
+                    if (this.label) {
+                        this.label[0].animate({ r: 5 }, 500, "bounce");
+                        this.label[1].attr({ "font-weight": 400 });
+                    }
+                });
+            };
+        </script>
+
+	{% endblock head %}
+	
+	{% block content %}
+		
+		<div class="contentWrapper">
+			<h2>User Segmentation </h2>
+			
+			<p>A user's activity score is calculated by awarding points for actions and aggregating over a time period: <br>
+			    Liking a Stamp: +2 points (Removing a like: -2) <br>
+			    Adding a Todo: +2 (Removing: -2) <br>
+	            Adding a comment: +3 (Removing: -3) <br>
+	            Adding a friend: +3 (Removing: -3) <br>
+				Taking an entity-based action: +2 <br>
+				Adding a stamp: +5 (Removing: -5) <br>
+	            Inviting a new User: +5 </p>
+	        
+	        <p>Based on these scores a User is classified into one of the following four user groups: <br>
+	           Power User: 100+ points in a month (25+ points in a week) <br>
+	           Active User: Between 10 and 99 points in a month (between 5 and 24 points in a week)<br>
+	           Irregular User: Between 1 and 9 points in a month (Between 1 and 4 points in a week)<br>
+	           Dormant User: 0 or less points in a week/month </p>
+	           
+	        <p>Note: Users who do not trigger a single API call in a given time period are not factored into calculations </p>
+	           
+	        <div class="pieWrapper">
+		        <div id="monthlyPie" class="monthlyPie">
+		        	<!-- Filled in by javascript -->
+		        </div>
+		        <div id="december2011" class="december2011">
+		        	<!-- Filled in by javascript -->
+		        </div>
+		    </div>
+		    
+		    <div id="areaWrapper" class="areaWrapper" >
+		    	<div id="areaGraph" class="areaGraph">
+		    		<!--Filled in by javascript -->
+		    	</div>
+		    </div> 
+	
+			
+			<script>
+			(function($){ 
+			
+			var chart;
+			$(document).ready(function() {
+				chart = new Highcharts.Chart({
+					chart: {
+						renderTo: 'areaGraph',
+						type: 'area'
+					},
+					title: {
+						text: "Previous 4 Weeks User Breakdown"
+					},
+					xAxis: {
+						categories: {{dates|safe}},
+						tickmarkPlacement: 'on',
+						title: {
+							enabled: false
+						}
+					},
+					yAxis: {
+						title: {
+	                		text: 'Users'
+	            		},
+					},
+					tooltip: {
+						formatter: function() {
+							return ''+
+								this.x +': '+ Highcharts.numberFormat(this.y, 0, ',') +' users';
+						}
+					},
+					plotOptions: {
+						area: {
+							stacking: 'normal',
+							lineColor: '#666666',
+							lineWidth: 1,
+							marker: {
+								lineWidth: 1,
+								lineColor: '#666666'
+							}
+						}
+					},
+					series: [{
+						name: 'Power',
+						data: {{powerT}}
+					}, {
+						name: 'Active',
+						data: {{activeT}}
+					}, {
+						name: 'Irregular',
+						data: {{irregularT}}
+					}, {
+						name: 'Dormant',
+						data: {{dormantT}}
+					}]
+				});
+			});
+			
+			})(jQuery);
+			
+			</script>
+		</div>
+		
 	{% endblock content %}
