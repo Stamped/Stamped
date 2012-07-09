@@ -51,8 +51,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             else:
                 try:
                     created = ObjectId(document['_id']).generation_time.replace(tzinfo=None)
-                except Exception:
-                    logs.warning("Unable to convert ObjectId to timestamp")
+                except Exception as e:
+                    logs.warning("Unable to convert ObjectId to timestamp: %s" % e)
                     created = datetime.utcnow()
             contents =  {
                 'blurb'     : document.pop('blurb', None),
