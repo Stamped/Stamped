@@ -10,7 +10,7 @@ APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
 APP_NAMESPACE   = 'stampedapp'
 
 USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvqLI9LyvDVL5Qg9CmuqJOHSMTT1cgDXk5uj7ODE8CsAZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
@@ -137,7 +137,7 @@ class Facebook(object):
                     {
                         'user_id' : d['id'],
                         'name' : d['name'],
-                        'image_url' : d['picture'],
+                        'image_url' : 'http://graph.facebook.com/%s/picture?type=normal' % d['id'],
                     }
                 )
 #            friends.extend([ d for d in result['data']] )
@@ -319,7 +319,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToOpenGraph'
+    methods = 'postToNewsFeed'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
