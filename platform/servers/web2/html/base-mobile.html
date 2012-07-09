@@ -50,7 +50,7 @@
             
             {% block header %}
                 <a href="/{{user.screen_name}}" class="user-logo-large"></a>
-                <a href="/download" class="download-the-app"></a>
+                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app"></a>
             {% endblock header %}
             
             {% block post_header %}
