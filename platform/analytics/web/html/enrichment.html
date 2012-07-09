@@ -4,44 +4,31 @@
 
 	
 	{% block content %}
-
-		<div>	
-			{{media_items}} <br>
-			<br>
-        	{% for line in songs %}
-        		{{line}} <br>
-        	{% endfor %}
-        	<br>
-         	{% for line in movies %}
-         		{{line}} <br>
-         	{% endfor %}
-         	<br>
-			{% for line in books %}
-				{{line}} <br>
-			{% endfor %}
-			<br><br>
+	
+	<div class="contentWrapper">
+		
+		<div class="segmentationForm">
+			<h2>Entity Enrichment Report by Type</h2>
+			<form action='/enrichment/' method='post'>
+				{{form}}
+				<input type='submit' />
+			</form>
+		</div>
+		
+		<div class="entityContent">
+			{% if attempted != None %}
+				Enrichment Attempts: {{attempted}} <br>
+				Unattempted: {{unattempted}} <br>
+				Percentage Attempted: {{ percentage }}%<br><br>
+				
+				{% for item in breakdown %}
+					{% for stat in item %}
+						{{stat}}<br>
+					{% endfor %}<br>
+				{% endfor %}
+			{% endif %}
 			
-			{{media_colls}} <br>
-			<br>
-			{% for line in shows %}
-				{{line}} <br>
-			{% endfor %}
-			<br>
-			{% for line in albums %}
-				{{line}} <br>
-			{% endfor %}
-			<br>
-			{% for line in places %}
-				{{line}} <br>
-			{% endfor %}
-			<br>
-			{{percentSingle}} <br> 
-			<br>
-			{% for line in artists %}
-				{{line}} <br>
-			{% endfor %}
-			<br>
-			{% for line in apps%}
-				{{line}} <br>
-			{% endfor %}
+		</div>
+	</div>
+			
 	{% endblock content %}

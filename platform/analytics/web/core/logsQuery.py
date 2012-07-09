@@ -152,7 +152,7 @@ class logsQuery(object):
     
     
     def dailyLatencyReport(self,t0,t1,uri,blacklist,whitelist):
-        
+        self.statDict = {}
         diff = (t1 - t0).days
         output = []
         for i in range (0,diff):
@@ -188,7 +188,7 @@ class logsQuery(object):
                 if uri+'-5' in self.errDict:
                     errors5 = self.errDict[uri+'-5']
                 
-                output.append((t2,t3,'%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5))
+                output.append((t2.date().isoformat(),'%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5))
                 
         return output
         

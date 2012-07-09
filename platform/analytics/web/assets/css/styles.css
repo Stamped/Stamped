@@ -1,4 +1,4 @@
-
+/* Header */
 .header_wrapper {
 	text_align: center;
 }
@@ -26,40 +26,94 @@
 .header a:hover  { color: #ffffff; text-decoration: underline; }
 .header a:active { color: #ffffff; text-decoration: underline; }
 
+/* Base */
+.contentWrapper {
+	width:1500px;
+	margin:0 auto;
+	text-align: center;
+}
+
+/* Index */
 .index_wrapper {
-	float: left;
-	clear: left;
 	position: relative;
-	left: 50%
+	text-align: center;
 }
 
 .index_content {
-	float: left;
+	display: inline-block;
+	width: auto;
 	position: relative;
-	left: -50%;
 	margin-left: 120px;
 	margin-right: 120px;
 	
 }
 
-.graph {
-	float: left;
+.indexGraph {
+	display: inline-block;
+	width: 400px;
 	position: relative;
-	left: -50%;
-	margin-left: 0px;
+	margin-left: 00px;
 	margin-right: 0px;
 }
 
-//Trending Page
+.indexTotals{
+	margin:0 auto;
+	text-align:center;
+}
+
+/*Enrichment page */
+.segmentationForm {
+	text-align: center;
+}
+
+.entityContent {
+	text-align: center;
+	margin-top:25px;
+}
+
+/* Latency */
+
+.latencyTable {
+	margin: 0 auto;
+	text-align:left;
+	border-spacing: 10px 1px;
+}
+
+.blackWhiteList {
+	position:relative;
+	display: inline-block;
+}
+
+/*Segmentation Page */
+.areaWrapper {
+	margin: 0 auto;
+}
+
+.areaGraph {
+	height: 400px;
+	width: 1200px;
+	margin: 0 auto;
+}
+
+.monthlyPie {
+	width: 600px;
+	display: inline-block;
+}
+
+.december2011 {
+	width: 600px;
+	display: inline-block;
+}
+
+/*Trending Page */
 .trending_form{
 	display: inline-block;
 	margin-top: 20px;
 }
 
-//Custom Page
-.custom_wrapper {
-	text-align: center
-}
+
+
+/*Custom Page */
 
 .custom_form {
 	margin: 0 auto;

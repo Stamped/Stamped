@@ -50,9 +50,22 @@ def index(request):
     for i in range (0,24):
         hours.append(i)
     
+    def clock(hour):
+        if hour == 0:
+            return "12am"
+        elif hour < 12:
+            return "%sam" % hour
+        elif hour == 12:
+            return "12pm"
+        else:
+            return "%spm" % (hour - 12)
+        
+    times = map(clock,hours)
+    
+    total_stamps = stamp_collection.count()
+    total_accts = acct_collection.count()
+    
     t = loader.get_template('../html/index.html')
-    
-    
     c = Context({
         'hour': est().hour,
         'minute': est().minute,
@@ -74,7 +87,10 @@ def index(request):
         'stamp_graph': stamp_graph,
         'acct_graph': acct_graph,
         'user_graph': users_graph,
-        'hours': hours
+        'hours': hours,
+        'total_stamps': total_stamps,
+        'total_accts': total_accts,
+        'times': times
 
         
     })
@@ -82,23 +98,33 @@ def index(request):
 
 def enrichment(request):
     
-    media_items,songs,movies,books,media_colls,shows,albums,places,percentSingle,artists,app = getEnrichmentStats(entity_collection)
+    class enrichForm(forms.Form):
+        subsets =[("media_items","Media Items"),("media_colls","Media Collections"),("places","Places"),("people","People"),("software","Software")]
+        type = forms.CharField(max_length=30,
+                widget=forms.Select(choices=subsets))
+    
+    unattempted = None
+    attempted = None
+    breakdown = None
+    percentage = None
+    if request.method == 'POST': 
+        form = enrichForm(request.POST)
+        if form.is_valid():
+            subset = form.cleaned_data['type']
+            unattempted, attempted, breakdown = getEnrichmentStats(entity_collection,subset)
+            percentage = "%.2f" % (float(attempted)/(unattempted+attempted) *100)
+    else:
+        form = enrichForm()         
     
     t = loader.get_template('../html/enrichment.html')
     c = Context({
-                 'hour': now().hour,
-                 'minute': now().minute,
-                 'media_items': media_items,
-                 'songs': songs,
-                 'movies': movies,
-                 'books': books,
-                 'media_colls': media_colls,
-                 'shows': shows,
-                 'albums': albums,
-                 'places': places,
-                 'percentSingle': percentSingle,
-                 'artists': artists,
-                 'apps': app
+                 'form': form,
+                 'hour': est().hour,
+                 'minute': est().minute,
+                 'unattempted': unattempted,
+                 'attempted': attempted,
+                 'percentage': percentage,
+                 'breakdown': breakdown,
     
     })
     return HttpResponse(t.render(c))
@@ -106,6 +132,34 @@ def enrichment(request):
 def latency(request):
     
     query = logsQuery()
+    
+    class latencyForm(forms.Form):
+        uri = forms.CharField(max_length=30)
+        start_date = forms.DateTimeField()
+        end_date = forms.DateTimeField(required=False)
+        blacklist= forms.CharField(required=False)
+        whitelist= forms.CharField(required=False)
+
+    customResults = []
+    if request.method == 'POST': 
+        form = latencyForm(request.POST)
+        if form.is_valid():
+            uri = form.cleaned_data['uri']
+            bgn = form.cleaned_data['start_date']
+            end = form.cleaned_data['end_date']
+            blacklist = form.cleaned_data['blacklist']
+            whitelist = form.cleaned_data['whitelist']
+            
+            if end is None:
+                end = today()
+            
+            customResults = query.dailyLatencyReport(bgn,end,uri,blacklist,whitelist)
+            
+            print customResults
+            
+        else: form = latencyForm()
+    else: form = latencyForm()
+    
     
     blacklist = []
     whitelist = []
@@ -120,25 +174,45 @@ def latency(request):
     is_blacklist = len(blacklist) > 0
     is_whitelist = len(whitelist) > 0
     
-    latency = query.latencyReport(weekAgo(today()),now(),None,blacklist,whitelist)
+    report = query.latencyReport(weekAgo(today()),now(),None,blacklist,whitelist)
         
     t = loader.get_template('../html/latency.html')
     c = Context({
-                 'hour': now().hour,
-                 'minute': now().minute,
-                 'report': latency,
+                 'hour': est().hour,
+                 'minute': est().minute,
+                 'report': report,
                  'blacklist': blacklist,
                  'whitelist': whitelist,
                  'is_whitelist': is_whitelist,
-                 'is_blacklist': is_blacklist
+                 'is_blacklist': is_blacklist,
+                 'form': form,
+                 'customResults': customResults
     })
     return HttpResponse(t.render(c))
 
 def segmentation(request):
+    
+    powerT,activeT,irregularT,dormantT = [],[],[],[]
+    dates = []
+    date = today()
+    for i in range (0,4):
+        dates.append(date)
+        date = weekAgo(date)
+            
     scorer = weeklyScore(api)
     
     
-    usersW,powerW,avgW,lurkerW,dormantW,mean_scoreW = scorer.segmentationReport(weekAgo(today()),now(),False)
+    for i in range (3,-1,-1):
+        users,power,active,irregular,dormant,mean_score = scorer.segmentationReport(weekAgo(dates[i]),dates[i],False)
+        powerT.append(power)
+        activeT.append(active)
+        irregularT.append(irregular)
+        dormantT.append(dormant)
+    
+    def format(date):
+        return "%s/%s" % (date.month,date.day)
+            
+    dates = map(format, reversed(dates))
     usersM,powerM,avgM,lurkerM,dormantM,mean_scoreM = scorer.segmentationReport(monthAgo(today()),now(),True)
     
     t = loader.get_template('../html/segmentation.html')
@@ -147,18 +221,17 @@ def segmentation(request):
                  'minute': est().minute,
                  'monthAgo': monthAgo(today()),
                  'weekAgo': weekAgo(today()),
-                 'usersW': '%s' % usersW,
-                 'powerW': '%.2f' % powerW,
-                 'avgW': '%.2f' % avgW,
-                 'lurkerW': '%.2f' % lurkerW,
-                 'dormantW': '%.2f' % dormantW,
-                 'meanW': '%.2f' % mean_scoreW,
                  'usersM': '%s' % usersM,
                  'powerM': '%.2f' % powerM,
                  'avgM': '%.2f' % avgM,
                  'lurkerM': '%.2f' % lurkerM,
                  'dormantM': '%.2f' % dormantM,
                  'meanM': '%.2f' % mean_scoreM,
+                 'dates': dates,
+                 'powerT': powerT,
+                 'activeT': activeT,
+                 'irregularT': irregularT,
+                 'dormantT': dormantT,
 
     })
     return HttpResponse(t.render(c))

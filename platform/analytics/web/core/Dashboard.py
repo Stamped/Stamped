@@ -47,21 +47,20 @@ class Dashboard(object):
         total_yest = 0
         yest_hourly = []
         
-        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,yesterday(today()).date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,dayAgo(today()).date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 try:
                     yest_hourly.append(int(i))
                 except:
                     pass
-            print yest_hourly
         if len(yest_hourly) == 0:
             for hour in range (0,24):
                 if unique:
-                    bgn = yesterday(today())
+                    bgn = dayAgo(today())
                 else:
-                    bgn = yesterday(today()) + timedelta(hours=hour)
-                end = yesterday(today()) + timedelta(hours=hour+1)
+                    bgn = dayAgo(today()) + timedelta(hours=hour)
+                end = dayAgo(today()) + timedelta(hours=hour+1)
                 num = fun(bgn,end)
                 if not unique:
                     total_yest += num
@@ -69,7 +68,7 @@ class Dashboard(object):
                     total_yest = num
                 yest_hourly.append(total_yest)
             print yest_hourly
-            self.writer.write({'stat': stat,'time':'day','bgn':yesterday(today()).date().isoformat(),'hours':str(yest_hourly)})
+            self.writer.write({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
         
         
         
@@ -117,7 +116,7 @@ class Dashboard(object):
         except ZeroDivisionError:
             deltaWeek = 0.0
         
-        return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(now().hour))],weeklyAvg,weeklyAvg[int(math.floor(now().hour))],deltaDay,deltaWeek
+        return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(est().hour))],weeklyAvg,weeklyAvg[int(math.floor(est().hour))],deltaDay,deltaWeek
     
     def newStamps(self):
         fun = (lambda bgn,end: self.stamp_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
