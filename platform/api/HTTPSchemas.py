@@ -62,7 +62,8 @@ def _coordinatesDictToFlat(coordinates):
             raise
 
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
-    except Exception:
+    except Exception as e:
+        logs.warning('coordinates: %s   error converting coordinates: %s' % (coordinates, e))
         return None
 
 def _coordinatesFlatToDict(coordinates):
@@ -720,20 +721,9 @@ class HTTPUserRelationship(Schema):
 class HTTPFindUser(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('query',                            basestring) # Comma delimited
+        cls.addProperty('query',                            basestring, required=True) # Comma delimited
 
-class HTTPFindTwitterUser(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_token',                       basestring)
-        cls.addProperty('user_secret',                      basestring)
-
-class HTTPFindFacebookUser(Schema):
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('user_token',                       basestring)
-
-class HTTPFacebookFriendsCollectionForm(Schema):
+class HTTPFriendsCollectionForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('limit',                            int)
@@ -915,6 +905,11 @@ class HTTPEmail(Schema):
     def setSchema(cls):
         cls.addProperty('email',                            basestring, cast=validateEmail)
 
+class HTTPEmails(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('emails',                           basestring, cast=validateEmails)
+
 
 # ######## #
 # Comments #
@@ -1082,7 +1077,9 @@ class HTTPEntityMini(Schema):
         _addImages(self, entity.images)
 
         try:
+            logs.info('### entity title: %s' % entity.title)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
+            logs.info('### coordinates: %s' % entity.coordinates)
         except AttributeError:
             pass
 
@@ -2628,19 +2625,6 @@ class HTTPStamp(Schema):
     def minimize(self):
         return HTTPStampMini().dataImport(self.dataExport(), overflow=True)
 
-class HTTPStampDetail(Schema):
-    
-    def __init__(self, *args, **kwargs):
-        Schema.__init__(self, *args, **kwargs)
-        self.ajax = False
-    
-    @classmethod
-    def setSchema(cls):
-        cls.addProperty('screen_name',                      basestring)
-        cls.addProperty('stamp_num',                        int)
-        cls.addProperty('stamp_title',                      basestring)
-        cls.addProperty('ajax',                             bool)
-
 class HTTPStampNew(Schema):
     @classmethod
     def setSchema(cls):
@@ -2653,8 +2637,8 @@ class HTTPStampNew(Schema):
 class HTTPStampShare(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('service_name',                     basestring)
-        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('service_name',                     basestring, required=True)
+        cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('temp_image_url',                   basestring)
 
 class HTTPStampEdit(Schema):
@@ -2810,6 +2794,8 @@ class HTTPActivity(Schema):
         self.dataImport(data, overflow=True)
 
         self.created = activity.timestamp.created
+        if activity.timestamp.modified is not None:
+            self.created = activity.timestamp.modified
 
         if self.icon is not None:
             self.icon = _getIconURL(self.icon)
@@ -3330,6 +3316,7 @@ class HTTPActivity(Schema):
                     self.image = _getIconURL('news_%s_group' % (self.verb[7:]))
                 else:
                     logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
+                    self.image = None
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

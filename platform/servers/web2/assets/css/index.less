@@ -6,226 +6,64 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "common.less";
 @import "libs/elements.less";
 
-.pitch {
-    height: 35px;
-    background: url(/assets/img/public-home/text-put-your-stamp-on-the-world.png) left top no-repeat;
-    width: 611px;
-    margin: 0 auto 14px;
-}
 
-.intro {
-    font-size: 16px;
-    text-align: center;
-    line-height: 29px;
-}
+/* **************************************************************************
+                                  BASE LAYOUT
+   ************************************************************************** */
 
-.intro span {
-    display: block;
-}
 
-.intro a {
-    font-weight: bold;
-}
+// TODO
 
-.itunes {
-    width: 247px;
-    height: 84px;
-    background: url(/assets/img/public-home/free-download-sprite.png) left top no-repeat;
-    margin: 23px auto;
-}
 
-.itunes:hover {
-    background-position: left bottom;
-}
+/* **************************************************************************
+                                    INTRO
+   ************************************************************************** */
 
-#tool-tipper {
-    position: relative;
-    height: 779px;
-    width: 100%;
-}
 
-.tooltip {
-    position: absolute;
-}
+// TODO
 
-.tooltip .image-rest {
-    z-index: 1;
-}
+/*@-webkit-keyframes -webkit-iphone-intro-animation {
+    0%   { background-position: 0 0; }
+    10%  { background-position: -400px 0; }
+    20%  { background-position: -800px 0; }
+    30%  { background-position: -1200px 0; }
+    40%  { background-position: -1600px 0; }
+    50%  { background-position: -2000px 0; }
+    60%  { background-position: -2400px 0; }
+    70%  { background-position: -2800px 0; }
+    80%  { background-position: -3200px 0; }
+    90%  { background-position: -3600px 0; }
+    100% { background-position: -4000px 0; }
+}*/
 
-.tooltip .text {
-    text-indent: -9999em;
-    overflow: hidden;
-}
-
-.tooltip .image-active {
-    display: none;
-}
-
-.tooltip .imager {
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-
-.tooltip.tip-1 {
-    width: 275px;
-    height: 165px;
-    top: 124px;
-    left: 0;
-}
-
-.tooltip.tip-2 {
-    width: 291px;
-    height: 187px;
-    right: -16px;
-    top: 186px;
-}
-
-.tooltip.tip-3 {
-    width: 275px;
-    height: 148px;
-    top: 418px;
-    left: 0;
-}
-
-.tooltip .image-active {
-    z-index: 3;
-}
-
-#iphone {
-    margin: 0 auto;
-    width: 435px;
-    height: 774px;
-    position: relative;
-    overflow: hidden;
-    right: -10px;
-    z-index: 2;
-    background: url(/assets/img/public-home/iphone-background.png) left top no-repeat;
-}
-
-#iphone .screen {
-    position: absolute;
-    left: 54px;
-    top: 136px;
-    width: 312px;
-    height: 466px;
-    display: none;
-}
-
-#iphone .screen.active {
-    display: block;
-}
-
-.video-block {
-    text-align: center;
-    position: absolute;
-    right: 16px;
-    bottom: 101px;
-}
-
-.video-block .thumbnail {
-    display: block;
-    margin-bottom: 15px;
-    width: 218px;
-    height: 117px;
-    background: url(/assets/img/public-home/video-thumbnail-sprite.png) left top no-repeat;
-}
-
-.video-block:hover .thumbnail {
-    background-position: left bottom;
-}
-
-.thanks {
-    margin-top: 90px;
-    margin-left: 5px;
-}
-
-#press {
-    width: 820px; 
-    margin: 0 auto 34px; 
-}
-
-#press h3 {
-    border-bottom: 1px solid #e5e5e5; 
-    color: #9b9b9b; 
-    font-size: 12px; 
-    padding: 0 0 6px; 
-}
-
-#press ul {
-    list-style-type: none; 
-    height: 32px; 
-    padding: 0; 
-    margin: 37px 0 0; 
-}
-
-#press ul + ul {
-    margin-top: 39px; 
-}
-
-#press a {
-    height: 32px; 
-    background-position: left top; 
-    display: block; 
-    background-repeat: no-repeat; 
-}
-
-#press a.techcrunch {
-    width: 198px; 
-    background-image: url(/assets/img/press-techcrunch-sprite.png); 
-    float: left; 
-}
-
-#press a.wsj {
-    width: 279px; 
-    background-image: url(/assets/img/press-wsj-sprite.png); 
-    float: left; 
-    margin-left: 75px; 
-}
-
-#press a.daringfireball {
-    width: 194px; 
-    background-image: url(/assets/img/press-daringfireball-sprite.png); 
-    float: right; 
-}
-
-#press a.mashable {
-    width: 130px; 
-    background-image: url(/assets/img/press-mashable-sprite.png); 
-    float: left; 
-    margin-left: 166px; 
-}
-
-#press a.gigaom {
-    width: 157px; 
-    background-image: url(/assets/img/press-gigaom-sprite.png); 
-    float: right; 
-    margin-right: 160px;
-}
-
-#press a:hover {
-    background-position: left bottom;
-}
-
-.stutter-bar {
-    position: fixed;
-    top: 0;
-    display: none;
-    text-align: center;
-    padding: 15px 0;
-    width: 100%;
-    z-index: 5000;
-    background-color: #fff;
+#iphone-intro {
+    background: url(/assets/img/iphone_intro_sprite.png) no-repeat;
     
-    .box-shadow(0, 0, 10px, rgba(0,0,0,0.35));
-}
-
-.stutter-bar .success {
-    font-size: 16px;
-    font-weight: bold;
-    background: url(/assets/img/notifications_check.png) left 1px no-repeat;
-    padding-left: 23px;
+    width:  395px;
+    height: 670px;
+    
+    position: fixed;
+    left: 50%;
+    top:  50%;
+    margin: -335px 0 0 -200px;
+    
+    /*&:hover {
+        @duration: 5s;
+        @timing: easeInOutCubic;
+        
+        -webkit-animation-name:             -webkit-iphone-intro-animation;
+        -webkit-animation-iteration-count:  1;
+        -webkit-animation-timing-function:  @timing;
+        -webkit-animation-duration:         @duration;
+    }*/
 }
 

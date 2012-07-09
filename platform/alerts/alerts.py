@@ -209,7 +209,7 @@ class InviteEmail(Email):
 
         params = HTTPUser().importUser(self._subject).dataExport()
 
-        return parseTemplate(template, params)
+        return self._parseTemplate(template, params)
 
 
 class PushNotification(object):
@@ -285,7 +285,7 @@ class PushNotification(object):
 class NotificationQueue(object):
     def __init__(self, sandbox=True, admins=None):
         self._admins = set()
-        self._adminEmails = set()
+        self._adminEmails = set(['test-invite@stamped.com'])
         self._adminTokens = set()
 
         if admins is not None:
@@ -497,7 +497,7 @@ class NotificationQueue(object):
                 self._users[str(invite.user_id)] = None
         
         missingAccounts = set()
-        for k, v in self._users:
+        for k, v in self._users.iteritems():
             if v is None:
                 missingAccounts.add(k)
         accounts = self._accountDB.getAccounts(list(missingAccounts))
@@ -531,7 +531,7 @@ class NotificationQueue(object):
 
             finally:
                 if not noop:
-                    inviteDB.removeInvite(invite.invite_id)
+                    self._inviteDB.removeInvite(invite.invite_id)
 
     def sendEmails(self, noop=False):
         logs.info("Submitting emails to %s users" % len(self._emailQueue))
@@ -552,7 +552,7 @@ class NotificationQueue(object):
                         break
 
                     try:
-                        logs.debug("Email activityId '%s' to address '%s'" % (email.activityId, emailAddress))
+                        logs.debug("Send email: %s" % (email))
                         if not noop:
                             ses.send_email(email.sender, email.title, email.body, emailAddress, format='html')
 

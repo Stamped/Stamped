@@ -454,7 +454,6 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
         path = "users/find/facebook.json"
         data = {
             "oauth_token"   : self.fUserAToken['access_token'],
-            "user_token"    : self.fb_user_token_a,
         }
 
         logs.info("self.fb_user_token_a %s" % self.fb_user_token_a)
@@ -479,12 +478,23 @@ class StampedAPIFacebookCreate(StampedAPIFacebookTest):
             ])
 
 class StampedAPIFacebookFind(StampedAPIFacebookTest):
+
+    def test_find_by_facebook(self):
+        path = "users/find/facebook.json"
+        data = {
+            "oauth_token"   : self.fUserAToken['access_token']
+        }
+        self.async(lambda: self.handleGET(path, data), [
+            lambda x: self.assertEqual(len(x), 1),
+            lambda x: self.assertEqual(x[0]['user_id'], self.fUserB['user_id']),
+            ])
+
     def test_invite_facebook_collection(self):
-        path = "v0/users/invite/facebook/collection.json"
+        path = "users/invite/facebook/collection.json"
         data = {
             "oauth_token"   : self.fUserAToken['access_token'],
             }
-        result = self.handlePOST(path, data)
+        result = self.handleGET(path, data)
         from pprint import pprint
         pprint(result)
 
@@ -504,7 +514,6 @@ class StampedAPITwitterHttpTest(AStampedAPIHttpTestCase):
         (self.twUserA, self.twUserAToken) = self.createTwitterAccount(self.tw_user_a_token, self.tw_user_a_secret, name='twUserA')
         (self.twUserB, self.twUserBToken) = self.createTwitterAccount(self.tw_user_b_token, self.tw_user_b_secret, name='twUserB')
         (self.sUser, self.sUserToken) = self.createAccount(name='sUser')
-
 
     def tearDown(self):
         self.twitter.destroyFriendship(self.tw_user_a_token, self.tw_user_a_secret, 'TestUserB0')
@@ -571,15 +580,21 @@ class StampedAPITwitterFind(StampedAPITwitterHttpTest):
     def test_find_by_twitter(self):
         path = "users/find/twitter.json"
         data = {
-            "oauth_token"   : self.twUserAToken['access_token'],
-            "user_token"    : TWITTER_USER_A0_TOKEN,
-            "user_secret"   : TWITTER_USER_A0_SECRET,
+            "oauth_token"   : self.twUserAToken['access_token']
             }
-        self.async(lambda: self.handlePOST(path, data), [
+        self.async(lambda: self.handleGET(path, data), [
                 lambda x: self.assertEqual(len(x), 1),
                 lambda x: self.assertEqual(x[0]['user_id'], self.twUserB['user_id']),
             ])
 
+    def test_invite_twitter_collection(self):
+        path = "users/invite/twitter/collection.json"
+        data = {
+            "oauth_token"   : self.twUserAToken['access_token'],
+            }
+        result = self.handleGET(path, data)
+        from pprint import pprint
+        pprint(result)
 
         ### TESTS TO ADD:
 # Change bio from string to None

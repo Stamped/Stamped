@@ -123,6 +123,7 @@ class AMongoCollection(object):
         self._primary_key = primary_key
         self._obj = obj
         self._overflow = overflow
+        self._collection_name = collection
     
     def _init_collection(self, db, collection):
         cfg = MongoDBConfig.getInstance()
@@ -421,5 +422,63 @@ class AMongoCollection(object):
                     
             self._collection.remove({'_id': keyId})
         
+        return True
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, noop=False):
+        raise NotImplementedError
+
+    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, noop=False):
+
+        """
+        Verify that the key exists in the referenced table. If not, remove the key.
+        """
+        try:
+            keyCheck(key)
+        except AssertionError:
+            if not noop:
+                ### TODO: Delete item
+                self._collection.remove({'_id' : key})
+            raise StampedStaleRelationshipKeyError("Stale key '%s'" % key)
+
+        """
+        Verify that the existing value is equal to the "generated" one. If not, replace the existing value. 
+        """
+        old = self._collection.find_one({'_id' : key})
+        if old is None:
+            oldRefIds = set()
+        else:
+            oldRefIds = set(old['ref_ids'])
+
+        new = regenerate(key)
+        if new is None:
+            newRefIds = set()
+        else:
+            newRefIds = set(new['ref_ids'])
+
+        if newRefIds != oldRefIds:
+            if old is None:
+                logs.debug("Creating ref ids")
+                if not noop:
+                    self._collection.insert(new)
+
+            else:
+                # Add ref ids
+                addRefIds = newRefIds.difference(oldRefIds)
+                if len(addRefIds) > 0:
+                    logs.debug("Adding ref ids: %s" % addRefIds)
+                    if not noop:
+                        self._collection.update({'_id' : key}, {'$addToSet' : { 'ref_ids' : { '$each' : list(addRefIds)}}})
+
+                # Delete ref ids
+                delRefIds = oldRefIds.difference(newRefIds)
+                if len(delRefIds) > 0:
+                    logs.debug("Removing ref ids: %s" % delRefIds)
+                    if not noop:
+                        self._collection.update({'_id' : key}, {'$pullAll' : { 'ref_ids' : list(delRefIds)}})
+
+            raise StampedStaleRelationshipDataError("Relationships have changed for key '%s'" % key)
+
         return True
 

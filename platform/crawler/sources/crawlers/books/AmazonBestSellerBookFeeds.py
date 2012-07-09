@@ -24,7 +24,7 @@ class AmazonBestSellerBookFeeds(AExternalEntitySource):
     
     def __init__(self):
         AExternalEntitySource.__init__(self, "AmazonBestSellerBookFeeds", self.TYPES, 512)
-        self.base = 'http://www.nytimes.com'
+        self.base = 'http://www.amazon.com'
         self.seen = set()
         self.max_depth = 2
     
@@ -62,7 +62,6 @@ class AmazonBestSellerBookFeeds(AExternalEntitySource):
         self._output.put(StopIteration)
     
     def _parseResultsPage(self, queue, url, name, depth):
-        #utils.log('[%s] parsing page %s (%s)' % (self, name, url))
         
         try:
             soup = utils.getSoup(url)

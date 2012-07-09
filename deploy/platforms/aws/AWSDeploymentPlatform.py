@@ -146,12 +146,6 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                 'rules' : [ ], 
             }, 
             {
-                'name' : 'test', 
-                'desc' : 'Test security group', 
-                'rules' : [
-                ], 
-            }, 
-            {
                 'name' : 'dev', 
                 'desc' : 'Dev security group', 
                 'rules' : [ dev_rule ], 
@@ -182,6 +176,18 @@ class AWSDeploymentPlatform(DeploymentPlatform):
                         'ip_protocol' : 'udp', 
                         'from_port'   : 8125, 
                         'to_port'     : 8125, 
+                        'cidr_ip'     : '0.0.0.0/0', 
+                    }, 
+                ], 
+            }, 
+            {
+                'name' : 'analytics', 
+                'desc' : 'Analytics security group', 
+                'rules' : [
+                    {
+                        'ip_protocol' : 'tcp', 
+                        'from_port'   : 5000, 
+                        'to_port'     : 5000, 
                         'cidr_ip'     : '0.0.0.0/0', 
                     }, 
                 ], 

@@ -9,11 +9,9 @@ import Globals
 import api.HTTPSchemas
 import os, pprint, utils
 
-from django.http    import HttpResponse, HttpResponseRedirect
-from servers.web2.core.schemas        import *
-from servers.web2.core.helpers        import *
-
-from servers.web2.core import travis_test
+from django.http                import HttpResponseRedirect
+from servers.web2.core.schemas  import *
+from servers.web2.core.helpers  import *
 
 # TODO: stricter input schema validation
 
@@ -95,7 +93,10 @@ def handle_profile(request, schema, **kwargs):
     schema.limit  = schema.limit  or 25
     screen_name   = schema.screen_name
     ajax          = schema.ajax
+    mobile        = schema.mobile
+    
     del schema.ajax
+    del schema.mobile
     
     friends       = []
     followers     = []
@@ -137,7 +138,7 @@ def handle_profile(request, schema, **kwargs):
             if user['user_id'] is None or user['user_id'] != user_id:
                 raise StampedInputError("mismatched user_id")
     
-    if not ajax:
+    if not (ajax | mobile):
         friends     = stampedAPIProxy.getFriends  (user_id, limit=3)
         followers   = stampedAPIProxy.getFollowers(user_id, limit=3)
         
@@ -186,7 +187,9 @@ def handle_profile(request, schema, **kwargs):
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
     
-    return stamped_render(request, 'profile.html', {
+    template = 'profile-mobile.html' if mobile else 'profile.html'
+    
+    return stamped_render(request, template, {
         'user'                  : user, 
         'stamps'                : stamps, 
         
@@ -205,13 +208,26 @@ def handle_profile(request, schema, **kwargs):
     }, preload=[ 'user', 'sdetail' ])
 
 def handle_map(request, schema, **kwargs):
-    schema.offset = schema.offset or 0
-    schema.limit  = 1000 # TODO: customize this
-    screen_name   = schema.screen_name
-    stamp_id      = schema.stamp_id
+    schema.offset   = schema.offset or 0
+    schema.limit    = 1000 # TODO: customize this
+    screen_name     = schema.screen_name
+    stamp_id        = schema.stamp_id
+    ajax            = schema.ajax
+    mobile          = schema.mobile
     
-    del schema.ajax
+    uri             = request.get_full_path()
+    url             = request.build_absolute_uri(uri)
+    
+    if mobile:
+        redirect_uri = "/%s?category=place" % screen_name
+        redirect_url = request.build_absolute_uri(redirect_uri)
+        logs.info("redirecting mobile map from '%s' to: '%s'" % (uri, redirect_uri))
+        
+        return HttpResponseRedirect(redirect_url)
+    
     del schema.stamp_id
+    del schema.ajax
+    del schema.mobile
     
     user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
     user_id     = user['user_id']
@@ -222,6 +238,7 @@ def handle_map(request, schema, **kwargs):
     
     s = schema.dataExport()
     del s['screen_name']
+    
     s['user_id']  = user_id
     s['category'] = 'place'
     
@@ -237,7 +254,6 @@ def handle_map(request, schema, **kwargs):
     body_classes = _get_body_classes('map collapsed-header', schema)
     
     title = "Stamped - %s map" % user['screen_name']
-    url   = request.build_absolute_uri(request.get_full_path())
     
     return stamped_render(request, 'map.html', {
         'user'          : user, 
@@ -253,7 +269,10 @@ def handle_map(request, schema, **kwargs):
 def sdetail(request, schema, **kwargs):
     body_classes = _get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax
+    mobile       = schema.mobile
+    
     del schema.ajax
+    del schema.mobile
     
     #import time
     #time.sleep(2)
@@ -287,9 +306,11 @@ def sdetail(request, schema, **kwargs):
         todos = _shuffle_split_users(todos)
         users.extend(todos)
     
+    template = 'sdetail-mobile.html' if mobile else 'sdetail.html'
+    
     #users   = _shuffle_split_users(users)
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
-    sdetail = stamped_render(request, 'sdetail.html', {
+    sdetail = stamped_render(request, template, {
         'user'               : user, 
         'feedback_users'     : users, 
         'stamp'              : stamp, 

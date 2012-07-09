@@ -148,10 +148,49 @@ class StampedNotLoggedInError(StampedPermissionsError):
 
 # Specific Stamped Exceptions
 
-    # Database-related Errors
+
+# Auth
+class StampedInvalidAuthTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedInvalidRefreshTokenError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedGrantTypeIncorrectError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidClientError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidCredentialsError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedWrongAuthServiceError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+class StampedAuthUserNotFoundError(StampedAuthError):
+    def __init__(self, msg=None):
+        StampedAuthError.__init__(self, msg)
+
+
+# Database-related Errors
 class StampedDocumentNotFoundError(StampedUnavailableError):
     def __init__(self, msg=None):
         StampedUnavailableError.__init__(self, msg)
+
+class StampedStaleRelationshipKeyError(StampedDocumentNotFoundError):
+    def __init__(self, msg=None):
+        StampedDocumentNotFoundError.__init__(self, msg)
+
+class StampedStaleRelationshipDataError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
 
 class StampedRemoveDocumentError(StampedInternalError):
     def __init__(self, msg=None):
@@ -169,7 +208,8 @@ class StampedInvalidObjectIdError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
-    # Internal Errors
+
+# Internal Errors
 class StampedInvalidRelationshipError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)
@@ -253,32 +293,6 @@ class StampedAlreadyStampedAuthError(StampedIllegalActionError):
 class StampedViewUserPermissionsError(StampedPermissionsError):
     def __init__(self, msg=None):
         StampedPermissionsError.__init__(self, msg)
-
-
-    # Auth
-class StampedInvalidAuthTokenError(StampedAuthError):
-    def __init__(self, msg=None):
-        StampedAuthError.__init__(self, msg)
-
-class StampedInvalidRefreshTokenError(StampedAuthError):
-    def __init__(self, msg=None):
-        StampedAuthError.__init__(self, msg)
-
-class StampedGrantTypeIncorrectError(StampedInputError):
-    def __init__(self, msg=None):
-        StampedInputError.__init__(self, msg)
-
-class StampedInvalidClientError(StampedInputError):
-    def __init__(self, msg=None):
-        StampedInputError.__init__(self, msg)
-
-class StampedInvalidCredentialsError(StampedAuthError):
-    def __init__(self, msg=None):
-        StampedAuthError.__init__(self, msg)
-
-class StampedWrongAuthServiceError(StampedAuthError):
-    def __init__(self, msg=None):
-        StampedAuthError.__init__(self, msg)
 
     # Linked Accounts
 class StampedLinkedAccountAlreadyExistsError(StampedIllegalActionError):

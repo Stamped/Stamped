@@ -458,6 +458,8 @@ class StampedAPI(AStampedAPI):
         account.linked                      = LinkedAccounts()
         tw_acct                             = LinkedAccount()
         tw_acct.service_name                = 'twitter'
+        tw_acct.token                       = new_tw_account.user_token
+        tw_acct.secret                      = new_tw_account.user_secret
         tw_acct.linked_user_id              = twitterUser['id']
         tw_acct.linked_screen_name          = twitterUser['screen_name']
         tw_acct.linked_name                 = twitterUser.pop('name', None)
@@ -1182,6 +1184,15 @@ class StampedAPI(AStampedAPI):
         return self._facebook.getFriendData(user_token, offset, limit)
 
     @API_CALL
+    def getTwitterFriendData(self, user_token=None, user_secret=None, offset=0, limit=30):
+        ### TODO: Add check for privacy settings?
+        if user_token is None or user_secret is None:
+            raise StampedThirdPartyInvalidCredentialsError("Connecting to Twitter requires a valid token/secret")
+
+        # Grab friend list from Twitter API
+        return self._twitter.getFriendData(user_token, user_secret, offset, limit)
+
+    @API_CALL
     def searchUsers(self, authUserId, query, limit, relationship):
         if limit <= 0 or limit > 20:
             limit = 20
@@ -1449,21 +1460,22 @@ class StampedAPI(AStampedAPI):
         return user
 
     @API_CALL
-    def inviteFriend(self, authUserId, email):
+    def inviteFriends(self, authUserId, emails):
+        for email in emails:
+            # Store email address linked to auth user id
+            tasks.invoke(tasks.APITasks.inviteFriends, args=[authUserId, email])
+        return True
+
+    @API_CALL
+    def inviteFriendsAsync(self, authUserId, email):
         # Validate email address
         email = str(email).lower().strip()
         email = SchemaValidation.validateEmail(email)
 
         if self._inviteDB.checkInviteExists(email, authUserId):
-            raise StampedInviteAlreadyExistsError("Invite already exists")
+            logs.info("Invite already exists")
+            return
 
-        # Store email address linked to auth user id
-        tasks.invoke(tasks.APITasks.inviteFriend, args=[authUserId, email])
-
-        return True
-
-    @API_CALL
-    def inviteFriendAsync(self, authUserId, email):
         self._inviteDB.inviteUser(email, authUserId)
 
     """
@@ -2789,6 +2801,8 @@ class StampedAPI(AStampedAPI):
         url = None
 
         kwargs = {}
+        stamp = None
+        user = None
         if imageUrl is not None:
             kwargs['imageUrl'] = imageUrl
         if stampId is not None and share_settings.share_stamps == True:
@@ -2823,8 +2837,13 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
+        result = self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
 
+
+#        links = stamp.links
+#        if links is None:
+#            links = StampLinks()
+#        links.og_id =
 
 
     """
@@ -4023,7 +4042,7 @@ class StampedAPI(AStampedAPI):
         for stamp in stamps:
             sourceStampIds[str(stamp.stamp_id)] = stamp
 
-        followerIds = self._friendshipDB.getFollowers(user.user_id)
+        friendIds = self._friendshipDB.getFriends(user.user_id)
 
         result = []
         for rawTodo in todoData:
@@ -4032,7 +4051,7 @@ class StampedAPI(AStampedAPI):
                 stamps       = None
                 if rawTodo.source_stamp_ids is not None:
                     stamps = [sourceStampIds[sid] for sid in rawTodo.source_stamp_ids]
-                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=followerIds, authUserId=authUserId)
+                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=friendIds, authUserId=authUserId)
                 result.append(todo)
             except Exception as e:
                 logs.debug("RAW TODO: %s" % rawTodo)
