@@ -24,9 +24,9 @@ class MongoUserTodosEntitiesCollection(AMongoCollection):
 
         def regenerate(key):
             entityIds = set()
-            entities = self._collection._database['favorites'].find({'user_id': key}, fields=['entity.entity_id'])
-            for entity in entities:
-                entityIds.add(str(entity['entity.entity_id']))
+            todos = self._collection._database['favorites'].find({'user_id': key}, fields=['entity.entity_id'])
+            for todo in todos:
+                entityIds.add(str(todo['entity']['entity_id']))
 
             return { '_id' : key, 'ref_ids' : list(entityIds) }
 
