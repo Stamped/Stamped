@@ -406,6 +406,9 @@ class RunEvalQueries(AStampedFixtureTestCase):
                            ('place', self.PLACE_QUERIES)])
 
     def __runQueries(self, categoriesAndQuerySets):
+        import search.EntitySearch
+        search.EntitySearch.shouldLogTiming = False
+
         searcher = EntitySearch()
 
         def runSearch(category, query):
