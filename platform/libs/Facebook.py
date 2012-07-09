@@ -137,7 +137,7 @@ class Facebook(object):
                     {
                         'user_id' : d['id'],
                         'name' : d['name'],
-                        'image_url' : d['picture'].replace('_q.jpg', '_s.jpg'),
+                        'image_url' : d['picture'],
                     }
                 )
 #            friends.extend([ d for d in result['data']] )
