@@ -176,7 +176,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         else:
             entityMini = buildEntity(entity).minimize().dataExport()
             if stamp['entity'] != entityMini:
-                logs.warning("Updating embedded entity")
+                logs.warning("Updating embedded entity: %s v %s" % (stamp['entity'], entityMini))
                 stamp['entity'] = entityMini
                 modified = True
 
