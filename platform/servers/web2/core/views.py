@@ -140,7 +140,7 @@ def handle_profile(request, schema, **kwargs):
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
     
-    template = 'profile-mobile.html' if mobile else 'profile.html'
+    template = 'profile.html'
     
     return stamped_render(request, template, {
         'user'                  : user, 
