@@ -178,10 +178,19 @@ class StampedAuthUserNotFoundError(StampedAuthError):
     def __init__(self, msg=None):
         StampedAuthError.__init__(self, msg)
 
+
 # Database-related Errors
 class StampedDocumentNotFoundError(StampedUnavailableError):
     def __init__(self, msg=None):
         StampedUnavailableError.__init__(self, msg)
+
+class StampedStaleRelationshipKeyError(StampedDocumentNotFoundError):
+    def __init__(self, msg=None):
+        StampedDocumentNotFoundError.__init__(self, msg)
+
+class StampedStaleRelationshipDataError(StampedInternalError):
+    def __init__(self, msg=None):
+        StampedInternalError.__init__(self, msg)
 
 class StampedRemoveDocumentError(StampedInternalError):
     def __init__(self, msg=None):
@@ -199,7 +208,8 @@ class StampedInvalidObjectIdError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
 
-    # Internal Errors
+
+# Internal Errors
 class StampedInvalidRelationshipError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)

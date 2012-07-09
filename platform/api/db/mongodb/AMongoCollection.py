@@ -430,24 +430,28 @@ class AMongoCollection(object):
         raise NotImplementedError
 
     def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, noop=False):
+
+        """
+        Verify that the key exists in the referenced table. If not, remove the key.
+        """
         try:
             keyCheck(key)
         except AssertionError:
-            logs.warning("Key '%s' does not exist" % key)
             if not noop:
                 ### TODO: Delete item
-                pass
-            raise Exception
+                self._collection.remove({'_id' : key})
+            raise StampedStaleRelationshipKeyError("Stale key '%s'" % key)
 
+        """
+        Verify that the existing value is equal to the "generated" one. If not, replace the existing value. 
+        """
         current = self._collection.find_one({'_id' : key})
         new = regenerate(key)
 
         if set(current['ref_ids']) != set(new['ref_ids']):
-            logs.warning("Reference has changed for key '%s'" % key)
             if not noop:
-                ### TODO: Update item
-                pass
-            raise Exception
+                self._collection.update({'_id' : key}, new)
+            raise StampedStaleRelationshipDataError("Relationships have changed for key '%s'" % key)
 
         return True
 
