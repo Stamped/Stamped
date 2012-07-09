@@ -27,6 +27,10 @@ class MongoCreditReceivedCollection(AMongoCollection):
             stamps = self._collection._database['stamps'].find({'credits.user.user_id': key}, fields=['_id'])
             for stamp in stamps:
                 stampIds.add(str(stamp['_id']))
+            # Support for deprecated structure
+            stamps = self._collection._database['stamps'].find({'credit.user_id': key}, fields=['_id'])
+            for stamp in stamps:
+                stampIds.add(str(stamp['_id']))
 
             return { '_id' : key, 'ref_ids' : list(stampIds) }
 
