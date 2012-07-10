@@ -264,7 +264,7 @@ def auth(msg):
     _getLoggingContext().addLogParameter('auth', msg)
 
 def error(code):
-    loggingContext = _getLoggingContext()
+    loggingContext = _getLoggingContext(forceCreate=True)
     loggingContext.addLogParameter('result', code)
     try:
         exc_type, exc_value, exc_traceback = sys.exc_info()
