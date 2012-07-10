@@ -15,7 +15,7 @@
 @import "common.less";
 
 @shadow-sdetail: rgba(50, 50, 50, 0.25);
-@space: 24px;
+@space: 12px;
 @round: 4px;
 
 @text0: #666;
@@ -72,7 +72,7 @@
                 float:    left;
                 
                 text-align: left;
-                margin-left: 24px;
+                margin-left: @space;
                 padding: 2px;
                 top: -7px;
                 max-width: 40%;
@@ -294,7 +294,7 @@
                     li.comment {
                         display: block;
                         border-bottom: 1px solid #f2f2f2;
-                        padding: 1em @space 0;
+                        padding: 1em 0 0 (@space / 2);
                         opacity: 1;
                         
                         .profile-image-small {
