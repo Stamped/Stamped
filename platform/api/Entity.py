@@ -239,8 +239,13 @@ def buildEntity(data=None, kind=None, mini=False):
     try:
         if data is not None:
             if 'schema_version' not in data:
-                return upgradeEntityData(data)
-            kind = data.pop('kind', kind)
+                data = upgradeEntityData(data).dataExport()
+            if '_id' in data:
+                data['entity_id'] = data['_id']
+                del(data['_id'])
+            kind = None
+            if 'kind' in data:
+                kind = data['kind']
         if mini:
             new = getEntityMiniObjectFromKind(kind)
         else:
@@ -254,7 +259,7 @@ def buildEntity(data=None, kind=None, mini=False):
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
-    old     = entityData
+    old = entityData
 
     if '_id' in old:
         old['entity_id'] = str(old['_id'])
