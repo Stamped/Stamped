@@ -108,7 +108,7 @@ oldSubcategories = {
     # --------------------------
     'artist'            : 'music', 
     'album'             : 'music', 
-    'track'             : 'music', 
+    'song'             : 'music', 
     
     # --------------------------
     #           other
@@ -163,7 +163,7 @@ def deriveKindFromOldSubcategory(subcategory):
         'tv'                : 'media_collection', 
         
         'book'              : 'media_item', 
-        'track'             : 'media_item', 
+        'song'             : 'media_item', 
         'movie'             : 'media_item', 
         
         'app'               : 'software', 
