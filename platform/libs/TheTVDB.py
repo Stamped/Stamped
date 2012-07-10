@@ -20,6 +20,7 @@ from libs.CachedFunction  import cachedFn
 from libs.CountedFunction import countedFn
 from api.Schemas         import MediaCollectionEntity
 
+
 class TheTVDB(object):
     
     def __init__(self, api_key='F1D337C9BF2357FB'):
@@ -79,7 +80,7 @@ class TheTVDB(object):
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @countedFn(name='TheTVDB (before caching)')
     @lru_cache(maxsize=64)
-    @cachedFn()
+    @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
     def lookup(self, thetvdb_id):
         details_url = 'http://www.thetvdb.com/api/%s/series/%s/all/' % \

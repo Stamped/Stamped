@@ -262,8 +262,10 @@ class EntitySearch(object):
         for result in filteredResults[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.
             entityBuilder.addSource(EntityProxySource(result.resolverObject))
-        return entityBuilder.buildEntity()
-
+        entity = entityBuilder.buildEntity()
+        for result in filteredResults:
+            entity.addThirdPartyId(result.resolverObject.source, result.resolverObject.key)
+        return entity
 
     @utils.lazyProperty
     def __stampedSource(self):
@@ -275,6 +277,7 @@ class EntitySearch(object):
         proxy = self.__stampedSource.entityProxyFromKey(entityId)
         entity = EntityProxyContainer(proxy).buildEntity()
         entity.entity_id = entityId
+        entity._maybeRegenerateThirdPartyIds()
         return entity
 
 

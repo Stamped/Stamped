@@ -6,9 +6,23 @@
 /*jslint plusplus: true */
 /*global STAMPED_PRELOAD, jQuery, $, History, moment */
 
+/* TODO:
+    * what easing should we use for iPhone reveal animation?
+ */
+
 (function() {
     $(document).ready(function() {
-        jQuery.ease = function(start, end, duration, easing, callback) {
+        
+        // ---------------------------------------------------------------------
+        // initialize globals and utils
+        // ---------------------------------------------------------------------
+        
+        
+        var $body   = $("body");
+        var $window = $(window);
+        var $main   = $("#main");
+        
+        jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
             var easer = $("<div>");
             var step_index = 0;
@@ -21,29 +35,230 @@
             // processing power of the browser.
             var estimated_num_steps = Math.ceil(duration / 13);
             
-            easer.css("easingIndex", start);
-            
-            easer.animate({
-                easingIndex : end
-            }, 
-            {
+            var params = {
                 easing      : easing,
                 duration    : duration,
                 step        : function(index) {
                     callback(index, step_index++, estimated_num_steps, start, end);
                 }
-            });
+            };
+            
+            if (!!complete) {
+                params.complete = complete;
+            }
+            
+            return easer.css("easingIndex", start).animate({ easingIndex : end }, params);
         };
         
-        $("#iphone-intro").click(function(event) {
-            var $this = $(this);
+        var Animation = Class.extend({
+            init : function(params) {
+                this.params = {
+                    start       : 0.0, 
+                    end         : 1.0, 
+                    duration    : 1000, 
+                    easing      : 'linear', 
+                    step        : null, 
+                    complete    : null
+                };
+                
+                for (var key in params) {
+                    if (params.hasOwnProperty(key)) {
+                        this.params[key] = params[key];
+                    }
+                }
+                
+                this._easer = null;
+            },
             
-            $.ease(1, 100, 200, "linear", function(value) {
+            start : function() {
+                if (!!this._easer) {
+                    /// animation is already running
+                    return this._easer;
+                }
+                
+                var that       = this;
+                var params     = this.params;
+                var p_step     = params.step;
+                var p_complete = params.complete;
+                
+                var callback = function(now, fx) {
+                    if (!!p_step) {
+                        p_step(now, fx, that);
+                    }
+                };
+                
+                var complete = function() {
+                    if (!!p_complete) {
+                        p_complete(that);
+                    }
+                };
+                
+                this._easer  = $.ease(params.start, params.end, params.duration, 
+                                      params.easing, callback, complete);
+                
+                return this._easer;
+            }, 
+            
+            stop : function(clearQueue, jumpToEnd) {
+                if (!!this._easer) {
+                    clearQueue = (typeof(clearQueue) !== 'undefined' ? clearQueue : false);
+                    jumpToEnd  = (typeof(jumpToEnd)  !== 'undefined' ? jumpToEnd  : false);
+                    
+                    this._easer.stop(clearQueue, jumpToEnd);
+                    this._easer = null;
+                }
+            }, 
+            
+            restart : function() {
+                this.stop(true, false);
+                
+                return this.start();
+            }
+        });
+        
+        var get_relative_offset = function(height) {
+            return Math.ceil(-100 * (height / (window.innerHeight||1))) + "%";
+        };
+        
+        
+        // ---------------------------------------------------------------------
+        // intro animation
+        // ---------------------------------------------------------------------
+        
+        
+        var active_text = 'active-text';
+        var active_line = 'active-line';
+        
+        // choose a random stanza of text to use for the intro animation
+        var $texts = $(".text");
+        var index  = Math.floor(Math.random() * $texts.length);
+        $texts.eq(index).addClass(active_text);
+        
+        $(".line").fitText();
+        
+        var $intro_iphone   = $("#intro-iphone");
+        var $intro_hero     = $("#intro-hero");
+        
+        var intro_iphone_animation = new Animation({
+            start       : 1, 
+            end         : 100, 
+            duration    : 400, 
+            
+            step        : function(value) {
                 var v = -400 * Math.floor(value / 10);
                 
-                $this.css('background-position', v + "px 0");
-            });
+                $intro_iphone.css('background-position', v + "px 0");
+            }, 
+            
+            complete    : function() {
+                var height = $intro_iphone.height();
+                height     = (!!height ? height : 632);
+                var offset = get_relative_offset(height);
+                
+                $intro_iphone.delay(700).animate({
+                    top : offset
+                }, {
+                    duration : 800, 
+                    easing   : "swing", 
+                    complete : function() {
+                        // intro animation is fully complete here
+                        $body.removeClass("intro");
+                        init_main();
+                    }
+                });
+            }
         });
+        
+        var intro_animation = new Animation({
+            duration    : 2100, 
+            complete    : function() {
+                var $active     = $(".active-line");
+                var $next       = $active.next(".line").filter(":visible");
+                
+                if ($next.length > 0) {
+                    $active.removeClass(active_line);
+                    $next.addClass(active_line);
+                    
+                    intro_animation.restart();
+                } else {
+                    intro_iphone_animation.start();
+                    
+                    setTimeout(function() {
+                        var height = $active.height();
+                        var offset = get_relative_offset(height);
+                        
+                        $intro_hero.animate({
+                            top : offset
+                        }, {
+                            duration : 600, 
+                            easing   : "swing"
+                        });
+                    }, 50);
+                }
+            }
+        });
+        
+        
+        // ---------------------------------------------------------------------
+        // core page content
+        // ---------------------------------------------------------------------
+        
+        
+        var update_main_layout = function(noop) {
+            // vertically center the page's main content
+            var height = $main.height();
+            var offset = Math.max(0, (window.innerHeight - height) / 2);
+            
+            if (!!noop) {
+                $main.css('top', offset + "px");
+            }
+            
+            return {
+                height : height, 
+                offset : offset
+            };
+        };
+        
+        var init_main = function() {
+            $body.addClass("main");
+            var result = update_main_layout(true);
+            var start  = $window.height() + result.height;
+            
+            $main
+                .addClass("main-animating")
+                .css('top', start + "px")
+                .animate({
+                    'top'       : result.offset + "px"
+                }, {
+                    easing      : "easeOutExpo", 
+                    duration    : 800, 
+                    step        : function(value) {
+                        var percent = (value - result.offset) / (start - result.offset);
+                        
+                        if (percent < 0.1) {
+                            $main.removeClass("main-animating");
+                        }
+                    }, 
+                    complete    : function() {
+                        $main.removeClass("main-animating");
+                        update_main_layout();
+                    }
+                });
+        };
+        
+        
+        // ---------------------------------------------------------------------
+        // setup misc bindings and start initial animations
+        // ---------------------------------------------------------------------
+        
+        
+        $window.resize(update_main_layout);
+        
+        if ($body.hasClass("intro")) {
+            intro_animation.start();
+        } else {
+            init_main();
+        }
     });
 })();
 

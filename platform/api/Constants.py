@@ -129,6 +129,7 @@ subcategoryData = {
     'artist'            : ( 'music',        [ 'person' ],               [ 'artist' ] ),
     'album'             : ( 'music',        [ 'media_collection' ],     [ 'album' ] ),
     'track'             : ( 'music',        [ 'media_item' ],           [ 'track' ] ),
+    'song'              : ( 'music',        [ 'media_item' ],           [ 'track' ] ),
 
     # Subcategory           Category        Kind                        Type
     'app'               : ( 'app',          [ 'software' ],             [ 'app' ] ),
@@ -137,3 +138,6 @@ subcategoryData = {
     'other'             : ( 'other',        [ 'other' ],                [ 'other' ] ),
     'video_game'        : ( 'other',        [ 'software' ],             [ 'video_game' ] ),
     }
+
+subcategories = set(subcategoryData.keys())
+

@@ -345,6 +345,7 @@ class FactualSource(GenericSource):
             if controller.shouldEnrich('factual', self.sourceName, entity):
                 factual_id = self.__factual.factual_from_entity(entity)
                 entity.sources.factual_id = factual_id
+                entity.addThirdPartyId(self.sourceName, factual_id)
                 timestamps['factual'] = controller.now
             else:
                 return False

@@ -15,6 +15,7 @@
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
+        script: libs/jquery.fittext.js
     
     Third-party library dependencies:
     
@@ -56,6 +57,9 @@
     <![endif]-->
 {% endblock styles %}
 
+{% block pre_header %}
+{% endblock pre_header %}
+
 {% block header %}
 {% endblock header %}
 
@@ -63,11 +67,115 @@
 {% endblock post_header %}
 
 {% block main %}
-    <p>Stamped.com TODO TEST TODO TEST TODO</p>
-    <div id="iphone-intro"></div>
+    <div id="intro">
+        <div id="intro-hero">
+            <div class="text">
+                <div class="line active-line"><span class="blurred">FUCK</span><span class="unblurred">SCREW</span> MEDIOCRITY</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">WHY SO SERIOUS?</div>
+                <div class="line">START STAMPING</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">LIKES  ARE CHEAP</div>
+                <div class="line">STARS  ARE PASSÉ</div>
+                <div class="line">STAMPS ARE RELEVANT</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line"><span class="blurred">WHO</span><span class="unblurred">WHAT</span> WOULD YOU STAMP?</div>
+                <div class="line">ONLY THE BEST</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">SHARE YOUR PERSONALITY</div>
+                <div class="line">FIND COOL STUFF</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">FORGET THE REST</div>
+                <div class="line">STAMP THE BEST</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">BORED OF BEING BORED?</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">BE A TASTEMAKER</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">STAMPED</div>
+                <div class="line">FOR ONLY THE BEST</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">MESS WITH THE BEST</div>
+                <div class="line">DIE LIKE THE REST</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+        </div>
+        
+        <div id="intro-iphone"></div>
+    </div>
+     
+    <div id="main">
+        <div id="main-header hidden-main-animating">
+        </div>
+        
+        <div id="main-body">
+            <div id="stamped-logo" class="replaced">Stamped</div>
+            
+            <div id="pane-0" class="pane active-pane">
+                <div class="ribbon-wrapper">
+                    <div class="ribbon-bottom"></div>
+                </div>
+                
+                <div class="pane-body">
+                    <div class="title">
+                        Declare your favorite things, and discover new ones.
+                    </div>
+                    
+                    <p class="desc">
+                        Introducing, the new Stamped.
+                    </p>
+                    
+                    <p class="desc">
+                        Stamped is the fun and useful way to record and share all your favorite things -- and discover ones you never knew existed, from people whose opinions you actually trust. 
+                    </p>
+                    
+                    <p class="desc">
+                        Everyone gets a limited number of stamps to start, so you’ll only find the best restaurants, books, movies, music and more. Try it out. It’s free!
+                    </p>
+                </div>
+                
+                <div class="ribbon-wrapper">
+                    <div class="ribbon-top"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="main-footer"></div>
+    </div>
 {% endblock main %}
 
 {% block footer %}
+    <div id="footer-lhs">
+        <div id="social">
+        </div>
+        
+        <div id="nav">
+        </div>
+    </div>
+    
+    <a id="footer-rhs" class="replaced">Available on the App Store</a>
 {% endblock footer %}
 
 {% block scripts %}
@@ -75,6 +183,8 @@
     
     {% if DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
+        <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
     {% else %}
         <script src="{{ STATIC_URL }}js/index.generated.js"></script>

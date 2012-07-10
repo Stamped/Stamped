@@ -127,6 +127,15 @@ class StampedAuthError(Exception):
         if msg is not None:
             logs.warning(msg)
 
+class StampedDataError(Exception):
+    def __init__(self, msg=None, desc=None):
+        Exception.__init__(self, msg)
+        self.msg  = msg
+        self.desc = desc
+
+        if msg is not None:
+            logs.warning(msg)
+
 class StampedInternalError(Exception):
     def __init__(self, msg=None, desc=None):
         Exception.__init__(self, msg)
@@ -179,18 +188,18 @@ class StampedAuthUserNotFoundError(StampedAuthError):
         StampedAuthError.__init__(self, msg)
 
 
-# Database-related Errors
+# Database Errors
 class StampedDocumentNotFoundError(StampedUnavailableError):
     def __init__(self, msg=None):
         StampedUnavailableError.__init__(self, msg)
 
-class StampedStaleRelationshipKeyError(StampedDocumentNotFoundError):
+class StampedStaleRelationshipKeyError(StampedDataError):
     def __init__(self, msg=None):
-        StampedDocumentNotFoundError.__init__(self, msg)
+        StampedDataError.__init__(self, msg)
 
-class StampedStaleRelationshipDataError(StampedInternalError):
+class StampedStaleRelationshipDataError(StampedDataError):
     def __init__(self, msg=None):
-        StampedInternalError.__init__(self, msg)
+        StampedDataError.__init__(self, msg)
 
 class StampedRemoveDocumentError(StampedInternalError):
     def __init__(self, msg=None):
@@ -277,15 +286,15 @@ class StampedDuplicateScreenNameError(StampedDuplicationError):
         StampedDuplicationError.__init__(self, msg)
 
 class StampedAccountNotFoundError(StampedUnavailableError):
-    def __init(self, msg=None):
+    def __init__(self, msg=None):
         StampedUnavailableError.__init__(self, msg)
 
 class StampedBlackListedScreenNameError(StampedIllegalActionError):
-    def __init(self, msg=None):
+    def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
 class StampedAlreadyStampedAuthError(StampedIllegalActionError):
-    def __init(self, msg=None):
+    def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
 
@@ -308,7 +317,7 @@ class StampedLinkedAccountError(StampedPermissionsError):
         StampedPermissionsError.__init__(self, msg)
 
 class StampedLinkedAccountMismatchError(StampedIllegalActionError):
-    def __init(self, msg=None):
+    def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
 class StampedMissingLinkedAccountTokenError(StampedInputError):
@@ -316,15 +325,15 @@ class StampedMissingLinkedAccountTokenError(StampedInputError):
         StampedInputError.__init__(self, msg)
 
 class StampedNetflixNoInstantWatchError(StampedIllegalActionError):
-    def __init(self, msg=None):
+    def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
 class StampedLinkedAccountIsAuthError(StampedIllegalActionError):
-    def __init(self, msg=None):
+    def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
 class StampedNoSharingForLinkedAccountError(StampedIllegalActionError):
-    def __init(self, msg=None):
+    def __init__(self, msg=None):
         StampedIllegalActionError.__init__(self, msg)
 
     # Third Party Errors

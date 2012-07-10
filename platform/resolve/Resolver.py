@@ -47,68 +47,15 @@ try:
     from difflib                    import SequenceMatcher
     from time                       import time
     from resolve.ResolverObject             import *
+    from resolve.EntityProxyComparator      import *
 except:
     report()
     raise
 
-# Debugging and demo flags
-_verbose = False
-_very_verbose = False
-
-"""
-General string formatting, simplification, and mangling methods
-
-removal dicts are used in a modification-based loop to remove certain patterns.
-"""
-
-
-#generally applicable removal patterns
-_general_regex_removals = [
-    (re.compile(r'.*(\(.*\)).*')    , [1]),     # a name ( with parens ) anywhere
-    (re.compile(r'.*(\[.*]).*')     , [1]),     # a name [ with brackets ] anywhere
-    (re.compile(r'.*(\(.*)')        , [1]),     # a name ( bad parathetical
-    (re.compile(r'.*(\[.*)')        , [1]),     # a name [ bad brackets
-    (re.compile(r'.*(\.\.\.).*')    , [1]),     # ellipsis ... anywhere
-    (re.compile(r".*(').*")         , [1]),
-    (re.compile(r'.*(").*')         , [1]),
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*\w(-)\w.*$')    , [1], ' '),
-]
-
-#generally applicable replacements
-_general_replacements = [
-    ('&', ' and '),                             # canonicalize synonyms
-]
-
-# track-specific removal patterns
-_track_removals = [
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm|single|\w+ [vV]ersion)$)')  , [1]),
-    (re.compile(r'.*( *[\(\[]\w* *\w* *[vV]ersion[\)\]]$)') , [1]),
-]
-
-# album-specific removal patterns
-_album_removals = [
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*((-|,)( the)? remixes.*$)')     , [1]),
-    (re.compile(r'.*(- ep$)')                       , [1]),
-    (re.compile(r'.*( the (\w+ )?remixes$)')        , [1]),
-    (re.compile(r'.*(- remix ep)')  , [1]),
-    (re.compile(r'.*(- single$)')   , [1]),
-]
-
-# artist-specific removal patterns
-_artist_removals = [
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'^.*( band)')      , [1]),
-]
-
-# movie-specific removal patterns
-_movie_removals = [
-    # TODO - unimplemented and unused
-]
+useComparators = False
 
 # blacklist words and score
+# TODO PRELAUNCH FUCK FUCK FUCK: WORK THESE INTO THE DATA QUALITY UTIL SHIT
 _negative_weights = {
     'remix'         : 0.1,
     're-mix'        : 0.1,
@@ -126,256 +73,6 @@ _negative_weights = {
     'season'        : 0.1,
     'edition'       : 0.05,
 }
-
-_prefix_delimeters = set([ ':', '-', ';' ])
-punctuation_re = re.compile('[%s]' % re.escape(string.punctuation))
-
-_types_weights = {
-    # --------------------------
-    #           food
-    # --------------------------
-    'restaurant'        : 100, 
-    'bar'               : 90, 
-    'bakery'            : 70, 
-    'cafe'              : 70, 
-    'market'            : 60, 
-    'food'              : 70, 
-    'night_club'        : 75, 
-    'place'             : 54, 
-    
-    # --------------------------
-    #           book
-    # --------------------------
-    'book'              : 50, 
-    
-    # --------------------------
-    #           film
-    # --------------------------
-    'movie'             : 65, 
-    'tv'                : 60, 
-    
-    # --------------------------
-    #           music
-    # --------------------------
-    'artist'            : 56, 
-    'album'             : 45, 
-    'track'             : 25, 
-    
-    # --------------------------
-    #           other
-    # --------------------------
-    'app'               : 65, 
-    'other'             : 5, 
-    
-    # the following subcategories are from google places
-    'amusement_park'    : 25, 
-    'aquarium'          : 25, 
-    'art_gallery'       : 25, 
-    'beauty_salon'      : 15, 
-    'book_store'        : 15, 
-    'bowling_alley'     : 25, 
-    'campground'        : 20, 
-    'casino'            : 25, 
-    'clothing_store'    : 20, 
-    'department_store'  : 20, 
-    'establishment'     : 5, 
-    'florist'           : 15, 
-    'gym'               : 10, 
-    'home_goods_store'  : 5, 
-    'jewelry_store'     : 15, 
-    'library'           : 5, 
-    'liquor_store'      : 10, 
-    'lodging'           : 45, 
-    'movie_theater'     : 45, 
-    'museum'            : 70, 
-    'park'              : 50, 
-    'school'            : 25, 
-    'shoe_store'        : 20, 
-    'shopping_mall'     : 20, 
-    'spa'               : 25, 
-    'stadium'           : 25, 
-    'store'             : 15, 
-    'university'        : 65, 
-    'zoo'               : 65, 
-    
-    # the following subcategories are from amazon
-    'video_game'        : 65
-}
-
-def regexRemoval(string, patterns):
-    """
-    Modification-loop pattern removal
-
-    Given a list of (pattern,groups) tuples, attempts to remove any match
-    until no pattern matches for a full cycle.
-
-    Multipass safe and partially optimized
-    """
-    modified = True
-    while modified:
-        modified = False
-        
-        for case in patterns:
-            replacement = ''
-            
-            if len(case) == 2:
-                pattern, groups = case
-            else:
-                assert len(case) == 3
-                pattern, groups, replacement = case
-            
-            while True:
-                match = pattern.match(string)
-                
-                if match is None:
-                    break
-                else:
-                    for group in groups:
-                        string2 = string.replace(match.group(group), replacement)
-                        
-                        if _very_verbose:
-                            print('Replaced %s with %s' % (string, string2))
-                        
-                        string   = string2
-                        modified = True
-    
-    return string
-
-
-_whitespace_regexp = re.compile("\s+")
-
-def format(string):
-    """
-    Whitespace unification
-    Replaces all non-space whitespace with spaces.
-    Removes any double-spacing or leading or trailing whitespace.
-    """
-    return _whitespace_regexp.sub(" ", string).strip()
-
-def simplify(string):
-    """
-    General purpose string simplification
-    
-    Maps unicode characters to simplified ascii versions.
-    Removes parenthesized strings, bracked stings, and ellipsis
-    Performs whitespace unification.
-    
-    Multipass safe and partially optimized
-    """
-    
-    string = unicodedata.normalize('NFKD', unicode(string)).encode('ascii', 'ignore')
-    string = format(string.lower().strip())
-    string = regexRemoval(string, _general_regex_removals)
-    
-    for find, replacement in _general_replacements:
-        string = string.replace(find, replacement)
-    
-    return format(string)
-
-def trackSimplify(name, artist=None):
-    """
-    Track specific simplification for fuzzy comparisons.
-
-    Multipass safe and partially optimized
-    """
-    string = simplify(name)
-    string = regexRemoval(string, _track_removals)
-    
-    # occasionally track names have their artist's name embedded within them, 
-    # so attempt to canonicalize track names by removing their artist's name 
-    # if present. 
-    if artist:
-        artist = artist.lower().strip()
-        
-        artist_names = [
-            artist, 
-            simplify(artist), 
-            artistSimplify(artist), 
-        ]
-        
-        for name in artist_names:
-            if len(name) > 3:
-                n = string.find(name)
-                
-                if n >= 0:
-                    s2 = "%s %s" % (string[:n].strip(), string[n + len(name):].strip())
-                    
-                    if len(s2) > 3:
-                        string = s2
-                        break
-    
-    return format(string)
-
-def albumSimplify(string):
-    """
-    Album specific simplification for fuzzy comparisons.
-
-    Multipass safe and partially optimized
-    """
-    string = simplify(string)
-    string = regexRemoval(string, _album_removals)
-    return format(string)
-
-def artistSimplify(string):
-    """
-    Album specific simplification for fuzzy comparisons.
-
-    Multipass safe and partially optimized
-    """
-    string = simplify(string)
-    string = regexRemoval(string, _artist_removals)
-    return format(string)
-
-def movieSimplify(string):
-    """
-    Movie specific simplification for fuzzy comparisons.
-
-    Multipass safe and partially optimized
-    """
-    return format(simplify(string))
-
-def bookSimplify(string):
-    """
-    Book specific simplification for fuzzy comparisons.
-
-    Multipass safe and partially optimized
-    """
-    return format(simplify(string))
-
-def nameSimplify(string):
-    """
-    Name (person) specific simplification for fuzzy comparisons.
-    
-    Multipass safe and partially optimized
-    """
-    return format(simplify(string))
-
-def videoGameSimplify(string):
-    """
-    Video Game specific simplification for fuzzy comparisons.
-    
-    Multipass safe and partially optimized
-    """
-    return format(simplify(string))
-
-def stringComparison(a, b, strict=False):
-    """
-    Generic fuzzy string comparison.
-
-    Returns a comparison decimal [0,1]
-    """
-    if not strict:
-        a = simplify(a)
-        b = simplify(b)
-    
-    if a == b:
-        return 1.0
-    else:
-        junk_to_ignore = "\t-.;&".__contains__ # characters for SequenceMatcher to disregard
-        v = SequenceMatcher(junk_to_ignore, a, b).ratio()
-        
-        #utils.log("DEBUG: %s vs %s (%f)" % (a, b, v))
-        return v
 
 def setComparison(a, b, symmetric=False, strict=False):
     """
@@ -763,6 +460,15 @@ class Resolver(object):
         """ Place specific comparison metric. """
         return self.nameComparison(q['name'], m['name'])
 
+    def checkWithComparator(self, comparator, results, query, match, options, order):
+        similarities = {}
+        compare_result = comparator.compare_proxies(query, match)
+        similarity = 100 if compare_result.is_match() else 0
+        similarities['total'] = similarity
+        result = (similarities, match)
+        results.append(result)
+        options['callback'](result, order)
+
     def checkPerson(self, results, query, match, options, order):
         tests = [
             ('types',           lambda q, m, s, o: self.typesComparison(q, m)), 
@@ -774,19 +480,26 @@ class Resolver(object):
         types = self.__typesIntersection(query, match)
 
         if 'artist' in types:
+            if useComparators:
+                self.checkWithComparator(ArtistEntityProxyComparator, results, query, match, options, order)
+                return
             tests.extend([
-                ('name',            lambda q, m, s, o: self.artistComparison(q.name, m.name)), 
-                ('albums',          lambda q, m, s, o: self.albumsComparison(q, m, o)), 
-                ('tracks',          lambda q, m, s, o: self.tracksComparison(q, m, o)), 
+                ('name',            lambda q, m, s, o: self.artistComparison(q.name, m.name)),
+                ('albums',          lambda q, m, s, o: self.albumsComparison(q, m, o)),
+                ('tracks',          lambda q, m, s, o: self.tracksComparison(q, m, o)),
             ])
-        
+
             weights['name']         = lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=5.0)
-            weights['albums']       = lambda q, m, s, o: self.__albumsWeight(q, m) 
+            weights['albums']       = lambda q, m, s, o: self.__albumsWeight(q, m)
             weights['tracks']       = lambda q, m, s, o: self.__tracksWeight(q, m)
 
         self.genericCheck(tests, weights, results, query, match, options, order)
 
     def checkPlace(self, results, query, match, options, order):
+        if useComparators:
+            self.checkWithComparator(PlaceEntityProxyComparator, results, query, match, options, order)
+            return
+
         tests = [
             ('name',            lambda q, m, s, o: self.nameComparison(q.name, m.name)),
             ('location',        self.__locationTest),
@@ -808,6 +521,9 @@ class Resolver(object):
         types = self.__typesIntersection(query, match)
 
         if 'album' in types:
+            if useComparators:
+                self.checkWithComparator(AlbumEntityProxyComparator, results, query, match, options, order)
+                return
             tests.extend([
                 ('name',            lambda q, m, s, o: self.albumComparison(q.name, m.name)), 
                 ('artists',         lambda q, m, s, o: self.artistsComparison(q, m, o)),
@@ -819,6 +535,9 @@ class Resolver(object):
             weights['tracks']       = lambda q, m, s, o: self.__tracksWeight(q, m)
 
         if 'tv' in types:
+            if useComparators:
+                self.checkWithComparator(TvEntityProxyComparator, results, query, match, options, order)
+                return
             tests.extend([
                 ('name',            lambda q, m, s, o: self.movieComparison(q.name, m.name)),
                 ('cast',            lambda q, m, s, o: self.castComparison(q, m, o)),
@@ -845,6 +564,9 @@ class Resolver(object):
         types = self.__typesIntersection(query, match)
 
         if 'track' in types:
+            if useComparators:
+                self.checkWithComparator(TrackEntityProxyComparator, results, query, match, options, order)
+                return
             tests.extend([
                 ('track_name',      lambda q, m, s, o: self.trackComparison(q, m)),
                 ('artists',         lambda q, m, s, o: self.artistsComparison(q, m, o)),
@@ -858,6 +580,9 @@ class Resolver(object):
             weights['track_length'] = lambda q, m, s, o: self.__lengthWeight(q.length, m.length)
 
         if 'movie' in types:
+            if useComparators:
+                self.checkWithComparator(MovieEntityProxyComparator, results, query, match, options, order)
+                return
             tests.extend([
                 ('movie_name',      lambda q, m, s, o: self.movieComparison(q.name, m.name)),
                 ('cast',            lambda q, m, s, o: self.castComparison(q, m, o)),
@@ -873,6 +598,9 @@ class Resolver(object):
             weights['movie_date']   = lambda q, m, s, o: self.__dateWeight(q.release_date, m.release_date, exact_boost=4)
 
         if 'book' in types:
+            if useComparators:
+                self.checkWithComparator(BookEntityProxyComparator, results, query, match, options, order)
+                return
             tests.extend([
                 ('book_name',       lambda q, m, s, o: self.movieComparison(q.name, m.name)),
                 ('authors',         lambda q, m, s, o: self.authorsComparison(q, m, o)),
@@ -900,6 +628,9 @@ class Resolver(object):
         types = self.__typesIntersection(query, match)
 
         if 'app' in types:
+            if useComparators:
+                self.checkWithComparator(AppEntityProxyComparator, results, query, match, options, order)
+                return
             tests.extend([
                 ('name',            lambda q, m, s, o: self.nameComparison(q.name, m.name)), 
                 ('date',            lambda q, m, s, o: self.dateComparison(q.release_date, m.release_date)),
@@ -1393,7 +1124,6 @@ def demo(generic_source, default_title, subcategory=None):
     invert it using a StampedSource. The result of this inversion 
     will also be verbosely outputted. 
     """
-    _verbose = True
     import sys
     from resolve import StampedSource
     from api import Schemas

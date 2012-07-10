@@ -14,6 +14,7 @@ import htmlentitydefs, threading, time, traceback, urllib, urllib2
 import keys.aws, logs, math, random, boto, bson
 import libs.ec2_utils
 import functools
+import PIL, Image, ImageFile
 
 from errors              import *
 from boto.ec2.connection import EC2Connection
@@ -23,6 +24,7 @@ from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
 from gevent.pool         import Pool
+
 
 
 class LoggingThreadPool(object):
@@ -965,28 +967,35 @@ class HeadRequest(urllib2.Request):
     def get_method(self):
         return "HEAD"
 
-def getHeadRequest(url):
+def getHeadRequest(url, maxDelay=2):
     """ 
         Robust HEAD request to ensure that the requested resource exists. Returns 
         the response object if the resource is accessible or None otherwise.
     """
     
     request  = HeadRequest(url)
-    maxDelay = 2
     delay    = 0.5
     
     while True:
         try:
             return urllib2.urlopen(request)
         except urllib2.HTTPError, e:
-            # reraise the exception if the request resulted in an HTTP client 4xx error code, 
-            # since it was a problem with the url / headers and retrying most likely won't 
-            # solve the problem.
-            if e.code >= 400 and e.code < 500:
+            if e.code == 404:
+                # Not found, return immediately
+                return None
+            elif e.code == 403:
+                # Amazon returns 403s periodically -- worth another shot!
+                pass
+            elif e.code >= 400 and e.code < 500:
+                # reraise the exception if the request resulted in any other 4xx error code, 
+                # since it was a problem with the url / headers and retrying most likely won't 
+                # solve the problem.
+                logs.warning("Head request %s: (%s)" % (e.code, e))
                 return None
         except (ValueError, IOError, httplib.BadStatusLine) as e:
             pass
         except Exception, e:
+            logs.warning("Head request error: %s" % e)
             return None
         
         # if delay is already too large, request will likely not complete successfully, 
@@ -1050,3 +1059,32 @@ def basicNestedObjectToString(obj, wrapStrings=False):
     # TODO: should fallback to a simple str(obj)?
     raise Exception('Can\'t string-ify object of type: ' + type(obj))
 
+
+def getImage(data):
+    assert isinstance(data, basestring)
+    
+    io = StringIO(data)
+    im = Image.open(io)
+    
+    return im
+
+def getWebImage(url, desc=None):
+    try:
+        data = getFile(url)
+    except urllib2.HTTPError:
+        desc = ("%s " % desc if desc is not None else "")
+        logs.warning("unable to download %simage from '%s'" % (url, desc))
+        raise
+    
+    return getImage(data)
+
+def getWebImageSize(url):
+    try:
+        data = getFile(url)
+    except urllib2.HTTPError:
+        logs.warning("Unable to download image: %s" % url)
+        raise
+
+    img = getImage(data)
+
+    return img.size[0], img.size[1]

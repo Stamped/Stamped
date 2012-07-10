@@ -10,7 +10,7 @@ from logs       import report
 
 try:
     from datetime                       import datetime
-    from utils                          import lazyProperty
+    from utils                          import lazyProperty, getHeadRequest, getWebImageSize
     from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
@@ -79,6 +79,149 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         if 'title' in document:
             document['titlel'] = getSimplifiedTitle(document['title'])
         return document
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        """
+        Check the entity to verify the following things:
+
+        - Entity has the proper structure (updated schema)
+
+        - Populate third_party_ids if missing
+
+        - If tombstoned, verify that tombstone points to a non-tombstoned / non-user-generated entity
+
+        - If an image url exists, verify via a HEAD request that the image is valid
+
+        - Source-specific assertions:
+            - itunes_url exists if itunes_id exists
+
+        - If 'menu' is True, verify a menu exists
+
+        """
+        
+        document = self._getMongoDocumentFromId(key)
+
+        modified = False
+
+        # Check if old schema version
+        if 'schema_version' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        entity = self._convertFromMongo(document)
+
+        # Generate third_party_ids if it doesn't exist
+        if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
+            msg = "%s: Missing third_party_ids" % key
+            if repair:
+                logs.info(msg)
+                entity._maybeRegenerateThirdPartyIds()
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        # Verify tombstone is set properly
+        if entity.sources.tombstone_id is not None:
+            tombstone = None
+
+            # Verify tombstoned entity still exists
+            try:
+                tombstone = self._getMongoDocumentFromId(self._getObjectIdFromString(entity.sources.tombstone_id))
+            except StampedDocumentNotFoundError:
+                msg = "%s: Tombstoned entity not found" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.sources.tombstone_id)
+                    del(entity.sources.tombstone_source)
+                    del(entity.sources.tombstone_timestamp)
+                else:
+                    raise StampedDataError(msg)
+
+            # Raise exception if tombstone is chained
+            if tombstone is not None and tombstone.sources.tombstone_id is not None:
+                if tombstone.sources.tombstone_id == entity.entity_id:
+                    raise StampedDataError("Entities tombstoned to each other: '%s' and '%s'" % \
+                        (entity.entity_id, tombstone.entity_id))
+                raise StampedDataError("Entity tombstone chain: '%s' to '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id))
+                
+            # Raise exception if tombstone to user-generated entity
+            if tombstone is not None and tombstone.sources.user_generated_id is not None:
+                raise StampedDataError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id))
+
+        # Source-specific checks
+        if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
+            raise StampedDataError("Missing iTunes URL: '%s'" % entity.entity_id)
+
+        # Menu check
+        if entity.kind == 'place' and entity.menu == True:
+            if self._collection._database['menus'].find({'_id': self._getObjectIdFromString(entity.entity_id)}).count() == 0:
+                msg = "%s: Menu missing" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.menu)
+                    del(entity.menu_source)
+                    del(entity.menu_timestamp)
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+
+        # Verify image exists
+        if entity.images is not None:
+            images = []
+            for image in entity.images:
+                sizes = []
+                for size in image.sizes:
+                    if size.url.startswith('http://maps.gstatic.com'):
+                        msg = "%s: Blacklisted image (%s)" % (key, size.url)
+                        if repair:
+                            logs.info(msg)
+                            modified = True
+                            continue
+                        else:
+                            raise StampedDataError(msg)
+                    if getHeadRequest(size.url, maxDelay=4) is None:
+                        msg = "%s: Image is unavailable (%s)" % (key, size.url)
+                        if repair:
+                            logs.info(msg)
+                            modified = True
+                            continue
+                        else:
+                            raise StampedDataError(msg)
+                    if size.width is None or size.height is None:
+                        msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
+                        if repair:
+                            logs.info(msg)
+                            try:
+                                size.width, size.height = getWebImageSize(size.url)
+                                modified = True
+                            except Exception as e:
+                                logs.warning("%s: Could not get image sizes: %s" % (key, e))
+                                raise 
+                        else:
+                            raise StampedDataError(msg)
+                    sizes.append(size)
+                if len(sizes) > 0:
+                    image.sizes = sizes
+                    images.append(image)
+            if len(images) > 0:
+                entity.images = images
+            else:
+                del(entity.images)
+
+        if modified and repair:
+            from pprint import pprint
+            # pprint(entity.dataExport())
+            print 'UPDATED:', entity.title
+
+        return True
 
     ### PUBLIC
 
