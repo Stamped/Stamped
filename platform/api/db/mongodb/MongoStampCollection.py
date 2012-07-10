@@ -189,8 +189,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             raise StampedDataError("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
 
         if modified and repair:
-            print "UPDATED: %s" % document
-            # self._collection.update({'_id' : key}, stamp)
+            self._collection.update({'_id' : key}, stamp)
 
         return True
 
