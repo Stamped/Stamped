@@ -126,7 +126,6 @@ class Netflix(object):
                     if self.__addToBlacklistCount(user_id):
                         logs.warning('Too many 401/403 responses.  User added to blacklist')
 
-        print response.getheader('Location')
         if response.status < 300:
             return json.loads(response.read())
         else:
@@ -209,17 +208,6 @@ class Netflix(object):
                         expand          ='synopsis,cast,directors,formats,delivery_formats'
                     )
         return results.get('catalog_titles', None)
-
-    def getFullCatalog(self, user_token, user_secret):
-        """
-        Searches the netflix catalog for titles with a given search string.
-        returns the json result as a dict
-        """
-        results = self.__get(
-                        service         = 'catalog/titles/full',
-                        v               = '2.0',
-                    )
-        return results
 
     def getTitleDetails(self, netflix_id):
         results = self.__get(
@@ -418,12 +406,11 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
     if 'getRecommendations' in methods:   pprint( netflix.getRecommendations(user_id, user_token, user_secret) )
     if 'getUserRatings' in methods:       pprint( netflix.getUserRatings(user_id, user_token, user_secret, netflix_id) )
     if 'addToQueue' in methods:           pprint( netflix.addToQueue(user_id, user_token, user_secret, netflix_id) )
-    if 'getFullCatalog' in methods:     pprint( netflix.getFullCatalog(user_token, user_secret) )
 
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getFullCatalog'
+    methods = 'getTitleDetails'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
