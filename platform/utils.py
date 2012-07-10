@@ -981,11 +981,15 @@ def getHeadRequest(url, maxDelay=2):
             return urllib2.urlopen(request)
         except urllib2.HTTPError, e:
             if e.code == 404:
+                # Not found, return immediately
                 return None
-            # reraise the exception if the request resulted in an HTTP client 4xx error code, 
-            # since it was a problem with the url / headers and retrying most likely won't 
-            # solve the problem.
-            if e.code >= 400 and e.code < 500:
+            elif e.code == 403:
+                # Amazon returns 403s periodically -- worth another shot!
+                pass
+            elif e.code >= 400 and e.code < 500:
+                # reraise the exception if the request resulted in any other 4xx error code, 
+                # since it was a problem with the url / headers and retrying most likely won't 
+                # solve the problem.
                 logs.warning("Head request %s: (%s)" % (e.code, e))
                 return None
         except (ValueError, IOError, httplib.BadStatusLine) as e:
