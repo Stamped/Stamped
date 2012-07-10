@@ -822,6 +822,12 @@ class BasicEntity(BasicEntityMini):
         # of input we got indicating that this is currently popular.
         cls.addProperty('last_popular_info',                basestring)
 
+        # A list of all third-party IDs (prefixed with the name of the third party in caps and an underscore) attached
+        # to a cluster. Can include duplicates from one source. Put all in a repeated list for ease of searching.
+        # Ordered for best matches first.
+        cls.addPropertyList('third_party_ids',              basestring)
+
+
     def __init__(self):
         BasicEntityMini.__init__(self)
         self.schema_version = 0
@@ -836,11 +842,26 @@ class BasicEntity(BasicEntityMini):
 
     @lazyProperty
     def search_id(self):
-        _is_valid_id = lambda x: x is not None and len(x) > 0
+        if self.entity_id:
+            return self.entity_id
+        if self.sources.tombstone_id:
+            return self.sources.tombstone_id
+        self._maybeRegenerateThirdPartyIds()
+        if not self.third_party_ids:
+            raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" %
+                                 pformat(self.dataExport()))
+
+        return 'T_' + ('____'.join(self.third_party_ids))
+
+    def dataExport(self):
+        self._maybeRegenerateThirdPartyIds()
+        return super(BasicEntity, self).dataExport()
+
+    def _maybeRegenerateThirdPartyIds(self):
+        if self.third_party_ids:
+            return
 
         ids = [
-            (self.sources.tombstone_id,             ''),
-            (self.entity_id,                        ''),
             (self.sources.itunes_id,                'T_ITUNES_'),
             (self.sources.rdio_id,                  'T_RDIO_'),
             (self.sources.spotify_id,               'T_SPOTIFY_'),
@@ -854,12 +875,11 @@ class BasicEntity(BasicEntityMini):
             (self.sources.netflix_id,               'T_NETFLIX_'),
         ]
 
-        for (id, prefix) in ids:
-            if _is_valid_id(id):
-                return "%s%s" % (prefix, id)
+        third_party_ids = []
+        for (id_value, prefix) in ids:
+            third_party_ids.append(prefix + id_value)
 
-        raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" %
-                             pformat(self.dataExport()))
+        self.third_party_ids = third_party_ids
 
     def _genericSubtitle(self):
         if self.sources.user_generated_subtitle is not None:

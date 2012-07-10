@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent
+    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback
 
     from api import Blacklist
     import libs.ec2_utils
@@ -4366,11 +4366,13 @@ class StampedAPI(AStampedAPI):
                     report()
 
     def _convertSearchId(self, search_id):
-        if not search_id.startswith('T_'):
+        temp_id_prefix = 'T_'
+        if not search_id.startswith(temp_id_prefix):
             # already a valid entity id
             return search_id
 
-        source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', search_id).groups()
+        # TODO: This code should be moved into a common location with BasicEntity.search_id
+        id_components = search_id[len(temp_id_prefix):].split('____')
 
         sources = {
             'amazon':       AmazonSource,
@@ -4381,30 +4383,50 @@ class StampedAPI(AStampedAPI):
             'spotify':      SpotifySource,
             'tmdb':         TMDBSource,
             'thetvdb':      TheTVDBSource,
+            'netflix':      NetflixSource,
+            'fandango':     FandangoSource,
         }
 
-        if source_name.lower() not in sources:
-            raise StampedUnknownSourceError('Source not found: %s (%s)' % (source_name, search_id))
+        sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:]+)')
+        sourcesAndKeys = [sourceAndNameRe.match(component).groups() for component in id_components]
 
-        # Attempt to resolve against the Stamped DB
-        source    = sources[source_name.lower()]()
-        stamped   = StampedSource(stamped_api=self)
-        entity_id = stamped.resolve_fast(source.sourceName, source_id)
+        stamped = StampedSource(stamped_api=self)
+        for sourceIdentifier, key in sourcesAndKeys:
+            if sourceIdentifier.lower() not in sources:
+                raise StampedUnknownSourceError('Source not found: %s (%s)' % (sourceIdentifier, search_id))
+            source = sources[sourceIdentifier.lower()]()
+            entity_id = stamped.resolve_fast(source.sourceName, key)
+            if entity_id:
+                break
 
-        if entity_id is None:
+        proxies = []
+        for sourceIdentifier, key in sourcesAndKeys:
+            source = sources[sourceIdentifier.lower()]()
             try:
                 proxy = source.entityProxyFromKey(source_id)
+                if not proxies:
+                    # This is the first proxy, so we'll try to resolve against Stamped.
+                    results = stamped.resolve(proxy)
+
+                    if len(results) > 0 and results[0][0]['resolved']:
+                        # We were able to find a match in the Stamped DB.
+                        entity_id = results[0][1].key
+                        break
+
+                proxies.append(proxy)
+
             except KeyError:
-                raise StampedUnavailableError("Entity not found")
+                logs.warning('Failed to load key %s from source %s; exception body:\n%s' %
+                             (key, sourceIdentifier, traceback.format_exc()))
 
-            results = stamped.resolve(proxy)
-
-            if len(results) > 0 and results[0][0]['resolved']:
-                # Source key found in the Stamped DB
-                entity_id = results[0][1].key
+        if not entity_id and not proxies:
+            logs.warning('Completely unable to create entity from search ID: ' + search_id)
+            raise StampedUnavailableError("Entity not found")
 
         if entity_id is None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxies[0])
+            for proxy in proxies[1:]:
+                entityBuilder.addSource(EntityProxySource(proxy))
             entity = entityProxy.buildEntity()
 
             entity = self._entityDB.addEntity(entity)
@@ -4416,7 +4438,7 @@ class StampedAPI(AStampedAPI):
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
         return entity_id
 
-
+    
     def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
