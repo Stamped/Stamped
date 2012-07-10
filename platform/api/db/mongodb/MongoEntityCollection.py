@@ -10,7 +10,7 @@ from logs       import report
 
 try:
     from datetime                       import datetime
-    from utils                          import lazyProperty
+    from utils                          import lazyProperty, getHeadRequest
     from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
@@ -79,6 +79,70 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         if 'title' in document:
             document['titlel'] = getSimplifiedTitle(document['title'])
         return document
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        """
+        Check the entity to verify the following things:
+
+        - Entity has the proper structure (updated schema)
+
+        - Populate third_party_ids if missing
+
+        - If tombstoned, verify that tombstone points to a non-tombstoned / non-user-generated entity
+
+        - If an image url exists, verify via a HEAD request that the image is valid
+
+        - Source-specific assertions:
+            - itunes_url exists if itunes_id exists
+
+        """
+        
+        document = self._getMongoDocumentFromId(key)
+
+        modified = False
+
+        # Check if old version
+        if 'schema_version' not in document:
+            modified = True
+
+        entity = self._convertFromMongo(document)
+
+        ### TODO: Implement after Paul commits third_party_ids
+        # if entity.third_party_ids is None or not entity.third_party_ids:
+        #     entity._maybeRegenerateThirdPartyIds()
+
+        # Verify tombstone is set properly
+        if entity.sources.tombstone_id is not None:
+            tombstone = self._getMongoDocumentFromId(entity.sources.tombstone_id)
+            # Raise exception if tombstone is chained
+            if tombstone.sources.tombstone_id is not None:
+                if tombstone.sources.tombstone_id == entity.entity_id:
+                    raise StampedDataError("Entities tombstoned to each other: '%s' and '%s'" % \
+                        (entity.entity_id, tombstone.entity_id))
+                raise StampedDataError("Entity tombstone chain: '%s' to '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id))
+            # Raise exception if tombstone to user-generated entity
+            if tombstone.sources.user_generated_id is not None:
+                raise StampedDataError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id))
+
+        # Verify image exists
+        if entity.images is not None:
+            for image in entity.images:
+                for size in image.sizes:
+                    if getHeadRequest(size.url) is None:
+                        raise StampedDataError("Image is unavailable for entity '%s': '%s'" % \
+                            (entity.entity_id, size.url))
+                    if size.width is None or size.height is None:
+                        raise StampedDataError("Image width / height not defined: '%s'" % entity.entity_id)
+
+        # Source-specific checks
+        if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
+            raise StampedDataError("Missing iTunes URL: '%s'" % entity.entity_id)
+
+        return True
 
     ### PUBLIC
 

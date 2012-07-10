@@ -20,6 +20,7 @@ from api.db.mongodb.MongoUserTodosEntitiesCollection    import MongoUserTodosEnt
 from api.db.mongodb.MongoStampCommentsCollection        import MongoStampCommentsCollection
 
 from api.db.mongodb.MongoStampCollection                import MongoStampCollection
+from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection
 
 collections = [
     # Indexes 
@@ -31,7 +32,8 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    MongoStampCollection,
+    # MongoStampCollection,
+    MongoEntityCollection,
 ]
 
 
@@ -72,7 +74,8 @@ def main():
         logs.info("Running checks for %s" % collection.__name__)
         db = collection()
         begin = time.time()
-        for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
+        # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
+        for i in db._collection.find(fields=['_id']).limit(1000):
             try:
                 result = db.checkIntegrity(i['_id'], repair=(not options.noop))
                 print i['_id'], 'PASS'
