@@ -83,12 +83,15 @@ def main():
                 print i['_id'], 'FAIL: Key deleted'
             except StampedStaleRelationshipDataError:
                 print i['_id'], 'FAIL: References updated'
+            except StampedDataError:
+                print i['_id'], 'FAIL'
             except Exception as e:
                 print i['_id'], 'FAIL: %s (%s)' % (e.__class__, e)
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 f = traceback.format_exception(exc_type, exc_value, exc_traceback)
                 f = string.joinfields(f, '')
                 print f
+                break
 
         logs.info("Completed checks for %s (%s seconds)" % (collection.__name__, (time.time() - begin)))
 
