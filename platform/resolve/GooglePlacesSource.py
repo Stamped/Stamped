@@ -469,6 +469,7 @@ class GooglePlacesSource(GenericSource):
             return True
         else:
             entity.sources.googleplaces_reference = details['reference']
+            entity.addThirdPartyId(self.sourceName, details['reference'])
         
         reformatted = self.__reformatAddress(details)
         if reformatted is not None:
