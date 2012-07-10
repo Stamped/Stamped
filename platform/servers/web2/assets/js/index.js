@@ -222,15 +222,25 @@
         var init_main = function() {
             $body.addClass("main");
             var result = update_main_layout(true);
+            var start  = $window.height() + result.height;
             
             $main
-                .css('top', ($window.height() + result.height) + "px")
+                .addClass("main-animating")
+                .css('top', start + "px")
                 .animate({
                     'top'       : result.offset + "px"
                 }, {
-                    easing      : "easeInOutCubic", 
-                    duration    : 1000, 
+                    easing      : "easeOutExpo", 
+                    duration    : 800, 
+                    step        : function(value) {
+                        var percent = (value - result.offset) / (start - result.offset);
+                        
+                        if (percent < 0.1) {
+                            $main.removeClass("main-animating");
+                        }
+                    }, 
                     complete    : function() {
+                        $main.removeClass("main-animating");
                         update_main_layout();
                     }
                 });

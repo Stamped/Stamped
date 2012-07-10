@@ -153,6 +153,11 @@ body.main {
         }
     }
     
+    .hidden-main-animating {
+        opacity: 1;
+        .transition(opacity, .4s, ease);
+    }
+    
     .active-pane {
         opacity: 1;
     }
@@ -170,6 +175,20 @@ body.main {
     height: 180px;
     top:   -150px;
     left:  -90px;
+    
+    opacity: 1;
+    .transition-transform(.3s, ease);
+}
+
+.main-animating {
+    #stamped-logo {
+        opacity: 0;
+        .transform(scale(2.0, 2.0));
+    }
+    
+    .hidden-main-animating {
+        opacity: 0;
+    }
 }
 
 
