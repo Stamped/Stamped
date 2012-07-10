@@ -6,13 +6,21 @@
 /*jslint plusplus: true */
 /*global STAMPED_PRELOAD, jQuery, $, History, moment */
 
+/* TODO:
+    * what easing should we use for iPhone reveal animation?
+ */
+
 (function() {
     $(document).ready(function() {
         
         // ---------------------------------------------------------------------
-        // initialize utils
+        // initialize globals and utils
         // ---------------------------------------------------------------------
         
+        
+        var $body   = $("body");
+        var $window = $(window);
+        var $main   = $("#main");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -130,7 +138,6 @@
         
         var $intro_iphone   = $("#intro-iphone");
         var $intro_hero     = $("#intro-hero");
-        var $body           = $("body");
         
         var intro_iphone_animation = new Animation({
             start       : 1, 
@@ -191,22 +198,57 @@
             }
         });
         
-        intro_animation.start();
-        
         
         // ---------------------------------------------------------------------
         // core page content
         // ---------------------------------------------------------------------
         
         
-        var init_main = function() {
+        var update_main_layout = function(noop) {
             // vertically center the page's main content
-            var $main = $("#main");
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
-            $main.css('top', offset + "px");
+            if (!!noop) {
+                $main.css('top', offset + "px");
+            }
+            
+            return {
+                height : height, 
+                offset : offset
+            };
         };
+        
+        var init_main = function() {
+            $body.addClass("main");
+            var result = update_main_layout(true);
+            
+            $main
+                .css('top', ($window.height() + result.height) + "px")
+                .animate({
+                    'top'       : result.offset + "px"
+                }, {
+                    easing      : "easeInOutCubic", 
+                    duration    : 1000, 
+                    complete    : function() {
+                        update_main_layout();
+                    }
+                });
+        };
+        
+        
+        // ---------------------------------------------------------------------
+        // setup misc bindings and start initial animations
+        // ---------------------------------------------------------------------
+        
+        
+        $window.resize(update_main_layout);
+        
+        if ($body.hasClass("intro")) {
+            intro_animation.start();
+        } else {
+            init_main();
+        }
     });
 })();
 

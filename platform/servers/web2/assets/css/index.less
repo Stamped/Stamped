@@ -21,12 +21,19 @@
    ************************************************************************** */
 
 
-body {
+body, html {
     background: #f2f2f2;
+    overflow: hidden !important;
 }
 
 body.intro {
     #main, footer {
+        display: none;
+    }
+}
+
+body.main {
+    #intro {
         display: none;
     }
 }
@@ -99,18 +106,35 @@ body.intro {
    ************************************************************************** */
 
 
+#main-page-content {
+    position: static;
+    top: 0;
+}
+
 #main {
     position: absolute;
     left: 50%;
+    top: -100%;
     margin-left: -350px;
     
     .pane {
-        width: 470px;
         overflow-y: auto;
         background: #fff;
+        width: 470px;
         
         opacity: 0;
         .transition(opacity, .4s, ease);
+        
+        .ribbon-wrapper {
+            height: 15px;
+            background: #c7c7c7;
+            
+            .rounded(2px);
+            
+            .ribbon {
+                .rounded(2px);
+            }
+        }
         
         .pane-body {
             margin: 24px 48px;
@@ -118,6 +142,13 @@ body.intro {
             .title {
                 .stamped-font();
                 font-size: 3em;
+                line-height: 110%;
+                color: #333;
+            }
+            
+            .desc {
+                color: #666;
+                font-weight: 200;
             }
         }
     }
