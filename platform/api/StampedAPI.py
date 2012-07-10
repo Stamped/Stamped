@@ -50,6 +50,7 @@ try:
     from resolve.FactualSource              import FactualSource
     from resolve.GooglePlacesSource         import GooglePlacesSource
     from resolve.iTunesSource               import iTunesSource
+    from resolve.NetflixSource              import NetflixSource
     from resolve.RdioSource                 import RdioSource
     from resolve.SpotifySource              import SpotifySource
     from resolve.TMDBSource                 import TMDBSource
@@ -4384,7 +4385,6 @@ class StampedAPI(AStampedAPI):
             'tmdb':         TMDBSource,
             'thetvdb':      TheTVDBSource,
             'netflix':      NetflixSource,
-            'fandango':     FandangoSource,
         }
 
         sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:/]+)$')
