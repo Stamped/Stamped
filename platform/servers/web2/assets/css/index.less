@@ -137,7 +137,7 @@ body.main {
         }
         
         .pane-body {
-            margin: 24px 48px;
+            margin: 12px 48px;
             
             .title {
                 .stamped-font();
@@ -147,14 +147,14 @@ body.main {
             }
             
             .desc {
-                color: #666;
+                color: #888;
                 font-weight: 200;
+                font-size: 80%;
             }
         }
     }
     
     .hidden-main-animating {
-        opacity: 1;
         .transition(opacity, .4s, ease);
     }
     
@@ -164,8 +164,16 @@ body.main {
 }
 
 #main-header {
-    .lhs {
-        float: lef
+    text-align: right;
+    margin-bottom: 12px;
+    
+    #available {
+        margin: 4px 12px 0 0;
+        
+        .desc {
+            font-size: 90%;
+            margin-bottom: 4px;
+        }
     }
 }
 
@@ -186,6 +194,13 @@ body.main {
     .transition-transform(.3s, ease);
 }
 
+.intro {
+    .hidden-main-animating {
+        opacity: 0;
+        .transition(opacity, 0s, linear);
+    }
+}
+
 .main-animating {
     #stamped-logo {
         opacity: 0;
@@ -194,6 +209,7 @@ body.main {
     
     .hidden-main-animating {
         opacity: 0;
+        .transition(opacity, 0s, linear);
     }
 }
 
