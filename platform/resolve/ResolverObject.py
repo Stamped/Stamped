@@ -80,7 +80,7 @@ class ResolverObject(object):
 
         self.__lookupCallsMade += 1
 
-    def __repr__(self):
+    def __str__(self):
         # Temporary disable lookup calls because we don't want to make them just for printing.
         # There are some obvious concurrency issues here.
         oldMax = self.__maxLookupCalls
