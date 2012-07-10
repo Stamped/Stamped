@@ -452,10 +452,10 @@ class GenericSource(BasicSource):
                 report()
 
         # Haaaaaaaack.
-        if results and self.source != 'stamped':
+        if results and self.sourceName != 'stamped':
             for result in results:
                 if result[0]['resolved']:
-                    entity.addThirdPartyId(self.sourceName, results[1].key)
+                    entity.addThirdPartyId(self.sourceName, result[1].key)
 
         return True
 
