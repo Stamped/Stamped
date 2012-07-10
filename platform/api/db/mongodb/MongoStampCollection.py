@@ -179,6 +179,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             entityMini = buildEntity(entity, mini=True)
             if buildEntity(document['entity'], mini=True) != entityMini:
                 logs.warning("Upgrading entity mini")
+                logs.debug("New entity: %s" % entityMini)
                 document['entity'] = entityMini.dataExport()
                 modified = True
 
