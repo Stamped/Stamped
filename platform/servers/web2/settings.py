@@ -8,6 +8,8 @@ DEBUG           = (not IS_PROD)
 TEMPLATE_DEBUG  = DEBUG
 PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 
+STAMPED_DOWNLOAD_APP_LINK = "http://itunes.apple.com/us/app/stamped/id467924760?mt=8&uo=4"
+
 utils.log("Django DEBUG=%s ROOT=%s" % (DEBUG, PROJ_ROOT))
 
 ADMINS = (

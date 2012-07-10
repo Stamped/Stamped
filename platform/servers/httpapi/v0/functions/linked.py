@@ -22,6 +22,7 @@ exceptions = [
     (StampedNetflixNoInstantWatchError, 403, 'illegal_action', "Netflix account must have instant watch access"),
     (StampedLinkedAccountDoesNotExistError, 400, 'illegal_action', "No such third party account linked to user"),
     (StampedLinkedAccountIsAuthError, 403, 'forbidden', "This third-party account is used for authorization and cannot be removed"),
+    (StampedLinkedAccountAlreadyExistsError, 409, 'invalid_credentials', "Another user is already connected to this third-party account"),
     (StampedThirdPartyError, 403, 'illegal_action', "There was a problem communicating with the third-party service"),
     (StampedLinkedAccountMismatchError, 400, 'illegal_action', "There was a problem verifying the third-party account"),
     (StampedFacebookTokenError, 401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),

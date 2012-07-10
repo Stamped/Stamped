@@ -17,7 +17,6 @@ try:
     from api.Entity                         import getSimplifiedTitle, buildEntity
 
     from api.db.mongodb.AMongoCollection               import AMongoCollection
-    from api.db.mongodb.MongoPlacesEntityCollection    import MongoPlacesEntityCollection
     from api.db.mongodb.MongoEntitySeedCollection      import MongoEntitySeedCollection
     from api.db.mongodb.MongoMenuCollection            import MongoMenuCollection
     from api.AEntityDB                      import AEntityDB
@@ -43,10 +42,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.netflix_id', 'sources.thetvdb_id')
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
-
-    @lazyProperty
-    def places_collection(self):
-        return MongoPlacesEntityCollection()
 
     @lazyProperty
     def seed_collection(self):

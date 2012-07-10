@@ -383,7 +383,6 @@ def parse_request(request, schema, django_kwargs, overflow, **kwargs):
                 raise
             return
         
-        utils.log("OVERFLOW: %s" % overflow);
         schema.dataImport(data, overflow=overflow)
         return schema
     except Exception as e:
@@ -424,4 +423,51 @@ def format_url(url_format, schema, diff = None):
             url = "%s?%s" % (url, params)
     
     return url
+
+def is_static_profile_image(url):
+    return url.lower().strip() == 'http://static.stamped.com/users/default.jpg'
+
+def get_body_classes(base, schema):
+    has_category    = False
+    has_subcategory = False
+    body_classes    = base
+    
+    try:
+        has_category    = (schema.category is not None)
+        has_subcategory = (schema.subcategory is not None)
+    except:
+        pass
+    
+    if has_category:
+        body_classes += " %s" % schema.category
+    else:
+        body_classes += " default"
+    
+    if has_subcategory:
+        body_classes += " %s" % schema.subcategory
+    
+    return body_classes
+
+# ensure friends and followers are randomly shuffled s.t. different users will 
+# appear every page refresh, with preferential treatment always going to users 
+# who have customized their profile image away from the default.
+def shuffle_split_users(users):
+    has_image        = (lambda a: a.get('image_url', None) is not None)
+    has_custom_image = (lambda a: has_image(a) and not is_static_profile_image(a['image_url']))
+    
+    # find all users who have a custom profile image
+    a0 = filter(has_custom_image, users)
+    
+    # find all users who have the default profile image
+    a1 = filter(lambda a: not has_custom_image(a), users)
+    
+    # shuffle them both independently
+    a0 = utils.shuffle(a0)
+    a1 = utils.shuffle(a1)
+    
+    # and combine the results s.t. all users with custom profile images precede 
+    # all those without custom profile images
+    a0.extend(a1)
+    
+    return a0
 

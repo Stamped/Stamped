@@ -99,6 +99,7 @@ class Twitter(object):
 
 
     def getFriendData(self, user_token, user_secret, offset=0, limit=30):
+        logs.info('### user_token %s   user_secret: %s' % (user_token, user_secret))
         if limit > 100:
             raise StampedInputError("Limit must be <= 100")
         ids = self._getUserIds(user_token, user_secret, 'friends')
@@ -115,6 +116,7 @@ class Twitter(object):
                 {
                     'user_id'   : result['id'],
                     'name'      : result['name'],
+                    'screen_name' : result['screen_name'],
                     'image_url' : result['profile_image_url'],
                 }
             )
