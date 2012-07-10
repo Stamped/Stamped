@@ -12,6 +12,7 @@ from datetime                           import datetime
 from utils                              import lazyProperty
 from api.Schemas                        import *
 from api.Entity                             import buildEntity
+from pprint                             import pprint
 
 from api.AStampDB                       import AStampDB
 from api.db.mongodb.AMongoCollection                   import AMongoCollection
@@ -176,11 +177,11 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         else:
             # Note: Because schema objects use tuples and documents use lists, we need to convert the
             # raw document into a schema object in order to do the comparison.
-            entityMini = buildEntity(entity, mini=True)
-            if buildEntity(document['entity'], mini=True) != entityMini:
+            oldEntityMini = buildEntity(document['entity'], mini=True)
+            newEntityMini = buildEntity(entity, mini=True)
+            document['entity'] = newEntityMini.dataExport() # buildEntity mutates entity
+            if oldEntityMini != newEntityMini:
                 logs.warning("Upgrading entity mini")
-                logs.debug("New entity: %s" % entityMini)
-                document['entity'] = entityMini.dataExport()
                 modified = True
 
         stampNum = document['stats']['stamp_num']
@@ -190,7 +191,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             raise StampedDataError("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
 
         if modified and repair:
-            self._collection.update({'_id' : key}, document)
+            pprint(document)
+            # self._collection.update({'_id' : key}, document)
 
         return True
 

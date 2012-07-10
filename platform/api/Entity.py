@@ -243,7 +243,9 @@ def buildEntity(data=None, kind=None, mini=False):
             if '_id' in data:
                 data['entity_id'] = data['_id']
                 del(data['_id'])
-            kind = data.pop('kind', kind)
+            kind = None
+            if 'kind' in data:
+                kind = data['kind']
         if mini:
             new = getEntityMiniObjectFromKind(kind)
         else:
