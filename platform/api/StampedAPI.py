@@ -43,6 +43,8 @@ try:
     from libs.Memcache                   import globalMemcache
     from api.HTTPSchemas                import generateStampUrl
 
+    from crawler.RssFeedScraper     import RssFeedScraper
+
     #resolve classes
     from resolve.EntitySource       import EntitySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
@@ -4696,6 +4698,27 @@ class StampedAPI(AStampedAPI):
 
         return modified
 
+
+    def crawlExternalSources(self):
+        stampedSource = StampedSource(stamped_api=self)
+        for proxy in RssFeedScraper().fetchSources():
+            self.__mergeProxyIntoDb(proxy, stampedSource)
+
+    def __mergeProxyIntoDb(self, proxy, stampedSource):
+        entity_id = stampedSource.resolve_fast(proxy.source, proxy.key)
+
+        if entity_id is None:
+            results = stampedSource.resolve(proxy)
+            if len(results) > 0 and results[0][0]['resolved']:
+                # Source key found in the Stamped DB
+                entity_id = results[0][1].key
+        if entity_id:
+            self.mergeEntityId(entity_id)
+
+        if entity_id is None:
+            entityProxy = EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
+            self.mergeEntity(entity)
 
     """
     ######
