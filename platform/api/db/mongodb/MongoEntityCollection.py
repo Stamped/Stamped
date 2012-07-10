@@ -128,7 +128,19 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         # Verify tombstone is set properly
         if entity.sources.tombstone_id is not None:
-            tombstone = self._getMongoDocumentFromId(entity.sources.tombstone_id)
+            # Verify tombstoned entity still exists
+            try:
+                tombstone = self._getMongoDocumentFromId(entity.sources.tombstone_id)
+            except StampedDocumentNotFoundError:
+                msg = "%s: Tombstoned entity not found" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.sources.tombstone_id)
+                    del(entity.sources.tombstone_source)
+                    del(entity.sources.tombstone_timestamp)
+                else:
+                    raise StampedDataError(msg)
+
             # Raise exception if tombstone is chained
             if tombstone.sources.tombstone_id is not None:
                 if tombstone.sources.tombstone_id == entity.entity_id:
@@ -136,6 +148,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                         (entity.entity_id, tombstone.entity_id))
                 raise StampedDataError("Entity tombstone chain: '%s' to '%s' to '%s'" % \
                     (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id))
+                
             # Raise exception if tombstone to user-generated entity
             if tombstone.sources.user_generated_id is not None:
                 raise StampedDataError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
@@ -173,7 +186,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                         else:
                             raise StampedDataError(msg)
                     if size.width is None or size.height is None:
-                        msg = "%s: Image width / height not defined (%s)" % (key, size.url)
+                        msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
                         if repair:
                             logs.info(msg)
                             try:
