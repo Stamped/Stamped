@@ -1,0 +1,66 @@
+/* common.less - styles shared across multiple stamped stylesheets
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "../libs/elements.less";
+
+
+/* **************************************************************************
+                              STYLING CONSTANTS
+   ************************************************************************** */
+
+
+@shadow: rgba(50, 50, 50, 0.25);
+
+
+/* **************************************************************************
+                             REUSABLE COMPONENTS
+   ************************************************************************** */
+
+
+.replaced {
+    display: block;
+    text-indent: -9999em;
+    overflow: hidden;
+}
+
+.floatleft {
+    float: left;
+}
+
+.floatright {
+    float: right;
+}
+
+@font-face {
+    font-family: StampedFallbackFont;
+    font-style: normal;
+    font-weight: 200;
+    src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+}
+
+.stamped-font() {
+    font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+    font-style:  normal;
+    font-weight: 200;
+}
+
+.profile-image-border(@size) {
+    border: @size solid #fff;
+    .box-shadow(0px, 1px, 3px, 0, rgba(0, 0, 0, 0.15));
+    
+    &:active {
+        border-color: #666;
+    }
+}
+

@@ -1,0 +1,459 @@
+/* styles.less - Main Stamped.com Mobile Stylesheet
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "../libs/h5bp.min.css";
+@import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
+
+@import "common.less";
+
+
+/* **************************************************************************
+                            BASIC HIGH-LEVEL SETUP
+   ************************************************************************** */
+
+
+html {
+	overflow-y: scroll;
+}
+
+body, html {
+    width:  100%;
+    height: 100%;
+}
+
+body {
+    font-family: 'helvetica', sans-serif;
+    font-size: 1em;
+    
+    background: #e5e5e5;
+    color: #666;
+}
+
+a, a:link {
+	font-style: inherit;
+}
+
+a, a:focus {
+    outline: 0;
+}
+
+a, a:visited {
+    color: #666; /* #3366cc; */
+    text-decoration: none;
+}
+
+a:visited {
+    color: #444;
+}
+
+a:hover {
+    color: black;
+}
+
+ol, ul {
+    text-decoration: none;
+    list-style: none;
+    text-indent: 0;
+    padding: 0;
+    margin:  0;
+}
+
+
+/* **************************************************************************
+                                    HEADER
+   ************************************************************************** */
+
+
+header {
+    position: relative;
+    display:  block;
+    width: 100%;
+    
+    .user-logo-large {
+        position: absolute;
+        z-index: 160;
+        
+        left: 12px;
+        top: -24px;
+        
+        display: block;
+        width:  148px;
+        height: 148px;
+    }
+    
+    .download-the-app {
+        float: right;
+        margin: 24px 8px;
+    }
+}
+
+.ribbon-top {
+    background: url(/assets/img/ribbon-top.png) repeat-x;
+    width:  100%;
+    height: 15px;
+}
+
+.ribbon-bottom {
+    background: url(/assets/img/ribbon-bottom.png) repeat-x 0 -1px;
+    width:  100%;
+    height: 15px;
+}
+
+
+/* **************************************************************************
+                                    FOOTER
+   ************************************************************************** */
+
+
+footer {
+    width: 100%;
+    background: #fff;
+    text-align: center;
+    color: #999;
+    
+    ol.footer-nav {
+        li {
+            display: inline-block;
+            font-weight: 700;
+            margin: 0 24px 24px 0;
+        }
+    }
+    
+    .made-in-nyc-logo {
+        margin: 0 auto;
+        padding-bottom: 24px;
+    }
+}
+
+.made-in-nyc-logo {
+    background: url(/assets/img/proudlymadeinnyc.png) no-repeat;
+    
+    display: block;
+    width:  102px;
+    height: 103px;
+}
+
+#retina {
+    .made-in-nyc-logo {
+        background: url(/assets/img/proudlymadeinnyc@2x.png) no-repeat;
+        width:  204px;
+        height: 205px;
+    }
+}
+
+
+/* **************************************************************************
+                                PROFILE IMAGES
+   ************************************************************************** */
+
+
+.profile-image(@size: 128px, @border: 4px) {
+    position: relative;
+    .floatleft;
+    
+    display: block;
+    width:  @size + @border * 2;
+    height: @size + @border * 2;
+    
+    img {
+        width:  @size;
+        height: @size;
+        
+        .profile-image-border(@border);
+    }
+    
+    &:hover .context-popup {
+        display: block;
+        cursor:  pointer;
+    }
+}
+
+.profile-image-large {
+    .profile-image(128px, 4px);
+}
+
+.profile-image-large-ish {
+    .profile-image(80px,  3px);
+}
+
+.profile-image-medium-ish {
+    .profile-image(72px,  3px);
+}
+
+.profile-image-medium {
+    .profile-image(54px,  2px);
+}
+
+.profile-image-small {
+    .profile-image(44px,  2px);
+}
+
+.profile-image-tiny {
+    .profile-image(24px,  1px);
+}
+
+
+/* **************************************************************************
+                                USER GALLERY
+   ************************************************************************** */
+
+
+.user-gallery {
+    display:  block;
+    position: relative;
+    
+    .user-gallery-item {
+        display: inline-block;
+    }
+    
+    .expand-friends {
+        position: absolute;
+        display:  block;
+        
+        width:  24px;
+        height: 24px;
+        
+        right: 8px;
+        top:   50%;
+        margin-top: -12px;
+        
+        background: url(/assets/img/user-gallery-expand.png) no-repeat;
+        .profile-image-border(1px);
+        
+        &:hover, &:active {
+            .context-popup {
+                display: block;
+            }
+        }
+    }
+}
+
+// target only Firefox
+@-moz-document url-prefix() {
+    .user-gallery .expand-friends {
+        margin-top: -13px;
+    }
+}
+
+
+/* **************************************************************************
+                              MISC / DEPRECATED
+   ************************************************************************** */
+
+
+.screen-name {
+    text-transform: lowercase;
+    letter-spacing: .05em;
+    font: 85% "StampedScreenNameFont", helvetica, sans-serif;
+}
+
+.pronounced-title a, a.pronounced-title {
+    color: #262626;
+}
+
+.pronounced-title {
+    position: relative;
+    
+    .stamped-font();
+    
+    font-size: 2.8em;
+    letter-spacing: .05em;
+    color: #262626;
+}
+
+.download-the-app {
+    display: block;
+    width:  120px;
+    height: 31px;
+    
+    background: url(/assets/img/gettheapp_btn_sprite.png) no-repeat;
+    
+    &:hover {
+        background-position: -122px 0;
+    }
+    
+    &:active {
+        background-position: -224px 0;
+    }
+}
+
+#retina {
+    .download-the-app {
+        display: block;
+        width:  244px;
+        height: 62px;
+        
+        background: url(/assets/img/gettheapp_btn_sprite@2x.png) no-repeat;
+        
+        &:hover {
+            background-position: -246px 0;
+        }
+        
+        &:active {
+            background-position: -492px 0;
+        }
+    }
+}
+
+.app-store-button {
+    display: block;
+    width:  183px;
+    height: 66px;
+    
+    background: url(/assets/img/appstore_btn.png) no-repeat;
+    
+    &:active {
+        opacity: .8;
+    }
+}
+
+#retina {
+    .app-store-button {
+        display: block;
+        width:  365px;
+        height: 132px;
+        
+        background: url(/assets/img/appstore_btn@2x.png) no-repeat;
+    }
+}
+
+
+/* **************************************************************************
+                                POPUP VIEWS
+   ************************************************************************** */
+
+
+.context-popup {
+    position: absolute;
+    display:  none;
+    z-index:  10001;
+    
+    top:  -32px;
+    left: -16px;
+    
+    font: bold .9em;
+    padding: 8px;
+    line-height: 100%;
+    white-space: nowrap;
+    
+    background: rgba(10, 10, 10, 0.75);
+    color: #fff;
+    
+    .rounded(4px);
+}
+
+.close-button {
+    position: relative;
+    display:  block;
+    
+    /* NOTE: with the rounded corners, this ends up being roughly 36x36px */
+    /* TODO: possibly replace these rounded corners with static images?   */
+    width:  28px;
+    height: 28px;
+    
+    border: 4px solid #bfbfbf;
+    background: #fff;
+    
+    .rounded(36px);
+    .box-shadow(0, 0, 6px, 0, @shadow);
+    
+    .close-button-inner {
+        background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+        position: absolute;
+        top:  7px;
+        left: 7px;
+        
+        width:  14px;
+        height: 14px;
+    }
+    
+    &:hover {
+        border-color: #666;
+        cursor: pointer;
+        
+        .close-button-inner {
+            background-position: -48px 0;
+        }
+    }
+}
+
+
+/* **************************************************************************
+                        ENTITY / STAMP CATEGORY ICONS
+   ************************************************************************** */
+
+
+.icon {
+    background: url('/assets/img/categoryicons18px.png') no-repeat;
+    display: inline-block;
+    width:  18px;
+    height: 18px;
+}
+
+.dark-icon {
+    background: url('/assets/img/categoryicons18px-dark.png') no-repeat;
+}
+
+.stamp-category-book .icon {
+    background-position: -40px -20px;
+}
+
+.stamp-category-film .icon {
+    background-position: 0 -20px;
+}
+
+.stamp-category-place .icon {
+    background-position: -60px 0;
+}
+
+.stamp-category-food .icon {
+    background-position: 0 0;
+}
+
+.stamp-category-music .icon {
+    background-position: -80px 0;
+}
+
+.stamp-category-other .icon, .stamp-category- .icon {
+    background-position: -80px -20px;
+}
+
+.stamp-subcategory-restaurant .icon {
+    background-position: 0 0;
+}
+
+.stamp-subcategory-bar .icon {
+    background-position: -20px 0;
+}
+
+.stamp-subcategory-cafe .icon {
+    background-position: -40px 0;
+}
+
+.stamp-subcategory-tv .icon {
+    background-position: -20px -20px;
+}
+
+.stamp-subcategory-song .icon {
+    background-position: -100px 0;
+}
+
+.stamp-subcategory-artist .icon {
+    background-position: -120px 0;
+}
+
+.stamp-subcategory-app .icon {
+    background-position: -60px -20px;
+}
+

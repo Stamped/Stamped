@@ -6,6 +6,7 @@ __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
 import Globals
+import sys, traceback, string
 import logs, time
 
 from errors                 import *
@@ -83,8 +84,11 @@ def main():
             except StampedStaleRelationshipDataError:
                 print i['_id'], 'FAIL: References updated'
             except Exception as e:
-                print i['_id'], 'FAIL: %s' % e
-                raise
+                print i['_id'], 'FAIL: %s (%s)' % (e.__class__, e)
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                f = string.joinfields(f, '')
+                print f
 
         logs.info("Completed checks for %s (%s seconds)" % (collection.__name__, (time.time() - begin)))
 
