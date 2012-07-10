@@ -31,7 +31,7 @@ body {
    ************************************************************************** */
 
 
-#iphone-intro {
+#intro-iphone {
     background: url(/assets/img/iphone_intro_sprite.png) no-repeat;
     
     width:  395px;
@@ -50,7 +50,7 @@ body {
     
     text-align: center;
     width: 100%;
-    top:  50%;
+    top:   50%;
     margin-top: -200px;
     color: #b7b7b7;
     
@@ -63,11 +63,11 @@ body {
             display: block;
             left: -25%;
             width: 150%;
-            opacity: 0;
             pointer-events: none;
             z-index: 1;
             
-            .transition(opacity, .3s, ease);
+            opacity: 0;
+            .transition(opacity, .1s, ease);
             .stamped-font();
             
             .blurred {
