@@ -76,6 +76,7 @@ def main():
         begin = time.time()
         # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
         for i in db._collection.find(fields=['_id']).limit(1000):
+            print '%s' % ('='*40)
             try:
                 result = db.checkIntegrity(i['_id'], repair=(not options.noop))
                 print i['_id'], 'PASS'
