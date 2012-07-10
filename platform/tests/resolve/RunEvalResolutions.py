@@ -10,6 +10,7 @@ import pickle
 import re
 import sys
 import tempfile
+import traceback
 import pprint
 
 from api.MongoStampedAPI import globalMongoStampedAPI
@@ -36,16 +37,22 @@ class RunEvalResolutions(AStampedFixtureTestCase):
         resolver = FullResolveContainer.FullResolveContainer()
         api = globalMongoStampedAPI()
         resolutionResult = {}
+
+        formattedErrors = []
+
         for resultList in searchResults.itervalues():
             # TODO(geoff): dedupe the entities before resolve
-            for entity, _ in resultList[:5]:
-                item = HTTPEntitySearchResultsItem()
-                item.importEntity(entity)
-                converted = self.__convertSearchId(item.search_id, resolver)
-                if converted:
-                    entity, proxy = converted
-                    proxyList = self.__getResolverObjects(entity)
-                    resolutionResult[item.search_id] = (item, entity, proxy, proxyList)
+            for entity, _ in resultList[:2]:
+                try:
+                    item = HTTPEntitySearchResultsItem()
+                    item.importEntity(entity)
+                    converted = self.__convertSearchId(item.search_id, resolver)
+                    if converted:
+                        entity, proxy = converted
+                        proxyList = self.__getResolverObjects(entity)
+                        resolutionResult[item.search_id] = (item, entity, proxy, proxyList)
+                except Exception:
+                    formattedErrors.append(traceback.format_exc())
 
         outputMessage = """
         /---------------------------------------------
@@ -55,6 +62,10 @@ class RunEvalResolutions(AStampedFixtureTestCase):
         """
         with tempfile.NamedTemporaryFile(delete=False) as output:
             pickle.dump(resolutionResult, output)
+            if formattedErrors:
+                print('\n\nENCOUNTERED %i ERRORS\n\n' % len(formattedErrors))
+                print('\n\n'.join([''.join(formattedError) for formattedError in formattedErrors]))
+                print('\n\n')
             print outputMessage % output.name
 
         printFunctionCounts()

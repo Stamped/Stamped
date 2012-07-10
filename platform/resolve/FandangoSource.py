@@ -76,6 +76,13 @@ class FandangoMovie(ResolverMediaItem):
     def url(self):
         return self.__data.link
 
+    @lazyProperty
+    def release_date(self):
+        # TODO(geoff): This is a huge huge huge huge hack. We don't get much info from Fandango, but
+        # we only use it for upcoming releases, so we just use now as an approximation of the
+        # release date.
+        return datetime.datetime.now()
+
 
 class FandangoSource(GenericSource):
     def __init__(self):

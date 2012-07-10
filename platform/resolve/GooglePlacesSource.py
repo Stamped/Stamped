@@ -116,7 +116,14 @@ class GooglePlacesPlace(ResolverPlace):
 
     @lazyProperty
     def raw_name(self):
-        return self.data['name']
+        try:
+            return self.data['name']
+        except Exception:
+            print '\n\n\nDATA IS:'
+            import pprint
+            pprint.pprint(self.data)
+            print '\n\n\n'
+            raise
 
     @lazyProperty
     def coordinates(self):

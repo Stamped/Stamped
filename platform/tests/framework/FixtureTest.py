@@ -45,6 +45,7 @@ class FixtureTestRuntimeSettings(Singleton):
         self.useDbFixture = True
         self.useCacheFixture = True
         self.writeFixtureFiles = False
+        self.liveCallsOnCacheMiss = False
 
 
 def defaultFixtureFilename(testCaseInstance, testFn, fixtureType):
@@ -173,7 +174,7 @@ def fixtureTest(generateLocalDbFn=None,
                     issueQueries(generateLocalDbQueries)
 
             if useCacheFixture:
-                MongoCache.exceptionOnCacheMiss = True
+                MongoCache.exceptionOnCacheMiss = not FixtureTestRuntimeSettings.getInstance().liveCallsOnCacheMiss
 
             # The actual DB fixtures we want to snapshot before the function runs, because we don't want to incorporate
             # anything written during the function. But the third-party calls cache we want to snapshot after the
@@ -225,6 +226,11 @@ def main():
     if writeFixtureFilesFlag in argv:
         del argv[argv.index(writeFixtureFilesFlag)]
         FixtureTestRuntimeSettings.getInstance().writeFixtureFiles = True
+
+    liveCallsOnCacheMissFlag = '--live_calls_on_cache_miss'
+    if liveCallsOnCacheMissFlag in argv:
+        del argv[argv.index(liveCallsOnCacheMissFlag)]
+        FixtureTestRuntimeSettings.getInstance().liveCallsOnCacheMiss = True
 
     StampedTestRunner().run()
 

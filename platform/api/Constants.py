@@ -129,6 +129,7 @@ subcategoryData = {
     'artist'            : ( 'music',        [ 'person' ],               [ 'artist' ] ),
     'album'             : ( 'music',        [ 'media_collection' ],     [ 'album' ] ),
     'track'             : ( 'music',        [ 'media_item' ],           [ 'track' ] ),
+    'song'              : ( 'music',        [ 'media_item' ],           [ 'track' ] ),
 
     # Subcategory           Category        Kind                        Type
     'app'               : ( 'app',          [ 'software' ],             [ 'app' ] ),

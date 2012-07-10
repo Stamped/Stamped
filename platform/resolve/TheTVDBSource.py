@@ -14,7 +14,7 @@ import Globals
 from logs import report
 
 try:
-    import logs, utils
+    import logs, traceback, utils
     from resolve.Resolver                   import *
     from resolve.ResolverObject             import *
     from resolve.TitleUtils                 import *
@@ -54,6 +54,10 @@ class _TheTVDBObject(object):
                 data = thetvdb.lookup(thetvdb_id)
             except KeyError:
                 raise ValueError('bad thetvdb_id')
+            except Exception:
+                logs.warning('ERROR looking up TheTVDB ID: %s\n\n%s\n\n' %
+                             (thetvdb_id, traceback.format_exc()))
+                raise
         elif thetvdb_id is not None:
             if thetvdb_id != data.sources.thetvdb_id:
                 raise ValueError('thetvdb_id does not match data["key"]')

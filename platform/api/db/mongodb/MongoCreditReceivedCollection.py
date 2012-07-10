@@ -20,7 +20,7 @@ class MongoCreditReceivedCollection(AMongoCollection):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, noop=False):
+    def checkIntegrity(self, key, repair=True):
 
         def regenerate(key):
             stampIds = set()
@@ -37,7 +37,7 @@ class MongoCreditReceivedCollection(AMongoCollection):
         def keyCheck(key):
             assert self._collection._database['users'].find({'_id': self._getObjectIdFromString(key)}).count() == 1
 
-        return self._checkRelationshipIntegrity(key, keyCheck, regenerate, noop=noop)
+        return self._checkRelationshipIntegrity(key, keyCheck, regenerate, repair=repair)
     
     ### PUBLIC
     

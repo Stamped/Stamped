@@ -22,6 +22,7 @@ exceptions = [
     (StampedNetflixNoInstantWatchError, 403, 'illegal_action', "Netflix account must have instant watch access"),
     (StampedLinkedAccountDoesNotExistError, 400, 'illegal_action', "No such third party account linked to user"),
     (StampedLinkedAccountIsAuthError, 403, 'forbidden', "This third-party account is used for authorization and cannot be removed"),
+    (StampedLinkedAccountAlreadyExistsError, 409, 'invalid_credentials', "Another user is already connected to this third-party account"),
     (StampedThirdPartyError, 403, 'illegal_action', "There was a problem communicating with the third-party service"),
     (StampedLinkedAccountMismatchError, 400, 'illegal_action', "There was a problem verifying the third-party account"),
     (StampedFacebookTokenError, 401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
@@ -144,6 +145,8 @@ def createNetflixLoginResponse(request, netflixAddId=None):
     #source.endpoint         = 'account/linked/netflix/login_callback.json'
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
+    print ('### netflix login response: %s' % response.dataExport())
+
     return transformOutput(response.dataExport())
 
 @handleHTTPRequest(http_schema=HTTPNetflixId,
@@ -157,11 +160,16 @@ def netflixLogin(request, http_schema, authUserId, **kwargs):
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
+
+    logs.info('### http_schema: %s ' % http_schema)
+
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
         result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
+
+
 
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'

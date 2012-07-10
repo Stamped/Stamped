@@ -239,8 +239,13 @@ def buildEntity(data=None, kind=None, mini=False):
     try:
         if data is not None:
             if 'schema_version' not in data:
-                return upgradeEntityData(data)
-            kind = data.pop('kind', kind)
+                data = upgradeEntityData(data).dataExport()
+            if '_id' in data:
+                data['entity_id'] = data['_id']
+                del(data['_id'])
+            kind = None
+            if 'kind' in data:
+                kind = data['kind']
         if mini:
             new = getEntityMiniObjectFromKind(kind)
         else:
@@ -254,7 +259,11 @@ def buildEntity(data=None, kind=None, mini=False):
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
-    old     = entityData
+    old = entityData
+
+    if '_id' in old:
+        old['entity_id'] = str(old['_id'])
+        del(old['_id'])
 
     kind    = deriveKindFromOldSubcategory(old['subcategory'])
     types   = deriveTypesFromOldSubcategories([old['subcategory']])
@@ -267,8 +276,8 @@ def upgradeEntityData(entityData):
 
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time.replace(tzinfo=None)
-    except Exception:
-        logs.warning("Unable to convert ObjectId to timestamp")
+    except Exception as e:
+        logs.warning("Unable to convert ObjectId to timestamp: %s" % e)
         seedTimestamp = datetime.utcnow()
 
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None, seed=True):

@@ -69,7 +69,6 @@ class ResolverObject(object):
     __metaclass__ = ABCMeta
 
     def countLookupCall(self, fieldName):
-
         if (self.__maxLookupCalls is not None) and (self.__maxLookupCalls <= self.__lookupCallsMade):
             # I used to use self.name here, but you get into this weird problem where self.name is a lazyProperty that
             # opens self.data, and self.data requires a lookup, which throws an error here, and for the error text we
@@ -80,7 +79,7 @@ class ResolverObject(object):
 
         self.__lookupCallsMade += 1
 
-    def __repr__(self):
+    def __str__(self):
         # Temporary disable lookup calls because we don't want to make them just for printing.
         # There are some obvious concurrency issues here.
         oldMax = self.__maxLookupCalls
@@ -88,11 +87,14 @@ class ResolverObject(object):
 
         lines = []
         for property in self._properties:
-            propertyValue = getattr(self, property)
-            if isinstance(propertyValue, unicode):
-                propertyValue = propertyValue.encode('utf-8')
-            if propertyValue is not None and propertyValue != [] and propertyValue != '':
-                lines.append('%s\t:%s' % (property, propertyValue))
+            try:
+                propertyValue = getattr(self, property)
+                if isinstance(propertyValue, unicode):
+                    propertyValue = propertyValue.encode('utf-8')
+                if propertyValue is not None and propertyValue != [] and propertyValue != '':
+                    lines.append('%s\t:%s' % (property, propertyValue))
+            except LookupRequiredError:
+                pass
 
         self.__maxLookupCalls = oldMax
         return '\n'.join(lines)

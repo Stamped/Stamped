@@ -10,7 +10,7 @@ __license__   = "TODO"
 import Globals
 from collections import namedtuple
 from search.SearchResult import SearchResult
-from resolve.Resolver import simplify
+from resolve.StringNormalizationUtils import simplify
 from difflib import SequenceMatcher
 from search.DataQualityUtils import *
 

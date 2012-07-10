@@ -73,7 +73,6 @@ class HTTPStampDetail(Schema):
     def __init__(self, *args, **kwargs):
         Schema.__init__(self, *args, **kwargs)
         self.ajax   = False
-        self.mobile = False
     
     @classmethod
     def setSchema(cls):
@@ -81,7 +80,6 @@ class HTTPStampDetail(Schema):
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('stamp_title',                      basestring)
         cls.addProperty('ajax',                             bool)
-        cls.addProperty('mobile',                           bool)
 
 class HTTPObjectId(Schema):
     

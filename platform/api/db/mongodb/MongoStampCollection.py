@@ -12,6 +12,7 @@ from datetime                           import datetime
 from utils                              import lazyProperty
 from api.Schemas                        import *
 from api.Entity                             import buildEntity
+from pprint                             import pprint
 
 from api.AStampDB                       import AStampDB
 from api.db.mongodb.AMongoCollection                   import AMongoCollection
@@ -39,14 +40,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                                         ('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('stats.stamp_num', pymongo.ASCENDING)])
-    
-    def _convertFromMongo(self, document):
+
+    def _upgradeDocument(self, document):
         if document is None:
             return None
-        
-        if '_id' in document and self._primary_key is not None:
-            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
 
         # Convert single-blurb documents into new multi-blurb schema
         if 'contents' not in document:
@@ -54,9 +51,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 created = document['timestamp']['created']
             else:
                 try:
-                    created = ObjectId(document[self._primary_key]).generation_time.replace(tzinfo=None)
-                except Exception:
-                    logs.warning("Unable to convert ObjectId to timestamp")
+                    created = ObjectId(document['_id']).generation_time.replace(tzinfo=None)
+                except Exception as e:
+                    logs.warning("Unable to convert ObjectId to timestamp: %s" % e)
                     created = datetime.utcnow()
             contents =  {
                 'blurb'     : document.pop('blurb', None),
@@ -70,7 +67,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                             {
                                 'width'     : document['image_dimensions'].split(',')[0],
                                 'height'    : document['image_dimensions'].split(',')[1],
-                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['stamp_id'],
+                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['_id'],
                             }
                         ]
                     }
@@ -79,6 +76,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['timestamp']['stamped'] = created
 
         else:
+            # Temp: clean bad dev data (should never exist on prod)
             contents = []
             for content in document['contents']:
                 if 'mentions' in content:
@@ -103,6 +101,18 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                     credit.append(creditItem)
             document['credits'] = credit
 
+        return document
+    
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        document = self._upgradeDocument(document)
+        
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
         entityData = document.pop('entity')
         entity = buildEntity(entityData)
         document['entity'] = {'entity_id': entity.entity_id}
@@ -111,6 +121,88 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         stamp.entity = entity
 
         return stamp 
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        document = self._getMongoDocumentFromId(key)
+
+        modified = False
+        
+        assert document is not None
+
+        # Update stamp to new structure
+        if 'contents' not in document or 'credit' in document:
+            logs.warning("Old stamp schema")
+            document = self._upgradeDocument(document)
+            modified = True
+
+        # Verify that user exists
+        userId = document['user']['user_id']
+        if self._collection._database['users'].find({'_id' : self._getObjectIdFromString(userId)}).count() != 1:
+            raise StampedDataError("User '%s' not found" % userId)
+
+        # Verify that any credited users exist
+        if 'credits' in document:
+            credits = []
+            for credit in document['credits']:
+                creditedUserId = credit['user']['user_id']
+                query = {'_id' : self._getObjectIdFromString(creditedUserId)}
+                if self._collection._database['users'].find(query).count() == 1:
+                    credits.append(credit)
+                else:
+                    modified = True
+            if len(credits) > 0:
+                document['credits'] = credits
+            else:
+                del(document['credits'])
+
+        # Verify that entity exists
+        entityId = document['entity']['entity_id']
+        entity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(entityId)})
+        if entity is None:
+            raise StampedDataError("Entity '%s' not found" % entityId)
+
+        # Check if entity has been tombstoned; update entity if so
+        if 'tombstone_id' in entity['sources'] and entity['sources']['tombstone_id'] is not None:
+            newEntityId = entity['sources']['tombstone_id']
+            logs.warning("Entity '%s' is tombstoned to '%s'" % (entityId, newEntityId))
+            newEntity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(newEntityId)})
+            if newEntity is None:
+                raise StampedDataError("Entity '%s' not found" % newEntityId)
+
+            document['entity'] = buildEntity(newEntity, mini=True).dataExport()
+            modified = True
+
+        # Check if entity stub has been updated
+        else:
+            # Note: Because schema objects use tuples and documents use lists, we need to convert the
+            # raw document into a schema object in order to do the comparison between minis. FML.
+            oldEntityMini = buildEntity(document['entity'], mini=True)
+            newEntityMini = buildEntity(entity, mini=True)
+            document['entity'] = newEntityMini.dataExport() # buildEntity mutates entity, so set it regardless
+            if oldEntityMini != newEntityMini:
+                logs.warning("Upgrading entity mini")
+                modified = True
+
+        stampNum = document['stats']['stamp_num']
+        duplicateStamps = self._collection.find({'user.user_id' : userId, 'stats.stamp_num' : stampNum})
+        if duplicateStamps.count() > 1:
+            duplicateStamps.sort('timestamp.created', pymongo.ASCENDING)
+            raise StampedDataError("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
+
+        if modified and repair:
+            self._collection.update({'_id' : key}, document)
+
+        return True
+
+        # Check if temp_image_url exists -> kick off async process
+        # Check that image[s] have dimensions
+        # Verify image url exists?
+        # Check if stats need to be updated?
+        # Verify that user_id / stamp_num is unique
+
+
     
     ### PUBLIC
     
