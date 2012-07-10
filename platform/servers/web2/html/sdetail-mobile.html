@@ -115,14 +115,14 @@
                             
                             {% if stamp.previews and feedback_users and feedback_users|length > 0 %}
                                 <div class='user-previews clearfix'>
-                                    {% for user_mini in feedback_users|slice:":10" %}
+                                    {% for user_mini in feedback_users|slice:":13" %}
                                         <div class='user-preview {{user_mini.preview_type}}'>
                                             {% handlebars_template "profile-image-tiny" user_mini %}
                                             <div class='user-preview-icon'></div>
                                         </div>
                                     {% endfor %}
                                     
-                                    {% if feedback_users|length > 10 %}
+                                    {% if feedback_users|length > 13 %}
                                         <a class="user-preview expand-popup" href="/popups/sdetail-social?stamp_id={{stamp.stamp_id}}">
                                             <div class="context-popup">Expand list...</div>
                                         </a>
