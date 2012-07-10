@@ -133,6 +133,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             # Verify tombstoned entity still exists
             try:
                 tombstone = self._getMongoDocumentFromId(self._getObjectIdFromString(entity.sources.tombstone_id))
+                tombstone = self._convertFromMongo(tombstone)
             except StampedDocumentNotFoundError:
                 msg = "%s: Tombstoned entity not found" % key
                 if repair:
