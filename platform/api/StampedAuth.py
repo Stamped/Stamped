@@ -176,6 +176,10 @@ class StampedAuth(AStampedAuth):
 
         logs.info("Token created")
 
+        ### Update linked account with latest user token
+        account.linked.facebook.token = fb_token
+        self._accountDB.updateLinkedAccount(account.user_id, account.linked.facebook)
+
         return account, token
 
     def verifyTwitterUserCredentials(self, clientId, user_token, user_secret):
