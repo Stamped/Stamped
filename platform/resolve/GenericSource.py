@@ -178,7 +178,7 @@ class GenericSource(BasicSource):
             entity.tracks = tracks
     
     def entityProxyFromKey(self, key, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError(str(type(self)))
     
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
