@@ -45,7 +45,7 @@ body.main {
 
 
 #intro-iphone {
-    background: url(/assets/img/iphone_intro_sprite.png) no-repeat;
+    background: url(/assets/img/index/iphone_intro_sprite.png) no-repeat;
     
     width:  395px;
     height: 632px;
@@ -196,4 +196,192 @@ body.main {
                                   FOOTER
    ************************************************************************** */
 
+
+/* **************************************************************************
+                                 BUTTONS
+   ************************************************************************** */
+
+
+.pane-nav-button {
+    background: url(/assets/img/index/navdots_sprite.png) no-repeat;
+    width:  16px;
+    height: 16px;
+    
+    &:hover {
+        background-position: -18px 0;
+    }
+    
+    &:active {
+        background-position: -36px 0;
+    }
+}
+
+.active-pane-nav-button {
+    background-position: -36px 0;
+    
+    &:hover {
+        background-position: -36px 0;
+    }
+}
+
+.social-button {
+    background: url(/assets/img/index/social_sprite.png) no-repeat;
+    width:  20px;
+    height: 20px;
+}
+
+.social-button(@x, @offset) {
+    @x2: (@x * @offset);
+    background-position: @x2 0;
+    
+    &:hover, &:active {
+        background-position: @x2 -22px;
+    }
+}
+
+.social-button-twitter {
+    .social-button(0, -22px);
+}
+
+.social-button-facebook {
+    .social-button(1, -22px);
+}
+
+.social-button-google {
+    .social-button(2, -22px);
+}
+
+.app-store-button {
+    background: url(/assets/img/index/appstore_sprite.png) no-repeat;
+    width:  110px;
+    height: 36px;
+    
+    &:hover, &:active {
+        background-position: -112px 0;
+    }
+}
+
+.download-the-app-button {
+    background: url(/assets/img/index/downloadbtn_sprite.png) no-repeat;
+    width:  200px;
+    height: 32px;
+    
+    &:hover {
+        background-position: -202px 0;
+    }
+    
+    &:active {
+        background-position: -404px 0;
+    }
+}
+
+.launcher-icon-button {
+    background: url(/assets/img/index/launchericon_sprite.png) no-repeat;
+    width:  64px;
+    height: 64px;
+    
+    &:hover, &:active {
+        background-position: -66px 0;
+    }
+}
+
+.bieber-preview-button {
+    background: url(/assets/img/index/bieberlittle.gif) no-repeat;
+    width:  45px;
+    height: 45px;
+}
+
+.category-illustration {
+    background: url(/assets/img/index/illustration.png) no-repeat;
+    width:  373px;
+    height: 84px;
+}
+
+#retina {
+    .pane-nav-button {
+        background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
+        width:  31px;
+        height: 31px;
+        
+        &:hover {
+            background-position: -35px 0;
+        }
+        
+        &:active {
+            background-position: -70px 0;
+        }
+    }
+    
+    .active-pane-nav-button {
+        background-position: -70px 0;
+        
+        &:hover {
+            background-position: -70px 0;
+        }
+    }
+    
+    .social-button {
+        background: url(/assets/img/index/social_sprite@2x.png) no-repeat;
+        width:  40px;
+        height: 40px;
+    }
+    
+    .social-button-twitter {
+        .social-button(0, -44px);
+    }
+    
+    .social-button-facebook {
+        .social-button(1, -44px);
+    }
+    
+    .social-button-google {
+        .social-button(2, -44px);
+    }
+    
+    .app-store-button {
+        background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
+        width:  220px;
+        height: 72px;
+        
+        &:hover, &:active {
+            background-position: -224px 0;
+        }
+    }
+    
+    .download-the-app-button {
+        background: url(/assets/img/index/downloadbtn_sprite@2x.png) no-repeat;
+        width:  400px;
+        height: 64px;
+        
+        &:hover {
+            background-position: -404px 0;
+        }
+        
+        &:active {
+            background-position: -808px 0;
+        }
+    }
+    
+    .launcher-icon-button {
+        background: url(/assets/img/index/launchericon_sprite@2x.png) no-repeat;
+        width:  128px;
+        height: 128px;
+        
+        &:hover, &:active {
+            background-position: -132px 0;
+        }
+    }
+    
+    .bieber-preview-button {
+        background: url(/assets/img/index/bieberlittle@2x.gif) no-repeat;
+        width:  90px;
+        height: 90px;
+    }
+    
+    .category-illustration {
+        background: url(/assets/img/index/illustration@2x.png) no-repeat;
+        width:  746px;
+        height: 168px;
+    }
+}
 
