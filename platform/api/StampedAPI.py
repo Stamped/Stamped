@@ -21,7 +21,7 @@ try:
     from api import SchemaValidation
 
     from api.auth                       import convertPasswordForStorage
-    from utils                      import lazyProperty
+    from utils                      import lazyProperty, LoggingThreadPool
     from functools                  import wraps
     from errors                     import *
     from libs.ec2_utils             import is_prod_stack
@@ -4400,24 +4400,39 @@ class StampedAPI(AStampedAPI):
                 break
 
         proxies = []
-        for sourceIdentifier, key in sourcesAndKeys:
-            source = sources[sourceIdentifier.lower()]()
-            try:
-                proxy = source.entityProxyFromKey(source_id)
-                if not proxies:
-                    # This is the first proxy, so we'll try to resolve against Stamped.
-                    results = stamped.resolve(proxy)
+        if not entity_id:
+            seenSourceNames = set()
+            entity_ids = []
+            pool = LoggingThreadPool(len(sources))
+            for sourceIdentifier, key in sourcesAndKeys:
+                if sourceIdentifier in seenSourceNames:
+                    continue
+                seenSourceNames.add(sourceIdentifier)
 
-                    if len(results) > 0 and results[0][0]['resolved']:
-                        # We were able to find a match in the Stamped DB.
-                        entity_id = results[0][1].key
-                        break
+                def loadProxy():
+                    source = sources[sourceIdentifier.lower()]()
+                    try:
+                        proxy = source.entityProxyFromKey(source_id)
+                        proxies.append(proxy)
+                        if len(proxies) == 1:
+                            # This is the first proxy, so we'll try to resolve against Stamped.
+                            results = stamped.resolve(proxy)
 
-                proxies.append(proxy)
+                            if len(results) > 0 and results[0][0]['resolved']:
+                                # We were able to find a match in the Stamped DB.
+                                entity_ids.append(results[0][1].key)
+                                pool.kill()
 
-            except KeyError:
-                logs.warning('Failed to load key %s from source %s; exception body:\n%s' %
-                             (key, sourceIdentifier, traceback.format_exc()))
+                    except KeyError:
+                        logs.warning('Failed to load key %s from source %s; exception body:\n%s' %
+                                     (key, sourceIdentifier, traceback.format_exc()))
+
+                pool.spawn(loadProxy)
+
+            MAX_LOOKUP_TIME=2.5
+            pool.join(timeout=MAX_LOOKUP_TIME)
+            if entity_ids:
+                entity_id = entity_ids[0]
 
         if not entity_id and not proxies:
             logs.warning('Completely unable to create entity from search ID: ' + search_id)
@@ -4428,6 +4443,7 @@ class StampedAPI(AStampedAPI):
             for proxy in proxies[1:]:
                 entityBuilder.addSource(EntityProxySource(proxy))
             entity = entityProxy.buildEntity()
+            entity.third_party_ids = id_components
 
             entity = self._entityDB.addEntity(entity)
             entity_id = entity.entity_id

@@ -862,17 +862,17 @@ class BasicEntity(BasicEntityMini):
             return
 
         ids = [
-            (self.sources.itunes_id,                'T_ITUNES_'),
-            (self.sources.rdio_id,                  'T_RDIO_'),
-            (self.sources.spotify_id,               'T_SPOTIFY_'),
-            (self.sources.opentable_id,             'T_OPENTABLE_'),
-            (self.sources.googleplaces_reference,   'T_GOOGLEPLACES_'),
-            (self.sources.factual_id,               'T_FACTUAL_'),
-            (self.sources.tmdb_id,                  'T_TMDB_'),
-            (self.sources.thetvdb_id,               'T_THETVDB_'),
-            (self.sources.amazon_id,                'T_AMAZON_'),
-            (self.sources.fandango_id,              'T_FANDANGO_'),
-            (self.sources.netflix_id,               'T_NETFLIX_'),
+            (self.sources.itunes_id,                'ITUNES_'),
+            (self.sources.rdio_id,                  'RDIO_'),
+            (self.sources.spotify_id,               'SPOTIFY_'),
+            (self.sources.opentable_id,             'OPENTABLE_'),
+            (self.sources.googleplaces_reference,   'GOOGLEPLACES_'),
+            (self.sources.factual_id,               'FACTUAL_'),
+            (self.sources.tmdb_id,                  'TMDB_'),
+            (self.sources.thetvdb_id,               'THETVDB_'),
+            (self.sources.amazon_id,                'AMAZON_'),
+            (self.sources.fandango_id,              'FANDANGO_'),
+            (self.sources.netflix_id,               'NETFLIX_'),
         ]
 
         third_party_ids = []
