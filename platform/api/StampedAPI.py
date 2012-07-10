@@ -846,21 +846,21 @@ class StampedAPI(AStampedAPI):
         if service_name == 'facebook':
             if linkedAccount.token is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide an access token for facebook account")
-
-            userInfo = self._facebook.getUserInfo(linkedAccount.token)
             self._verifyFacebookAccount(userInfo['id'])
+            userInfo = self._facebook.getUserInfo(linkedAccount.token)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
+
         elif service_name == 'twitter':
             if linkedAccount.token is None or linkedAccount.secret is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for twitter account")
-
             userInfo = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
             self._verifyTwitterAccount(userInfo['id'])
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_screen_name = userInfo['screen_name']
+            
         elif service_name == 'netflix':
             if linkedAccount.token is None or linkedAccount.secret is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for netflix account")
