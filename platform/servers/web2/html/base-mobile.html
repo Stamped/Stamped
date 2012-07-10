@@ -15,7 +15,7 @@
         <meta name="author"             content="Stamped, Inc.">
         <meta name="copyright"          content="Stamped, Inc.">
         <meta name="robots"             content="index,follow">
-        <meta name="viewport"           content="width=device-width,initial-scale=1,maximum-scale=1">
+        <meta name="viewport"           content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
         <meta name="application-name"   content="Stamped">
         
         <!-- icons -->
@@ -40,7 +40,7 @@
     {% endblock post_head %}
     
     {% block pre_body %}
-    <body id="retina" {% if body_classes %}class="{{ body_classes }}"{% endif %}>
+    <body {% if body_classes %}class="{{ body_classes }}"{% endif %}>
         <div id="fb-root"></div>
         {% endblock pre_body %}
         
