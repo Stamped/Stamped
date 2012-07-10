@@ -176,7 +176,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         else:
             # Note: Because schema objects use tuples and documents use lists, we need to convert the
             # raw document into a schema object in order to do the comparison.
-            entityMini = buildEntity(entity).minimize()
+            entityMini = buildEntity(entity, mini=True)
             if buildEntity(document['entity'], mini=True) != entityMini:
                 logs.warning("Upgrading entity mini")
                 document['entity'] = entityMini.dataExport()
