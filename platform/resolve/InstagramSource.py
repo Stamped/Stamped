@@ -101,6 +101,11 @@ class InstagramSource(GenericSource):
     def __instagram(self):
         return globalInstagram()
 
+    def entityProxyFromKey(self, key):
+        response = self.__instagram.place_lookup(key)
+        if response:
+            return InstagramPlace(response['data'])
+
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
         entity.sources.instagram_id = proxy.key
