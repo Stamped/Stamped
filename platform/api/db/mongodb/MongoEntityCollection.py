@@ -107,14 +107,24 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         # Check if old version
         if 'schema_version' not in document:
-            modified = True
+            msg = "Old schema version"
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
 
         entity = self._convertFromMongo(document)
 
         ### TODO: Implement after Paul commits third_party_ids
         if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
-            entity._maybeRegenerateThirdPartyIds()
-            modified = True
+            msg = "Missing third_party_ids"
+            if repair:
+                logs.info(msg)
+                entity._maybeRegenerateThirdPartyIds()
+                modified = True
+            else:
+                raise StampedDataError(msg)
 
         # Verify tombstone is set properly
         if entity.sources.tombstone_id is not None:
@@ -141,7 +151,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 msg = "Menu missing for entity '%s'" % entity.entity_id
                 if repair:
                     logs.info(msg)
-                    entity.menu = False
+                    del(entity.menu)
+                    del(entity.menu_source)
+                    del(entity.menu_timestamp)
                     modified = True
                 else:
                     raise StampedDataError(msg)
