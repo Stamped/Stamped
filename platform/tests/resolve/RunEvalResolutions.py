@@ -87,7 +87,7 @@ class RunEvalResolutions(AStampedFixtureTestCase):
     def __getResolverObjects(self, entity):
         result = []
         for sourceName, sourceObj in SOURCES.iteritems():
-            sourceId = getattr(entity.SOURCES, sourceName, None)
+            sourceId = getattr(entity.sources, sourceName, None)
             if sourceId:
                 result.append(sourceObj.entityProxyFromKey(sourceId))
         return result
