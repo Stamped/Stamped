@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import difflib
 import os
+import logs
 import pickle
 import pprint
 import random
@@ -80,18 +81,22 @@ def writeComparisons(oldResults, newResults, outputDir):
         filename = key[:40] + '.html'
         oldData = __stripEntity(oldResolved.dataExport())
         newData = __stripEntity(newResolved.dataExport())
-        with open(path.join(outputDir, filename), 'w') as fout:
-            print >> fout, DIFF_FILE_HEADER
-            print >> fout, '<h1>%s</h1>' % 'Input'
-            print >> fout, '<pre class="diff">'
-            pprint.pprint(original.dataExport(), fout)
-            print >> fout, '</pre><h1>%s</h1>' % 'Proxy'
-            print >> fout, '<pre class="diff">%s</pre>' % str(oldProxy)
-            print >> fout, '<h1>%s</h1>' % 'Resolve output'
-            print >> fout, __createDiffTable(pprint.pformat(oldData), pprint.pformat(newData))
-            print >> fout, '<h1>%s</h1>' % 'List of resolver objects:'
-            print >> fout, __createDiffTable(__formatProxyList(oldProxyList), __formatProxyList(newProxyList))
-            print >> fout, '</body></html>'
+        try:
+            with open(path.join(outputDir, filename), 'w') as fout:
+                print >> fout, DIFF_FILE_HEADER
+                print >> fout, '<h1>%s</h1>' % 'Input'
+                print >> fout, '<pre class="diff">'
+                pprint.pprint(original.dataExport(), fout)
+                print >> fout, '</pre><h1>%s</h1>' % 'Proxy'
+                print >> fout, '<pre class="diff">%s</pre>' % str(oldProxy)
+                print >> fout, '<h1>%s</h1>' % 'Resolve output'
+                print >> fout, __createDiffTable(pprint.pformat(oldData), pprint.pformat(newData))
+                print >> fout, '<h1>%s</h1>' % 'List of resolver objects:'
+                print >> fout, __createDiffTable(__formatProxyList(oldProxyList), __formatProxyList(newProxyList))
+                print >> fout, '</body></html>'
+        except Exception:
+            logs.warning('Error writing diff file!')
+            logs.report()
         diffLink = '<td><a href="%s">show diffs</a></td>' % filename
 
         tableRow = '<tr><td>%s</td>%s</tr>' % (original.title[:100], diffLink)
