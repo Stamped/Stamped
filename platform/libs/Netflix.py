@@ -147,13 +147,6 @@ class Netflix(object):
             else:
                 raise StampedThirdPartyError(message)
 
-    # note: these decorators add tiered caching to this function, such that
-    # results will be cached locally with a very small LRU cache of 64 items
-    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
-#    @countedFn('Netflix (before caching)')
-#    @lru_cache(maxsize=64)
-#    @cachedFn()
-#    @countedFn('Netflix (after caching)')
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 
@@ -180,6 +173,13 @@ class Netflix(object):
                 return item[returnKey]
         return None
 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('Netflix (before caching)')
+    @lru_cache(maxsize=64)
+    @cachedFn()
+    @countedFn('Netflix (after caching)')
     def autocomplete(self, term):
         results = self.__get(
             service         = 'catalog/titles/autocomplete',
@@ -195,6 +195,13 @@ class Netflix(object):
         return completions
 
 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('Netflix (before caching)')
+    @lru_cache(maxsize=64)
+    @cachedFn()
+    @countedFn('Netflix (after caching)')
     def searchTitles(self, title, start=0, count=100):
         """
         Searches the netflix catalog for titles with a given search string.
@@ -209,6 +216,13 @@ class Netflix(object):
                     )
         return results.get('catalog_titles', None)
 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn('Netflix (before caching)')
+    @lru_cache(maxsize=64)
+    @cachedFn()
+    @countedFn('Netflix (after caching)')
     def getTitleDetails(self, netflix_id):
         results = self.__get(
             service         = netflix_id,
