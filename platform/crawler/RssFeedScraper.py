@@ -13,9 +13,10 @@ import feedparser
 import sys
 
 from optparse import OptionParser
-from pprint import pformat
+from pprint import pprint
 
 from api.MongoStampedAPI import globalMongoStampedAPI
+from resolve.AmazonSource import AmazonBook
 from resolve.EntityProxyContainer import EntityProxyContainer
 from resolve.FandangoSource import FandangoMovie
 from resolve.StampedSource import StampedSource
@@ -23,8 +24,14 @@ from resolve.ResolverObject import *
 from utils import lazyProperty
 
 FEED_SOURCES = {
+    # TODO(geoff): add in the top box office list. It needs a bit of cleaning
     'fandango_upcoming' : ('http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=5348839', FandangoMovie.createMovieFromData),
-    'fandango_current' : ('http://www.fandango.com/rss/openingthisweekmobile.rss?pid=5348839', FandangoMovie.createMovieFromData),
+    'fandango_opening' : ('http://www.fandango.com/rss/openingthisweekmobile.rss?pid=5348839', FandangoMovie.createMovieFromData),
+
+    'amazon_book_new' : ('http://www.amazon.com/gp/rss/new-releases/books', AmazonBook.createFromRssEntry),
+    'amazon_book_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/books', AmazonBook.createFromRssEntry),
+    'amazon_kindle_new' : ('http://www.amazon.com/gp/rss/new-releases/digital-text', AmazonBook.createFromRssEntry),
+    'amazon_kindle_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/digital-text', AmazonBook.createFromRssEntry),
 }
 
 
@@ -60,6 +67,9 @@ def main():
     parser.add_option("--save_to_db", action='store_true', dest='saveToDb', default=False)
 
     options, args = parser.parse_args()
+    if len(args) == 1 and args[0] == 'all':
+        args = FEED_SOURCES.keys()
+
     for source in args:
         if source not in FEED_SOURCES:
             print >> sys.stderr, 'Source "%s" not found. Valid sources are: %s' % (source, FEED_SOURCES.keys())
@@ -76,7 +86,7 @@ def main():
             mergeProxyIntoDb(proxy, stampedApi, stampedSource)
     else:
         for proxy in proxies:
-            print proxy
+            pprint(proxy)
 
 if __name__ == '__main__':
     main()
