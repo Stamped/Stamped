@@ -153,7 +153,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 else:
                     modified = True
             if len(credits) > 0:
-                document['credits'] = credit 
+                document['credits'] = credits
             else:
                 del(document['credits'])
 
