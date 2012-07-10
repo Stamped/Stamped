@@ -8,6 +8,12 @@
 
 (function() {
     $(document).ready(function() {
+        
+        // ---------------------------------------------------------------------
+        // initialize utils
+        // ---------------------------------------------------------------------
+        
+        
         jQuery.ease = function(start, end, duration, easing, callback) {
             // create a jQuery element that we'll be animating internally
             var easer = $("<div>");
@@ -35,6 +41,12 @@
             });
         };
         
+        
+        // ---------------------------------------------------------------------
+        // initialize intro animation
+        // ---------------------------------------------------------------------
+        
+        
         $("#iphone-intro").click(function(event) {
             var $this = $(this);
             
@@ -43,6 +55,33 @@
                 
                 $this.css('background-position', v + "px 0");
             });
+        });
+        
+        
+        var active_text = 'active-text';
+        var active_line = 'active-line';
+        
+        var $texts = $(".text");
+        var index  = Math.floor(Math.random() * $texts.length);
+        $texts.eq(index).addClass("active-text");
+        
+        $(".line").fitText();
+        $(".line").click(function(event) {
+            event.preventDefault();
+            var $active = $(".active-line");
+            
+            var $next = $active.next('.line');
+            
+            if ($next.length <= 0) {
+                $next = $active.parents(".text").find(".line").first();
+            }
+            
+            if ($next.length > 0) {
+                $active.removeClass(active_line);
+                $next.addClass(active_line);
+            }
+            
+            return false;
         });
     });
 })();
