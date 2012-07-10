@@ -45,6 +45,6 @@ class SearchResult(object):
         if self.__dataQualityDebugInfo:
             dataQualityScoringDetails = '\n'.join(['  %s: %f' % component for component in self.__dataQualityDebugInfo])
             reprComponents.append('Data quality score details:\n%s' % dataQualityScoringDetails)
-        reprComponents.append('Result:\n%s' % indentText(str(self.resolverObject), 4))
+        reprComponents.append('Result:\n%s' % indentText(unicode(self.resolverObject).encode('utf-8'), 4))
 
         return '\n'.join(reprComponents)
