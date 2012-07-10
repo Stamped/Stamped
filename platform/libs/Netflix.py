@@ -17,7 +17,7 @@ from libs.LRUCache               import lru_cache
 from libs.CachedFunction         import cachedFn
 from libs.CountedFunction   import countedFn
 
-HOST              = 'api.netflix.com'
+HOST              = 'api-public.netflix.com'
 PORT              = '80'
 REQUEST_TOKEN_URL = 'http://api-public.netflix.com/oauth/request_token'
 ACCESS_TOKEN_URL  = 'http://api-public.netflix.com/oauth/access_token'
@@ -95,7 +95,7 @@ class Netflix(object):
                 url = "http://%s/%s" % (HOST, service)
             else:
                 url = "http://%s/users/%s/%s" % (HOST, user_id, service)
-        #parameters['output'] = 'json'
+        parameters['output'] = 'json'
         # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so never mind it
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url=url,
@@ -150,10 +150,10 @@ class Netflix(object):
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
-    @countedFn('Netflix (before caching)')
-    @lru_cache(maxsize=64)
-    @cachedFn()
-    @countedFn('Netflix (after caching)')
+#    @countedFn('Netflix (before caching)')
+#    @lru_cache(maxsize=64)
+#    @cachedFn()
+#    @countedFn('Netflix (after caching)')
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 
