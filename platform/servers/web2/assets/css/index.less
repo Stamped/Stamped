@@ -25,6 +25,12 @@ body {
     background: #f2f2f2;
 }
 
+body.intro {
+    #main, footer {
+        display: none;
+    }
+}
+
 
 /* **************************************************************************
                                     INTRO
@@ -86,4 +92,58 @@ body {
         display: block;
     }
 }
+
+
+/* **************************************************************************
+                               CORE PAGE CONTENT
+   ************************************************************************** */
+
+
+#main {
+    position: absolute;
+    left: 50%;
+    margin-left: -350px;
+    
+    .pane {
+        width: 470px;
+        overflow-y: auto;
+        background: #fff;
+        
+        opacity: 0;
+        .transition(opacity, .4s, ease);
+        
+        .pane-body {
+            margin: 24px 48px;
+            
+            .title {
+                .stamped-font();
+                font-size: 3em;
+            }
+        }
+    }
+    
+    .active-pane {
+        opacity: 1;
+    }
+}
+
+#main-body {
+    position: relative;
+}
+
+#stamped-logo {
+    position: absolute;
+    
+    background: url(/assets/img/stamped-logo.png) no-repeat;
+    width:  180px;
+    height: 180px;
+    top:   -150px;
+    left:  -90px;
+}
+
+
+/* **************************************************************************
+                                  FOOTER
+   ************************************************************************** */
+
 

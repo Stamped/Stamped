@@ -114,7 +114,7 @@
         
         
         // ---------------------------------------------------------------------
-        // initialize intro animation
+        // intro animation
         // ---------------------------------------------------------------------
         
         
@@ -128,8 +128,9 @@
         
         $(".line").fitText();
         
-        var $intro_iphone = $("#intro-iphone");
-        var $intro_hero   = $("#intro-hero");
+        var $intro_iphone   = $("#intro-iphone");
+        var $intro_hero     = $("#intro-hero");
+        var $body           = $("body");
         
         var intro_iphone_animation = new Animation({
             start       : 1, 
@@ -151,7 +152,12 @@
                     top : offset
                 }, {
                     duration : 800, 
-                    easing   : "swing"
+                    easing   : "swing", 
+                    complete : function() {
+                        // intro animation is fully complete here
+                        $body.removeClass("intro");
+                        init_main();
+                    }
                 });
             }
         });
@@ -186,6 +192,21 @@
         });
         
         intro_animation.start();
+        
+        
+        // ---------------------------------------------------------------------
+        // core page content
+        // ---------------------------------------------------------------------
+        
+        
+        var init_main = function() {
+            // vertically center the page's main content
+            var $main = $("#main");
+            var height = $main.height();
+            var offset = Math.max(0, (window.innerHeight - height) / 2);
+            
+            $main.css('top', offset + "px");
+        };
     });
 })();
 

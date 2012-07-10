@@ -21,6 +21,7 @@ def index(request, **kwargs):
     
     return stamped_render(request, 'index.html', {
         'autoplay_video' : autoplay_video, 
+        'body_classes'   : "index intro", 
     })
 
 @stamped_view()
