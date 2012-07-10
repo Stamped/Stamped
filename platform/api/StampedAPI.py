@@ -846,8 +846,8 @@ class StampedAPI(AStampedAPI):
         if service_name == 'facebook':
             if linkedAccount.token is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide an access token for facebook account")
-            self._verifyFacebookAccount(userInfo['id'])
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
+            self._verifyFacebookAccount(userInfo['id'])
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
             if 'username' in userInfo:
