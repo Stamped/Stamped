@@ -273,6 +273,15 @@ class NetflixSource(GenericSource):
 #        except KeyError:
 #            raise
 
+    def getId(self, entity):
+        idField = getattr(entity.sources, self.idField)
+        try:
+            int(idField)
+            # ID fields that are just integers are broken.
+            return None
+        except Exception:  # Could be ValueError (if it's a string) or TypeError (if it's None)
+            return idField
+
     def entityProxyFromKey(self, netflix_id, **kwargs):
         try:
             titleObj = self.__netflix.getTitleDetails(netflix_id)

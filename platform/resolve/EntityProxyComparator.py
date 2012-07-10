@@ -370,21 +370,15 @@ class BookEntityProxyComparator(AEntityProxyComparator):
     def compare_proxies(cls, book1, book2):
         """
         """
-        print 'COMPARING BOOKS: "%s" (%s) and "%s" (%s)' % (book1.name, book1.key, book2.name, book2.key)
         title_similarity = cls._compare_titles(book1.name, book2.name)
-        print 'TITLE SIMILARITY:', title_similarity
         if book1.isbn and book1.isbn == book2.isbn and title_similarity > 0.5:
-            print 'GOT THE ISBN THING AND IM GOING WITH IS'
             return CompareResult.match(title_similarity + 1)
         if title_similarity < 0.75:
-            print 'QUITTIN TIME'
             return CompareResult.unknown()
 
         try:
             # TODO: Look for multiple authors, try to match intelligently.
-            print 'GETTING AUTHOR SIMILARITY'
             author_similarity = cls._compare_authors(book1.authors[0]['name'], book2.authors[0]['name'])
-            print 'AUTHOR SIMILARITY:', author_similarity
             if title_similarity + author_similarity > 1.7:
                 return CompareResult.match(title_similarity + author_similarity)
         except KeyError:
