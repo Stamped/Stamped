@@ -4390,7 +4390,7 @@ class StampedAPI(AStampedAPI):
         sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:/]+)$')
         sourcesAndKeys = []
         for component in id_components:
-            match = sourceAndKey Re.match(component)
+            match = sourceAndKeyRe.match(component)
             if not match:
                 logs.warning('Unable to parse search ID component:' + component)
             else:
