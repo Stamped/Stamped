@@ -247,7 +247,7 @@ class PlaceImageCollage(AImageCollage):
         
         for size in self._sizes:
             map_url = "https://maps.googleapis.com/maps/api/staticmap?sensor=false&scale=1&format=jpg&maptype=roadmap&size=%dx%d&%smarkers=%s&key=%s" % (size[0], size[1], bounds, markers, API_KEY)
-            image   = self._db.getWebImage(map_url)
+            image   = utils.getWebImage(map_url)
             
             image   = self._apply_postprocessing(image, user)
             images.append(image)

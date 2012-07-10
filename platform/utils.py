@@ -14,6 +14,7 @@ import htmlentitydefs, threading, time, traceback, urllib, urllib2
 import keys.aws, logs, math, random, boto, bson
 import libs.ec2_utils
 import functools
+import PIL, Image, ImageFile
 
 from errors              import *
 from boto.ec2.connection import EC2Connection
@@ -23,6 +24,7 @@ from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
 from gevent.pool         import Pool
+
 
 
 class LoggingThreadPool(object):
@@ -1050,3 +1052,32 @@ def basicNestedObjectToString(obj, wrapStrings=False):
     # TODO: should fallback to a simple str(obj)?
     raise Exception('Can\'t string-ify object of type: ' + type(obj))
 
+
+def getImage(data):
+    assert isinstance(data, basestring)
+    
+    io = StringIO(data)
+    im = Image.open(io)
+    
+    return im
+
+def getWebImage(url, desc=None):
+    try:
+        data = getFile(url)
+    except urllib2.HTTPError:
+        desc = ("%s " % desc if desc is not None else "")
+        logs.warning("unable to download %simage from '%s'" % (url, desc))
+        raise
+    
+    return getImage(data)
+
+def getWebImageSize(url):
+    try:
+        data = getFile(url)
+    except urllib2.HTTPError:
+        logs.warning("Unable to download image: %s" % url)
+        raise
+
+    img = getImage(data)
+
+    return img.size[0], img.size[1]

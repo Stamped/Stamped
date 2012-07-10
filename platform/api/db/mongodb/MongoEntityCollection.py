@@ -10,7 +10,7 @@ from logs       import report
 
 try:
     from datetime                       import datetime
-    from utils                          import lazyProperty, getHeadRequest
+    from utils                          import lazyProperty, getHeadRequest, getWebImageSize
     from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
@@ -112,8 +112,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         entity = self._convertFromMongo(document)
 
         ### TODO: Implement after Paul commits third_party_ids
-        # if entity.third_party_ids is None or not entity.third_party_ids:
-        #     entity._maybeRegenerateThirdPartyIds()
+        if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
+            entity._maybeRegenerateThirdPartyIds()
+            modified = True
 
         # Verify tombstone is set properly
         if entity.sources.tombstone_id is not None:
@@ -137,17 +138,54 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         # Menu check
         if entity.kind == 'place' and entity.menu == True:
             if self._collection._database['menus'].find({'_id': self._getObjectIdFromString(entity.entity_id)}).count() == 0:
-                raise StampedDataError("Menu is missing: '%s'" % entity.entity_id)
+                msg = "Menu missing for entity '%s'" % entity.entity_id
+                if repair:
+                    logs.info(msg)
+                    entity.menu = False
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
 
         # Verify image exists
         if entity.images is not None:
+            images = []
             for image in entity.images:
+                sizes = []
                 for size in image.sizes:
                     if getHeadRequest(size.url) is None:
-                        raise StampedDataError("Image is unavailable for entity '%s': '%s'" % \
-                            (entity.entity_id, size.url))
+                        msg = "Image is unavailable for entity '%s': '%s'" % (entity.entity_id, size.url)
+                        if repair:
+                            logs.info(msg)
+                            modified = True
+                            continue
+                        else:
+                            raise StampedDataError(msg)
                     if size.width is None or size.height is None:
-                        raise StampedDataError("Image width / height not defined: '%s'" % entity.entity_id)
+                        msg = "Image width / height not defined for entity '%s': '%s'" % (entity.entity_id, size.url)
+                        if repair:
+                            logs.info(msg)
+                            try:
+                                size.width, size.height = getWebImageSize(size.url)
+                                modified = True
+                            except Exception as e:
+                                logs.warning("Could not get image sizes: %s" % e)
+                                raise 
+                        else:
+                            raise StampedDataError(msg)
+                    sizes.append(size)
+                if len(sizes) > 0:
+                    image.sizes = sizes
+                    images.append(image)
+            if len(images) > 0:
+                entity.images = images
+            else:
+                del(entity.images)
+
+        if modified and repair:
+            from pprint import pprint
+            print '%s' % ('='*40)
+            pprint(entity.dataExport())
+            print '%s' % ('='*40)
 
         return True
 
