@@ -877,7 +877,8 @@ class BasicEntity(BasicEntityMini):
 
         third_party_ids = []
         for (id_value, prefix) in ids:
-            third_party_ids.append(prefix + id_value)
+            if id_value:
+                third_party_ids.append(prefix + id_value)
 
         self.third_party_ids = third_party_ids
 
