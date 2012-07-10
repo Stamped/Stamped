@@ -1978,9 +1978,9 @@ class HTTPEntity(Schema):
 class HTTPEntityNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('title',                            basestring, required=True)
-        cls.addProperty('category',                         basestring, required=True)
-        cls.addProperty('subcategory',                      basestring, required=True)
+        cls.addProperty('title',                            basestring, required=True, cast=validateString)
+        cls.addProperty('category',                         basestring, required=True, cast=validateCategory)
+        cls.addProperty('subcategory',                      basestring, required=True, cast=validateSubcategory)
         cls.addProperty('subtitle',                         basestring, cast=validateString)
         cls.addProperty('desc',                             basestring, cast=validateString)
 

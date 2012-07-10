@@ -165,21 +165,22 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         # Check if entity has been tombstoned; update entity if so
         if 'tombstone_id' in entity['sources'] and entity['sources']['tombstone_id'] is not None:
-            logs.warning("Stamp is tombstoned")
             newEntityId = entity['sources']['tombstone_id']
+            logs.warning("Entity '%s' is tombstoned to '%s'" % (entityId, newEntityId))
             newEntity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(newEntityId)})
             if newEntity is None:
                 raise StampedDataError("Entity '%s' not found" % newEntityId)
 
-            document['entity'] = buildEntity(newEntity).minimize().dataExport()
+            document['entity'] = buildEntity(newEntity, mini=True).dataExport()
             modified = True
+
         # Check if entity stub has been updated
         else:
             # Note: Because schema objects use tuples and documents use lists, we need to convert the
-            # raw document into a schema object in order to do the comparison.
+            # raw document into a schema object in order to do the comparison between minis. FML.
             oldEntityMini = buildEntity(document['entity'], mini=True)
             newEntityMini = buildEntity(entity, mini=True)
-            document['entity'] = newEntityMini.dataExport() # buildEntity mutates entity
+            document['entity'] = newEntityMini.dataExport() # buildEntity mutates entity, so set it regardless
             if oldEntityMini != newEntityMini:
                 logs.warning("Upgrading entity mini")
                 modified = True
@@ -191,8 +192,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             raise StampedDataError("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
 
         if modified and repair:
-            pprint(document)
-            # self._collection.update({'_id' : key}, document)
+            self._collection.update({'_id' : key}, document)
 
         return True
 
