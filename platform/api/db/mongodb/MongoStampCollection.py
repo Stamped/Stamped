@@ -174,9 +174,12 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             modified = True
         # Check if entity stub has been updated
         else:
-            entityMini = buildEntity(entity).minimize().dataExport()
-            if document['entity'] != entityMini:
-                document['entity'] = entityMini
+            # Note: Because schema objects use tuples and documents use lists, we need to convert the
+            # raw document into a schema object in order to do the comparison.
+            entityMini = buildEntity(entity).minimize()
+            if buildEntity(document['entity'], mini=True) != entityMini:
+                logs.warning("Upgrading entity mini")
+                document['entity'] = entityMini.dataExport()
                 modified = True
 
         stampNum = document['stats']['stamp_num']
