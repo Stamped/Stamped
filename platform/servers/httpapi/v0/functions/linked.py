@@ -158,13 +158,16 @@ def netflixLogin(request, http_schema, authUserId, **kwargs):
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     netflix = globalNetflix()
+
+    logs.info('### http_schema: %s ' % http_schema)
+
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
         result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
 
-    logs.info('### http_schema: %s   result: %s' (http_schema, result))
+
 
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
