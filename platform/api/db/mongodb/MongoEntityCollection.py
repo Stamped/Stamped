@@ -105,7 +105,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         modified = False
 
-        # Check if old version
+        # Check if old schema version
         if 'schema_version' not in document:
             msg = "%s: Old schema" % key
             if repair:
@@ -116,7 +116,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         entity = self._convertFromMongo(document)
 
-        ### TODO: Implement after Paul commits third_party_ids
+        # Generate third_party_ids if it doesn't exist
         if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
             msg = "%s: Missing third_party_ids" % key
             if repair:
@@ -132,7 +132,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
             # Verify tombstoned entity still exists
             try:
-                tombstone = self._getMongoDocumentFromId(entity.sources.tombstone_id)
+                tombstone = self._getMongoDocumentFromId(self._getObjectIdFromString(entity.sources.tombstone_id))
             except StampedDocumentNotFoundError:
                 msg = "%s: Tombstoned entity not found" % key
                 if repair:
