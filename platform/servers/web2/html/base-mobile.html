@@ -75,16 +75,16 @@
             {% block footer %}
                 <div class="ribbon-bottom"></div>
                 
-                <ol class="footer-nav">
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/about">About Us</a></li>
-                    <li><a href="/help">Help</a></li>
+                <div id="footer-nav">
+                    <a href="/" class="nav">Home</a></li>
+                    <a href="/about" class="nav rhs">About</a></li>
+                    <a href="/help" class="nav rhs">Help</a></li>
                     
                     <br />
                     
-                    <li><a href="/blog">Blog</a></li>
-                    <li><a href="/legal">Legal</a></li>
-                </ol>
+                    <a href="/blog" class="nav">Blog</a>
+                    <a href="/legal" class="nav rhs">Legal</a>
+                </div>
                 
                 <a href="/" class="made-in-nyc-logo"></a>
             {% endblock footer %}

@@ -179,6 +179,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             entityMini = buildEntity(entity, mini=True)
             if buildEntity(document['entity'], mini=True) != entityMini:
                 logs.warning("Upgrading entity mini")
+                logs.debug("New entity: %s" % entityMini)
                 document['entity'] = entityMini.dataExport()
                 modified = True
 
@@ -189,8 +190,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             raise StampedDataError("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
 
         if modified and repair:
-            print "UPDATED: %s" % document
-            # self._collection.update({'_id' : key}, stamp)
+            self._collection.update({'_id' : key}, document)
 
         return True
 
