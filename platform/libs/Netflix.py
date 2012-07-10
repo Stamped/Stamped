@@ -17,7 +17,7 @@ from libs.LRUCache               import lru_cache
 from libs.CachedFunction         import cachedFn
 from libs.CountedFunction   import countedFn
 
-HOST              = 'api-public.netflix.com'
+HOST              = 'api.netflix.com'
 PORT              = '80'
 REQUEST_TOKEN_URL = 'http://api-public.netflix.com/oauth/request_token'
 ACCESS_TOKEN_URL  = 'http://api-public.netflix.com/oauth/access_token'
