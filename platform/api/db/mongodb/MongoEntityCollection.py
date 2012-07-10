@@ -129,7 +129,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         # Verify tombstone is set properly
         if entity.sources.tombstone_id is not None:
             tombstone = None
-            
+
             # Verify tombstoned entity still exists
             try:
                 tombstone = self._getMongoDocumentFromId(entity.sources.tombstone_id)
@@ -179,7 +179,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             for image in entity.images:
                 sizes = []
                 for size in image.sizes:
-                    if getHeadRequest(size.url) is None:
+                    if getHeadRequest(size.url, maxDelay=60) is None:
                         msg = "%s: Image is unavailable (%s)" % (key, size.url)
                         if repair:
                             logs.info(msg)
@@ -210,7 +210,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         if modified and repair:
             from pprint import pprint
-            pprint(entity.dataExport())
+            # pprint(entity.dataExport())
+            print 'UPDATED:', entity.title
 
         return True
 

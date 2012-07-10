@@ -967,14 +967,13 @@ class HeadRequest(urllib2.Request):
     def get_method(self):
         return "HEAD"
 
-def getHeadRequest(url):
+def getHeadRequest(url, maxDelay=2):
     """ 
         Robust HEAD request to ensure that the requested resource exists. Returns 
         the response object if the resource is accessible or None otherwise.
     """
     
     request  = HeadRequest(url)
-    maxDelay = 2
     delay    = 0.5
     
     while True:
