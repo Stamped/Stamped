@@ -451,14 +451,11 @@ class GenericSource(BasicSource):
             except Exception as e:
                 report()
 
-        if results:
-            third_party_ids = list(entity.third_party_ids)
+        # Haaaaaaaack.
+        if results and self.source != 'stamped':
             for result in results:
                 if result[0]['resolved']:
-                    result_id = '%s_%s' % (self.sourceName.upper(), result[1].key)
-                    if result_id not in third_party_ids:
-                        third_party_ids.append(result_id)
-            entity.third_party_ids = third_party_ids
+                    entity.addThirdPartyId(self.sourceName, results[1].key)
 
         return True
 

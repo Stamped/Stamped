@@ -263,9 +263,8 @@ class EntitySearch(object):
             # TODO PRELAUNCH: Only use the best result from each source.
             entityBuilder.addSource(EntityProxySource(result.resolverObject))
         entity = entityBuilder.buildEntity()
-        entity.third_party_ids = [
-            '%s_%s' % (result.resolverObject.source.upper(), result.resolverObject.key) for result in filteredResults
-        ]
+        for result in filteredResults:
+            entity.addThirdPartyId(result.resolverObject.source, result.resolverObject.key)
         return entity
 
     @utils.lazyProperty

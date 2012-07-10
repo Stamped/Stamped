@@ -857,31 +857,32 @@ class BasicEntity(BasicEntityMini):
         self._maybeRegenerateThirdPartyIds()
         return super(BasicEntity, self).dataExport()
 
+    def addThirdPartyId(self, sourceName, sourceId):
+        idString = '%s_%s' % (sourceName.upper(), sourceId)
+        if idString not in self.third_party_ids:
+            self.third_party_ids = list(self.third_party_ids) + [idString]
+
     def _maybeRegenerateThirdPartyIds(self):
         if self.third_party_ids:
             return
 
         ids = [
-            (self.sources.itunes_id,                'ITUNES_'),
-            (self.sources.rdio_id,                  'RDIO_'),
-            (self.sources.spotify_id,               'SPOTIFY_'),
-            (self.sources.opentable_id,             'OPENTABLE_'),
-            (self.sources.googleplaces_reference,   'GOOGLEPLACES_'),
-            (self.sources.factual_id,               'FACTUAL_'),
-            (self.sources.tmdb_id,                  'TMDB_'),
-            (self.sources.thetvdb_id,               'THETVDB_'),
-            (self.sources.amazon_id,                'AMAZON_'),
-            (self.sources.fandango_id,              'FANDANGO_'),
-            (self.sources.netflix_id,               'NETFLIX_'),
+            (self.sources.itunes_id,                'ITUNES'),
+            (self.sources.rdio_id,                  'RDIO'),
+            (self.sources.spotify_id,               'SPOTIFY'),
+            (self.sources.opentable_id,             'OPENTABLE'),
+            (self.sources.googleplaces_reference,   'GOOGLEPLACES'),
+            (self.sources.factual_id,               'FACTUAL'),
+            (self.sources.tmdb_id,                  'TMDB'),
+            (self.sources.thetvdb_id,               'THETVDB'),
+            (self.sources.amazon_id,                'AMAZON'),
+            (self.sources.fandango_id,              'FANDANGO'),
+            (self.sources.netflix_id,               'NETFLIX'),
         ]
 
-        third_party_ids = []
-        for (id_value, prefix) in ids:
+        for sourceId, sourceNamme in ids:
             if id_value:
-                third_party_ids.append(prefix + id_value)
-
-        if third_party_ids:
-            self.third_party_ids = third_party_ids
+                self.addThirdPartyId(sourceName, sourceId)
 
     def _genericSubtitle(self):
         if self.sources.user_generated_subtitle is not None:
