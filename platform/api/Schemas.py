@@ -880,8 +880,8 @@ class BasicEntity(BasicEntityMini):
             (self.sources.netflix_id,               'NETFLIX'),
         ]
 
-        for sourceId, sourceNamme in ids:
-            if id_value:
+        for sourceId, sourceName in ids:
+            if sourceId:
                 self.addThirdPartyId(sourceName, sourceId)
 
     def _genericSubtitle(self):
