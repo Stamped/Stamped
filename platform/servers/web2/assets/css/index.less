@@ -163,6 +163,12 @@ body.main {
     }
 }
 
+#main-header {
+    .lhs {
+        float: lef
+    }
+}
+
 #main-body {
     position: relative;
 }
@@ -204,6 +210,7 @@ body.main {
 
 .pane-nav-button {
     background: url(/assets/img/index/navdots_sprite.png) no-repeat;
+    display: block;
     width:  16px;
     height: 16px;
     
@@ -226,11 +233,13 @@ body.main {
 
 .social-button {
     background: url(/assets/img/index/social_sprite.png) no-repeat;
+    display: block;
+    
     width:  20px;
     height: 20px;
 }
 
-.social-button(@x, @offset) {
+.social-button-template(@x, @offset) {
     @x2: (@x * @offset);
     background-position: @x2 0;
     
@@ -240,19 +249,21 @@ body.main {
 }
 
 .social-button-twitter {
-    .social-button(0, -22px);
+    .social-button-template(0, -22px);
 }
 
 .social-button-facebook {
-    .social-button(1, -22px);
+    .social-button-template(1, -22px);
 }
 
 .social-button-google {
-    .social-button(2, -22px);
+    .social-button-template(2, -22px);
 }
 
 .app-store-button {
     background: url(/assets/img/index/appstore_sprite.png) no-repeat;
+    display: block;
+    
     width:  110px;
     height: 36px;
     
@@ -263,6 +274,8 @@ body.main {
 
 .download-the-app-button {
     background: url(/assets/img/index/downloadbtn_sprite.png) no-repeat;
+    display: block;
+    
     width:  200px;
     height: 32px;
     
@@ -277,6 +290,8 @@ body.main {
 
 .launcher-icon-button {
     background: url(/assets/img/index/launchericon_sprite.png) no-repeat;
+    display: block;
+    
     width:  64px;
     height: 64px;
     
@@ -287,6 +302,8 @@ body.main {
 
 .bieber-preview-button {
     background: url(/assets/img/index/bieberlittle.gif) no-repeat;
+    display: block;
+    
     width:  45px;
     height: 45px;
 }
@@ -327,15 +344,15 @@ body.main {
     }
     
     .social-button-twitter {
-        .social-button(0, -44px);
+        .social-button-template(0, -44px);
     }
     
     .social-button-facebook {
-        .social-button(1, -44px);
+        .social-button-template(1, -44px);
     }
     
     .social-button-google {
-        .social-button(2, -44px);
+        .social-button-template(2, -44px);
     }
     
     .app-store-button {
