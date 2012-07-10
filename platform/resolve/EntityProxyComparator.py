@@ -309,9 +309,9 @@ class TvEntityProxyComparator(AEntityProxyComparator):
 class AppEntityProxyComparator(AEntityProxyComparator):
     @classmethod
     def compare_proxies(cls, app1, app2):
-        # TODO PRELAUNCH FUCK FUCK FUCK IMPLEMENT. This should not be empty! Even though we only have one apps backend
-        # and we don't mix or anything we do sometimes get dupes! (Maybe from StampedSource/iTunes dupes?) AT THE VERY
-        # LEAST CHECK THAT ITUNES IDS ARE NOT EQUAL.
+        # TODO: Yeah this TOTALLY needs work.
+        if app1.name == app2.name:
+            return CompareResult.match(1.0)
         return CompareResult.unknown()
 
 
