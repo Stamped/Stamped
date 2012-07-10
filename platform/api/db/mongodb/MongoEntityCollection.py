@@ -97,6 +97,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         - Source-specific assertions:
             - itunes_url exists if itunes_id exists
 
+        - If 'menu' is True, verify a menu exists
+
         """
         
         document = self._getMongoDocumentFromId(key)
@@ -128,6 +130,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 raise StampedDataError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
                     (entity.entity_id, tombstone.entity_id))
 
+        # Source-specific checks
+        if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
+            raise StampedDataError("Missing iTunes URL: '%s'" % entity.entity_id)
+
+        # Menu check
+        if entity.kind == 'place' and entity.menu == True:
+            if self._collection._database['menus'].find({'_id': self._getObjectIdFromString(entity.entity_id)}).count() == 0:
+                raise StampedDataError("Menu is missing: '%s'" % entity.entity_id)
+
         # Verify image exists
         if entity.images is not None:
             for image in entity.images:
@@ -137,10 +148,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                             (entity.entity_id, size.url))
                     if size.width is None or size.height is None:
                         raise StampedDataError("Image width / height not defined: '%s'" % entity.entity_id)
-
-        # Source-specific checks
-        if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
-            raise StampedDataError("Missing iTunes URL: '%s'" % entity.entity_id)
 
         return True
 
