@@ -4400,13 +4400,10 @@ class StampedAPI(AStampedAPI):
             raise StampedUnavailableError("Entity not found")
 
         stamped = StampedSource(stamped_api=self)
-        for sourceIdentifier, key in sourcesAndKeys:
-            if sourceIdentifier.lower() not in sources:
-                raise StampedUnknownSourceError('Source not found: %s (%s)' % (sourceIdentifier, search_id))
-            source = sources[sourceIdentifier.lower()]()
-            entity_id = stamped.resolve_fast(source.sourceName, key)
-            if entity_id:
-                break
+        fast_resolve_results = stamped.resolve_fast_batch(sourcesAndKeys)
+        entity_ids = filter(lambda x : x, fast_resolve_results)
+        if len(entity_ids):
+            entity_id = entity_ids[0]
 
         proxies = []
         if not entity_id:
@@ -4652,6 +4649,7 @@ class StampedAPI(AStampedAPI):
         if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
             entity_id = stub.entity_id
         else:
+            # TODO GEOFF FUCK FUCK FUCK: Use third_party_ids here, and resolve_fast_batch!
             for sourceName in musicSources:
                 try:
                     if getattr(stub.sources, '%s_id' % sourceName, None) is not None:
