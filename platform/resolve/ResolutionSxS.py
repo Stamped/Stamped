@@ -53,6 +53,13 @@ DIFF_FILE_HEADER = """
 
 
 def __formatProxyList(proxies):
+    # OK, so this line is a weird hack. Ugh.
+    # Basically -- ResolverObject.__str__ won't issue any lookups to get information about something. But sometimes we
+    # end up with proxies that literally just have keys and have to issue lookups to even have a title. Since __str__
+    # won't force that, we force it ourselves here.
+    # TODO: FIND A BETTER SOLUTION HERE.
+    [proxy.name for proxy in proxies]
+
     return '\n\n'.join(str(proxy) for proxy in proxies)
 
 def writeComparisons(oldResults, newResults, outputDir):
@@ -70,7 +77,7 @@ def writeComparisons(oldResults, newResults, outputDir):
         original, oldResolved, oldProxy, oldProxyList = oldResults[key]
         _, newResolved, _, newProxyList = newResults[key]
 
-        filename = key + '.html'
+        filename = key[:40] + '.html'
         oldData = __stripEntity(oldResolved.dataExport())
         newData = __stripEntity(newResolved.dataExport())
         with open(path.join(outputDir, filename), 'w') as fout:
