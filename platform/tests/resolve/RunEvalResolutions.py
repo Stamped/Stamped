@@ -20,6 +20,7 @@ from resolve.AmazonSource import AmazonSource
 from resolve.FactualSource import FactualSource
 from resolve.GooglePlacesSource import GooglePlacesSource
 from resolve.iTunesSource import iTunesSource
+from resolve.NetflixSource import NetflixSource
 from resolve.RdioSource import RdioSource
 from resolve.SpotifySource import SpotifySource
 from resolve.TMDBSource import TMDBSource
@@ -27,6 +28,18 @@ from resolve.TheTVDBSource import TheTVDBSource
 from libs.CountedFunction import printFunctionCounts
 
 from tests.framework.FixtureTest import *
+
+SOURCES = {
+    'amazon_id' : AmazonSource(),
+    'factual_id' : FactualSource(),
+    'googleplaces_id' : GooglePlacesSource(),
+    'itunes_id' : iTunesSource(),
+    'rdio_id' : RdioSource(),
+    'spotify_id' : SpotifySource(),
+    'tmdb_id' : TMDBSource(),
+    'thetvdb_id' : TheTVDBSource(),
+    'netflix_id' : NetflixSource(),
+}
 
 class RunEvalResolutions(AStampedFixtureTestCase):
     @fixtureTest()
@@ -72,19 +85,9 @@ class RunEvalResolutions(AStampedFixtureTestCase):
 
 
     def __getResolverObjects(self, entity):
-        sources = {
-            'amazon_id':       AmazonSource(),
-            'factual_id':      FactualSource(),
-            'googleplaces_id': GooglePlacesSource(),
-            'itunes_id':       iTunesSource(),
-            'rdio_id':         RdioSource(),
-            'spotify_id':      SpotifySource(),
-            'tmdb_id':         TMDBSource(),
-            'thetvdb_id':      TheTVDBSource(),
-        }
         result = []
-        for sourceName, sourceObj in sources.iteritems():
-            sourceId = getattr(entity.sources, sourceName, None)
+        for sourceName, sourceObj in SOURCES.iteritems():
+            sourceId = getattr(entity.SOURCES, sourceName, None)
             if sourceId:
                 result.append(sourceObj.entityProxyFromKey(sourceId))
         return result
@@ -93,21 +96,11 @@ class RunEvalResolutions(AStampedFixtureTestCase):
     def __convertSearchId(self, searchId, fullResolver):
         source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', searchId).groups()
 
-        sources = {
-            'amazon':       AmazonSource,
-            'factual':      FactualSource,
-            'googleplaces': GooglePlacesSource,
-            'itunes':       iTunesSource,
-            'rdio':         RdioSource,
-            'spotify':      SpotifySource,
-            'tmdb':         TMDBSource,
-            'thetvdb':      TheTVDBSource,
-        }
+        id_name = source_name.lower() + '_id'
+        if id_name not in SOURCES:
+            raise Exception('Unknow source: ' + id_name)
 
-        if source_name.lower() not in sources:
-            raise Exception('Unknow source: ' + source_name.lower())
-
-        source = sources[source_name.lower()]()
+        source = SOURCES[id_name]
         try:
             proxy = source.entityProxyFromKey(source_id)
         except KeyError as e:
