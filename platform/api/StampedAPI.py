@@ -4387,8 +4387,17 @@ class StampedAPI(AStampedAPI):
             'fandango':     FandangoSource,
         }
 
-        sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:]+)')
-        sourcesAndKeys = [sourceAndNameRe.match(component).groups() for component in id_components]
+        sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:/]+)$')
+        sourcesAndKeys = []
+        for component in id_components:
+            match = sourceAndNameRe.match(component)
+            if not match:
+                logs.warning('Unable to parse search ID component:' + component)
+            else:
+                sourcesAndKeys.append(match.groups())
+        if not sourcesAndKeys:
+            logs.warning('Unable to extract and third-party ID from composite search ID: ' + search_id)
+            raise StampedUnavailableError("Entity not found")
 
         stamped = StampedSource(stamped_api=self)
         for sourceIdentifier, key in sourcesAndKeys:
