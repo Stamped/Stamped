@@ -107,7 +107,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         # Check if old version
         if 'schema_version' not in document:
-            msg = "Old schema version"
+            msg = "%s: Old schema" % key
             if repair:
                 logs.info(msg)
                 modified = True
@@ -118,7 +118,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         ### TODO: Implement after Paul commits third_party_ids
         if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
-            msg = "Missing third_party_ids"
+            msg = "%s: Missing third_party_ids" % key
             if repair:
                 logs.info(msg)
                 entity._maybeRegenerateThirdPartyIds()
@@ -148,7 +148,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         # Menu check
         if entity.kind == 'place' and entity.menu == True:
             if self._collection._database['menus'].find({'_id': self._getObjectIdFromString(entity.entity_id)}).count() == 0:
-                msg = "Menu missing for entity '%s'" % entity.entity_id
+                msg = "%s: Menu missing" % key
                 if repair:
                     logs.info(msg)
                     del(entity.menu)
@@ -165,7 +165,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 sizes = []
                 for size in image.sizes:
                     if getHeadRequest(size.url) is None:
-                        msg = "Image is unavailable for entity '%s': '%s'" % (entity.entity_id, size.url)
+                        msg = "%s: Image is unavailable (%s)" % (key, size.url)
                         if repair:
                             logs.info(msg)
                             modified = True
@@ -173,14 +173,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                         else:
                             raise StampedDataError(msg)
                     if size.width is None or size.height is None:
-                        msg = "Image width / height not defined for entity '%s': '%s'" % (entity.entity_id, size.url)
+                        msg = "%s: Image width / height not defined (%s)" % (key, size.url)
                         if repair:
                             logs.info(msg)
                             try:
                                 size.width, size.height = getWebImageSize(size.url)
                                 modified = True
                             except Exception as e:
-                                logs.warning("Could not get image sizes: %s" % e)
+                                logs.warning("%s: Could not get image sizes: %s" % (key, e))
                                 raise 
                         else:
                             raise StampedDataError(msg)
@@ -195,9 +195,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         if modified and repair:
             from pprint import pprint
-            print '%s' % ('='*40)
             pprint(entity.dataExport())
-            print '%s' % ('='*40)
 
         return True
 
