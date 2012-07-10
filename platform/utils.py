@@ -986,7 +986,7 @@ def getHeadRequest(url, maxDelay=2):
             # since it was a problem with the url / headers and retrying most likely won't 
             # solve the problem.
             if e.code >= 400 and e.code < 500:
-                logs.warning("Head request %s: (%s)" % (e.code, e.reason))
+                logs.warning("Head request %s: (%s)" % (e.code, e))
                 return None
         except (ValueError, IOError, httplib.BadStatusLine) as e:
             pass

@@ -179,6 +179,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             for image in entity.images:
                 sizes = []
                 for size in image.sizes:
+                    if size.url.startswith('http://maps.gstatic.com'):
+                        msg = "%s: Blacklisted image (%s)" % (key, size.url)
+                        if repair:
+                            logs.info(msg)
+                            modified = True
+                            continue
+                        else:
+                            raise StampedDataError(msg)
                     if getHeadRequest(size.url, maxDelay=60) is None:
                         msg = "%s: Image is unavailable (%s)" % (key, size.url)
                         if repair:
