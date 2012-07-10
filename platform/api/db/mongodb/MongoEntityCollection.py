@@ -128,6 +128,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         # Verify tombstone is set properly
         if entity.sources.tombstone_id is not None:
+            tombstone = None
+            
             # Verify tombstoned entity still exists
             try:
                 tombstone = self._getMongoDocumentFromId(entity.sources.tombstone_id)
@@ -142,7 +144,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                     raise StampedDataError(msg)
 
             # Raise exception if tombstone is chained
-            if tombstone.sources.tombstone_id is not None:
+            if tombstone is not None and tombstone.sources.tombstone_id is not None:
                 if tombstone.sources.tombstone_id == entity.entity_id:
                     raise StampedDataError("Entities tombstoned to each other: '%s' and '%s'" % \
                         (entity.entity_id, tombstone.entity_id))
@@ -150,7 +152,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                     (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id))
                 
             # Raise exception if tombstone to user-generated entity
-            if tombstone.sources.user_generated_id is not None:
+            if tombstone is not None and tombstone.sources.user_generated_id is not None:
                 raise StampedDataError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
                     (entity.entity_id, tombstone.entity_id))
 
