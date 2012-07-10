@@ -16,7 +16,7 @@ from servers.web2.core.helpers  import *
 # TODO: stricter input schema validation
 
 @stamped_view()
-def index(request):
+def index(request, **kwargs):
     autoplay_video = bool(request.GET.get('video', False))
     
     return stamped_render(request, 'index.html', {

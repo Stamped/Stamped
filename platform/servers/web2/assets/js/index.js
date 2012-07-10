@@ -142,7 +142,7 @@
                 $intro_iphone.css('background-position', v + "px 0");
             }, 
             
-            complete    : function(animation) {
+            complete    : function() {
                 var height = $intro_iphone.height();
                 height     = (!!height ? height : 632);
                 var offset = get_relative_offset(height);
@@ -158,23 +158,15 @@
         
         var intro_animation = new Animation({
             duration    : 2100, 
-            complete    : function(animation) {
+            complete    : function() {
                 var $active     = $(".active-line");
                 var $next       = $active.next(".line").filter(":visible");
-                
-                /*if ($next.length <= 0) {
-                    // cycle active line back to start of stanza
-                    $next   = $active.parents(".text").find(".line").first();
-                }*/
-                
-                console.debug($next.length);
-                console.debug($next);
                 
                 if ($next.length > 0) {
                     $active.removeClass(active_line);
                     $next.addClass(active_line);
                     
-                    animation.restart();
+                    intro_animation.restart();
                 } else {
                     intro_iphone_animation.start();
                     
@@ -185,7 +177,7 @@
                         $intro_hero.animate({
                             top : offset
                         }, {
-                            duration : 500, 
+                            duration : 600, 
                             easing   : "swing"
                         });
                     }, 50);
