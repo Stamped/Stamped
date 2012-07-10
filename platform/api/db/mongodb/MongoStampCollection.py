@@ -124,27 +124,27 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     ### INTEGRITY
 
     def checkIntegrity(self, key, repair=True):
-        stamp = self._getMongoDocumentFromId(key)
+        document = self._getMongoDocumentFromId(key)
 
         modified = False
         
-        assert stamp is not None
+        assert document is not None
 
         # Update stamp to new structure
-        if 'contents' not in stamp or 'credit' in stamp:
-            logs.warning("Old-style stamp")
-            stamp = self._upgradeDocument(stamp)
+        if 'contents' not in document or 'credit' in document:
+            logs.warning("Old stamp schema")
+            document = self._upgradeDocument(document)
             modified = True
 
         # Verify that user exists
-        userId = stamp['user']['user_id']
+        userId = document['user']['user_id']
         if self._collection._database['users'].find({'_id' : self._getObjectIdFromString(userId)}).count() != 1:
-            raise Exception("User '%s' not found" % userId)
+            raise StampedDataError("User '%s' not found" % userId)
 
         # Verify that any credited users exist
-        if 'credits' in stamp:
+        if 'credits' in document:
             credits = []
-            for credit in stamp['credits']:
+            for credit in document['credits']:
                 creditedUserId = credit['user']['user_id']
                 query = {'_id' : self._getObjectIdFromString(creditedUserId)}
                 if self._collection._database['users'].find(query).count() == 1:
@@ -152,15 +152,15 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 else:
                     modified = True
             if len(credits) > 0:
-                stamp['credits'] = credit 
+                document['credits'] = credit 
             else:
-                del(stamp['credits'])
+                del(document['credits'])
 
         # Verify that entity exists
-        entityId = stamp['entity']['entity_id']
+        entityId = document['entity']['entity_id']
         entity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(entityId)})
         if entity is None:
-            raise Exception("Entity '%s' not found" % entityId)
+            raise StampedDataError("Entity '%s' not found" % entityId)
 
         # Check if entity has been tombstoned; update entity if so
         if 'tombstone_id' in entity['sources'] and entity['sources']['tombstone_id'] is not None:
@@ -168,27 +168,28 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             newEntityId = entity['sources']['tombstone_id']
             newEntity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(newEntityId)})
             if newEntity is None:
-                raise Exception("Entity '%s' not found" % newEntityId)
+                raise StampedDataError("Entity '%s' not found" % newEntityId)
 
-            stamp['entity'] = buildEntity(newEntity).minimize().dataExport()
+            document['entity'] = buildEntity(newEntity).minimize().dataExport()
             modified = True
         # Check if entity stub has been updated
         else:
-            entityMini = buildEntity(entity).minimize().dataExport()
-            if stamp['entity'] != entityMini:
-                logs.warning("Updating embedded entity: %s v %s" % (stamp['entity'], entityMini))
-                stamp['entity'] = entityMini
+            # Note: Because schema objects use tuples and documents use lists, we need to convert the
+            # raw document into a schema object in order to do the comparison.
+            entityMini = buildEntity(entity, mini=True)
+            if buildEntity(document['entity'], mini=True) != entityMini:
+                logs.warning("Upgrading entity mini")
+                document['entity'] = entityMini.dataExport()
                 modified = True
 
-        stampNum = stamp['stats']['stamp_num']
+        stampNum = document['stats']['stamp_num']
         duplicateStamps = self._collection.find({'user.user_id' : userId, 'stats.stamp_num' : stampNum})
         if duplicateStamps.count() > 1:
             duplicateStamps.sort('timestamp.created', pymongo.ASCENDING)
-            raise Exception("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
+            raise StampedDataError("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
 
         if modified and repair:
-            print "UPDATED: %s" % stamp
-            # self._collection.update({'_id' : key}, stamp)
+            self._collection.update({'_id' : key}, document)
 
         return True
 

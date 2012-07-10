@@ -72,7 +72,7 @@ def main():
         logs.info("Running checks for %s" % collection.__name__)
         db = collection()
         begin = time.time()
-        for i in db._collection.find(fields=['_id']).limit(1000):
+        for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
             try:
                 result = db.checkIntegrity(i['_id'], repair=(not options.noop))
                 print i['_id'], 'PASS'
@@ -83,12 +83,15 @@ def main():
                 print i['_id'], 'FAIL: Key deleted'
             except StampedStaleRelationshipDataError:
                 print i['_id'], 'FAIL: References updated'
+            except StampedDataError:
+                print i['_id'], 'FAIL'
             except Exception as e:
                 print i['_id'], 'FAIL: %s (%s)' % (e.__class__, e)
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 f = traceback.format_exception(exc_type, exc_value, exc_traceback)
                 f = string.joinfields(f, '')
                 print f
+                break
 
         logs.info("Completed checks for %s (%s seconds)" % (collection.__name__, (time.time() - begin)))
 

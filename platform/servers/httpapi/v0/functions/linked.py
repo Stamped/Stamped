@@ -145,6 +145,8 @@ def createNetflixLoginResponse(request, netflixAddId=None):
     #source.endpoint         = 'account/linked/netflix/login_callback.json'
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
+    print ('### netflix login response: %s' % response.dataExport())
+
     return transformOutput(response.dataExport())
 
 @handleHTTPRequest(http_schema=HTTPNetflixId,

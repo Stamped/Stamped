@@ -150,10 +150,10 @@ class Netflix(object):
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
-    @countedFn('Netflix (before caching)')
-    @lru_cache(maxsize=64)
-    @cachedFn()
-    @countedFn('Netflix (after caching)')
+#    @countedFn('Netflix (before caching)')
+#    @lru_cache(maxsize=64)
+#    @cachedFn()
+#    @countedFn('Netflix (after caching)')
     def __get(self, service, user_id=None, token=None, **parameters):
         return self.__http('GET', service, user_id, token, **parameters)
 
@@ -366,7 +366,7 @@ class Netflix(object):
         result = self.__get(
            'oauth/access_token',
             token                   = token,
-            parameters              = { 'application_name': 'Stamped' },
+            #parameters              = { 'application_name': 'Stamped' },
         )
         return result
 
@@ -383,6 +383,9 @@ def globalNetflix():
 USER_ID = 'BQAJAAEDEBt1T1psKyjyA2IphhT34icw3Nwze3KAkc232VbNA7apgZuLYhrDaHkY2dTHbhLCE1aBH2mxmhKYIbgy9mJZmHdy'
 OAUTH_TOKEN = 'BQAJAAEDEDXdt6wgpbupNB2Tb9h-_hcwAdmYwRvmtwsUNtV96kMObcRjcEM4xT3Iy5rJcKY1pW3gQsQ7tGNsC3U_Bu3yuZVq'
 OAUTH_TOKEN_SECRET = 'gxpc6dxp242x'
+
+
+
 
 GHOSTBUSTERS2_ID = 'http://api-public.netflix.com/catalog/titles/movies/541027'
 BIGLEB_ID = 'http://api-public.netflix.com/catalog/titles/movies/1181532'
@@ -410,7 +413,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getTitleDetails'
+    methods = 'getUserInfo'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
