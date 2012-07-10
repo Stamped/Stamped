@@ -30,7 +30,7 @@ def cachedFn(ttl=ONE_WEEK, memberFn=True, schemaClasses=[]):
     if utils.is_ec2():
         return memcached_function(time=ttl)
     else:
-        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=[])
+        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=schemaClasses)
 
 def devOnlyCachedFn(memberFn=True, schemaClasses=[]):
     """
@@ -41,4 +41,4 @@ def devOnlyCachedFn(memberFn=True, schemaClasses=[]):
     if utils.is_ec2():
         return lambda wrappedFn: wrappedFn
     else:
-        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=[])
+        return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=schemaClasses)
