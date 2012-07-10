@@ -12,6 +12,7 @@ import Globals
 import feedparser
 import sys
 
+from collections import Iterable
 from optparse import OptionParser
 from pprint import pprint
 
@@ -19,26 +20,36 @@ from api.MongoStampedAPI import globalMongoStampedAPI
 from resolve.AmazonSource import AmazonBook
 from resolve.EntityProxyContainer import EntityProxyContainer
 from resolve.FandangoSource import FandangoMovie
+from resolve.NYTimesSource import NYTimesBook
 from resolve.StampedSource import StampedSource
 from resolve.ResolverObject import *
 from utils import lazyProperty
 
 FEED_SOURCES = {
-    # TODO(geoff): add in the top box office list. It needs a bit of cleaning
-    'fandango_upcoming' : ('http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=5348839', FandangoMovie.createMovieFromData),
-    'fandango_opening' : ('http://www.fandango.com/rss/openingthisweekmobile.rss?pid=5348839', FandangoMovie.createMovieFromData),
+    'fandango_upcoming' : ('http://www.fandango.com/rss/comingsoonmoviesmobile.rss?pid=5348839', FandangoMovie.createMovie),
+    'fandango_opening' : ('http://www.fandango.com/rss/openingthisweekmobile.rss?pid=5348839', FandangoMovie.createMovie),
+    'fandango_popular' : ('http://www.fandango.com/rss/top10boxofficemobile.rss?pid=5348839', FandangoMovie.createMovieFromTopBoxOffice),
 
     'amazon_book_new' : ('http://www.amazon.com/gp/rss/new-releases/books', AmazonBook.createFromRssEntry),
     'amazon_book_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/books', AmazonBook.createFromRssEntry),
     'amazon_kindle_new' : ('http://www.amazon.com/gp/rss/new-releases/digital-text', AmazonBook.createFromRssEntry),
     'amazon_kindle_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/digital-text', AmazonBook.createFromRssEntry),
+
+    'nytimes_bestseller' : ('http://feeds.nytimes.com/nyt/rss/BestSellers', NYTimesBook.parseFromRss),
 }
 
 
 def fetchFromSource(source):
     feedUrl, parserFn = FEED_SOURCES[source]
     data = feedparser.parse(feedUrl)
-    return filter(None, (parserFn(entry) for entry in data.entries))
+    parsed = filter(None, (parserFn(entry) for entry in data.entries))
+    results = []
+    for parsedEntry in parsed:
+        if isinstance(parsedEntry, Iterable):
+            results.extend(parsedEntry)
+        else:
+            results.append(parsedEntry)
+    return results
 
 
 def mergeProxyIntoDb(proxy, stampedApi, stampedSource):
@@ -56,7 +67,6 @@ def mergeProxyIntoDb(proxy, stampedApi, stampedSource):
         entityProxy = EntityProxyContainer(proxy)
         entity = entityProxy.buildEntity()
         stampedApi.mergeEntity(entity)
-
 
 
 def main():
@@ -86,7 +96,7 @@ def main():
             mergeProxyIntoDb(proxy, stampedApi, stampedSource)
     else:
         for proxy in proxies:
-            pprint(proxy)
+            print str(proxy)
 
 if __name__ == '__main__':
     main()
