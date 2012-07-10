@@ -187,7 +187,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                             continue
                         else:
                             raise StampedDataError(msg)
-                    if getHeadRequest(size.url, maxDelay=60) is None:
+                    if getHeadRequest(size.url, maxDelay=4) is None:
                         msg = "%s: Image is unavailable (%s)" % (key, size.url)
                         if repair:
                             logs.info(msg)
