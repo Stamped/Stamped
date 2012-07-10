@@ -415,14 +415,18 @@ class GenericSource(BasicSource):
     @property 
     def idName(self):
         return self.sourceName
-    
+
+    def getId(self, entity):
+        return getattr(entity.sources, self.idField)
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """
 
         """
         proxy = None
+        results = None
 
-        if getattr(entity.sources, self.idField) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
+        if self.getId(entity) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
@@ -435,9 +439,10 @@ class GenericSource(BasicSource):
                             setattr(entity.sources, self.urlField, best[1].url)
                         proxy = best[1]
             except ValueError:
+                logs.report()
                 pass
 
-        source_id = getattr(entity.sources, self.idField)
+        source_id = self.getId(entity)
         if source_id is not None:
             try:
                 if proxy is None:
@@ -445,6 +450,15 @@ class GenericSource(BasicSource):
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 report()
+
+        if results:
+            third_party_ids = list(entity.third_party_ids)
+            for result in results:
+                if result[0]['resolved']:
+                    result_id = '%s_%s' % (self.sourceName.upper(), result[1].key)
+                    if result_id not in third_party_ids:
+                        third_party_ids.append(result_id)
+            entity.third_party_ids = third_party_ids
 
         return True
 
