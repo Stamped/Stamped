@@ -193,7 +193,7 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty
     def length(self):
         try:
-            if 'runtime' not in self.full_data:
+            if not self.full_data.get('runtime', None):
                 return -1  # TODO: Would None be more appropriate here?
             return self.full_data['runtime'] * 60
         except LookupRequiredError:
@@ -202,7 +202,7 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty 
     def genres(self):
         try:
-            if 'genres' not in self.full_data:
+            if not self.full_data.get('genres', None):
                 logs.debug('No genres for %s (%s:%s)' % (self.name, self.source, self.key))
                 return []
             return [ entry['name'] for entry in self.full_data['genres'] ]
