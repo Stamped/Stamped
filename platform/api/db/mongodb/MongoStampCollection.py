@@ -12,6 +12,7 @@ from datetime                           import datetime
 from utils                              import lazyProperty
 from api.Schemas                        import *
 from api.Entity                             import buildEntity
+from pprint                             import pprint
 
 from api.AStampDB                       import AStampDB
 from api.db.mongodb.AMongoCollection                   import AMongoCollection
@@ -152,7 +153,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 else:
                     modified = True
             if len(credits) > 0:
-                document['credits'] = credit 
+                document['credits'] = credits
             else:
                 del(document['credits'])
 
@@ -164,22 +165,24 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         # Check if entity has been tombstoned; update entity if so
         if 'tombstone_id' in entity['sources'] and entity['sources']['tombstone_id'] is not None:
-            logs.warning("Stamp is tombstoned")
             newEntityId = entity['sources']['tombstone_id']
+            logs.warning("Entity '%s' is tombstoned to '%s'" % (entityId, newEntityId))
             newEntity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(newEntityId)})
             if newEntity is None:
                 raise StampedDataError("Entity '%s' not found" % newEntityId)
 
-            document['entity'] = buildEntity(newEntity).minimize().dataExport()
+            document['entity'] = buildEntity(newEntity, mini=True).dataExport()
             modified = True
+
         # Check if entity stub has been updated
         else:
             # Note: Because schema objects use tuples and documents use lists, we need to convert the
-            # raw document into a schema object in order to do the comparison.
-            entityMini = buildEntity(entity, mini=True)
-            if buildEntity(document['entity'], mini=True) != entityMini:
+            # raw document into a schema object in order to do the comparison between minis. FML.
+            oldEntityMini = buildEntity(document['entity'], mini=True)
+            newEntityMini = buildEntity(entity, mini=True)
+            document['entity'] = newEntityMini.dataExport() # buildEntity mutates entity, so set it regardless
+            if oldEntityMini != newEntityMini:
                 logs.warning("Upgrading entity mini")
-                document['entity'] = entityMini.dataExport()
                 modified = True
 
         stampNum = document['stats']['stamp_num']
