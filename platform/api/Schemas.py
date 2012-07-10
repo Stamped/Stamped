@@ -880,7 +880,8 @@ class BasicEntity(BasicEntityMini):
             if id_value:
                 third_party_ids.append(prefix + id_value)
 
-        self.third_party_ids = third_party_ids
+        if third_party_ids:
+            self.third_party_ids = third_party_ids
 
     def _genericSubtitle(self):
         if self.sources.user_generated_subtitle is not None:
