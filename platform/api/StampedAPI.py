@@ -4404,6 +4404,8 @@ class StampedAPI(AStampedAPI):
         entity_ids = filter(lambda x : x, fast_resolve_results)
         if len(entity_ids):
             entity_id = entity_ids[0]
+        else:
+            entity_id = None
 
         proxies = []
         if not entity_id:
