@@ -859,7 +859,9 @@ class BasicEntity(BasicEntityMini):
 
     def addThirdPartyId(self, sourceName, sourceId):
         idString = '%s_%s' % (sourceName.upper(), sourceId)
-        if idString not in self.third_party_ids:
+        if not self.third_party_ids:
+            self.third_party_ids = [idString]
+        elif idString not in self.third_party_ids:
             self.third_party_ids = list(self.third_party_ids) + [idString]
 
     def _maybeRegenerateThirdPartyIds(self):
