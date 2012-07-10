@@ -279,6 +279,10 @@ def handleHTTPCallbackRequest(
 
                 params = {}
                 oauth_token = None
+
+                logs.info('### request.GET: %s' % request.GET)
+                logs.info('### request.POST: %s' % request.POST)
+
                 if 'stamped_oauth_token' in request.GET:
                     oauth_token = request.GET['stamped_oauth_token']
                 elif 'stamped_oauth_token' in request.POST:
