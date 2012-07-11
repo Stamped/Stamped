@@ -424,6 +424,12 @@ class StampedAPI(AStampedAPI):
         fb_acct.linked_user_id              = facebookUser['id']
         fb_acct.linked_name                 = facebookUser['name']
         fb_acct.linked_screen_name          = facebookUser.pop('username', None)
+        # Enable Open Graph sharing by default
+        fb_acct.share_settings = LinkedAccountShareSettings()
+        fb_acct.share_settings.share_stamps  = True
+        fb_acct.share_settings.share_likes   = True
+        fb_acct.share_settings.share_todos   = True
+        fb_acct.share_settings.share_follows = True
         account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
@@ -855,6 +861,15 @@ class StampedAPI(AStampedAPI):
             linkedAccount.linked_name = userInfo['name']
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
+            # Enable Open Graph sharing by default
+            try:
+                self.getLinkedAccount(authUserId, 'facebook')
+            except StampedLinkedAccountDoesNotExistError:
+                linkedAccount.share_settings = LinkedAccountShareSettings()
+                linkedAccount.share_settings.share_stamps  = True
+                linkedAccount.share_settings.share_likes   = True
+                linkedAccount.share_settings.share_todos   = True
+                linkedAccount.share_settings.share_follows = True
 
         elif service_name == 'twitter':
             if linkedAccount.token is None or linkedAccount.secret is None:
@@ -966,6 +981,7 @@ class StampedAPI(AStampedAPI):
 
         # Only send alert once (when the user initially connects to Facebook)
         if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
+            logs.info("Facebook alerts already sent")
             return False
 
         # Grab friend list from Facebook API
@@ -4354,6 +4370,7 @@ class StampedAPI(AStampedAPI):
 
     def _addLinkedFriendActivity(self, userId, service_name, recipientIds, body=None):
         objects = ActivityObjectIds()
+        objects.user_ids = [ userId ]
         self._addActivity('friend_%s' % service_name, userId, objects,
                                                               body = body,
                                                               recipientIds = recipientIds,
@@ -4415,8 +4432,6 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getActivity(self, authUserId, scope, limit=20, offset=0):
-        t0 = time.time()
-        t1 = t0
 
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
 
@@ -4455,22 +4470,12 @@ class StampedAPI(AStampedAPI):
         for user in users:
             userIds[str(user.user_id)] = user.minimize()
 
-        logs.debug("### getActivity section 1: %s" % (time.time() - t1))
-        t1 = time.time()
-
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
 
-        logs.debug("### getActivity section 2a: %s" % (time.time() - t1))
-        t1 = time.time()
-
-        ########
         stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=True)
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
-
-        logs.debug("### getActivity section 2b: %s" % (time.time() - t1))
-        t1 = time.time()
 
         # Enrich entities
         entities = self._entityDB.getEntityMinis(entityIds.keys())
@@ -4512,9 +4517,6 @@ class StampedAPI(AStampedAPI):
             self._accountDB.updateUserTimestamp(authUserId, 'activity', datetime.utcnow())
             ### DEPRECATED
             self._userDB.updateUserStats(authUserId, 'num_unread_news', value=0)
-
-        logs.debug("### getActivity section 3: %s" % (time.time() - t1))
-        t1 = time.time()
 
         return activity
 
