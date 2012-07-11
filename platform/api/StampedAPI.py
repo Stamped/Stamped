@@ -692,6 +692,8 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getLinkedAccount(self, authUserId, service_name):
         account = self.getAccount(authUserId)
+        if account.linked is None:
+            raise StampedLinkedAccountDoesNotExistError("User has no linked accounts")
         linked = getattr(account.linked, service_name)
         if linked is None:
             raise StampedLinkedAccountDoesNotExistError("User has no linked account: %s" % service_name)
