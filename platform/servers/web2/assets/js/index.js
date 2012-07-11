@@ -142,7 +142,7 @@
         var intro_iphone_animation = new Animation({
             start       : 1, 
             end         : 100, 
-            duration    : 400, 
+            duration    : 250, 
             
             step        : function(value) {
                 var v = -400 * Math.floor(value / 10);
@@ -155,22 +155,25 @@
                 height     = (!!height ? height : 632);
                 var offset = get_relative_offset(height);
                 
-                $intro_iphone.delay(700).animate({
-                    top : offset
-                }, {
-                    duration : 800, 
-                    easing   : "swing", 
-                    complete : function() {
-                        // intro animation is fully complete here
-                        $body.removeClass("intro");
-                        init_main();
-                    }
-                });
+                setTimeout(function() {
+                    $intro_iphone.animate({
+                        top : offset
+                    }, {
+                        duration : 800, 
+                        easing   : "swing", 
+                        complete : function() {
+                            // intro animation is fully complete here
+                            $body.removeClass("intro");
+                        }
+                    });
+                    
+                    init_main();
+                }, 150);
             }
         });
         
         var intro_animation = new Animation({
-            duration    : 2100, 
+            duration    : 1600, 
             complete    : function() {
                 var $active     = $(".active-line");
                 var $next       = $active.next(".line").filter(":visible");
@@ -183,17 +186,15 @@
                 } else {
                     intro_iphone_animation.start();
                     
-                    setTimeout(function() {
-                        var height = $active.height();
-                        var offset = get_relative_offset(height);
-                        
-                        $intro_hero.animate({
-                            top : offset
-                        }, {
-                            duration : 600, 
-                            easing   : "swing"
-                        });
-                    }, 50);
+                    var height = $active.height();
+                    var offset = get_relative_offset(height);
+                    
+                    $intro_hero.animate({
+                        top : offset
+                    }, {
+                        duration : 600, 
+                        easing   : "swing"
+                    });
                 }
             }
         });
@@ -231,7 +232,7 @@
                     'top'       : result.offset + "px"
                 }, {
                     easing      : "easeOutExpo", 
-                    duration    : 800, 
+                    duration    : 1000, 
                     step        : function(value) {
                         var percent = (value - result.offset) / (start - result.offset);
                         
