@@ -223,9 +223,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 del(entity.images)
 
         if modified and repair:
-            from pprint import pprint
-            # pprint(entity.dataExport())
-            print 'UPDATED:', entity.title
+            self._collection.update({'_id' : key}, self._convertToMongo(entity))
 
         return True
 
@@ -254,11 +252,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         document    = self._getMongoDocumentFromId(documentId)
         entity      = self._convertFromMongo(document)
 
-        # if entity.tombstone_id is not None:
-        #     documentId  = self._getObjectIdFromString(entity.tombstone_id)
-        #     document    = self._getMongoDocumentFromId(documentId)
-        #     entity      = self._convertFromMongo(document)
-
         return entity
 
     def getEntityMinis(self, entityIds):
@@ -274,8 +267,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         for doc in documents:
             entity = self._convertFromMongo(doc, mini=False)
             entity = entity.minimize()
-            # if entity.tombstone_id is not None:
-            #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
 
         return result
@@ -289,8 +280,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         result = []
         for item in data:
             entity = self._convertFromMongo(item)
-            # if entity.tombstone_id is not None:
-            #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
 
         return result
