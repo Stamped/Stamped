@@ -15,6 +15,7 @@ try:
     from resolve.EntityGroups           import *
     from resolve.ResolverSources        import *
     from pprint                 import pformat
+    import logs
 
     import re
 except:
@@ -60,8 +61,14 @@ def buildQueryFromArgs(args):
     return query
 
 
-def getEntityFromSearchId(searchId):
-    source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', searchId).groups()
+def getEntityFromSearchId(search_id):
+    temp_id_prefix = 'T_'
+    if not search_id.startswith(temp_id_prefix):
+        # already a valid entity id
+        return search_id
+
+        # TODO: This code should be moved into a common location with BasicEntity.search_id
+    id_components = search_id[len(temp_id_prefix):].split('____')
 
     sources = {
         'amazon':       AmazonSource,
@@ -72,16 +79,37 @@ def getEntityFromSearchId(searchId):
         'spotify':      SpotifySource,
         'tmdb':         TMDBSource,
         'thetvdb':      TheTVDBSource,
-    }
+        'netflix':      NetflixSource,
+        }
 
-    if source_name.lower() not in sources:
-        raise Exception('Source not found: %s (%s)' % (source_name, searchId))
+    sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:/]+)$')
+    proxies = []
+    for component in id_components:
+        match = sourceAndKeyRe.match(component)
+        if not match:
+            logs.warning('Unable to parse search ID component:' + component)
+        else:
+            sourceName, key = match.groups()
+            if sourceName.lower() not in sources:
+                logs.warning('Unable to recognize source:' + sourceName.lower())
+            else:
+                try:
+                    proxies.append(sources[sourceName.lower()]().entityProxyFromKey(key))
+                except Exception:
+                    import traceback
+                    logs.warning('ERROR while loading proxy:\n' + ''.join(traceback.format_exc()))
 
-    source = sources[source_name.lower()]()
-    proxy = source.entityProxyFromKey(source_id)
+    if not proxies:
+        logs.warning('Unable to extract and third-party ID from composite search ID: ' + search_id)
+        raise StampedUnavailableError("Entity not found")
 
     from resolve.EntityProxyContainer import EntityProxyContainer
-    return EntityProxyContainer(proxy).buildEntity()
+    from resolve.EntityProxySource import EntityProxySource
+    builder = EntityProxyContainer(proxies[0])
+    for proxy in proxies[1:]:
+        builder.addSource(EntityProxySource(proxy))
+
+    return builder.buildEntity()
 
 
 import sys

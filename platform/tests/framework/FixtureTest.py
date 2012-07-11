@@ -11,34 +11,9 @@ from utils import AttributeDict, Singleton, get_db_config
 from bson import json_util
 import json
 from api.db.mongodb.AMongoCollection import MongoDBConfig
-from tests.StampedTestUtils import *
 from libs import MongoCache
 import functools
-
-
-class AStampedFixtureTestCase(AStampedTestCase):
-    """
-    Base class for tests intending to use test fixtures.
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        MongoDBConfig.getInstance().database_name = 'stamped_fixtures'
-        from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
-        MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
-        MongoCache.disableStaleness = True
-        
-        db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
-        [getattr(db, tableName).drop() for tableName in db.collection_names() if tableName != 'system.indexes']
-
-    @classmethod
-    def tearDownClass(cls):
-        # Put things back the way they were in case another test needs to hit the real database.
-        MongoDBConfig.getInstance().database_name = 'stamped'
-        from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
-        MongoDBConfig2.getInstance().database_name = 'stamped'
-        MongoCache.disableStaleness = False
-
+from tests.StampedTestUtils import *
 
 class FixtureTestRuntimeSettings(Singleton):
     def __init__(self):
@@ -104,7 +79,8 @@ def dumpDbDictToFilename(dbDict, fileName):
     fileOut.write(dbAsJson)
     fileOut.close()
 
-def fixtureTest(generateLocalDbFn=None,
+def fixtureTest(useLocalDb=False,
+                generateLocalDbFn=None,
                 generateLocalDbQueries=None,
                 fixtureText=None):
     totalFixtureSources = ((generateLocalDbFn is not None) +
@@ -112,43 +88,50 @@ def fixtureTest(generateLocalDbFn=None,
                            (fixtureText is not None))
     if totalFixtureSources > 1:
         raise Exception('generateLocalDbFn, generateLocalDbQueries, and fixtureText are mutually exclusive!')
+    if useLocalDb and totalFixtureSources:
+        raise Exception('useLocalDb is set to True, but you also provided a fixture source.')
 
     def decoratorFn(testFn):
-
         @functools.wraps(testFn)
         def runTest(self, *args, **kwargs):
             useDbFixture = FixtureTestRuntimeSettings.getInstance().useDbFixture
             useCacheFixture = FixtureTestRuntimeSettings.getInstance().useCacheFixture
             writeFixtureFiles = FixtureTestRuntimeSettings.getInstance().writeFixtureFiles
 
-            db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
-
-            # Some functions may want a fixture literally so simple that they can specify it as inline text -- it doesn't come
-            # from the database, it doesn't need to be updated, it's just something quick and hand-written. In that case, even
-            # when we're doing runs of tests that regenerate the fixtures of the test suite, for these tests we still need to
-            # load fixtures as normal.
-            useDbFixture = useDbFixture or (generateLocalDbFn is None and generateLocalDbQueries is None)
-
-            dbFixtureFilename = defaultFixtureFilename
-            # Clear out the whole test DB before running the test.
-            [getattr(db, tableName).drop() for tableName in db.collection_names() if tableName != 'system.indexes']
-
-            dbDict = {}
-
             dbFixtureFilename = defaultFixtureFilename(self, testFn, 'dbfixture')
             cacheFixtureFilename = defaultFixtureFilename(self, testFn, 'cachefixture')
 
-            if useDbFixture or useCacheFixture:
-                if fixtureText is not None:
-                    loadTestDbDataFromText(fixtureText)
-                else:
-                    try:
-                        loadTestDbDataFromFilename(dbFixtureFilename)
-                    except IOError:
-                        # We wanted to use a fixture, but we didn't find one. In this case we just decide to fall back
-                        # to generating data if either a function or query to do so is provided. If neither is provided,
-                        # we assume that this function doesn't touch the database at all.
-                        useDbFixture = False
+            if not useLocalDb:
+                MongoDBConfig.getInstance().database_name = 'stamped_fixtures'
+                from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+                MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
+                MongoCache.disableStaleness = True
+                
+            db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
+
+            if not useLocalDb:
+                # Some functions may want a fixture literally so simple that they can specify it as inline text -- it doesn't come
+                # from the database, it doesn't need to be updated, it's just something quick and hand-written. In that case, even
+                # when we're doing runs of tests that regenerate the fixtures of the test suite, for these tests we still need to
+                # load fixtures as normal.
+                useDbFixture = useDbFixture or (generateLocalDbFn is None and generateLocalDbQueries is None)
+
+                # Clear out the whole test DB before running the test.
+                [getattr(db, tableName).drop() for tableName in db.collection_names() if tableName != 'system.indexes']
+
+                dbDict = {}
+
+                if useDbFixture or useCacheFixture:
+                    if fixtureText is not None:
+                        loadTestDbDataFromText(fixtureText)
+                    else:
+                        try:
+                            loadTestDbDataFromFilename(dbFixtureFilename)
+                        except IOError:
+                            # We wanted to use a fixture, but we didn't find one. In this case we just decide to fall back
+                            # to generating data if either a function or query to do so is provided. If neither is provided,
+                            # we assume that this function doesn't touch the database at all.
+                            useDbFixture = False
 
             if useCacheFixture:
                 try:
@@ -157,7 +140,7 @@ def fixtureTest(generateLocalDbFn=None,
                     useCacheFixture = False
 
             # Take anything out of the database that we don't want.
-            if not useDbFixture:
+            if not useDbFixture and not useLocalDb:
                 # TODO: 'cache' should really be a constant somewhere rather than being hard-coded all over the
                 # place.
                 [getattr(db, tableName).drop() for tableName in db.collection_names()
@@ -167,7 +150,7 @@ def fixtureTest(generateLocalDbFn=None,
                 db.cache.drop()
 
             # Generate the DB objects anew if we're not loading them from file.
-            if not useDbFixture:
+            if not useDbFixture and not useLocalDb:
                 if generateLocalDbFn is not None:
                     generateLocalDbFn()
                 elif generateLocalDbQueries is not None:
@@ -179,7 +162,7 @@ def fixtureTest(generateLocalDbFn=None,
             # The actual DB fixtures we want to snapshot before the function runs, because we don't want to incorporate
             # anything written during the function. But the third-party calls cache we want to snapshot after the
             # function runs.
-            if writeFixtureFiles:
+            if writeFixtureFiles and not useLocalDb:
                 for tableName in db.collection_names():
                     if tableName not in ['cache', 'system.indexes']:
                         dbDict[tableName] = list(getattr(db, tableName).find())
@@ -193,6 +176,11 @@ def fixtureTest(generateLocalDbFn=None,
                     dumpDbDictToFilename(dbDict, dbFixtureFilename)
                     if db.cache.count():
                         dumpDbDictToFilename({'cache': list(db.cache.find())}, cacheFixtureFilename)
+
+                MongoDBConfig.getInstance().database_name = 'stamped'
+                from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+                MongoDBConfig2.getInstance().database_name = 'stamped'
+                MongoCache.disableStaleness = False
 
             return testResult
 
