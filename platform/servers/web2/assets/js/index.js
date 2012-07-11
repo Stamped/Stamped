@@ -211,12 +211,12 @@
         
         
         // vertically centers the page's main content
-        // NOTE: if noop is truthy, this method will not make any modifications
+        // NOTE: if update is false, this method will not make any modifications
         var update_main_layout = function(noop) {
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
-            if (!!noop) {
+            if (!noop) {
                 $main.css('top', offset + "px");
             }
             
@@ -226,11 +226,8 @@
             };
         };
         
-        // initialize and display the main page content
-        var init_main = function() {
-            $body.addClass("main");
-            
-            var $panes = $(".pane");
+        var resize_panes = function(noop) {
+            var $panes = $(".pane").css('min-height', 0);
             var height = 0;
             
             // find max height of all panes
@@ -243,7 +240,19 @@
             // constrain the minimum pane height to the height of the tallest pane
             if (height > 0) {
                 $panes.css('min-height', height);
+                
+                if (!noop) {
+                    return update_main_layout(noop);
+                }
             }
+            
+            return false;
+        };
+        
+        // initialize and display the main page content
+        var init_main = function() {
+            $body.addClass("main");
+            resize_panes(false);
             
             var result = update_main_layout(true);
             var start  = $window.height() + result.height;
@@ -266,8 +275,11 @@
                         }
                     }, 
                     complete    : function() {
+                        if (!resize_panes()) {
+                            update_main_layout();
+                        }
+                        
                         $main.removeClass("main-animating");
-                        update_main_layout();
                     }
                 });
         };

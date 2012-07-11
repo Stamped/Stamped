@@ -182,7 +182,7 @@ body.main {
                 .title {
                     .stamped-font();
                     
-                    letter-spacing: 0.05em;
+                    letter-spacing: 0.03em;
                     font-size: 3em;
                     line-height: 115%;
                     color: #333;
@@ -367,13 +367,13 @@ body.main {
     }
 }
 
-.hero-video-preview {
+#hero-video-preview {
     position: absolute;
     top:  50%;
     left: 290px;
     margin-top: -129px;
     
-    display: block;
+    display: none;
     width: 470px;
     
     .user-video-preview-image {
@@ -384,6 +384,10 @@ body.main {
     .user-video-desc {
         text-align: center;
     }
+}
+
+.active-pane-4 #hero-video-preview {
+    display: block;
 }
 
 .screen-name {
@@ -406,6 +410,39 @@ body.main {
     .hidden-main-animating {
         opacity: 0;
         .transition(opacity, 0s, linear);
+    }
+}
+
+#tastemaker-gallery {
+    margin-top: 24px;
+    .tastemaker {
+        position: relative;
+        display:  inline-block;
+        
+        margin-right: 8px;
+    }
+    
+    .tastemaker:last-child {
+        margin-right: 0;
+    }
+}
+
+.tastemaker-logo {
+    width:  36px;
+    height: 36px;
+    
+    top:   -18px;
+    right: -18px;
+}
+
+// target webkit browsers
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .tastemaker-logo {
+        @mask-image: url(/assets/img/stamped_email_mask.png);
+        
+        -webkit-mask: @mask-image no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask: @mask-image no-repeat;
     }
 }
 
@@ -596,7 +633,7 @@ footer {
     height: 45px;
 }
 
-.category-illustration {
+#category-illustration {
     background: url(/assets/img/index/illustration.png) no-repeat;
     width:  373px;
     height: 84px;
@@ -695,7 +732,7 @@ footer {
         height: 90px;
     }
     
-    .category-illustration {
+    #category-illustration {
         background: url(/assets/img/index/illustration@2x.png) no-repeat;
         width:  746px;
         height: 168px;

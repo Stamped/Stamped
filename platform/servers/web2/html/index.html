@@ -49,6 +49,12 @@
     <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/helpers/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
     
+    <style>
+        {% for user in tastemakers %}
+            {% custom_css "index" user %}
+        {% endfor %}
+    </style>
+    
     <!--[if lte IE 9]>
     <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.9.css">
     <![endif]-->
@@ -194,7 +200,7 @@
                             </p>
                         </div>
                         
-                        <div class="category-illustration"></div>
+                        <div id="category-illustration"></div>
                     </div>
                     
                     <div id="pane-1" class="pane">
@@ -222,11 +228,11 @@
                         
                         <div class="desc">
                             <p>
-                                Want to try something new? Look no further than the Guide, the visual and personalized way to discover the best new things, curated completely by people you trust.
+                                Want to try something new? Look no further than The Guide, the visual and personalized way to discover the best new things, curated completely by people you trust.
                             </p>
                             
                             <p>
-                                Listen to music, find an amazing restaurant, add movies to your Instant Queue, check out new books, be the first to hear about awesome new apps -- the latest &amp; greatest is all at your fingertips in the Guide.
+                                Listen to music, find an amazing restaurant, add movies to your Instant Queue, check out new books, be the first to hear about awesome new apps -- the latest &amp; greatest is all at your fingertips in The Guide.
                             </p>
                             
                             <a href="#pane-3" class="continue-button">Continue</a>
@@ -244,6 +250,16 @@
                             </p>
                             
                             <a href="#pane-4" class="continue-button">Continue</a>
+                            
+                            <div id="tastemaker-gallery">
+                                {% for user in tastemakers %}
+                                    <div class="tastemaker">
+                                        {% handlebars_template "profile-image-60" user %}
+                                        
+                                        <div class="user-logo-small tastemaker-logo tastemaker-logo-{{user.screen_name}}"></div>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                     
@@ -280,7 +296,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="user-video-preview hero-video-preview">
+                                <div id="hero-video-preview" class="user-video-preview">
                                     <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="user-video-preview-image lightbox-video"></a>
                                     
                                     <div class="user-video-desc">
