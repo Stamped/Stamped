@@ -285,6 +285,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             'linked_screen_name'    : False,
             'token'                 : True,
             'token_expiration'      : False,
+            'share_settings'        : False,
         }
 
         valid_netflix = {
@@ -343,7 +344,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix', 'rdio'] :
             raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
 
-        logs.info('### linkedAccount: %s' % linkedAccount)
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
             {'$set': { 'linked.%s' % linkedAccount.service_name : linkedAccount.dataExport() } }
