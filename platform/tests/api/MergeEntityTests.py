@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 from tests.framework.FixtureTest import *
+from tests.StampedTestUtils import *
 import datetime
 from libs.MongoCache import mongoCachedFn
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
@@ -19,7 +20,7 @@ TRACKS = {
         'Tug of War' : set(['Bucket', 'Tell Me', 'Heavy Lifting'])
         }
 
-class MergeEntityTest(AStampedFixtureTestCase):
+class MergeEntityTest(AStampedTestCase):
     @fixtureTest(generateLocalDbQueries=[('entities', {'title' : ARTIST})])
     def test_resolve_artist(self):
         mongoApi = globalMongoStampedAPI()

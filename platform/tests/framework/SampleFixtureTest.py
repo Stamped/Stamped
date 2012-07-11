@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 from tests.framework.FixtureTest import *
+from tests.StampedTestUtils import *
 import datetime
 from libs.MongoCache import mongoCachedFn
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
@@ -24,7 +25,7 @@ def generate_john_doe():
     person.timestamp.created = datetime.datetime.now()
     MongoEntityCollection().addEntity(person)
 
-class SampleFixtureTestCase(AStampedFixtureTestCase):
+class SampleFixtureTestCase(AStampedTestCase):
     @fixtureTest()
     def test_api_caching_only(self):
         print "Result of myCachedFn() is", myCachedFn()
