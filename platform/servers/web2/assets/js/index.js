@@ -216,7 +216,7 @@
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
-            if (!noop) {
+            if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
             }
             
