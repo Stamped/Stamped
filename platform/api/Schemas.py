@@ -827,6 +827,9 @@ class BasicEntity(BasicEntityMini):
         # Ordered for best matches first.
         cls.addPropertyList('third_party_ids',              basestring)
 
+        # A list of normalized tokens for search
+        cls.addPropertyList('match_codes',                  basestring)
+
 
     def __init__(self):
         BasicEntityMini.__init__(self)

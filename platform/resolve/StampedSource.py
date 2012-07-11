@@ -37,6 +37,7 @@ try:
     from search.ScoringUtils import *
     from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
 
+    from libs.SearchUtils import formatSearchQuery
 except:
     report()
     raise
@@ -789,11 +790,10 @@ class StampedSource(GenericSource):
         return self.__querySource(query_gen(), query)
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
-        simplifiedText = queryText.lower()
+        tokenQueries = formatSearchQuery(queryText)
         if queryCategory == 'film':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                         { 'types' : { '$in' : [ 'tv', 'movie' ] } },
                         { 'subcategory' : { '$in' : [ 'tv', 'movie' ] } },
@@ -802,8 +802,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'music':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : { '$in' : [ 'artist', 'album', 'track' ] } },
                             { 'subcategory' : { '$in' : [ 'artist', 'album', 'song' ] } },
@@ -812,8 +811,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'place':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'kind' : 'place' },
                             { 'subcategory' : { '$in' : [ 'bar', 'restaurant' ] } },
@@ -822,8 +820,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'app':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : 'app' },
                             { 'subcategory' : 'app' },
@@ -832,8 +829,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'book':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : 'book' },
                             { 'subcategory' : 'book' },
