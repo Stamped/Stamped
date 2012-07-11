@@ -201,6 +201,18 @@ class StampedStaleRelationshipDataError(StampedDataError):
     def __init__(self, msg=None):
         StampedDataError.__init__(self, msg)
 
+class StampedInvalidSourcesError(StampedDataError):
+    pass
+
+class StampedGooglePlacesSourceError(StampedDataError):
+    pass
+
+class StampedItunesSourceError(StampedDataError):
+    pass
+
+class StampedTombstoneError(StampedDataError):
+    pass
+
 class StampedRemoveDocumentError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)
