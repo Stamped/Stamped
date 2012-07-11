@@ -137,16 +137,23 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                     del(entity.sources.tombstone_id)
                     del(entity.sources.tombstone_source)
                     del(entity.sources.tombstone_timestamp)
+                    modified = True
                 else:
                     raise StampedDataError(msg)
 
-            # Raise exception if tombstone is chained
+            # Check if tombstone is chained
             if tombstone is not None and tombstone.sources.tombstone_id is not None:
                 if tombstone.sources.tombstone_id == entity.entity_id:
-                    raise StampedTombstoneError("Entities tombstoned to each other: '%s' and '%s'" % \
-                        (entity.entity_id, tombstone.entity_id))
-                raise StampedTombstoneError("Entity tombstone chain: '%s' to '%s' to '%s'" % \
-                    (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id))
+                    msg = "Entities tombstoned to each other: '%s' and '%s'" % (entity.entity_id, tombstone.entity_id)
+                    raise StampedTombstoneError(msg)
+                msg = "Entity tombstone chain: '%s' to '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id)
+                if repair:
+                    logs.info(msg)
+                    entity.sources.tombstone_id = tombstone.sources.tombstone_id
+                    modified = True
+                else:
+                    raise StampedTombstoneError(msg)
                 
             # Raise exception if tombstone to user-generated entity
             if tombstone is not None and tombstone.sources.user_generated_id is not None:
@@ -193,6 +200,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 if repair:
                     logs.info(msg)
                     del(entity.images)
+                    modified = True
                 else:
                     raise StampedDataError(msg)
             else:
