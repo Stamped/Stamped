@@ -424,6 +424,12 @@ class StampedAPI(AStampedAPI):
         fb_acct.linked_user_id              = facebookUser['id']
         fb_acct.linked_name                 = facebookUser['name']
         fb_acct.linked_screen_name          = facebookUser.pop('username', None)
+        # Enable Open Graph sharing by default
+        fb_acct.share_settings = LinkedAccountShareSettings()
+        fb_acct.share_settings.share_stamps  = True
+        fb_acct.share_settings.share_likes   = True
+        fb_acct.share_settings.share_todos   = True
+        fb_acct.share_settings.share_follows = True
         account.linked.facebook             = fb_acct
         account.auth_service                = 'facebook'
 
@@ -855,6 +861,13 @@ class StampedAPI(AStampedAPI):
             linkedAccount.linked_name = userInfo['name']
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
+            # Enable Open Graph sharing by default
+            if linkedAccount.share_settings is None:
+                linkedAccount.share_settings = LinkedAccountShareSettings()
+                linkedAccount.share_settings.share_stamps  = True
+                linkedAccount.share_settings.share_likes   = True
+                linkedAccount.share_settings.share_todos   = True
+                linkedAccount.share_settings.share_follows = True
 
         elif service_name == 'twitter':
             if linkedAccount.token is None or linkedAccount.secret is None:
