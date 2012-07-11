@@ -27,6 +27,7 @@ from resolve.TMDBSource import TMDBSource
 from resolve.TheTVDBSource import TheTVDBSource
 from libs.CountedFunction import printFunctionCounts
 
+from tests.StampedTestUtils import *
 from tests.framework.FixtureTest import *
 
 SOURCES = {
@@ -43,7 +44,7 @@ SOURCES = {
 
 OUTPUT_PREFIX = 'tmp'
 
-class RunEvalResolutions(AStampedFixtureTestCase):
+class RunEvalResolutions(AStampedTestCase):
     @fixtureTest()
     def test_run_eval(self):
         with open('/tmp/resolution_eval_input') as input:
