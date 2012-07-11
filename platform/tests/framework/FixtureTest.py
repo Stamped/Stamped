@@ -108,6 +108,7 @@ def fixtureTest(useLocalDb=False,
                 MongoCache.disableStaleness = True
                 
             db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
+            dbDict = {}
 
             if not useLocalDb:
                 # Some functions may want a fixture literally so simple that they can specify it as inline text -- it doesn't come
@@ -118,8 +119,6 @@ def fixtureTest(useLocalDb=False,
 
                 # Clear out the whole test DB before running the test.
                 [getattr(db, tableName).drop() for tableName in db.collection_names() if tableName != 'system.indexes']
-
-                dbDict = {}
 
                 if useDbFixture or useCacheFixture:
                     if fixtureText is not None:

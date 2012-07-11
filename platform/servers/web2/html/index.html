@@ -15,6 +15,8 @@
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
+        script: libs/jquery.fancybox.js
+        script: libs/helpers/jquery.fancybox-thumbs.js
         script: libs/jquery.fittext.js
     
     Third-party library dependencies:
@@ -28,6 +30,7 @@
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
+        stylesheet: libs/jquery.fancybox.css?v=2.0.6
     
     Core stamped dependencies:
         stylesheet: index.less
@@ -42,7 +45,9 @@
     
     <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.css">-->
     
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/helpers/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
     
     <!--[if lte IE 9]>
     <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.9.css">
@@ -244,7 +249,7 @@
                     
                     <div id="pane-4" class="pane">
                         <div class="title">
-                            Start stamping!
+                            Download Stamped and start stamping!
                         </div>
                         
                         <div class="desc">
@@ -255,6 +260,35 @@
                             <p>
                                 Watch some of our user videos for inspiration.
                             </p>
+                            
+                            <div id="user-video-gallery">
+                                <div id="user-video-preview-0" class="user-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" rel="user-video-gallery" class="user-video-preview-image lightbox-video"></a>
+                                    
+                                    <div class="user-video-desc">
+                                        <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" rel="user-video-gallery" class="watch-video lightbox-video">Watch</a>
+                                        <span class="screen-names"><a href="/honeybadger">@honey</a></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="user-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" rel="user-video-gallery" class="user-video-preview-image lightbox-video"></a>
+                                    
+                                    <div class="user-video-desc">
+                                        <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" rel="user-video-gallery" class="watch-video lightbox-video">Watch</a>
+                                        <span class="screen-names"><a href="/heman">@heman</a></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="user-video-preview hero-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" rel="user-video-gallery" class="user-video-preview-image lightbox-video"></a>
+                                    
+                                    <div class="user-video-desc">
+                                        <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" rel="user-video-gallery" class="watch-video lightbox-video">Watch</a>
+                                        <span class="screen-names"><a href="/justinbieber">@justinbieber</a></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -311,6 +345,8 @@
     
     {% if DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
         <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
