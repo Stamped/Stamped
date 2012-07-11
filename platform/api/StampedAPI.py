@@ -45,6 +45,7 @@ try:
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
+    from resolve.EntityProxySource  import EntityProxySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
     from resolve.AmazonSource               import AmazonSource
     from resolve.FactualSource              import FactualSource
@@ -1621,7 +1622,13 @@ class StampedAPI(AStampedAPI):
         entities = self._newEntitySearch.searchEntities(category, query, limit=10, coords=coordsAsTuple)
 
         results = []
-        process = 5
+        numToStore = 5
+
+        #if category != 'place':
+        #    # The 'place' search engines -- especially Google -- return these shitty half-assed results with nowhere
+        #    # near enough detail to be useful for a user, so we definitely want to do a full lookup on those.
+        #    for entity in entities[:numToStore]:
+        #        self._searchEntityDB.writeSearchEntity(entity)
 
         for entity in entities:
             distance = None
@@ -1634,13 +1641,6 @@ class StampedAPI(AStampedAPI):
                 pass
 
             results.append((entity, distance))
-
-            process -= 1
-            if process > 0:
-                # asynchronously merge & enrich entity
-                ### TODO: This section is causing problems. Commenting out for now...
-                # self.mergeEntity(entity)
-                pass
 
         return results
 
@@ -4420,7 +4420,7 @@ class StampedAPI(AStampedAPI):
                 def loadProxy():
                     source = sources[sourceIdentifier.lower()]()
                     try:
-                        proxy = source.entityProxyFromKey(source_id)
+                        proxy = source.entityProxyFromKey(key)
                         proxies.append(proxy)
                         if len(proxies) == 1:
                             # This is the first proxy, so we'll try to resolve against Stamped.
@@ -4447,10 +4447,10 @@ class StampedAPI(AStampedAPI):
             raise StampedUnavailableError("Entity not found")
 
         if entity_id is None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxies[0])
+            entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
             for proxy in proxies[1:]:
                 entityBuilder.addSource(EntityProxySource(proxy))
-            entity = entityProxy.buildEntity()
+            entity = entityBuilder.buildEntity()
             entity.third_party_ids = id_components
 
             entity = self._entityDB.addEntity(entity)
