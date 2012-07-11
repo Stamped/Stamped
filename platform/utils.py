@@ -403,6 +403,7 @@ def getFile(url, request=None, params=None, logging=False):
             # since it was a problem with the url / headers and retrying most likely won't 
             # solve the problem.
             if e.code >= 400 and e.code < 500:
+                logs.warning("Failed: %s" % e)
                 raise
             
             # if delay is already too large, request will likely not complete successfully, 
@@ -428,6 +429,7 @@ def getFile(url, request=None, params=None, logging=False):
         
         # put the current thread to sleep for a bit, increase the delay, 
         # and retry the request
+        print 'wait %s' % delay
         time.sleep(delay)
         delay *= 2
     
