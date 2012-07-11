@@ -106,10 +106,10 @@ class RateLimit(object):
             return 0
 
 # Fail Limit functions similarly to RateLimit, but only initiates a wait period once the fail limit has been reached
-# The cool down value imposes a shorter fail trigger immediately after resetting from a failure timeout.
+# The cool down field is used to impose a stricter fail trigger immediately after resetting from a failure timeout:
 #  Every failed request decrements cooldown, and every success increments cooldown.  When cooldown hits 0, a wait period
-#  is enforced just as though a fail limit were hit. After resetting from a wait, cooldown is set to 1, so we're more
-#  quick to impose a wait period if fails occur immediately after a wait period has lapsed
+#  is enforced as if a fail limit were hit. After resetting from a wait, cooldown is set to 1 so that if we immediately
+#  hit an error, a wait period will be imposed again.
 class FailLimit(object):
 
 
