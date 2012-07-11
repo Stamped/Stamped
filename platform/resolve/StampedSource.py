@@ -700,7 +700,6 @@ class StampedSource(GenericSource):
             yield {
                 'titlel'        : query.name.lower(),
                 'subcategory'   : {'$in' : ['bar', 'restaurant']},
-                ],
             }
         return self.__querySource(query_gen(), query)
 
