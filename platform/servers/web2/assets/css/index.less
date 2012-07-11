@@ -122,8 +122,11 @@ body.main {
         background: #fff;
         width: 470px;
         
+        margin: 0 0 18px 12px;
+        
         opacity: 0;
         .transition(opacity, .4s, ease);
+        .box-shadow(0, 2px, 25px, 0, @shadow);
         
         .ribbon-wrapper {
             height: 15px;
@@ -187,11 +190,50 @@ body.main {
     background: url(/assets/img/stamped-logo.png) no-repeat;
     width:  180px;
     height: 180px;
-    top:   -150px;
+    top:   -130px;
     left:  -90px;
     
     opacity: 1;
     .transition-transform(.3s, ease);
+}
+
+#main-footer {
+    text-align: center;
+    position: relative;
+    left: 8px;
+    
+    .watch-video {
+        .bieber-video-preview-icon {
+            display: inline-block;
+            position: relative;
+            top: 12px;
+        }
+    }
+}
+
+.speech-bubble {
+    display: inline-block;
+    width: 190px;
+    padding: 8px;
+    margin-right: 12px;
+    text-align: left;
+    
+    border: 1px solid #d7d7d7;
+    .rounded(4px);
+    
+    .play-video-button {
+        float: left;
+        margin-right: 12px;
+    }
+    
+    .desc {
+        font-size: 80%;
+        margin: 0;
+    }
+}
+
+.screen-name {
+    color: #438fed !important;
 }
 
 .intro {
@@ -316,9 +358,20 @@ body.main {
     }
 }
 
-.bieber-preview-button {
-    background: url(/assets/img/index/bieberlittle.gif) no-repeat;
+.play-video-button {
+    background: url(/assets/img/index/playbutton_small_sprite.png) no-repeat;
     display: block;
+    
+    width:  40px;
+    height: 40px;
+    
+    &:hover, &:active {
+        background-position: -42px 0;
+    }
+}
+
+.bieber-video-preview-icon {
+    background: url(/assets/img/index/bieberlittle.gif) no-repeat;
     
     width:  45px;
     height: 45px;
@@ -405,7 +458,19 @@ body.main {
         }
     }
     
-    .bieber-preview-button {
+    .play-video-button {
+        background: url(/assets/img/index/playbutton_small_sprite@2x.png) no-repeat;
+        display: block;
+        
+        width:  80px;
+        height: 80px;
+        
+        &:hover, &:active {
+            background-position: -84px 0;
+        }
+    }
+    
+    .bieber-video-preview-icon {
         background: url(/assets/img/index/bieberlittle@2x.gif) no-repeat;
         width:  90px;
         height: 90px;
