@@ -15,7 +15,7 @@ class ASearchEntityDB(object):
     promoted to full entities (when the user stamps them.)
     """
     @abstract
-    def getSearchEntityByEntityId(self, entity_id):
+    def getSearchEntityBySearchId(self, search_id):
         pass
 
     @abstract
