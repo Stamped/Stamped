@@ -108,6 +108,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         """
         
         document = self._getMongoDocumentFromId(key)
+        
+        assert document is not None
 
         modified = False
 

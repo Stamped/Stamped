@@ -126,10 +126,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
     def checkIntegrity(self, key, repair=True):
         document = self._getMongoDocumentFromId(key)
-
-        modified = False
         
         assert document is not None
+
+        modified = False
 
         # Update stamp to new structure
         if 'contents' not in document or 'credit' in document:
