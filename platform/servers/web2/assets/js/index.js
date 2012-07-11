@@ -7,7 +7,7 @@
 /*global STAMPED_PRELOAD, jQuery, $, History, moment */
 
 /* TODO:
-    * what easing should we use for iPhone reveal animation?
+    * what easing function should we use for the iPhone reveal animation?
  */
 
 (function() {
@@ -18,9 +18,10 @@
         // ---------------------------------------------------------------------
         
         
-        var $body   = $("body");
-        var $window = $(window);
-        var $main   = $("#main");
+        var $window     = $(window);
+        var $body       = $("body");
+        var $main       = $("#main");
+        var $main_body  = $("#main-body");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -117,7 +118,7 @@
         });
         
         var get_relative_offset = function(height) {
-            return Math.ceil(-100 * (height / (window.innerHeight||1))) + "%";
+            return Math.ceil(-100 * (height / (window.innerHeight || 1))) + "%";
         };
         
         
@@ -178,17 +179,21 @@
                 var $active     = $(".active-line");
                 var $next       = $active.next(".line").filter(":visible");
                 
+                // if there is another line of intro text to display, toggle it to be active 
+                // and restart the intro animation
                 if ($next.length > 0) {
                     $active.removeClass(active_line);
                     $next.addClass(active_line);
                     
                     intro_animation.restart();
                 } else {
+                    // otherwise, start the iphone flipping animation and hero text translation
                     intro_iphone_animation.start();
                     
                     var height = $active.height();
                     var offset = get_relative_offset(height);
                     
+                    // hide the intro hero text by translating it off the top of the screen
                     $intro_hero.animate({
                         top : offset
                     }, {
@@ -205,8 +210,9 @@
         // ---------------------------------------------------------------------
         
         
+        // vertically centers the page's main content
+        // NOTE: if noop is truthy, this method will not make any modifications
         var update_main_layout = function(noop) {
-            // vertically center the page's main content
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
@@ -220,11 +226,30 @@
             };
         };
         
+        // initialize and display the main page content
         var init_main = function() {
             $body.addClass("main");
+            
+            var $panes = $(".pane");
+            var height = 0;
+            
+            // find max height of all panes
+            $panes.each(function(i, elem) {
+                var $elem = $(elem);
+                
+                height = Math.max($elem.height(), height);
+            });
+            
+            // constrain the minimum pane height to the height of the tallest pane
+            if (height > 0) {
+                $panes.css('min-height', height);
+            }
+            
             var result = update_main_layout(true);
             var start  = $window.height() + result.height;
             
+            // load the main content with a spiffy animation, translating in from beneath 
+            // the bottom of the page
             $main
                 .addClass("main-animating")
                 .css('top', start + "px")
@@ -247,6 +272,45 @@
                 });
         };
         
+        // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
+        var set_active_pane = function(index) {
+            if (index >= 0 && index <= 4) {
+                var active  = "active-pane-" + index;
+                
+                if (!$main_body.hasClass(active)) {
+                    $main_body.removeClass().addClass(active);
+                    
+                    return true;
+                }
+            }
+            
+            return false;
+        };
+        
+        // switch active pane on pane nav button click
+        $main.on("click", ".pane-nav-button", function(event) {
+            event.preventDefault();
+            
+            var $this   = $(this);
+            var id      = $this.attr("id");
+            var index   = id.slice("pane-nav-".length);
+            
+            set_active_pane(index);
+            return false;
+        });
+        
+        // cycle active pane on continue button click
+        $main.on("click", ".continue-button", function(event) {
+            event.preventDefault();
+            
+            var $this   = $(this);
+            var href    = $this.attr("href");
+            var index   = href.slice("#pane-".length);
+            
+            set_active_pane(index);
+            return false;
+        });
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
@@ -256,8 +320,10 @@
         $window.resize(update_main_layout);
         
         if ($body.hasClass("intro")) {
+            // start the intro animation sequence
             intro_animation.start();
         } else {
+            // bypass intro animation and go directly to the main page content
             init_main();
         }
     });
