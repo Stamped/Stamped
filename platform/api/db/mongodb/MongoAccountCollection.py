@@ -327,9 +327,16 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         # Construct a new LinkedAccount object which contains only valid fields
         newLinkedAccount = LinkedAccount()
+
         for k, v in linkedDict.iteritems():
-            if k in valid_fields and k is not None:
-                setattr(newLinkedAccount, k, v)
+            if k is not None and k not in valid_fields:
+                 delattr(linkedDic, k)
+
+        newLinkedAccount.dataImport(linkedDict)
+
+#        for k, v in linkedDict.iteritems():
+#            if k in valid_fields and k is not None:
+#                setattr(newLinkedAccount, k, v)
 
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
