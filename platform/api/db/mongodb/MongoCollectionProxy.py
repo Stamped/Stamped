@@ -211,6 +211,8 @@ class MongoCollectionProxy(object):
                     logs.info("Retrying delete (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
             except Exception as e:
+                import traceback
+                logs.warning('Failure updating document:\n%s' % ''.join(traceback.format_exc()))
                 raise StampedSaveDocumentError("Unable to update document")
 
 
