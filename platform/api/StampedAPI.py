@@ -278,6 +278,10 @@ class StampedAPI(AStampedAPI):
         alert_settings.alerts_replies_email     = True
         alert_settings.alerts_followers_apns    = True
         alert_settings.alerts_followers_email   = True
+        alert_settings.alerts_friends_apns      = True
+        alert_settings.alerts_friends_email     = True
+        alert_settings.alerts_actions_apns      = True
+        alert_settings.alerts_actions_email     = False
         account.alert_settings                  = alert_settings
 
         # Validate screen name

@@ -154,9 +154,6 @@ class StampedAuth(AStampedAuth):
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists for facebook_id: %s" % fb_user['id'])
         account = accounts[0]
 
-        if account.linked.facebook is None or account.linked.facebook.linked_user_id is None:
-            raise StampedWrongAuthServiceError("Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account")
-
         logs.info("Login successful")
 
         """
@@ -196,12 +193,6 @@ class StampedAuth(AStampedAuth):
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using twitter_id: %s" % tw_user['id'])
         account = accounts[0]
-
-        if account.auth_service != 'twitter':
-            raise StampedWrongAuthServiceError("Attempting to login via Twitter for an account that doesn't use twitter auth")
-
-        if account.linked.twitter is None or account.linked.twitter.linked_user_id is None:
-            raise StampedMissingRequiredLinkedAccountError("Twitter Auth account does not have twitter linked account information!  user_id: %s" % account.user_id)
 
         logs.info("Login successful")
 

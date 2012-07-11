@@ -294,4 +294,5 @@ ChangeList 6/22/2012:
                 rewrite ^/(.*)$ /mobile/$1 break;
             }
             
+hitler ipad:    http://www.youtube.com/watch?v=9_EcybyLJS8
 
