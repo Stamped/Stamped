@@ -45,6 +45,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
         self._collection.ensure_index('match_codes')
+        self._collection.ensure_index('titlel')
 
     @lazyProperty
     def seed_collection(self):

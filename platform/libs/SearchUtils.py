@@ -13,6 +13,7 @@ from whoosh.analysis import *
 from whoosh.support.charset import accent_map
 
 TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter() | StopFilter() 
+# TODO add spell correction here?
 NORMALIZER = TeeFilter(PassFilter(), StemFilter())
 
 def addMatchCodesToMongoDocument(document):
