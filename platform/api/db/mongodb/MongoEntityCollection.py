@@ -42,6 +42,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.netflix_id', 'sources.thetvdb_id')
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
+        self._collection.ensure_index('titlel')
+        self._collection.ensure_index('albums.title')
+        self._collection.ensure_index('artists.title')
+        self._collection.ensure_index('tracks.title')
 
     @lazyProperty
     def seed_collection(self):
