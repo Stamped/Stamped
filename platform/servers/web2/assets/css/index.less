@@ -30,6 +30,7 @@ body.intro {
     #main, footer {
         display: none;
     }
+    
     #intro {
         display: block !important;
     }
@@ -107,6 +108,18 @@ body.main {
     }
 }
 
+.italic {
+    font-style: italic;
+}
+
+.facebook {
+    color: #3B5999;
+}
+
+.twitter {
+    color: #4099FF;
+}
+
 
 /* **************************************************************************
                                CORE PAGE CONTENT
@@ -124,20 +137,20 @@ body.main {
     top: -100%;
     margin-left: -350px;
     
-    .pane {
-        overflow-y: auto;
+    .pane-body {
+        position: relative;
         background: #fff;
         width: 470px;
         
-        margin: 0 0 18px 12px;
+        margin:  0 0 18px 12px;
+        padding-bottom: 15px;
         
-        opacity: 0;
-        .transition(opacity, .4s, ease);
         .box-shadow(0, 2px, 25px, 0, @shadow);
         
         .ribbon-wrapper {
-            height: 15px;
             background: #c7c7c7;
+            width:  100%;
+            height: 15px;
             
             .rounded(2px);
             
@@ -146,20 +159,52 @@ body.main {
             }
         }
         
-        .pane-body {
+        .ribbon-wrapper-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+        }
+        
+        #pane-wrapper {
+            position: relative;
             margin: 12px 48px;
             
-            .title {
-                .stamped-font();
-                font-size: 3em;
-                line-height: 110%;
-                color: #333;
+            .pane {
+                position: absolute;
+                top:  0;
+                left: 0;
+                
+                opacity: 0;
+                .transition(opacity, .4s, ease);
+                
+                .title {
+                    .stamped-font();
+                    
+                    letter-spacing: 0.05em;
+                    font-size: 3em;
+                    line-height: 115%;
+                    color: #333;
+                }
+                
+                .desc {
+                    color: #888;
+                    font-weight: 200;
+                    font-size: 80%;
+                    
+                    .continue-button {
+                        color: #438fED;
+                        margin-bottom: 1em;
+                    }
+                }
             }
             
-            .desc {
-                color: #888;
-                font-weight: 200;
-                font-size: 80%;
+            #pane-0 {
+                position: relative !important;
+                
+                .continue-button {
+                    margin-bottom: 0 !important;
+                    margin-left: .5em;
+                }
             }
         }
     }
@@ -168,8 +213,40 @@ body.main {
         .transition(opacity, .4s, ease);
     }
     
-    .active-pane {
-        opacity: 1;
+    #pane-nav {
+        position: absolute;
+        left: -24px;
+        top: 50%;
+        margin-top: -40px;
+    }
+}
+
+.active-pane-0 #pane-nav-0, 
+.active-pane-1 #pane-nav-1, 
+.active-pane-2 #pane-nav-2, 
+.active-pane-3 #pane-nav-3, 
+.active-pane-4 #pane-nav-4 {
+    background-position: -36px 0;
+}
+
+.active-pane-0 #pane-0, 
+.active-pane-1 #pane-1, 
+.active-pane-2 #pane-2, 
+.active-pane-3 #pane-3, 
+.active-pane-4 #pane-4 {
+    opacity: 1 !important;
+    z-index: 50;
+}
+
+#retina .active-pane-0 #pane-nav-0, 
+#retina .active-pane-1 #pane-nav-1, 
+#retina .active-pane-2 #pane-nav-2, 
+#retina .active-pane-3 #pane-nav-3, 
+#retina .active-pane-4 #pane-nav-4 {
+    background-position: -70px 0;
+    
+    &:hover {
+        background-position: -70px 0;
     }
 }
 
@@ -193,15 +270,27 @@ body.main {
 
 #stamped-logo {
     position: absolute;
+    z-index: 100;
     
-    background: url(/assets/img/stamped-logo.png) no-repeat;
-    width:  180px;
-    height: 180px;
+    background: url(/assets/img/index/stamped-logo.png) no-repeat;
+    width:  184px;
+    height: 184px;
+    
     top:   -130px;
     left:  -90px;
     
     opacity: 1;
     .transition-transform(.3s, ease);
+}
+
+#retina #stamped-logo {
+    background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
+    width:  368px;
+    height: 368px;
+    
+    // TODO: test retina offsets
+    top:   -130px;
+    left:  -90px;
 }
 
 #main-footer {
