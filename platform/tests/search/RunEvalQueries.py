@@ -10,9 +10,10 @@ import pickle
 import tempfile
 
 from search.EntitySearch import EntitySearch
+from tests.StampedTestUtils import *
 from tests.framework.FixtureTest import *
 
-class RunEvalQueries(AStampedFixtureTestCase):
+class RunEvalQueries(AStampedTestCase):
     BOOK_QUERIES = [
         '1984',
         '1Q84 book',
@@ -87,7 +88,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
         'unbroken hellanbrend',
     ]
 
-    @fixtureTest()
+    @fixtureTest(useLocalDb=True)
     def test_run_book_queries(self):
         self.__runQueries([('book', self.BOOK_QUERIES)])
 
@@ -181,7 +182,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
         'superman kevin spacey',
     ]
 
-    @fixtureTest()
+    @fixtureTest(useLocalDb=True)
     def test_run_film_queries(self):
         self.__runQueries([('film', self.FILM_QUERIES)])
 
@@ -294,7 +295,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
         'jamey johnson dreaming my dreams',
         'alison krauss dreaming my dreams with you',
     ]
-    @fixtureTest()
+    @fixtureTest(useLocalDb=True)
     def test_run_music_queries(self):
         self.__runQueries([('music', self.MUSIC_QUERIES)])
 
@@ -378,7 +379,7 @@ class RunEvalQueries(AStampedFixtureTestCase):
         ('wegmans', (40.58, -74.64))
     ]
 
-    @fixtureTest()
+    @fixtureTest(useLocalDb=True)
     def test_run_place_queries(self):
         self.__runQueries([('place', self.PLACE_QUERIES)])
 
@@ -393,11 +394,11 @@ class RunEvalQueries(AStampedFixtureTestCase):
         'temple run',
         'pandora radio',
         ]
-    @fixtureTest()
+    @fixtureTest(useLocalDb=True)
     def test_run_app_queries(self):
         self.__runQueries([('app', self.APP_QUERIES)])
 
-    @fixtureTest()
+    @fixtureTest(useLocalDb=True)
     def test_run_all_queries(self):
         self.__runQueries([('music', self.MUSIC_QUERIES),
                            ('film', self.FILM_QUERIES),
