@@ -109,7 +109,7 @@ class RateLimit(object):
 # The cool down value imposes a shorter fail trigger immediately after resetting from a failure timeout.
 #  Every failed request decrements cooldown, and every success increments cooldown.  When cooldown hits 0, a wait period
 #  is enforced just as though a fail limit were hit. After resetting from a wait, cooldown is set to 1, so we're more
-#  quick to impose a wait period if fails occur immediately after recovery
+#  quick to impose a wait period if fails occur immediately after a wait period has lapsed
 class FailLimit(object):
 
 
@@ -213,6 +213,9 @@ class RateLimiter(object):
             self.__request_dur_log.popleft()
 
     def _getLimitsWait(self, now):
+        """
+        Get the longest wait time among rate limits and the fail limit
+        """
         max_wait = 0
         max_name = None
 
@@ -223,10 +226,11 @@ class RateLimiter(object):
                 max_name = name
                 max_wait = wait
 
-        fail_wait = self.__fail_limit.wait(now)
-        if fail_wait > max_wait:
-            max_wait = fail_wait
-            max_name = 'fail limit'
+        if self.__fail_limit is not None:
+            fail_wait = self.__fail_limit.wait(now)
+            if fail_wait > max_wait:
+                max_wait = fail_wait
+                max_name = 'fail limit'
 
         return max_wait, max_name
 
@@ -325,10 +329,11 @@ class RateLimiter(object):
         except Exception as e:
             asyncresult.set_exception(e)
             return
-        if response.status >= 400:
-            self.__fail_limit.fail()
-        else:
-            self.__fail_limit.success()
+        if self.__fail_limit is not None:
+            if response.status >= 400:
+                self.__fail_limit.fail()
+            else:
+                self.__fail_limit.success()
 
         print('### response: %s' % response)
         asyncresult.set((response, content))
@@ -339,11 +344,11 @@ class RateLimiter(object):
         return
 
 limiters = {
-    'facebook'      : RateLimiter(                      fail_limit=10,      fail_dur=10),
-    'twitter'       : RateLimiter(                      fail_limit=10,      fail_dur=10),
-    'netflix'       : RateLimiter(cps=1,    cpd=100000, fail_limit=10,      fail_dur=60),
-    'rdio'          : RateLimiter(          cpd=15000,  fail_limit=10,      fail_dur=10),
-    'spotify'       : RateLimiter(                      fail_limit=10,      fail_dur=10),
+    'facebook'      : RateLimiter(                      fail_limit=10,      fail_dur=60),
+    'twitter'       : RateLimiter(                      fail_limit=10,      fail_dur=60),
+    'netflix'       : RateLimiter(cps=4,    cpd=100000, fail_limit=10,      fail_dur=60),
+    'rdio'          : RateLimiter(          cpd=15000,  fail_limit=10,      fail_dur=60),
+    'spotify'       : RateLimiter(                      fail_limit=10,      fail_dur=60),
     }
 
 
