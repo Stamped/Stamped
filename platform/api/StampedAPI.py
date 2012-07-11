@@ -1624,11 +1624,11 @@ class StampedAPI(AStampedAPI):
         results = []
         numToStore = 5
 
-        #if category != 'place':
-        #    # The 'place' search engines -- especially Google -- return these shitty half-assed results with nowhere
-        #    # near enough detail to be useful for a user, so we definitely want to do a full lookup on those.
-        #    for entity in entities[:numToStore]:
-        #        self._searchEntityDB.writeSearchEntity(entity)
+        if category != 'place':
+            # The 'place' search engines -- especially Google -- return these shitty half-assed results with nowhere
+            # near enough detail to be useful for a user, so we definitely want to do a full lookup on those.
+            for entity in entities[:numToStore]:
+                self._searchEntityDB.writeSearchEntity(entity)
 
         for entity in entities:
             distance = None
