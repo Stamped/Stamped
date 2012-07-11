@@ -179,8 +179,51 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         """
         
         document = self._getMongoDocumentFromId(key)
+        
+        assert document is not None
 
         modified = False
+
+        # Check if old schema version
+        if 'linked' not in document or 'alert_settings' not in document or 'auth_service' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        account = self._convertFromMongo(document)
+
+        # Verify Facebook accounts are unique
+        if account.linked is not None and account.linked.facebook is not None:
+            facebookId = account.linked.facebook.linked_user_id
+            if facebookId is None:
+                logs.info("Cleaning up linked.facebook")
+                del(account.linked.facebook)
+                modified = True
+            else:
+                if self._collection.find({'account.linked.facebook': facebookId}).count() > 1:
+                    msg = "%s: Multiple accounts exist linked to Facebook id '%s'" % (key, facebookId)
+                    raise StampedFacebookLinkedToMultipleAccountsError(msg)
+
+        # Verify Twitter accounts are unique
+        if account.linked is not None and account.linked.twitter is not None:
+            twitterId = account.linked.twitter.linked_user_id
+            if twitterId is None:
+                logs.info("Cleaning up linked.twitter")
+                del(account.linked.twitter)
+                modified = True
+            else:
+                if self._collection.find({'account.linked.twitter': twitterId}).count() > 1:
+                    msg = "%s: Multiple accounts exist linked to Twitter id '%s'" % (key, twitterId)
+                    raise StampedTwitterLinkedToMultipleAccountsError(msg)
+
+        if modified and repair:
+            # self._collection.update({'_id' : key}, self._convertToMongo(account))
+            print self._convertToMongo(account)
+
+        return True
     
     ### PUBLIC
     

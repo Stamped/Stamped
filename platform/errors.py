@@ -213,6 +213,12 @@ class StampedItunesSourceError(StampedDataError):
 class StampedTombstoneError(StampedDataError):
     pass
 
+class StampedFacebookLinkedToMultipleAccountsError(StampedDataError):
+    pass
+
+class StampedTwitterLinkedToMultipleAccountsError(StampedDataError):
+    pass
+
 class StampedRemoveDocumentError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)
