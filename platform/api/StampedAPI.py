@@ -56,6 +56,7 @@ try:
     from resolve.TMDBSource                 import TMDBSource
     from resolve.TheTVDBSource              import TheTVDBSource
     from resolve.StampedSource              import StampedSource
+    from resolve.EntityProxySource import EntityProxySource
 
     # TODO (travis): we should NOT be importing * here -- it's okay in limited
     # situations, but in general, this is very bad practice.
@@ -4401,7 +4402,7 @@ class StampedAPI(AStampedAPI):
 
         stamped = StampedSource(stamped_api=self)
         fast_resolve_results = stamped.resolve_fast_batch(sourcesAndKeys)
-        entity_ids = filter(lambda x : x, fast_resolve_results)
+        entity_ids = filter(None, fast_resolve_results)
         if len(entity_ids):
             entity_id = entity_ids[0]
         else:
@@ -4420,7 +4421,7 @@ class StampedAPI(AStampedAPI):
                 def loadProxy():
                     source = sources[sourceIdentifier.lower()]()
                     try:
-                        proxy = source.entityProxyFromKey(source_id)
+                        proxy = source.entityProxyFromKey(key)
                         proxies.append(proxy)
                         if len(proxies) == 1:
                             # This is the first proxy, so we'll try to resolve against Stamped.
@@ -4450,7 +4451,7 @@ class StampedAPI(AStampedAPI):
             entityProxy = EntityProxyContainer.EntityProxyContainer(proxies[0])
             for proxy in proxies[1:]:
                 entityBuilder.addSource(EntityProxySource(proxy))
-            entity = entityProxy.buildEntity()
+            entity = entityBuilder.buildEntity()
             entity.third_party_ids = id_components
 
             entity = self._entityDB.addEntity(entity)
