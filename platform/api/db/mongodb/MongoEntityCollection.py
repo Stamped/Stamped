@@ -45,6 +45,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self._collection.ensure_index('titlel')
         self._collection.ensure_index('albums.title')
         self._collection.ensure_index('artists.title')
+        self._collection.ensure_index('authors.title')
         self._collection.ensure_index('tracks.title')
 
     @lazyProperty
