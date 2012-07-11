@@ -101,6 +101,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         - Source-specific assertions:
             - itunes_url exists if itunes_id exists
+            - googleplaces_reference exists if googleplaces_id exists
 
         - If 'menu' is True, verify a menu exists
 
@@ -120,16 +121,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 raise StampedDataError(msg)
 
         entity = self._convertFromMongo(document)
-
-        # Generate third_party_ids if it doesn't exist
-        if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
-            msg = "%s: Missing third_party_ids" % key
-            if repair:
-                logs.info(msg)
-                entity._maybeRegenerateThirdPartyIds()
-                modified = True
-            else:
-                raise StampedDataError(msg)
 
         # Verify tombstone is set properly
         if entity.sources.tombstone_id is not None:
@@ -152,19 +143,25 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             # Raise exception if tombstone is chained
             if tombstone is not None and tombstone.sources.tombstone_id is not None:
                 if tombstone.sources.tombstone_id == entity.entity_id:
-                    raise StampedDataError("Entities tombstoned to each other: '%s' and '%s'" % \
+                    raise StampedTombstoneError("Entities tombstoned to each other: '%s' and '%s'" % \
                         (entity.entity_id, tombstone.entity_id))
-                raise StampedDataError("Entity tombstone chain: '%s' to '%s' to '%s'" % \
+                raise StampedTombstoneError("Entity tombstone chain: '%s' to '%s' to '%s'" % \
                     (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id))
                 
             # Raise exception if tombstone to user-generated entity
             if tombstone is not None and tombstone.sources.user_generated_id is not None:
-                raise StampedDataError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
+                raise StampedTombstoneError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
                     (entity.entity_id, tombstone.entity_id))
+
+        # Verify that at least one source exists
+        if entity.sources is None or len(entity.sources.dataExport().keys()) == 0:
+            raise StampedInvalidSourcesError("%s: Missing sources" % key)
 
         # Source-specific checks
         if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
-            raise StampedDataError("Missing iTunes URL: '%s'" % entity.entity_id)
+            raise StampedItunesSourceError("%s: Missing iTunes URL" % entity.entity_id)
+        if entity.sources.googleplaces_id is not None and entity.sources.googleplaces_reference is None:
+            raise StampedGooglePlacesSourceError("%s: Missing Google Places reference" % entity.entity_id)
 
         # Menu check
         if entity.kind == 'place' and entity.menu == True:
@@ -179,53 +176,70 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 else:
                     raise StampedDataError(msg)
 
+        # Generate third_party_ids if it doesn't exist
+        if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
+            msg = "%s: Missing third_party_ids" % key
+            if repair:
+                logs.info(msg)
+                entity._maybeRegenerateThirdPartyIds()
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
         # Verify image exists
         if entity.images is not None:
-            images = []
-            for image in entity.images:
-                sizes = []
-                for size in image.sizes:
-                    if size.url.startswith('http://maps.gstatic.com'):
-                        msg = "%s: Blacklisted image (%s)" % (key, size.url)
-                        if repair:
-                            logs.info(msg)
-                            modified = True
-                            continue
-                        else:
-                            raise StampedDataError(msg)
-                    if getHeadRequest(size.url, maxDelay=4) is None:
-                        msg = "%s: Image is unavailable (%s)" % (key, size.url)
-                        if repair:
-                            logs.info(msg)
-                            modified = True
-                            continue
-                        else:
-                            raise StampedDataError(msg)
-                    if size.width is None or size.height is None:
-                        msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
-                        if repair:
-                            logs.info(msg)
-                            try:
-                                size.width, size.height = getWebImageSize(size.url)
-                                modified = True
-                            except Exception as e:
-                                logs.warning("%s: Could not get image sizes: %s" % (key, e))
-                                raise 
-                        else:
-                            raise StampedDataError(msg)
-                    sizes.append(size)
-                if len(sizes) > 0:
-                    image.sizes = sizes
-                    images.append(image)
-            if len(images) > 0:
-                entity.images = images
+            if entity.kind == 'place':
+                msg = "%s: No image for places" % (key)
+                if repair:
+                    logs.info(msg)
+                    del(entity.images)
+                else:
+                    raise StampedDataError(msg)
             else:
-                del(entity.images)
+                images = []
+                for image in entity.images:
+                    sizes = []
+                    for size in image.sizes:
+                        if size.url.startswith('http://maps.gstatic.com'):
+                            msg = "%s: Blacklisted image (%s)" % (key, size.url)
+                            if repair:
+                                logs.info(msg)
+                                modified = True
+                                continue
+                            else:
+                                raise StampedDataError(msg)
+                        if getHeadRequest(size.url, maxDelay=4) is None:
+                            msg = "%s: Image is unavailable (%s)" % (key, size.url)
+                            if repair:
+                                logs.info(msg)
+                                modified = True
+                                continue
+                            else:
+                                raise StampedDataError(msg)
+                        if size.width is None or size.height is None:
+                            msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
+                            if repair:
+                                logs.info(msg)
+                                try:
+                                    size.width, size.height = getWebImageSize(size.url)
+                                    modified = True
+                                except Exception as e:
+                                    logs.warning("%s: Could not get image sizes: %s" % (key, e))
+                                    raise 
+                            else:
+                                raise StampedDataError(msg)
+                        sizes.append(size)
+                    if len(sizes) > 0:
+                        image.sizes = sizes
+                        images.append(image)
+                if len(images) > 0:
+                    entity.images = images
+                else:
+                    del(entity.images)
 
         if modified and repair:
-            from pprint import pprint
-            # pprint(entity.dataExport())
-            print 'UPDATED:', entity.title
+            self._collection.update({'_id' : key}, self._convertToMongo(entity))
+            print self._convertToMongo(entity)
 
         return True
 
@@ -254,11 +268,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         document    = self._getMongoDocumentFromId(documentId)
         entity      = self._convertFromMongo(document)
 
-        # if entity.tombstone_id is not None:
-        #     documentId  = self._getObjectIdFromString(entity.tombstone_id)
-        #     document    = self._getMongoDocumentFromId(documentId)
-        #     entity      = self._convertFromMongo(document)
-
         return entity
 
     def getEntityMinis(self, entityIds):
@@ -274,8 +283,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         for doc in documents:
             entity = self._convertFromMongo(doc, mini=False)
             entity = entity.minimize()
-            # if entity.tombstone_id is not None:
-            #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
 
         return result
@@ -289,8 +296,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         result = []
         for item in data:
             entity = self._convertFromMongo(item)
-            # if entity.tombstone_id is not None:
-            #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
 
         return result
