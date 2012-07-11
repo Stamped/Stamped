@@ -18,10 +18,11 @@
         // ---------------------------------------------------------------------
         
         
-        var $window     = $(window);
-        var $body       = $("body");
-        var $main       = $("#main");
-        var $main_body  = $("#main-body");
+        var $window         = $(window);
+        var $body           = $("body");
+        var $main           = $("#main");
+        var $main_body      = $("#main-body");
+        var $main_iphone    = $("#main-iphone");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -211,7 +212,7 @@
         
         
         // vertically centers the page's main content
-        // NOTE: if update is false, this method will not make any modifications
+        // NOTE: if noop is false, this method will not make any modifications
         var update_main_layout = function(noop) {
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
@@ -241,7 +242,7 @@
             if (height > 0) {
                 $panes.css('min-height', height);
                 
-                if (!noop) {
+                if (typeof(noop) !== 'boolean' || !noop) {
                     return update_main_layout(noop);
                 }
             }
@@ -252,7 +253,7 @@
         // initialize and display the main page content
         var init_main = function() {
             $body.addClass("main");
-            resize_panes(false);
+            resize_panes(true);
             
             var result = update_main_layout(true);
             var start  = $window.height() + result.height;
@@ -282,6 +283,18 @@
                         $main.removeClass("main-animating");
                     }
                 });
+            
+            // load the main content's interactive iphone with a spiffy animation, 
+            // translating in from beneath the bottom of the page
+            $main_iphone
+                .delay(300)
+                .css('top', "200%")
+                .animate({
+                    'top'       : "50%"
+                }, {
+                    easing      : "easeOutCubic", 
+                    duration    : 600
+                });
         };
         
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
@@ -291,6 +304,12 @@
                 
                 if (!$main_body.hasClass(active)) {
                     $main_body.removeClass().addClass(active);
+                    
+                    if (index >= 4) {
+                        $main_iphone.css("visibility", "hidden");
+                    } else {
+                        $main_iphone.css("visibility", "visible");
+                    }
                     
                     return true;
                 }
@@ -329,8 +348,23 @@
             $.fancybox({
                 'padding'       : 0,
                 'autoScale'     : false, 
+                
                 'transitionIn'  : 'none', 
                 'transitionOut' : 'none', 
+                
+                'openEffect'    : 'elastic', 
+                'openEasing'    : 'easeOutBack', 
+                'openSpeed'     : 300, 
+                
+                'closeEffect'   : 'elastic', 
+                'closeEasing'   : 'easeInBack', 
+                'closeSpeed'    : 300, 
+                
+                'tpl'           : {
+				    'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                    'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
+                }, 
+                
                 'title'         : this.title, 
                 'width'         : 680, 
                 'height'        : 495,
@@ -339,7 +373,7 @@
                 'swf'           : {
                     'wmode'             : 'transparent',
                     'allowfullscreen'   : 'true'
-                }
+                }, 
             });
             
             return false;
