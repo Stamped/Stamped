@@ -156,7 +156,7 @@ def latency(request):
             whitelist = form.cleaned_data['whitelist']
             
             if end is None:
-                end = today()
+                end = now()
             
             customResults = query.dailyLatencyReport(bgn,end,uri,blacklist,whitelist)
             
