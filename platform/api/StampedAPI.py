@@ -2283,8 +2283,6 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
-        t0 = time.time()
-        t1 = t0
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
@@ -2323,9 +2321,6 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
         else:
             stamp = Stamp()
-
-        logs.debug('### addStamp section 1: %s' % (time.time() - t1))
-        t1 = time.time()
 
         # Update content if stamp exists
         if stampExists:
@@ -2384,9 +2379,6 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
-        logs.debug('### addStamp section 2: %s' % (time.time() - t1))
-        t1 = time.time()
-
         if imageUrl is not None:
             self._statsSink.increment('stamped.api.stamps.images')
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, stamp.stamp_id, content.content_id])
@@ -2398,10 +2390,7 @@ class StampedAPI(AStampedAPI):
         # Enrich linked user, entity, todos, etc. within the stamp
         ### TODO: Pass userIds (need to scrape existing credited users)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
-        logs.info('### stampExists: %s' % stampExists)
-
-        logs.debug('### addStamp section 3: %s' % (time.time() - t1))
-        t1 = time.time()
+        logs.debug('### stampExists: %s' % stampExists)
 
         if not stampExists:
             # Add a reference to the stamp in the user's collection
@@ -2416,38 +2405,33 @@ class StampedAPI(AStampedAPI):
             self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
             distribution = self._getUserStampDistribution(authUserId)
             self._userDB.updateDistribution(authUserId, distribution)
-
-            # Asynchronously add references to the stamp in follower's inboxes and
-            # add activity for credit and mentions
-            tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
             
             if utils.is_ec2():
                 tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
-        else:
-            # Update stamp stats
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
-        logs.debug('### addStamp section 4: %s' % (time.time() - t1))
-        t1 = time.time()
+        # Generate activity and stamp pointers
+        tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl], 
+            kwargs={'stampExists': stampExists})
         
         return stamp
     
     @API_CALL
-    def addStampAsync(self, authUserId, stampId, imageUrl):
+    def addStampAsync(self, authUserId, stampId, imageUrl, stampExists=False):
         stamp   = self._stampDB.getStamp(stampId)
         entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
-        # Add references to the stamp in all relevant inboxes
-        followers = self._friendshipDB.getFollowers(authUserId)
-        self._stampDB.addInboxStampReference(followers, stampId)
+        if not stampExists:
+            # Add references to the stamp in all relevant inboxes
+            followers = self._friendshipDB.getFollowers(authUserId)
+            self._stampDB.addInboxStampReference(followers, stampId)
 
-        # If stamped entity is on the to do list, mark as complete
-        try:
-            self._todoDB.completeTodo(entity.entity_id, authUserId)
-            if entity.entity_id != stamp.entity.entity_id:
-                self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
-        except Exception:
-            pass
+            # If stamped entity is on the to do list, mark as complete
+            try:
+                self._todoDB.completeTodo(entity.entity_id, authUserId)
+                if entity.entity_id != stamp.entity.entity_id:
+                    self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
+            except Exception:
+                pass
         
         creditedUserIds = set()
         
@@ -2498,7 +2482,8 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph,
+        if not stampExists:
+            tasks.invoke(tasks.APITasks.postToOpenGraph,
                 kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
     
     @API_CALL
