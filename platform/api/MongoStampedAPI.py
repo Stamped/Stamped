@@ -43,6 +43,7 @@ from api.db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshToken
 from api.db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 from api.db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
 from api.db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
+from api.db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -131,6 +132,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _tempEntityDB(self):
         return MongoTempEntityCollection()
+
+    @lazyProperty
+    def _searchEntityDB(self):
+        return MongoSearchEntityCollection()
     
     @lazyProperty
     def _searchCacheDB(self):

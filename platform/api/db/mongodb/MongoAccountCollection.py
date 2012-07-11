@@ -285,6 +285,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             'linked_screen_name'    : False,
             'token'                 : True,
             'token_expiration'      : False,
+            'share_settings'        : False,
         }
 
         valid_netflix = {
@@ -326,9 +327,16 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         # Construct a new LinkedAccount object which contains only valid fields
         newLinkedAccount = LinkedAccount()
+
         for k, v in linkedDict.iteritems():
-            if k in valid_fields and k is not None:
-                setattr(newLinkedAccount, k, v)
+            if k is not None and k not in valid_fields:
+                 delattr(linkedDic, k)
+
+        newLinkedAccount.dataImport(linkedDict)
+
+#        for k, v in linkedDict.iteritems():
+#            if k in valid_fields and k is not None:
+#                setattr(newLinkedAccount, k, v)
 
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
@@ -343,7 +351,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix', 'rdio'] :
             raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
 
-        logs.info('### linkedAccount: %s' % linkedAccount)
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},
             {'$set': { 'linked.%s' % linkedAccount.service_name : linkedAccount.dataExport() } }
