@@ -209,16 +209,16 @@ body.main {
         }
     }
     
-    .hidden-main-animating {
-        .transition(opacity, .4s, ease);
-    }
-    
     #pane-nav {
         position: absolute;
         left: -24px;
         top: 50%;
         margin-top: -40px;
     }
+}
+
+.hidden-main-animating {
+    .transition(opacity, .4s, ease);
 }
 
 .active-pane-0 #pane-nav-0, 
@@ -353,8 +353,66 @@ body.main {
 
 
 /* **************************************************************************
+                      TILTED IPHONE IN CORE PAGE VIEWS
+   ************************************************************************** */
+
+
+.iphone-hero {
+    position: absolute;
+    z-index: 99;
+    
+    background: url(/assets/img/index/iPhone_HERO-1.png) no-repeat;
+    width:  276px;
+    height: 530px;
+}
+
+#retina .iphone-hero {
+    background: url(/assets/img/index/iPhone_HERO-1@2x.png) no-repeat;
+    width:  551px;
+    height: 1060px;
+}
+
+
+/* **************************************************************************
                                   FOOTER
    ************************************************************************** */
+
+
+footer {
+    position: absolute;
+    width: 100%;
+    
+    left:   0;
+    bottom: 0;
+    
+    padding: 0;
+    margin:  24px;
+    
+    .app-store-button {
+        position: absolute;
+        right:  0;
+        bottom: 0;
+    }
+}
+
+#social {
+    .social-button {
+        display: inline-block;
+    }
+}
+
+#footer-nav {
+    margin-top: .5em;
+    
+    .nav {
+        display: inline-block;
+        margin-right: 1em;
+        
+        &:hover {
+            color: #000;
+        }
+    }
+}
 
 
 /* **************************************************************************

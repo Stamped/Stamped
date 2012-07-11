@@ -7,8 +7,7 @@
 /*global STAMPED_PRELOAD, jQuery, $, History, moment */
 
 /* TODO:
-    * what easing should we use for iPhone reveal animation?
-    * set pane-0 min-height to max(pane-0.height(), pane-1.height(), pane-2.height(), etc.)
+    * what easing function should we use for the iPhone reveal animation?
  */
 
 (function() {
@@ -273,40 +272,45 @@
                 });
         };
         
-        var set_active_pane = function(num) {
-            var active  = "active-pane-" + num;
-            
-            if (!$main_body.hasClass(active)) {
-                $main_body.removeClass().addClass(active);
+        // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
+        var set_active_pane = function(index) {
+            if (index >= 0 && index <= 4) {
+                var active  = "active-pane-" + index;
                 
-                return true;
-            } else {
-                return false;
+                if (!$main_body.hasClass(active)) {
+                    $main_body.removeClass().addClass(active);
+                    
+                    return true;
+                }
             }
+            
+            return false;
         };
         
+        // switch active pane on pane nav button click
         $main.on("click", ".pane-nav-button", function(event) {
             event.preventDefault();
             
             var $this   = $(this);
             var id      = $this.attr("id");
-            var num     = id.slice("pane-nav-".length);
+            var index   = id.slice("pane-nav-".length);
             
-            set_active_pane(num);
+            set_active_pane(index);
             return false;
         });
         
+        // cycle active pane on continue button click
         $main.on("click", ".continue-button", function(event) {
             event.preventDefault();
             
             var $this   = $(this);
             var href    = $this.attr("href");
-            var num     = href.slice("#pane-".length);
-            var active  = "active-pane-" + num;
+            var index   = href.slice("#pane-".length);
             
-            set_active_pane(num);
+            set_active_pane(index);
             return false;
         });
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations

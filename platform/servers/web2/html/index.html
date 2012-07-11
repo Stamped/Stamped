@@ -278,16 +278,32 @@
     </div>
 {% endblock main %}
 
+{% block pre_footer %}
+    <footer class="hidden-main-animating">
+{% endblock pre_footer %}
+
 {% block footer %}
-    <div id="footer-lhs">
-        <div id="social">
+    <div class="clearfix">
+        <div class="floatleft">
+            <div id="social">
+                <div class="social-button social-button-twitter"></div>
+                <div class="social-button social-button-facebook"></div>
+                <div class="social-button social-button-google"></div>
+            </div>
+            
+            <div id="footer-nav">
+                <a href="/"      class="nav">Home</a></li>
+                <a href="/about" class="nav">About</a></li>
+                <a href="/faq"   class="nav">FAQ</a></li>
+                <a href="/help"  class="nav">Help</a></li>
+                <a href="/blog"  class="nav">Blog</a>
+                <a href="/legal" class="nav">Legal</a>
+            </div>
+
         </div>
         
-        <div id="nav">
-        </div>
+        <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button floatright replaced">Available on the App Store</a>
     </div>
-    
-    <a id="footer-rhs" class="replaced">Available on the App Store</a>
 {% endblock footer %}
 
 {% block scripts %}
