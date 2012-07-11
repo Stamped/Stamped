@@ -30,9 +30,16 @@ def addMatchCodesToMongoDocument(document):
         addSubfieldTitles(field)
     document['match_codes'] = getTokensForIndexing(components)
 
+def toUnicode(string):
+    if isinstance(string, unicode):
+        return string
+    elif isinstance(string, str):
+        return string.decode('utf-8')
+    else:
+        raise TypeError('Invalid type for toUnicode: ' + str(type(string)))
 
 def getTokensForIndexing(components):
-    fullDoc = ' '.join(unicode(str(c), 'utf-8') for c in components)
+    fullDoc = ' '.join(toUnicode(c) for c in components)
     tokens = (token for token in TOKENIZER(fullDoc))
     return list(set(token.text for token in NORMALIZER(tokens)))
 
