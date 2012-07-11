@@ -30,8 +30,7 @@ class StampedAPIException(Exception):
 
 
 
-class AStampedAPITestCase(AStampedFixtureTestCase):
-
+class AStampedAPITestCase(AStampedTestCase):
     @lazyProperty
     def api(self):
         return globalAPI()

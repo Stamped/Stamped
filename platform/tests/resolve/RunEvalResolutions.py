@@ -27,6 +27,7 @@ from resolve.TMDBSource import TMDBSource
 from resolve.TheTVDBSource import TheTVDBSource
 from libs.CountedFunction import printFunctionCounts
 
+from tests.StampedTestUtils import *
 from tests.framework.FixtureTest import *
 
 SOURCES = {
@@ -41,7 +42,9 @@ SOURCES = {
     'netflix_id' : NetflixSource(),
 }
 
-class RunEvalResolutions(AStampedFixtureTestCase):
+OUTPUT_PREFIX = 'tmp'
+
+class RunEvalResolutions(AStampedTestCase):
     @fixtureTest()
     def test_run_eval(self):
         with open('/tmp/resolution_eval_input') as input:
@@ -73,7 +76,7 @@ class RunEvalResolutions(AStampedFixtureTestCase):
         |      %s
         \\---------------------------------------------
         """
-        with tempfile.NamedTemporaryFile(delete=False) as output:
+        with tempfile.NamedTemporaryFile(prefix=OUTPUT_PREFIX, delete=False) as output:
             pickle.dump(resolutionResult, output)
             if formattedErrors:
                 print('\n\nENCOUNTERED %i ERRORS\n\n' % len(formattedErrors))
@@ -115,4 +118,16 @@ class RunEvalResolutions(AStampedFixtureTestCase):
 
 
 if __name__ == '__main__':
+    # Hacky command line parsing. Modify argv in place, because main() will do its own parsing
+    # later.
+    global OUTPUT_PREFIX
+    for i, arg in enumerate(sys.argv):
+        if arg.startswith('--prefix'):
+            if arg == '--prefix':
+                OUTPUT_PREFIX = argv[i+1]
+                del argv[i]
+            elif arg.startswith('--prefix='):
+                OUTPUT_PREFIX = arg[9:]
+            del argv[i]
+            break
     main()

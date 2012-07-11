@@ -316,12 +316,12 @@ footer {
 .app-store-button {
     display: block;
     width:  183px;
-    height: 66px;
+    height: 65px;
     
-    background: url(/assets/img/appstore_btn.png) no-repeat;
+    background: url(/assets/img/appstore_btn_sprite.png) no-repeat;
     
-    &:active {
-        opacity: .8;
+    &:hover, &:active {
+        background-position: -185px 0;
     }
 }
 
@@ -331,7 +331,11 @@ footer {
         width:  365px;
         height: 132px;
         
-        background: url(/assets/img/appstore_btn@2x.png) no-repeat;
+        background: url(/assets/img/appstore_btn_sprite@2x.png) no-repeat;
+        
+        &:hover, &:active {
+            background-position: -369px 0;
+        }
     }
 }
 

@@ -426,8 +426,8 @@ def upgradeEntityData(entityData):
     # Google Places
     googleplaces = sources.pop('googlePlaces', {})
     setBasicGroup(googleplaces, new.sources, 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    if new.sources.googleplaces_id is None:
-        setBasicGroup(googleplaces, new.sources, 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(googleplaces, new.sources, 'gid', 'googleplaces', newSuffix='id')
+    setBasicGroup(googleplaces, new.sources, 'reference', 'googleplaces', newSuffix='reference')
 
     # User Generated
     userGenerated = sources.pop('userGenerated', {}).pop('generated_by', None)

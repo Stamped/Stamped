@@ -382,6 +382,14 @@ var g_update_stamps = null;
             update_stamps($sdetail);
         };
         
+        $("#stamped-desc").click(function(event) {
+            event.preventDefault();
+            var $this = $(this);
+            
+            $this.toggleClass("badass");
+            return false;
+        });
+        
         
         // ---------------------------------------------------------------------
         // base page initialization
