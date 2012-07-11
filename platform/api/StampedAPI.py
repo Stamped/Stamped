@@ -4447,7 +4447,7 @@ class StampedAPI(AStampedAPI):
             raise StampedUnavailableError("Entity not found")
 
         if entity_id is None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxies[0])
+            entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
             for proxy in proxies[1:]:
                 entityBuilder.addSource(EntityProxySource(proxy))
             entity = entityBuilder.buildEntity()
