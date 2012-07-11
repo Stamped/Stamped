@@ -293,6 +293,10 @@ class AccountAlertSettings(Schema):
         cls.addProperty('alerts_replies_email',             bool)
         cls.addProperty('alerts_followers_apns',            bool)
         cls.addProperty('alerts_followers_email',           bool)
+        cls.addProperty('alerts_friends_apns',              bool)
+        cls.addProperty('alerts_friends_email',             bool)
+        cls.addProperty('alerts_actions_apns',              bool)
+        cls.addProperty('alerts_actions_email',             bool)
 
 class LinkedAccountShareSettings(Schema):
     @classmethod

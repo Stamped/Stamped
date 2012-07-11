@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback
+    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback, random
 
     from api import Blacklist
     import libs.ec2_utils
@@ -278,6 +278,10 @@ class StampedAPI(AStampedAPI):
         alert_settings.alerts_replies_email     = True
         alert_settings.alerts_followers_apns    = True
         alert_settings.alerts_followers_email   = True
+        alert_settings.alerts_friends_apns      = True
+        alert_settings.alerts_friends_email     = True
+        alert_settings.alerts_actions_apns      = True
+        alert_settings.alerts_actions_email     = False
         account.alert_settings                  = alert_settings
 
         # Validate screen name
@@ -2457,6 +2461,11 @@ class StampedAPI(AStampedAPI):
                 # Update credited user stats
                 self._userDB.updateUserStats(item.user.user_id, 'num_credits',     increment=1)
                 self._userDB.updateUserStats(item.user.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
+
+                # Update stamp stats if stamp exists
+                creditedStamp = self._stampDB.getStampFromUserEntity(item.user.user_id, entity.entity_id)
+                if creditedStamp is not None:
+                    tasks.invoke(tasks.APITasks.updateStampStats, args=[creditedStamp.stamp_id])
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -4794,8 +4803,13 @@ class StampedAPI(AStampedAPI):
             if modified:
                 self._entityDB.updateEntity(entity)
             if depth:
-                for mergedEntity in mergedEntities:
-                    self._followOutLinks(mergedEntity, persisted, depth-1)
+                # HACK: To prevent the number of entities to be merged from blowing up, we will only
+                # merge one of the albums for artists.
+                if entity.isType('artist') and attr == 'albums':
+                    self._followOutLinks(random.choice(mergedEntities), persisted, depth-1)
+                else:
+                    for mergedEntity in mergedEntities:
+                        self._followOutLinks(mergedEntity, persisted, depth-1)
         self._iterateOutLinks(entity, followStubList)
 
     def _resolveStub(self, stub, quickResolveOnly):
