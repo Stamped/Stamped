@@ -862,7 +862,9 @@ class StampedAPI(AStampedAPI):
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
             # Enable Open Graph sharing by default
-            if linkedAccount.share_settings is None:
+            try:
+                self.getLinkedAccount(authUserId, 'facebook')
+            except StampedLinkedAccountDoesNotExistError:
                 linkedAccount.share_settings = LinkedAccountShareSettings()
                 linkedAccount.share_settings.share_stamps  = True
                 linkedAccount.share_settings.share_likes   = True
