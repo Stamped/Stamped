@@ -2462,6 +2462,11 @@ class StampedAPI(AStampedAPI):
                 self._userDB.updateUserStats(item.user.user_id, 'num_credits',     increment=1)
                 self._userDB.updateUserStats(item.user.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
 
+                # Update stamp stats if stamp exists
+                creditedStamp = self._stampDB.getStampFromUserEntity(item.user.user_id, entity.entity_id)
+                if creditedStamp is not None:
+                    tasks.invoke(tasks.APITasks.updateStampStats, args=[creditedStamp.stamp_id])
+
         # Note: No activity should be generated for the user creating the stamp
 
         # Add activity for credited users

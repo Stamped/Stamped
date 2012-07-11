@@ -28,6 +28,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
+
+    @lazyProperty
+    def alert_apns_collection(self):
+        return MongoAlertAPNSCollection()
+
+    @lazyProperty
+    def user_linked_alerts_history_collection(self):
+        return MongoUserLinkedAlertsHistoryCollection()
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
@@ -93,11 +101,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                         netflixAcctSparse[k] = v
                 document['linked']['netflix'] = netflixAcctSparse
 
-
-        self._collection.update(
-                {'_id': document['user_id']},
-                {'$unset': { 'linked_accounts' : 1 } }
-        )
         return document
 
     def _convertFromMongo(self, document):
@@ -162,16 +165,24 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             return self._obj().dataImport(document, overflow=self._overflow)
         else:
             return document
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        """
+        Check the account to verify the following things:
+
+        - Proper schema 
+
+        - Verify linked accounts are unique (i.e. not linked to other users as well)
+
+        """
+        
+        document = self._getMongoDocumentFromId(key)
+
+        modified = False
     
     ### PUBLIC
-    
-    @lazyProperty
-    def alert_apns_collection(self):
-        return MongoAlertAPNSCollection()
-
-    @lazyProperty
-    def user_linked_alerts_history_collection(self):
-        return MongoUserLinkedAlertsHistoryCollection()
     
     def addAccount(self, user):
         try:
@@ -323,7 +334,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 missing_fields.append(k)
 
         if valid == False:
-            raise StampedInputError("Missing required linked account fields for %s: %s" % (linkedAccount.service_name, missing_fields))
+            raise StampedInputError("Missing required linked account fields for %s: %s" % \
+                (linkedAccount.service_name, missing_fields))
 
         # Construct a new LinkedAccount object which contains only valid fields
         newLinkedAccount = LinkedAccount()
