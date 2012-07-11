@@ -40,7 +40,7 @@ class AImageCollage(object):
     def _get_image(self, image_url):
         logs.info("downloading '%s'" % image_url)
         
-        return self._db.getWebImage(image_url, "collage")
+        return utils.getWebImage(image_url, "collage")
     
     def get_images(self, image_urls):
         images = []
@@ -94,7 +94,7 @@ class AImageCollage(object):
         user_logo_url   = "http://static.stamped.com/logos/%s-%s-email-36x36.png" % \
                         (user.color_primary, user.color_secondary)
         try:
-            user_logo   = self._db.getWebImage(user_logo_url)
+            user_logo   = utils.getWebImage(user_logo_url)
         except Exception:
             user_logo   = None
         

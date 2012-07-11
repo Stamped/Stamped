@@ -7,7 +7,7 @@ __license__   = 'TODO'
 
 import Globals
 import sys, traceback, string
-import logs, time
+import logs, time, bson
 
 from errors                 import *
 from optparse               import OptionParser
@@ -20,6 +20,10 @@ from api.db.mongodb.MongoUserTodosEntitiesCollection    import MongoUserTodosEnt
 from api.db.mongodb.MongoStampCommentsCollection        import MongoStampCommentsCollection
 
 from api.db.mongodb.MongoStampCollection                import MongoStampCollection
+from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection
+
+import gevent
+from gevent.queue import Queue, Empty
 
 collections = [
     # Indexes 
@@ -31,7 +35,8 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    MongoStampCollection,
+    # MongoStampCollection,
+    MongoEntityCollection,
 ]
 
 
@@ -64,7 +69,83 @@ def parseCommandLine():
     
     return (options, args)
 
+documentIds = Queue(maxsize=10)
+
+stats = {
+    'passed': 0,
+}
+
+def worker(db, collection, stats):
+    try:
+        while True:
+            documentId = documentIds.get(timeout=1) # decrements queue size by 1
+            
+            try:
+                result = db.checkIntegrity(documentId, repair=True)
+                print documentId, 'PASS'
+                stats['passed'] += 1
+            except NotImplementedError:
+                logs.warning("WARNING: Collection '%s' not implemented" % collection.__name__)
+                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+            except StampedStaleRelationshipKeyError:
+                print documentId, 'FAIL: Key deleted'
+                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+            except StampedStaleRelationshipDataError:
+                print documentId, 'FAIL: References updated'
+                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+            except StampedDataError as e:
+                print documentId, 'FAIL'
+                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+            except Exception as e:
+                print documentId, 'FAIL: %s (%s)' % (e.__class__, e)
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                f = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                f = string.joinfields(f, '')
+                print f
+                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+
+    except Empty:
+        print('Quitting time!')
+
+def handler(db):
+        # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
+        for i in db._collection.find(fields=['_id']):
+            documentIds.put(i['_id'])
+
+
+for collection in collections:
+    logs.info("Running checks for %s" % collection.__name__)
+    db = collection()
+    gevent.joinall([
+        gevent.spawn(handler, db),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+        gevent.spawn(worker, db, collection, stats),
+    ])
+
+passed = stats.pop('passed', 0)
+total = passed
+
+print ('='*80)
+print '%40s: %s' % ('PASSED', passed)
+for k, v in stats.items():
+    print '%40s: %s' % (k, v)
+    total += int(v)
+print ('-'*80)
+print '%40s: %s%s' % ('RATIO', int(100.0*passed/total*1.0), '%')
+
+"""
 def main():
+    pass
+
+def mainOld():
     options, args = parseCommandLine()
 
     # Verify that existing documents are valid
@@ -72,7 +153,9 @@ def main():
         logs.info("Running checks for %s" % collection.__name__)
         db = collection()
         begin = time.time()
-        for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
+        # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
+        for i in db._collection.find(fields=['_id']).limit(100):
+            print '%s' % ('='*40)
             try:
                 result = db.checkIntegrity(i['_id'], repair=(not options.noop))
                 print i['_id'], 'PASS'
@@ -99,3 +182,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+"""

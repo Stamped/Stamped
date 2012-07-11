@@ -62,8 +62,6 @@ def mapCategoryToTypes(category):
             result = result | set(v[2])
     return result
 
-subcategories = set(subcategoryData.keys())
-
 
 
 

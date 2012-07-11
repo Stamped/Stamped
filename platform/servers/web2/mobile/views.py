@@ -14,6 +14,11 @@ import servers.web2.core.views as views
 from servers.web2.core.schemas  import *
 from servers.web2.core.helpers  import *
 
+def index(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.index(*args, **kwargs)
+
 def profile(*args, **kwargs):
     kwargs['mobile'] = True
     

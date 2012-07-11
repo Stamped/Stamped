@@ -16,7 +16,7 @@
 
 @shadow-sdetail: rgba(50, 50, 50, 0.25);
 @space: 12px;
-@round: 4px;
+@round: 2px;
 
 @text0: #666;
 @text1: #999;
@@ -915,17 +915,25 @@
 }
 
 #stamped-desc {
-    background: url(/assets/img/stamped_is_copy.png) no-repeat;
-    width:  278px;
-    height: 78px;
+    background: url(/assets/img/stamped_is_sprite.png) no-repeat;
+    width:  215px;
+    height: 86px;
     margin: 0 auto;
+}
+
+.badass {
+    background-position: -217px 0 !important;
 }
 
 #retina {
     #stamped-desc {
-        background: url(/assets/img/stamped_is_copy@2x.png) no-repeat;
-        width:  555px;
-        height: 155px;
+        background: url(/assets/img/stamped_is_sprite@2x.png) no-repeat;
+        width:  430px;
+        height: 172px;
+    }
+    
+    .badass {
+        background-position: -434px 0 !important;
     }
 }
 

@@ -309,9 +309,9 @@ class TvEntityProxyComparator(AEntityProxyComparator):
 class AppEntityProxyComparator(AEntityProxyComparator):
     @classmethod
     def compare_proxies(cls, app1, app2):
-        # TODO PRELAUNCH FUCK FUCK FUCK IMPLEMENT. This should not be empty! Even though we only have one apps backend
-        # and we don't mix or anything we do sometimes get dupes! (Maybe from StampedSource/iTunes dupes?) AT THE VERY
-        # LEAST CHECK THAT ITUNES IDS ARE NOT EQUAL.
+        # TODO: Yeah this TOTALLY needs work.
+        if app1.name == app2.name:
+            return CompareResult.match(1.0)
         return CompareResult.unknown()
 
 
@@ -370,21 +370,15 @@ class BookEntityProxyComparator(AEntityProxyComparator):
     def compare_proxies(cls, book1, book2):
         """
         """
-        print 'COMPARING BOOKS: "%s" (%s) and "%s" (%s)' % (book1.name, book1.key, book2.name, book2.key)
         title_similarity = cls._compare_titles(book1.name, book2.name)
-        print 'TITLE SIMILARITY:', title_similarity
         if book1.isbn and book1.isbn == book2.isbn and title_similarity > 0.5:
-            print 'GOT THE ISBN THING AND IM GOING WITH IS'
             return CompareResult.match(title_similarity + 1)
         if title_similarity < 0.75:
-            print 'QUITTIN TIME'
             return CompareResult.unknown()
 
         try:
             # TODO: Look for multiple authors, try to match intelligently.
-            print 'GETTING AUTHOR SIMILARITY'
             author_similarity = cls._compare_authors(book1.authors[0]['name'], book2.authors[0]['name'])
-            print 'AUTHOR SIMILARITY:', author_similarity
             if title_similarity + author_similarity > 1.7:
                 return CompareResult.match(title_similarity + author_similarity)
         except KeyError:

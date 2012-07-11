@@ -138,3 +138,6 @@ subcategoryData = {
     'other'             : ( 'other',        [ 'other' ],                [ 'other' ] ),
     'video_game'        : ( 'other',        [ 'software' ],             [ 'video_game' ] ),
     }
+
+subcategories = set(subcategoryData.keys())
+

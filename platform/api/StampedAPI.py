@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent
+    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback
 
     from api import Blacklist
     import libs.ec2_utils
@@ -21,7 +21,7 @@ try:
     from api import SchemaValidation
 
     from api.auth                       import convertPasswordForStorage
-    from utils                      import lazyProperty
+    from utils                      import lazyProperty, LoggingThreadPool
     from functools                  import wraps
     from errors                     import *
     from libs.ec2_utils             import is_prod_stack
@@ -50,11 +50,13 @@ try:
     from resolve.FactualSource              import FactualSource
     from resolve.GooglePlacesSource         import GooglePlacesSource
     from resolve.iTunesSource               import iTunesSource
+    from resolve.NetflixSource              import NetflixSource
     from resolve.RdioSource                 import RdioSource
     from resolve.SpotifySource              import SpotifySource
     from resolve.TMDBSource                 import TMDBSource
     from resolve.TheTVDBSource              import TheTVDBSource
     from resolve.StampedSource              import StampedSource
+    from resolve.EntityProxySource import EntityProxySource
 
     # TODO (travis): we should NOT be importing * here -- it's okay in limited
     # situations, but in general, this is very bad practice.
@@ -683,9 +685,8 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getLinkedAccount(self, authUserId, service_name):
         account = self.getAccount(authUserId)
-        try:
-            return getattr(account.linked, service_name)
-        except Exception:
+        linked = getattr(account.linked, service_name)
+        if linked is None:
             raise StampedLinkedAccountDoesNotExistError("User has no linked account: %s" % service_name)
 
     @API_CALL
@@ -2788,7 +2789,7 @@ class StampedAPI(AStampedAPI):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin', 'robby']:
+        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
             logs.info('Skipping Open Graph post because user not on whitelist')
             return
 
@@ -4552,11 +4553,13 @@ class StampedAPI(AStampedAPI):
                     report()
 
     def _convertSearchId(self, search_id):
-        if not search_id.startswith('T_'):
+        temp_id_prefix = 'T_'
+        if not search_id.startswith(temp_id_prefix):
             # already a valid entity id
             return search_id
 
-        source_name, source_id = re.match(r'^T_([A-Z]*)_([\w+-:]*)', search_id).groups()
+        # TODO: This code should be moved into a common location with BasicEntity.search_id
+        id_components = search_id[len(temp_id_prefix):].split('____')
 
         sources = {
             'amazon':       AmazonSource,
@@ -4567,31 +4570,74 @@ class StampedAPI(AStampedAPI):
             'spotify':      SpotifySource,
             'tmdb':         TMDBSource,
             'thetvdb':      TheTVDBSource,
+            'netflix':      NetflixSource,
         }
 
-        if source_name.lower() not in sources:
-            raise StampedUnknownSourceError('Source not found: %s (%s)' % (source_name, search_id))
+        sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:/]+)$')
+        sourcesAndKeys = []
+        for component in id_components:
+            match = sourceAndKeyRe.match(component)
+            if not match:
+                logs.warning('Unable to parse search ID component:' + component)
+            else:
+                sourcesAndKeys.append(match.groups())
+        if not sourcesAndKeys:
+            logs.warning('Unable to extract and third-party ID from composite search ID: ' + search_id)
+            raise StampedUnavailableError("Entity not found")
 
-        # Attempt to resolve against the Stamped DB
-        source    = sources[source_name.lower()]()
-        stamped   = StampedSource(stamped_api=self)
-        entity_id = stamped.resolve_fast(source.sourceName, source_id)
+        stamped = StampedSource(stamped_api=self)
+        fast_resolve_results = stamped.resolve_fast_batch(sourcesAndKeys)
+        entity_ids = filter(None, fast_resolve_results)
+        if len(entity_ids):
+            entity_id = entity_ids[0]
+        else:
+            entity_id = None
+
+        proxies = []
+        if not entity_id:
+            seenSourceNames = set()
+            entity_ids = []
+            pool = LoggingThreadPool(len(sources))
+            for sourceIdentifier, key in sourcesAndKeys:
+                if sourceIdentifier in seenSourceNames:
+                    continue
+                seenSourceNames.add(sourceIdentifier)
+
+                def loadProxy():
+                    source = sources[sourceIdentifier.lower()]()
+                    try:
+                        proxy = source.entityProxyFromKey(key)
+                        proxies.append(proxy)
+                        if len(proxies) == 1:
+                            # This is the first proxy, so we'll try to resolve against Stamped.
+                            results = stamped.resolve(proxy)
+
+                            if len(results) > 0 and results[0][0]['resolved']:
+                                # We were able to find a match in the Stamped DB.
+                                entity_ids.append(results[0][1].key)
+                                pool.kill()
+
+                    except KeyError:
+                        logs.warning('Failed to load key %s from source %s; exception body:\n%s' %
+                                     (key, sourceIdentifier, traceback.format_exc()))
+
+                pool.spawn(loadProxy)
+
+            MAX_LOOKUP_TIME=2.5
+            pool.join(timeout=MAX_LOOKUP_TIME)
+            if entity_ids:
+                entity_id = entity_ids[0]
+
+        if not entity_id and not proxies:
+            logs.warning('Completely unable to create entity from search ID: ' + search_id)
+            raise StampedUnavailableError("Entity not found")
 
         if entity_id is None:
-            try:
-                proxy = source.entityProxyFromKey(source_id)
-            except KeyError:
-                raise StampedUnavailableError("Entity not found")
-
-            results = stamped.resolve(proxy)
-
-            if len(results) > 0 and results[0][0]['resolved']:
-                # Source key found in the Stamped DB
-                entity_id = results[0][1].key
-
-        if entity_id is None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-            entity = entityProxy.buildEntity()
+            entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
+            for proxy in proxies[1:]:
+                entityBuilder.addSource(EntityProxySource(proxy))
+            entity = entityBuilder.buildEntity()
+            entity.third_party_ids = id_components
 
             entity = self._entityDB.addEntity(entity)
             entity_id = entity.entity_id
@@ -4602,7 +4648,7 @@ class StampedAPI(AStampedAPI):
         logs.info('Converted search_id (%s) to entity_id (%s)' % (search_id, entity_id))
         return entity_id
 
-
+    
     def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
         tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
@@ -4791,6 +4837,7 @@ class StampedAPI(AStampedAPI):
         if stub.entity_id is not None and not stub.entity_id.startswith('T_'):
             entity_id = stub.entity_id
         else:
+            # TODO GEOFF FUCK FUCK FUCK: Use third_party_ids here, and resolve_fast_batch!
             for sourceName in musicSources:
                 try:
                     if getattr(stub.sources, '%s_id' % sourceName, None) is not None:

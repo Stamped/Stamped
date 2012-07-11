@@ -42,6 +42,10 @@
 
 
 TODO:
+    * blurred FUCK MEDIOCRITY easter egg w/ f hotkey?
+    /* Stop breaking my iphone font size! */
+    div, p, a, li, td { -webkit-text-size-adjust:none; }
+    
     * embed bieber video in bieber's profile & sdetail pages
     * customize favicon.ico per profile
         * in addition to png, will need to generate 16x16 (and possibly 32x32?) .ico's
