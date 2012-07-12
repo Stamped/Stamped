@@ -37,9 +37,9 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    MongoStampCollection,
     MongoEntityCollection,
     MongoAccountCollection,
+    MongoStampCollection,
 ]
 
 WORKER_COUNT = 10

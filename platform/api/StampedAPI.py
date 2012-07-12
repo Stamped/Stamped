@@ -1815,7 +1815,8 @@ class StampedAPI(AStampedAPI):
             preview = StampPreview()
             preview.stamp_id = stamp.stamp_id
             preview.user = userIds[stamp.user.user_id]
-            stampPreviewList.append(preview)
+            if preview.user is not None:
+                stampPreviewList.append(preview)
 
         allUsers            = StampedByGroup()
         allUsers.stamps     = stampPreviewList
