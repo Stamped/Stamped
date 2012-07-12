@@ -8,6 +8,7 @@ __license__   = 'TODO'
 import Globals
 import sys, traceback, string, random
 import logs, utils, time, bson
+import libs.ec2_utils
 
 from errors                 import *
 from optparse               import OptionParser
