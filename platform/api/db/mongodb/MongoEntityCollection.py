@@ -73,6 +73,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document['timestamp'] = { 'created' : created }
 
         document.pop('titlel')
+        document.pop('match_codes', None)
 
         entity = buildEntity(document, mini=mini)
 
