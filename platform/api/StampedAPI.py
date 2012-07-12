@@ -419,19 +419,16 @@ class StampedAPI(AStampedAPI):
 
         # If the facebook account email address is already in our system, then we will use a mock email address
         # to avoid a unique id conflict in our db
-        accounttest = None
-        try:
-            accounttest = self._accountDB.getAccountByEmail()
-        except StampedAccountNotFoundError:
-            pass
+        email = 'fb_%s' % facebookUser['id']
+        if 'email' in facebookUser:
+            try:
+                testemail = str(facebookUser['email']).lower().strip()
+                self._accountDB.getAccountByEmail(testemail)
+            except StampedAccountNotFoundError:
+                email = testemail
 
-        # If an email address is not provided or conflicts, create a mock email address.  Necessary because we index on email in Mongo
-        #  and require uniqueness
-        if account.email is None or accounttest is not None:
-            account.email = 'fb_%s' % facebookUser['id']
-        else:
-            account.email = str(account.email).lower().strip()
-            SchemaValidation.validateEmail(account.email)
+        account.email = email
+        SchemaValidation.validateEmail(account.email)
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
