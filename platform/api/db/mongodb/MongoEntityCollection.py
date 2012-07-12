@@ -231,18 +231,19 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                                 continue
                             else:
                                 raise StampedDataError(msg)
-                        if size.width is None or size.height is None:
-                            msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
-                            if repair:
-                                logs.info(msg)
-                                try:
-                                    size.width, size.height = getWebImageSize(size.url)
-                                    modified = True
-                                except Exception as e:
-                                    logs.warning("%s: Could not get image sizes: %s" % (key, e))
-                                    raise 
-                            else:
-                                raise StampedDataError(msg)
+                        # NOTE: This is hitting rate limits from Amazon, so commenting out for now
+                        # if size.width is None or size.height is None:
+                        #     msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
+                        #     if repair:
+                        #         logs.info(msg)
+                        #         try:
+                        #             size.width, size.height = getWebImageSize(size.url)
+                        #             modified = True
+                        #         except Exception as e:
+                        #             logs.warning("%s: Could not get image sizes: %s" % (key, e))
+                        #             raise 
+                        #     else:
+                        #         raise StampedDataError(msg)
                         sizes.append(size)
                     if len(sizes) > 0:
                         image.sizes = sizes
