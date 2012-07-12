@@ -5,10 +5,14 @@ import utils, os, libs.ec2_utils
 
 IS_PROD         = libs.ec2_utils.is_prod_stack()
 DEBUG           = (not IS_PROD)
+STAMPED_DEBUG   = (not utils.is_ec2())
 TEMPLATE_DEBUG  = DEBUG
 PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 
-utils.log("Django DEBUG=%s ROOT=%s" % (DEBUG, PROJ_ROOT))
+STAMPED_ASSET_VERSION       = utils.shell("cd %s && make version" % PROJ_ROOT)[0]
+STAMPED_DOWNLOAD_APP_LINK   = "http://itunes.apple.com/us/app/stamped/id467924760?mt=8&uo=4"
+
+utils.log("Django DEBUG=%s ROOT=%s VERSION=%s" % (DEBUG, PROJ_ROOT, STAMPED_ASSET_VERSION))
 
 ADMINS = (
     ('Travis', 'travis@stamped.com'), 

@@ -167,7 +167,7 @@ def findPhone(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(exceptions=twitterUserExceptions)
 def findTwitter(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'twitter')
-    if linked.token is None or linked.secret is None:
+    if linked is None or linked.token is None or linked.secret is None:
         raise StampedMissingLinkedAccountTokenError("No twitter access token associated with linked account")
 
     users = stampedAPI.findUsersByTwitter(authUserId, linked.token, linked.secret)
@@ -183,7 +183,7 @@ def findTwitter(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(exceptions=facebookUserExceptions)
 def findFacebook(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'facebook')
-    if linked.token is None:
+    if linked is None or linked.token is None:
         raise StampedMissingLinkedAccountTokenError("No facebook access token associated with linked account")
 
     users = stampedAPI.findUsersByFacebook(authUserId, linked.token)
@@ -193,15 +193,29 @@ def findFacebook(request, authUserId, http_schema, **kwargs):
 
 
 @require_http_methods(["GET"])
-@handleHTTPRequest(http_schema=HTTPFacebookFriendsCollectionForm,
+@handleHTTPRequest(http_schema=HTTPFriendsCollectionForm,
                    exceptions=facebookUserExceptions)
 def inviteFacebookCollection(request, authUserId, http_schema, **kwargs):
     linked = stampedAPI.getLinkedAccount(authUserId, 'facebook')
-    if linked.token is None:
+    if linked is None or linked.token is None:
         raise StampedMissingLinkedAccountTokenError("No facebook access token associated with linked account")
 
     offset = 0 if http_schema.offset is None else http_schema.offset
     limit = 30 if http_schema.limit is None else http_schema.limit
 
     result = stampedAPI.getFacebookFriendData(linked.token, offset, limit)
+    return transformOutput(result)
+
+@require_http_methods(["GET"])
+@handleHTTPRequest(http_schema=HTTPFriendsCollectionForm,
+                   exceptions=twitterUserExceptions)
+def inviteTwitterCollection(request, authUserId, http_schema, **kwargs):
+    linked = stampedAPI.getLinkedAccount(authUserId, 'twitter')
+    if linked is None or linked.token is None or linked.secret is None:
+        raise StampedMissingLinkedAccountTokenError("No twitter token/secret associated with linked account")
+
+    offset = 0 if http_schema.offset is None else http_schema.offset
+    limit = 30 if http_schema.limit is None else http_schema.limit
+
+    result = stampedAPI.getTwitterFriendData(linked.token, linked.secret, offset, limit)
     return transformOutput(result)

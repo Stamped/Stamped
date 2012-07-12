@@ -63,7 +63,6 @@ def _coordinatesDictToFlat(coordinates):
 
         return '%s,%s' % (coordinates['lat'], coordinates['lng'])
     except Exception as e:
-        logs.warning('coordinates: %s   error converting coordinates: %s' % (coordinates, e))
         return None
 
 def _coordinatesFlatToDict(coordinates):
@@ -723,7 +722,7 @@ class HTTPFindUser(Schema):
     def setSchema(cls):
         cls.addProperty('query',                            basestring, required=True) # Comma delimited
 
-class HTTPFacebookFriendsCollectionForm(Schema):
+class HTTPFriendsCollectionForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('limit',                            int)
@@ -1077,9 +1076,7 @@ class HTTPEntityMini(Schema):
         _addImages(self, entity.images)
 
         try:
-            logs.info('### entity title: %s' % entity.title)
             self.coordinates    = _coordinatesDictToFlat(entity.coordinates)
-            logs.info('### coordinates: %s' % entity.coordinates)
         except AttributeError:
             pass
 
@@ -1978,9 +1975,9 @@ class HTTPEntity(Schema):
 class HTTPEntityNew(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('title',                            basestring, required=True)
-        cls.addProperty('category',                         basestring, required=True)
-        cls.addProperty('subcategory',                      basestring, required=True)
+        cls.addProperty('title',                            basestring, required=True, cast=validateString)
+        cls.addProperty('category',                         basestring, required=True, cast=validateCategory)
+        cls.addProperty('subcategory',                      basestring, required=True, cast=validateSubcategory)
         cls.addProperty('subtitle',                         basestring, cast=validateString)
         cls.addProperty('desc',                             basestring, cast=validateString)
 

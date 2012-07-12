@@ -62,8 +62,6 @@ def mapCategoryToTypes(category):
             result = result | set(v[2])
     return result
 
-subcategories = set(subcategoryData.keys())
-
 
 
 
@@ -108,7 +106,7 @@ oldSubcategories = {
     # --------------------------
     'artist'            : 'music', 
     'album'             : 'music', 
-    'track'             : 'music', 
+    'song'             : 'music', 
     
     # --------------------------
     #           other
@@ -163,7 +161,7 @@ def deriveKindFromOldSubcategory(subcategory):
         'tv'                : 'media_collection', 
         
         'book'              : 'media_item', 
-        'track'             : 'media_item', 
+        'song'             : 'media_item', 
         'movie'             : 'media_item', 
         
         'app'               : 'software', 
@@ -239,8 +237,13 @@ def buildEntity(data=None, kind=None, mini=False):
     try:
         if data is not None:
             if 'schema_version' not in data:
-                return upgradeEntityData(data)
-            kind = data.pop('kind', kind)
+                data = upgradeEntityData(data).dataExport()
+            if '_id' in data:
+                data['entity_id'] = data['_id']
+                del(data['_id'])
+            kind = None
+            if 'kind' in data:
+                kind = data['kind']
         if mini:
             new = getEntityMiniObjectFromKind(kind)
         else:
@@ -248,16 +251,24 @@ def buildEntity(data=None, kind=None, mini=False):
         if data is not None:
             return new().dataImport(data, overflow=True)
     except Exception as e:
-        logs.info(e.message)
+        logs.info(e)
         raise
     return new()
 
 def upgradeEntityData(entityData):
     # Just to be explicit..
-    old     = entityData
+    old = entityData
 
-    kind    = deriveKindFromOldSubcategory(old['subcategory'])
-    types   = deriveTypesFromOldSubcategories([old['subcategory']])
+    if '_id' in old:
+        old['entity_id'] = str(old['_id'])
+        del(old['_id'])
+
+    try:
+        kind    = deriveKindFromOldSubcategory(old['subcategory'])
+        types   = deriveTypesFromOldSubcategories([old['subcategory']])
+    except KeyError as e:
+        logs.warning("Malformed entity data: missing '%s'" % e)
+        raise 
 
     if kind == 'other' and 'coordinates' in old and 'lat' in old['coordinates'] and 'lng' in old['coordinates']:
         kind = 'place'
@@ -267,8 +278,8 @@ def upgradeEntityData(entityData):
 
     try:
         seedTimestamp = ObjectId(old['entity_id']).generation_time.replace(tzinfo=None)
-    except Exception:
-        logs.warning("Unable to convert ObjectId to timestamp")
+    except Exception as e:
+        logs.warning("Unable to convert ObjectId to timestamp: %s" % e)
         seedTimestamp = datetime.utcnow()
 
     def setBasicGroup(source, target, oldName, newName=None, oldSuffix=None, newSuffix=None, additionalSuffixes=None, seed=True):
@@ -419,8 +430,8 @@ def upgradeEntityData(entityData):
     # Google Places
     googleplaces = sources.pop('googlePlaces', {})
     setBasicGroup(googleplaces, new.sources, 'googleplaces', oldSuffix='id', newSuffix='id', additionalSuffixes=['url'])
-    if new.sources.googleplaces_id is None:
-        setBasicGroup(googleplaces, new.sources, 'reference', 'googleplaces', newSuffix='id', additionalSuffixes=['url'])
+    setBasicGroup(googleplaces, new.sources, 'gid', 'googleplaces', newSuffix='id')
+    setBasicGroup(googleplaces, new.sources, 'reference', 'googleplaces', newSuffix='reference')
 
     # User Generated
     userGenerated = sources.pop('userGenerated', {}).pop('generated_by', None)

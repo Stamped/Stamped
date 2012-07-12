@@ -50,6 +50,9 @@ class Instagram(object):
     def place_search(self, foursquare_id):
         return self.__instagram('locations/search', foursquare_v2_id=foursquare_id)
 
+    def place_lookup(self, instagram_id):
+        return self.__instagram('locations/' + instagram_id)
+
     def place_recent_media(self, instagram_id):
         return self.__instagram('locations/%s/media/recent' % instagram_id)
 

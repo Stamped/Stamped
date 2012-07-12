@@ -44,6 +44,7 @@ class HTTPWebTimeMapSlice(Schema):
     def __init__(self, *args, **kwargs):
         Schema.__init__(self, *args, **kwargs)
         self.ajax   = False
+        self.lite   = False
         self.mobile = False
     
     @classmethod
@@ -66,6 +67,7 @@ class HTTPWebTimeMapSlice(Schema):
         
         # Web-specific
         cls.addProperty('ajax',                             bool)
+        cls.addProperty('lite',                             bool)
         cls.addProperty('mobile',                           bool)
 
 class HTTPStampDetail(Schema):
@@ -73,7 +75,6 @@ class HTTPStampDetail(Schema):
     def __init__(self, *args, **kwargs):
         Schema.__init__(self, *args, **kwargs)
         self.ajax   = False
-        self.mobile = False
     
     @classmethod
     def setSchema(cls):
@@ -81,7 +82,6 @@ class HTTPStampDetail(Schema):
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('stamp_title',                      basestring)
         cls.addProperty('ajax',                             bool)
-        cls.addProperty('mobile',                           bool)
 
 class HTTPObjectId(Schema):
     

@@ -95,7 +95,13 @@ class _NetflixObject(object):
 
     @lazyProperty
     def raw_name(self):
-        return self._titleObj['title']['regular']
+        title = self._titleObj['title']['regular']
+        # OK, this is bizarre and FUCKED and we should fix the way this gets parsed in the beginning rather than hacking
+        # this shit in here. But what we're dealing with is a problem where if the title is numeric -- like, "1984" --
+        # we literally get an int value rather than a string here. Ugh.
+        if not isinstance(title, basestring):
+            title = unicode(title)
+        return title
 
     @lazyProperty
     def cast(self):
@@ -267,6 +273,15 @@ class NetflixSource(GenericSource):
 #        except KeyError:
 #            raise
 
+    def getId(self, entity):
+        idField = getattr(entity.sources, self.idField)
+        try:
+            int(idField)
+            # ID fields that are just integers are broken.
+            return None
+        except Exception:  # Could be ValueError (if it's a string) or TypeError (if it's None)
+            return idField
+
     def entityProxyFromKey(self, netflix_id, **kwargs):
         try:
             titleObj = self.__netflix.getTitleDetails(netflix_id)
@@ -306,7 +321,7 @@ class NetflixSource(GenericSource):
 
                 # return all remaining results through separate page calls to the api
                 while result_counter < num_results:
-                    results = self.__netflix.searchTitles(query, start=result_counter)
+                    results = self.__netflix.searchTitles(query.name, start=result_counter)
                     result_counter += results['results_per_page']
 
                     # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.

@@ -109,6 +109,12 @@ class AlertEmail(Email):
         elif self._verb == 'follow':
             msg = u'%s (@%s) is now following you on Stamped' % (self._subject.name, self._subject.screen_name)
 
+        elif self._verb == 'friend':
+            msg = u'Your friend %s (@%s) joined Stamped' % (self._subject.name, self._subject.screen_name)
+
+        elif self._verb == 'action':
+            msg = u'%s (@%s) did something to your stamp' % (self._subject.name, self._subject.screen_name)
+
         else:
             logs.warning("Invalid verb for title: %s" % verb)
             raise
@@ -121,7 +127,7 @@ class AlertEmail(Email):
     @lazyProperty 
     def body(self):
         try:
-            path = os.path.join(base, 'templates', 'email_%s.html.j2' % self._verb)
+            path = os.path.join(base, 'templates', 'email_%s.html.j2' % self._verb.split('_')[0])
             template = open(path, 'r')
         except Exception as e:
             logs.warning("Unable to get email template: %s" % self._verb)
@@ -262,6 +268,9 @@ class PushNotification(object):
         elif self._verb.startswith('friend_'):
             msg = 'Your friend %s joined Stamped' % (self._subject.screen_name)
 
+        elif self.verb.startswith('action_'):
+            msg = '%s interacted with your stamp'
+
         else:
             raise Exception("Unrecognized verb: %s" % verb)
 
@@ -379,11 +388,11 @@ class NotificationQueue(object):
                     send_push   = settings.alerts_followers_apns
                     send_email  = settings.alerts_followers_email
                 elif alert.verb.startswith('friend_'):
-                    send_push   = False ## TODO: Add
-                    send_email  = False ## TODO: Add
+                    send_push   = settings.alerts_friends_apns
+                    send_email  = settings.alerts_friends_email
                 elif alert.verb.startswith('action_'):
-                    send_push   = False ## TODO: Add
-                    send_email  = False ## TODO: Add
+                    send_push   = settings.alerts_actions_apns
+                    send_email  = settings.alerts_actions_email
                 else:
                     send_push   = False
                     send_email  = False

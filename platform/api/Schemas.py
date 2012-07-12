@@ -206,7 +206,7 @@ class RefreshToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class AccessToken(Schema):
     @classmethod
@@ -221,7 +221,7 @@ class AccessToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class PasswordResetToken(Schema):
     @classmethod
@@ -293,6 +293,10 @@ class AccountAlertSettings(Schema):
         cls.addProperty('alerts_replies_email',             bool)
         cls.addProperty('alerts_followers_apns',            bool)
         cls.addProperty('alerts_followers_email',           bool)
+        cls.addProperty('alerts_friends_apns',              bool)
+        cls.addProperty('alerts_friends_email',             bool)
+        cls.addProperty('alerts_actions_apns',              bool)
+        cls.addProperty('alerts_actions_email',             bool)
 
 class LinkedAccountShareSettings(Schema):
     @classmethod
@@ -582,6 +586,10 @@ class EntitySources(Schema):
         cls.addProperty('amazon_source',                    basestring)
         cls.addProperty('amazon_timestamp',                 datetime)
 
+        cls.addProperty('nytimes_id',                        basestring)
+        cls.addProperty('nytimes_source',                    basestring)
+        cls.addProperty('nytimes_timestamp',                 datetime)
+
         cls.addProperty('opentable_id',                     basestring)
         cls.addProperty('opentable_url',                    basestring)
         cls.addProperty('opentable_source',                 basestring)
@@ -818,9 +826,17 @@ class BasicEntity(BasicEntityMini):
 
         # The last date/time we got some input indicating that this is currently popular.
         cls.addProperty('last_popular',                     datetime)
+        cls.addProperty('last_popular_source',              basestring)
+        cls.addProperty('last_popular_timestamp',           datetime)
         # Not to be exposed to users -- just some internal data letting us know what sort
         # of input we got indicating that this is currently popular.
         cls.addProperty('last_popular_info',                basestring)
+
+        # A list of all third-party IDs (prefixed with the name of the third party in caps and an underscore) attached
+        # to a cluster. Can include duplicates from one source. Put all in a repeated list for ease of searching.
+        # Ordered for best matches first.
+        cls.addPropertyList('third_party_ids',              basestring)
+
 
     def __init__(self):
         BasicEntityMini.__init__(self)
@@ -836,30 +852,49 @@ class BasicEntity(BasicEntityMini):
 
     @lazyProperty
     def search_id(self):
-        _is_valid_id = lambda x: x is not None and len(x) > 0
+        if self.entity_id:
+            return self.entity_id
+        if self.sources.tombstone_id:
+            return self.sources.tombstone_id
+        self._maybeRegenerateThirdPartyIds()
+        if not self.third_party_ids:
+            raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" %
+                                 pformat(self.dataExport()))
+
+        return 'T_' + ('____'.join(self.third_party_ids))
+
+    def dataExport(self):
+        self._maybeRegenerateThirdPartyIds()
+        return super(BasicEntity, self).dataExport()
+
+    def addThirdPartyId(self, sourceName, sourceId):
+        idString = '%s_%s' % (sourceName.upper(), sourceId)
+        if not self.third_party_ids:
+            self.third_party_ids = [idString]
+        elif idString not in self.third_party_ids:
+            self.third_party_ids = list(self.third_party_ids) + [idString]
+
+    def _maybeRegenerateThirdPartyIds(self):
+        if self.third_party_ids:
+            return
 
         ids = [
-            (self.sources.tombstone_id,             ''),
-            (self.entity_id,                        ''),
-            (self.sources.itunes_id,                'T_ITUNES_'),
-            (self.sources.rdio_id,                  'T_RDIO_'),
-            (self.sources.spotify_id,               'T_SPOTIFY_'),
-            (self.sources.opentable_id,             'T_OPENTABLE_'),
-            (self.sources.googleplaces_reference,   'T_GOOGLEPLACES_'),
-            (self.sources.factual_id,               'T_FACTUAL_'),
-            (self.sources.tmdb_id,                  'T_TMDB_'),
-            (self.sources.thetvdb_id,               'T_THETVDB_'),
-            (self.sources.amazon_id,                'T_AMAZON_'),
-            (self.sources.fandango_id,              'T_FANDANGO_'),
-            (self.sources.netflix_id,               'T_NETFLIX_'),
+            (self.sources.itunes_id,                'ITUNES'),
+            (self.sources.rdio_id,                  'RDIO'),
+            (self.sources.spotify_id,               'SPOTIFY'),
+            (self.sources.opentable_id,             'OPENTABLE'),
+            (self.sources.googleplaces_reference,   'GOOGLEPLACES'),
+            (self.sources.factual_id,               'FACTUAL'),
+            (self.sources.tmdb_id,                  'TMDB'),
+            (self.sources.thetvdb_id,               'THETVDB'),
+            (self.sources.amazon_id,                'AMAZON'),
+            (self.sources.fandango_id,              'FANDANGO'),
+            (self.sources.netflix_id,               'NETFLIX'),
         ]
 
-        for (id, prefix) in ids:
-            if _is_valid_id(id):
-                return "%s%s" % (prefix, id)
-
-        raise SchemaKeyError("invalid search_id (no unique ids exist) (%s)" %
-                             pformat(self.dataExport()))
+        for sourceId, sourceName in ids:
+            if sourceId:
+                self.addThirdPartyId(sourceName, sourceId)
 
     def _genericSubtitle(self):
         if self.sources.user_generated_subtitle is not None:
@@ -886,7 +921,6 @@ class BasicEntity(BasicEntityMini):
                 logs.warning('Unable to minimize attribute "%s"' % attribute)
 
         mini.subtitle = self.subtitle
-        logs.info('### mini.subtitle: %s   self.subtitle: %s' % (mini.subtitle, self.subtitle))
         return mini
 
 def getEntityObjectFromKind(kind):

@@ -178,7 +178,7 @@ class GenericSource(BasicSource):
             entity.tracks = tracks
     
     def entityProxyFromKey(self, key, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError(str(type(self)))
     
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
         if controller is None:
@@ -334,6 +334,11 @@ class GenericSource(BasicSource):
             if len(artists) > 0:
                 entity.artists = artists
                 timestamps['artists'] = controller.now
+
+            if proxy.last_popular:
+                if entity.last_popular is None or proxy.last_popular > entity.last_popular:
+                    entity.last_popular = proxy.last_popular
+                    timestamps['last_popular'] = controller.now
         
         ### Media Collection
         if entity.kind == 'media_collection' and proxy.kind == 'media_collection':
@@ -415,14 +420,18 @@ class GenericSource(BasicSource):
     @property 
     def idName(self):
         return self.sourceName
-    
+
+    def getId(self, entity):
+        return getattr(entity.sources, self.idField)
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """
 
         """
         proxy = None
+        results = None
 
-        if getattr(entity.sources, self.idField) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
+        if self.getId(entity) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
@@ -435,9 +444,10 @@ class GenericSource(BasicSource):
                             setattr(entity.sources, self.urlField, best[1].url)
                         proxy = best[1]
             except ValueError:
+                logs.report()
                 pass
 
-        source_id = getattr(entity.sources, self.idField)
+        source_id = self.getId(entity)
         if source_id is not None:
             try:
                 if proxy is None:
@@ -445,6 +455,12 @@ class GenericSource(BasicSource):
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
                 report()
+
+        # Haaaaaaaack.
+        if results and self.sourceName != 'stamped':
+            for result in results:
+                if result[0]['resolved']:
+                    entity.addThirdPartyId(self.sourceName, result[1].key)
 
         return True
 

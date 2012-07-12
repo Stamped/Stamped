@@ -9,6 +9,8 @@ import stamped
 import utils, logs
 import libs.ec2_utils
 
+from datetime import timedelta
+
 # List of modules to import when celery starts.
 CELERY_IMPORTS = ("tasks", )
 
@@ -80,5 +82,11 @@ CELERY_DEFAULT_QUEUE = "default"
 CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
 CELERY_DEFAULT_ROUTING_KEY = "default"
 
-
+CELERYBEAT_SCHEDULE = {
+    'rss-crawlers' : {
+        'task' : 'tasks.APITasks.crawlExternalSources',
+        'schedule' : timedelta(hours=3),
+        'relative' : True,
+    },
+}
 

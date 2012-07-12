@@ -18,6 +18,8 @@ var g_update_stamps = null;
         
         var screen_name             = STAMPED_PRELOAD.user.screen_name;
         var user_id                 = STAMPED_PRELOAD.user.user_id;
+        var mobile                  = STAMPED_PRELOAD.mobile;
+        
         var $body                   = $('body');
         var selected                = 'selected';
         var selected_sel            = '.' + selected;
@@ -822,33 +824,7 @@ var g_update_stamps = null;
                     }*/
                 });
                 
-                $gallery.on("click", ".stamp-gallery-item", function(event) {
-                    var $target = $(event.target);
-                    
-                    if ($target.is('a') && $target.hasClass('zoom')) {
-                        // override the sdetail popup if a lightbox target was clicked
-                        return true;
-                    }
-                    
-                    event.preventDefault();
-                    
-                    var $this = $(this);
-                    var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
-                    var href  = $link.attr('href');
-                    var title = $link.data("title");
-                    
-                    href = href.replace('http://www.stamped.com', '');
-                    //href = href + "&" + new Date().getTime();
-                    
-                    if (History && History.enabled) {
-                        History.pushState(null, title, href);
-                    } else {
-                        open_sdetail(href);
-                    }
-                    
-                    return false;
-                });
-                
+                $gallery.on("click", ".stamp-gallery-item", open_sdetail_click);
                 init_infinite_scroll();
             }
         };
@@ -1484,7 +1460,10 @@ var g_update_stamps = null;
             
             var params   = { category : category };
             
-            if (History && History.enabled) {
+            if (mobile) {
+                var href = get_custom_url(params);
+                window.location = href;
+            } else if (History && History.enabled) {
                 var params_str = get_custom_params_string(params);
                 
                 //console.debug(params);
@@ -1661,7 +1640,8 @@ var g_update_stamps = null;
                 }
                 
                 ++update_navbar_count;
-                if (gallery || update_navbar_count >= 3) {
+                
+                if (gallery || update_navbar_count >= 2) {
                     style['visibility'] = 'visible';
                 }
                 
@@ -1679,7 +1659,7 @@ var g_update_stamps = null;
         // cleanly closes the current sdetail popup if one exists
         var close_sdetail = function() {
             if (!!close_sdetail_func) {
-                if (History && History.enabled) {
+                if (!mobile && History && History.enabled) {
                     var options = { };
                     
                     // restore original URL options beneath sdetail popup
@@ -1703,6 +1683,45 @@ var g_update_stamps = null;
                 }
             }
         };
+        
+        var open_sdetail_click = function(event) {
+            var $target = $(event.target);
+            
+            if ($target.is('a') && $target.hasClass('zoom')) {
+                // override the sdetail popup if a lightbox target was clicked
+                return true;
+            }
+            
+            event.preventDefault();
+            
+            var $this = $(this);
+            var $link = ($this.is('a') ? $this : $this.find('a.sdetail'));
+            if ($link.length <= 0) {
+                $link = $target.find('a.sdetail');
+            }
+            
+            if ($link.length <= 0) {
+                return;
+            }
+            
+            var href  = $link.attr('href');
+            var title = $link.data("title");
+            
+            href = href.replace('http://www.stamped.com', '');
+            //href = href + "&" + new Date().getTime();
+            
+            if (mobile) {
+                window.location = href;
+            } else if (History && History.enabled) {
+                History.pushState(null, title, href);
+            } else {
+                open_sdetail(href);
+            }
+            
+            return false;
+        };
+        
+        window.g_open_sdetail_click = open_sdetail_click;
         
         // loads and opens the specified sdetail popup
         var open_sdetail = function(href, html) {
@@ -2041,6 +2060,7 @@ var g_update_stamps = null;
                 var $this = $(this);
                 var href  = $this.attr('href');
                 
+                console.log(href);
                 var popup_options = get_fancybox_popup_options({
                     href  : href
                 });
@@ -2093,7 +2113,6 @@ var g_update_stamps = null;
         
         $(document).bind('keydown', function(e) {
             // close lightboxes, sDetail, and/or map popups when the user presses ESC
-            // TODO: only close lightbox if one is up instead of closing sdetail as well
             if (e.which == 27) { // ESC
                 if ($('.fancybox-opened').length <= 0) {
                     close_sdetail();

@@ -12,6 +12,7 @@ from datetime                           import datetime
 from utils                              import lazyProperty
 from api.Schemas                        import *
 from api.Entity                             import buildEntity
+from pprint                             import pprint
 
 from api.AStampDB                       import AStampDB
 from api.db.mongodb.AMongoCollection                   import AMongoCollection
@@ -39,14 +40,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                                         ('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
                                         ('stats.stamp_num', pymongo.ASCENDING)])
-    
-    def _convertFromMongo(self, document):
+
+    def _upgradeDocument(self, document):
         if document is None:
             return None
-        
-        if '_id' in document and self._primary_key is not None:
-            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
-            del(document['_id'])
 
         # Convert single-blurb documents into new multi-blurb schema
         if 'contents' not in document:
@@ -54,9 +51,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 created = document['timestamp']['created']
             else:
                 try:
-                    created = ObjectId(document[self._primary_key]).generation_time.replace(tzinfo=None)
-                except Exception:
-                    logs.warning("Unable to convert ObjectId to timestamp")
+                    created = ObjectId(document['_id']).generation_time.replace(tzinfo=None)
+                except Exception as e:
+                    logs.warning("Unable to convert ObjectId to timestamp: %s" % e)
                     created = datetime.utcnow()
             contents =  {
                 'blurb'     : document.pop('blurb', None),
@@ -70,7 +67,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                             {
                                 'width'     : document['image_dimensions'].split(',')[0],
                                 'height'    : document['image_dimensions'].split(',')[1],
-                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['stamp_id'],
+                                'url'       : 'http://static.stamped.com/stamps/%s.jpg' % document['_id'],
                             }
                         ]
                     }
@@ -79,6 +76,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['timestamp']['stamped'] = created
 
         else:
+            # Temp: clean bad dev data (should never exist on prod)
             contents = []
             for content in document['contents']:
                 if 'mentions' in content:
@@ -103,14 +101,132 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                     credit.append(creditItem)
             document['credits'] = credit
 
+        return document
+    
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        document = self._upgradeDocument(document)
+        
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
         entityData = document.pop('entity')
-        entity = buildEntity(entityData)
-        document['entity'] = {'entity_id': entity.entity_id}
+        document['entity'] = {'entity_id': entityData['entity_id']}
         
         stamp = self._obj().dataImport(document, overflow=self._overflow)
-        stamp.entity = entity
+
+        try:
+            entity = buildEntity(entityData, mini=True)
+            stamp.entity = entity
+        except Exception as e:
+            logs.warning("Unable to upgrade entity embedded within stamp '%s'" % (stamp.stamp_id))
 
         return stamp 
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        document = self._getMongoDocumentFromId(key)
+        
+        assert document is not None
+
+        modified = False
+
+        # Check if old schema version
+        if 'contents' not in document or 'credit' in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        stamp = self._convertFromMongo(document)
+
+        # Verify that user exists
+        userId = stamp.user.user_id
+        if self._collection._database['users'].find({'_id': self._getObjectIdFromString(userId)}).count() == 0:
+            msg = "%s: User not found (%s)" % (key, userId)
+            raise StampedDataError(msg)
+
+        # Verify that any credited users exist
+        if stamp.credits is not None:
+            credits = []
+            for credit in stamp.credits:
+                creditedUserId = credit.user.user_id
+                query = {'_id' : self._getObjectIdFromString(creditedUserId)}
+                if self._collection._database['users'].find(query).count() == 1:
+                    credits.append(credit)
+                else:
+                    msg = "%s: Credited user not found (%s)" % (key, creditedUserId)
+                    if repair:
+                        logs.info(msg)
+                        modified = True
+                    else:
+                        raise StampedDataError(msg)
+            if len(credits) > 0:
+                document['credits'] = credits
+            else:
+                msg = "%s: Cleaning up credits" % key
+                logs.info(msg)
+                if repair:
+                    del(document['credits'])
+                    modified = True
+
+        # Verify that entity exists
+        entityId = stamp.entity.entity_id
+        entityDocument = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(entityId)})
+        if entityDocument is None:
+            msg = "%s: Entity not found (%s)" % (key, entityId)
+            raise StampedDataError(msg)
+        entity = buildEntity(entityDocument)
+
+        # Check if entity has been tombstoned and update entity if so
+        if entity.sources.tombstone_id is not None:
+            msg = "%s: Entity tombstoned to new entity" % (key)
+            if repair:
+                logs.info(msg)
+                tombstoneId = entity.sources.tombstone_id
+                tombstone = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(tombstoneId)})
+                if tombstone is None:
+                    msg = "%s: New tombstone entity not found (%s)" % (key, tombstoneId)
+                    raise StampedDataError(msg)
+                stamp.entity = buildEntity(tombstone).minimize()
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        # Check if entity stub has been updated
+        else:
+            if stamp.entity != entity.minimize():
+                msg = "%s: Embedded entity is stale" % key
+                if repair:
+                    logs.info(msg)
+                    stamp.entity = entity.minimize()
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+
+        # Verify that stamp number is unique
+        stampNum = stamp.stats.stamp_num
+        duplicateStamps = self._collection.find({'user.user_id' : userId, 'stats.stamp_num' : stampNum})
+        if duplicateStamps.count() > 1:
+            msg = "%s: Multiple stamps exist for userId '%s' and stampNum '%s'" % (key, userId, stampNum)
+            raise StampedDataError(msg)
+
+        ### TODO
+        # Check if temp_image_url exists -> kick off async process
+        # Check that image[s] have dimensions
+        # Verify image url exists?
+        # Check if stats need to be updated?
+
+        if modified and repair:
+            self._collection.update({'_id' : key}, self._convertToMongo(stamp))
+
+        return True
     
     ### PUBLIC
     
@@ -365,6 +481,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
     def getCreditedStamps(self, userId, entityId, limit=0):
         try:
+            ### TODO: User credit_received_collection?
             query = {
                 'entity.entity_id'      : entityId,
                 'credits.user.user_id'  : userId,

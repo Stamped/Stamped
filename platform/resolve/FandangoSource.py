@@ -9,93 +9,76 @@ __license__   = "TODO"
 __all__ = [ 'FandangoSource', 'FandangoMovie' ]
 
 import Globals
-from logs import report
 
-try:
-    import logs, re
-    from libs.TMDB                  import globalTMDB
-    from resolve.GenericSource              import GenericSource
-    from utils                      import lazyProperty
-    from abc                        import ABCMeta, abstractproperty
-    from urllib2                    import HTTPError
-    from datetime                   import datetime
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from pprint                     import pformat, pprint
-    from libs.LibUtils              import parseDateString
-except:
-    report()
-    raise
+import logs, re
+from utils import lazyProperty
+from datetime import datetime
+from resolve.DumbSource import DumbSource
+from resolve.Resolver import *
+from resolve.ResolverObject import *
+from pprint import pformat, pprint
 
-class _FandangoObject(object):
-    __metaclass__ = ABCMeta
-    """
-    Abstract superclass (mixin) for Fandango objects.
+class FandangoMovie(ResolverMediaItem):
+    @classmethod
+    def createMovie(cls, data):
+        if hasattr(data, 'id'):
+            return cls(data, False)
 
-    _FandangoObjects must be instantiated with their fandango_id.
+    @classmethod
+    def createMovieFromTopBoxOffice(cls, data):
+        if hasattr(data, 'id'):
+            titlePattern = re.compile(r'\d+\.\s*(.*)\$.*$')
+            match = titlePattern.match(data.title)
+            if match:
+                data.title = match.group(1)
+            return cls(data, True)
 
-    Attributes:
+    def __init__(self, data, popular):
+        ResolverMediaItem.__init__(self, types=['movie'])
+        self.__data = data
+        self.__popular = popular
 
-    fandango - an instance of Fandango (API wrapper)
-    info (abstract) - the type-specific Fandango data for the object
-    """
-    def __init__(self, fandango_id):
-        self.__key = int(fandango_id)
-
-    @property
-    def key(self):
-        return self.__key
-
-    @property
+    @lazyProperty
     def source(self):
-        return "fandango"
-
-    def __repr__(self):
-        return "%s %s %s" % (self.name, self.source, self.date)
-
-
-class FandangoMovie(_FandangoObject, ResolverMediaItem):
-    """
-    Fandango movie wrapper
-    """
-    def __init__(self, fandango_id, title, date):
-        _FandangoObject.__init__(self, fandango_id)
-        ResolverMovie.__init__(self)        
-        self.__date = date
-        self.__title = title
+        return 'fandango'
 
     @lazyProperty
-    def name(self):
-        return self.__title
+    def raw_name(self):
+        return self.__data.title
+
+    def _cleanName(self, name):
+        return name
 
     @lazyProperty
-    def date(self):
-        return self.__date
+    def key(self):
+        return self.__data.id
+
+    @lazyProperty
+    def url(self):
+        return self.__data.link
+
+    @lazyProperty
+    def release_date(self):
+        # TODO(geoff): This is a huge huge huge huge hack. We don't get much info from Fandango, but
+        # we only use it for upcoming releases, so we just use now as an approximation of the
+        # release date.
+        return datetime.now()
+
+    @lazyProperty
+    def last_popular(self):
+        if self.__popular:
+            return datetime.now()
 
 
-class FandangoSource(GenericSource):
+class FandangoSource(DumbSource):
     def __init__(self):
-        GenericSource.__init__(self, 'fandango',
-            'release_date',
-        )
+        super(FandangoSource, self).__init__('fandango', groups=['last_popular'], kinds=['media_item'], types=['movie'])
 
-    def enrichEntityWithWrapper(self, wrapper, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithWrapper(self, wrapper, entity, controller, decorations, timestamps)
-        entity.sources.fandango_id = wrapper.key
+    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
+        super(FandangoSource, self).enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
+        if proxy.key:
+            entity.sources.fandango_id = proxy.key
+        if proxy.url:
+            entity.sources.fandango_url = proxy.url
         return True
-
-
-def testFandango(fandango_id, title, release_date):
-    from resolve import TMDBSource
-    tmdb = TMDBSource.TMDBSource()
-
-    source = tmdb.matchSource(movie)
-
-    results = resolver.resolve(movie, source)
-
-    pprint(results)
-
-
-if __name__ == '__main__':
-    testFandango('1234', '21 Jump Street', parseDateString('2012-03-12'))
 

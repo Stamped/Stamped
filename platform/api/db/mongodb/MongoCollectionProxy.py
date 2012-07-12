@@ -9,7 +9,7 @@ import Globals
 import math, os, pymongo, time, utils, logs
 
 from pymongo.errors import AutoReconnect
-from errors         import Fail
+from errors         import *
 from datetime       import datetime
 
 DEBUG = False
@@ -211,6 +211,8 @@ class MongoCollectionProxy(object):
                     logs.info("Retrying delete (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
             except Exception as e:
+                import traceback
+                logs.warning('Failure updating document:\n%s' % ''.join(traceback.format_exc()))
                 raise StampedSaveDocumentError("Unable to update document")
 
 
@@ -237,7 +239,7 @@ class MongoCollectionProxy(object):
                 logs.info("Retrying update (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
             except Exception as e:
-                raise StampedUpdateDocumentError("Unable to update document")
+                raise StampedUpdateDocumentError("Unable to update document: %s" % e)
 
 
     def remove(self, spec_or_id=None, safe=False, **kwargs):

@@ -53,12 +53,12 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.generated.css">-->
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
     
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
     
     <style>
         {% custom_css "profile" %}
@@ -429,8 +429,7 @@
 {% block scripts %}
     {{ block.super }}
      
-    <!-- Stamped profile scripts -->
-    {% if DEBUG %}
+    {% if STAMPED_DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.isotope.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
@@ -446,7 +445,7 @@
         <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
         <script src="{{ STATIC_URL }}js/profile.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/profile.generated.js"></script>
+        <script src="{{ STATIC_URL }}js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     <!-- Social sharing plugins -->

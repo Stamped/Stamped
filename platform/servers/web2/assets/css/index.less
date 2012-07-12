@@ -6,226 +6,795 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "common.less";
 @import "libs/elements.less";
 
-.pitch {
-    height: 35px;
-    background: url(/assets/img/public-home/text-put-your-stamp-on-the-world.png) left top no-repeat;
-    width: 611px;
-    margin: 0 auto 14px;
+
+/* **************************************************************************
+                                  BASE LAYOUT
+   ************************************************************************** */
+
+@base-background: #f2f2f2;
+
+body, html {
+    background: @base-background;
+    overflow: hidden !important;
 }
 
-.intro {
-    font-size: 16px;
-    text-align: center;
-    line-height: 29px;
+body.intro {
+    .main-content {
+        display: none;
+    }
+    
+    #intro {
+        display: block !important;
+    }
 }
 
-.intro span {
-    display: block;
+body.main {
+    .main-content {
+        display: block !important;
+    }
+    
+    #intro {
+        display: none;
+    }
 }
 
-.intro a {
-    font-weight: bold;
-}
 
-.itunes {
-    width: 247px;
-    height: 84px;
-    background: url(/assets/img/public-home/free-download-sprite.png) left top no-repeat;
-    margin: 23px auto;
-}
+/* **************************************************************************
+                                    INTRO
+   ************************************************************************** */
 
-.itunes:hover {
-    background-position: left bottom;
-}
 
-#tool-tipper {
-    position: relative;
-    height: 779px;
-    width: 100%;
-}
-
-.tooltip {
-    position: absolute;
-}
-
-.tooltip .image-rest {
+#intro-iphone {
+    background: url(/assets/img/index/iphone_intro_sprite.png) no-repeat;
+    
+    width:  395px;
+    height: 632px;
+    
+    position: fixed;
+    left: 50%;
+    top:  50%;
+    margin: -316px 0 0 -200px;
     z-index: 1;
 }
 
-.tooltip .text {
-    text-indent: -9999em;
-    overflow: hidden;
-}
-
-.tooltip .image-active {
-    display: none;
-}
-
-.tooltip .imager {
-    position: absolute;
-    left: 0;
-    top: 0;
-}
-
-.tooltip.tip-1 {
-    width: 275px;
-    height: 165px;
-    top: 124px;
-    left: 0;
-}
-
-.tooltip.tip-2 {
-    width: 291px;
-    height: 187px;
-    right: -16px;
-    top: 186px;
-}
-
-.tooltip.tip-3 {
-    width: 275px;
-    height: 148px;
-    top: 418px;
-    left: 0;
-}
-
-.tooltip .image-active {
-    z-index: 3;
-}
-
-#iphone {
-    margin: 0 auto;
-    width: 435px;
-    height: 774px;
-    position: relative;
-    overflow: hidden;
-    right: -10px;
-    z-index: 2;
-    background: url(/assets/img/public-home/iphone-background.png) left top no-repeat;
-}
-
-#iphone .screen {
-    position: absolute;
-    left: 54px;
-    top: 136px;
-    width: 312px;
-    height: 466px;
-    display: none;
-}
-
-#iphone .screen.active {
-    display: block;
-}
-
-.video-block {
-    text-align: center;
-    position: absolute;
-    right: 16px;
-    bottom: 101px;
-}
-
-.video-block .thumbnail {
-    display: block;
-    margin-bottom: 15px;
-    width: 218px;
-    height: 117px;
-    background: url(/assets/img/public-home/video-thumbnail-sprite.png) left top no-repeat;
-}
-
-.video-block:hover .thumbnail {
-    background-position: left bottom;
-}
-
-.thanks {
-    margin-top: 90px;
-    margin-left: 5px;
-}
-
-#press {
-    width: 820px; 
-    margin: 0 auto 34px; 
-}
-
-#press h3 {
-    border-bottom: 1px solid #e5e5e5; 
-    color: #9b9b9b; 
-    font-size: 12px; 
-    padding: 0 0 6px; 
-}
-
-#press ul {
-    list-style-type: none; 
-    height: 32px; 
-    padding: 0; 
-    margin: 37px 0 0; 
-}
-
-#press ul + ul {
-    margin-top: 39px; 
-}
-
-#press a {
-    height: 32px; 
-    background-position: left top; 
-    display: block; 
-    background-repeat: no-repeat; 
-}
-
-#press a.techcrunch {
-    width: 198px; 
-    background-image: url(/assets/img/press-techcrunch-sprite.png); 
-    float: left; 
-}
-
-#press a.wsj {
-    width: 279px; 
-    background-image: url(/assets/img/press-wsj-sprite.png); 
-    float: left; 
-    margin-left: 75px; 
-}
-
-#press a.daringfireball {
-    width: 194px; 
-    background-image: url(/assets/img/press-daringfireball-sprite.png); 
-    float: right; 
-}
-
-#press a.mashable {
-    width: 130px; 
-    background-image: url(/assets/img/press-mashable-sprite.png); 
-    float: left; 
-    margin-left: 166px; 
-}
-
-#press a.gigaom {
-    width: 157px; 
-    background-image: url(/assets/img/press-gigaom-sprite.png); 
-    float: right; 
-    margin-right: 160px;
-}
-
-#press a:hover {
-    background-position: left bottom;
-}
-
-.stutter-bar {
+#intro-hero {
     position: fixed;
-    top: 0;
-    display: none;
-    text-align: center;
-    padding: 15px 0;
-    width: 100%;
-    z-index: 5000;
-    background-color: #fff;
+    z-index: 100;
     
-    .box-shadow(0, 0, 10px, rgba(0,0,0,0.35));
+    text-align: center;
+    width: 100%;
+    top:   50%;
+    margin-top: -200px;
+    color: #b7b7b7;
+    
+    .text {
+        display: none;
+        
+        .line {
+            position: absolute;
+            white-space: nowrap;
+            display: block;
+            width: 100%;
+            pointer-events: none;
+            z-index: 1;
+            
+            opacity: 0;
+            .transition(opacity, .1s, ease);
+            .stamped-font();
+            
+            .blurred {
+                display: none;
+            }
+        }
+        
+        .active-line {
+            pointer-events: auto;
+            opacity: 1;
+            z-index: 100;
+        }
+    }
+    
+    .active-text {
+        display: block;
+    }
 }
 
-.stutter-bar .success {
-    font-size: 16px;
-    font-weight: bold;
-    background: url(/assets/img/notifications_check.png) left 1px no-repeat;
-    padding-left: 23px;
+.italic {
+    font-style: italic;
+}
+
+.facebook {
+    color: #3B5999;
+}
+
+.twitter {
+    color: #4099FF;
+}
+
+
+/* **************************************************************************
+                               CORE PAGE CONTENT
+   ************************************************************************** */
+
+
+#main-page-content {
+    position: static;
+    top: 0;
+}
+
+#main {
+    position: absolute;
+    left: 50%;
+    top: -100%;
+    margin-left: -350px;
+    z-index: 3;
+    
+    .pane-body {
+        position: relative;
+        background: #fff;
+        width: 470px;
+        
+        margin:  0 0 18px 12px;
+        padding-bottom: 15px;
+        
+        .box-shadow(0, 2px, 25px, 0, @shadow);
+        
+        .ribbon-wrapper {
+            background: #c7c7c7;
+            width:  100%;
+            height: 15px;
+            
+            .rounded(2px);
+            
+            .ribbon {
+                .rounded(2px);
+            }
+        }
+        
+        .ribbon-wrapper-bottom {
+            position: absolute;
+            bottom: 0;
+            left:   0;
+        }
+        
+        #pane-wrapper {
+            position: relative;
+            margin: 12px 48px;
+            
+            .pane {
+                position: absolute;
+                top:  0;
+                left: 0;
+                
+                opacity: 0;
+                .transition(opacity, .3s, ease);
+                
+                .title {
+                    .stamped-font();
+                    
+                    letter-spacing: 0.03em;
+                    font-size: 3em;
+                    line-height: 115%;
+                    color: #333;
+                }
+                
+                .desc {
+                    color: #888;
+                    font-weight: 200;
+                    font-size: 80%;
+                    
+                    .continue-button {
+                        color: #438fED;
+                        margin-bottom: 1em;
+                    }
+                }
+            }
+            
+            #pane-0 {
+                position: relative !important;
+                
+                .continue-button {
+                    margin-bottom: 0 !important;
+                    margin-left: .5em;
+                }
+            }
+        }
+    }
+    
+    #pane-nav {
+        position: absolute;
+        left: -24px;
+        top: 50%;
+        margin-top: -40px;
+    }
+}
+
+.hidden-main-animating {
+    .transition(opacity, .4s, ease);
+}
+
+.active-pane-0 #pane-nav-0, 
+.active-pane-1 #pane-nav-1, 
+.active-pane-2 #pane-nav-2, 
+.active-pane-3 #pane-nav-3, 
+.active-pane-4 #pane-nav-4 {
+    background-position: -36px 0;
+}
+
+.active-pane-0 #pane-0, 
+.active-pane-1 #pane-1, 
+.active-pane-2 #pane-2, 
+.active-pane-3 #pane-3, 
+.active-pane-4 #pane-4 {
+    opacity: 1 !important;
+    z-index: 50;
+}
+
+#retina .active-pane-0 #pane-nav-0, 
+#retina .active-pane-1 #pane-nav-1, 
+#retina .active-pane-2 #pane-nav-2, 
+#retina .active-pane-3 #pane-nav-3, 
+#retina .active-pane-4 #pane-nav-4 {
+    background-position: -70px 0;
+    
+    &:hover {
+        background-position: -70px 0;
+    }
+}
+
+#main-header {
+    margin-bottom: 12px;
+    text-align: right;
+    
+    .launcher-icon-button {
+        position: relative;
+        z-index: 99;
+    }
+    
+    #available {
+        margin: 4px 12px 0 0;
+        
+        .desc {
+            font-size: 90%;
+            margin-bottom: 4px;
+        }
+    }
+}
+
+#main-body {
+    position: relative;
+}
+
+#stamped-logo {
+    position: absolute;
+    z-index: 100;
+    
+    background: url(/assets/img/index/stamped-logo.png) no-repeat;
+    width:  184px;
+    height: 184px;
+    
+    top:   -130px;
+    left:  -90px;
+    
+    opacity: 1;
+    .transition-transform(.3s, ease);
+}
+
+#retina #stamped-logo {
+    background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
+    width:  368px;
+    height: 368px;
+    
+    // TODO: test retina offsets
+    top:   -130px;
+    left:  -90px;
+}
+
+#main-footer {
+    text-align: center;
+    position: relative;
+    left: 8px;
+    
+    .watch-video {
+        .bieber-video-preview-icon {
+            display: inline-block;
+            position: relative;
+            top: 12px;
+        }
+    }
+}
+
+.speech-bubble {
+    display: inline-block;
+    width: 190px;
+    padding: 8px;
+    margin-right: 12px;
+    text-align: left;
+    
+    background: @base-background;
+    border: 1px solid #d7d7d7;
+    .rounded(4px);
+    
+    .play-video-button {
+        float: left;
+        margin-right: 12px;
+    }
+    
+    .desc {
+        font-size: 80%;
+        margin: 0;
+    }
+}
+
+.user-video-preview {
+    display: inline-block;
+    width: 108px;
+    
+    .user-video-preview-image {
+        display: block;
+        width:  100%;
+        height: 64px;
+        margin-bottom: 8px;
+        
+        .box-shadow(0, 2px, 6px, 0, @shadow);
+        
+        background: #000;
+        
+        &:hover, &:active {
+            background: red;
+        }
+    }
+    
+    .user-video-desc {
+        .watch-video {
+            color: #438fED;
+        }
+    }
+}
+
+#user-video-preview-0 {
+    margin-right: 1em;
+}
+
+#pane-4 {
+    .title, .desc {
+        max-width: 270px;
+    }
+}
+
+#hero-video-preview {
+    position: absolute;
+    top:  50%;
+    left: 290px;
+    margin-top: -129px;
+    
+    display: none;
+    width: 470px;
+    
+    .user-video-preview-image {
+        height: 258px;
+        .box-shadow(0, 2px, 25px, 0, @shadow);
+    }
+    
+    .user-video-desc {
+        text-align: center;
+    }
+}
+
+.active-pane-4 #hero-video-preview {
+    display: block;
+}
+
+.screen-name {
+    color: #438fed !important;
+}
+
+.intro {
+    .hidden-main-animating {
+        opacity: 0;
+        .transition(opacity, 0s, linear);
+    }
+}
+
+.main-animating {
+    #stamped-logo {
+        opacity: 0;
+        .transform(scale(1.5, 1.5));
+    }
+    
+    .hidden-main-animating {
+        opacity: 0;
+        .transition(opacity, 0s, linear);
+    }
+}
+
+#tastemaker-gallery {
+    margin-top: 24px;
+    .tastemaker {
+        position: relative;
+        display:  inline-block;
+        
+        margin-right: 8px;
+    }
+    
+    .tastemaker:last-child {
+        margin-right: 0;
+    }
+}
+
+.tastemaker-logo {
+    width:  36px;
+    height: 36px;
+    
+    top:   -18px;
+    right: -18px;
+}
+
+// target webkit browsers
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .tastemaker-logo {
+        @mask-image: url(/assets/img/stamped_email_mask.png);
+        
+        -webkit-mask: @mask-image no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask: @mask-image no-repeat;
+    }
+}
+
+#tastemaker-map-window {
+    background: url(/assets/img/index/chrome.png) no-repeat;
+    width:  1145px;
+    height: 732px;
+    
+    position: absolute;
+    display: none;
+    z-index: 2;
+    
+    top: 50%;
+    //right: (356px - 1145px);
+    right: -1200px;
+    
+    //width: 356px;
+    //right: 0;
+    
+    margin-top: -364px;
+    padding: 84px 0 0 42px;
+    
+    #fake-url {
+        position: absolute;
+        left: 128px;
+        top:  62px;
+        font: 10pt helvetica;
+        color: #666;
+    }
+}
+
+#tastemaker-map-window-iframe {
+    width:  100%;
+    height: 100%;
+}
+
+
+/* **************************************************************************
+                      TILTED IPHONE IN CORE PAGE VIEWS
+   ************************************************************************** */
+
+
+#main-iphone {
+    position: absolute;
+    top:  200%;
+    left: 50%;
+    margin: -265px 0 0 70px;
+    z-index: 98;
+    
+    width:  377px;
+    height: 530px;
+}
+
+.iphone-hero {
+    position: absolute;
+    background: url(/assets/img/index/iphone_shadow01.png) no-repeat;
+    width:  377px;
+    height: 596px;
+    
+    .iphone-inner {
+        background: url(/assets/img/index/iPhone_HERO-1.png) no-repeat;
+        width:  276px;
+        height: 530px;
+        margin: 0 auto;
+    }
+}
+
+#retina {
+    #main-iphone {
+        margin: -530px 0 0 120px;
+    }
+    
+    .iphone-hero {
+        background: url(/assets/img/index/iPhone_HERO-1@2x.png) no-repeat;
+        width:  551px;
+        height: 1060px;
+    }
+}
+
+
+/* **************************************************************************
+                                  FOOTER
+   ************************************************************************** */
+
+
+footer {
+    position: fixed;
+    z-index: 0;
+    width: 100%;
+    
+    left:   0;
+    bottom: 0;
+    
+    padding: 12px 24px;
+    
+    .app-store-button {
+        position: absolute;
+        top: 50%;
+        right: 72px;
+        
+        margin-top: -18px;
+    }
+}
+
+#retina footer .app-store-button {
+    margin-top: -36px;
+}
+
+#social {
+    .social-button {
+        display: inline-block;
+    }
+}
+
+#footer-nav {
+    margin-top: .5em;
+    font-size: 90%;
+    
+    .nav {
+        display: inline-block;
+        margin-right: 1em;
+        
+        &:hover {
+            color: #000;
+        }
+    }
+}
+
+
+/* **************************************************************************
+                                 BUTTONS
+   ************************************************************************** */
+
+
+.pane-nav-button {
+    background: url(/assets/img/index/navdots_sprite.png) no-repeat;
+    display: block;
+    width:  16px;
+    height: 16px;
+    
+    &:hover {
+        background-position: -18px 0;
+    }
+    
+    &:active {
+        background-position: -36px 0;
+    }
+}
+
+.active-pane-nav-button {
+    background-position: -36px 0;
+    
+    &:hover {
+        background-position: -36px 0;
+    }
+}
+
+.social-button {
+    background: url(/assets/img/index/social_sprite.png) no-repeat;
+    display: block;
+    
+    width:  20px;
+    height: 20px;
+}
+
+.social-button-template(@x, @offset) {
+    @x2: (@x * @offset);
+    background-position: @x2 0;
+    
+    &:hover, &:active {
+        background-position: @x2 -22px;
+    }
+}
+
+.social-button-twitter {
+    .social-button-template(0, -22px);
+}
+
+.social-button-facebook {
+    .social-button-template(1, -22px);
+}
+
+.social-button-google {
+    .social-button-template(2, -22px);
+}
+
+.app-store-button {
+    background: url(/assets/img/index/appstore_sprite.png) no-repeat;
+    display: block;
+    
+    width:  110px;
+    height: 36px;
+    
+    &:hover, &:active {
+        background-position: -112px 0;
+    }
+}
+
+.download-the-app-button {
+    background: url(/assets/img/index/downloadbtn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  200px;
+    height: 32px;
+    
+    &:hover {
+        background-position: -202px 0;
+    }
+    
+    &:active {
+        background-position: -404px 0;
+    }
+}
+
+.launcher-icon-button {
+    background: url(/assets/img/index/launchericon_sprite.png) no-repeat;
+    display: block;
+    
+    width:  64px;
+    height: 64px;
+    
+    &:hover, &:active {
+        background-position: -66px 0;
+    }
+}
+
+.play-video-button {
+    background: url(/assets/img/index/playbutton_small_sprite.png) no-repeat;
+    display: block;
+    
+    width:  40px;
+    height: 40px;
+    
+    &:hover, &:active {
+        background-position: -42px 0;
+    }
+}
+
+.bieber-video-preview-icon {
+    background: url(/assets/img/index/bieberlittle.gif) no-repeat;
+    
+    width:  45px;
+    height: 45px;
+}
+
+#category-illustration {
+    background: url(/assets/img/index/illustration.png) no-repeat;
+    width:  373px;
+    height: 84px;
+}
+
+#retina {
+    .pane-nav-button {
+        background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
+        width:  31px;
+        height: 31px;
+        
+        &:hover {
+            background-position: -35px 0;
+        }
+        
+        &:active {
+            background-position: -70px 0;
+        }
+    }
+    
+    .active-pane-nav-button {
+        background-position: -70px 0;
+        
+        &:hover {
+            background-position: -70px 0;
+        }
+    }
+    
+    .social-button {
+        background: url(/assets/img/index/social_sprite@2x.png) no-repeat;
+        width:  40px;
+        height: 40px;
+    }
+    
+    .social-button-twitter {
+        .social-button-template(0, -44px);
+    }
+    
+    .social-button-facebook {
+        .social-button-template(1, -44px);
+    }
+    
+    .social-button-google {
+        .social-button-template(2, -44px);
+    }
+    
+    .app-store-button {
+        background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
+        width:  220px;
+        height: 72px;
+        
+        &:hover, &:active {
+            background-position: -224px 0;
+        }
+    }
+    
+    .download-the-app-button {
+        background: url(/assets/img/index/downloadbtn_sprite@2x.png) no-repeat;
+        width:  400px;
+        height: 64px;
+        
+        &:hover {
+            background-position: -404px 0;
+        }
+        
+        &:active {
+            background-position: -808px 0;
+        }
+    }
+    
+    .launcher-icon-button {
+        background: url(/assets/img/index/launchericon_sprite@2x.png) no-repeat;
+        width:  128px;
+        height: 128px;
+        
+        &:hover, &:active {
+            background-position: -132px 0;
+        }
+    }
+    
+    .play-video-button {
+        background: url(/assets/img/index/playbutton_small_sprite@2x.png) no-repeat;
+        display: block;
+        
+        width:  80px;
+        height: 80px;
+        
+        &:hover, &:active {
+            background-position: -84px 0;
+        }
+    }
+    
+    .bieber-video-preview-icon {
+        background: url(/assets/img/index/bieberlittle@2x.gif) no-repeat;
+        width:  90px;
+        height: 90px;
+    }
+    
+    #category-illustration {
+        background: url(/assets/img/index/illustration@2x.png) no-repeat;
+        width:  746px;
+        height: 168px;
+    }
 }
 

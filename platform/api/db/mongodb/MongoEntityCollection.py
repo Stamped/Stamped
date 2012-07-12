@@ -6,18 +6,18 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import time
 from logs       import report
 
 try:
     from datetime                       import datetime
-    from utils                          import lazyProperty
+    from utils                          import lazyProperty, getHeadRequest, getWebImageSize
     from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
     from api.Entity                         import getSimplifiedTitle, buildEntity
 
     from api.db.mongodb.AMongoCollection               import AMongoCollection
-    from api.db.mongodb.MongoPlacesEntityCollection    import MongoPlacesEntityCollection
     from api.db.mongodb.MongoEntitySeedCollection      import MongoEntitySeedCollection
     from api.db.mongodb.MongoMenuCollection            import MongoMenuCollection
     from api.AEntityDB                      import AEntityDB
@@ -25,6 +25,8 @@ try:
     from api.ADecorationDB                  import ADecorationDB
     from errors                         import StampedUnavailableError
     from logs                           import log
+
+    from libs.SearchUtils               import addMatchCodesToMongoDocument
 except:
     report()
     raise
@@ -36,9 +38,19 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         AMongoCollection.__init__(self, collection=collection, primary_key='entity_id', overflow=True)
         AEntityDB.__init__(self)
 
-    @lazyProperty
-    def places_collection(self):
-        return MongoPlacesEntityCollection()
+        fast_resolve_fields = ('sources.amazon_id', 'sources.spotify_id', 'sources.rdio_id',
+                'sources.opentable_id', 'sources.tmdb_id', 'sources.factual_id',
+                'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
+                'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
+                'sources.netflix_id', 'sources.thetvdb_id')
+        for field in fast_resolve_fields:
+            self._collection.ensure_index(field)
+        self._collection.ensure_index('match_codes')
+        self._collection.ensure_index('titlel')
+        self._collection.ensure_index('albums.title')
+        self._collection.ensure_index('artists.title')
+        self._collection.ensure_index('authors.title')
+        self._collection.ensure_index('tracks.title')
 
     @lazyProperty
     def seed_collection(self):
@@ -62,6 +74,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document['timestamp'] = { 'created' : created }
 
         document.pop('titlel')
+        document.pop('match_codes', None)
 
         entity = buildEntity(document, mini=mini)
 
@@ -75,7 +88,189 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             return None
         if 'title' in document:
             document['titlel'] = getSimplifiedTitle(document['title'])
+        addMatchCodesToMongoDocument(document)
         return document
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        """
+        Check the entity to verify the following things:
+
+        - Entity has the proper structure (updated schema)
+
+        - Populate third_party_ids if missing
+
+        - If tombstoned, verify that tombstone points to a non-tombstoned / non-user-generated entity
+
+        - If an image url exists, verify via a HEAD request that the image is valid
+
+        - Source-specific assertions:
+            - itunes_url exists if itunes_id exists
+            - googleplaces_reference exists if googleplaces_id exists
+
+        - If 'menu' is True, verify a menu exists
+
+        """
+        
+        document = self._getMongoDocumentFromId(key)
+        
+        assert document is not None
+
+        modified = False
+        postUpdateErrors = []
+
+        # Check if old schema version
+        if 'schema_version' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        entity = self._convertFromMongo(document)
+
+        # Verify tombstone is set properly
+        if entity.sources.tombstone_id is not None:
+            tombstone = None
+
+            # Verify tombstoned entity still exists
+            try:
+                tombstone = self._getMongoDocumentFromId(self._getObjectIdFromString(entity.sources.tombstone_id))
+                tombstone = self._convertFromMongo(tombstone)
+            except StampedDocumentNotFoundError:
+                msg = "%s: Tombstoned entity not found" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.sources.tombstone_id)
+                    del(entity.sources.tombstone_source)
+                    del(entity.sources.tombstone_timestamp)
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+
+            # Check if tombstone is chained
+            if tombstone is not None and tombstone.sources.tombstone_id is not None:
+                if tombstone.sources.tombstone_id == entity.entity_id:
+                    msg = "Entities tombstoned to each other: '%s' and '%s'" % (entity.entity_id, tombstone.entity_id)
+                    raise StampedTombstoneError(msg)
+                msg = "Entity tombstone chain: '%s' to '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id)
+                if repair:
+                    logs.info(msg)
+                    entity.sources.tombstone_id = tombstone.sources.tombstone_id
+                    modified = True
+                else:
+                    raise StampedTombstoneError(msg)
+                
+            # Raise exception if tombstone to user-generated entity
+            if tombstone is not None and tombstone.sources.user_generated_id is not None:
+                raise StampedTombstoneError("Entity tombstones to user-generated entity: '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id))
+
+        # Verify that at least one source exists
+        if entity.sources is None or len(entity.sources.dataExport().keys()) == 0:
+            raise StampedInvalidSourcesError("%s: Missing sources" % key)
+
+        # Source-specific checks
+        if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
+            msg = "%s: Missing iTunes URL" % entity.entity_id
+            if repair and entity.sources.itunes_timestamp is not None:
+                logs.info(msg)
+                del(entity.sources.itunes_timestamp)
+                modified = True
+                postUpdateErrors.append(StampedItunesSourceError(msg))
+            else:
+                raise StampedItunesSourceError(msg)
+        if entity.sources.googleplaces_id is not None and entity.sources.googleplaces_reference is None:
+            raise StampedGooglePlacesSourceError("%s: Missing Google Places reference" % entity.entity_id)
+
+        # Menu check
+        if entity.kind == 'place' and entity.menu == True:
+            if self._collection._database['menus'].find({'_id': self._getObjectIdFromString(entity.entity_id)}).count() == 0:
+                msg = "%s: Menu missing" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.menu)
+                    del(entity.menu_source)
+                    del(entity.menu_timestamp)
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+
+        # Generate third_party_ids if it doesn't exist
+        if (entity.third_party_ids is None or not entity.third_party_ids) and entity.sources.user_generated_id is None:
+            msg = "%s: Missing third_party_ids" % key
+            if repair:
+                logs.info(msg)
+                entity._maybeRegenerateThirdPartyIds()
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        # Verify image exists
+        if entity.images is not None:
+            if entity.kind == 'place':
+                msg = "%s: No image for places" % (key)
+                if repair:
+                    logs.info(msg)
+                    del(entity.images)
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+            else:
+                images = []
+                for image in entity.images:
+                    sizes = []
+                    for size in image.sizes:
+                        if size.url.startswith('http://maps.gstatic.com'):
+                            msg = "%s: Blacklisted image (%s)" % (key, size.url)
+                            if repair:
+                                logs.info(msg)
+                                modified = True
+                                continue
+                            else:
+                                raise StampedDataError(msg)
+                        # Sleep for half a second as a poor-man's rate limiter
+                        # time.sleep(0.5)
+                        # if getHeadRequest(size.url, maxDelay=4) is None:
+                        #     msg = "%s: Image is unavailable (%s)" % (key, size.url)
+                        #     if repair:
+                        #         logs.info(msg)
+                        #         modified = True
+                        #         continue
+                        #     else:
+                        #         raise StampedDataError(msg)
+                        # NOTE: This is hitting rate limits from Amazon, so commenting out for now
+                        # if size.width is None or size.height is None:
+                        #     msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
+                        #     if repair:
+                        #         logs.info(msg)
+                        #         try:
+                        #             size.width, size.height = getWebImageSize(size.url)
+                        #             modified = True
+                        #         except Exception as e:
+                        #             logs.warning("%s: Could not get image sizes: %s" % (key, e))
+                        #             raise 
+                        #     else:
+                        #         raise StampedDataError(msg)
+                        sizes.append(size)
+                    if len(sizes) > 0:
+                        image.sizes = sizes
+                        images.append(image)
+                if len(images) > 0:
+                    entity.images = images
+                else:
+                    del(entity.images)
+
+        if modified and repair:
+            self._collection.update({'_id' : key}, self._convertToMongo(entity))
+
+        if len(postUpdateErrors) > 0:
+            raise postUpdateErrors[0]
+
+        return True
 
     ### PUBLIC
 
@@ -102,11 +297,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         document    = self._getMongoDocumentFromId(documentId)
         entity      = self._convertFromMongo(document)
 
-        # if entity.tombstone_id is not None:
-        #     documentId  = self._getObjectIdFromString(entity.tombstone_id)
-        #     document    = self._getMongoDocumentFromId(documentId)
-        #     entity      = self._convertFromMongo(document)
-
         return entity
 
     def getEntityMinis(self, entityIds):
@@ -122,8 +312,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         for doc in documents:
             entity = self._convertFromMongo(doc, mini=False)
             entity = entity.minimize()
-            # if entity.tombstone_id is not None:
-            #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
 
         return result
@@ -137,8 +325,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         result = []
         for item in data:
             entity = self._convertFromMongo(item)
-            # if entity.tombstone_id is not None:
-            #     entity = self.getEntity(entity.tombstone_id)
             result.append(entity)
 
         return result

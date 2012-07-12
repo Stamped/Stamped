@@ -37,6 +37,7 @@ try:
     from search.ScoringUtils import *
     from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
 
+    from libs.SearchUtils import formatSearchQuery
 except:
     report()
     raise
@@ -581,219 +582,133 @@ class StampedSource(GenericSource):
 
     def trackSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'types'         : 'track',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'subcategory'   : 'song',
-                }
-                yield {
-                    '$or': [
-                        { 'albums': {'$elemMatch':{ 'title': album['name'] } } }
-                            for album in query.albums[:20]
-                    ],
-                    'types'         : 'track',
-                }
-                yield {
-                    'details.song.album.name': query.album['name'],
-                    'subcategory'   : 'song',
-                }
-                yield {
-                    '$or': [
-                        { 'artists': {'$elemMatch':{ 'title': artist['name'] } } }
-                            for artist in query.artists[:20]
-                    ],
-                    'types'         : 'track',
-                }
-                yield {
-                    'details.media.artist_display_title' : query.artist['name'],
-                    'subcategory'   : 'song',
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'types'         : 'track',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : 'song',
+            }
+            yield {
+                'albums.title': {'$in': [album['name'] for album in query.albums[:20]]},
+                'types'         : 'track',
+            }
+            yield {
+                'artists.title': {'$in': [artist['name'] for artist in query.artists[:20]]},
+                'types'         : 'track',
+            }
         return self.__querySource(query_gen(), query)
 
     def albumSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'types'         : 'album',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'subcategory'   : 'album',
-                }
-                yield {
-                    '$or': [
-                        { 'artists': {'$elemMatch':{ 'title': artist['name'] } } }
-                            for artist in query.artists[:20]
-                    ],
-                    'types'         : 'album',
-                }
-                yield {
-                    'details.media.artist_display_title' : query.artist['name'],
-                    'subcategory'   : 'album',
-                } 
-                yield {
-                    '$or': [
-                        { 'tracks': {'$elemMatch':{ 'title': track['name'] } } }
-                            for track in query.tracks[:20]
-                    ],
-                    'types'         : 'album',
-                }
-                yield {
-                    '$or': [
-                        { 'details.album.tracks': track['name'] }
-                            for track in query.tracks
-                    ],
-                    'subcategory'   : 'album',
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'types'         : 'album',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : 'album',
+            }
+            yield {
+                'artists.title': {'$in': [artist['name'] for artist in query.artists[:20]]},
+                'types'         : 'album',
+            }
+            yield {
+                'tracks.title': {'$in': [track['name'] for track in query.tracks[:20]]},
+                'types'         : 'album',
+            }
         return self.__querySource(query_gen(), query)
 
     def artistSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'types'         : 'artist',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'subcategory'   : 'artist',
-                }
-                yield {
-                    '$or': [
-                        { 'albums': {'$elemMatch':{ 'title': album['name'] } } }
-                            for album in query.albums[:20]
-                    ],
-                    'types'         : 'artist',
-                }
-                yield {
-                    '$or': [
-                        { 'tracks': {'$elemMatch':{ 'title': track['name'] } } }
-                            for track in query.tracks[:20]
-                    ],
-                    'types'         : 'artist',
-                }
-                yield {
-                    '$or': [
-                        { 'details.artist.albums': {'$elemMatch':{ 'album_name': album['name'] } } }
-                            for album in query.albums[:20]
-                    ],
-                    'subcategory'   : 'artist',
-                }
-                yield {
-                    '$or': [
-                        { 'details.artist.songs': {'$elemMatch':{ 'song_name': track['name'] } } }
-                            for track in query.tracks[:20]
-                    ],
-                    'subcategory'   : 'artist',
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'types'         : 'artist',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : 'artist',
+            }
+            yield {
+                'albums.title': {'$in': [album['name'] for album in query.albums[:20]]},
+                'types'         : 'artist',
+            }
+            yield {
+                'tracks.title': {'$in': [track['name'] for track in query.tracks[:20]]},
+                'types'         : 'artist',
+            }
         return self.__querySource(query_gen(), query)
 
     def movieSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'types'         : 'movie',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'subcategory'   : 'movie',
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'types'         : 'movie',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : 'movie',
+            }
         return self.__querySource(query_gen(), query)
 
     def tvSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'types'         : 'tv',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'subcategory'   : 'tv',
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'types'         : 'tv',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : 'tv',
+            }
         return self.__querySource(query_gen(), query)
 
     def bookSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'types'         : 'book',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'subcategory'   : 'book',
-                }
-                yield {
-                    '$or': [
-                        { 'authors': {'$elemMatch':{ 'title': author['name'] } } }
-                            for author in query.authors[:20]
-                    ],
-                    'types'         : 'book',
-                }
-                yield {
-                    'details.book.author' : query.author['name'],
-                    'subcategory'   : 'book',
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'types'         : 'book',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : 'book',
+            }
+            yield {
+                'authors.title': {'$in': [author['name'] for author in query.authors[:20]]},
+                'types'         : 'book',
+            }
         return self.__querySource(query_gen(), query)
 
     def appSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'types'         : 'app',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'subcategory'   : 'app',
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'types'         : 'app',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : 'app',
+            }
         return self.__querySource(query_gen(), query)
 
     def placeSource(self, query):
         def query_gen():
-            try:
-                yield {
-                    'titlel'        : query.name.lower(),
-                    'kind'          : 'place',
-                }
-                yield {
-                    'titlel'        : query.name.lower(),
-                    '$or' : [
-                        {'subcategory' : 'bar'},
-                        {'subcategory' : 'restaurant'},
-                    ],
-                }
-            except GeneratorExit:
-                pass
+            yield {
+                'titlel'        : query.name.lower(),
+                'kind'          : 'place',
+            }
+            yield {
+                'titlel'        : query.name.lower(),
+                'subcategory'   : {'$in' : ['bar', 'restaurant']},
+            }
         return self.__querySource(query_gen(), query)
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
-        simplifiedText = queryText.lower()
+        tokenQueries = formatSearchQuery(queryText)
         if queryCategory == 'film':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                         { 'types' : { '$in' : [ 'tv', 'movie' ] } },
                         { 'subcategory' : { '$in' : [ 'tv', 'movie' ] } },
@@ -802,8 +717,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'music':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : { '$in' : [ 'artist', 'album', 'track' ] } },
                             { 'subcategory' : { '$in' : [ 'artist', 'album', 'song' ] } },
@@ -812,8 +726,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'place':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'kind' : 'place' },
                             { 'subcategory' : { '$in' : [ 'bar', 'restaurant' ] } },
@@ -822,8 +735,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'app':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : 'app' },
                             { 'subcategory' : 'app' },
@@ -832,8 +744,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'book':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : 'book' },
                             { 'subcategory' : 'book' },
@@ -844,12 +755,8 @@ class StampedSource(GenericSource):
             raise NotImplementedError()
         # Exclude tombstoned listings.
         and_list = query.setdefault('$and',[])
-        and_list.append( {
-            '$or' : [
-                    {'sources.tombstone_id' : { '$exists':False }},
-                    {'sources.tombstone_id' : None},
-            ]
-        } )
+        and_list.append({'sources.tombstone_id' : { '$exists':False }})
+        and_list.append({'sources.user_generated_id' : { '$exists':False }})
         matches = list(self.__id_query(query))
         entityIds = [ match['_id'] for match in matches ]
         # TODO: Should just retrieve all of this from the initial query!
@@ -992,31 +899,24 @@ class StampedSource(GenericSource):
 
     def __querySource(self, query_gen, query_obj, constructor_proxy=None, **kwargs):
         def gen():
-            try:
-                id_set = set()
-                for query in query_gen:
-                    for k,v in kwargs.items():
-                        query[k] = v
-                    
-                    and_list = query.setdefault('$and',[])
-                    and_list.append( {
-                        '$or' : [
-                            {'sources.tombstone_id' : { '$exists':False }},
-                            {'sources.tombstone_id' : None},
-                        ]
-                    } )
-                    if query_obj.source == 'stamped' and query_obj.key != '':
-                        query['_id'] = { '$lt' : ObjectId(query_obj.key) }
-                    matches = self.__id_query(query)
-                    logs.debug('Found %d matches for query: %20s' % (len(matches), str(matches)))
-                    #print(matches)
-                    for match in matches:
-                        entity_id = match['_id']
-                        if entity_id not in id_set:
-                            yield entity_id
-                            id_set.add(entity_id)
-            except GeneratorExit:
-                pass
+            id_set = set()
+            for query in query_gen:
+                for k,v in kwargs.items():
+                    query[k] = v
+                
+                and_list = query.setdefault('$and',[])
+                and_list.append({'sources.tombstone_id' : { '$exists':False }})
+                and_list.append({'sources.user_generated_id' : { '$exists':False }})
+                if query_obj.source == 'stamped' and query_obj.key != '':
+                    query['_id'] = { '$lt' : ObjectId(query_obj.key) }
+                matches = self.__id_query(query)
+                logs.debug('Found %d matches for query: %20s' % (len(matches), str(matches)))
+                #print(matches)
+                for match in matches:
+                    entity_id = match['_id']
+                    if entity_id not in id_set:
+                        yield entity_id
+                        id_set.add(entity_id)
         generator = gen()
         
         def constructor(entity_id):
@@ -1041,7 +941,7 @@ class StampedSource(GenericSource):
     def resolve_fast_batch(self, sourcesAndKeys):
         SOURCES = set(['amazon', 'spotify', 'rdio', 'opentable', 'tmdb', 'factual', 'instagram',
                 'singleplatform', 'foursquare', 'fandango', 'googleplaces', 'itunes', 'netflix',
-                'thetvdb'])
+                'thetvdb', 'nytimes'])
         mongoQueries = []
         queryPairs = []
         for source, key in sourcesAndKeys:

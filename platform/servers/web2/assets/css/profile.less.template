@@ -20,8 +20,8 @@
    ************************************************************************** */
 
 {{#user}}
-@user_primary:   #{{color_primary}};   /* #004ab2 */
-@user_secondary: #{{color_secondary}}; /* #0057d1 */
+@user_primary:   #{{color_primary}};
+@user_secondary: #{{color_secondary}};
 {{/user}}
 
 @primary:   @user_primary;

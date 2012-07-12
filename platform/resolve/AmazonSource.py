@@ -31,6 +31,24 @@ except:
     report()
     raise
 
+def _getSearchResults(results):
+    return _getResults('ItemSearchResponse', results)
+
+
+def _getLookupResult(results):
+    # TODO(geoff): log a warning if we get more than one?
+    results = _getResults('ItemLookupResponse', results)
+    if len(results) > 1:
+        logs.warn("Received more than one result for lookup: " + str(results))
+    return results[0] if results else None
+
+
+def _getResults(firstLayer, results):
+    items = xp(results, firstLayer, 'Items')['c']
+    if 'Item' in items:
+        return list(items['Item'])
+    return []
+
 
 class _AmazonObject(object):
 
@@ -220,6 +238,12 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
 
 
 class AmazonBook(_AmazonObject, ResolverMediaItem):
+    @classmethod
+    def createFromRssEntry(cls, entry):
+        asinPattern = re.compile('_([0-9A-Z]{10})$')
+        match = asinPattern.search(entry.id)
+        if match:
+            return cls(match.group(1))
 
     def __init__(self, amazon_id, data=None, maxLookupCalls=None):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='AlternateVersions,Large')
@@ -666,22 +690,6 @@ class AmazonSource(GenericSource):
         return self.emptySource
 
 
-    def __getSearchResults(self, results):
-        return self.__getResults('ItemSearchResponse', results)
-
-    def __getLookupResult(self, results):
-        # TODO(geoff): log a warning if we get more than one?
-        results = self.__getResults('ItemLookupResponse', results)
-        if len(results) > 1:
-            logs.warn("Received more than one result for lookup: " + str(results))
-        return results[0] if results else None
-
-    def __getResults(self, firstLayer, results):
-        items = xp(results, firstLayer, 'Items')['c']
-        if 'Item' in items:
-            return list(items['Item'])
-        return []
-
     def __searchGen(self, proxy, *queries):
         def gen():
             try:
@@ -693,7 +701,7 @@ class AmazonSource(GenericSource):
                         params['ResponseGroup'] = "ItemAttributes"
                     results = globalAmazon().item_search(**params)
 
-                    for item in self.__getSearchResults(results):
+                    for item in _getSearchResults(results):
                         try:
                             if test == None or test(item):
                                 yield xp(item, 'ASIN')['v'], item
@@ -823,7 +831,7 @@ class AmazonSource(GenericSource):
         #pprint(searchResults)
         #print "\n\n\n\nENDMAZON\n\n\n\n\n"
         indexResults = []
-        for item in self.__getSearchResults(searchResults):
+        for item in _getSearchResults(searchResults):
             parsedItem = searchIndexData.proxyConstructor(item, maxLookupCalls=0)
             if parsedItem:
                 indexResults.append(parsedItem)
@@ -1299,7 +1307,7 @@ class AmazonSource(GenericSource):
     def entityProxyFromKey(self, key, **kwargs):
         try:
             lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key)
-            result = self.__getLookupResult(lookupData)
+            result = _getLookupResult(lookupData)
             kind = xp(result, 'ItemAttributes', 'ProductGroup')['v'].lower()
             logs.debug(kind)
 

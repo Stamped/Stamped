@@ -63,13 +63,12 @@ class ResolverObject(object):
             self.__types = set(types)
         self.__maxLookupCalls = maxLookupCalls
         self.__lookupCallsMade = 0
-        self._properties = [ 'name', 'source', 'key', 'kind', 'types', 'url', 'keywords', 'related_terms',
+        self._properties = [ 'name', 'raw_name', 'source', 'key', 'kind', 'types', 'url', 'keywords', 'related_terms',
                              'description', 'priority', 'subcategory', 'images']
 
     __metaclass__ = ABCMeta
 
     def countLookupCall(self, fieldName):
-
         if (self.__maxLookupCalls is not None) and (self.__maxLookupCalls <= self.__lookupCallsMade):
             # I used to use self.name here, but you get into this weird problem where self.name is a lazyProperty that
             # opens self.data, and self.data requires a lookup, which throws an error here, and for the error text we
@@ -88,11 +87,14 @@ class ResolverObject(object):
 
         lines = []
         for property in self._properties:
-            propertyValue = getattr(self, property)
-            if isinstance(propertyValue, unicode):
-                propertyValue = propertyValue.encode('utf-8')
-            if propertyValue is not None and propertyValue != [] and propertyValue != '':
-                lines.append('%s\t:%s' % (property, propertyValue))
+            try:
+                propertyValue = getattr(self, property)
+                if isinstance(propertyValue, unicode):
+                    propertyValue = propertyValue.encode('utf-8')
+                if propertyValue is not None and propertyValue != [] and propertyValue != '':
+                    lines.append('%s\t:%s' % (property, propertyValue))
+            except LookupRequiredError:
+                pass
 
         self.__maxLookupCalls = oldMax
         return '\n'.join(lines)
@@ -300,7 +302,7 @@ class ResolverMediaCollection(ResolverObject):
         super(ResolverMediaCollection, self).__init__(*args, **kwargs)
         self._properties.extend([
             'artists', 'authors', 'tracks', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date',
-            'genres', 'length', 'mpaa_rating'
+            'genres', 'length', 'mpaa_rating', 'last_popular',
         ])
 
     @property 
@@ -355,6 +357,10 @@ class ResolverMediaCollection(ResolverObject):
     def mpaa_rating(self):
         return None
 
+    @property
+    def last_popular(self):
+        return None
+
     @lazyProperty
     def related_terms(self):
         l = [ self.name ]
@@ -381,7 +387,7 @@ class ResolverMediaItem(ResolverObject):
         super(ResolverMediaItem, self).__init__(*args, **kwargs)
         self._properties.extend([
             'artists', 'authors', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date', 'genres',
-            'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number'
+            'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number', 'last_popular',
         ])
 
     @property
@@ -443,6 +449,10 @@ class ResolverMediaItem(ResolverObject):
 
     @property
     def sku_number(self):
+        return None
+
+    @property
+    def last_popular(self):
         return None
 
     @lazyProperty

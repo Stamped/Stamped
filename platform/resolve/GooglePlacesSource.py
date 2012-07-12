@@ -22,6 +22,7 @@ try:
     from resolve.Resolver                   import *
     from resolve.ResolverObject             import *
     from resolve.TitleUtils                 import *
+    from errors                     import StampedThirdPartyError
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from datetime                   import datetime
@@ -116,7 +117,14 @@ class GooglePlacesPlace(ResolverPlace):
 
     @lazyProperty
     def raw_name(self):
-        return self.data['name']
+        try:
+            return self.data['name']
+        except Exception:
+            print '\n\n\nDATA IS:'
+            import pprint
+            pprint.pprint(self.data)
+            print '\n\n\n'
+            raise
 
     @lazyProperty
     def coordinates(self):
@@ -272,9 +280,6 @@ class GooglePlacesAutocompletePlace(ResolverPlace):
         if address_components[-1] == 'United States':
             del address_components[-1]
         return string.joinfields(address_components, ', ')
-
-    def __repr__(self):
-        return pformat(self.data)
 
 
 class GooglePlacesSearchAll(ResolverProxy, ResolverSearchAll):
@@ -448,6 +453,8 @@ class GooglePlacesSource(GenericSource):
     def entityProxyFromKey(self, key, **kwargs):
         try:
             item = self.__places.getPlaceDetails(key)
+            if item.get('status') == 'NOT FOUND':
+                raise StampedThirdPartyError('Failed to look up GooglePlaces key: %s' % key)
             return GooglePlacesPlace(item)
         except KeyError:
             pass
@@ -465,6 +472,7 @@ class GooglePlacesSource(GenericSource):
             return True
         else:
             entity.sources.googleplaces_reference = details['reference']
+            entity.addThirdPartyId(self.sourceName, details['reference'])
         
         reformatted = self.__reformatAddress(details)
         if reformatted is not None:

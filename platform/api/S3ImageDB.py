@@ -42,45 +42,6 @@ class S3ImageDB(AImageDB):
         self.bucket_name = bucket_name
 
         self.base_url = 'http://static.stamped.com'
-
-        # find or create distribution
-        # ---------------------------
-        """
-        cdn = CloudFrontConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-        rs = cdn.get_all_distributions()
-        self.distro = None
-        
-        for distro in rs:
-            if distro.origin.dns_name.startswith(bucket_name):
-                self.distro = distro
-                break
-        
-        if self.distro is None:
-            origin = "%s.s3.amazonaws.com" % bucket_name
-            logs.info("[%s] creating new distro (%s)..." % (self, origin))
-            self.distro = cdn.create_distribution(origin=origin, enabled=True)
-            
-            while self.distro.status == u'InProgress':
-                self.distro.update()
-        """
-    
-    def getImage(self, data):
-        assert isinstance(data, basestring)
-        
-        io = StringIO(data)
-        im = Image.open(io)
-        
-        return im
-    
-    def getWebImage(self, url, desc=None):
-        try:
-            data = utils.getFile(url)
-        except urllib2.HTTPError:
-            desc = ("%s " % desc if desc is not None else "")
-            logs.warn("unable to download %simage from '%s'" % (url, desc))
-            raise
-        
-        return self.getImage(data)
     
     @property
     def profileImageMaxSize(self):
@@ -154,7 +115,7 @@ class S3ImageDB(AImageDB):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
         
-        image    = self.getWebImage(image_url, "profile")
+        image    = utils.getWebImage(image_url, "profile")
         sizes    = self.profileImageSizes
         max_size = self.profileImageMaxSize
         
@@ -201,7 +162,7 @@ class S3ImageDB(AImageDB):
         return url
     
     def addResizedStampImages(self, sourceUrl, imageId, maxSize, sizes):
-        image    = self.getWebImage(sourceUrl, "stamp")
+        image    = utils.getWebImage(sourceUrl, "stamp")
         prefix   = 'stamps/%s' % imageId
 
         return self._addImageSizes(prefix, image, maxSize, sizes, original_url=sourceUrl)
@@ -283,7 +244,7 @@ class S3ImageDB(AImageDB):
     def addWebEntityImage(self, image_url):
         utils.log("downloading '%s'" % image_url)
         
-        image    = self.getWebImage(image_url)
+        image    = utils.getWebImage(image_url)
         suffix   = os.path.basename(image_url)
         filename = "entities/%s" % suffix
         
@@ -503,7 +464,14 @@ class S3ImageDB(AImageDB):
             filename = '%s-%s-%s-%sx%s' % (primary_color.upper(), 
                 secondary_color.upper(), suffix, width, height)
             
-            if not self.bucket.get_key("logos/%s.png" % filename):
+            generate = False
+            try:
+                generate = not self.bucket.get_key("logos/%s.png" % filename)
+            except Exception:
+                generate = True
+                utils.printException()
+            
+            if generate:
                 generateImage(filename, mask, width, height, gradient([
                     (2.0, rgb(primary_color), rgb(secondary_color)),
                 ]))

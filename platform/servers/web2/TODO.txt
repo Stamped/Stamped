@@ -42,12 +42,13 @@
 
 
 TODO:
-    * MOBILE
-        * lookup best approach; options:
-            * redirect to m.stamped.com
-            * sniff user-agent and include mobile param as a view decorator
-        * incorporate mobile browser sniffing and redirection
-            * http://minidetector.googlecode.com/svn/trunk/minidetector/search_strings.txt
+    * blurred FUCK MEDIOCRITY easter egg w/ f hotkey?
+    /* Stop breaking my iphone font size! */
+    div, p, a, li, td { -webkit-text-size-adjust:none; }
+    
+    * embed bieber video in bieber's profile & sdetail pages
+    * customize favicon.ico per profile
+        * in addition to png, will need to generate 16x16 (and possibly 32x32?) .ico's
     
     * incorporate versioning into asset management
         * styles.vXXX.css
@@ -66,8 +67,6 @@ TODO:
             * https://developers.google.com/speed/docs/best-practices/rendering
             * optimize LESS compiled CSS to remove unnecessary / inefficient descendant selectors
             * use more efficient id selectors where possible
-        * remove unused PRELOAD templates from per-page <script> include
-            * USED: stamp-map-item and social-feedback
     
     * profile:
         * category nav:
@@ -112,6 +111,7 @@ TODO:
         * ALPHA - Relayout according to sdetail spec
         * DONE - Transformed entity image
         * Move like / todo / comment counters to their own section
+    
     * Map view:
         * DONE - Refactor profile.js w/ map.js in mind
         * DONE - Map layout matches spec
@@ -121,6 +121,7 @@ TODO:
         * DONE - Share this map widget
         * DONE - Customize stamp popup
         * PASS - Incorporate closest geocoded metropolitan area in marker cluster hover
+    
     * Profile Page:
         * header:
             * DONE - Dynamic, category-dependent header titles
@@ -233,6 +234,14 @@ OLD:
     * fix infinite scroll after returning to default category
     * clicking on header stamp logo should bring you back to your default profile page
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
+    * MOBILE
+        * lookup best approach; options:
+            * redirect to m.stamped.com
+            * sniff user-agent and include mobile param as a view decorator
+        * incorporate mobile browser sniffing and redirection
+            * http://minidetector.googlecode.com/svn/trunk/minidetector/search_strings.txt
+    * remove unused PRELOAD templates from per-page <script> include
+        * USED: stamp-map-item and social-feedback
 
 
 ChangeList 6/8/2012:
@@ -285,5 +294,4 @@ ChangeList 6/22/2012:
             if ($http_user_agent ~* '(2\.0 MMP|240x320|400X240|AvantGo|BlackBerry|Blazer|Cellphone|Danger|DoCoMo|Elaine\/3\.0|EudoraWeb|Googlebot-Mobile|hiptop|IEMobile|KYOCERA\/WX310K|LG\/U990|MIDP-2\.|MMEF20|MOT-V|NetFront|Newt|Nintendo Wii|Nitro|Nokia|Opera Mini|Palm|PlayStation Portable|portalmmm|Proxinet|ProxiNet|SHARP-TQ-GX10|SHG-i900|Small|SonyEricsson|Symbian OS|SymbianOS|TS21i-10|UP\.Browser|UP\.Link|webOS|Windows CE|WinWAP|YahooSeeker\/M1A1-R2D2|NF-Browser|iPhone|iPod|Android|BlackBerry9530|G-TU915 Obigo|LGE VX|webOS|Nokia5800)') {
                 rewrite ^/(.*)$ /mobile/$1 break;
             }
-            
 
