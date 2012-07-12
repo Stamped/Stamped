@@ -83,8 +83,7 @@ body.main {
             position: absolute;
             white-space: nowrap;
             display: block;
-            left: -25%;
-            width: 150%;
+            width: 100%;
             pointer-events: none;
             z-index: 1;
             
@@ -253,8 +252,13 @@ body.main {
 }
 
 #main-header {
-    text-align: right;
     margin-bottom: 12px;
+    text-align: right;
+    
+    .launcher-icon-button {
+        position: relative;
+        z-index: 99;
+    }
     
     #available {
         margin: 4px 12px 0 0;
@@ -465,7 +469,7 @@ body.main {
     margin-top: -364px;
     padding: 84px 0 0 42px;
     
-    .fake-url {
+    #fake-url {
         position: absolute;
         left: 128px;
         top:  62px;
@@ -490,7 +494,7 @@ body.main {
     top:  200%;
     left: 50%;
     margin: -265px 0 0 70px;
-    z-index: 99;
+    z-index: 98;
     
     width:  377px;
     height: 530px;

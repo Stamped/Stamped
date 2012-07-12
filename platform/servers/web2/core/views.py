@@ -51,7 +51,7 @@ def index(request, **kwargs):
     ]
     
     return stamped_render(request, 'index.html', {
-        'body_classes'      : "index intro", 
+        'body_classes'      : "index main", 
         'tastemakers'       : tastemakers, 
     })
 
@@ -194,13 +194,13 @@ def handle_profile(request, schema, **kwargs):
     }, preload=[ 'user', 'sdetail', 'mobile' ])
 
 def handle_map(request, schema, **kwargs):
-    schema.offset   = schema.offset or 0
-    schema.limit    = 1000 # TODO: customize this
     screen_name     = schema.screen_name
     stamp_id        = schema.stamp_id
     ajax            = schema.ajax
     lite            = schema.lite
     mobile          = schema.mobile
+    schema.offset   = schema.offset or 0
+    schema.limit    = 25 if lite else 1000 # TODO: customize this
     
     uri             = request.get_full_path()
     url             = request.build_absolute_uri(uri)
