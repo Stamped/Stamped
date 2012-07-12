@@ -355,11 +355,14 @@ class StampedAuth(AStampedAuth):
             
         while True:
             try:
+                timestamp = BasicTimestamp()
+                timestamp.created = datetime.utcnow()
+
                 refreshToken = RefreshToken()
                 refreshToken.token_id = auth.generateToken(43)
                 refreshToken.client_id = clientId
                 refreshToken.user_id = userId
-                refreshToken.timestamp.created = datetime.utcnow()
+                refreshToken.timestamp = timestamp
 
                 self._refreshTokenDB.addRefreshToken(refreshToken)
                 logs.debug("Refresh Token created")
@@ -414,13 +417,16 @@ class StampedAuth(AStampedAuth):
             try:
                 rightNow = datetime.utcnow()
 
+                timestamp = BasicTimestamp()
+                timestamp.created = rightNow
+
                 accessToken = AccessToken()
                 accessToken.token_id = auth.generateToken(22)
                 accessToken.client_id = clientId
                 accessToken.refresh_token = refreshToken
                 accessToken.user_id = authUserId
                 accessToken.expires = rightNow + timedelta(seconds=expire)
-                accessToken.timestamp.created = rightNow
+                accessToken.timestamp = timestamp
                 
                 self._accessTokenDB.addAccessToken(accessToken)
                 break
@@ -470,10 +476,13 @@ class StampedAuth(AStampedAuth):
             
         while True:
             try:
+                timestamp = BasicTimestamp()
+                timestamp.created = datetime.utcnow()
+
                 token = SettingsEmailAlertToken()
                 token.token_id = auth.generateToken(43)
                 token.user_id = userId
-                token.timestamp.created = datetime.utcnow()
+                token.timestamp = timestamp
 
                 self._emailAlertDB.addToken(token)
                 logs.debug("Email Alert Token Created")
@@ -501,8 +510,8 @@ class StampedAuth(AStampedAuth):
         if token.user_id != userId:
             try:
                 token = self.addEmailAlertToken(userId)
-            except:
-                logs.warning('UNABLE TO ADD TOKEN FOR USER: %s' % userId)
+            except Exception as e:
+                logs.warning('UNABLE TO ADD TOKEN FOR USER "%s": %s' % (userId, e))
                 return None
         return token
 
@@ -518,8 +527,8 @@ class StampedAuth(AStampedAuth):
                 try:
                     token = self.addEmailAlertToken(userId)
                     result[userId] = token
-                except:
-                    logs.warning('UNABLE TO ADD TOKEN FOR USER: %s' % userId)
+                except Exception as e:
+                    logs.warning('UNABLE TO ADD TOKEN FOR USER "%s": %s' % (userId, e))
                     pass
         
         return result

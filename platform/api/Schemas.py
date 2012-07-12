@@ -206,7 +206,7 @@ class RefreshToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class AccessToken(Schema):
     @classmethod
@@ -221,7 +221,7 @@ class AccessToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class PasswordResetToken(Schema):
     @classmethod
