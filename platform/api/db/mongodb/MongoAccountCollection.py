@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, logs
+import Globals, utils, logs, pymongo
 
 from datetime                   import datetime
 from utils                      import lazyProperty
@@ -28,8 +28,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
-        self._collection.ensure_index('linked.facebook.facebook_id')
-        self._collection.ensure_index('linked.twitter.twitter_id')
+        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING), \
+                                        ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
+                                        ('_id', pymongo.ASCENDING)])
 
     @lazyProperty
     def alert_apns_collection(self):
