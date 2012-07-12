@@ -4903,7 +4903,7 @@ class StampedAPI(AStampedAPI):
             self.mergeEntityId(entity_id)
 
         if entity_id is None:
-            entityProxy = EntityProxyContainer(proxy)
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
             entity = entityProxy.buildEntity()
             self.mergeEntity(entity)
 
