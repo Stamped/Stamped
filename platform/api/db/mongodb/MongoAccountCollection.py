@@ -150,10 +150,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             }
             alertSettings = {}
             for k, v in document['alert_settings'].iteritems():
-                if k in alertMapping.values():
-                    alertSettings[k] = v 
-                elif k in alertMapping:
+                if k in alertMapping:
                     alertSettings[alertMapping[k]] = v
+                else:
+                    alertSettings[k] = v 
             document['alert_settings'] = alertSettings 
 
         if 'stats' in document and 'num_faves' in document['stats']:
