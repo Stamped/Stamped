@@ -6,18 +6,83 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from logs import report
 
-try:
-    import sys, inspect
-    from resolve.AEntityGroups        import *
-except:
-    report()
-    raise
+import sys, inspect
+from api.Schemas import *
+from resolve.AEntityGroups import *
+
+def moveField(source, target=None):
+    target = target or source
+    def wrapped(self, entity, proxy):
+        item = getattr(proxy, source, None)
+        if item:
+            setattr(entity, target, item)
+    return wrapped
+
+
+def importEntityMinisFromProxyField(field, entityClass, entityType):
+    def wrapper(self, entity, proxy):
+        subfieldList = getattr(proxy, field, [])
+        results = []
+        for subfield in subfieldList:
+            try:
+                entityMini = MediaItemEntityMini()
+                entityMini.title = subfield['name']
+                entityMini.types = [entityType]
+                if 'key' in subfield:
+                    setattr(entityMini.sources, '%s_id' % proxy.source, subfield['key'])
+                    setattr(entityMini.sources, '%s_source' % proxy.source, proxy.source)
+                if 'url' in subfield:
+                    setattr(entityMini.sources, '%s_url' % proxy.source, subfield['url'])
+                results.append(entityMini)
+            except Exception:
+                report()
+                logs.info('%s import failure: %s for %s' % (field, subfield['name'], proxy.name))
+        if results:
+            setattr(entity, field, results)
+        
+
+class IMDBGroup(AFilmGroup):
+    def __init__(self, *args, **kwargs):
+        AFilmGroup.__init__(self, 'imdb',
+            source_path=['sources', 'imdb_source'], 
+            timestamp_path=['sources', 'imdb_timestamp']
+        )
+        self.addField(['sources', 'imdb_id'])
+
+
+class AmazonGroup(AAmazonGroup):
+    def __init__(self):
+        AAmazonGroup.__init__(self, 'amazon',
+            source_path=['sources', 'amazon_source'], 
+            timestamp_path=['sources', 'amazon_timestamp']
+        )
+        self.addField(['sources', 'amazon_id'])
+        self.addField(['sources', 'amazon_url'])
+        self.addField(['sources', 'amazon_underlying'])
+ 
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.amazon_id = proxy.key
+        try:
+            if entity.isType('book'):
+                entity.sources.amazon_underlying = proxy.underlying.key
+        except Exception:
+            pass
+
+
+class StampedTombstoneGroup(BasicFieldGroup):
+    def __init__(self):
+        BasicFieldGroup.__init__(self, 'tombstone',
+            source_path=['sources', 'tombstone_source'], 
+            timestamp_path=['sources', 'tombstone_timestamp']
+        )
+        self.addField(['sources', 'tombstone_id'])
+
+    def eligible(self, entity):
+        return True
 
 
 class FactualGroup(APlaceGroup):
-
     def __init__(self):
         APlaceGroup.__init__(self, 'factual', 
             source_path=['sources', 'factual_source'], 
@@ -25,8 +90,11 @@ class FactualGroup(APlaceGroup):
         )
         self.addField(['sources', 'factual_id'])
 
-class FoursquareGroup(APlaceGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.factual_id = proxy.key
 
+
+class FoursquareGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'foursquare',
             source_path=['sources', 'foursquare_source'], 
@@ -35,8 +103,8 @@ class FoursquareGroup(APlaceGroup):
         self.addField(['sources', 'foursquare_id'])
         self.addField(['sources', 'foursquare_url'])
 
-class InstagramGroup(APlaceGroup):
 
+class InstagramGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'instagram',
             source_path=['sources', 'instagram_source'], 
@@ -44,9 +112,11 @@ class InstagramGroup(APlaceGroup):
         )
         self.addField(['sources', 'instagram_id'])
 
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.instagram_id = proxy.key
+
 
 class OpenTableGroup(APlaceGroup):
-
     def __init__(self):
         APlaceGroup.__init__(self, 'opentable',
             source_path=['sources', 'opentable_source'], 
@@ -56,8 +126,8 @@ class OpenTableGroup(APlaceGroup):
         self.addField(['sources', 'opentable_url'])
         self.addField(['sources', 'opentable_nickname'])
 
-class SinglePlatformGroup(APlaceGroup):
 
+class SinglePlatformGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'singleplatform',
             source_path=['sources', 'singleplatform_source'], 
@@ -66,8 +136,11 @@ class SinglePlatformGroup(APlaceGroup):
         self.addField(['sources', 'singleplatform_id'])
         self.addField(['sources', 'singleplatform_url'])
 
-class GooglePlacesGroup(APlaceGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.singleplatform_id = proxy.key
 
+
+class GooglePlacesGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'googleplaces',
             source_path=['sources', 'googleplaces_source'], 
@@ -76,8 +149,13 @@ class GooglePlacesGroup(APlaceGroup):
         self.addField(['sources', 'googleplaces_id'])
         self.addField(['sources', 'googleplaces_reference'])
 
-class TMDBGroup(AMovieGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.googleplaces_id = proxy.key
+        entity.sources.googleplaces_reference = proxy.key
+        ### NOTE: It looks like the proxy.key is actually the reference. Shouldn't this be the id?
 
+
+class TMDBGroup(AMovieGroup):
     def __init__(self):
         AMovieGroup.__init__(self, 'tmdb',
             source_path=['sources', 'tmdb_source'], 
@@ -86,8 +164,11 @@ class TMDBGroup(AMovieGroup):
         self.addField(['sources', 'tmdb_id'])
         self.addField(['sources', 'tmdb_url'])
 
-class FandangoGroup(AMovieGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.tmdb_id = proxy.key
 
+
+class FandangoGroup(AMovieGroup):
     def __init__(self):
         AMovieGroup.__init__(self, 'fandango',
             source_path=['sources', 'fandango_source'], 
@@ -96,11 +177,13 @@ class FandangoGroup(AMovieGroup):
         self.addField(['sources', 'fandango_id'])
         self.addField(['sources', 'fandango_url'])
 
-        self.addKind('media_item')
-        self.addType('movie')
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.fandango_id = proxy.key
+        if proxy.url:
+            entity.sources.fandango_url = proxy.url
+
 
 class NetflixGroup(AKindTypeGroup):
-
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'netflix',
             source_path=['sources', 'netflix_source'], 
@@ -116,8 +199,12 @@ class NetflixGroup(AKindTypeGroup):
         self.addField(['sources', 'netflix_is_instant_available'])
         self.addField(['sources', 'netflix_instant_available_until'])
 
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.netflix_is_instant_available = proxy.is_instant_available
+        entity.sources.netflix_instant_available_until = proxy.instant_available_until
+
+
 class RdioGroup(AKindTypeGroup):
-    
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'rdio',
             source_path=['sources', 'rdio_source'], 
@@ -133,8 +220,11 @@ class RdioGroup(AKindTypeGroup):
         self.addField(['sources', 'rdio_id'])
         self.addField(['sources', 'rdio_url'])
 
-class TheTVDBGroup(AKindTypeGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.rdio_id = proxy.key
     
+
+class TheTVDBGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'thetvdb',
             source_path=['sources', 'thetvdb_source'], 
@@ -145,8 +235,11 @@ class TheTVDBGroup(AKindTypeGroup):
 
         self.addField(['sources', 'thetvdb_id'])
 
-class SpotifyGroup(AKindTypeGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.thetvdb_id = proxy.key
+    
 
+class SpotifyGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'spotify',
             source_path=['sources', 'spotify_source'], 
@@ -162,8 +255,10 @@ class SpotifyGroup(AKindTypeGroup):
         self.addField(['sources', 'spotify_id'])
         self.addField(['sources', 'spotify_url'])
 
-class iTunesGroup(AKindTypeGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.spotify_id = proxy.key
 
+class iTunesGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'itunes',
             source_path=['sources', 'itunes_source'], 
@@ -185,16 +280,23 @@ class iTunesGroup(AKindTypeGroup):
         self.addField(['sources', 'itunes_url'])
         self.addField(['sources', 'itunes_preview'])
 
-class FormattedAddressGroup(APlaceGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.itunes_id = proxy.key
+        entity.sources.itunes_url = proxy.url
 
+        preview = getattr(proxy, 'preview', None)
+        if preview:
+            entity.sources.itunes_preview = preview
+
+
+class FormattedAddressGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'formatted_address')
-        fields = [ ['formatted_address'] ]
-        for field in fields:
-            self.addField(field)
+        self.addField(['formatted_address'])
+
+    enrichEntityWithEntityProxy = moveField('address_string', 'formatted_address')
 
 class AddressGroup(APlaceGroup):
-
     def __init__(self):
         APlaceGroup.__init__(self, 'address')
         fields = [
@@ -208,57 +310,94 @@ class AddressGroup(APlaceGroup):
         for field in fields:
             self.addField(field)
 
-class CoordinatesGroup(APlaceGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        if len(proxy.address) > 0:
+            address_components = [
+                'street',
+                'street_ext',
+                'locality',
+                'region',
+                'postcode',
+                'country',
+            ]
+            for k in address_components:
+                if k in proxy.address:
+                    setattr(entity, 'address_%s' % k, proxy.address[k])
 
+
+class CoordinatesGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'coordinates')
         self.addNameField()
 
-class PhoneGroup(APlaceGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        if proxy.coordinates is not None:
+            coordinates = Coordinates()
+            coordinates.lat = proxy.coordinates[0]
+            coordinates.lng = proxy.coordinates[1]
+            entity.coordinates = coordinates
 
+
+class PhoneGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'phone')
         self.addNameField()
+
+    enrichEntityWithEntityProxy = moveField('phone')
     
 class SiteGroup(APlaceGroup):
-
     def __init__(self):
         APlaceGroup.__init__(self, 'site')
         self.addNameField()
 
-class GalleryGroup(APlaceGroup):
+    enrichEntityWithEntityProxy = moveField('url', 'site')
 
+class GalleryGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'gallery')
         self.addNameField()
 
-class PriceRangeGroup(ARestaurantGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        gallery = []
+        for image in proxy.gallery:
+            img = ImageSchema()
+            img.caption = image['caption']
+            size = ImageSizeSchema()
+            size.url = image['url']
+            size.height = image['height']
+            size.width = image['width']
+            img.sizes = [size]
+            gallery.append(img)
+        if gallery:
+            entity.gallery = gallery
 
+
+class PriceRangeGroup(ARestaurantGroup):
     def __init__(self):
         ARestaurantGroup.__init__(self, 'price_range')
         self.addNameField()
 
-class CuisineGroup(ARestaurantGroup):
 
+class CuisineGroup(ARestaurantGroup):
     def __init__(self):
         ARestaurantGroup.__init__(self, 'cuisine')
         self.addNameField()
 
-class AlcoholFlagGroup(ARestaurantGroup):
 
+class AlcoholFlagGroup(ARestaurantGroup):
     def __init__(self):
         ARestaurantGroup.__init__(self, 'alcohol_flag')
         self.addNameField()
 
-class MenuGroup(ARestaurantGroup):
 
+class MenuGroup(ARestaurantGroup):
     def __init__(self):
         ARestaurantGroup.__init__(self, 'menu')
         self.addNameField()
         self.addDecoration(['menu'])
 
-class ReleaseDateGroup(AKindTypeGroup):
 
+class ReleaseDateGroup(AKindTypeGroup):
     def __init__(self):
         AKindTypeGroup.__init__(self, 'release_date')
         self.addKind('media_collection')
@@ -266,8 +405,10 @@ class ReleaseDateGroup(AKindTypeGroup):
         self.addKind('software')
         self.addNameField()
 
-class MPAARatingGroup(AKindTypeGroup):
+    enrichEntityWithEntityProxy = moveField('release_date')
 
+
+class MPAARatingGroup(AKindTypeGroup):
     def __init__(self):
         AKindTypeGroup.__init__(self, 'mpaa_rating')
         self.addKind('media_collection')
@@ -276,8 +417,9 @@ class MPAARatingGroup(AKindTypeGroup):
         self.addType('movie')
         self.addNameField()
 
-class GenresGroup(AKindTypeGroup):
+    enrichEntityWithEntityProxy = moveField('mpaa_rating')
 
+class GenresGroup(AKindTypeGroup):
     def __init__(self):
         AKindTypeGroup.__init__(self, 'genres')
         self.addKind('person')
@@ -286,23 +428,33 @@ class GenresGroup(AKindTypeGroup):
         self.addKind('software')
         self.addNameField()
 
-class ArtistsGroup(AKindTypeGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        if len(proxy.genres) > 0:
+            entity.genres = proxy.genres
 
+class ArtistsGroup(AKindTypeGroup):
     def __init__(self):
         AKindTypeGroup.__init__(self, 'artists')
         self.addKind('media_collection')
         self.addKind('media_item')
         self.addNameField()
 
-class LengthGroup(AKindTypeGroup):
+    enrichEntityWithEntityProxy = importEntityMinisFromProxyField(
+            'artists', PersonEntityMini, 'artist')
 
+
+class LengthGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'length')
         self.addKind('media_item')
         self.addNameField()
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        if proxy.length > 0:
+            entity.length = int(proxy.length)
+
         
 class AlbumsGroup(AKindTypeGroup):
-
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'albums')
         self.addKind('person')
@@ -311,51 +463,54 @@ class AlbumsGroup(AKindTypeGroup):
         self.addType('track')
         self.addNameField()
 
-class TracksGroup(AKindTypeGroup):
+    enrichEntityWithEntityProxy = importEntityMinisFromProxyField(
+            'albums', MediaCollectionEntityMini, 'album')
 
+
+class TracksGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'tracks')
         self.addKind('person')
         self.addType('artist')
         self.addKind('media_collection')
         self.addType('album')
-
         self.addNameField()
 
-class IMDBGroup(AFilmGroup):
+    enrichEntityWithEntityProxy = importEntityMinisFromProxyField(
+            'tracks', MediaItemEntityMini, 'track')
 
-    def __init__(self, *args, **kwargs):
-        AFilmGroup.__init__(self, 'imdb',
-            source_path=['sources', 'imdb_source'], 
-            timestamp_path=['sources', 'imdb_timestamp']
-        )
-        self.addField(['sources', 'imdb_id'])
 
-class AmazonGroup(AAmazonGroup):
-
-    def __init__(self):
-        AAmazonGroup.__init__(self, 'amazon',
-            source_path=['sources', 'amazon_source'], 
-            timestamp_path=['sources', 'amazon_timestamp']
-        )
-        self.addField(['sources', 'amazon_id'])
-        self.addField(['sources', 'amazon_url'])
-        self.addField(['sources', 'amazon_underlying'])
- 
 class DirectorsGroup(AFilmGroup):
-
     def __init__(self):
         AFilmGroup.__init__(self, 'directors')
         self.addNameField()
 
-class CastGroup(AFilmGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        directors = []
+        for director in proxy.directors:
+            entityMini = PersonEntityMini()
+            entityMini.title = director['name']
+            directors.append(entityMini)
+        if directors:
+            entity.directors = directors
 
+
+class CastGroup(AFilmGroup):
     def __init__(self):
         AFilmGroup.__init__(self, 'cast')
         self.addNameField()
 
-class DescGroup(BasicFieldGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        cast = []
+        for actor in proxy.cast:
+            entityMini = PersonEntityMini()
+            entityMini.title = actor['name']
+            cast.append(entityMini)
+        if cast:
+            entity.cast = cast
 
+
+class DescGroup(BasicFieldGroup):
     def __init__(self):
         BasicFieldGroup.__init__(self, 'desc')
         self.addNameField()
@@ -363,20 +518,10 @@ class DescGroup(BasicFieldGroup):
     def eligible(self, entity):
         return True
 
-class StampedTombstoneGroup(BasicFieldGroup):
+    enrichEntityWithEntityProxy = moveField('description', 'desc')
 
-    def __init__(self):
-        BasicFieldGroup.__init__(self, 'tombstone',
-            source_path=['sources', 'tombstone_source'], 
-            timestamp_path=['sources', 'tombstone_timestamp']
-        )
-        self.addField(['sources', 'tombstone_id'])
-
-    def eligible(self, entity):
-        return True
 
 class ImagesGroup(BasicFieldGroup):
-
     def __init__(self):
         BasicFieldGroup.__init__(self, 'images')
         self.addNameField()
@@ -384,35 +529,90 @@ class ImagesGroup(BasicFieldGroup):
     def eligible(self, entity):
         return True
 
-class ScreenshotsGroup(ASoftwareGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        images = []
+        for image in proxy.images:
+            if not image:
+                logs.warning('Caught an empty image from the proxy entity %s' % (proxy,))
+                continue
+            img = ImageSchema()
+            size = ImageSizeSchema()
+            size.url = image
+            img.sizes = [size]
+            images.append(img)
+        if images:
+            entity.images = images
 
+
+class ScreenshotsGroup(ASoftwareGroup):
     def __init__(self):
         ASoftwareGroup.__init__(self, 'screenshots')
         self.addNameField()
 
-class AuthorsGroup(ABookGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        screenshots = []
+        for screenshot in proxy.screenshots:
+            img = ImageSchema()
+            size = ImageSizeSchema()
+            size.url = screenshot
+            img.sizes = [size]
+            screenshots.append(img)
+        if screenshots:
+            entity.screenshots = screenshots
 
+
+class AuthorsGroup(AKindTypeGroup):
     def __init__(self):
-        ABookGroup.__init__(self, 'authors')
+        AKindTypeGroup.__init__(self, 'authors')
+        self.addKind('media_item')
+        self.addKind('software')
+        self.addType('book')
+        self.addType('app')
         self.addNameField()
 
-class PublishersGroup(ABookGroup):
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        authors = []
+        for author in proxy.authors:
+            entityMini = PersonEntityMini()
+            entityMini.title = author['name']
+            authors.append(entityMini)
+        if authors:
+            entity.authors = authors
 
+
+class PublishersGroup(AKindTypeGroup):
     def __init__(self):
-        ABookGroup.__init__(self, 'publishers')
+        AKindTypeGroup.__init__(self, 'publishers')
+        self.addKind('media_item')
+        self.addKind('software')
+        self.addType('book')
+        self.addType('app')
         self.addNameField()
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        publishers = []
+        for publisher in proxy.publishers:
+            entityMini = PersonEntityMini()
+            entityMini.title = publisher['name']
+            publishers.append(entityMini)
+        if publishers:
+            entity.publishers = publishers
 
 class ISBNGroup(ABookGroup):
-
     def __init__(self):
         ABookGroup.__init__(self, 'isbn')
         self.addNameField()
 
-class SKUNumberGroup(ABookGroup):
+    enrichEntityWithEntityProxy = moveField('isbn')
 
+
+# TODO(geoff): shouldn't SKU be on most of the products, not just books?
+class SKUNumberGroup(ABookGroup):
     def __init__(self):
         ABookGroup.__init__(self, 'sku_number')
         self.addNameField()
+
+    enrichEntityWithEntityProxy = moveField('sku_number')
 
 
 """

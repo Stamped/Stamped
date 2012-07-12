@@ -212,11 +212,6 @@ class FactualSource(GenericSource):
     def __factual(self):
         return globalFactual()
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.factual_id = proxy.key
-        return True
-
     def matchSource(self, query):
         if query.kind == 'search':
             return self.searchAllSource(query)
@@ -333,7 +328,7 @@ class FactualSource(GenericSource):
         return jointResults
 
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         """
         Attempt to populate data fields based on id data.
 

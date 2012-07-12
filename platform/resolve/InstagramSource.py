@@ -106,11 +106,6 @@ class InstagramSource(GenericSource):
         if response:
             return InstagramPlace(response['data'])
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.instagram_id = proxy.key
-        return True
-
     def matchSource(self, query):
         #if query.type == 'place' and query.entity.sources.foursquare_id is not None:
         if query.kind == 'place':

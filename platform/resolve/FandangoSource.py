@@ -88,14 +88,6 @@ class FandangoSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'fandango', groups=['url'], kinds=['media_item'], types=['movie'])
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        if proxy.key:
-            entity.sources.fandango_id = proxy.key
-        if proxy.url:
-            entity.sources.fandango_url = proxy.url
-        return True
-
     # At the time of writing, Fandango doesn't have good API, so we can't exactly do lookups using
     # any key or query. The next two methods are just dumb implementations.
     def entityProxyFromKey(self, key, **kwargs):

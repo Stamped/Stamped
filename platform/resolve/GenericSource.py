@@ -11,25 +11,19 @@ __license__   = "TODO"
 __all__ = [ 'GenericSource', 'generatorSource', 'listSource', 'multipleSource' ]
 
 import Globals
-from logs import report
 
-try:
-    import logs, sys
-    from resolve.BasicSource                import BasicSource
-    from utils                      import lazyProperty
-    from gevent.pool                import Pool
-    from pprint                     import pprint, pformat
-    from abc                        import ABCMeta, abstractmethod
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.ASourceController          import *
-    from api.Schemas                import *
-    from resolve.EntityGroups               import *
-    from api.Entity                     import buildEntity
-except Exception:
-    report()
-    raise
-
+import logs, sys
+from resolve.BasicSource                import BasicSource
+from utils                      import lazyProperty
+from gevent.pool                import Pool
+from pprint                     import pprint, pformat
+from abc                        import ABCMeta, abstractmethod
+from resolve.Resolver                   import *
+from resolve.ResolverObject             import *
+from resolve.ASourceController          import *
+from api.Schemas                import *
+from resolve.EntityGroups               import *
+from api.Entity                     import buildEntity
 
 def generatorSource(generator, constructor=None, unique=False, tolerant=False):
     if constructor is None:
@@ -133,276 +127,8 @@ class GenericSource(BasicSource):
     def generatorSource(self, generator, constructor=None, unique=False, tolerant=False):
         return generatorSource(generator, constructor=constructor, unique=unique, tolerant=tolerant)
 
-    def __repopulateAlbums(self, entity, artist, controller, decorations=None):
-        if decorations is None:
-            decorations = {}
-
-        albums = []
-        for album in artist.albums:
-            try:
-                entityMini  = MediaCollectionEntityMini()
-                entityMini.title = album['name']
-                entityMini.types = ['album']
-                if 'key' in album:
-                    setattr(entityMini.sources, '%s_id' % artist.source, album['key'])
-                    setattr(entityMini.sources, '%s_source' % artist.source, artist.source)
-                if 'url' in album:
-                    setattr(entityMini.sources, '%s_url' % artist.source, album['url'])
-                albums.append(entityMini)
-            except Exception:
-                report()
-                logs.info('Album import failure: %s for artist %s' % (album, artist))
-        if len(albums) > 0:
-            entity.albums = albums
-
-    def __repopulateTracks(self, entity, artist, controller, decorations=None):
-        if decorations is None:
-            decorations = {}
-
-        tracks = []
-        for track in artist.tracks:
-            try:
-                entityMini  = MediaItemEntityMini()
-                entityMini.title = track['name']
-                entityMini.types = ['track']
-                if 'key' in track:
-                    setattr(entityMini.sources, '%s_id' % artist.source, track['key'])
-                    setattr(entityMini.sources, '%s_source' % artist.source, artist.source)
-                if 'url' in track:
-                    setattr(entityMini.sources, '%s_url' % artist.source, track['url'])
-                tracks.append(entityMini)
-            except Exception:
-                report()
-                logs.info('Track import failure: %s for artist %s' % (track, artist))
-        if len(tracks) > 0:
-            entity.tracks = tracks
-    
     def entityProxyFromKey(self, key, **kwargs):
         raise NotImplementedError(str(type(self)))
-    
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        if controller is None:
-            controller = AlwaysSourceController()
-        if decorations is None:
-            decorations = {}
-        if timestamps is None:
-            timestamps = {}
-
-        timestamps[proxy.source] = controller.now
-        
-        def setAttribute(source, target):
-            try:
-                item = getattr(proxy, source)
-                if item is not None and item != '':
-                    setattr(entity, target, item)
-                    timestamps[target] = controller.now
-            except Exception as e:
-                pass
-        
-        setAttribute('description',     'desc')
-        setAttribute('phone',           'phone')
-        setAttribute('email',           'email')
-        setAttribute('url',             'site')
-
-        images = []
-        for image in proxy.images:
-            if image is None or image == '':
-                logs.warning('Caught an empty image from the proxy entity %s' % (proxy,))
-                continue
-            img = ImageSchema()
-            size = ImageSizeSchema()
-            size.url = image
-            img.sizes = [size]
-            images.append(img)
-        if len(images) > 0:
-            entity.images = images
-            timestamps['images'] = controller.now
-        
-        ### Place
-        if entity.kind == 'place' and proxy.kind == 'place':
-            setAttribute('address_string', 'formatted_address')
-
-            if proxy.coordinates is not None:
-                coordinates = Coordinates()
-                coordinates.lat = proxy.coordinates[0]
-                coordinates.lng = proxy.coordinates[1]
-                entity.coordinates = coordinates
-
-            if len(proxy.address) > 0:
-                address_set = set([
-                    'street',
-                    'street_ext',
-                    'locality',
-                    'region',
-                    'postcode',
-                    'country',
-                ])
-                for k in address_set:
-                    v = None
-                    if k in proxy.address:
-                        v = proxy.address[k]
-                    if v is not None:
-                        setattr(entity, 'address_%s' % k, v)
-                timestamps['address'] = controller.now
-
-            gallery = []
-            for image in proxy.gallery:
-                img             = ImageSchema()
-                img.caption     = image['caption']
-                size            = ImageSizeSchema()
-                size.url        = image['url']
-                size.height     = image['height']
-                size.width      = image['width']
-                img.sizes       = [size]
-                gallery.append(img)
-            if len(gallery) > 0:
-                entity.gallery = gallery
-                timestamps['gallery'] = controller.now
-        
-        ### Person
-        if entity.kind == 'person' and proxy.kind == 'person':
-            if len(proxy.genres) > 0:
-                entity.genres = proxy.genres
-
-            if controller.shouldEnrich('albums', self.sourceName, entity):
-                self.__repopulateAlbums(entity, proxy, controller, decorations) 
-                timestamps['albums'] = controller.now
-
-            if controller.shouldEnrich('tracks', self.sourceName, entity):
-                self.__repopulateTracks(entity, proxy, controller, decorations)
-                timestamps['tracks'] = controller.now
-        
-        ### Media
-        if entity.kind in set(['media_collection', 'media_item']) and entity.kind == proxy.kind:
-            setAttribute('mpaa_rating',     'mpaa_rating')
-            setAttribute('release_date',    'release_date')
-
-            if proxy.length > 0:
-                entity.length = int(proxy.length)
-                timestamps['length'] = controller.now
-            if len(proxy.genres) > 0:
-                entity.genres = proxy.genres
-                timestamps['genres'] = controller.now
-
-            cast = []
-            for actor in proxy.cast:
-                entityMini = PersonEntityMini()
-                entityMini.title = actor['name']
-                cast.append(entityMini)
-            if len(cast) > 0:
-                entity.cast = cast
-                timestamps['cast'] = controller.now
-
-            directors = []
-            for director in proxy.directors:
-                entityMini = PersonEntityMini()
-                entityMini.title = director['name']
-                directors.append(entityMini)
-            if len(directors) > 0:
-                entity.directors = directors
-                timestamps['directors'] = controller.now
-
-            publishers = []
-            for publisher in proxy.publishers:
-                entityMini = PersonEntityMini()
-                entityMini.title = publisher['name']
-                publishers.append(entityMini)
-            if len(publishers) > 0:
-                entity.publishers = publishers
-                timestamps['publishers'] = controller.now
-
-            authors = []
-            for author in proxy.authors:
-                entityMini = PersonEntityMini()
-                entityMini.title = author['name']
-                authors.append(entityMini)
-            if len(authors) > 0:
-                entity.authors = authors
-                timestamps['authors'] = controller.now
-
-            artists = []
-            for artist in proxy.artists:
-                entityMini = PersonEntityMini()
-                entityMini.title = artist['name']
-                entityMini.types = ['artist']
-                if 'key' in artist:
-                    setattr(entityMini.sources, '%s_id' % proxy.source, artist['key'])
-                    setattr(entityMini.sources, '%s_source' % proxy.source,  proxy.source)
-                if 'url' in artist:
-                    setattr(entityMini.sources, '%s_url' % proxy.source, artist['url'])
-                artists.append(entityMini)
-            if len(artists) > 0:
-                entity.artists = artists
-                timestamps['artists'] = controller.now
-        
-        ### Media Collection
-        if entity.kind == 'media_collection' and proxy.kind == 'media_collection':
-            if proxy.isType('album'):
-                if controller.shouldEnrich('tracks', self.sourceName, entity):
-                    self.__repopulateTracks(entity, proxy, controller)
-                    timestamps['tracks'] = controller.now
-        
-        ### Media Item
-        if entity.kind == 'media_item' and proxy.kind == 'media_item':
-            albums = []
-            for album in proxy.albums:
-                entityMini = MediaCollectionEntityMini()
-                entityMini.title = album['name']
-                entityMini.types = ['album']
-                if 'key' in album:
-                    setattr(entityMini.sources, '%s_id' % proxy.source, album['key'])
-                    setattr(entityMini.sources, '%s_source' % proxy.source, proxy.source)
-                if 'url' in album:
-                    setattr(entityMini.sources, '%s_url' % proxy.source, album['url'])
-                albums.append(entityMini)
-            if len(albums) > 0:
-                entity.albums = albums
-                timestamps['albums'] = controller.now
-
-            if proxy.isbn is not None:
-                entity.isbn = proxy.isbn
-                timestamps['isbn'] = controller.now
-
-            if proxy.sku_number is not None:
-                entity.sku_number = proxy.sku_number
-                timestamps['sku_number'] = controller.now
-
-        ### Software
-        if entity.kind == 'software' and proxy.kind == 'software':
-            setAttribute('release_date', 'release_date')
-
-            if len(proxy.genres) > 0:
-                entity.genres = proxy.genres
-                timestamps['genres'] = controller.now
-
-            publishers = []
-            for publisher in proxy.publishers:
-                entityMini = PersonEntityMini()
-                entityMini.title = publisher['name']
-                publishers.append(entityMini)
-            if len(publishers) > 0:
-                entity.publishers = publishers
-                timestamps['publishers'] = controller.now
-
-            authors = []
-            for author in proxy.authors:
-                entityMini = PersonEntityMini()
-                entityMini.title = author['name']
-                authors.append(entityMini)
-            if len(authors) > 0:
-                entity.authors = authors
-                timestamps['authors'] = controller.now
-
-            screenshots = []
-            for screenshot in proxy.screenshots:
-                img = ImageSchema()
-                size = ImageSizeSchema()
-                size.url = screenshot
-                img.sizes = [size]
-                screenshots.append(img)
-            if len(screenshots) > 0:
-                entity.screenshots = screenshots
-                timestamps['screenshots'] = controller.now
     
     @property
     def idField(self):
@@ -419,10 +145,7 @@ class GenericSource(BasicSource):
     def getId(self, entity):
         return getattr(entity.sources, self.idField)
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        """
-
-        """
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         proxy = None
         results = None
 
@@ -447,7 +170,9 @@ class GenericSource(BasicSource):
             try:
                 if proxy is None:
                     proxy = self.entityProxyFromKey(source_id, entity=entity)
-                self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
+                timestamps[self.idName] = controller.now
+                for group in groups:
+                    group.enrichEntityWithEntityProxy(entity, proxy)
             except Exception as e:
                 report()
 

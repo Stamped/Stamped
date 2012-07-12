@@ -1320,15 +1320,6 @@ class AmazonSource(GenericSource):
             logs.report()
         return None
     
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.amazon_id = proxy.key
-        try:
-            if entity.isType('book'):
-                entity.sources.amazon_underlying = proxy.underlying.key
-        except Exception:
-            pass
-        return True
 
 if __name__ == '__main__':
     demo(AmazonSource(), "Don't Speak")

@@ -292,13 +292,6 @@ class NetflixSource(GenericSource):
         except KeyError:
             logs.warning('Unable to find Netflix item for key: %s' % netflix_id)
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.netflix_is_instant_available = proxy.is_instant_available
-        entity.sources.netflix_instant_available_until = proxy.instant_available_until
-        return True
-
-
     def matchSource(self, query):
         if query.isType('movie'):
             return self.movieSource(query)

@@ -814,15 +814,6 @@ class iTunesSource(GenericSource):
             raise
         return None
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.itunes_id = proxy.key
-        entity.sources.itunes_url = proxy.url
-
-        if hasattr(proxy, 'preview') and proxy.preview is not None:
-            entity.sources.itunes_preview = proxy.preview
-        return True
-
     def matchSource(self, query):
         if query.kind == 'person':
             if query.isType('artist'):
