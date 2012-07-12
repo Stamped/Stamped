@@ -18,11 +18,13 @@
         // ---------------------------------------------------------------------
         
         
-        var $window         = $(window);
-        var $body           = $("body");
-        var $main           = $("#main");
-        var $main_body      = $("#main-body");
-        var $main_iphone    = $("#main-iphone");
+        var $window             = $(window);
+        var $body               = $("body");
+        var $main               = $("#main");
+        var $main_body          = $("#main-body");
+        var $main_iphone        = $("#main-iphone");
+        var $map_window         = $("#tastemaker-map-window");
+        var $app_store_button   = $("footer .app-store-button");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -304,11 +306,21 @@
                 
                 if (!$main_body.hasClass(active)) {
                     $main_body.removeClass().addClass(active);
+                    index = parseInt(index);
                     
-                    if (index >= 4) {
+                    // TODO: animation here
+                    if (index >= 3) {
                         $main_iphone.css("visibility", "hidden");
                     } else {
                         $main_iphone.css("visibility", "visible");
+                    }
+                    
+                    if (index === 3) {
+                        $map_window.css("visibility", "visible");
+                        $app_store_button.hide();
+                    } else {
+                        $map_window.css("visibility", "hidden");
+                        $app_store_button.show();
                     }
                     
                     return true;

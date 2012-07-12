@@ -13,8 +13,7 @@
         
         var canvas   = $(".stamp-map .stamp-map-canvas")[0];
         var $canvas  = $(canvas);
-        
-        // TODO: load in preloaded stamps
+        var lite     = STAMPED_PRELOAD.lite;
         
         var init_stamp_id = STAMPED_PRELOAD.stamp_id;
         var center   = new google.maps.LatLng(40.707913, -74.013696);
@@ -28,25 +27,35 @@
             center   = position;
         }*/
         
-        var map      = new google.maps.Map(canvas, {
-	        mapTypeId           : google.maps.MapTypeId.ROADMAP, 
-            center              : center, 
-            zoom                : 8, 
+        options = {
+	        mapTypeId               : google.maps.MapTypeId.ROADMAP, 
+            center                  : center, 
+            zoom                    : 8, 
             
             // disable all default controls in favor of enabling a few explicitly
-            disableDefaultUI    : true,
-            
-            zoomControl         : true,
-            zoomControlOptions  : {
-                style           : google.maps.ZoomControlStyle.DEFAULT, 
-                position        : google.maps.ControlPosition.TOP_RIGHT
-            }, 
-            
-            panControl          : true, 
-            panControlOptions   : {
-                position        : google.maps.ControlPosition.TOP_RIGHT
-            }
-        });
+            disableDefaultUI        : true
+        };
+        
+        if (lite) {
+            $.extend(options, {
+                draggable           : false
+            });
+        } else {
+            $.extend(options, {
+                zoomControl         : true,
+                zoomControlOptions  : {
+                    style           : google.maps.ZoomControlStyle.DEFAULT, 
+                    position        : google.maps.ControlPosition.TOP_RIGHT
+                }, 
+                
+                panControl          : true, 
+                panControlOptions   : {
+                    position        : google.maps.ControlPosition.TOP_RIGHT
+                }
+            });
+        }
+        
+        var map = new google.maps.Map(canvas, options);
         
         var update_map_center = function(pos) {
             // TODO: only use user_pos or update center on resize if we're still at the default center
@@ -279,9 +288,12 @@
                         if (!!g_update_stamps) {
                             setTimeout(function() {
                                 var $s = $('.stamp-map-item');
-                                $s.click(function(event) {
-                                    g_open_sdetail_click(event);
-                                });
+                                
+                                if (!lite) {
+                                    $s.click(function(event) {
+                                        g_open_sdetail_click(event);
+                                    });
+                                }
                                 
                                 $s.find('.stamp-map-item-close-button').click(function(event) {
                                     event.preventDefault();
@@ -653,7 +665,7 @@
         // ---------------------------------------------------------------------
         
         
-        if (navigator.geolocation) {
+        if (!lite && navigator.geolocation) {
             $('a.my-location')
                 .css('display', 'block')
                 .click(function(event) {
@@ -719,11 +731,13 @@
         
         setTimeout(resize_map, 150);
         
-        setTimeout(function() {
-            if (typeof(g_init_social_sharing) !== 'undefined') {
-                g_init_social_sharing();
-            }
-        }, 1000);
+        if (!lite) {
+            setTimeout(function() {
+                if (typeof(g_init_social_sharing) !== 'undefined') {
+                    g_init_social_sharing();
+                }
+            }, 1000);
+        }
     });
 })();
 

@@ -51,7 +51,7 @@ def index(request, **kwargs):
     ]
     
     return stamped_render(request, 'index.html', {
-        'body_classes'      : "index intro", 
+        'body_classes'      : "index main", 
         'tastemakers'       : tastemakers, 
     })
 
@@ -199,6 +199,7 @@ def handle_map(request, schema, **kwargs):
     screen_name     = schema.screen_name
     stamp_id        = schema.stamp_id
     ajax            = schema.ajax
+    lite            = schema.lite
     mobile          = schema.mobile
     
     uri             = request.get_full_path()
@@ -213,6 +214,7 @@ def handle_map(request, schema, **kwargs):
     
     del schema.stamp_id
     del schema.ajax
+    del schema.lite
     del schema.mobile
     
     user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
@@ -244,12 +246,13 @@ def handle_map(request, schema, **kwargs):
     return stamped_render(request, 'map.html', {
         'user'          : user, 
         'stamps'        : stamps, 
+        'lite'          : lite, 
         
         'stamp_id'      : stamp_id, 
         'body_classes'  : body_classes, 
         'title'         : title, 
         'URL'           : url, 
-    }, preload=[ 'user', 'stamps', 'stamp_id' ])
+    }, preload=[ 'user', 'stamps', 'stamp_id', 'lite' ])
 
 @stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):

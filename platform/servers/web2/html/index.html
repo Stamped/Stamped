@@ -43,7 +43,7 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.css">-->
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
@@ -154,7 +154,7 @@
         <div id="intro-iphone"></div>
     </div>
      
-    <div id="main">
+    <div id="main" class="main-content">
         <div id="main-header" class="hidden-main-animating clearfix">
             <div class="floatright">
                 <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button"></a>
@@ -327,15 +327,20 @@
         </div>
     </div>
     
-    <div id="main-iphone">
+    <div id="main-iphone" class="main-content">
         <div id="main-iphone-0" class="iphone-hero">
             <div class="iphone-inner"></div>
         </div>
     </div>
+    
+    <div id="tastemaker-map-window" class="main-content">
+        <a class="fake-url" href="/robby/map">www.stamped.com/robby/map</a>
+        <iframe id="tastemaker-map-window-iframe" src="/robby/map?lite=true" frameborder="0" scrolling="no"></iframe>
+    </div>
 {% endblock main %}
 
 {% block pre_footer %}
-    <footer class="hidden-main-animating">
+    <footer class="hidden-main-animating main-content">
 {% endblock pre_footer %}
 
 {% block footer %}
@@ -355,7 +360,6 @@
                 <a href="/blog"  class="nav">Blog</a>
                 <a href="/legal" class="nav">Legal</a>
             </div>
-
         </div>
         
         <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
@@ -365,7 +369,7 @@
 {% block scripts %}
     {{ block.super }}
     
-    {% if DEBUG %}
+    {% if STAMPED_DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
         <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
@@ -373,7 +377,7 @@
         <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/index.generated.js"></script>
+        <script src="{{ STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 
