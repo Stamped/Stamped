@@ -7,7 +7,7 @@ __license__   = 'TODO'
 
 import Globals
 import sys, traceback, string, random
-import logs, time, bson
+import logs, utils, time, bson
 
 from errors                 import *
 from optparse               import OptionParser
@@ -36,10 +36,12 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    # MongoStampCollection,
+    MongoStampCollection,
     MongoEntityCollection,
     MongoAccountCollection,
 ]
+
+WORKER_COUNT = 10
 
 
 def parseCommandLine():
@@ -87,6 +89,7 @@ def worker(db, collection, stats, options):
             except StampedDataError as e:
                 logs.warning("%s: FAIL" % documentId)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+                stats['errors'].append(e)
             except Exception as e:
                 logs.warning("%s: FAIL: %s (%s)" % (documentId, e.__class__, e))
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -94,21 +97,24 @@ def worker(db, collection, stats, options):
                 f = string.joinfields(f, '')
                 print f
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+                stats['errors'].append(e)
 
     except Empty:
         print('Done!')
 
 def handler(db, options):
-    # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
-    for i in db._collection.find(fields=['_id']):
+    query = {}
+    # query = {'_id': bson.objectid.ObjectId("4ecbdfcb366b3c188700035a")}
+    for i in db._collection.find(query, fields=['_id']):
         if options.sampleSetRatio < 1 and random.random() > options.sampleSetRatio:
             continue
         documentIds.put(i['_id'])
 
 
-
 def main():
     options, args = parseCommandLine()
+
+    warnings = {}
 
     # Verify that existing documents are valid
     for collection in collections:
@@ -118,23 +124,21 @@ def main():
 
         stats = {
             'passed': 0,
+            'errors': [],
         }
 
-        gevent.joinall([
-            gevent.spawn(handler, db, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-            gevent.spawn(worker, db, collection, stats, options),
-        ])
+        # Build handler
+        greenlets = [ gevent.spawn(handler, db, options) ]
+
+        # Build workers
+        for i in range(WORKER_COUNT):
+            greenlets.append(gevent.spawn(worker, db, collection, stats, options))
+
+        # Run!
+        gevent.joinall(greenlets)
 
         passed = stats.pop('passed', 0)
+        errors = stats.pop('errors', [])
         total = passed
 
         print ('='*80)
@@ -145,6 +149,37 @@ def main():
         print ('-'*80)
         print '%40s: %s%s Accuracy (%.2f seconds)' % (collection.__name__, int(100.0*passed/total*1.0), '%', (time.time()-begin))
         print 
+
+        if len(errors) > 0:
+            warnings[collection.__name__] = errors
+
+            for error in errors:
+                print error 
+            print 
+
+    # TODO: Repopulate missing documents
+
+    # Email dev if any errors come up
+    if libs.ec2_utils.is_ec2():
+        if len(warnings) > 0:
+            try:
+                stack = libs.ec2_utils.get_stack().instance.stack
+                email = {}
+                email['from'] = 'Stamped <noreply@stamped.com>'
+                email['to'] = 'dev@stamped.com'
+                email['subject'] = '%s: Integrity Checker Failure' % stack
+
+                html = '<html><body><p>Integrity checker caught the following errors:</p>'
+                for k, v in warnings.iteritems():
+                    html += '<hr><h3>%s</h3>' % k 
+                    for e in v:
+                        html += ('<p><code>%s</code></p>' % e).replace('\n','<br>')
+                html += '</body></html>'
+
+                email['body'] = html
+                utils.sendEmail(email, format='html')
+            except Exception as e:
+                logs.warning('UNABLE TO SEND EMAIL: %s' % e)
 
 def mainOld():
     options, args = parseCommandLine()

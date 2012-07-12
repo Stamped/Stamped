@@ -114,11 +114,15 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             del(document['_id'])
 
         entityData = document.pop('entity')
-        entity = buildEntity(entityData)
-        document['entity'] = {'entity_id': entity.entity_id}
+        document['entity'] = {'entity_id': entityData['entity_id']}
         
         stamp = self._obj().dataImport(document, overflow=self._overflow)
-        stamp.entity = entity
+
+        try:
+            entity = buildEntity(entityData, mini=True)
+            stamp.entity = entity
+        except Exception as e:
+            logs.warning("Unable to upgrade entity embedded within stamp '%s'" % (stamp.stamp_id))
 
         return stamp 
 
@@ -131,78 +135,98 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         modified = False
 
-        # Update stamp to new structure
+        # Check if old schema version
         if 'contents' not in document or 'credit' in document:
-            logs.warning("Old stamp schema")
-            document = self._upgradeDocument(document)
-            modified = True
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        stamp = self._convertFromMongo(document)
 
         # Verify that user exists
-        userId = document['user']['user_id']
-        if self._collection._database['users'].find({'_id' : self._getObjectIdFromString(userId)}).count() != 1:
-            raise StampedDataError("User '%s' not found" % userId)
+        userId = stamp.user.user_id
+        if self._collection._database['users'].find({'_id': self._getObjectIdFromString(userId)}).count() == 0:
+            msg = "%s: User not found (%s)" % (key, userId)
+            raise StampedDataError(msg)
 
         # Verify that any credited users exist
-        if 'credits' in document:
+        if stamp.credits is not None:
             credits = []
-            for credit in document['credits']:
-                creditedUserId = credit['user']['user_id']
+            for credit in stamp.credits:
+                creditedUserId = credit.user.user_id
                 query = {'_id' : self._getObjectIdFromString(creditedUserId)}
                 if self._collection._database['users'].find(query).count() == 1:
                     credits.append(credit)
                 else:
-                    modified = True
+                    msg = "%s: Credited user not found (%s)" % (key, creditedUserId)
+                    if repair:
+                        logs.info(msg)
+                        modified = True
+                    else:
+                        raise StampedDataError(msg)
             if len(credits) > 0:
                 document['credits'] = credits
             else:
-                del(document['credits'])
+                msg = "%s: Cleaning up credits" % key
+                logs.info(msg)
+                if repair:
+                    del(document['credits'])
+                    modified = True
 
         # Verify that entity exists
-        entityId = document['entity']['entity_id']
-        entity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(entityId)})
-        if entity is None:
-            raise StampedDataError("Entity '%s' not found" % entityId)
+        entityId = stamp.entity.entity_id
+        entityDocument = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(entityId)})
+        if entityDocument is None:
+            msg = "%s: Entity not found (%s)" % (key, entityId)
+            raise StampedDataError(msg)
+        entity = buildEntity(entityDocument)
 
-        # Check if entity has been tombstoned; update entity if so
-        if 'tombstone_id' in entity['sources'] and entity['sources']['tombstone_id'] is not None:
-            newEntityId = entity['sources']['tombstone_id']
-            logs.warning("Entity '%s' is tombstoned to '%s'" % (entityId, newEntityId))
-            newEntity = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(newEntityId)})
-            if newEntity is None:
-                raise StampedDataError("Entity '%s' not found" % newEntityId)
-
-            document['entity'] = buildEntity(newEntity, mini=True).dataExport()
-            modified = True
+        # Check if entity has been tombstoned and update entity if so
+        if entity.sources.tombstone_id is not None:
+            msg = "%s: Entity tombstoned to new entity" % (key)
+            if repair:
+                logs.info(msg)
+                tombstoneId = entity.sources.tombstone_id
+                tombstone = self._collection._database['entities'].find_one({'_id' : self._getObjectIdFromString(tombstoneId)})
+                if tombstone is None:
+                    msg = "%s: New tombstone entity not found (%s)" % (key, tombstoneId)
+                    raise StampedDataError(msg)
+                stamp.entity = buildEntity(tombstone).minimize()
+                modified = True
+            else:
+                raise StampedDataError(msg)
 
         # Check if entity stub has been updated
         else:
-            # Note: Because schema objects use tuples and documents use lists, we need to convert the
-            # raw document into a schema object in order to do the comparison between minis. FML.
-            oldEntityMini = buildEntity(document['entity'], mini=True)
-            newEntityMini = buildEntity(entity, mini=True)
-            document['entity'] = newEntityMini.dataExport() # buildEntity mutates entity, so set it regardless
-            if oldEntityMini != newEntityMini:
-                logs.warning("Upgrading entity mini")
-                modified = True
+            if stamp.entity != entity.minimize():
+                msg = "%s: Embedded entity is stale" % key
+                if repair:
+                    logs.info(msg)
+                    stamp.entity = entity.minimize()
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
 
-        stampNum = document['stats']['stamp_num']
+        # Verify that stamp number is unique
+        stampNum = stamp.stats.stamp_num
         duplicateStamps = self._collection.find({'user.user_id' : userId, 'stats.stamp_num' : stampNum})
         if duplicateStamps.count() > 1:
-            duplicateStamps.sort('timestamp.created', pymongo.ASCENDING)
-            raise StampedDataError("Duplicate stamp numbers '%s' for user '%s'" % (stampNum, userId))
+            msg = "%s: Multiple stamps exist for userId '%s' and stampNum '%s'" % (key, userId, stampNum)
+            raise StampedDataError(msg)
 
-        if modified and repair:
-            self._collection.update({'_id' : key}, document)
-
-        return True
-
+        ### TODO
         # Check if temp_image_url exists -> kick off async process
         # Check that image[s] have dimensions
         # Verify image url exists?
         # Check if stats need to be updated?
-        # Verify that user_id / stamp_num is unique
 
+        if modified and repair:
+            self._collection.update({'_id' : key}, self._convertToMongo(stamp))
 
+        return True
     
     ### PUBLIC
     

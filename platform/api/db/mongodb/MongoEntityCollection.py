@@ -254,7 +254,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(entity))
-            print self._convertToMongo(entity)
 
         return True
 
