@@ -21,6 +21,7 @@ from api.db.mongodb.MongoStampCommentsCollection        import MongoStampComment
 
 from api.db.mongodb.MongoStampCollection                import MongoStampCollection
 from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection
+from api.db.mongodb.MongoAccountCollection              import MongoAccountCollection
 
 import gevent
 from gevent.queue import Queue, Empty
@@ -36,7 +37,8 @@ collections = [
 
     # Documents
     # MongoStampCollection,
-    MongoEntityCollection,
+    # MongoEntityCollection,
+    MongoAccountCollection,
 ]
 
 
@@ -108,9 +110,9 @@ def worker(db, collection, stats):
         print('Quitting time!')
 
 def handler(db):
-        # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
-        for i in db._collection.find(fields=['_id']):
-            documentIds.put(i['_id'])
+    # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
+    for i in db._collection.find(fields=['_id']).limit(100):
+        documentIds.put(i['_id'])
 
 
 for collection in collections:

@@ -28,6 +28,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
+
+    @lazyProperty
+    def alert_apns_collection(self):
+        return MongoAlertAPNSCollection()
+
+    @lazyProperty
+    def user_linked_alerts_history_collection(self):
+        return MongoUserLinkedAlertsHistoryCollection()
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
@@ -93,11 +101,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                         netflixAcctSparse[k] = v
                 document['linked']['netflix'] = netflixAcctSparse
 
-
-        self._collection.update(
-                {'_id': document['user_id']},
-                {'$unset': { 'linked_accounts' : 1 } }
-        )
         return document
 
     def _convertFromMongo(self, document):
@@ -162,16 +165,67 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             return self._obj().dataImport(document, overflow=self._overflow)
         else:
             return document
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        """
+        Check the account to verify the following things:
+
+        - Proper schema 
+
+        - Verify linked accounts are unique (i.e. not linked to other users as well)
+
+        """
+        
+        document = self._getMongoDocumentFromId(key)
+        
+        assert document is not None
+
+        modified = False
+
+        # Check if old schema version
+        if 'linked' not in document or 'alert_settings' not in document or 'auth_service' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        account = self._convertFromMongo(document)
+
+        # Verify Facebook accounts are unique
+        if account.linked is not None and account.linked.facebook is not None:
+            facebookId = account.linked.facebook.linked_user_id
+            if facebookId is None:
+                logs.info("Cleaning up linked.facebook")
+                del(account.linked.facebook)
+                modified = True
+            else:
+                if self._collection.find({'account.linked.facebook': facebookId}).count() > 1:
+                    msg = "%s: Multiple accounts exist linked to Facebook id '%s'" % (key, facebookId)
+                    raise StampedFacebookLinkedToMultipleAccountsError(msg)
+
+        # Verify Twitter accounts are unique
+        if account.linked is not None and account.linked.twitter is not None:
+            twitterId = account.linked.twitter.linked_user_id
+            if twitterId is None:
+                logs.info("Cleaning up linked.twitter")
+                del(account.linked.twitter)
+                modified = True
+            else:
+                if self._collection.find({'account.linked.twitter': twitterId}).count() > 1:
+                    msg = "%s: Multiple accounts exist linked to Twitter id '%s'" % (key, twitterId)
+                    raise StampedTwitterLinkedToMultipleAccountsError(msg)
+
+        if modified and repair:
+            # self._collection.update({'_id' : key}, self._convertToMongo(account))
+            print self._convertToMongo(account)
+
+        return True
     
     ### PUBLIC
-    
-    @lazyProperty
-    def alert_apns_collection(self):
-        return MongoAlertAPNSCollection()
-
-    @lazyProperty
-    def user_linked_alerts_history_collection(self):
-        return MongoUserLinkedAlertsHistoryCollection()
     
     def addAccount(self, user):
         try:
@@ -323,7 +377,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 missing_fields.append(k)
 
         if valid == False:
-            raise StampedInputError("Missing required linked account fields for %s: %s" % (linkedAccount.service_name, missing_fields))
+            raise StampedInputError("Missing required linked account fields for %s: %s" % \
+                (linkedAccount.service_name, missing_fields))
 
         # Construct a new LinkedAccount object which contains only valid fields
         newLinkedAccount = LinkedAccount()

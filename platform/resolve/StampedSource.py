@@ -759,12 +759,8 @@ class StampedSource(GenericSource):
             raise NotImplementedError()
         # Exclude tombstoned listings.
         and_list = query.setdefault('$and',[])
-        and_list.append( {
-            '$or' : [
-                    {'sources.tombstone_id' : { '$exists':False }},
-                    {'sources.tombstone_id' : None},
-            ]
-        } )
+        and_list.append({'sources.tombstone_id' : { '$exists':False }})
+        and_list.append({'sources.user_generated_id' : { '$exists':False }})
         matches = list(self.__id_query(query))
         entityIds = [ match['_id'] for match in matches ]
         # TODO: Should just retrieve all of this from the initial query!

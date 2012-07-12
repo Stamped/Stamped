@@ -1,0 +1,26 @@
+
+@primary:   #{{color_primary}};
+@secondary: #{{color_secondary}};
+
+.user-gradient-func2(@angle: 135deg, @c0, @c1) {
+    background: @c0;
+    background: -webkit-linear-gradient(@angle, @c0, @c1);
+    background: linear-gradient(@angle, @c0, @c1);
+}
+
+.user-gradient-func(@angle: 135deg, @a: 50%) {
+    .user-gradient-func2(@angle, fade(@primary, @a), fade(@secondary, @a));
+}
+
+.tastemaker-logo-{{screen_name}} {
+    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+// target webkit browsers
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .tastemaker-logo-{{screen_name}} {
+        .user-gradient-func(135deg, 80%);
+    }
+}
+

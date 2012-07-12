@@ -28,7 +28,7 @@ body, html {
 }
 
 body.intro {
-    #main, footer {
+    #main, #main-iphone, footer {
         display: none;
     }
     
@@ -38,7 +38,7 @@ body.intro {
 }
 
 body.main {
-    #main, footer {
+    #main, #main-iphone, footer {
         display: block !important;
     }
     
@@ -164,7 +164,7 @@ body.main {
         .ribbon-wrapper-bottom {
             position: absolute;
             bottom: 0;
-            left: 0;
+            left:   0;
         }
         
         #pane-wrapper {
@@ -182,7 +182,7 @@ body.main {
                 .title {
                     .stamped-font();
                     
-                    letter-spacing: 0.05em;
+                    letter-spacing: 0.03em;
                     font-size: 3em;
                     line-height: 115%;
                     color: #333;
@@ -367,13 +367,13 @@ body.main {
     }
 }
 
-.hero-video-preview {
+#hero-video-preview {
     position: absolute;
     top:  50%;
     left: 290px;
     margin-top: -129px;
     
-    display: block;
+    display: none;
     width: 470px;
     
     .user-video-preview-image {
@@ -384,6 +384,10 @@ body.main {
     .user-video-desc {
         text-align: center;
     }
+}
+
+.active-pane-4 #hero-video-preview {
+    display: block;
 }
 
 .screen-name {
@@ -409,25 +413,80 @@ body.main {
     }
 }
 
+#tastemaker-gallery {
+    margin-top: 24px;
+    .tastemaker {
+        position: relative;
+        display:  inline-block;
+        
+        margin-right: 8px;
+    }
+    
+    .tastemaker:last-child {
+        margin-right: 0;
+    }
+}
+
+.tastemaker-logo {
+    width:  36px;
+    height: 36px;
+    
+    top:   -18px;
+    right: -18px;
+}
+
+// target webkit browsers
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .tastemaker-logo {
+        @mask-image: url(/assets/img/stamped_email_mask.png);
+        
+        -webkit-mask: @mask-image no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask: @mask-image no-repeat;
+    }
+}
+
 
 /* **************************************************************************
                       TILTED IPHONE IN CORE PAGE VIEWS
    ************************************************************************** */
 
 
-.iphone-hero {
+#main-iphone {
     position: absolute;
+    top:  200%;
+    left: 50%;
+    margin: -265px 0 0 70px;
     z-index: 99;
     
-    background: url(/assets/img/index/iPhone_HERO-1.png) no-repeat;
-    width:  276px;
+    width:  377px;
     height: 530px;
 }
 
-#retina .iphone-hero {
-    background: url(/assets/img/index/iPhone_HERO-1@2x.png) no-repeat;
-    width:  551px;
-    height: 1060px;
+.iphone-hero {
+    position: absolute;
+    background: url(/assets/img/index/iphone_shadow01.png) no-repeat;
+    width:  377px;
+    height: 596px;
+    
+    .iphone-inner {
+        background: url(/assets/img/index/iPhone_HERO-1.png) no-repeat;
+        width:  276px;
+        height: 530px;
+        margin: 0 auto;
+    }
+}
+
+#retina {
+    #main-iphone {
+        margin: -530px 0 0 120px;
+    }
+    
+    .iphone-hero {
+        background: url(/assets/img/index/iPhone_HERO-1@2x.png) no-repeat;
+        width:  551px;
+        height: 1060px;
+    }
 }
 
 
@@ -596,7 +655,7 @@ footer {
     height: 45px;
 }
 
-.category-illustration {
+#category-illustration {
     background: url(/assets/img/index/illustration.png) no-repeat;
     width:  373px;
     height: 84px;
@@ -695,7 +754,7 @@ footer {
         height: 90px;
     }
     
-    .category-illustration {
+    #category-illustration {
         background: url(/assets/img/index/illustration@2x.png) no-repeat;
         width:  746px;
         height: 168px;

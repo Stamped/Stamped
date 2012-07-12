@@ -464,7 +464,14 @@ class S3ImageDB(AImageDB):
             filename = '%s-%s-%s-%sx%s' % (primary_color.upper(), 
                 secondary_color.upper(), suffix, width, height)
             
-            if not self.bucket.get_key("logos/%s.png" % filename):
+            generate = False
+            try:
+                generate = not self.bucket.get_key("logos/%s.png" % filename)
+            except Exception:
+                generate = True
+                utils.printException()
+            
+            if generate:
                 generateImage(filename, mask, width, height, gradient([
                     (2.0, rgb(primary_color), rgb(secondary_color)),
                 ]))

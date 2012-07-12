@@ -216,7 +216,7 @@ def _buildAlertsFromAccount(account):
             toggle.value = True
         return toggle
 
-    def buildGroup(settingGroup, settingName, alertSuffix):
+    def buildGroup(settingGroup, settingName):
         group = HTTPSettingsGroup()
         group.group_id = 'alerts_%s' % settingGroup
         group.name = settingName
@@ -226,13 +226,15 @@ def _buildAlertsFromAccount(account):
         ]
         return group
 
-    result.append(buildGroup('followers', 'New Followers', 'follow'))
-    result.append(buildGroup('credits', 'Credit', 'credit'))
-    result.append(buildGroup('mentions', 'Mentions', 'mention'))
-    result.append(buildGroup('comments', 'Comments', 'comment'))
-    result.append(buildGroup('replies', 'Replies', 'reply'))
-    result.append(buildGroup('likes', 'Likes', 'like'))
-    result.append(buildGroup('todos', 'To-Dos', 'todo'))
+    result.append(buildGroup('followers', 'New Followers'))
+    result.append(buildGroup('credits', 'Credit'))
+    result.append(buildGroup('mentions', 'Mentions'))
+    result.append(buildGroup('comments', 'Comments'))
+    result.append(buildGroup('replies', 'Replies'))
+    result.append(buildGroup('likes', 'Likes'))
+    result.append(buildGroup('todos', 'To-Dos'))
+    result.append(buildGroup('friends', 'Facebook & Twitter Friends'))
+    result.append(buildGroup('actions', 'Stamp Interactions'))
 
     return map(lambda x: x.dataExport(), result)
 

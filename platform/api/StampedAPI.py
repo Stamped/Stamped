@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback
+    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback, random
 
     from api import Blacklist
     import libs.ec2_utils
@@ -278,6 +278,10 @@ class StampedAPI(AStampedAPI):
         alert_settings.alerts_replies_email     = True
         alert_settings.alerts_followers_apns    = True
         alert_settings.alerts_followers_email   = True
+        alert_settings.alerts_friends_apns      = True
+        alert_settings.alerts_friends_email     = True
+        alert_settings.alerts_actions_apns      = True
+        alert_settings.alerts_actions_email     = False
         account.alert_settings                  = alert_settings
 
         # Validate screen name
@@ -2457,6 +2461,11 @@ class StampedAPI(AStampedAPI):
                 # Update credited user stats
                 self._userDB.updateUserStats(item.user.user_id, 'num_credits',     increment=1)
                 self._userDB.updateUserStats(item.user.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
+
+                # Update stamp stats if stamp exists
+                creditedStamp = self._stampDB.getStampFromUserEntity(item.user.user_id, entity.entity_id)
+                if creditedStamp is not None:
+                    tasks.invoke(tasks.APITasks.updateStampStats, args=[creditedStamp.stamp_id])
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -4653,27 +4662,15 @@ class StampedAPI(AStampedAPI):
     def mergeEntityIdAsync(self, entityId):
         self._mergeEntity(self._entityDB.getEntity(entityId))
 
-    def _mergeEntity(self, entity, depth=2):
+    def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
-
-        The resolved parameter is used to keep track of the entities we've
-        already resolved so far. It is used internally by this function during
-        recursive calls, and should be passed in an empty set at the top
-        invocation.
-
-        The depth is a way to limit the scope of the search. We will only look
-        at items within "depth" distance from the given entity.
         """
-        persistedEntities = set()
-        entity = self._enrichAndPersistEntity(entity, persistedEntities)
-        self._followOutLinks(entity, persistedEntities, depth)
+        entity = self._enrichAndPersistEntity(entity)
+        self._followOutLinks(entity, set(), 2 if entity.isType('album') else 1)
         return entity
 
 
-    def _enrichAndPersistEntity(self, entity, persisted):
-        if entity.entity_id and entity.entity_id in persisted:
-            return entity
-
+    def _enrichAndPersistEntity(self, entity):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
         logs.info('Modified: ' + str(modified))
@@ -4685,7 +4682,6 @@ class StampedAPI(AStampedAPI):
             else:
                 entity = self._entityDB.updateEntity(entity)
 
-        persisted.add(entity.entity_id)
         return entity
 
     def _resolveEntity(self, entity):
@@ -4741,6 +4737,7 @@ class StampedAPI(AStampedAPI):
 
     def _resolveRelatedEntities(self, entity):
         def _resolveStubList(entity, attr):
+            dropUnknown = attr == 'albums' or attr == 'artists' and entity.isType('track')
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
@@ -4754,7 +4751,8 @@ class StampedAPI(AStampedAPI):
                 if resolved is None:
                     # It's okay to fail resolution here, since we're only
                     # resolving against our own db
-                    resolvedList.append(stub)
+                    if not dropUnknown:
+                        resolvedList.append(stub)
                     continue
                 resolvedList.append(resolved.minimize())
                 if stubId != resolved.entity_id:
@@ -4766,6 +4764,9 @@ class StampedAPI(AStampedAPI):
         return self._iterateOutLinks(entity, _resolveStubList)
 
     def _followOutLinks(self, entity, persisted, depth):
+        if entity.entity_id in persisted:
+            return
+
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
@@ -4778,7 +4779,7 @@ class StampedAPI(AStampedAPI):
                     logs.warning('stub resolution failed: %s' % stub)
                     mergeEntityTasks.append(None)
                 else:
-                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
+                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull))
             
             modified = False
             visitedStubs = []
@@ -4793,6 +4794,7 @@ class StampedAPI(AStampedAPI):
             setattr(entity, attr, visitedStubs)
             if modified:
                 self._entityDB.updateEntity(entity)
+            persisted.add(entity.entity_id)
             if depth:
                 for mergedEntity in mergedEntities:
                     self._followOutLinks(mergedEntity, persisted, depth-1)

@@ -17,11 +17,42 @@ from servers.web2.core.helpers  import *
 
 @stamped_view()
 def index(request, **kwargs):
-    autoplay_video = bool(request.GET.get('video', False))
+    tastemakers = [
+        {
+            'screen_name'       : 'justinbieber', 
+            'image_url'         : 'http://static.stamped.com/users/justinbieber-60x60.jpg', 
+            'color_primary'     : '84004B', 
+            'color_secondary'   : 'FF00EA', 
+        }, 
+        {
+            'screen_name'       : 'nytimes', 
+            'image_url'         : 'http://static.stamped.com/users/nytimes-60x60.jpg', 
+            'color_primary'     : '000A19', 
+            'color_secondary'   : 'CCE2FF', 
+        }, 
+        {
+            'screen_name'       : 'michaelkors', 
+            'image_url'         : 'http://static.stamped.com/users/michaelkors-60x60.jpg', 
+            'color_primary'     : '190000', 
+            'color_secondary'   : 'FFEDCC', 
+        }, 
+        {
+            'screen_name'       : 'TIME', 
+            'image_url'         : 'http://static.stamped.com/users/time-60x60.jpg', 
+            'color_primary'     : 'D50000', 
+            'color_secondary'   : 'FF2F2F', 
+        }, 
+        {
+            'screen_name'       : 'passionpit', 
+            'image_url'         : 'http://static.stamped.com/users/passionpit-60x60.jpg', 
+            'color_primary'     : 'D25D82', 
+            'color_secondary'   : 'F9E9E9', 
+        }, 
+    ]
     
     return stamped_render(request, 'index.html', {
-        'autoplay_video' : autoplay_video, 
-        'body_classes'   : "index intro", 
+        'body_classes'      : "index intro", 
+        'tastemakers'       : tastemakers, 
     })
 
 @stamped_view()
