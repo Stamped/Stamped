@@ -299,6 +299,36 @@
                 });
         };
         
+        var map_window_show = function() {
+            $app_store_button.hide(800);
+            
+            $map_window
+                .stop(true, false)
+                .show()
+                .animate({
+                    right       : "-789px"
+                }, {
+                    easing      : "easeOutExpo", 
+                    duration    : 800
+                });
+        };
+        
+        var map_window_hide = function() {
+            $map_window
+                .stop(true, false)
+                .animate({
+                    right       : "-1200px"
+                }, {
+                    easing      : "easeInQuad", 
+                    duration    : 400, 
+                    complete    : function() {
+                        $map_window.hide();
+                    }
+                });
+            
+            $app_store_button.show(400);
+        };
+        
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
         var set_active_pane = function(index) {
             if (index >= 0 && index <= 4) {
@@ -316,11 +346,9 @@
                     }
                     
                     if (index === 3) {
-                        $map_window.css("visibility", "visible");
-                        $app_store_button.hide();
+                        map_window_show();
                     } else {
-                        $map_window.css("visibility", "hidden");
-                        $app_store_button.show();
+                        map_window_hide();
                     }
                     
                     return true;
