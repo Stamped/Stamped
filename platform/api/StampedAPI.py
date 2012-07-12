@@ -4662,14 +4662,11 @@ class StampedAPI(AStampedAPI):
     def mergeEntityIdAsync(self, entityId):
         self._mergeEntity(self._entityDB.getEntity(entityId))
 
-    def _mergeEntity(self, entity, depth=2):
+    def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
-
-        The depth is a way to limit the scope of the search. We will only look
-        at items within "depth" distance from the given entity.
         """
         entity = self._enrichAndPersistEntity(entity)
-        self._followOutLinks(entity, set(), depth)
+        self._followOutLinks(entity, set(), 2 if entity.isType('album') else 1)
         return entity
 
 
@@ -4740,7 +4737,7 @@ class StampedAPI(AStampedAPI):
 
     def _resolveRelatedEntities(self, entity):
         def _resolveStubList(entity, attr):
-            dropUnknown = attr == 'albums'
+            dropUnknown = attr == 'albums' or attr == 'artists' and entity.isType('track')
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
