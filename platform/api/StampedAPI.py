@@ -4886,7 +4886,7 @@ class StampedAPI(AStampedAPI):
         return modified
 
 
-    def crawlExternalSources(self):
+    def crawlExternalSourcesAsync(self):
         stampedSource = StampedSource(stamped_api=self)
         for proxy in RssFeedScraper().fetchSources():
             self.__mergeProxyIntoDb(proxy, stampedSource)
