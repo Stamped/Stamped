@@ -6,7 +6,7 @@ __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
 import Globals
-import sys, traceback, string
+import sys, traceback, string, random
 import logs, time, bson
 
 from errors                 import *
@@ -37,7 +37,7 @@ collections = [
 
     # Documents
     # MongoStampCollection,
-    # MongoEntityCollection,
+    MongoEntityCollection,
     MongoAccountCollection,
 ]
 
@@ -56,15 +56,15 @@ def parseCommandLine():
     parser.add_option("-c", "--check", default=None, 
         action="store", help="optionally filter checks based off of their name")
     
-    # parser.add_option("-s", "--sampleSetSize", default=None, type="int", 
-    #     action="store", help="sample size as a percentage (e.g., 5 for 5%)")
+    parser.add_option("-s", "--sampleSetSize", default=None, type="int", 
+        action="store", help="sample size as a percentage (e.g., 5 for 5%)")
     
     (options, args) = parser.parse_args()
     
-    # if options.sampleSetSize is None:
-    #     options.sampleSetRatio = 1.0
-    # else:
-    #     options.sampleSetRatio = options.sampleSetSize / 100.0
+    if options.sampleSetSize is None:
+        options.sampleSetRatio = 1.0
+    else:
+        options.sampleSetRatio = options.sampleSetSize / 100.0
     
     # if options.db:
     #     utils.init_db_config(options.db)
@@ -73,33 +73,22 @@ def parseCommandLine():
 
 documentIds = Queue(maxsize=10)
 
-stats = {
-    'passed': 0,
-}
-
-def worker(db, collection, stats):
+def worker(db, collection, stats, options):
     try:
         while True:
-            documentId = documentIds.get(timeout=1) # decrements queue size by 1
+            documentId = documentIds.get(timeout=2) # decrements queue size by 1
             
             try:
-                result = db.checkIntegrity(documentId, repair=True)
-                print documentId, 'PASS'
+                result = db.checkIntegrity(documentId, repair=(not options.noop))
                 stats['passed'] += 1
             except NotImplementedError:
                 logs.warning("WARNING: Collection '%s' not implemented" % collection.__name__)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
-            except StampedStaleRelationshipKeyError:
-                print documentId, 'FAIL: Key deleted'
-                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
-            except StampedStaleRelationshipDataError:
-                print documentId, 'FAIL: References updated'
-                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
             except StampedDataError as e:
-                print documentId, 'FAIL'
+                logs.warning("%s: FAIL" % documentId)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
             except Exception as e:
-                print documentId, 'FAIL: %s (%s)' % (e.__class__, e)
+                logs.warning("%s: FAIL: %s (%s)" % (documentId, e.__class__, e))
                 exc_type, exc_value, exc_traceback = sys.exc_info()
                 f = traceback.format_exception(exc_type, exc_value, exc_traceback)
                 f = string.joinfields(f, '')
@@ -107,45 +96,55 @@ def worker(db, collection, stats):
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
 
     except Empty:
-        print('Quitting time!')
+        print('Done!')
 
-def handler(db):
+def handler(db, options):
     # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
-    for i in db._collection.find(fields=['_id']).limit(100):
+    for i in db._collection.find(fields=['_id']):
+        if options.sampleSetRatio < 1 and random.random() > options.sampleSetRatio:
+            continue
         documentIds.put(i['_id'])
 
 
-for collection in collections:
-    logs.info("Running checks for %s" % collection.__name__)
-    db = collection()
-    gevent.joinall([
-        gevent.spawn(handler, db),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-        gevent.spawn(worker, db, collection, stats),
-    ])
 
-passed = stats.pop('passed', 0)
-total = passed
-
-print ('='*80)
-print '%40s: %s' % ('PASSED', passed)
-for k, v in stats.items():
-    print '%40s: %s' % (k, v)
-    total += int(v)
-print ('-'*80)
-print '%40s: %s%s' % ('RATIO', int(100.0*passed/total*1.0), '%')
-
-"""
 def main():
-    pass
+    options, args = parseCommandLine()
+
+    # Verify that existing documents are valid
+    for collection in collections:
+        logs.info("Running checks for %s" % collection.__name__)
+        db = collection()
+        begin = time.time()
+
+        stats = {
+            'passed': 0,
+        }
+
+        gevent.joinall([
+            gevent.spawn(handler, db, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+            gevent.spawn(worker, db, collection, stats, options),
+        ])
+
+        passed = stats.pop('passed', 0)
+        total = passed
+
+        print ('='*80)
+        print '%40s: %s' % ('PASSED', passed)
+        for k, v in stats.items():
+            print '%40s: %s' % (k, v)
+            total += int(v)
+        print ('-'*80)
+        print '%40s: %s%s Accuracy (%.2f seconds)' % (collection.__name__, int(100.0*passed/total*1.0), '%', (time.time()-begin))
+        print 
 
 def mainOld():
     options, args = parseCommandLine()
@@ -184,4 +183,3 @@ def mainOld():
 
 if __name__ == '__main__':
     main()
-"""

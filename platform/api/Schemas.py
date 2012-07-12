@@ -206,7 +206,7 @@ class RefreshToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class AccessToken(Schema):
     @classmethod
@@ -221,7 +221,7 @@ class AccessToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class PasswordResetToken(Schema):
     @classmethod
@@ -586,6 +586,10 @@ class EntitySources(Schema):
         cls.addProperty('amazon_source',                    basestring)
         cls.addProperty('amazon_timestamp',                 datetime)
 
+        cls.addProperty('nytimes_id',                        basestring)
+        cls.addProperty('nytimes_source',                    basestring)
+        cls.addProperty('nytimes_timestamp',                 datetime)
+
         cls.addProperty('opentable_id',                     basestring)
         cls.addProperty('opentable_url',                    basestring)
         cls.addProperty('opentable_source',                 basestring)
@@ -822,6 +826,8 @@ class BasicEntity(BasicEntityMini):
 
         # The last date/time we got some input indicating that this is currently popular.
         cls.addProperty('last_popular',                     datetime)
+        cls.addProperty('last_popular_source',              basestring)
+        cls.addProperty('last_popular_timestamp',           datetime)
         # Not to be exposed to users -- just some internal data letting us know what sort
         # of input we got indicating that this is currently popular.
         cls.addProperty('last_popular_info',                basestring)
@@ -830,9 +836,6 @@ class BasicEntity(BasicEntityMini):
         # to a cluster. Can include duplicates from one source. Put all in a repeated list for ease of searching.
         # Ordered for best matches first.
         cls.addPropertyList('third_party_ids',              basestring)
-
-        # A list of normalized tokens for search
-        cls.addPropertyList('match_codes',                  basestring)
 
 
     def __init__(self):

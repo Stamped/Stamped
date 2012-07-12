@@ -9,53 +9,34 @@ __license__   = "TODO"
 __all__ = [ 'FandangoSource', 'FandangoMovie' ]
 
 import Globals
-from logs import report
 
-try:
-    import logs, re
-    from libs.TMDB                  import globalTMDB
-    from resolve.GenericSource              import GenericSource
-    from utils                      import lazyProperty
-    from abc                        import ABCMeta, abstractproperty
-    from urllib2                    import HTTPError
-    from datetime                   import datetime
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from pprint                     import pformat, pprint
-    from libs.LibUtils              import parseDateString
-except:
-    report()
-    raise
-
-class DumbFandangoMovie(ResolverMediaItem):
-    def __init__(self):
-        ResolverMediaItem.__init__(self, types=['movie'])
-
-    @lazyProperty
-    def source(self):
-        return 'fandango'
-
-    @lazyProperty
-    def raw_name(self):
-        return None
-
-    def _cleanName(self, name):
-        return name
-
-    @lazyProperty
-    def key(self):
-        return None
-
+import logs, re
+from utils import lazyProperty
+from datetime import datetime
+from resolve.DumbSource import DumbSource
+from resolve.Resolver import *
+from resolve.ResolverObject import *
+from pprint import pformat, pprint
 
 class FandangoMovie(ResolverMediaItem):
     @classmethod
-    def createMovieFromData(cls, data):
+    def createMovie(cls, data):
         if hasattr(data, 'id'):
-            return cls(data)
+            return cls(data, False)
 
-    def __init__(self, data):
+    @classmethod
+    def createMovieFromTopBoxOffice(cls, data):
+        if hasattr(data, 'id'):
+            titlePattern = re.compile(r'\d+\.\s*(.*)\$.*$')
+            match = titlePattern.match(data.title)
+            if match:
+                data.title = match.group(1)
+            return cls(data, True)
+
+    def __init__(self, data, popular):
         ResolverMediaItem.__init__(self, types=['movie'])
         self.__data = data
+        self.__popular = popular
 
     @lazyProperty
     def source(self):
@@ -81,26 +62,23 @@ class FandangoMovie(ResolverMediaItem):
         # TODO(geoff): This is a huge huge huge huge hack. We don't get much info from Fandango, but
         # we only use it for upcoming releases, so we just use now as an approximation of the
         # release date.
-        return datetime.datetime.now()
+        return datetime.now()
+
+    @lazyProperty
+    def last_popular(self):
+        if self.__popular:
+            return datetime.now()
 
 
-class FandangoSource(GenericSource):
+class FandangoSource(DumbSource):
     def __init__(self):
-        GenericSource.__init__(self, 'fandango', groups=['url'], kinds=['media_item'], types=['movie'])
+        super(FandangoSource, self).__init__('fandango', groups=['last_popular'], kinds=['media_item'], types=['movie'])
 
     def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
+        super(FandangoSource, self).enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
         if proxy.key:
             entity.sources.fandango_id = proxy.key
         if proxy.url:
             entity.sources.fandango_url = proxy.url
         return True
-
-    # At the time of writing, Fandango doesn't have good API, so we can't exactly do lookups using
-    # any key or query. The next two methods are just dumb implementations.
-    def entityProxyFromKey(self, key, **kwargs):
-        return DumbFandangoMovie()
-
-    def matchSource(self, query):
-        return lambda start, end: []
 

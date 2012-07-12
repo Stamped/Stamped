@@ -391,8 +391,8 @@ class NotificationQueue(object):
                     send_push   = settings.alerts_friends_apns
                     send_email  = settings.alerts_friends_email
                 elif alert.verb.startswith('action_'):
-                    send_push   = settings.alert_actions_apns
-                    send_email  = settings.alert_actions_email
+                    send_push   = settings.alerts_actions_apns
+                    send_email  = settings.alerts_actions_email
                 else:
                     send_push   = False
                     send_email  = False
