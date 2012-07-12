@@ -909,12 +909,8 @@ class StampedSource(GenericSource):
                     query[k] = v
                 
                 and_list = query.setdefault('$and',[])
-                and_list.append( {
-                    '$or' : [
-                        {'sources.tombstone_id' : { '$exists':False }},
-                        {'sources.tombstone_id' : None},
-                    ]
-                } )
+                and_list.append({'sources.tombstone_id' : { '$exists':False }})
+                and_list.append({'sources.user_generated_id' : { '$exists':False }})
                 if query_obj.source == 'stamped' and query_obj.key != '':
                     query['_id'] = { '$lt' : ObjectId(query_obj.key) }
                 matches = self.__id_query(query)
