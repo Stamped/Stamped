@@ -424,6 +424,16 @@ class GenericSource(BasicSource):
     def getId(self, entity):
         return getattr(entity.sources, self.idField)
 
+    def clearBadIds(self, entity):
+        if not self.getId(entity):
+            return
+        try:
+            proxy = self.entityProxyFromKey(self.getId(entity), entity=entity)
+            proxy.name
+        except Exception:
+            # This is a bad ID and we need to clear it.
+            delattr(entity.sources, self.idField)
+
     def enrichEntity(self, entity, controller, decorations, timestamps):
         """
 
