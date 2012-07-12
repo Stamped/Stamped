@@ -45,6 +45,11 @@ try:
     from time                       import time
     from resolve.ResolverObject             import *
     from resolve.EntityProxyComparator      import *
+
+    # TODO FUCK FUCK FUCK SHOULD REALLY NOT NEED TO PULL FROM SEARCH, OR USE SEARCHRESULT AT ALL
+    from search.SearchResult import SearchResult
+    from search.DataQualityUtils import *
+    from resolve.TitleUtils import *
 except:
     report()
     raise
@@ -135,11 +140,39 @@ class Resolver(object):
     def verbose(self):
         return self.__verbose
 
-    def checkWithComparator(self, comparator, results, query, match, options, order):
-        similarities = {}
-        compare_result = comparator.compare_proxies(query, match)
-        similarity = 100 if compare_result.is_match() else 0
-        similarities['total'] = similarity
+    def checkWithComparator(self, comparator, results, query, match, options, order, subcat):
+        search_result_fuckfuckfuck_hack = SearchResult(match)
+        if subcat == 'artist':
+            augmentArtistDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyArtistTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'album':
+            augmentAlbumDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyAlbumTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'track':
+            augmentTrackDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyTrackTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'tv':
+            augmentTvDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyTvTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'movie':
+            augmentMovieDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyMovieTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'book':
+            augmentBookDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyBookTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'place':
+            augmentPlaceDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyPlaceTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'app':
+            augmentAppDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyAppTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+
+        comparison_result = search_result_fuckfuckfuck_hack.dataQuality > 0.6 and \
+                            comparator.compare_proxies(query, match).is_match()
+
+        similarity = 100 if comparison_result else 0
+        similarities = {'total': similarity}
+
         result = (similarities, match)
         results.append(result)
         options['callback'](result, order)
@@ -147,42 +180,42 @@ class Resolver(object):
     def checkPerson(self, results, query, match, options, order):
         types = self.__typesIntersection(query, match)
         if 'artist' in types:
-            self.checkWithComparator(ArtistEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(ArtistEntityProxyComparator, results, query, match, options, order, 'artist')
             return
 
     def checkPlace(self, results, query, match, options, order):
-        self.checkWithComparator(PlaceEntityProxyComparator, results, query, match, options, order)
+        self.checkWithComparator(PlaceEntityProxyComparator, results, query, match, options, order, 'place')
         return
 
     def checkMediaCollection(self, results, query, match, options, order):
         types = self.__typesIntersection(query, match)
         if 'album' in types:
-            self.checkWithComparator(AlbumEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(AlbumEntityProxyComparator, results, query, match, options, order, 'album')
             return
 
         if 'tv' in types:
-            self.checkWithComparator(TvEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(TvEntityProxyComparator, results, query, match, options, order, 'tv')
             return
 
     def checkMediaItem(self, results, query, match, options, order):
         types = self.__typesIntersection(query, match)
         if 'track' in types:
-            self.checkWithComparator(TrackEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(TrackEntityProxyComparator, results, query, match, options, order, 'track')
             return
 
         if 'movie' in types:
-            self.checkWithComparator(MovieEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(MovieEntityProxyComparator, results, query, match, options, order, 'movie')
             return
 
         if 'book' in types:
-            self.checkWithComparator(BookEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(BookEntityProxyComparator, results, query, match, options, order, 'book')
             return
 
     def checkSoftware(self, results, query, match, options, order):
         types = self.__typesIntersection(query, match)
 
         if 'app' in types:
-            self.checkWithComparator(AppEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(AppEntityProxyComparator, results, query, match, options, order, 'app')
             return
     
     def resolve(self, query, source, **options):

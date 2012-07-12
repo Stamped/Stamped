@@ -50,9 +50,14 @@ def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
 ################################################   MUSIC    ################################################
 ############################################################################################################
 
-def augmentMusicDataQualityOnBasicAttributePresence(musicSearchResult):
+def augmentTrackDataQualityOnBasicAttributePresence(trackSearchResult):
     pass
 
+def augmentAlbumDataQualityOnBasicAttributePresence(albumSearchResult):
+    pass
+
+def augmentArtistDataQualityOnBasicAttributePresence(artistSearchResult):
+    pass
 
 ############################################################################################################
 ################################################   BOOKS    ################################################
