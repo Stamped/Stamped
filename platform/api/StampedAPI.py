@@ -426,9 +426,9 @@ class StampedAPI(AStampedAPI):
                 self._accountDB.getAccountByEmail(testemail)
             except StampedAccountNotFoundError:
                 email = testemail
+                SchemaValidation.validateEmail(account.email)
 
         account.email = email
-        SchemaValidation.validateEmail(account.email)
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
