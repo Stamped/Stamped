@@ -63,7 +63,7 @@ class ResolverObject(object):
             self.__types = set(types)
         self.__maxLookupCalls = maxLookupCalls
         self.__lookupCallsMade = 0
-        self._properties = [ 'name', 'source', 'key', 'kind', 'types', 'url', 'keywords', 'related_terms',
+        self._properties = [ 'name', 'raw_name', 'source', 'key', 'kind', 'types', 'url', 'keywords', 'related_terms',
                              'description', 'priority', 'subcategory', 'images']
 
     __metaclass__ = ABCMeta
