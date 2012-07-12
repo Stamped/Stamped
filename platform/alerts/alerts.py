@@ -268,7 +268,7 @@ class PushNotification(object):
         elif self._verb.startswith('friend_'):
             msg = 'Your friend %s joined Stamped' % (self._subject.screen_name)
 
-        elif self.verb.startswith('action_'):
+        elif self._verb.startswith('action_'):
             msg = '%s interacted with your stamp'
 
         else:
