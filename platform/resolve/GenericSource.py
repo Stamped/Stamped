@@ -334,6 +334,11 @@ class GenericSource(BasicSource):
             if len(artists) > 0:
                 entity.artists = artists
                 timestamps['artists'] = controller.now
+
+            if proxy.last_popular:
+                if entity.last_popular is None or proxy.last_popular > entity.last_popular:
+                    entity.last_popular = proxy.last_popular
+                    timestamps['last_popular'] = controller.now
         
         ### Media Collection
         if entity.kind == 'media_collection' and proxy.kind == 'media_collection':

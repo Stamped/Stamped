@@ -6,27 +6,23 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from logs import report
 
-try:
-    from resolve.SeedSource             import SeedSource
-    from resolve.FactualSource          import FactualSource
-    from resolve.GooglePlacesSource     import GooglePlacesSource
-    from resolve.SinglePlatformSource   import SinglePlatformSource
-    from resolve.TMDBSource             import TMDBSource
-    from resolve.FormatSource           import FormatSource
-    from resolve.RdioSource             import RdioSource
-    from resolve.SpotifySource          import SpotifySource
-    from resolve.iTunesSource           import iTunesSource
-    from resolve.AmazonSource           import AmazonSource
-    from resolve.StampedSource          import StampedSource
-    from resolve.TheTVDBSource          import TheTVDBSource
-    from resolve.NetflixSource          import NetflixSource
-    from resolve.InstagramSource        import InstagramSource
-    from resolve.FandangoSource         import FandangoSource
-except:
-    report()
-    raise
+from resolve.SeedSource import SeedSource
+from resolve.FactualSource import FactualSource
+from resolve.GooglePlacesSource import GooglePlacesSource
+from resolve.SinglePlatformSource import SinglePlatformSource
+from resolve.TMDBSource import TMDBSource
+from resolve.FormatSource import FormatSource
+from resolve.RdioSource import RdioSource
+from resolve.SpotifySource import SpotifySource
+from resolve.iTunesSource import iTunesSource
+from resolve.AmazonSource import AmazonSource
+from resolve.StampedSource import StampedSource
+from resolve.TheTVDBSource import TheTVDBSource
+from resolve.NetflixSource import NetflixSource
+from resolve.InstagramSource import InstagramSource
+from resolve.FandangoSource import FandangoSource
+from resolve.NYTimesSource import NYTimesSource
 
 allSources = [
     SeedSource,
@@ -44,6 +40,7 @@ allSources = [
     TheTVDBSource,
     NetflixSource,
     StampedSource,
+    NYTimesSource,
 ]
 
 def getSource(name):
