@@ -467,6 +467,18 @@
                             } else {
                                 //console.debug(pts.length + " vs " + max_size);
                                 //console.debug(max_cluster_bounds.toString());
+                                
+                                if (lite) {
+                                    // shift the map's bounds west a bit to optimize stamp cluster placement on stamped.com landing page
+                                    var b  = max_cluster_bounds;
+                                    var sw = b.getSouthWest();
+                                    var ne = b.getNorthEast();
+                                    var dLng = 1.5 * (ne.lng() - sw.lng());
+                                    
+                                    max_cluster_bounds = new google.maps.LatLngBounds(new google.maps.LatLng(sw.lat(), sw.lng() + dLng), 
+                                                                                      new google.maps.LatLng(ne.lat(), ne.lng() + dLng));
+                                }
+                                
                                 map.fitBounds(max_cluster_bounds);
                             }
                             
