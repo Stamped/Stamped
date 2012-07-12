@@ -1690,7 +1690,7 @@ class StampedAPI(AStampedAPI):
         return newlist
 
     @API_CALL
-    def getEntityAutoSuggestions(self, authUserId, query, category, coordinates=None):
+    def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
         if category == 'film':
             return self._netflix.autocomplete(query)
         elif category == 'place':
