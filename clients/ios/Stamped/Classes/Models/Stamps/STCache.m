@@ -383,6 +383,11 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
     }
 }
 
+
+- (void)dirty {
+    self.page = [self.page dirtiedPage];
+}
+
 @end
 
 @implementation STCacheSnapshot

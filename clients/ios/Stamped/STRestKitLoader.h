@@ -31,6 +31,7 @@ typedef enum {
 } STRestKitLoaderError;
 
 extern NSString* const STRestKitLoaderErrorDomain;
+extern NSString* const STRestKitErrorIDKey;
 
 @interface STRestKitLoader : NSObject
 

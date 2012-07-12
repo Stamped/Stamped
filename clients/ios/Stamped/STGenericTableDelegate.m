@@ -9,6 +9,7 @@
 #import "STGenericTableDelegate.h"
 #import "STLoadingCell.h"
 #import "Util.h"
+#import "NoDataUtil.h"
 
 @interface STGenericTableDelegate () <STLazyListDelegate>
 
@@ -34,195 +35,226 @@
 @synthesize autoPrepareDisabled = autoPrepareDisabled_;
 @synthesize prepareCancellations = prepareCancellations_;
 @synthesize failed = failed_;
+@synthesize noDataFactory = _noDataFactory;
+@synthesize delegate = _delegate;
 
 - (id)init {
-  self = [super init];
-  if (self) {
-    preloadBufferSize_ = 20;
-    pageSize_ = 20;
-    prepareCancellations_ = [[NSMutableArray alloc] init];
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        preloadBufferSize_ = 20;
+        pageSize_ = 20;
+        prepareCancellations_ = [[NSMutableArray alloc] init];
+    }
+    return self;
 }
 
 - (void)dealloc {
-  [self cancelAndClearPreparations];
-  [self cancelPendingRequests];
-  [lazyList_ removeDelegate:self];
-  [lazyList_ release];
-  [tableViewCellFactory_ release];
-  [style_ release];
-  [selectedCallback_ release];
-  [tableShouldReloadCallback_ release];
-  [prepareCancellations_ release];
-  [super dealloc];
+    [self cancelAndClearPreparations];
+    [self cancelPendingRequests];
+    [lazyList_ removeDelegate:self];
+    [lazyList_ release];
+    [tableViewCellFactory_ release];
+    [style_ release];
+    [selectedCallback_ release];
+    [tableShouldReloadCallback_ release];
+    [prepareCancellations_ release];
+    [_noDataFactory release];
+    [super dealloc];
 }
 
 - (void)considerGrowingWithRow:(NSInteger)row {
-  if (!self.failed) {
-    NSInteger prepareCount = row + self.preloadBufferSize;
-    NSInteger max = [self roundUpToPageBoundary:prepareCount];
-    for (NSInteger i = self.pageSize; i <= max; i += self.pageSize) {
-      [self.lazyList prepareRange:NSMakeRange(0, i)];
+    if (!self.failed) {
+        NSInteger prepareCount = row + self.preloadBufferSize;
+        NSInteger max = [self roundUpToPageBoundary:prepareCount];
+        for (NSInteger i = self.pageSize; i <= max; i += self.pageSize) {
+            [self.lazyList prepareRange:NSMakeRange(0, i)];
+        }
     }
-  }
 }
 
 - (void)cancelAndClearPreparations {
-  for (STCancellation* cancellation in self.prepareCancellations) {
-    [cancellation cancel];
-  }
-  [self.prepareCancellations removeAllObjects];
+    for (STCancellation* cancellation in self.prepareCancellations) {
+        [cancellation cancel];
+    }
+    [self.prepareCancellations removeAllObjects];
 }
 
 - (void)continuePreparations {
-  if ([self.tableViewCellFactory respondsToSelector:@selector(prepareForData:andStyle:withCallback:)] &&
-      self.lazyList.count > self.prepareCancellations.count &&
-      !self.autoPrepareDisabled) {
-    NSInteger index = self.prepareCancellations.count;
-    id data = [self.lazyList objectAtIndex:index];
-    __block STGenericTableDelegate* weakSelf = self;
-    STCancellation* cancellation = [self.tableViewCellFactory prepareForData:data andStyle:self.style withCallback:^(NSError *error, STCancellation *cancellation2) {
-      [weakSelf continuePreparations];
-    }];
-    [self.prepareCancellations addObject:cancellation];
-  }
+    if ([self.tableViewCellFactory respondsToSelector:@selector(prepareForData:andStyle:withCallback:)] &&
+        self.lazyList.count > self.prepareCancellations.count &&
+        !self.autoPrepareDisabled) {
+        NSInteger index = self.prepareCancellations.count;
+        id data = [self.lazyList objectAtIndex:index];
+        __block STGenericTableDelegate* weakSelf = self;
+        STCancellation* cancellation = [self.tableViewCellFactory prepareForData:data andStyle:self.style withCallback:^(NSError *error, STCancellation *cancellation2) {
+            [weakSelf continuePreparations];
+        }];
+        [self.prepareCancellations addObject:cancellation];
+    }
 }
 
 - (void)setLazyList:(id<STLazyList>)lazyList {
-  [lazyList_ cancelPendingRequests];
-  [lazyList_ removeDelegate:self];
-  [lazyList_ autorelease];
-  [self cancelAndClearPreparations];
-  self.endReached = NO;
-  lazyList_ = [lazyList retain];
-  [lazyList_ addDelegate:self];
-  [self considerGrowingWithRow:0];
+    [lazyList_ cancelPendingRequests];
+    [lazyList_ removeDelegate:self];
+    [lazyList_ autorelease];
+    [self cancelAndClearPreparations];
+    self.endReached = NO;
+    lazyList_ = [lazyList retain];
+    [lazyList_ addDelegate:self];
+    [self considerGrowingWithRow:0];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-  if (self.lazyList) {
-    NSInteger count = self.lazyList.count;
-    if (!self.loadingCellDisabled && !self.endReached) {
-      count++;
+    if (self.endReached && self.lazyList.count == 0) {
+        return 1;
     }
-    return count;
-  }
-  else {
-    return 0;
-  }
+    if (self.lazyList) {
+        NSInteger count = self.lazyList.count;
+        if (!self.loadingCellDisabled && !self.endReached) {
+            count++;
+        }
+        return count;
+    }
+    else {
+        return 0;
+    }
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-  NSInteger prepareCount = 0 + self.preloadBufferSize;
-  [self.lazyList prepareRange:NSMakeRange(0, [self roundUpToPageBoundary:prepareCount])];
-  return 1;
+    if (self.endReached && self.lazyList.count == 0) {
+        return 1;
+    }
+    else {
+        NSInteger prepareCount = 0 + self.preloadBufferSize;
+        [self.lazyList prepareRange:NSMakeRange(0, [self roundUpToPageBoundary:prepareCount])];
+        return 1;
+    }
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-  [self considerGrowingWithRow:indexPath.row];
-  if (self.tableViewCellFactory) {
-    if (indexPath.row < self.lazyList.count) {
-      return [self.tableViewCellFactory cellForTableView:tableView data:[self.lazyList objectAtIndex:indexPath.row] andStyle:self.style];
+    if (self.endReached && self.lazyList.count == 0) {
+        if (self.noDataFactory) {
+            return self.noDataFactory(self, tableView);
+        }
+        else {
+            UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"NONE"] autorelease];
+            UIView* noData = [NoDataUtil waterMarkWithImage:nil title:@"no results" body:nil options:nil];
+            noData.frame = [Util centeredAndBounded:noData.frame.size inFrame:CGRectMake(0, 0, tableView.frame.size.width, tableView.frame.size.height)];
+            [cell.contentView addSubview:noData];
+            return cell;
+        }
     }
     else {
-      return [[[STLoadingCell alloc] init] autorelease];
+        [self considerGrowingWithRow:indexPath.row];
+        if (self.tableViewCellFactory) {
+            if (indexPath.row < self.lazyList.count) {
+                return [self.tableViewCellFactory cellForTableView:tableView data:[self.lazyList objectAtIndex:indexPath.row] andStyle:self.style];
+            }
+            else {
+                return [[[STLoadingCell alloc] init] autorelease];
+            }
+        }
+        else {
+            return [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TODO"] autorelease];
+        }
     }
-  }
-  else {
-    return [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TODO"] autorelease];
-  }
 }
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-  if (self.selectedCallback) {
-    self.selectedCallback(self, tableView, indexPath);
-  }
+    if (self.endReached && self.lazyList.count == 0) {
+    }
+    if (self.selectedCallback) {
+        self.selectedCallback(self, tableView, indexPath);
+    }
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-  if (self.tableViewCellFactory) {
-    id data = nil;
-    if (self.lazyList) {
-      data = [self.lazyList objectAtIndex:indexPath.row];
-      return [self.tableViewCellFactory cellHeightForTableView:tableView data:data andStyle:self.style];
+    if (self.endReached && self.lazyList.count == 0) {
+        return tableView.frame.size.height;
+    }
+    if (self.tableViewCellFactory) {
+        id data = nil;
+        if (self.lazyList) {
+            data = [self.lazyList objectAtIndex:indexPath.row];
+            return [self.tableViewCellFactory cellHeightForTableView:tableView data:data andStyle:self.style];
+        }
+        else {
+            return 100;
+        }
     }
     else {
-      return 100;
+        return 0;
     }
-  }
-  else {
-    return 0;
-  }
 }
 
 - (void)reloadStampedData {
-  self.failed = NO;
-  if (self.lazyList) {
-    [self cancelAndClearPreparations];
-    [self.lazyList reload];
-    self.endReached = NO;
-  }
+    self.failed = NO;
+    if (self.lazyList) {
+        [self cancelAndClearPreparations];
+        [self.lazyList reload];
+        self.endReached = NO;
+    }
 }
 
 - (void)lazyListDidReload:(id<STLazyList>)lazyList {
-  if (self.tableShouldReloadCallback) {
-    self.endReached = NO;
-    [self cancelAndClearPreparations];
-    self.tableShouldReloadCallback(self);
-  }
+    if (self.tableShouldReloadCallback) {
+        self.endReached = NO;
+        [self cancelAndClearPreparations];
+        self.tableShouldReloadCallback(self);
+    }
 }
 
 - (void)lazyListDidGrow:(id<STLazyList>)lazyList {
-  if (self.tableShouldReloadCallback) {
-    [self continuePreparations];
-    self.tableShouldReloadCallback(self);
-  }
+    if (self.tableShouldReloadCallback) {
+        [self continuePreparations];
+        self.tableShouldReloadCallback(self);
+    }
 }
 
 - (void)lazyListDidShrink:(id<STLazyList>)lazyList {
-  if (self.tableShouldReloadCallback) {
-    NSInteger diff = self.prepareCancellations.count - lazyList.count;
-    if (diff > 0) {
-      NSArray* subset = [self.prepareCancellations subarrayWithRange:NSMakeRange(lazyList.count, diff)];
-      for (STCancellation* cancellation in subset) {
-        [cancellation cancel];
-      }
-      [self.prepareCancellations removeObjectsInArray:subset];
+    if (self.tableShouldReloadCallback) {
+        NSInteger diff = self.prepareCancellations.count - lazyList.count;
+        if (diff > 0) {
+            NSArray* subset = [self.prepareCancellations subarrayWithRange:NSMakeRange(lazyList.count, diff)];
+            for (STCancellation* cancellation in subset) {
+                [cancellation cancel];
+            }
+            [self.prepareCancellations removeObjectsInArray:subset];
+        }
+        self.tableShouldReloadCallback(self);
     }
-    self.tableShouldReloadCallback(self);
-  }
 }
 
 - (void)lazyListDidReachMaxCount:(id<STLazyList>)lazyList {
-  if (self.tableShouldReloadCallback) {
-    self.endReached = YES;
-    self.tableShouldReloadCallback(self);
-  }
+    if (self.tableShouldReloadCallback) {
+        self.endReached = YES;
+        [self.delegate tableDelegate:self didFinishLoadingWithCount:lazyList.count];
+        self.tableShouldReloadCallback(self);
+    }
 }
 
 - (void)lazyListDidFail:(id<STLazyList>)lazyList {
-  if (self.tableShouldReloadCallback) {
-    self.failed = YES;
-    self.endReached = YES;
-    [self cancelPendingRequests];
-    self.tableShouldReloadCallback(self);
-    [Util warnWithMessage:@"Loading failed, see log" andBlock:nil];
-  }
+    if (self.tableShouldReloadCallback) {
+        self.failed = YES;
+        self.endReached = YES;
+        [self cancelPendingRequests];
+        self.tableShouldReloadCallback(self);
+        [Util warnWithMessage:@"Loading failed, see log" andBlock:nil];
+    }
 }
 
 - (NSInteger)roundUpToPageBoundary:(NSInteger)count {
-  NSInteger mod = count % self.pageSize;
-  NSInteger result = count - mod;
-  if (mod) {
-    result += self.pageSize;
-  }
-  return result;
+    NSInteger mod = count % self.pageSize;
+    NSInteger result = count - mod;
+    if (mod) {
+        result += self.pageSize;
+    }
+    return result;
 }
 
 - (void)cancelPendingRequests {
-  [self cancelAndClearPreparations];
-  [self.lazyList cancelPendingRequests];
+    [self cancelAndClearPreparations];
+    [self.lazyList cancelPendingRequests];
 }
 
 @end

@@ -116,17 +116,20 @@ static const CGFloat _batchSize = 100;
     }
     [Util confirmWithMessage:message action:@"Send" destructive:NO withBlock:^(BOOL success) {
         if (success) {
+            NSMutableArray* emails = [NSMutableArray array];
             for (STContact* contact in contacts) {
                 contact.invite = NO;
-                [[STRestKitLoader sharedInstance] loadOneWithPath:@"/friendships/invite.json"
-                                                             post:YES
-                                                    authenticated:YES
-                                                           params:[NSDictionary dictionaryWithObject:contact.primaryEmailAddress forKey:@"email"]
-                                                          mapping:[STSimpleBooleanResponse mapping]
-                                                      andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                          
-                                                      }];
+                [emails addObject:contact.primaryEmailAddress];
             }
+            NSString* emailList = [emails componentsJoinedByString:@","];
+            [[STRestKitLoader sharedInstance] loadOneWithPath:@"/friendships/invite.json"
+                                                         post:YES
+                                                authenticated:YES
+                                                       params:[NSDictionary dictionaryWithObject:emailList forKey:@"emails"]
+                                                      mapping:[STSimpleBooleanResponse mapping]
+                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                      
+                                                  }];
             [self.inviteIndices removeAllObjects];
             [self updateSendButton];
         }

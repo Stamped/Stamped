@@ -21,6 +21,9 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "STDebugViewController.h"
+#import "AboutUsViewController.h"
+#import "WebViewController.h"
+#import "TOSViewController.h"
 
 @interface STSettingsViewController ()
 
@@ -75,6 +78,10 @@
     [_sectionViews release], _sectionViews=nil;
     [_dataSource release], _dataSource=nil;
     [super dealloc];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    
 }
 
 
@@ -267,9 +274,30 @@
     } else if (indexPath.section == 1) {
         
         // stamped
-        
-        [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        if (indexPath.row == 0) {
+            //About us
+            AboutUsViewController* vc = [[AboutUsViewController alloc] init];
+            [self.navigationController pushViewController:vc animated:YES];
+            [vc release];
+        }
+        else if (indexPath.row == 1) {
+            //FAQ
+            WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/faq-mobile.html/"]];
+            [self.navigationController pushViewController:vc animated:YES];
+            [vc hideToolbar:YES];
+            [vc release];
+        }
+        else if (indexPath.row == 2) {
+            //Legal
+            TOSViewController* vc = [[TOSViewController alloc] init];
+            [self.navigationController pushViewController:vc animated:YES];
+            vc.doneButton.hidden = YES;
+            [vc release];
 
+        }
+        else {
+            [tableView deselectRowAtIndexPath:indexPath animated:YES];
+        }
         
     } else if (indexPath.section == 2) {
         

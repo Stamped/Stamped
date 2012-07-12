@@ -34,6 +34,7 @@
 #import "STHoverToolbar.h"
 #import "STNavigationItem.h"
 #import "STRootViewController.h"
+#import "STTwitter.h"
 
 typedef enum {
     CommentPanDirectionUp = 0,
@@ -52,7 +53,7 @@ typedef enum {
 
 @end
 
-@interface STStampDetailViewController () <UIActionSheetDelegate, UITextViewDelegate>
+@interface STStampDetailViewController () <UIActionSheetDelegate, UITextViewDelegate, MFMailComposeViewControllerDelegate>
 
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
@@ -60,6 +61,8 @@ typedef enum {
 - (void)_didLoadEntityDetail:(id<STEntityDetail>)detail;
 - (void)_deleteStampButtonPressed:(id)caller;
 - (void)commentButtonPressed;
+
+- (void)shareButtonPressed;
 
 @property (nonatomic, readonly, retain) STStampDetailHeaderView* headerView;
 @property (nonatomic, readonly, retain) STStampDetailCommentsView* commentsView;
@@ -123,10 +126,9 @@ typedef enum {
                      [[[STStampButton alloc] initWithStamp:stamp] autorelease],
                      [[[STTodoButton alloc] initWithStamp:stamp] autorelease],
                      [[[STShareButton alloc] initWithCallback:^{
-            [Util executeOnMainThread:^{
-                [Util warnWithMessage:@"☝ No leaking Stamped 2.0!" andBlock:nil];
-            }];
-        }] autorelease], nil] retain];
+            [weakController shareButtonPressed];
+        }] autorelease],
+                     nil] retain];
         
         CGFloat buttonSpacing = 60;
         buttonContainer_ = [[UIView alloc] initWithFrame:CGRectMake(0, -3, CGRectGetMinX(expandButton_.frame)+50, frame.size.height-7)];
@@ -289,7 +291,7 @@ typedef enum {
         _commentView = [view retain];
         [view release];        
     }
-
+    
 }
 
 - (void)loadEntityDetail {
@@ -305,7 +307,26 @@ typedef enum {
 }
 
 - (void)shareButtonPressed {
-    [Util warnWithMessage:@"☝ No leaking Stamped 2.0!" andBlock:nil];
+    [Util executeOnMainThread:^{
+        
+        UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:nil
+                                                            delegate:self
+                                                   cancelButtonTitle:nil
+                                              destructiveButtonTitle:nil
+                                                   otherButtonTitles:nil] autorelease];
+        
+        if ([TWTweetComposeViewController canSendTweet]) {
+            [sheet addButtonWithTitle:NSLocalizedString(@"Share to Twitter", nil)];
+        }
+        
+        if ([MFMailComposeViewController canSendMail])
+            [sheet addButtonWithTitle:NSLocalizedString(@"Email stamp", nil)];
+        
+        [sheet addButtonWithTitle:@"Copy link"];
+        sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
+        sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+        [sheet showInView:self.view];
+    }];
 }
 
 - (void)viewDidUnload {
@@ -622,6 +643,76 @@ typedef enum {
     
 }
 
+
+- (void)showTweetViewController {
+    TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
+
+    NSString* owner = nil;
+    if ([self.stamp.user.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+        owner = @"my";
+    }
+    else {
+        owner = [NSString stringWithFormat:@"%@'s", self.stamp.user.screenName];
+    }
+    NSString* text = [NSString stringWithFormat:@"Check %@ stamp of %@ at %@",
+                      owner,
+                      self.stamp.entity.title,
+                      self.stamp.URL];
+    if (text.length > 140) {
+        text =[NSString stringWithFormat:@"Check %@ stamp at %@",
+         owner,
+         self.stamp.URL];
+    }
+    if (text.length > 140) {
+        text = [NSString stringWithFormat:@"Check out %@", self.stamp.URL];
+    }
+    [twitter setInitialText:text];
+    
+    if ([TWTweetComposeViewController canSendTweet]) {
+        [self presentViewController:twitter animated:YES completion:nil];
+    }
+    
+    twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
+        [self dismissModalViewControllerAnimated:YES];
+    };
+}
+
+- (void)showEmailViewController {
+    MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+    vc.mailComposeDelegate = self;
+    [vc setSubject:[NSString stringWithFormat:@"Check out this stamp of %@", self.stamp.entity.title]];
+    [vc setMessageBody:[NSString stringWithFormat:@"<a href=\"%@\">%@</a><br/><br/>(Sent via <a href=\"http://stamped.com/\">Stamped</a>)", self.stamp.URL, self.stamp.URL]
+                isHTML:YES];
+    [self presentModalViewController:vc animated:YES];
+    [vc release];
+}
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+    if (error) {
+        [Util warnWithMessage:@"Couldn't send email" andBlock:^{
+            [self dismissModalViewControllerAnimated:YES];
+        }];
+    }
+    else {
+        [self dismissModalViewControllerAnimated:YES];
+    }
+}
+
+- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+        BOOL canTweet = NO;
+        if ([TWTweetComposeViewController canSendTweet]) {
+            canTweet = YES;
+        }
+        if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Copy link"]) {  // Copy link...
+            [UIPasteboard generalPasteboard].string = self.stamp.URL;
+        } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Twitter", nil)] && canTweet) {  // Twitter or cancel depending...
+            [self showTweetViewController];
+        } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
+            [self showEmailViewController];
+        }
+}
 
 
 @end

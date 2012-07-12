@@ -33,6 +33,8 @@ extern NSString* const kTwitterRequestTokenURL;
 extern NSString* const kTwitterAuthorizeURL;
 extern NSString* const kTwitterAccessTokenURL;
 
+extern NSString* const STUtilPopupDismissedNotification;
+
 // The OAuth callback URL. This need not be a real URL, but it is used to
 // determine authorization success or failure.
 extern NSString* const kOAuthCallbackURL;
@@ -111,6 +113,7 @@ typedef enum STGradientStyle {
 
 + (CGRect)centeredAndBounded:(CGSize)size inFrame:(CGRect)frame;
 
++ (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible animated:(BOOL)animated withBackground:(UIColor*)color;
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color;
 
 + (CGFloat)legacyImageScale;
@@ -138,6 +141,8 @@ typedef enum STGradientStyle {
 + (void)executeAsync:(void(^)(void))block;
 
 + (void)executeOnMainThread:(void(^)(void))block;
+
++ (void)executeWithDelay:(NSTimeInterval)timeInterval onMainThread:(void(^)(void))block;
 
 + (void)reframeView:(UIView*)view withDeltas:(CGRect)deltas;
 
@@ -247,6 +252,8 @@ typedef enum STGradientStyle {
                                        references:(NSArray<STActivityReference>*)references 
                                              font:(UIFont*)aFont 
                                             color:(UIColor*)aColor 
+                                    referenceFont:(UIFont*)referenceFont 
+                                   referenceColor:(UIColor*)referenceColor
                                        lineHeight:(CGFloat)lineHeight 
                                            indent:(CGFloat)indent 
                                           kerning:(CGFloat)kerning;
@@ -267,6 +274,8 @@ typedef enum STGradientStyle {
 + (STMenuController*)sharedMenuController;
 
 + (UINavigationController*)currentNavigationController;
+
++ (UIViewController*)topController;
 
 + (void)pushController:(UIViewController*)controller modal:(BOOL)modal animated:(BOOL)animated;
 

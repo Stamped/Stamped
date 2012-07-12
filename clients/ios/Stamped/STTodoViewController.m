@@ -19,6 +19,7 @@
 #import "STSimplePreviews.h"
 #import "STSharedCaches.h"
 #import "STObjectSetAccelerator.h"
+#import "NoDataUtil.h"
 
 typedef enum STTodoState {
 STTodoStateDone,
@@ -111,7 +112,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         
         UIView* tapButton = [Util tapViewWithFrame:_checkView.frame target:self selector:@selector(iconClicked:) andMessage:nil];
         _subtitleView = [[UILabel alloc] initWithFrame:CGRectMake(82, yOffset - 1, 0, 0)];
-        _subtitleView.font = [UIFont stampedFontWithSize:10];
+        _subtitleView.font = [UIFont stampedFontWithSize:12];
         _subtitleView.textColor = [UIColor stampedGrayColor];
         _subtitleView.textAlignment = UITextAlignmentLeft;
         _subtitleView.lineBreakMode = UILineBreakModeTailTruncation;
@@ -448,12 +449,35 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
-    CGRect frame = view.frame;
-    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
-    frame.origin.y = height;
-    frame.size.height -= height;
-    view.frame = frame;
-    [view setupWithTitle:@"No todos" detailTitle:@""];
+    view.custom = YES;
+    
+    UIView* waterMark = [NoDataUtil waterMarkWithImage:[UIImage imageNamed:@"watermark_no_todos"]
+                                                 title:@"No to-do's" 
+                                                  body:@"To add a to-do, just tap this guy when you see it."
+                                               options:nil];
+//    
+//    UIImageView* waterMark = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"watermark_no_todos"]] autorelease];
+//    UILabel* top = [Util viewWithText:@"No to-do's"
+//                                 font:[UIFont stampedBoldFontWithSize:12]
+//                                color:[UIColor stampedGrayColor]
+//                                 mode:UILineBreakModeTailTruncation
+//                           andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+//    UILabel* bottom = [Util viewWithText:@"To add a to-do, just tap this guy when you see it."
+//                                    font:[UIFont stampedFontWithSize:12]
+//                                   color:[UIColor stampedGrayColor]
+//                                    mode:UILineBreakModeTailTruncation
+//                              andMaxSize:CGSizeMake(135, CGFLOAT_MAX)];
+//    top.textAlignment = UITextAlignmentCenter;
+//    bottom.textAlignment = UITextAlignmentCenter;
+//    CGFloat adjustment = 84;
+//    top.frame = [Util centeredAndBounded:top.frame.size inFrame:waterMark.frame];
+//    [Util reframeView:top withDeltas:CGRectMake(0, -14 - adjustment, 0, 0)];
+//    bottom.frame = [Util centeredAndBounded:bottom.frame.size inFrame:waterMark.frame];
+//    [Util reframeView:bottom withDeltas:CGRectMake(0, 9 - adjustment, 0, 0)];
+//    [waterMark addSubview:top];
+//    [waterMark addSubview:bottom];
+    waterMark.frame = [Util centeredAndBounded:waterMark.frame.size inFrame:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
+    [view addSubview:waterMark];
 }
 
 - (void)applicationDidBecomeActive:(id)notImportant {

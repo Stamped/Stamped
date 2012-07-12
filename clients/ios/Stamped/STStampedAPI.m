@@ -46,6 +46,8 @@ NSString* const STStampedAPIUserUpdatedNotification = @"STStampedAPIUserUpdatedN
 NSString* const STStampedAPILocalStampModificationNotification = @"STStampedAPILocalStampModification";
 NSString* const STStampedAPIRefreshedTokenNotification = @"STStampedAPIRefreshTokenNotification";
 NSString* const STStampedAPILocalTodoModificationNotification = @"STStampedAPILocalTodoModificationNotification";
+NSString* const STStampedAPIFollowNotification = @"STStampedAPIFollowNotification";
+NSString* const STStampedAPIUnfollowNotification = @"STStampedAPIUnfollowNotification";
 
 @interface STStampedAPIUserIDs : NSObject
 
@@ -603,6 +605,10 @@ static STStampedAPI* _sharedInstance;
                                                  andCallback:^(id todo, NSError* error, STCancellation* cancellation) {
                                                      block(todo, error, cancellation);
                                                      if (todo) {
+                                                         STCache* cache = [STSharedCaches cacheForTodos];
+                                                         if (cache) {
+                                                             [cache dirty];
+                                                         }
                                                          [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalTodoModificationNotification object:todo];
                                                      }
                                                  }];
@@ -631,7 +637,7 @@ static STStampedAPI* _sharedInstance;
                          andCallback:(void(^)(BOOL,NSError*,STCancellation*))block {
     NSString* path = @"/todos/remove.json";
     NSDictionary* params = [NSDictionary dictionaryWithObject:entityID forKey:@"entity_id"];
-    if (![Util isOffline]) { 
+    if (![Util isOffline] && stampID) { 
         id<STUser> currentUser = self.currentUser;
         [Util executeOnMainThread:^ {
             [self _reduceLocalStampWithStampID:stampID 
@@ -649,6 +655,10 @@ static STStampedAPI* _sharedInstance;
                                                      mapping:[STSimpleTodo mapping] 
                                                  andCallback:^(id result, NSError* error, STCancellation* cancellation) {
                                                      block(error == nil, error, cancellation);
+                                                     STCache* cache = [STSharedCaches cacheForTodos];
+                                                     if (cache) {
+                                                         [cache dirty];
+                                                     }
                                                      if (result) {
                                                          [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalTodoModificationNotification object:nil];
                                                      }
@@ -681,8 +691,8 @@ static STStampedAPI* _sharedInstance;
     NSString* path = @"/friendships/followers.json";
     NSDictionary* params = [NSDictionary dictionaryWithObject:userID forKey:@"user_id"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path
-                                                 post:NO
-                                        authenticated:NO
+                                                 post:NO 
+                                           authPolicy:STRestKitAuthPolicyOptional
                                                params:params
                                               mapping:[STStampedAPIUserIDs mapping]
                                           andCallback:^(id result, NSError* error, STCancellation* cancellation) {
@@ -744,6 +754,11 @@ static STStampedAPI* _sharedInstance;
                                               mapping:[STSimpleUserDetail mapping]
                                           andCallback:^(id result, NSError* error, STCancellation* cancellation) {
                                               if (result) {
+                                                  STCache* cache = [STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends];
+                                                  if (cache) {
+                                                      [cache dirty];
+                                                  }
+                                                  [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIFollowNotification object:userID];
                                                   STSimpleUserDetail* user = result;
                                                   user.following = [NSNumber numberWithBool:YES];
                                               }
@@ -761,6 +776,11 @@ static STStampedAPI* _sharedInstance;
                                               mapping:[STSimpleUserDetail mapping]
                                           andCallback:^(id result, NSError* error, STCancellation* cancellation) {
                                               if (result) {
+                                                  STCache* cache = [STSharedCaches cacheForInboxScope:STStampedAPIScopeFriends];
+                                                  if (cache) {
+                                                      [cache dirty];
+                                                  }
+                                                  [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUnfollowNotification object:userID];
                                                   STSimpleUserDetail* user = result;
                                                   user.following = [NSNumber numberWithBool:NO];
                                               }
@@ -951,7 +971,7 @@ static STStampedAPI* _sharedInstance;
     }
     return [[STRestKitLoader sharedInstance] loadWithPath:path
                                                      post:NO
-                                               authPolicy:STRestKitAuthPolicyOptional
+                                               authPolicy:STRestKitAuthPolicyNone
                                                    params:params
                                                   mapping:[STSimpleEntityAutoCompleteResult mapping]
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
@@ -1475,6 +1495,30 @@ static STStampedAPI* _sharedInstance;
                                               andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
                                                   block((id)results, error, cancellation);
                                               }];
+}
+
+- (STCancellation*)usersFromTwitterWithCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/users/find/twitter.json"
+                                                     post:NO
+                                               authPolicy:STRestKitAuthPolicyWait
+                                                   params:[NSDictionary dictionary]
+                                                  mapping:[STSimpleUserDetail mapping]
+                                              andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
+                                                  block((id)results, error, cancellation);
+                                              }];
+}
+
+
+- (STCancellation*)userDetailForScreenName:(NSString*)screenName 
+                               andCallback:(void (^)(id<STUserDetail> userDetail, NSError* error, STCancellation* cancellation))block {
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/users/show.json"
+                                                        post:NO
+                                                  authPolicy:STRestKitAuthPolicyOptional
+                                                      params:[NSDictionary dictionaryWithObject:screenName forKey:@"screen_name"]
+                                                     mapping:[STSimpleUserDetail mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(result, error, cancellation); 
+                                                 }];
 }
 
 - (void)fastPurge {

@@ -19,12 +19,16 @@
 #import "STChunkGroup.h"
 #import "STChunksView.h"
 #import "STUserImageView.h"
+#import "STSimpleActivityReference.h"
+
+const static NSInteger _bodyOffset = 5;
 
 @interface STFastActivityCellConfiguration : NSObject
 
 - (id)initWithActivity:(id<STActivity>)activity andScope:(STStampedAPIScope)scope;
 
 @property (nonatomic, readonly, retain) id<STActivity> activity;
+@property (nonatomic, readonly, retain) NSArray<STActivityReference>* bodyReferences;
 @property (nonatomic, readonly, assign) STStampedAPIScope scope;
 
 @property (nonatomic, readonly, assign) CGFloat contentOffset;
@@ -91,6 +95,7 @@
 @synthesize bodyChunk = _bodyChunk;
 @synthesize footerChunk = _footerChunk;
 
+@synthesize bodyReferences = _bodyReferences;
 
 - (id)init {
     NSAssert1(NO, @"Shouldn't use init() with %@", self);
@@ -113,6 +118,8 @@
     [_headerChunk release];
     [_bodyChunk release];
     [_footerChunk release];
+    
+    [_bodyReferences release];
     
     [super dealloc];
 }
@@ -188,6 +195,10 @@
 }
 
 - (NSString *)body {
+    if (self.offsetBodyForIcon) {
+        NSString* prefix = [@"" stringByPaddingToLength:_bodyOffset withString:@" " startingAtIndex:0];
+        return [NSString stringWithFormat:@"%@%@", prefix, self.activity.body];
+    }
     return self.activity.body;
 }
 
@@ -211,6 +222,35 @@
     return nil;
 }
 
+- (NSArray<STActivityReference> *)bodyReferences {
+    if (!_bodyReferences) {
+        if (self.activity.bodyReferences) {
+            if (self.offsetBodyForIcon) {
+                NSMutableArray<STActivityReference>* refs = [NSMutableArray array];
+                for (id<STActivityReference> ref in self.activity.bodyReferences) {
+                    STSimpleActivityReference* copy = [[[STSimpleActivityReference alloc] init] autorelease];
+                    copy.action = ref.action;
+                    copy.format = ref.format;
+                    if (ref.indices.count == 2) {
+                        NSInteger start = [[ref.indices objectAtIndex:0] integerValue];
+                        NSInteger end = [[ref.indices objectAtIndex:1] integerValue];
+                        copy.indices = [NSArray arrayWithObjects:[NSNumber numberWithInteger:start + _bodyOffset], [NSNumber numberWithInteger:end + _bodyOffset], nil];
+                        [refs addObject:copy];
+                    }
+                }
+                _bodyReferences = [refs retain];
+            }
+            else {
+                _bodyReferences = [self.activity.bodyReferences retain];
+            }
+        }
+        else {
+            _bodyReferences = (id)[[NSArray alloc] init];
+        }
+    }
+    return _bodyReferences;
+}
+
 - (STChunk*)_chunkWithPrev:(STChunk*)prev
                       text:(NSString*)text
                 references:(NSArray<STActivityReference>*)references
@@ -218,44 +258,101 @@
                      color:(UIColor*)color 
              referenceFont:(UIFont*)referenceFont 
             referenceColor:(UIColor*)referenceColor {
-    NSMutableArray* chunks = [NSMutableArray arrayWithObject:prev];
-    NSInteger normalIndex = 0;
-    if (references) {
-        for (id<STActivityReference> reference in references) {
-            NSNumber* start = reference.start;
-            NSNumber* end = reference.end;
-            if (start && end && start.integerValue >= normalIndex && start.integerValue < end.integerValue && end.integerValue <= text.length) {
-                NSString* before = [text substringWithRange:NSMakeRange(normalIndex, start.integerValue - normalIndex)];
-                if (before.length > 0) {
-                    STChunk* normalChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
-                                                                         text:before
+    
+    
+    return [[[STTextChunk alloc] initWithPrev:prev
+                             attributedString:[Util attributedStringForString:text
+                                                                   references:references
                                                                          font:font
-                                                                        color:color] autorelease];
-                    [chunks addObject:normalChunk];
-                }
-                NSString* active = [text substringWithRange:NSMakeRange(start.integerValue, end.integerValue - start.integerValue)];
-                NSAssert1(active.length > 0, @"active length should be non-zero: %@", active);
-                STChunk* activeChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
-                                                                     text:active
-                                                                     font:referenceFont
-                                                                    color:referenceColor] autorelease];
-                [chunks addObject:activeChunk];
-                normalIndex = end.integerValue;
-//                if (activeChunk.lineCount > 1) {
-//                    NSLog(@"end:%f", activeChunk.end);
-//                }
-            }
-        }
-    }
-    if (normalIndex < text.length) {
-        STChunk* lastChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
-                                                           text:[text substringWithRange:NSMakeRange(normalIndex, text.length - normalIndex)]
-                                                           font:font
-                                                          color:color] autorelease];
-        [chunks addObject:lastChunk];
-    }
-    return [[[STChunkGroup alloc] initWithChunks:chunks] autorelease];
+                                                                        color:color
+                                                                referenceFont:referenceFont
+                                                               referenceColor:referenceColor
+                                                                   lineHeight:prev.lineHeight
+                                                                       indent:0
+                                                                      kerning:0] 
+                               andPrimaryFont:font] autorelease];
+    //    
+    //    NSMutableArray* chunks = [NSMutableArray arrayWithObject:prev];
+    //    NSInteger normalIndex = 0;
+    //    if (references) {
+    //        for (id<STActivityReference> reference in references) {
+    //            NSNumber* start = reference.start;
+    //            NSNumber* end = reference.end;
+    //            if (start && end && start.integerValue >= normalIndex && start.integerValue < end.integerValue && end.integerValue <= text.length) {
+    //                NSString* before = [text substringWithRange:NSMakeRange(normalIndex, start.integerValue - normalIndex)];
+    //                if (before.length > 0) {
+    //                    STChunk* normalChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+    //                                                                         text:before
+    //                                                                         font:font
+    //                                                                        color:color] autorelease];
+    //                    [chunks addObject:normalChunk];
+    //                }
+    //                NSString* active = [text substringWithRange:NSMakeRange(start.integerValue, end.integerValue - start.integerValue)];
+    //                NSAssert1(active.length > 0, @"active length should be non-zero: %@", active);
+    //                STChunk* activeChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+    //                                                                     text:active
+    //                                                                     font:referenceFont
+    //                                                                    color:referenceColor] autorelease];
+    //                [chunks addObject:activeChunk];
+    //                normalIndex = end.integerValue;
+    //            }
+    //        }
+    //    }
+    //    if (normalIndex < text.length) {
+    //        STChunk* lastChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+    //                                                           text:[text substringWithRange:NSMakeRange(normalIndex, text.length - normalIndex)]
+    //                                                           font:font
+    //                                                          color:color] autorelease];
+    //        [chunks addObject:lastChunk];
+    //    }
+    //    return [[[STChunkGroup alloc] initWithChunks:chunks] autorelease];
 }
+
+//- (STChunk*)_chunkWithPrev:(STChunk*)prev
+//                      text:(NSString*)text
+//                references:(NSArray<STActivityReference>*)references
+//                      font:(UIFont*)font 
+//                     color:(UIColor*)color 
+//             referenceFont:(UIFont*)referenceFont 
+//            referenceColor:(UIColor*)referenceColor {
+//    NSMutableArray* chunks = [NSMutableArray arrayWithObject:prev];
+//    NSInteger normalIndex = 0;
+//    if (references) {
+//        for (id<STActivityReference> reference in references) {
+//            NSNumber* start = reference.start;
+//            NSNumber* end = reference.end;
+//            if (start && end && start.integerValue >= normalIndex && start.integerValue < end.integerValue && end.integerValue <= text.length) {
+//                NSString* before = [text substringWithRange:NSMakeRange(normalIndex, start.integerValue - normalIndex)];
+//                if (before.length > 0) {
+//                    STChunk* normalChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+//                                                                         text:before
+//                                                                         font:font
+//                                                                        color:color] autorelease];
+//                    [chunks addObject:normalChunk];
+//                }
+//                NSString* active = [text substringWithRange:NSMakeRange(start.integerValue, end.integerValue - start.integerValue)];
+//                NSAssert1(active.length > 0, @"active length should be non-zero: %@", active);
+//                STChunk* activeChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+//                                                                     text:active
+//                                                                     font:referenceFont
+//                                                                    color:referenceColor] autorelease];
+//                [chunks addObject:activeChunk];
+//                normalIndex = end.integerValue;
+////                if (activeChunk.lineCount > 1) {
+////                    NSLog(@"end:%f", activeChunk.end);
+////                }
+//            }
+//        }
+//    }
+//    if (normalIndex < text.length) {
+//        STChunk* lastChunk = [[[STTextChunk alloc] initWithPrev:chunks.lastObject
+//                                                           text:[text substringWithRange:NSMakeRange(normalIndex, text.length - normalIndex)]
+//                                                           font:font
+//                                                          color:color] autorelease];
+//        [chunks addObject:lastChunk];
+//    }
+//    return [[[STChunkGroup alloc] initWithChunks:chunks] autorelease];
+//}
 
 - (STChunk*)_contentStartWithYOffset:(CGFloat)y end:(CGFloat)end {
     
@@ -287,10 +384,21 @@
 
 - (STChunk*)bodyChunk {
     if (!_bodyChunk && self.body) {
-        STChunk* start = [self _contentStartWithYOffset:self.headerHeight end:self.offsetBodyForIcon ? 15 : 0];
+        STChunk* start = [self _contentStartWithYOffset:self.headerHeight end:0];
+        //        _bodyChunk = [[STTextChunk alloc] initWithPrev:start
+        //                                      attributedString:[Util attributedStringForString:self.body
+        //                                                                            references:self.activity.bodyReferences
+        //                                                                                  font:self.bodyFontNormal
+        //                                                                                 color:self.bodyColorNormal
+        //                                                                         referenceFont:self.bodyFontAction
+        //                                                                        referenceColor:self.bodyColorAction
+        //                                                                            lineHeight:start.lineHeight
+        //                                                                                indent:0
+        //                                                                               kerning:0] 
+        //                                        andPrimaryFont:self.bodyFontNormal];
         _bodyChunk = [[self _chunkWithPrev:start
                                       text:self.body
-                                references:self.activity.bodyReferences
+                                references:self.bodyReferences
                                       font:self.bodyFontNormal
                                      color:self.bodyColorNormal
                              referenceFont:self.bodyFontAction
@@ -394,11 +502,11 @@
 }
 
 - (UIFont *)headerFontNormal {
-    return [UIFont stampedFontWithSize:10];
+    return [UIFont stampedFontWithSize:12];
 }
 
 - (UIFont *)headerFontAction {
-    return [UIFont stampedBoldFontWithSize:10];
+    return [UIFont stampedBoldFontWithSize:12];
 }
 
 - (UIFont *)bodyFontNormal {
@@ -540,11 +648,11 @@
         }
         if (self.configuration.useUserImage && self.activity.subjects.count > 0) {
             id<STUser> user = [self.activity.subjects objectAtIndex:0];
-//            STUserImageView* userImageView = [[[STUserImageView alloc] initWithSize:self.configuration.imageFrame.size.width] autorelease];
-//            userImageView.frame = self.configuration.imageFrame;
-//            [self addSubview:userImageView];
-//            [userImageView setupWithUser:user viewAction:YES];
-//            imageView = userImageView;
+            //            STUserImageView* userImageView = [[[STUserImageView alloc] initWithSize:self.configuration.imageFrame.size.width] autorelease];
+            //            userImageView.frame = self.configuration.imageFrame;
+            //            [self addSubview:userImageView];
+            //            [userImageView setupWithUser:user viewAction:YES];
+            //            imageView = userImageView;
             imageView = [Util profileImageViewForUser:user withSize:self.configuration.imageFrame.size.width];
             imageView.frame = self.configuration.imageFrame;
             [self.contentView addSubview:imageView];
@@ -585,7 +693,7 @@
                 UIView* currentImage = [Util profileImageViewForUser:currentUser withSize:self.configuration.imagesSize.width];
                 [Util reframeView:currentImage withDeltas:CGRectMake(x, y, 0, 0)];
                 x += self.configuration.imagesSpacing;
-                [self addSubview:currentImage];
+                [self.contentView addSubview:currentImage];
                 if (self.configuration.iconOnImages ) {
                     UIImageView* iconImageView = [[[UIImageView alloc] initWithFrame:self.configuration.iconFrame] autorelease];
                     [Util reframeView:iconImageView withDeltas:CGRectMake(currentImage.frame.origin.x, currentImage.frame.origin.y, 0, 0)];

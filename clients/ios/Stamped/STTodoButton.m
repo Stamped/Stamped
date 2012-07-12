@@ -76,7 +76,7 @@
                 }
                 else {
                     self.on = !self.on;
-                    [Util warnWithMessage:@"Todo failed; see log" andBlock:nil];
+                    [Util warnWithAPIError:error andBlock:nil];
                 }
             }];
             context.stamp = self.stamp;
@@ -92,13 +92,24 @@
         }
         else {
             BOOL current = self.on;
-            [[STStampedAPI sharedInstance] todoWithStampID:nil entityID:self.entityID andCallback:^(id<STTodo> todo, NSError* error, STCancellation* cancellation) {
-                self.waiting = NO;
-                if (!todo) {
-                    self.on = current;
-                    [Util warnWithMessage:@"Todo failed; see log" andBlock:nil];
-                }
-            }];
+            if (current) {
+                [[STStampedAPI sharedInstance] untodoWithStampID:nil entityID:self.entityID andCallback:^(BOOL success, NSError * error, STCancellation * cancellation) {
+                    self.waiting = NO;
+                    if (error) {
+                        self.on = current;
+                        [Util warnWithAPIError:error andBlock:nil];
+                    }
+                }];
+            }
+            else {
+                [[STStampedAPI sharedInstance] todoWithStampID:nil entityID:self.entityID andCallback:^(id<STTodo> todo, NSError* error, STCancellation* cancellation) {
+                    self.waiting = NO;
+                    if (!todo) {
+                        self.on = current;
+                        [Util warnWithAPIError:error andBlock:nil];
+                    }
+                }];
+            }
             self.on = !current;
         }
     }

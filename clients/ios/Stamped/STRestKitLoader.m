@@ -27,6 +27,7 @@ static NSString* const _refreshPath = @"/oauth2/token.json";
 
 
 NSString* const STRestKitLoaderErrorDomain = @"STRestKitLoaderErrorDomain";
+NSString* const STRestKitErrorIDKey = @"STRestKitErrorIDKey";
 
 @interface STRestKitLoaderHelper : NSObject <RKObjectLoaderDelegate, STCancellationDelegate>
 
@@ -217,6 +218,8 @@ static STRestKitLoader* _sharedInstance;
         _authRequestQueue = [[RKRequestQueue alloc] init];
         _authRequestQueue.delegate = self;
         _authRequestQueue.concurrentRequestsLimit = 1;
+        _authRequestQueue.requestTimeout = 35;
+        [RKClient sharedClient].requestQueue.requestTimeout = 35;
         [_authRequestQueue start];
         
         NSAssert1(_authRequestQueue != _objectManager.requestQueue, @"Auth queue should not be equal to normal queue %@", _authRequestQueue);
@@ -363,12 +366,18 @@ static STRestKitLoader* _sharedInstance;
     if (!errorMessage) {
         errorMessage = error.localizedDescription;
     }
+    if (!errorID) {
+        errorID = @"unknown";
+    }
     NSInteger httpCode = objectLoader.response.statusCode;
-    error = [NSError errorWithDomain:error.domain code:error.code userInfo:[NSDictionary dictionaryWithObject:errorMessage forKey:NSLocalizedDescriptionKey]];
+    error = [NSError errorWithDomain:error.domain code:error.code userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                            errorMessage, NSLocalizedDescriptionKey,
+                                                                            errorID, STRestKitErrorIDKey,
+                                                                            nil]];
     [STDebug log:[NSString stringWithFormat:
                   @"RestKit: Failed request with %d:\n%@\n%@\n%@",
                   httpCode,
-                  objectLoader.URL,
+                  objectLoader.resourcePath,
                   objectLoader.params,
                   error]];
     BOOL retry = NO;
@@ -388,6 +397,9 @@ static STRestKitLoader* _sharedInstance;
                 retry = YES;
             }
         }
+    }
+    else if (httpCode == 401 && [errorID isEqualToString:@"facebook_auth"]) {
+        
     }
     if (retry) {
         [self autoreleaseHelper:helper];
@@ -423,7 +435,7 @@ static STRestKitLoader* _sharedInstance;
             if (!cancellation.cancelled) {
                 block(nil, [NSError errorWithDomain:STRestKitLoaderErrorDomain 
                                                code:STRestKitLoaderErrorNotConnected
-                                           userInfo:[NSDictionary dictionaryWithObject:@"No network connection available" forKey:NSLocalizedDescriptionKey]
+                                           userInfo:[NSDictionary dictionaryWithObject:@"You are not connected to the internet." forKey:NSLocalizedDescriptionKey]
                             ], cancellation);
                 cancellation.delegate = nil;
             }
@@ -910,7 +922,7 @@ static STRestKitLoader* _sharedInstance;
             return;
         }
         NSMutableDictionary* params = [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
-        if (request.isGET && [request.URL isKindOfClass:[RKURL class]]) {
+        if (request.isGET /*&& [request.URL isKindOfClass:[RKURL class]]*/) {
             request.resourcePath = [request.resourcePath appendQueryParams:params];
             request.params = nil;
         }

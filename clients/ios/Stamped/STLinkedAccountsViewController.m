@@ -528,27 +528,6 @@ static const CGFloat _headerHeight = _cellHeight;
     }
 }
 
-- (void)request:(FBRequest *)request didLoad:(id)result {
-    STFacebook* fb = [STFacebook sharedInstance];
-    if (fb.facebook.accessToken && [result objectForKey:@"username"] && [result objectForKey:@"name"] && [result objectForKey:@"id"]) {
-        NSMutableDictionary* params = [NSMutableDictionary dictionary];
-        [params setObject:[result objectForKey:@"username"] forKey:@"linked_screen_name"];
-        [params setObject:[result objectForKey:@"name"] forKey:@"linked_name"];
-        [params setObject:[result objectForKey:@"id"] forKey:@"linked_user_id"];
-//        [params setObject:@"facebook" forKey:@"service_name"];
-        [params setObject:fb.facebook.accessToken forKey:@"token"];
-        //[params setObject:fb.facebook.expirationDate forKey:@"token_expiration"];
-        [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/facebook/add.json"
-                                                     post:YES
-                                            authenticated:YES
-                                                   params:params
-                                                  mapping:[STSimpleBooleanResponse mapping]
-                                              andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                  
-                                              }];
-    }
-}
-
 - (void)connectTemp:(id)notImportant {
     [Util warnWithMessage:@"Not implemented yet..." andBlock:nil];
 }
@@ -556,8 +535,6 @@ static const CGFloat _headerHeight = _cellHeight;
 - (void)connectToFacebook:(id)notImportant {
     if (!self.locked) {
         [[STFacebook sharedInstance] auth];
-        Facebook* fb = [[STFacebook sharedInstance] facebook];
-        self.meDetailsRequest = [fb requestWithGraphPath:@"me" andDelegate:self];
     }
 }
 

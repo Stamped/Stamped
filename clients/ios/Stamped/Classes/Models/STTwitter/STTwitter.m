@@ -123,7 +123,6 @@ static id __instance;
         if ([request responseStatusCode] == 200) {
             
             NSDictionary *params = [self paramsForString:[_request responseString]];
-            //[[GiftureSettings sharedSettings] setTwitterUserInfo:params];
             _twitterUserAuth = [params retain];
             [STEvents postEvent:EventTypeTwitterAuthFinished object:_twitterUserAuth];
             
@@ -153,7 +152,7 @@ static id __instance;
         NSDictionary *params = [self paramsForString:[request responseString]];
         NSString *string = [NSString stringWithFormat:@"http://api.twitter.com/oauth/authorize?oauth_token=%@", [params objectForKey:@"oauth_token"]];
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:string]];
-
+        
     }];
     
     [_request setRequestMethod:@"POST"];
@@ -317,6 +316,7 @@ static id __instance;
 
 #pragma mark - Requests
 
+
 - (void)reverseAuthWithAccount:(ACAccount*)account {
     
     __block EGOHTTPRequest *_request = [[EGOHTTPRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"] completion:^(id request, NSError *error) {
@@ -337,14 +337,14 @@ static id __instance;
                 _twitterUserAuth = [params retain];
                 [STEvents postEvent:EventTypeTwitterAuthFinished object:_twitterUserAuth];
                 [responseStr release];
-
+                
                 NSLog(@"login info %@", _twitterUserAuth);
                 
             }];
             
             [params release];
             [twRequest release];
-
+            
         } else {
             
             NSLog(@"revers oauth failed");
@@ -361,7 +361,7 @@ static id __instance;
     
     NSString *authBody = [@"x_auth_mode=reverse_auth" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     [_request setRequestBody:[authBody dataUsingEncoding:NSUTF8StringEncoding]]; 
-
+    
     [_request startAsynchronous];
     [_request release];
     
@@ -369,7 +369,7 @@ static id __instance;
 
 - (void)requestToken {
     
-   
+    
     
 }
 
@@ -389,7 +389,7 @@ static id __instance;
     ACAccountType *accountType = [_accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
     NSArray *accounts = [_accountStore accountsWithAccountType:accountType];
     return [accounts objectAtIndex:index];
-
+    
 }
 
 - (NSArray*)accounts {
@@ -397,7 +397,7 @@ static id __instance;
     ACAccountType *accountType = [_accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
     NSArray *accounts = [_accountStore accountsWithAccountType:accountType];
     return accounts;
-
+    
 }
 
 
@@ -409,6 +409,46 @@ static id __instance;
     // open settings.app
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"prefs://"]];
     
+}
+
+- (STCancellation*)sendTweet:(NSString*)tweet withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    ACAccount* account = nil;
+    STTwitter* twitter = [STTwitter sharedInstance];
+    for (NSInteger i = 0; i < twitter.accounts.count; i++) {
+        ACAccount* cur = [twitter.accounts objectAtIndex:i];
+        if ([cur.username isEqualToString:twitter.twitterUsername]) {
+            account = cur;
+            break;
+        }
+    }
+    STCancellation* cancellation = [STCancellation cancellation];
+    if (account) {
+        NSDictionary* params = [NSDictionary dictionaryWithObject:tweet forKey:@"status"];
+        NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/statuses/update.json"];
+        TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST] autorelease];    
+        request.account = account;
+        [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
+            NSLog(@"tweet:%@",error);
+            if (!cancellation.cancelled && block) {
+                if (!error) {
+                    block(YES, nil, cancellation);
+                }
+                else {
+                    block(NO, error, cancellation);
+                }
+            }
+        }];
+    }
+    else {
+        [Util executeOnMainThread:^{
+            if (!cancellation.cancelled && block) {
+                block(NO, 
+                      [NSError errorWithDomain:@"Twitter" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Couldn't send tweet." forKey:NSLocalizedDescriptionKey]],
+                      cancellation);
+            }
+        }];
+    }
+    return cancellation;
 }
 
 @end

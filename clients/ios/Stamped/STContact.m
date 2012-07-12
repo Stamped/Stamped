@@ -19,6 +19,8 @@
 @synthesize image = _image;
 @synthesize imageURL = _imageURL;
 @synthesize facebookID = _facebookID;
+@synthesize twitterUsername = _twitterUsername;
+@synthesize twitterID = _twitterID;
 
 @synthesize userDetail = _userDetail;
 
@@ -31,6 +33,8 @@
     [_image release];
     [_imageURL release];
     [_facebookID release];
+    [_twitterUsername release];
+    [_twitterID release];
     [super dealloc];
 }
 
@@ -132,6 +136,19 @@
     return mapping;
 }
 
++ (RKObjectMapping*)twitterMapping {
+    RKObjectMapping* mapping = [RKObjectMapping mappingForClass:self];
+    
+    [mapping mapKeyPathsToAttributes:
+     @"image_url", @"imageURL",
+     @"name", @"name",
+     @"screen_name", @"twitterUsername",
+     @"user_id", @"twitterID",
+     nil];
+    
+    return mapping;
+}
+
 + (STCancellation*)contactsFromFacebookWithOffset:(NSInteger)offset 
                                             limit:(NSInteger)limit 
                                       andCallback:(void (^)(NSArray*, NSError*, STCancellation*))block {
@@ -146,5 +163,18 @@
                                               andCallback:block];
 }
 
++ (STCancellation*)contactsFromTwitterWithOffset:(NSInteger)offset 
+                                           limit:(NSInteger)limit 
+                                     andCallback:(void (^)(NSArray*, NSError*, STCancellation*))block {
+    return [[STRestKitLoader sharedInstance] loadWithPath:@"/users/invite/twitter/collection.json"
+                                                     post:NO
+                                               authPolicy:STRestKitAuthPolicyWait
+                                                   params:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                           [NSNumber numberWithInteger:offset], @"offset",
+                                                           [NSNumber numberWithInteger:limit], @"limit",
+                                                           nil]
+                                                  mapping:[self twitterMapping]
+                                              andCallback:block];
+}
 
 @end

@@ -12,12 +12,16 @@
 #import <CoreText/CoreText.h>
 #import "UIColor+Stamped.h"
 #import "Util.h"
+#import "STPlayer.h"
+#import "STPlayerPopUp.h"
 
 @interface STNavigationBar ()
 - (void)initialize;
 - (CGPathRef)newPathForTitle;
 
 @property (nonatomic, readonly) CALayer* ripplesLayer;
+@property (nonatomic, readonly, retain) UIButton* playerIcon;
+
 @end
 
 @implementation STNavigationBar
@@ -26,35 +30,38 @@
 @synthesize hideLogo = hideLogo_;
 @synthesize string = string_;
 @synthesize black = black_;
+@synthesize playerIcon = _playerIcon;
 
 - (id)initWithFrame:(CGRect)frame {
-  self = [super initWithFrame:frame];
-  if (self)
-    [self initialize];
-  
-  return self;
+    self = [super initWithFrame:frame];
+    if (self) {
+        [self initialize];
+    }
+    return self;
 }
 
 - (id)initWithCoder:(NSCoder*)aDecoder {
-  self = [super initWithCoder:aDecoder];
-  if (self)
-    [self initialize];
-  
-  return self;
+    self = [super initWithCoder:aDecoder];
+    if (self)
+        [self initialize];
+    
+    return self;
 }
 
 - (void)dealloc {
-  self.string = nil;
-  ripplesLayer_ = nil;
-  [super dealloc];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    self.string = nil;
+    [_playerIcon release];
+    ripplesLayer_ = nil;
+    [super dealloc];
 }
 
 - (void)drawRect:(CGRect)rect {
-  if (black_) {
-    [super drawRect:rect];
-    return;
-  }
-
+    if (black_) {
+        [super drawRect:rect];
+        return;
+    }
+    
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSetFillColorWithColor(ctx, [UIColor blackColor].CGColor);
     CGContextFillRect(ctx, rect);
@@ -66,7 +73,7 @@
         [[UIImage imageNamed:@"nav_bar_no_logo"] drawInRect:rect];
     else
         [[UIImage imageNamed:@"nav_bar"] drawInRect:rect];
-  
+    
     if (hideLogo_ && self.topItem.title) {
         
         for (UIView *view in self.subviews) {
@@ -85,9 +92,14 @@
 }
 
 - (void)initialize {
-
+    
+    _playerIcon = [UIButton buttonWithType:UIButtonTypeCustom];
+    _playerIcon.frame = CGRectMake(205, 15, 20, 20);
+    [_playerIcon setImage:[UIImage imageNamed:@"currentplaylist_icon"] forState:UIControlStateNormal];
+    [_playerIcon addTarget:self action:@selector(playerButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+    
     self.layer.masksToBounds = NO;
-
+    
     CGFloat ripplesY = CGRectGetMaxY(self.bounds);
     ripplesLayer_ = [[CALayer alloc] init];
     ripplesLayer_.contentsScale = [[UIScreen mainScreen] scale];
@@ -96,75 +108,86 @@
     ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
     [self.layer addSublayer:ripplesLayer_];
     [ripplesLayer_ release];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerStateChanged:) name:STPlayerStateChangedNotification object:nil];
+    [self playerStateChanged:nil];
+    [self addSubview:_playerIcon];
+}
 
+- (void)playerButtonClicked:(id)notImportant {
+    [STPlayerPopUp present];
+}
+
+- (void)playerStateChanged:(id)notImportant {
+    self.playerIcon.hidden = [STPlayer sharedInstance].paused;
 }
 
 - (void)setBlack:(BOOL)black {
-  if (black == black_)
-    return;
-
-  black_ = black;
-  
-  ripplesLayer_.hidden = black;
-  [self setNeedsDisplay];
+    if (black == black_)
+        return;
+    
+    black_ = black;
+    
+    ripplesLayer_.hidden = black;
+    [self setNeedsDisplay];
 }
 
 - (CGPathRef)newPathForTitle {
-  if (!self.topItem.title)
-    return nil;
-
+    if (!self.topItem.title)
+        return nil;
+    
     NSString* title = self.topItem.title;
-
-  CGContextRef ctx = UIGraphicsGetCurrentContext(); 
-  
-  // Flip the coordinate system for right-reading text.
-  CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
+    
+    CGContextRef ctx = UIGraphicsGetCurrentContext(); 
+    
+    // Flip the coordinate system for right-reading text.
+    CGContextSetTextMatrix(ctx, CGAffineTransformIdentity);
 	CGContextTranslateCTM(ctx, 0, self.bounds.size.height);
 	CGContextScaleCTM(ctx, 1.0, -1.0);
-  
-  // Make an attrributed string reference from string member variable.
-  CFAttributedStringRef attStr;
-
-  UIFont* font = [UIFont fontWithName:@"Helvetica-Bold" size:20.0];
-  CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
-  NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:
-                              (id)ctFont, kCTFontAttributeName, // NSFontAttributeName
-                              (id)[NSNumber numberWithInteger:0], kCTLigatureAttributeName,
-                              nil];
-  NSAssert(attributes != nil, @"Font attributes are nil!");
-  
-  NSAttributedString* nsAttStr = [[[NSAttributedString alloc] initWithString:title
-                                                                  attributes:attributes] autorelease];
-  attStr = (CFAttributedStringRef)nsAttStr; 
-  
-  // Make a path from each glyph of the attributed string ref.
-  CTLineRef line = CTLineCreateWithAttributedString(attStr);
-  CFArrayRef runArray = CTLineGetGlyphRuns(line);
-  CGMutablePathRef textPath = CGPathCreateMutable();
-  
-  // For each RUN...
-  for (CFIndex runIndex = 0; runIndex < CFArrayGetCount(runArray); runIndex++) {
-    // Get FONT for this run...
-    CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, runIndex);
-    CTFontRef runFont = CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
     
-    // For each GLYPH in run...
-    for (CFIndex runGlyphIndex = 0; runGlyphIndex < CTRunGetGlyphCount(run); runGlyphIndex++) {
-      //  Get the glyph...
-      CFRange thisGlyphRange = CFRangeMake(runGlyphIndex, 1);
-      CGGlyph glyph;
-      CGPoint position;
-      CTRunGetGlyphs(run, thisGlyphRange, &glyph);
-      CTRunGetPositions(run, thisGlyphRange, &position);
-      
-      // Add it to the textPath.
-      //TODO MEMORY_LEAK
-      CGPathRef path = CTFontCreatePathForGlyph(runFont, glyph, NULL);
-      CGAffineTransform transform = CGAffineTransformMakeTranslation(position.x, position.y);
-      CGPathAddPath(textPath, &transform, path);
+    // Make an attrributed string reference from string member variable.
+    CFAttributedStringRef attStr;
+    
+    UIFont* font = [UIFont fontWithName:@"Helvetica-Bold" size:20.0];
+    CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
+    NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                (id)ctFont, kCTFontAttributeName, // NSFontAttributeName
+                                (id)[NSNumber numberWithInteger:0], kCTLigatureAttributeName,
+                                nil];
+    NSAssert(attributes != nil, @"Font attributes are nil!");
+    
+    NSAttributedString* nsAttStr = [[[NSAttributedString alloc] initWithString:title
+                                                                    attributes:attributes] autorelease];
+    attStr = (CFAttributedStringRef)nsAttStr; 
+    
+    // Make a path from each glyph of the attributed string ref.
+    CTLineRef line = CTLineCreateWithAttributedString(attStr);
+    CFArrayRef runArray = CTLineGetGlyphRuns(line);
+    CGMutablePathRef textPath = CGPathCreateMutable();
+    
+    // For each RUN...
+    for (CFIndex runIndex = 0; runIndex < CFArrayGetCount(runArray); runIndex++) {
+        // Get FONT for this run...
+        CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(runArray, runIndex);
+        CTFontRef runFont = CFDictionaryGetValue(CTRunGetAttributes(run), kCTFontAttributeName);
+        
+        // For each GLYPH in run...
+        for (CFIndex runGlyphIndex = 0; runGlyphIndex < CTRunGetGlyphCount(run); runGlyphIndex++) {
+            //  Get the glyph...
+            CFRange thisGlyphRange = CFRangeMake(runGlyphIndex, 1);
+            CGGlyph glyph;
+            CGPoint position;
+            CTRunGetGlyphs(run, thisGlyphRange, &glyph);
+            CTRunGetPositions(run, thisGlyphRange, &position);
+            
+            // Add it to the textPath.
+            //TODO MEMORY_LEAK
+            CGPathRef path = CTFontCreatePathForGlyph(runFont, glyph, NULL);
+            CGAffineTransform transform = CGAffineTransformMakeTranslation(position.x, position.y);
+            CGPathAddPath(textPath, &transform, path);
+        }
     }
-  }
-  return textPath;
+    return textPath;
 }
 
 - (void)showUserStrip:(BOOL)show forUser:(id<STUser>)user {
@@ -176,7 +199,7 @@
         
         float r2,g2,b2;
         [Util splitHexString:user.secondaryColor toRed:&r2 green:&g2 blue:&b2];
-                
+        
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, self.bounds.size.height, self.bounds.size.width, 4.0f)];
         view.backgroundColor = [UIColor whiteColor];
         [self insertSubview:view atIndex:0];

@@ -17,6 +17,14 @@
 #import "STInviteTableCell.h"
 #import "STRestKitLoader.h"
 #import "STSimpleBooleanResponse.h"
+#import "STFacebook.h"
+#import "STEvents.h"
+
+typedef enum {
+    STFindFacebookAuthStateNone = 0,
+    STFindFacebookAuthStateReauth,
+    STFindFacebookAuthStateTried,
+} STFindFacebookAuthState;
 
 static const CGFloat _batchSize = 100;
 
@@ -34,6 +42,12 @@ static const CGFloat _batchSize = 100;
 
 @property (nonatomic, readonly, retain) NSMutableSet* inviteIndices;
 
+@property (nonatomic, readwrite, assign) BOOL waitingForFB;
+
+@property (nonatomic, readwrite, assign) STFindFacebookAuthState reauthing;
+
+@property (nonatomic, readwrite, assign) BOOL shouldShowFacebookPopUp;
+
 @end
 
 @implementation STFindFacebookViewController
@@ -49,6 +63,10 @@ static const CGFloat _batchSize = 100;
 @synthesize offset = _offset;
 
 @synthesize inviteIndices = _inviteIndices;
+@synthesize waitingForFB = _waitingForFB;
+
+@synthesize reauthing = _reauthing;
+@synthesize shouldShowFacebookPopUp = _shouldShowFacebookPopUp;
 
 - (id)init
 {
@@ -73,14 +91,44 @@ static const CGFloat _batchSize = 100;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [self loadMore];
+    [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFinished];
+    [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFailed];
+    [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookLoggedOut];
+    if ([STFacebook sharedInstance].facebook.isSessionValid) {        
+        [self loadMore];
+    }
+    else {
+        self.waitingForFB = YES;
+        [[STFacebook sharedInstance] auth];
+    }
 }
 
 - (void)viewDidUnload
 {
     [super viewDidUnload];
+    [STEvents removeObserver:self];
     [self clearAll];
     [self updateSendButton];
+}
+
+- (void)facebookAuthChanged:(id)notImportant {
+    if ([STFacebook sharedInstance].facebook.isSessionValid) {
+        self.waitingForFB = NO;
+        [self loadMore];
+        if (self.shouldShowFacebookPopUp) {
+            self.shouldShowFacebookPopUp = YES;
+            [[STFacebook sharedInstance] showFacebookAlert];
+        }
+    }
+    else if (self.reauthing == STFindFacebookAuthStateReauth) {
+        self.reauthing = STFindFacebookAuthStateTried;
+        [[STFacebook sharedInstance] auth];
+    }
+    else {
+        [Util warnWithMessage:@"Could not connect to Facebook" andBlock:^{
+            [Util compareAndPopController:self animated:YES];
+        }];
+    }
 }
 
 - (void)sendButtonClicked:(id)notImportant {
@@ -106,16 +154,24 @@ static const CGFloat _batchSize = 100;
     }
     [Util confirmWithMessage:message action:@"Send" destructive:NO withBlock:^(BOOL success) {
         if (success) {
+            Facebook* fb = [STFacebook sharedInstance].facebook;
             for (STContact* contact in contacts) {
-                contact.invite = NO;
-                [[STRestKitLoader sharedInstance] loadOneWithPath:@"/friendships/invite.json"
-                                                             post:YES
-                                                    authenticated:YES
-                                                           params:[NSDictionary dictionaryWithObject:contact.primaryEmailAddress forKey:@"email"]
-                                                          mapping:[STSimpleBooleanResponse mapping]
-                                                      andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                          
-                                                      }];
+                if (fb.isSessionValid) {
+                    contact.invite = NO;
+                    
+                    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                                   kFacebookAppID, @"app_id",
+                                                   @"http://stamped.com", @"link",
+                                                   @"Stamped", @"name", nil];
+                    [params setObject:[self stampedLogoImageURL] forKey:@"picture"];
+                    [params setObject:[NSString stringWithFormat:@"Hey %@, I think you have good taste, so join me on Stamped to share and discover great things.", contact.name]
+                               forKey:@"message"];
+                    
+                    [fb requestWithGraphPath:[contact.facebookID stringByAppendingString:@"/feed"]
+                                   andParams:params
+                               andHttpMethod:@"POST"
+                                 andDelegate:nil];
+                }
             }
             [self.inviteIndices removeAllObjects];
             [self updateSendButton];
@@ -164,6 +220,8 @@ static const CGFloat _batchSize = 100;
 - (void)clearAll {
     self.offset = 0;
     self.consumedAllContacts = NO;
+    [self.friendsCancellation cancel];
+    self.friendsCancellation = nil;
     [self.unresolvedContacts removeAllObjects];
     [self.inviteIndices removeAllObjects];
     [self.matchCancellation cancel];
@@ -185,11 +243,24 @@ static const CGFloat _batchSize = 100;
         [self.tableView endUpdates];
     }
     else {
-        [Util warnWithAPIError:error andBlock:^{
-            [Util compareAndPopController:self animated:YES]; 
-        }];
+        NSString* errorID = [error.userInfo objectForKey:STRestKitErrorIDKey];
+        if (self.reauthing == STFindFacebookAuthStateNone && ([errorID isEqualToString:@"bad_request"] || [errorID isEqualToString:@"facebook_auth"] || [errorID isEqualToString:@"invalid_request"])) {
+            if (![errorID isEqualToString:@"facebook_auth"]) {
+                self.shouldShowFacebookPopUp = YES;
+            }
+            [self clearAll];
+            self.waitingForFB = YES;
+            self.reauthing = STFindFacebookAuthStateReauth;
+            [[STFacebook sharedInstance] invalidate];
+        }
+        else {
+            [Util warnWithAPIError:error andBlock:^{
+                [Util compareAndPopController:self animated:YES]; 
+            }];
+        }
     }
     [self dataSourceDidFinishLoading];
+    [self loadMore];
 }
 
 - (void)handleFacebookContacts:(NSArray*)contacts andError:(NSError*)error {
@@ -227,76 +298,11 @@ static const CGFloat _batchSize = 100;
     [self dataSourceDidFinishLoading];
 }
 
-//- (void)handleBoth {
-//    if (!self.pendingPhoneCancellation && !self.pendingEmailCancellation) {
-//        if (self.phoneResponse.count) {
-//            for (id<STUserDetail> user in self.phoneResponse) {
-//                NSString* searchID = [user searchIdentifier];
-//                NSArray* indices = [self.pendingContactsByPhone objectForKey:searchID];
-//                if (indices.count) {
-//                    for (NSNumber* index in indices) {
-//                        STContact* contact = [self.pendingContacts objectAtIndex:index.integerValue];
-//                        contact.userDetail = user;
-//                    }
-//                }
-//            }
-//        }
-//        if (self.emailResponse.count) {
-//            for (id<STUserDetail> user in self.emailResponse) {
-//                NSString* searchID = [user searchIdentifier];
-//                NSArray* indices = [self.pendingContactsByEmail objectForKey:searchID];
-//                if (indices.count) {
-//                    for (NSNumber* index in indices) {
-//                        STContact* contact = [self.pendingContacts objectAtIndex:index.integerValue];
-//                        contact.userDetail = user;
-//                    }
-//                }
-//            }
-//        }
-//        NSInteger countBefore = self.resolvedContacts.count;
-//        for (STContact* contact in self.pendingContacts) {
-//            if (contact.userDetail) {
-//                NSString* userID = contact.userDetail.userID;
-//                if (![self.resolvedUserIDs containsObject:userID]) {
-//                    [self.resolvedContacts addObject:contact];
-//                    [self.resolvedUserIDs addObject:userID];
-//                }
-//            }
-//            else if (contact.emailAddresses.count) {
-//                [self.unresolvedContacts addObject:contact];
-//            }
-//        }
-//        NSInteger delta = self.resolvedContacts.count - countBefore;
-//        self.pendingContacts = nil;
-//        self.emailResponse = nil;
-//        self.phoneResponse = nil;
-//        self.pendingContactsByEmail = nil;
-//        self.pendingContactsByPhone = nil;
-//        [self dataSourceDidFinishLoading];
-//        if (delta || self.consumedAllContacts) {
-//            [self.tableView beginUpdates];
-//            if (delta) {
-//                
-//                NSMutableArray* indices = [NSMutableArray array];
-//                for (NSInteger i = 0; i < delta; i++) {
-//                    [indices addObject:[NSIndexPath indexPathForRow:countBefore + i inSection:0]];
-//                }
-//                [self.tableView insertRowsAtIndexPaths:indices withRowAnimation:UITableViewRowAnimationNone];
-//            }
-//            if (self.consumedAllContacts) {
-//                [self.tableView insertSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
-//            }
-//            [self.tableView endUpdates];
-//        }
-//        [self loadMore]; 
-//    }
-//}
-
 #pragma mark - STRestViewController Methods
 
 - (BOOL)dataSourceReloading {
-    return self.matchCancellation != nil || self.friendsCancellation;
-}
+    return self.matchCancellation != nil || self.friendsCancellation || self.waitingForFB;
+} 
 
 - (void)loadNextPage {
     [self loadMore];
@@ -359,7 +365,7 @@ static const CGFloat _batchSize = 100;
         }
         
         id<STUserDetail> user = [self.matchUsers objectAtIndex:indexPath.row];
-
+        
         [cell setupWithUser:user];
         
         return cell;
@@ -462,18 +468,31 @@ static const CGFloat _batchSize = 100;
     }
 }
 
+- (NSString*)stampedLogoImageURL {
+    id<STUserDetail> currentUser = [STStampedAPI sharedInstance].currentUser;
+    return [NSString stringWithFormat:@"%@%@-%@%@", @"http://static.stamped.com/logos/", currentUser.primaryColor, currentUser.secondaryColor, @"-logo-195x195.png"];
+}
+
+
 - (void)inviteTableCellToggleInvite:(STInviteTableCell *)cell {
     NSIndexPath* path = [self.tableView indexPathForCell:cell];
     if (path) {
-        STContact* contact = cell.contact;
-        contact.invite = !contact.invite;
-        if (contact.invite) {
-            [self.inviteIndices addObject:[NSNumber numberWithInteger:path.row]];
+        
+        Facebook* fb = [STFacebook sharedInstance].facebook;
+        if (!fb.isSessionValid) {
+            [[STFacebook sharedInstance] auth];
         }
         else {
-            [self.inviteIndices removeObject:[NSNumber numberWithInt:path.row]];
+            STContact* contact = cell.contact;
+            contact.invite = !contact.invite;
+            if (contact.invite) {
+                [self.inviteIndices addObject:[NSNumber numberWithInteger:path.row]];
+            }
+            else {
+                [self.inviteIndices removeObject:[NSNumber numberWithInt:path.row]];
+            }
+            [self updateSendButton];
         }
-        [self updateSendButton];
     }
 }
 

@@ -52,7 +52,7 @@
         }
         
         UIView* titleView = [Util viewWithText:title 
-                                          font:[UIFont stampedBoldFontWithSize:16] 
+                                          font:[UIFont stampedBoldFontWithSize:12] 
                                          color:[UIColor whiteColor] 
                                           mode:UILineBreakModeClip 
                                     andMaxSize:CGSizeMake(200, 20)];
@@ -61,7 +61,7 @@
         
         if (subtitle != nil) {
             UIView* subtitleView = [Util viewWithText:subtitle
-                                                 font:[UIFont stampedFontWithSize:16]
+                                                 font:[UIFont stampedFontWithSize:12]
                                                 color:[UIColor stampedGrayColor]
                                                  mode:UILineBreakModeTailTruncation
                                            andMaxSize:CGSizeMake(200, 20)];

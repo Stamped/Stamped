@@ -19,6 +19,10 @@
                                             limit:(NSInteger)limit 
                                       andCallback:(void (^)(NSArray*, NSError*, STCancellation*))block;
 
++ (STCancellation*)contactsFromTwitterWithOffset:(NSInteger)offset 
+                                           limit:(NSInteger)limit 
+                                     andCallback:(void (^)(NSArray*, NSError*, STCancellation*))block;
+
 @property (nonatomic, readwrite, copy) NSString* name;
 @property (nonatomic, readwrite, copy) NSArray* phoneNumbers;
 @property (nonatomic, readwrite, copy) NSArray* emailAddresses;
@@ -28,5 +32,7 @@
 @property (nonatomic, readonly, retain) NSString* primaryEmailAddress;
 @property (nonatomic, readwrite, copy) NSString* imageURL;
 @property (nonatomic, readwrite, copy) NSString* facebookID;
+@property (nonatomic, readwrite, copy) NSString* twitterUsername;
+@property (nonatomic, readwrite, copy) NSString* twitterID;
 
 @end

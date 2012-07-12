@@ -38,6 +38,7 @@ NSString* const kOAuthCallbackURL = @"http://www.example.com/oauth_callback";
 NSString* const kTwitterScope = @"http://www.example.com/oauth_scope";
 NSString* const kKeychainTwitterToken = @"Stamped Twitter";
 
+NSString* const STUtilPopupDismissedNotification = @"UtilPopupDismissedNotification";
 
 @interface Util ()
 + (NSString*)userReadableTimeSinceDate:(NSDate*)date shortened:(BOOL)shortened;
@@ -580,21 +581,26 @@ static Rdio* _rdio;
 
 
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color {
+    [self setFullScreenPopUp:view dismissible:dismissible animated:YES withBackground:color];
+}
+
++ (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible animated:(BOOL)animated withBackground:(UIColor*)color {
     UIView* window = [UIApplication sharedApplication].keyWindow;
     STPopUpView* cur = _currentPopUp;
     if (cur && cur.superview) {
         [cur removeFromSuperview];
     }
     if (view) {
-        STPopUpView* popup = [[STPopUpView alloc] initWithFrame:[Util fullscreenFrameAdjustedForStatusBar] view:view dismissible:dismissible andColor:color];
-        popup.alpha = 0;
+        STPopUpView* popup = [[[STPopUpView alloc] initWithFrame:[Util fullscreenFrameAdjustedForStatusBar] view:view dismissible:dismissible andColor:color] autorelease];
         [window addSubview:popup];
         _currentPopUp = popup;
-        [UIView animateWithDuration:.25 animations:^{
-            popup.alpha = 1;
-        }];
+        if (animated) {
+            popup.alpha = 0;
+            [UIView animateWithDuration:.25 animations:^{
+                popup.alpha = 1;
+            }];
+        }
         //Pointer retained solely for comparison, not ownership
-        [popup release];
     }
     else {
         _currentPopUp = nil;
@@ -710,6 +716,19 @@ static Rdio* _rdio;
 + (void)executeOnMainThread:(void(^)(void))block {
     void(^block2)(void) = [block copy];
     dispatch_async(dispatch_get_main_queue(), ^{
+        @autoreleasepool {
+            block2();
+            [block2 release];
+        }
+    });
+}
+
++ (void)executeWithDelay:(NSTimeInterval)timeInterval 
+            onMainThread:(void(^)(void))block {
+    void(^block2)(void) = [block copy];
+    double delayInSeconds = timeInterval;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         @autoreleasepool {
             block2();
             [block2 release];
@@ -1409,42 +1428,29 @@ static Rdio* _rdio;
                                        references:(NSArray<STActivityReference>*)references 
                                              font:(UIFont*)aFont 
                                             color:(UIColor*)aColor 
+                                    referenceFont:(UIFont*)referenceFont 
+                                   referenceColor:(UIColor*)referenceColor
                                        lineHeight:(CGFloat)lineHeight 
                                            indent:(CGFloat)indent 
                                           kerning:(CGFloat)kerning {
-    
-    if (!aString)
-        return nil;
-    
-    id fontAttr = [NSMakeCollectable(CTFontCreateWithName((CFStringRef)aFont.fontName, aFont.pointSize, NULL)) autorelease];
-    id foregroundColorAttr = (id)(aColor ? aColor.CGColor : [UIColor blackColor].CGColor);
-    id paragraphStyleAttr = ((^ {
-        
-        CTParagraphStyleSetting paragraphStyles[] = (CTParagraphStyleSetting[]){
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineHeightMultiple, sizeof(float_t), (float_t[]){ 0.01f } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineSpacing, sizeof(float_t), (float_t[]){ 0.0f } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierFirstLineHeadIndent, sizeof(float_t), (float_t[]){ indent } },
-            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineBreakMode, sizeof(CTLineBreakMode), (CTLineBreakMode[]){ kCTLineBreakByWordWrapping } },
-        };
-        
-        CTParagraphStyleRef paragraphStyleRef = CTParagraphStyleCreate(paragraphStyles, sizeof(paragraphStyles) / sizeof(CTParagraphStyleSetting));
-        return [NSMakeCollectable(paragraphStyleRef) autorelease];
-        
-    })());
-    
-    NSMutableDictionary* attrs = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                  fontAttr, kCTFontAttributeName,
-                                  foregroundColorAttr, kCTForegroundColorAttributeName,
-                                  paragraphStyleAttr, kCTParagraphStyleAttributeName,
-                                  [NSNumber numberWithFloat:kerning], (id)kCTKernAttributeName,
-                                  nil];
-    NSAttributedString *returnedString = [[[NSAttributedString alloc] initWithString:aString attributes:attrs] autorelease];
-    return returnedString;
-    
+    NSAttributedString* original = [self attributedStringForString:aString font:aFont color:aColor lineHeight:lineHeight indent:indent kerning:kerning];
+    NSMutableAttributedString* copy = [[[NSMutableAttributedString alloc] initWithAttributedString:original] autorelease];
+    id fontAttr = [NSMakeCollectable(CTFontCreateWithName((CFStringRef)referenceFont.fontName, referenceFont.pointSize, NULL)) autorelease];
+    id foregroundColorAttr = (id)(referenceColor ? referenceColor.CGColor : [UIColor blackColor].CGColor);
+    NSDictionary* attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                fontAttr, kCTFontAttributeName,
+                                foregroundColorAttr, kCTForegroundColorAttributeName,
+                                nil];
+    for (id<STActivityReference> reference in references) {
+        if (reference.indices.count == 2) {
+            NSInteger start = [[reference.indices objectAtIndex:0] integerValue];
+            NSInteger end = [[reference.indices objectAtIndex:1] integerValue];
+            if (start >= 0 && end > start && end <= aString.length) {
+                [copy setAttributes:attributes range:NSMakeRange(start, end - start)];
+            }
+        }
+    }
+    return copy;
 }
 
 + (NSAttributedString *)attributedStringForString:(NSString *)aString 
@@ -1586,6 +1592,9 @@ static Rdio* _rdio;
     }
     else if ([string isEqualToString:@"other"]) {
         noun = @"thing";
+        if (withArticle) {
+            return @"";
+        }
     }
     if (withArticle) {
         return [NSString stringWithFormat:@"%@ %@", article, noun];
@@ -1666,6 +1675,12 @@ static Rdio* _rdio;
     }
 }
 
++ (UIViewController*)topController {
+    UINavigationController* cur = [self currentNavigationController];
+    UIViewController* current = cur.topViewController;
+    return current;
+}
+
 + (BOOL)compareAndPopController:(UIViewController*)controller animated:(BOOL)animated {
     UINavigationController* cur = [self currentNavigationController];
     UIViewController* current = cur.topViewController;
@@ -1737,6 +1752,7 @@ static Rdio* _rdio;
 }
 
 -(void)buttonCallback:(id)state {
+    [[NSNotificationCenter defaultCenter] postNotificationName:STUtilPopupDismissedNotification object:self];
     [Util setFullScreenPopUp:nil dismissible:NO withBackground:nil];
 }
 

@@ -69,7 +69,7 @@ extern NSString* const STCacheDidLoadPageNotification;
                         accelerator:(id<STCacheAccelerator>)accel
                         andCallback:(void (^)(NSDate* date, NSError* error, STCancellation* cancellation))block;
 
-//- (void)updateObjects:(NSArray<STDatum>*)objects;
+- (void)updateObjects:(NSArray<STDatum>*)objects;
 
 - (void)removeObjectsWithIDs:(NSSet*)doomedIDs;
 
@@ -80,6 +80,8 @@ extern NSString* const STCacheDidLoadPageNotification;
 - (STCacheSnapshot*)snapshot;
 - (void)cancelPendingRequests;
 - (void)refreshAtIndex:(NSInteger)index force:(BOOL)force;
+
+- (void)dirty;
 
 - (BOOL)hasMore;
 

@@ -210,9 +210,6 @@
 }
 
 - (STCachePage*)pageWithAddedPage:(STCachePage*)page {
-    if (page.count == 0) {
-        return self;
-    }
     if (self.created.timeIntervalSince1970 > page.created.timeIntervalSince1970) {
         //NSLog(@"Tried to add a page older than current page,%@,%@",page.created, self.created);
         return self;
@@ -237,10 +234,15 @@
         }
     }
     else {
-        //Create new page pointing to this as next
-        STCachePage* finalResult = [[[STCachePage alloc] initWithObjects:page.localObjects start:page.start end:page.end created:page.created andNext:self] autorelease];
-        NSAssert2(finalResult.count >= page.count, @"Count should have been at least %d was %d", page.count, finalResult.count);
-        return finalResult;
+        if (page.count == 0) {
+            return page;
+        }
+        else {
+            //Create new page pointing to this as next
+            STCachePage* finalResult = [[[STCachePage alloc] initWithObjects:page.localObjects start:page.start end:page.end created:page.created andNext:self] autorelease];
+            NSAssert2(finalResult.count >= page.count, @"Count should have been at least %d was %d", page.count, finalResult.count);
+            return finalResult;
+        }
     }
 }
 
@@ -303,29 +305,12 @@
     }
 }
 
-//TODO
-- (STCachePage*)pageWithDatums:(NSArray<STDatum>*)datums {
-    if (datums.count == 0) {
-        return self;
+- (STCachePage*)dirtiedPage {
+    STCachePage* next = nil;
+    if (self.next) {
+        next = [self.next dirtiedPage];
     }
-    NSMutableArray* local = [NSMutableArray array];
-    NSMutableArray* notLocal = [NSMutableArray array];
-    for (id<STDatum> datum in datums) {
-        NSDate* date = [datum timestamp];
-        if ([date earlierDate:self.end] == date) {
-            [notLocal addObject:datum];
-        }
-        else {
-            [local addObject:datum];
-        }
-    }
-    return nil;
+    return [[[STCachePage alloc] initWithObjects:self.localObjects start:self.start end:self.end created:[NSDate dateWithTimeIntervalSince1970:0] andNext:next] autorelease];
 }
-
-/*
- - (NSArray<STDatum>*)localObjectsAfterDate:(NSDate*)date {
- //TODO
- }
- */
 
 @end

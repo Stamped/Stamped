@@ -23,6 +23,17 @@
 #import "STConsumptionToolbarItem.h"
 #import "STConsumptionToolbar.h"
 #import "STGenericCellFactory.h"
+#import "NoDataView.h"
+#import "NoDataUtil.h"
+#import "FindFriendsViewController.h"
+
+typedef enum {
+    _animationStateNone = 0,
+    _animationStateRunning,
+    _animationStatePopUp,
+    _animationStateFinished,
+    _animationStateAbort,
+} _animationState_t ;
 
 //Film
 static NSString* _movieNameKey = @"Consumption.film.movie.name";
@@ -34,6 +45,7 @@ static NSString* _onlineAndDVDNameKey = @"Consumption.film.movie.onlineAndDVD.na
 static NSString* _onlineAndDVDFilterKey = @"Consumption.film.movie.onlineAndDVD.filter";
 
 static NSString* _tvNameKey = @"Consumption.film.tv.name";
+
 //Music
 static NSString* _artistNameKey = @"Consumption.music.artist.name";
 
@@ -41,7 +53,7 @@ static NSString* _albumNameKey = @"Consumption.music.album.name";
 
 static NSString* _songNameKey = @"Consumption.music.song.name";
 
-@interface STConsumptionViewController () <STConsumptionToolbarDelegate>
+@interface STConsumptionViewController () <STConsumptionToolbarDelegate, STGenericTableDelegateDelegate>
 
 - (STConsumptionToolbarItem*)setupToolbarItems;
 
@@ -52,6 +64,9 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 @property (nonatomic, readwrite, copy) NSString* filter;
 @property (nonatomic, readonly, retain) STConsumptionToolbar* consumptionToolbar;
 @property (nonatomic, readonly, retain) STGenericTableDelegate* tableDelegate;
+@property (nonatomic, readwrite, assign) _animationState_t animationState;
+@property (nonatomic, readwrite, retain) UIView* popUp;
+@property (nonatomic, readwrite, retain) UIView* tooltip;
 
 @end
 
@@ -64,6 +79,9 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 @synthesize subcategory = subcategory_;
 @synthesize filter = filter_;
 @synthesize consumptionToolbar = consumptionToolbar_;
+@synthesize animationState = _animationState;
+@synthesize tooltip = _tooltip;
+@synthesize popUp = _popUp;
 
 - (void)update {
     self.tableDelegate.lazyList = [[[STConsumptionLazyList alloc] initWithScope:self.scope
@@ -80,21 +98,6 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
         movie.value = @"movie";
         movie.type = STConsumptionToolbarItemTypeSubsection;
         [array addObject:movie];
-        
-        /*
-         STConsumptionToolbarItem* movieInTheaters = [[[STConsumptionToolbarItem alloc] init] autorelease];
-         movieInTheaters.name = [STConfiguration value:_inTheatersNameKey];
-         movieInTheaters.value = [STConfiguration value:_inTheatersFilterKey];
-         movieInTheaters.iconValue = @"in_theaters";
-         
-         movieInTheaters.type = STConsumptionToolbarItemTypeFilter;
-         STConsumptionToolbarItem* movieOnlineAndDVD = [[[STConsumptionToolbarItem alloc] init] autorelease];
-         movieOnlineAndDVD.name = [STConfiguration value:_onlineAndDVDNameKey];
-         movieOnlineAndDVD.value = [STConfiguration value:_onlineAndDVDFilterKey];
-         movieOnlineAndDVD.type = STConsumptionToolbarItemTypeFilter;
-         movieOnlineAndDVD.iconValue = @"online_dvd";
-         movie.children = [NSArray arrayWithObjects:movieInTheaters, movieOnlineAndDVD, nil];
-         */
         
         STConsumptionToolbarItem* tv = [[[STConsumptionToolbarItem alloc] init] autorelease];
         tv.name = [STConfiguration value:_tvNameKey];
@@ -135,6 +138,112 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
     return rootItem;
 }
 
+
+- (void)noDataAction:(id)sender {
+    
+    FindFriendsViewController *controller = [[[FindFriendsViewController alloc] init] autorelease];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    
+}
+
+- (void)showSmallTooltip {
+    if (self.animationState != _animationStateAbort) {
+        UIImageView* tooltip = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"guide_bubble"]] autorelease];
+        [Util reframeView:tooltip withDeltas:CGRectMake(230, -40, 0, 0)];
+        tooltip.alpha = 0;
+        UILabel* label = [Util viewWithText:@"Click below to change scope."
+                                       font:[UIFont stampedFontWithSize:10]
+                                      color:[UIColor whiteColor]
+                                       mode:UILineBreakModeTailTruncation
+                                 andMaxSize:CGSizeMake(78, CGFLOAT_MAX)];
+        label.frame = [Util centeredAndBounded:label.frame.size inFrame:CGRectMake(0, 0, 90, 38)];
+        label.textAlignment = UITextAlignmentCenter;
+        [tooltip addSubview:label];
+        self.tooltip = tooltip;
+        [self.consumptionToolbar addSubview:tooltip];
+        [UIView animateWithDuration:.3
+                         animations:^{
+                             tooltip.alpha = 1;
+                         } completion:^(BOOL finished) {
+                             [Util executeWithDelay:4 onMainThread:^{
+                                 if ([Util topController] == self) {
+                                     [UIView animateWithDuration:.4 animations:^{
+                                         tooltip.alpha = 0;
+                                     } completion:^(BOOL finished) {
+                                         [tooltip removeFromSuperview];
+                                         self.tooltip = nil;
+                                     }];
+                                 } 
+                             }];
+                         }];
+    }
+}
+
+- (void)exitNoDataView:(id)notImportant {
+    [Util setFullScreenPopUp:nil dismissible:YES withBackground:[UIColor clearColor]];
+    self.popUp = nil;
+    self.animationState = _animationStateFinished;
+    [self showSmallTooltip];
+}
+
+- (void)popUpDismissed:(NSNotification*)notification {
+    if (notification.object == self.popUp) {
+        self.animationState = _animationStateFinished;
+        [self showSmallTooltip];
+    }
+}
+
+- (void)showScopeShiftPopup {
+    if ([Util topController] == self) {
+        NoDataView* noDataView = [[[NoDataView alloc] initWithFrame:[Util fullscreenFrame]] autorelease];
+        //        [Util reframeView:noDataView withDeltas:CGRectMake(0, -50, 0, 0)];
+        noDataView.userInteractionEnabled = YES;
+        NSString* topString = @"Since you're not yet following anyone, we've bumped you over to the Tastemakers view.";
+        //        NSString* bottomString = @"Got it.";
+        UILabel* top = [Util viewWithText:topString
+                                     font:[UIFont stampedBoldFontWithSize:14]
+                                    color:[UIColor whiteColor]
+                                     mode:UILineBreakModeWordWrap
+                               andMaxSize:CGSizeMake(200, CGFLOAT_MAX)];
+        top.textAlignment = UITextAlignmentCenter;
+        CGRect bounds = CGRectMake(0, 0, noDataView.imageView.frame.size.width, noDataView.imageView.frame.size.height);
+        top.frame = [Util centeredAndBounded:top.frame.size inFrame:bounds];
+        [noDataView.imageView addSubview:top];
+        [Util reframeView:top withDeltas:CGRectMake(0, - 8 , 0, 0)];
+        noDataView.imageView.userInteractionEnabled = YES;
+        UIButton* exitButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [exitButton addTarget:self action:@selector(exitNoDataView:) forControlEvents:UIControlEventTouchUpInside];
+        [exitButton setImage:[UIImage imageNamed:@"closebutton_black"] forState:UIControlStateNormal];
+        exitButton.frame = CGRectMake(-6.5, - 11, 48, 48);
+        [noDataView.imageView addSubview:exitButton];
+        
+        //noDataView.frame = [Util centeredAndBounded:noDataView.frame.size inFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+        noDataView.backgroundColor = [UIColor clearColor];
+        //        [self.view addSubview:noDataView];
+        //        self.emptyPopupView = noDataView;
+        top.hidden = YES;
+        //        bottom.hidden = YES;
+        CGRect rectAfter = noDataView.imageView.frame;
+        [Util setFullScreenPopUp:noDataView dismissible:YES withBackground:[UIColor clearColor]];
+        noDataView.imageView.frame = [Util centeredAndBounded:CGSizeMake(20, 14) inFrame:rectAfter];
+        [noDataView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitNoDataView:)] autorelease]];
+        [UIView animateWithDuration:.2 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
+            noDataView.backgroundColor = [UIColor colorWithWhite:0 alpha:.3];
+            noDataView.imageView.frame = rectAfter;
+        } completion:^(BOOL finished) {
+            top.hidden = NO;
+            
+        }];
+        noDataView.userInteractionEnabled = YES;
+    }
+}
+
+- (void)sliderWillShow:(id)notImportant {
+    self.animationState = _animationStateAbort;
+    [self.tooltip removeFromSuperview];
+    self.tooltip = nil;
+}
+
 - (id)initWithCategory:(NSString*)category
 {
     self = [super initWithHeaderHeight:0];
@@ -148,20 +257,65 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
             scope_ = STStampedAPIScopeEveryone;
         }
         tableDelegate_ = [[STGenericTableDelegate alloc] init];
+        tableDelegate_.delegate = self;
         tableDelegate_.style = STCellStyleConsumption;
         tableDelegate_.lazyList = lazyList_;
         tableDelegate_.tableViewCellFactory = [STGenericCellFactory sharedInstance];
         __block STConsumptionViewController* weak = self;
         tableDelegate_.tableShouldReloadCallback = ^(id<STTableDelegate> tableDelegate) {
             [weak.tableView reloadData];
+            if (self.animationState == _animationStateRunning) {
+                self.animationState = _animationStatePopUp;
+                [Util executeWithDelay:.3 onMainThread:^{
+                    if ([Util topController] == self && self.animationState != _animationStateAbort) {
+                        [self.consumptionToolbar.slider setScope:STStampedAPIScopeEveryone animated:YES];
+                        [Util executeWithDelay:.4 onMainThread:^{
+                            [self showScopeShiftPopup];
+                        }];
+                    }
+                }];
+            }
+        };
+        tableDelegate_.noDataFactory = ^(id<STTableDelegate> tableDelegate, UITableView* tableView) {
+            CGRect bounds = CGRectMake(0, 0, tableView.frame.size.width, tableView.frame.size.height);
+            UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"NONE"] autorelease];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            if (self.animationState == _animationStateRunning || self.animationState == _animationStatePopUp) {
+                NSString* title = @"No suggestions";
+                NSString* body = nil;
+                UIView* noData = [NoDataUtil waterMarkWithImage:[UIImage imageNamed:@"watermark_theguide"] title:title body:body options:nil];
+                noData.frame = [Util centeredAndBounded:noData.frame.size inFrame:bounds];
+                [cell.contentView addSubview:noData];
+            }
+            else if (weak.scope == STStampedAPIScopeFriends) {
+                NoDataView* view = [[[NoDataView alloc] initWithFrame:bounds] autorelease];
+                [view setupWithButtonTitle:@"Find friends to follow" detailTitle:@"Add friends to improve suggestions." target:weak andAction:@selector(noDataAction:)];
+                view.frame = [Util centeredAndBounded:view.frame.size inFrame:CGRectMake(0, 0, tableView.frame.size.width, tableView.frame.size.height)];
+                [cell.contentView addSubview:view];
+            }
+            else {
+                NSString* title = nil;
+                NSString* body = nil;
+                if (weak.scope == STStampedAPIScopeYou) {
+                    title = @"Sorry, no suggestions";
+                    body = @"Try making more stamps.";
+                }
+                UIView* noData = [NoDataUtil waterMarkWithImage:[UIImage imageNamed:@"watermark_theguide"] title:title body:body options:nil];
+                noData.frame = [Util centeredAndBounded:noData.frame.size inFrame:bounds];
+                [cell.contentView addSubview:noData];
+            }
+            return cell;
         };
         [self update];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(popUpDismissed:) name:STUtilPopupDismissedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sliderWillShow:) name:STConsumptionToolbarSliderWillShowNotification object:nil];
     }
     return self;
 }
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [tableDelegate_ release];
     [lazyList_ release];
     [category_ release];
@@ -175,12 +329,18 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
     [super viewDidLoad];
     self.tableView.delegate = self.tableDelegate;
     self.tableView.dataSource = self.tableDelegate;
-	// Do any additional setup after loading the view.
 }
 
 - (void)viewDidUnload
 {
     [super viewDidUnload];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [Util setFullScreenPopUp:nil dismissible:NO withBackground:[UIColor clearColor]];
+    self.animationState = _animationStateAbort;
+    [self.tooltip removeFromSuperview];
+    [super viewDidDisappear:animated];
 }
 
 - (UIView *)loadToolbar {
@@ -209,6 +369,7 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 - (void)toolbar:(STConsumptionToolbar*)toolbar 
   didMoveToItem:(STConsumptionToolbarItem*)item 
            from:(STConsumptionToolbarItem*)previous {
+    self.animationState = _animationStateAbort;
     if (item.type == STConsumptionToolbarItemTypeSection) {
         self.subcategory = nil;
         self.filter = nil;
@@ -266,6 +427,12 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
     
     self.scope = scope;
     
+}
+
+- (void)tableDelegate:(STGenericTableDelegate *)tableDelegate didFinishLoadingWithCount:(NSInteger)count {
+    if (count == 0 && self.scope == STStampedAPIScopeFriends && _animationState == _animationStateNone) {
+        self.animationState = _animationStateRunning;
+    }
 }
 
 @end

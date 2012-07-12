@@ -9,38 +9,44 @@
 #import "STInviteTableCell.h"
 #import "STAvatarView.h"
 #import "UIButton+Stamped.h"
+#import "STImageCache.h"
 
 @interface STInviteTableCell  ()
 
-@property (nonatomic, readonly, retain) STAvatarView* avatarView;
+@property (nonatomic, readonly, retain) UIImageView* userImageView;
 @property (nonatomic, readonly, retain) UILabel* titleLabel;
 @property (nonatomic, readonly, retain) UILabel* detailTitleLabel;
 @property (nonatomic, readonly, retain) UIButton* inviteButton;
 @property (nonatomic, readwrite, retain) STContact* contact;
+@property (nonatomic, readwrite, retain) STCancellation* imageCancellation;
 
 @end
 
 @implementation STInviteTableCell
 
-@synthesize avatarView = _avatarView;
+@synthesize userImageView = _userImageView;
 @synthesize titleLabel = _titleLabel;
 @synthesize detailTitleLabel = _detailTitleLabel;
 @synthesize inviteButton = inviteButton_;
 @synthesize contact = _contact;
 @synthesize delegate = _delegate;
+@synthesize imageCancellation = _imageCancellation;
 
 - (id)initWithReuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
     if (self) {
         // Initialization code
-        _avatarView = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 4.0f, 46.0f, 46.0f)];
-        _avatarView.userInteractionEnabled = NO;
-        _avatarView.backgroundColor = [UIColor whiteColor];
-        [self.contentView addSubview:_avatarView];
+        _userImageView = [[UIImageView alloc] initWithFrame:CGRectMake(10.0f, 4.0f, 46.0f, 46.0f)];
+        _userImageView.userInteractionEnabled = NO;
+        _userImageView.backgroundColor = [UIColor whiteColor];
+        [self.contentView addSubview:_userImageView];
         
-        _avatarView.backgroundView.layer.shadowRadius = 1.0f;
-        _avatarView.backgroundView.layer.shadowOpacity = 0.2f;
+        _userImageView.layer.shadowRadius = 1.0f;
+        _userImageView.layer.shadowOpacity = 0.2f;
+        _userImageView.layer.shadowOffset = CGSizeMake(0, 1);
+        _userImageView.layer.borderWidth = 2;
+        _userImageView.layer.borderColor = [UIColor whiteColor].CGColor;
         
         _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(70.0f, 10.0f, 0.0f, 0.0f)];
         _titleLabel.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin;
@@ -82,7 +88,7 @@
 - (void)dealloc
 {
     [self releaseContact];
-    [_avatarView release];
+    [_userImageView release];
     [_titleLabel release];
     [_detailTitleLabel release];
     [inviteButton_ release];
@@ -94,6 +100,8 @@
         [self.contact removeObserver:self forKeyPath:@"invite"];
     }
     self.contact = nil;
+    [self.imageCancellation cancel];
+    self.imageCancellation = nil;
 }
 
 - (void)setupWithContact:(STContact*)contact {
@@ -101,15 +109,25 @@
     self.contact = contact;
     [contact addObserver:self forKeyPath:@"invite" options:0 context:nil];
     self.inviteButton.selected = contact.invite;
-    _avatarView.imageView.image = nil;
+    _userImageView.image = nil;
     if (contact.image) {
-        _avatarView.imageView.image = contact.image;
+        _userImageView.image = contact.image;
     }
     else if (contact.imageURL) {
-        _avatarView.imageURL = [NSURL URLWithString:contact.imageURL];
+        UIImage* fastImage = [[STImageCache sharedInstance] cachedImageForImageURL:contact.imageURL];
+        if (fastImage) {
+            _userImageView.image = fastImage;
+        }
+        else {
+            self.imageCancellation = [[STImageCache sharedInstance] imageForImageURL:contact.imageURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                if ([self.contact.imageURL isEqualToString:contact.imageURL]) {
+                    _userImageView.image = image; 
+                }
+            }];
+        }
     }
-    else {
-        _avatarView.imageView.image = [UIImage imageNamed:@"default_user_image"];
+    if (!_userImageView.image) {
+        _userImageView.image = [UIImage imageNamed:@"default_user_image"];
     }
     _titleLabel.text = contact.name;
     [_titleLabel sizeToFit];

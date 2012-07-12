@@ -35,6 +35,7 @@ typedef enum {
 
 - (id)initWithStyle:(STSliderScopeStyle)style frame:(CGRect)frame;
 
+- (void)moveToScope:(STStampedAPIScope)scope animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion;
 @property (nonatomic,assign) NSInteger selectedIndex;
 @property (nonatomic,assign) STStampedAPIScope scope; // default STStampedAPIScopeYou
 @property (nonatomic,readonly) UILongPressGestureRecognizer *longPress;
