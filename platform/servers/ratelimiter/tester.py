@@ -49,7 +49,6 @@ def parseCommandLine():
 
 import random
 
-count = 0
 def makeRequest(host, port, service, priority, timeout, method, url):
     sleep(random.random()*10)
     if timeout == 0:
