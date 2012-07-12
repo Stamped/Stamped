@@ -468,14 +468,6 @@ class StampedAPI(AStampedAPI):
         self._verifyTwitterAccount(twitterUser['id'])
         account = Account().dataImport(new_tw_account.dataExport(), overflow=True)
 
-        # If the twitter account email address is already in our system, then we will use a mock email address
-        # to avoid a unique id conflict in our db
-        accounttest = None
-        try:
-            accounttest = self._accountDB.getAccountByEmail()
-        except StampedAccountNotFoundError:
-            pass
-
         # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
         #  and require uniqueness
         if account.email is None or accounttest is not None:
