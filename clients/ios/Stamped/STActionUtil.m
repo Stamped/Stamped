@@ -63,7 +63,9 @@ static id _sharedInstance;
                 }
                 if ([[STRdio sharedRdio] connected]) {
                     [[STRdio sharedRdio] ensureLoginWithCompletionBlock:^{
-                        [STPlayerPopUp presentWithItems:items clear:![STConfiguration flag:STPlayerCummulativeKey] startIndex:startIndex];
+                        //if ([STRdio sharedRdio].loggedIn) {
+                            [STPlayerPopUp presentWithItems:items clear:![STConfiguration flag:STPlayerCummulativeKey] startIndex:startIndex];
+                        //}
                     }];
                 }
                 else {

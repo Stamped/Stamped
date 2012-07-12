@@ -28,7 +28,7 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 
 - (id)initWithCachePage:(STCachePage*)page;
 
-@property (nonatomic, readonly, retain) STCachePage* page;
+//@property (nonatomic, readonly, retain) STCachePage* page;
 
 @end
 
@@ -381,6 +381,11 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
         self.page = nextPage;
         [[NSNotificationCenter defaultCenter] postNotificationName:STCacheDidChangeNotification object:self];
     }
+}
+
+
+- (void)dirty {
+    self.page = [self.page dirtiedPage];
 }
 
 @end

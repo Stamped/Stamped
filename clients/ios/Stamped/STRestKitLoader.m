@@ -23,89 +23,50 @@ static NSString* const _baseURL = @"https://api.stamped.com/v0";
 static NSString* const _clientID = @"iphone8@2x";
 static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 
+static NSString* const _refreshPath = @"/oauth2/token.json";
+
+
+NSString* const STRestKitLoaderErrorDomain = @"STRestKitLoaderErrorDomain";
+NSString* const STRestKitErrorIDKey = @"STRestKitErrorIDKey";
+
 @interface STRestKitLoaderHelper : NSObject <RKObjectLoaderDelegate, STCancellationDelegate>
 
-- (id)initWithCallback:(void(^)(NSArray* array, NSError* error, STCancellation* cancellation))block;
+- (id)initWithPath:(NSString*)path 
+        authPolicy:(STRestKitAuthPolicy)policy
+              post:(BOOL)post 
+            params:(NSDictionary*)params 
+           mapping:(RKObjectMapping*)mapping
+          Callback:(void(^)(NSArray* array, NSError* error, STCancellation* cancellation))block;
 
-@property (nonatomic, readonly, copy) void(^callback)(NSArray*,NSError*,STCancellation*);
 @property (nonatomic, readonly, retain) STCancellation* cancellation;
-
-@end
-
-@implementation STRestKitLoaderHelper
-
-@synthesize callback = callback_;
-@synthesize cancellation = cancellation_;
-
-- (id)initWithCallback:(void(^)(NSArray* array, NSError* error, STCancellation* cancellation))block
-{
-    self = [super init];
-    if (self) {
-        [self retain];
-        callback_ = [block copy];
-        cancellation_ = [[STCancellation cancellationWithDelegate:self] retain];
-    }
-    return self;
-}
-
-- (void)dealloc {
-    [callback_ release];
-    [cancellation_ release];
-    [super dealloc];
-}
-
-- (void)cancellationWasCancelled:(STCancellation *)cancellation {
-    //NSLog(@"Cancelled operation");
-    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:self];
-    [self autorelease];
-}
-
-#pragma mark - RKObjectLoaderDelegate Methods.
-
-- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
-    id<RKParser> parser = [[RKParserRegistry sharedRegistry] parserForMIMEType:objectLoader.response.MIMEType];
-    NSString* errorMessage = nil;
-    if (parser) {
-        NSString* body = objectLoader.response.bodyAsString;
-        if (body) {
-            NSDictionary* errorDict = [parser objectFromString:objectLoader.response.bodyAsString error:nil];
-            errorMessage = [errorDict objectForKey:@"message"];
-        }
-    }
-    if (!errorMessage) {
-        errorMessage = error.localizedDescription;
-    }
-    error = [NSError errorWithDomain:error.domain code:error.code userInfo:[NSDictionary dictionaryWithObject:errorMessage forKey:NSLocalizedDescriptionKey]];
-    [STDebug log:[NSString stringWithFormat:@"RestKit: Failed request with %d:\n%@\n%@", objectLoader.response.statusCode, objectLoader.URL, objectLoader.params]];
-    if ([self.cancellation finish]) {
-        [Util executeOnMainThread:^{
-            self.callback(nil, error, self.cancellation);
-            [self autorelease];
-        }];
-    }
-    if ([objectLoader.response isUnauthorized]) {
-        [[STRestKitLoader sharedInstance] refreshToken];
-    }
-}
-
-- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
-    //NSLog(@"RestKit Loaded %d objects for %@",objects.count, objectLoader.URL);
-    if ([self.cancellation finish]) {
-        [Util executeOnMainThread:^{
-            self.callback(objects, nil, self.cancellation);
-            [self autorelease];
-        }];
-    }
-}
+@property (nonatomic, readonly, assign) STRestKitAuthPolicy policy;
+@property (nonatomic, readonly, assign) BOOL post;
+@property (nonatomic, readonly, assign) NSString* path;
+@property (nonatomic, readonly, retain) NSDictionary* params;
+@property (nonatomic, readonly, copy) void(^callback)(NSArray*,NSError*,STCancellation*);
+@property (nonatomic, readonly, retain) NSTimer* timer;
+@property (nonatomic, readonly, retain) RKObjectMapping* mapping;
 
 @end
 
 @interface STRestKitLoader() <RKRequestQueueDelegate>
 
++ (NSError*)errorWithCode:(STRestKitLoaderError)code andDescription:(NSString*)string;
+
+- (void)helperDidCancel:(STRestKitLoaderHelper*)helper;
+
+- (void)helperDidTimeout:(STRestKitLoaderHelper*)helper;
+
+- (void)helper:(STRestKitLoaderHelper*)helper didFailWithObjectLoader:(RKObjectLoader*)objectLoader andError:(NSError*)error;
+
+- (void)helper:(STRestKitLoaderHelper*)helper didLoadWithObjectLoader:(RKObjectLoader*)objectLoader andObjects:(NSArray*)objects;
+
 @property (nonatomic, readwrite, retain) STSimpleOAuthToken* authToken;
 
 @property (nonatomic, readwrite, retain) id<STUserDetail> currentUser;
 @property (nonatomic, readonly, retain) RKObjectManager* objectManager;
+@property (nonatomic, readonly, retain) NSMutableArray* pendingRequests;
+@property (nonatomic, readonly, retain) NSMutableArray* waitingRequests;
 
 @property (nonatomic, readonly, retain) RKRequestQueue* authRequestQueue;
 @property (nonatomic, readonly, retain) KeychainItemWrapper* passwordKeychainItem;
@@ -119,6 +80,69 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 @property (nonatomic, readwrite, retain) STCancellation* loginCancellation;
 
 @property (nonatomic, readwrite, retain) NSTimer* refreshTimer;
+
+@end
+
+@implementation STRestKitLoaderHelper
+
+@synthesize callback = callback_;
+@synthesize cancellation = cancellation_;
+@synthesize params = params_;
+@synthesize post = post_;
+@synthesize policy = policy_;
+@synthesize path = path_;
+@synthesize timer = timer_;
+@synthesize mapping = mapping_;
+
+- (id)initWithPath:(NSString*)path 
+        authPolicy:(STRestKitAuthPolicy)policy
+              post:(BOOL)post 
+            params:(NSDictionary*)params 
+           mapping:(RKObjectMapping*)mapping
+          Callback:(void(^)(NSArray* array, NSError* error, STCancellation* cancellation))block
+{
+    self = [super init];
+    if (self) {
+        path_ = [path retain];
+        policy_ = policy;
+        post_ = post;
+        mapping_= [mapping retain];
+        timer_ = [[NSTimer timerWithTimeInterval:30 target:self selector:@selector(timeout:) userInfo:nil repeats:NO] retain];
+        params_ = [params retain];
+        callback_ = [block copy];
+        cancellation_ = [[STCancellation cancellationWithDelegate:self] retain];
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [callback_ release];
+    cancellation_.delegate = nil;
+    [cancellation_ release];
+    [params_ release];
+    [timer_ release];
+    [path_ release];
+    [mapping_ release];
+    [super dealloc];
+}
+
+- (void)timeout:(NSTimer*)timer {
+    [[STRestKitLoader sharedInstance] helperDidTimeout:[[self retain] autorelease]];
+}
+
+- (void)cancellationWasCancelled:(STCancellation *)cancellation {
+    [[STRestKitLoader sharedInstance] helperDidCancel:[[self retain] autorelease]];
+}
+
+#pragma mark - RKObjectLoaderDelegate Methods.
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didFailWithError:(NSError*)error {
+    [[STRestKitLoader sharedInstance] helper:[[self retain] autorelease] didFailWithObjectLoader:objectLoader andError:error];
+}
+
+- (void)objectLoader:(RKObjectLoader*)objectLoader didLoadObjects:(NSArray*)objects {
+    [[STRestKitLoader sharedInstance] helper:[[self retain] autorelease] didLoadWithObjectLoader:objectLoader andObjects:objects];
+}
 
 @end
 
@@ -141,6 +165,8 @@ static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
 @synthesize loginCancellation = _loginCancellation;
 
 @synthesize refreshTimer = _refreshTimer;
+@synthesize pendingRequests = _pendingRequests;
+@synthesize waitingRequests = _waitingRequests;
 
 
 static NSString* const _passwordKeychainItemID = @"Password";
@@ -168,23 +194,32 @@ static STRestKitLoader* _sharedInstance;
     return _sharedInstance;
 }
 
++ (NSError*)errorWithCode:(STRestKitLoaderError)code andDescription:(NSString*)string {
+    return [NSError errorWithDomain:STRestKitLoaderErrorDomain
+                               code:code
+                           userInfo:[NSDictionary dictionaryWithObject:string forKey:NSLocalizedDescriptionKey]];
+}
+
 - (id)init {
     self = [super init];
     if (self) {
+        
+        _pendingRequests = [[NSMutableArray alloc] init];
+        _waitingRequests = [[NSMutableArray alloc] init];
         
         _authToken = [[STSimpleOAuthToken alloc] init];
         
         _objectManager = [[RKObjectManager objectManagerWithBaseURL:_baseURL] retain];
         
         _objectManager.requestQueue.delegate = self;
-        _objectManager.requestQueue.requestTimeout = 30;
         _objectManager.requestQueue.concurrentRequestsLimit = 1;
         [_objectManager.requestQueue start];
         
         _authRequestQueue = [[RKRequestQueue alloc] init];
-        _authRequestQueue.requestTimeout = 30;
         _authRequestQueue.delegate = self;
         _authRequestQueue.concurrentRequestsLimit = 1;
+        _authRequestQueue.requestTimeout = 35;
+        [RKClient sharedClient].requestQueue.requestTimeout = 35;
         [_authRequestQueue start];
         
         NSAssert1(_authRequestQueue != _objectManager.requestQueue, @"Auth queue should not be equal to normal queue %@", _authRequestQueue);
@@ -208,6 +243,10 @@ static STRestKitLoader* _sharedInstance;
 }
 
 -(void)dealloc {
+    //Not ever going to happen, singleton
+    [_pendingRequests release];
+    [_waitingRequests release];
+    
     [_currentUser release];
     [_authToken release];
     
@@ -226,9 +265,162 @@ static STRestKitLoader* _sharedInstance;
     [super dealloc];
 }
 
+- (void)helper:(STRestKitLoaderHelper*)helper finishWithObjects:(NSArray*)objects andError:(NSError*)error {
+    helper.cancellation.delegate = nil;
+    if (!helper.cancellation.cancelled && helper.callback) {
+        helper.callback(objects, error, helper.cancellation);
+    }
+    [helper.cancellation cancel];
+}
+
+- (void)autoreleaseHelper:(STRestKitLoaderHelper*)helper {
+    [[helper retain] autorelease];
+    [self.pendingRequests removeObject:helper];
+    [self.waitingRequests removeObject:helper];
+}
+
+- (void)processHelper:(STRestKitLoaderHelper*)helper {
+    
+    RKObjectManager* objectManager = [RKObjectManager sharedManager];
+    RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:helper.path
+                                                                      delegate:helper];
+    if (helper.post) {
+        objectLoader.method = RKRequestMethodPOST;
+    }
+    NSMutableDictionary* paramsCopy = [NSMutableDictionary dictionaryWithDictionary:helper.params];
+    BOOL putOntoWaitQueue = NO;
+    if (helper.policy != STRestKitAuthPolicyStampedAuth && helper.policy != STRestKitAuthPolicyNone) {
+        NSString* accessToken = self.authToken.accessToken;
+        if (accessToken) {
+            [paramsCopy setObject:accessToken forKey:@"oauth_token"];
+        }
+        else {
+            if (helper.policy == STRestKitAuthPolicyFail || helper.policy == STRestKitAuthPolicyWait) {
+                if (helper.policy == STRestKitAuthPolicyFail || !self.loggedIn) {
+                    NSError* error = nil;
+                    if (helper.policy == STRestKitAuthPolicyFail) {
+                        error = [STRestKitLoader errorWithCode:STRestKitLoaderErrorRefreshing
+                                                andDescription:@"Token was refreshing"];
+                    }
+                    else {
+                        error = [STRestKitLoader errorWithCode:STRestKitLoaderErrorLoggedOut
+                                                andDescription:[NSString stringWithFormat:@"Must be logged in to complete this operation.%d,%d", self.loggedIn, helper.policy] ];
+                    }
+                    [Util executeOnMainThread:^{
+                        [self helper:helper finishWithObjects:nil andError:error];
+                    }];
+                }
+                else {
+                    putOntoWaitQueue = YES;
+                }
+            }
+        }
+    }
+    
+    objectLoader.objectMapping = helper.mapping;
+    
+    STCancellation* can = [[helper.cancellation retain] autorelease];
+    can.decoration = [NSString stringWithFormat:@"RestKit:%@ %@", objectLoader.resourcePath, objectLoader.params];
+    
+    // NSLog(@"RestKit:%@-%@",path, params);
+    
+    if (putOntoWaitQueue) {
+        [self.waitingRequests addObject:helper];
+    }
+    else {
+        objectLoader.params = paramsCopy;
+        if (helper.policy != STRestKitAuthPolicyStampedAuth) {
+            [objectManager.requestQueue addRequest:objectLoader];
+        }
+        else {
+            [self.authRequestQueue addRequest:objectLoader];
+        }
+    }
+}
+
+- (void)helperDidTimeout:(STRestKitLoaderHelper *)helper {
+    [helper.timer invalidate];
+    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:helper];
+    [self helper:helper finishWithObjects:nil andError:[STRestKitLoader errorWithCode:STRestKitLoaderErrorTimeout andDescription:@"Server was not responding"]];
+    [self autoreleaseHelper:helper];
+}
+
+- (void)helperDidCancel:(STRestKitLoaderHelper *)helper {
+    [helper.timer invalidate];
+    [[RKClient sharedClient].requestQueue cancelRequestsWithDelegate:helper];
+    [self autoreleaseHelper:helper];
+}
+
+- (void)helper:(STRestKitLoaderHelper *)helper didFailWithObjectLoader:(RKObjectLoader *)objectLoader andError:(NSError *)error {
+    id<RKParser> parser = [[RKParserRegistry sharedRegistry] parserForMIMEType:objectLoader.response.MIMEType];
+    NSString* errorMessage = nil;
+    NSString* errorID = nil;
+    if (parser) {
+        NSString* body = objectLoader.response.bodyAsString;
+        if (body) {
+            NSDictionary* errorDict = [parser objectFromString:objectLoader.response.bodyAsString error:nil];
+            errorMessage = [errorDict objectForKey:@"message"];
+            errorID = [errorDict objectForKey:@"error"];
+        }
+    }
+    if (!errorMessage) {
+        errorMessage = error.localizedDescription;
+    }
+    if (!errorID) {
+        errorID = @"unknown";
+    }
+    NSInteger httpCode = objectLoader.response.statusCode;
+    error = [NSError errorWithDomain:error.domain code:error.code userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                                            errorMessage, NSLocalizedDescriptionKey,
+                                                                            errorID, STRestKitErrorIDKey,
+                                                                            nil]];
+    [STDebug log:[NSString stringWithFormat:
+                  @"RestKit: Failed request with %d:\n%@\n%@\n%@",
+                  httpCode,
+                  objectLoader.resourcePath,
+                  objectLoader.params,
+                  error]];
+    BOOL retry = NO;
+    if (httpCode == 401 && [errorID isEqualToString:@"invalid_token"]) {
+        if (objectLoader.queue == [STRestKitLoader sharedInstance].authRequestQueue) {
+            NSAssert1(helper.policy == STRestKitAuthPolicyStampedAuth, @"bad policy, should be Auth was %2", helper.policy);
+            if ([helper.path isEqualToString:_refreshPath]) {
+                //fail so login can be handled
+            }
+            else {
+                [STStampedAPI logError:[NSString stringWithFormat:@"Unknown auth op\npath=%@\nparams=%@", helper.path, helper.params]];
+            }
+        }
+        else {
+            [[STRestKitLoader sharedInstance] refreshToken];
+            if (helper.policy == STRestKitAuthPolicyWait) {
+                retry = YES;
+            }
+        }
+    }
+    else if (httpCode == 401 && [errorID isEqualToString:@"facebook_auth"]) {
+        
+    }
+    if (retry) {
+        [self autoreleaseHelper:helper];
+        [self processHelper:helper];
+    }
+    else {
+        [helper.timer invalidate];
+        [self helper:helper finishWithObjects:nil andError:error];
+        [self autoreleaseHelper:helper];
+    }
+}
+
+- (void)helper:(STRestKitLoaderHelper *)helper didLoadWithObjectLoader:(RKObjectLoader *)objectLoader andObjects:(NSArray *)objects {
+    [helper.timer invalidate];
+    [self helper:helper finishWithObjects:objects andError:nil];
+    [self autoreleaseHelper:helper];
+}
+
 - (STCancellation*)loadWithPath:(NSString*)path
                            post:(BOOL)post
-                  authenticated:(BOOL)authenticated
+                     authPolicy:(STRestKitAuthPolicy)policy
                          params:(NSDictionary*)params 
                         mapping:(RKObjectMapping*)mapping 
                     andCallback:(void(^)(NSArray* results, NSError* error, STCancellation* cancellation))block {
@@ -241,9 +433,9 @@ static STRestKitLoader* _sharedInstance;
         STCancellation* cancellation = [STCancellation cancellation];
         [Util executeOnMainThread:^{
             if (!cancellation.cancelled) {
-                block(nil, [NSError errorWithDomain:@"RestKit" 
-                                               code:0 
-                                           userInfo:[NSDictionary dictionaryWithObject:@"Not Online" forKey:@"Reason"]
+                block(nil, [NSError errorWithDomain:STRestKitLoaderErrorDomain 
+                                               code:STRestKitLoaderErrorNotConnected
+                                           userInfo:[NSDictionary dictionaryWithObject:@"You are not connected to the internet." forKey:NSLocalizedDescriptionKey]
                             ], cancellation);
                 cancellation.delegate = nil;
             }
@@ -251,51 +443,30 @@ static STRestKitLoader* _sharedInstance;
         return cancellation;
     }
     else {
-        STRestKitLoaderHelper* helper = [[[STRestKitLoaderHelper alloc] initWithCallback:block] autorelease];    
-        RKObjectManager* objectManager = [RKObjectManager sharedManager];
-        RKObjectLoader* objectLoader = [objectManager objectLoaderWithResourcePath:path
-                                                                          delegate:helper];
-        if (post) {
-            objectLoader.method = RKRequestMethodPOST;
-        }
-        NSMutableDictionary* paramsCopy = [NSMutableDictionary dictionaryWithDictionary:params];
-        if (authenticated) {
-            NSString* accessToken = self.authToken.accessToken;
-            if (accessToken) {
-                [paramsCopy setObject:accessToken forKey:@"oauth_token"];
-            }
-            else {
-                //TODO logging
-            }
-        }
-        
-        objectLoader.objectMapping = mapping;
-        
-        objectLoader.params = paramsCopy;
-        
-        // NSLog(@"RestKit:%@-%@",path, params);
-        
-        if (authenticated) {
-            [objectManager.requestQueue addRequest:objectLoader];
-        }
-        else {
-            [self.authRequestQueue addRequest:objectLoader];
-        }
-        STCancellation* can = [[helper.cancellation retain] autorelease];
-        can.decoration = [NSString stringWithFormat:@"RestKit:%@ %@", objectLoader.resourcePath, objectLoader.params];
-        return can;
+        STRestKitLoaderHelper* helper = [[[STRestKitLoaderHelper alloc] initWithPath:path
+                                                                          authPolicy:policy
+                                                                                post:post
+                                                                              params:params 
+                                                                             mapping:mapping
+                                                                            Callback:block] autorelease];
+        [self processHelper:helper];
+        return helper.cancellation;
     }
+}
+
+- (void)cancelHelper:(STRestKitLoaderHelper*)helper {
+    [helper.cancellation cancel];
 }
 
 - (STCancellation*)loadOneWithPath:(NSString*)path
                               post:(BOOL)post 
-                     authenticated:(BOOL)authenticated
+                        authPolicy:(STRestKitAuthPolicy)policy
                             params:(NSDictionary*)params 
                            mapping:(RKObjectMapping*)mapping 
                        andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block {
     return [self loadWithPath:path 
                          post:post 
-                authenticated:authenticated
+                   authPolicy:policy
                        params:params 
                       mapping:mapping 
                   andCallback:^(NSArray* array, NSError* error, STCancellation* cancellation) {
@@ -312,19 +483,82 @@ static STRestKitLoader* _sharedInstance;
                   }];
 }
 
+- (STCancellation*)loadWithPath:(NSString*)path
+                           post:(BOOL)post
+                  authenticated:(BOOL)authenticated
+                         params:(NSDictionary*)params 
+                        mapping:(RKObjectMapping*)mapping 
+                    andCallback:(void(^)(NSArray* results, NSError* error, STCancellation* cancellation))block {
+    return [self loadWithPath:path
+                         post:post
+                   authPolicy:authenticated ? STRestKitAuthPolicyOptional : STRestKitAuthPolicyStampedAuth
+                       params:params
+                      mapping:mapping
+                  andCallback:block];
+}
+
+- (STCancellation*)loadOneWithPath:(NSString*)path
+                              post:(BOOL)post 
+                     authenticated:(BOOL)authenticated
+                            params:(NSDictionary*)params 
+                           mapping:(RKObjectMapping*)mapping 
+                       andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block {
+    return [self loadOneWithPath:path
+                            post:post
+                      authPolicy:authenticated ? STRestKitAuthPolicyOptional : STRestKitAuthPolicyStampedAuth
+                          params:params
+                         mapping:mapping
+                     andCallback:block];;
+}
+
 #pragma mark - Auth
 
+- (void)cancelAllWaitingRequests {
+    NSArray* copy = [NSArray arrayWithArray:self.waitingRequests];
+    [self.waitingRequests removeAllObjects];
+    for (STRestKitLoaderHelper* helper in copy) {
+        [helper.timer invalidate];
+        [self helper:helper finishWithObjects:nil andError:[STRestKitLoader errorWithCode:STRestKitLoaderErrorLoggedOut andDescription:@"Task interrupted by logout"]];
+        [self autoreleaseHelper:helper];
+    }
+}
+
+- (void)performWaitingRequests {
+    NSArray* copy = [NSArray arrayWithArray:self.waitingRequests];
+    [self.waitingRequests removeAllObjects];
+    for (STRestKitLoaderHelper* helper in copy) {
+        [self processHelper:helper];
+    }
+}
+
+- (void)handleAllWaitingRequests {
+    if (self.authToken.accessToken) {
+        [self performWaitingRequests];
+    }
+    else {
+        if (!self.loggedIn) {
+            [self cancelAllWaitingRequests];
+        }
+        else {
+            //Keep waiting
+        }
+    }
+}
+
 - (void)storeOAuthToken:(id<STOAuthToken>)token {
+    self.authToken.accessToken = nil;
     if (token.refreshToken) {
         [_refreshTokenKeychainItem setObject:_refreshTokenKeychainItemID forKey:(id)kSecAttrAccount];
         [_refreshTokenKeychainItem setObject:token.refreshToken forKey:(id)kSecValueData];
         self.authToken.refreshToken = token.refreshToken;
     }
-    
     if (token.accessToken) {
         [_accessTokenKeychainItem setObject:_accessTokenKeychainItemID forKey:(id)kSecAttrAccount];
         [_accessTokenKeychainItem setObject:token.accessToken forKey:(id)kSecValueData];
         self.authToken.accessToken = token.accessToken;
+        [Util executeOnMainThread:^{
+            [self handleAllWaitingRequests]; 
+        }];
     }
     if (token.lifespanInSeconds) {
         [[NSUserDefaults standardUserDefaults] setObject:[NSDate dateWithTimeIntervalSinceNow:token.lifespanInSeconds.floatValue] forKey:_tokenExpirationUserDefaultsKey];
@@ -363,7 +597,10 @@ static STRestKitLoader* _sharedInstance;
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:_tokenExpirationUserDefaultsKey];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:_loginTypeUserDefaultsKey];
     self.currentUser = nil;
+    self.authToken.refreshToken = nil;
+    self.authToken.accessToken = nil;
     [[NSUserDefaults standardUserDefaults] synchronize];
+    [self cancelAllWaitingRequests];
 }
 
 - (void)refreshTimerFired:(NSTimer*)theTimer {
@@ -445,7 +682,7 @@ static STRestKitLoader* _sharedInstance;
 - (STCancellation*)sendTokenRefreshRequestWithCallback:(void (^)(id<STOAuthToken> token, NSError* error, STCancellation* cancellation))block {
     NSString* refreshToken = [_refreshTokenKeychainItem objectForKey:(id)kSecValueData];
     if (refreshToken.length) {
-        NSString* path = @"/oauth2/token.json";
+        NSString* path = _refreshPath;
         NSDictionary* params = [NSDictionary dictionaryWithObjectsAndKeys:
                                 refreshToken, @"refresh_token",
                                 @"refresh_token", @"grant_type",
@@ -511,10 +748,13 @@ static STRestKitLoader* _sharedInstance;
                              store(response);
                              [self storeOAuthToken:response.token];
                              self.currentUser = response.user;
+                         }
+                         block(result, error, cancellation);
+                         if (response) {
+                             store(response);
                              [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILoginNotification object:nil];
                              [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:nil];
                          }
-                         block(result, error, cancellation);
                      }];
 }
 
@@ -633,6 +873,10 @@ static STRestKitLoader* _sharedInstance;
     }
 }
 
+- (BOOL)loggedIn {
+    return self.authToken.refreshToken != nil;
+}
+
 - (void)refreshToken {
     if (!self.refreshTokenCancellation && self.authToken.refreshToken) {
         STCancellation* cancellation = [self sendTokenRefreshRequestWithCallback:^(id<STOAuthToken> token, NSError *error, STCancellation *cancellation) {
@@ -678,7 +922,7 @@ static STRestKitLoader* _sharedInstance;
             return;
         }
         NSMutableDictionary* params = [NSMutableDictionary dictionaryWithDictionary:(NSDictionary*)request.params];
-        if (request.isGET && [request.URL isKindOfClass:[RKURL class]]) {
+        if (request.isGET /*&& [request.URL isKindOfClass:[RKURL class]]*/) {
             request.resourcePath = [request.resourcePath appendQueryParams:params];
             request.params = nil;
         }

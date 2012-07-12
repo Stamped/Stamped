@@ -15,13 +15,6 @@
 #import "STSpotify.h"
 #import "CocoaLibSpotify.h"
 
-typedef enum {
-    STPlayerServiceNone = 0,
-    STPlayerServicePreview = 1,
-    STPlayerServiceRdio = 2,
-    STPlayerServiceSpotify = 3,
-} STPlayerService;
-
 NSString* const STPlayerItemChangedNotification = @"STPlayerItemChangedNotification";
 NSString* const STPlayerStateChangedNotification = @"STPlayerStateChangedNotification";
 NSString* const STPlayerPlaylistChangedNotification = @"STPlayerPlaylistChangedNotification";
@@ -93,6 +86,12 @@ static id _sharedInstance;
     [_previewPlayer release];
     [_spotifyPlaybackManager release];
     [super dealloc];
+}
+
+- (STPlayerService)currentTrackService {
+    if (self.items.count == 0) return STPlayerServiceNone;
+    id<STPlaylistItem> item = [self.items objectAtIndex:self.currentItemIndex];
+    return [self serviceForItem:item];
 }
 
 - (void)initializeSpotify {

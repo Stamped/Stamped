@@ -65,7 +65,7 @@
         
         // user image view
         
-        _userImageView = [[STUserImageView alloc] initWithSize:46];//[[Util profileImageViewForUser:nil withSize:46] retain]; //[[UIImageView alloc] initWithFrame:CGRectMake(11.0f, originY, 46.0f, 46.0f)];
+        _userImageView = [[STUserImageView alloc] initWithSize:48];//[[Util profileImageViewForUser:nil withSize:46] retain]; //[[UIImageView alloc] initWithFrame:CGRectMake(11.0f, originY, 46.0f, 46.0f)];
         [Util reframeView:_userImageView withDeltas:CGRectMake(11, originY, 0, 0)];
         [self addSubview:_userImageView];
         
@@ -75,7 +75,7 @@
         [longPress release];
         
         // cell text
-        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, originY, self.bounds.size.width - 88.0f, 70.0f)];
+        STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, 0, self.bounds.size.width - 88.0f, 70.0f + originY)];
         view.backgroundColor = [UIColor whiteColor];
         [self addSubview:view];
         [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
@@ -86,17 +86,17 @@
                 [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f] setFill];
                 UIFont *font = [UIFont stampedBoldFontWithSize:12];
                 CGSize size = [_username sizeWithFont:font];
-                [_username drawInRect:CGRectMake(rect.origin.x, rect.origin.y, size.width, size.height) withFont:font lineBreakMode:UILineBreakModeTailTruncation];
-                [_subcategory drawAtPoint:CGPointMake(size.width, rect.origin.y) withFont:[UIFont stampedFontWithSize:12]];
+                [_username drawInRect:CGRectMake(rect.origin.x, rect.origin.y + 5.5, size.width, size.height) withFont:font lineBreakMode:UILineBreakModeTailTruncation];
+                [_subcategory drawAtPoint:CGPointMake(size.width, rect.origin.y + 6.0 ) withFont:[UIFont stampedFontWithSize:12]];
             }
             
             if (_category) {
                 if (_categoryImage) {
-                    
+                    CGFloat imageOffset = 13;
                     if (highlighted) {
                         
                         CGContextSaveGState(ctx);
-                        CGRect imageRect = CGRectMake(rect.origin.x, rect.size.height -  (56.0f+_categoryImage.size.height), _categoryImage.size.width, _categoryImage.size.height);
+                        CGRect imageRect = CGRectMake(rect.origin.x, rect.size.height -  (56.0f+_categoryImage.size.height + imageOffset), _categoryImage.size.width, _categoryImage.size.height);
                         CGContextTranslateCTM(ctx, 0, rect.size.height);
                         CGContextScaleCTM(ctx, 1.0, -1.0);
                         
@@ -107,22 +107,22 @@
                         CGContextRestoreGState(ctx);
                         
                     } else {
-                        [_categoryImage drawAtPoint:CGPointMake(rect.origin.x, 56.0f)];
+                        [_categoryImage drawAtPoint:CGPointMake(rect.origin.x, 56.0f + imageOffset)];
                     }
                     
                 }
                 [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.6f green:0.6f blue:0.6f alpha:1.0f] setFill];
-                [_category drawAtPoint:CGPointMake((_categoryImage!=nil) ? _categoryImage.size.width + 5.0f : 0.0f, 54.0f) withFont:[UIFont stampedFontWithSize:12]];
+                [_category drawAtPoint:CGPointMake((_categoryImage!=nil) ? _categoryImage.size.width + 5.0f : 0.0f, 54.0f + 12) withFont:[UIFont stampedFontWithSize:12]];
             }
             
             if (_title) {
                 
-                UIFont *font = [UIFont stampedTitleLightFontWithSize:36];
+                UIFont *font = [UIFont stampedTitleLightFontWithSize:40];
                 CGContextSetFillColorWithColor(ctx, [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.149f green:0.149f blue:0.149f alpha:1.0f] CGColor]);
                 
                 CGContextSetCharacterSpacing(ctx, 10);
-                CGPoint point = CGPointMake(0.0f, 18.0f);
-                CGFloat maxWidth = rect.size.width - 36.0f;
+                CGPoint point = CGPointMake(0.0f, 18.0f + 7.5f); //adjusted
+                CGFloat maxWidth = rect.size.width - 36.0f - 10;
                 BOOL _drawn = NO;
                 BOOL truncate = NO;
                 
@@ -144,7 +144,7 @@
                         }
                         
                         CGRect imageRect = CGRectMake(imageOrigin, 17.0f, 14.0f, 14.0f);
-                        imageRect.origin.y = floorf(rect.size.height - (17.0f+14.0f));
+                        imageRect.origin.y = floorf(rect.size.height - (17.0f+14.0f) ) - 13;
                         CGContextSaveGState(ctx);
                         CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
                         CGContextScaleCTM(ctx, 1.0f, -1.0f);
@@ -199,7 +199,7 @@
         
         // date label
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.font = [UIFont stampedFontWithSize:12];
+        label.font = [UIFont stampedFontWithSize:10];
         label.textColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
         label.highlightedTextColor = [UIColor whiteColor];
         label.backgroundColor = [UIColor whiteColor];
@@ -207,7 +207,7 @@
         _dateLabel = label;
         [label release];
         
-        STPreviewsView *previewsView = [[STPreviewsView alloc] initWithFrame:CGRectMake(69.0f, 95.0f, 0, 0)];
+        STPreviewsView *previewsView = [[STPreviewsView alloc] initWithFrame:CGRectMake(69.0f, 95.0f - 2, 0, 0)];
         [self addSubview:previewsView];
         _statsView = previewsView;
         [previewsView release];
@@ -225,7 +225,7 @@
         _statsDots = layer;
         
         // comment count
-        STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200, 30.0f)];
+        STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200, 60.0f)];
         commentView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
         commentView.backgroundColor = [UIColor whiteColor];
         [self addSubview:commentView];
@@ -242,9 +242,9 @@
                 offset += 12.0f;
                 if (!_hasMedia) {
                     
-                    [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.521f green:0.635f blue:0.8f alpha:1.0f] setFill];
+                    [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f] setFill];
                     NSString *comments = [NSString stringWithFormat:@"%i", _commentCount];
-                    CGFloat width = [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont systemFontOfSize:9]].width;
+                    CGFloat width = [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont stampedFontWithSize:12]].width;
                     UIFont *font = [UIFont stampedFontWithSize:12];
                     [comments drawInRect:CGRectMake(offset, -1.0f, width, font.lineHeight) withFont:font];
                     offset += (width+2.0f);
@@ -357,7 +357,7 @@
     _dateLabel.text = [Util shortUserReadableTimeSinceDate:stamp.created];
     [_dateLabel sizeToFit];
     CGRect frame = _dateLabel.frame;
-    frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+16.0f)), 10);
+    frame.origin = CGPointMake(floorf(self.bounds.size.width - (frame.size.width+16.0f)), 10 - 2.5);
     _dateLabel.frame = frame;
     
     [_userImageView setupWithUser:stamp.user viewAction:YES];

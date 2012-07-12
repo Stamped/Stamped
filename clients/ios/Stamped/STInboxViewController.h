@@ -10,5 +10,7 @@
 #import "STLazyList.h"
 #import "STRestViewController.h"
 
+extern NSString* STInboxViewControllerPrepareForAnimationNotification;
+
 @interface STInboxViewController : STRestViewController
 @end

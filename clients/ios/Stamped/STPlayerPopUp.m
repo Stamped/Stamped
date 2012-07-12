@@ -15,16 +15,25 @@
 #import "STImageCache.h"
 #import "STRippleBar.h"
 #import "STRdio.h"
+#import "STSpotify.h"
+
+static const CGFloat _cellHeight = 52;
 
 @interface STPlayerPopUpCell : UITableViewCell
 
 - (id)initWithReuseIdentifier:(NSString *)reuseIdentifier;
-- (void)setupWithPlaylistItem:(id<STPlaylistItem>)item;
+- (void)setupWithPlaylistItem:(id<STPlaylistItem>)item andIndex:(NSInteger)index;
+
+@property (nonatomic, readonly, retain) UILabel* indexLabel;
+@property (nonatomic, readonly, retain) UILabel* titleLabel;
+@property (nonatomic, readonly, retain) UIImageView* playerIcon;
+@property (nonatomic, readonly, retain) UILabel* lengthLabel;
 
 @end
 
 @interface STPlayerPopUp () <UITableViewDataSource, UITableViewDelegate>
 
+@property (nonatomic, readonly, retain) UIView* contentView;
 @property (nonatomic, readonly, retain) UITableView* tableView;
 @property (nonatomic, readonly, retain) STPlayer* player;
 @property (nonatomic, readonly, retain) UIButton* editButton;
@@ -36,11 +45,13 @@
 @property (nonatomic, readwrite, assign) BOOL selectMask;
 @property (nonatomic, readonly, retain) UIButton* pauseButton;
 @property (nonatomic, readonly, assign) BOOL fullFooter;
+@property (nonatomic, readonly, retain) UILabel* viaLabel;
 
 @end
 
 @implementation STPlayerPopUp
 
+@synthesize contentView = _contentView;
 @synthesize tableView = _tableView;
 @synthesize player = _player;
 @synthesize editButton = _editButton;
@@ -52,15 +63,17 @@
 @synthesize subtitleView = _subtitleView;
 @synthesize pauseButton = _pauseButton;
 @synthesize fullFooter = _fullFooter;
+@synthesize viaLabel = _viaLabel;
 
 - (id)init
 {
-    self = [super initWithFrame:CGRectMake(15, 35, 290, 360)];
+    self = [super initWithFrame:[Util fullscreenFrame]];
     if (self) {
-        self.backgroundColor = [UIColor whiteColor];
+        self.backgroundColor = [UIColor clearColor];
+        _contentView = [[UIView alloc] initWithFrame:CGRectMake(15, 55, 290, 360)];
+        _contentView.backgroundColor = [UIColor whiteColor];
         
-        
-        _fullFooter = NO;//![STRdio sharedRdio].loggedIn;
+        _fullFooter = !([STRdio sharedRdio].connected || [STSpotify sharedInstance].connected);// YES;//![STRdio sharedRdio].loggedIn;
         
         CGFloat headerHeight = 66;
         CGFloat footerHeight;
@@ -73,13 +86,19 @@
         CGFloat xOffset = 65;
         
         _player = [[STPlayer sharedInstance] retain];
-        _headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width, headerHeight)];
+        _headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, _contentView.frame.size.width, headerHeight)];
         _headerView.backgroundColor = [UIColor whiteColor];
         //_headerView.clipsToBounds = YES;
         _headerView.layer.shadowOffset = CGSizeMake(0, 2);
         _headerView.layer.shadowColor = [UIColor blackColor].CGColor;
         _headerView.layer.shadowOpacity = .2;
         
+        CGFloat viaWidth = 120;
+        _viaLabel = [[UILabel alloc] initWithFrame:CGRectMake(_headerView.frame.size.width - viaWidth, 48, viaWidth, 18)];
+        _viaLabel.font = [UIFont stampedFontWithSize:10];
+        _viaLabel.textColor = [UIColor stampedGrayColor];
+        _viaLabel.textAlignment = UITextAlignmentCenter;
+        [_headerView addSubview:_viaLabel];
         
         CGFloat contentWidth = 110;
         UIFont* titleFont = [UIFont stampedTitleLightFontWithSize:24];
@@ -127,14 +146,14 @@
         _imageView = [[UIImageView alloc] initWithFrame:CGRectMake(10, 10, 44, 44)];
         [_headerView addSubview:_imageView];
         
-        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, headerHeight, self.frame.size.width, self.frame.size.height - (headerHeight + (_fullFooter ? footerHeight : 0)))];
+        _tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, headerHeight, _contentView.frame.size.width, _contentView.frame.size.height - (headerHeight + (_fullFooter ? footerHeight : 0)))];
         _tableView.dataSource = self;
         _tableView.delegate = self;
-        [self addSubview:_tableView];
+        [_contentView addSubview:_tableView];
         
-        [self addSubview:_headerView];
+        [_contentView addSubview:_headerView];
         
-        _footerView = [[UIView alloc] initWithFrame:CGRectMake(0, self.frame.size.height - footerHeight, self.frame.size.width, footerHeight)];
+        _footerView = [[UIView alloc] initWithFrame:CGRectMake(0, _contentView.frame.size.height - footerHeight, _contentView.frame.size.width, footerHeight)];
         
         STRippleBar* footerBar = [[[STRippleBar alloc] initWithPrimaryColor:@"eaeaea" andSecondaryColor:@"eaeaea" isTop:NO] autorelease];
         footerBar.frame = CGRectMake(0, _footerView.frame.size.height - footerBar.frame.size.height, _footerView.frame.size.width, footerBar.frame.size.height);
@@ -163,13 +182,14 @@
                                       nil]
                             vertical:YES];
         }
-        [self addSubview:_footerView];
+        [_contentView addSubview:_footerView];
         
         
         UIButton* exitButton = [UIButton buttonWithType:UIButtonTypeCustom];
         [exitButton addTarget:self action:@selector(exit:) forControlEvents:UIControlEventTouchUpInside];
         [exitButton setImage:[UIImage imageNamed:@"popup_wht_closeButton"] forState:UIControlStateNormal];
-        exitButton.frame = CGRectMake(-24, -24, 48, 48);
+        exitButton.frame = CGRectMake(-24 + _contentView.frame.origin.x, -24 + _contentView.frame.origin.y, 48, 48);
+        [self addSubview:_contentView];
         [self addSubview:exitButton];
         [self.tableView reloadData];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changed:) name:STPlayerItemChangedNotification object:nil];
@@ -189,7 +209,12 @@
     [_tableView release];
     [_player release];
     [_pauseButton release];
+    [_contentView release];
     [super dealloc];
+}
+
++ (UIColor*)backgroundColor {
+    return [UIColor colorWithWhite:0 alpha:.5];
 }
 
 - (void)changed:(id)notImportant {
@@ -218,17 +243,70 @@
 
 - (void)pauseButtonPressed:(UIButton*)button {
     BOOL paused = button.selected;
-    NSLog(@"pausing %d", paused);
-    self.player.paused = button.selected;
+    self.player.paused = paused;
 }
 
+static CGFloat _time = .4;
+
 - (void)exit:(id)notImportant {
-    [Util setFullScreenPopUp:nil dismissible:YES withBackground:[UIColor clearColor]];
+    STPlayerService service = self.player.currentTrackService;
+    if (service == STPlayerServicePreview) {
+        self.player.paused = YES;
+    }
+    [UIView animateWithDuration:_time animations:^{
+        self.backgroundColor = [UIColor clearColor];
+    } completion:^(BOOL finished) {
+        UIView* snapshot = [STPlayerPopUp snapshot:self];
+        [STPlayerPopUp expand:snapshot withPopUp:self];
+        [Util setFullScreenPopUp:snapshot dismissible:NO animated:NO withBackground:[UIColor clearColor]];
+        [UIView animateWithDuration:_time animations:^{
+            [STPlayerPopUp collapse:snapshot withPopUp:self];
+        } completion:^(BOOL finished) {
+            [Util setFullScreenPopUp:nil dismissible:YES animated:NO withBackground:[UIColor clearColor]]; 
+        }];
+    }];
+}
+
++ (CGRect)collapseFrame {
+    return CGRectMake(220, 15, 0, 0);
+}
+
++ (UIView*)snapshot:(STPlayerPopUp*)popUp {
+    UIGraphicsBeginImageContext(popUp.frame.size);
+    [popUp.layer renderInContext:UIGraphicsGetCurrentContext()];
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextTranslateCTM(context, popUp.frame.origin.x, popUp.frame.origin.y);
+    UIImage *resultingImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    UIImageView* imageView = [[[UIImageView alloc] initWithImage:resultingImage] autorelease];
+    return imageView;
+}
+
++ (void)collapse:(UIView*)view withPopUp:(STPlayerPopUp*)popUp{
+    view.frame = [self collapseFrame];
+    view.alpha = 0;
+}
+
++ (void)expand:(UIView*)view  withPopUp:(STPlayerPopUp*)popUp{
+    view.frame = popUp.frame;
+    view.alpha = 1;
 }
 
 + (void)present {
     STPlayerPopUp* popUp = [[[STPlayerPopUp alloc] init] autorelease];
-    [Util setFullScreenPopUp:popUp dismissible:YES withBackground:[UIColor colorWithWhite:0 alpha:.5]];
+    UIView* snapshot = [self snapshot:popUp];
+    [self collapse:snapshot withPopUp:popUp];
+    [Util setFullScreenPopUp:snapshot dismissible:NO animated:NO withBackground:[UIColor clearColor]];
+    [UIView animateWithDuration:_time delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
+        [self expand:snapshot withPopUp:popUp];
+            
+    } completion:^(BOOL finished) {
+        [Util setFullScreenPopUp:popUp dismissible:YES animated:NO withBackground:[UIColor clearColor]]; 
+        [UIView animateWithDuration:_time animations:^{
+            popUp.backgroundColor = [self backgroundColor]; 
+        }];
+        
+    }];
 }
 
 + (void)presentWithItems:(NSArray<STPlaylistItem>*)playlist clear:(BOOL)clear startIndex:(NSInteger)index {
@@ -256,6 +334,23 @@
         if (item) {
             _titleView.text = item.name;
             _subtitleView.text = item.subtitle;
+            STPlayerService service = self.player.currentTrackService;
+            NSString* serviceString = nil;
+            if (service == STPlayerServicePreview) {
+                serviceString = @"iTunes";
+            }
+            else if (service == STPlayerServiceRdio) {
+                serviceString = @"Rdio";
+            }
+            else if (service == STPlayerServiceSpotify) {
+                serviceString = @"Spotify";
+            }
+            if (serviceString) {
+                _viaLabel.text = [NSString stringWithFormat:@"via %@", serviceString];
+            }
+            else {
+                _viaLabel.text = @"";
+            }
             id<STImage> bestImage = [Util bestImageFromImages:item.images forSize:_imageView.frame.size];
             if (bestImage) {
                 void (^block)(UIImage* image) = ^(UIImage* image) {
@@ -283,6 +378,10 @@
             }];
         }
     }
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return _cellHeight;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -316,7 +415,7 @@
         cell = [[[STPlayerPopUpCell alloc] initWithReuseIdentifier:reuseID] autorelease];
     }
     id<STPlaylistItem> item = [self.player itemAtIndex:indexPath.row];
-    [cell setupWithPlaylistItem:item];
+    [cell setupWithPlaylistItem:item andIndex:indexPath.row];
     return cell;
 }
 
@@ -348,20 +447,56 @@
 
 @implementation STPlayerPopUpCell
 
+@synthesize indexLabel = _indexLabel;
+@synthesize titleLabel = _titleLabel;
+@synthesize playerIcon = _playerIcon;
+@synthesize lengthLabel = _lengthLabel;
+
 - (id)initWithReuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier];
     if (self) {
         self.shouldIndentWhileEditing = NO;
         self.showsReorderControl = YES;
-        self.textLabel.font = [UIFont stampedBoldFontWithSize:14];
+        self.textLabel.font = [UIFont stampedBoldFontWithSize:12];
         self.textLabel.textColor = [UIColor stampedDarkGrayColor];
+        
+        _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(60, 0, 185, 52)];
+        _titleLabel.backgroundColor = [UIColor clearColor];
+        _titleLabel.font = [UIFont stampedBoldFontWithSize:12];
+        _titleLabel.textColor = [UIColor stampedDarkGrayColor];
+        _titleLabel.highlightedTextColor = [UIColor whiteColor];
+        
+        [self.contentView addSubview:_titleLabel];
+        
+        _indexLabel = [[UILabel alloc] initWithFrame:CGRectMake(42, .5, 35, 52)];
+        _indexLabel.backgroundColor = [UIColor clearColor];
+        _indexLabel.font = [UIFont stampedFontWithSize:12];
+        _indexLabel.textColor = [UIColor stampedGrayColor];
+        _indexLabel.highlightedTextColor = [UIColor whiteColor];
+        [self.contentView addSubview:_indexLabel];
+        
+        CGFloat rightSide = 275;
+        CGFloat lengthWidth = 27;
+        _lengthLabel = [[UILabel alloc] initWithFrame:CGRectMake(rightSide - lengthWidth, .5, lengthWidth, _cellHeight)];
+        _lengthLabel.backgroundColor = [UIColor clearColor];
+        _lengthLabel.font = [UIFont stampedFontWithSize:12];
+        _lengthLabel.textColor = [UIColor stampedGrayColor];
+        _lengthLabel.highlightedTextColor = [UIColor whiteColor];
+        _lengthLabel.textAlignment = UITextAlignmentRight;
+        [self.contentView addSubview:_lengthLabel];
     }
     return self;
 }
 
-- (void)setupWithPlaylistItem:(id<STPlaylistItem>)item {
-    self.textLabel.text = item.name;
+- (void)setupWithPlaylistItem:(id<STPlaylistItem>)item andIndex:(NSInteger)index {
+    _titleLabel.text = item.name;
+    _lengthLabel.text = @"";
+    if (item.length > 0) {
+        _lengthLabel.text = [Util trackLengthString:item.length];
+    }
+    _indexLabel.text = [NSString stringWithFormat:@"%d.", index + 1];
+    _playerIcon.image = nil;
 }
 
 @end

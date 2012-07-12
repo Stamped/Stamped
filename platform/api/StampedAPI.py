@@ -1690,7 +1690,7 @@ class StampedAPI(AStampedAPI):
         return newlist
 
     @API_CALL
-    def getEntityAutoSuggestions(self, authUserId, query, category, coordinates=None):
+    def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
         if category == 'film':
             return self._netflix.autocomplete(query)
         elif category == 'place':
@@ -1815,7 +1815,8 @@ class StampedAPI(AStampedAPI):
             preview = StampPreview()
             preview.stamp_id = stamp.stamp_id
             preview.user = userIds[stamp.user.user_id]
-            stampPreviewList.append(preview)
+            if preview.user is not None:
+                stampPreviewList.append(preview)
 
         allUsers            = StampedByGroup()
         allUsers.stamps     = stampPreviewList

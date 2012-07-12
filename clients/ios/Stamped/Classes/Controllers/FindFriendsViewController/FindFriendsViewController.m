@@ -9,6 +9,11 @@
 #import "FindFriendsViewController.h"
 #import "FindFriendsHeaderView.h"
 #import "FriendsViewController.h"
+#import "STFindFacebookViewController.h"
+#import "STFindTwitterViewController.h"
+#import "STContactsViewController.h"
+#import "Util.h"
+
 #import "STDebug.h"
 
 
@@ -33,7 +38,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     self.tableView.separatorColor = [UIColor colorWithWhite:0.0f alpha:0.05f];
     self.showsSearchBar = YES;
     [self.searchView setPlaceholderTitle:@"Search users"];
@@ -51,7 +55,14 @@
 - (void)viewDidAppear:(BOOL)animated {
     
     [super viewDidAppear:animated];
+    if (self.firstAppearance) {
         self.tableView.contentOffset = CGPointZero;
+    }
+    self.firstAppearance = NO;
+    NSIndexPath* indexPath = [self.tableView indexPathForSelectedRow];
+    if (indexPath) {
+        [self.tableView deselectRowAtIndexPath:indexPath animated:YES];
+    }
 }
 
 #pragma mark - Table view data source
@@ -153,6 +164,15 @@
         [alert release];
         
     } 
+    else if (type == FindFriendsSelectionTypeFacebook) {
+        STFindFacebookViewController* controller = [[[STFindFacebookViewController alloc] init] autorelease];
+        [Util pushController:controller modal:NO animated:YES];
+    } 
+    else if (type == FindFriendsSelectionTypeTwitter) {
+//        [Util warnWithMessage:@"Down for maintenance" andBlock:nil];
+        UIViewController* controller = [[[STFindTwitterViewController alloc] init] autorelease];
+        [Util pushController:controller modal:NO animated:YES];
+    }
     else {
         
         [self showFriendsControllerWithType:type];
@@ -167,7 +187,9 @@
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
     if (alertView.cancelButtonIndex==buttonIndex) return;
 
-    [self showFriendsControllerWithType:FindFriendsSelectionTypeContacts];
+    STContactsViewController* controller = [[[STContactsViewController alloc] init] autorelease];
+    [Util compareAndPushOnto:self withController:controller modal:NO animated:YES];
+//    [self showFriendsControllerWithType:FindFriendsSelectionTypeContacts];
 
 }
 

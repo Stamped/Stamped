@@ -20,6 +20,9 @@ static NSString* _buttonPaddingKey = @"Consumption.toolbar.button.padding";
 static NSString* _buttonInnerPaddingKey = @"Consumption.toolbar.button.inner_padding";
 static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_radius";
 
+
+extern NSString* const STConsumptionToolbarSliderWillShowNotification = @"STConsumptionToolbarSliderWillShowNotification";
+
 @interface STConsumptionToolbar ()
 
 - (CGFloat)generateViewsWithItem:(STConsumptionToolbarItem*)item andOuput:(NSMutableArray*)outputArray;
@@ -88,6 +91,7 @@ static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_ra
 - (void)viewScopeButtonClicked:(id)nothing {
     self.slider.hidden = NO;
     self.backButton.hidden = NO;
+    [[NSNotificationCenter defaultCenter] postNotificationName:STConsumptionToolbarSliderWillShowNotification object:nil];
     [UIView animateWithDuration:.25 animations:^{
         self.toolbarContents.frame = CGRectMake(-320, self.toolbarContents.frame.origin.y, self.toolbarContents.frame.size.width, self.toolbarContents.frame.size.height);
     }];

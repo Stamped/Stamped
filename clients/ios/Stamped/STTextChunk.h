@@ -13,5 +13,7 @@
 
 - (id)initWithPrev:(STChunk*)chunk text:(NSString*)text font:(UIFont*)font color:(UIColor*)color;
 - (id)initWithPrev:(STChunk*)chunk text:(NSString*)text font:(UIFont*)font color:(UIColor*)color kerning:(CGFloat)kerning;
+- (id)initWithPrev:(STChunk*)chunk attributedString:(NSAttributedString*)string andPrimaryFont:(UIFont*)primaryFont;
+
 
 @end

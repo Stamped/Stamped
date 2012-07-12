@@ -209,7 +209,6 @@
 }
 
 - (void)loadNextPage {
-    NSLog(@"loadNextPage");
     [self.cache refreshAtIndex:self.snapshot.count force:NO];
 }
 
@@ -218,13 +217,11 @@
 }
 
 - (void)reloadDataSource {
-    NSLog(@"reloading");
     if (self.dirty) {
         [self.cache updateAllWithAccellerator:[STStampedAPI sharedInstance]];
     }
     self.dirty = NO;
     [self.cache refreshAtIndex:-1 force:YES];
-    [[STUnreadActivity sharedInstance] update];
     [super reloadDataSource];
 }
 

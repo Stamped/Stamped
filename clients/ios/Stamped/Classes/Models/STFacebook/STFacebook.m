@@ -9,14 +9,16 @@
 #import "STFacebook.h"
 #import "FBConnect.h"
 #import "STEvents.h"
-
-#define kFacebookUserIdentifier @"kFacebookUserIdentifier"
-
-#define kFacebookAppID @"297022226980395"
-#define kFacebookSecret @"17eb87d731f38bf68c7b40c45c35e52e"
-#define kFacebookNameSpace @"stampedapp"
+#import "STRestKitLoader.h"
+#import "STSimpleBooleanResponse.h"
+#import "STSettingsViewController.h"
+#import "Util.h"
 
 static id __instance;
+
+@interface STFacebook () <UIAlertViewDelegate>
+
+@end
 
 @implementation STFacebook
 
@@ -59,20 +61,19 @@ static id __instance;
         
         if ([self.facebook shouldExtendAccessToken]) {
             [self.facebook extendAccessToken];
-        } else {
-            
-            /*
-             email
-             user_location
-             publish_stream (for posting to wall)
-             user_about_me (for bio)
-             */
-            
+        }
+        else {
+
             [self.facebook authorize:[NSArray arrayWithObjects:@"user_about_me", @"user_location", @"email", @"publish_stream", @"publish_actions", nil]];
         }
         
     } else {
-        [STEvents postEvent:EventTypeFacebookAuthFinished];
+        if ([STRestKitLoader sharedInstance].loggedIn) {
+            [self updateLinkedAccount];
+        }
+        else {
+            [STEvents postEvent:EventTypeFacebookAuthFinished];   
+        }
     }
     
 }
@@ -89,8 +90,22 @@ static id __instance;
     
 }
 
-
 #pragma mark - FBSessionDelegate
+
+- (void)updateLinkedAccount {
+    if (self.facebook.accessToken) {
+        NSMutableDictionary* params = [NSMutableDictionary dictionary];
+        [params setObject:self.facebook.accessToken forKey:@"token"];
+        [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/facebook/add.json"
+                                                     post:YES
+                                            authenticated:YES
+                                                   params:params
+                                                  mapping:[STSimpleBooleanResponse mapping]
+                                              andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                  [STEvents postEvent:EventTypeFacebookAuthFinished];
+                                              }];
+    }
+}
 
 - (void)fbDidLogin {
     
@@ -99,14 +114,16 @@ static id __instance;
     [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
     [defaults synchronize];
     
-    [STEvents postEvent:EventTypeFacebookAuthFinished];
-    
+    if ([STRestKitLoader sharedInstance].loggedIn) {
+        [self updateLinkedAccount];
+    }
+    else {
+        [STEvents postEvent:EventTypeFacebookAuthFinished];
+    }
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled {
-    
     [STEvents postEvent:EventTypeFacebookAuthFailed];
-    
 }
 
 - (void)fbDidExtendToken:(NSString*)accessToken  expiresAt:(NSDate*)expiresAt {
@@ -116,7 +133,12 @@ static id __instance;
     [defaults setObject:expiresAt forKey:@"FBExpirationDateKey"];
     [defaults synchronize];
     
-    [STEvents postEvent:EventTypeFacebookAuthFinished];
+    if ([STRestKitLoader sharedInstance].loggedIn) {
+        [self updateLinkedAccount];
+    }
+    else {
+        [STEvents postEvent:EventTypeFacebookAuthFinished];
+    }
     
 }
 
@@ -146,7 +168,7 @@ static id __instance;
     
     if ([[request url] hasSuffix:@"friends"]) {
         
-       // [Events postEvent:EventTypeFacebookFriendsFinished object:result];
+        // [Events postEvent:EventTypeFacebookFriendsFinished object:result];
         
     } else if ([[request url] hasSuffix:@"me"]) {
         if ([result objectForKey:@"id"]) {
@@ -155,7 +177,7 @@ static id __instance;
         }
         
         self.userData = result;
-
+        
         if (self.handler) {
             self.handler(result);
         }
@@ -202,6 +224,23 @@ static id __instance;
     
     [facebook requestWithGraphPath:@"me" andDelegate:self];
     
+}
+
+
+- (void)showFacebookAlert {
+    UIAlertView* alert = [[[UIAlertView alloc] initWithTitle:@"Stamped added to your Facebook Timeline."
+                                                     message:@"You can now share Stamped activity to your Facebook Timeline. Tap \"Settings\" to change sharing preferences."
+                                                    delegate:self
+                                           cancelButtonTitle:nil
+                                           otherButtonTitles:@"Settings" , @"Dismiss", nil] autorelease];
+    [alert show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) {
+        STSettingsViewController* controller = [[[STSettingsViewController alloc] init] autorelease];
+        [Util pushController:controller modal:NO animated:YES];
+    }
 }
 
 

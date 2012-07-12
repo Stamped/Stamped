@@ -34,6 +34,7 @@
 #import "Util.h"
 #import "STNavigationItem.h"
 #import "STEvents.h"
+#import "NoDataUtil.h"
 
 #import "STStampsViewController.h"
 
@@ -111,7 +112,7 @@
     if (self = [super init]) {
         _user = [user retain];
         self.userIdentifier = user.userID;
-        self.title = user.screenName;
+        //self.title = user.screenName;
         [self commonInit];
         
     }
@@ -754,12 +755,18 @@
 
 - (void)setupNoDataView:(NoDataView*)view {
     
-    CGRect frame = view.frame;
-    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
-    frame.origin.y = height;
-    frame.size.height -= height;
-    view.frame = frame;
-    [view setupWithTitle:@"No stamps" detailTitle:[NSString stringWithFormat:@"No stamps found for %@.", (self.user==nil) ? @"this user" : self.user.screenName]];
+    view.custom = YES;
+    
+    UIView* waterMark = [NoDataUtil stampWatermarkWithTitle:@"No stamps" andSubtitle:[NSString stringWithFormat:@"from %@", (self.user==nil) ? @"this user" : self.user.screenName]];
+    waterMark.frame = [Util centeredAndBounded:waterMark.frame.size inFrame:CGRectMake(0, 0, view.frame.size.width, 160)];
+    [view addSubview:waterMark];
+    
+//    CGRect frame = view.frame;
+//    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
+//    frame.origin.y = height;
+//    frame.size.height -= height;
+//    view.frame = frame;
+//    [view setupWithTitle:@"No stamps" detailTitle:[NSString stringWithFormat:@"No stamps found for %@.", (self.user==nil) ? @"this user" : self.user.screenName]];
     
 }
 #pragma mark - Cache Methods

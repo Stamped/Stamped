@@ -49,14 +49,14 @@
             [self addSubview:button];
         }
         UIView* nameView = [Util viewWithText: playlistItem.name ? playlistItem.name : @"?"
-                                         font:[UIFont stampedFontWithSize:16]
+                                         font:[UIFont stampedFontWithSize:12]
                                         color:playlistItem.entityID ? [UIColor stampedLinkColor] : [UIColor stampedDarkGrayColor]
                                          mode:UILineBreakModeTailTruncation
                                    andMaxSize:CGSizeMake(180, 40)];
         nameView.frame = [Util centeredAndBounded:nameView.frame.size inFrame:CGRectMake(65, 5, nameView.frame.size.width, 40)];
         [self addSubview:nameView];
         UIView* indexView = [Util viewWithText:[NSString stringWithFormat:@"%d.",index+1]
-                                          font:[UIFont stampedFontWithSize:16]
+                                          font:[UIFont stampedFontWithSize:12]
                                          color:[UIColor stampedGrayColor]
                                           mode:UILineBreakModeTailTruncation
                                     andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
@@ -75,7 +75,7 @@
         }
         if (playlistItem.length != 0) {
             UIView* lengthView = [Util viewWithText:[Util trackLengthString:playlistItem.length]
-                                               font:[UIFont stampedFontWithSize:16] 
+                                               font:[UIFont stampedFontWithSize:12] 
                                               color:[UIColor stampedGrayColor]
                                                mode:UILineBreakModeTailTruncation 
                                          andMaxSize:CGSizeMake(50, 40)];
@@ -132,7 +132,7 @@
             
             if (entityDetail.playlist.name) {
                 UIView* titleView = [Util viewWithText:entityDetail.playlist.name 
-                                                  font:[UIFont stampedBoldFontWithSize:16] 
+                                                  font:[UIFont stampedBoldFontWithSize:12] 
                                                  color:[UIColor stampedDarkGrayColor] 
                                                   mode:UILineBreakModeTailTruncation
                                             andMaxSize:CGSizeMake(self.frame.size.width, CGFLOAT_MAX)];

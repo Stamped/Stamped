@@ -25,6 +25,7 @@
 //
 
 #import "DDMenuController.h"
+#import "STLeftMenuViewController.h"
 
 #define kMenuFullWidth 320.0f
 #define kMenuDisplayedWidth 280.0f
@@ -598,6 +599,11 @@ NSString* const DDMenuControllerWillShowLeftMenuNotification = @"DDMenuControlle
     view.frame = frame;
     [self.view insertSubview:view atIndex:0];
     [self.leftViewController viewWillAppear:animated];
+    
+    if ([self.leftViewController isKindOfClass:[STLeftMenuViewController class]]) {
+        [(STLeftMenuViewController*)self.leftViewController reloadDataSource];
+    }
+    
     
     frame = _root.view.frame;
     frame.origin.x = CGRectGetMaxX(view.frame) - (kMenuFullWidth - kMenuDisplayedWidth);

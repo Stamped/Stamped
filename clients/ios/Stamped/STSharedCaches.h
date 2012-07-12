@@ -19,4 +19,8 @@ extern NSString* const STSharedCachesDidLoadCacheNotification;
 + (STCancellation*)cacheForInboxScope:(STStampedAPIScope)scope 
                          withCallback:(void (^)(STCache* cache, NSError* error, STCancellation* cancellation))block;
 
++ (STCache*)cacheForTodos;
+
++ (STCancellation*)cacheForTodosWithCallback:(void (^)(STCache* cache, NSError* error, STCancellation* cancellation))block;
+
 @end

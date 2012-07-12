@@ -13,6 +13,8 @@ import libs.ec2_utils
 from errors                 import *
 from optparse               import OptionParser
 
+from api.MongoStampedAPI import MongoStampedAPI
+
 from api.db.mongodb.MongoInboxStampsCollection          import MongoInboxStampsCollection
 from api.db.mongodb.MongoUserStampsCollection           import MongoUserStampsCollection
 from api.db.mongodb.MongoCreditReceivedCollection       import MongoCreditReceivedCollection
@@ -37,12 +39,14 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    MongoStampCollection,
     MongoEntityCollection,
     MongoAccountCollection,
+    MongoStampCollection,
 ]
 
 WORKER_COUNT = 10
+
+api = MongoStampedAPI()
 
 
 def parseCommandLine():
@@ -87,6 +91,12 @@ def worker(db, collection, stats, options):
             except NotImplementedError:
                 logs.warning("WARNING: Collection '%s' not implemented" % collection.__name__)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+            except StampedItunesSourceError as e:
+                logs.warning("%s: FAIL" % documentId)
+                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
+                stats['errors'].append(e)
+                api.mergeEntityId(str(documentId))
+
             except StampedDataError as e:
                 logs.warning("%s: FAIL" % documentId)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
