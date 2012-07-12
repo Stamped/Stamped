@@ -22,6 +22,7 @@ try:
     from resolve.Resolver                   import *
     from resolve.ResolverObject             import *
     from resolve.TitleUtils                 import *
+    from errors                     import StampedThirdPartyError
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from datetime                   import datetime
@@ -452,6 +453,8 @@ class GooglePlacesSource(GenericSource):
     def entityProxyFromKey(self, key, **kwargs):
         try:
             item = self.__places.getPlaceDetails(key)
+            if item.get('status') == 'NOT FOUND':
+                raise StampedThirdPartyError('Failed to look up GooglePlaces key: %s' % key)
             return GooglePlacesPlace(item)
         except KeyError:
             pass
