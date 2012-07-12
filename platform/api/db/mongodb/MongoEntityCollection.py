@@ -24,6 +24,8 @@ try:
     from api.ADecorationDB                  import ADecorationDB
     from errors                         import StampedUnavailableError
     from logs                           import log
+
+    from libs.SearchUtils               import addMatchCodesToMongoDocument
 except:
     report()
     raise
@@ -42,6 +44,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.netflix_id', 'sources.thetvdb_id')
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
+        self._collection.ensure_index('match_codes')
         self._collection.ensure_index('titlel')
         self._collection.ensure_index('albums.title')
         self._collection.ensure_index('artists.title')
@@ -83,6 +86,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             return None
         if 'title' in document:
             document['titlel'] = getSimplifiedTitle(document['title'])
+        addMatchCodesToMongoDocument(document)
         return document
 
     ### INTEGRITY
