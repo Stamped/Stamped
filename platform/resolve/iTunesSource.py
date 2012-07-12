@@ -616,7 +616,7 @@ class iTunesApp(_iTunesObject, ResolverSoftware):
     @lazyProperty
     def url(self):
         try:
-            return self.data['sellerUrl']
+            return self.data['trackViewUrl']
         except Exception:
             return None
 

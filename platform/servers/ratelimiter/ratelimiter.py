@@ -6,13 +6,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import gevent
-from gevent             import monkey
+from gevent import monkey
 monkey.patch_all()
-from GreenletServer     import GreenletServer
+from gevent             import sleep
 from gevent.queue       import PriorityQueue
 from gevent.event       import AsyncResult
 from gevent.coros       import Semaphore
-from rpyc.utils.server  import ThreadedServer
 
 import Globals
 import rpyc
@@ -28,6 +27,16 @@ REQUEST_DUR_CAP         = 5.0   # the cap for an individual request duration whe
 
 from optparse           import OptionParser
 #from libs.RateLimiter import RateLimiter
+
+class RLPriorityQueue(PriorityQueue):
+    def qsize_priority(self, priority):
+        """Return the number of entries in the queue of equal or higher priority.  Assumes the entries are a sequence
+           where the first index is the priority as int"""
+        count = 0
+        for item in self.queue:
+            if item[0] <= priority:
+                count += 1
+        return count
 
 class RateException(Exception):
     def __init__(self, msg=None):
@@ -53,11 +62,12 @@ class RequestLog():
     def __init__(self):
         self.avg_wait_time = None
         self.max_wait = 0
-        self.expected_wait = None
+        self.expected_dur = None
         self.items_in_queue = 0
 
 class Request():
     def __init__(self, timeout, verb, url, body, headers):
+        self.number = 0
         self.created = time()
         self.timeout = timeout
         self.verb = verb
@@ -104,6 +114,19 @@ class RateLimit(object):
             return self.__duration - diff
         else:
             return 0
+
+    def wait_forecast(self, num_requests, now=None):
+        if now is None:
+            now = time()
+        wait = self.wait(now)
+
+        # if the wait time is in effect, then it will clear the number of calls in RateLimit afterward
+        cur_calls = self.__calls
+        if wait > 0:
+            cur_calls = 0
+
+        requests_wait = ((num_requests + cur_calls) / self.__limit) * self.__duration
+        return wait + requests_wait
 
 # Fail Limit functions similarly to RateLimit, but only initiates a wait period once the fail limit has been reached
 # The cool down field is used to impose a stricter fail trigger immediately after resetting from a failure timeout:
@@ -170,13 +193,16 @@ class FailLimit(object):
 def processRequestLoop(limiter):
     print('### starting up processRequestLoop')
     while True:
+        sleep(0)
         limiter.doRequest()
+
+count = 0
 
 class RateLimiter(object):
 
     def __init__(self, cps=None, cpm=None, cph=None, cpd=None, fail_limit=None, fail_dur=None, max_wait=None):
         print('rate limit init')
-        self.__queue = gevent.queue.PriorityQueue()
+        self.__queue = RLPriorityQueue()
         self.__max_wait = max_wait
         self.__limits = {}
         self.__fail_limit = None
@@ -202,7 +228,7 @@ class RateLimiter(object):
             self.__fail_limit = FailLimit(fail_limit, fail_dur)
 
         self.__semaphore = Semaphore()
-        self.__workers = [gevent.spawn(processRequestLoop, self) for i in range(10 if cps is None else min(cps,20))]
+        self.__workers = [gevent.spawn(processRequestLoop, self) for i in range(10 if cps is None else min(cps*2,20))]
 
     def _addDurationLog(self, elapsed, total_waited, total_elapsed):
         """
@@ -218,6 +244,8 @@ class RateLimiter(object):
         """
         max_wait = 0
         max_name = None
+
+
 
         for name, limit in self.__limits.items():
             wait = limit.wait(now)
@@ -244,20 +272,38 @@ class RateLimiter(object):
 
         return dur_sum / len(self.__request_dur_log)
 
-    def _getExpectedWait(self, now, request=None):
+    def _getExpectedWaitTime(self, now, priority=0):
+        # determine the longest wait time for all of the rate limits, given the number of items in the queue
+        max_wait = 0
+        num_pending_requests = self.__queue.qsize_priority(priority)
+        for name, limit in self.__limits.items():
+            queue_wait = limit.wait_forecast(num_pending_requests, now)
+            if queue_wait > max_wait:
+                max_wait = queue_wait
+
+        return max_wait
+
+    def _getExpectedRequestTime(self, now, priority, request=None):
         # Calculate wait time based on average req time wait * num pending requests plus the current rate limit wait
         avg = self._getAverageRequestTime()
         max_wait, max_name = self._getLimitsWait(now)
-        expected_wait = max_wait + (self.__queue.qsize() * avg)
+
+        # expected request time equals the expected wait until request + the average request time
+        # the expected wait until request is equal to the current max wait un
+        expected_wait = self._getExpectedWaitTime(now, priority)
+
+        total_wait = expected_wait + avg
+
+
 
         # add to request log
         if request is not None:
             request.log.avg_wait_time = avg
             request.log.max_wait = max_wait
-            request.log.items_in_queue = self.__queue.qsize()
-            request.log.expected_wait = expected_wait
+            request.log.items_in_queue = self.__queue.qsize_priority(priority)
+            request.log.expected_dur = total_wait
 
-        return expected_wait
+        return total_wait
 
     def _enforceWait(self):
         locked = self.__semaphore.acquire(timeout=self.__max_wait)
@@ -292,25 +338,33 @@ class RateLimiter(object):
             raise RateException('Max wait (%s) exceeded trying to get slot' % self.__max_wait)
 
 
+
     def addRequest(self, request, priority="high"):
+        global count
+
         now = time()
 
         priority_int = 0
         if priority == "low":
             priority_int = 10
 
-        if priority_int == 0 and self._getExpectedWait(now, request) > request.timeout:
+        if priority_int == 0 and self._getExpectedRequestTime(now, priority_int, request) > request.timeout:
             max_wait, max_name = self._getLimitsWait(now)
             raise WaitTooLongException("Expected wait too long: %s seconds   TIMEOUT: %s  MAX LIMIT '%s':  %s" %
-                                       (self._getExpectedWait(now, request), request.timeout, max_name, max_wait))
+                                       (self._getExpectedRequestTime(now, priority_int, request), request.timeout, max_name, max_wait))
         asyncresult =  AsyncResult()
 
+        print('ADDING NUMBER: %s' % count)
+        request.number = count
+        count += 1
         data = (priority_int, request, asyncresult)
+
         self.__queue.put(data)
         return asyncresult
 
     def doRequest(self):
         priority, request, asyncresult = self.__queue.get()
+        print ('READ NUM: %s' % request.number)
 
         if (request.created + request.timeout < time()):
             #TODO: add timeout log
@@ -321,83 +375,31 @@ class RateLimiter(object):
         self._enforceWait()
         total_wait = time() - request.created
         log = request.log
-        if log is not None:
-            print( 'realized wait: %s    expected wait: %s  max_wait: %s  avg_wait_time: %s  items in queue: %s  priority: %s' %
-                   (total_wait, log.expected_wait, log.max_wait, log.avg_wait_time, log.items_in_queue, priority))
         try:
-            response, content = self.__http.request(request.url, request.verb, headers=request.headers, body=urllib.urlencode(request.body))
+            sleep(0.5)
+            response = 1
+            content = 1
+            #response, content = self.__http.request(request.url, request.verb, headers=request.headers, body=urllib.urlencode(request.body))
         except Exception as e:
             asyncresult.set_exception(e)
             return
+
+        realized_dur = time() - request.created
+
+        if log is not None:
+            print( 'NUM: %s  realized dur: %s    expected dur: %s  max_wait: %s  avg_wait_time: %s  items in queue: %s  priority: %s' %
+                   (request.number, realized_dur, log.expected_dur, log.max_wait, log.avg_wait_time, log.items_in_queue, priority))
+
+
         if self.__fail_limit is not None:
             if response.status >= 400:
                 self.__fail_limit.fail()
             else:
                 self.__fail_limit.success()
 
-        print('### response: %s' % response)
         asyncresult.set((response, content))
         now = time()
         elapsed = now - begin
         total_elapsed = now - request.created
         self._addDurationLog(elapsed, total_wait, total_elapsed)
         return
-
-limiters = {
-    'facebook'      : RateLimiter(                      fail_limit=10,      fail_dur=60),
-    'twitter'       : RateLimiter(                      fail_limit=10,      fail_dur=60),
-    'netflix'       : RateLimiter(cps=4,    cpd=100000, fail_limit=10,      fail_dur=60),
-    'rdio'          : RateLimiter(          cpd=15000,  fail_limit=10,      fail_dur=60),
-    'spotify'       : RateLimiter(                      fail_limit=10,      fail_dur=60),
-    }
-
-
-class StampedRateLimiterService(rpyc.Service):
-    def on_connect(self):
-        # code that runs when a connection is created
-        # (to init the serivce, if needed
-        pass
-
-    def on_disconnect(self):
-        # code that runs when the connection has already closed
-        # (to finalize the service, if needed)
-        pass
-
-    def exposed_request(self, service, priority, timeout, verb, url, body = {}, headers = {}):
-        if timeout is None:
-            raise StampedInputError("Timeout period must be provided")
-        request = Request(timeout, verb, url, body, headers)
-
-        limiter = limiters[service]
-
-        asyncresult = limiter.addRequest(request, priority)
-
-        # This sleep call is necessary because of a bug with the way gevent handles timeouts... Effectively resets
-        # the starting time for the timeout, otherwise the starting time is the time of last pop from queue
-        gevent.sleep(0)
-        return asyncresult.get(block=True, timeout=timeout)
-
-
-def runServer(port=18861):
-    t = GreenletServer(StampedRateLimiterService, port = port)
-    t.start()
-
-def parseCommandLine():
-    usage   = "Usage: %prog [options] command [args]"
-    version = "%prog " + __version__
-    parser  = OptionParser(usage=usage, version=version)
-
-    parser.add_option("-p", "--port", dest="port",
-        default=18861, type="int", help="Set server port")
-
-    (options, args) = parser.parse_args()
-
-    return options
-
-if __name__ == "__main__":
-    import sys
-    options     = parseCommandLine()
-    options     = options.__dict__
-    port        = options.pop('port', 18861)
-
-    runServer(port)
