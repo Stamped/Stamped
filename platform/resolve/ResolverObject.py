@@ -302,7 +302,7 @@ class ResolverMediaCollection(ResolverObject):
         super(ResolverMediaCollection, self).__init__(*args, **kwargs)
         self._properties.extend([
             'artists', 'authors', 'tracks', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date',
-            'genres', 'length', 'mpaa_rating'
+            'genres', 'length', 'mpaa_rating', 'last_popular',
         ])
 
     @property 
@@ -357,6 +357,10 @@ class ResolverMediaCollection(ResolverObject):
     def mpaa_rating(self):
         return None
 
+    @property
+    def last_popular(self):
+        return None
+
     @lazyProperty
     def related_terms(self):
         l = [ self.name ]
@@ -383,7 +387,7 @@ class ResolverMediaItem(ResolverObject):
         super(ResolverMediaItem, self).__init__(*args, **kwargs)
         self._properties.extend([
             'artists', 'authors', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date', 'genres',
-            'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number'
+            'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number', 'last_popular',
         ])
 
     @property
@@ -445,6 +449,10 @@ class ResolverMediaItem(ResolverObject):
 
     @property
     def sku_number(self):
+        return None
+
+    @property
+    def last_popular(self):
         return None
 
     @lazyProperty
