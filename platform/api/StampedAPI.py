@@ -350,52 +350,56 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
-    def verifyLinkedAccount(self, linkedAccount):
-        if linkedAccount.service_name == 'facebook':
-            try:
-                facebookUser = self._facebook.getUserInfo(linkedAccount.token)
-            except (StampedInputError, StampedUnavailableError) as e:
-                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
-            if facebookUser['id'] != linkedAccount.linked_user_id:
-                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
-#            if facebookUser['name'] != linkedAccount.linked_name:
-#                logs.warning("The name associated with the Facebook account is different from the name provided")
-#                raise StampedAuthError('Unable to connect to Facebook')
-#            if linkedAccount.linked_screen_name is not None and \
-#               facebookUser['username'] != linkedAccount.linked_screen_name:
-#                logs.warning("The username associated with the Facebook account is different from the screen name provided")
-#                raise StampedAuthError('Unable to connect to Facebook')
-            self._verifyFacebookAccount(facebookUser['id'])
-        elif linkedAccount.service_name == 'twitter':
-            try:
-                twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
-            except (StampedInputError, StampedUnavailableError):
-                logs.warning("Unable to get user info from twitter %s" % e)
-                raise StampedInputError('Unable to connect to Twitter')
-#            if twitterUser['id'] != linkedAccount.linked_user_id:
-#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
-#                raise StampedAuthError('Unable to connect to Twitter')
-#            if twitterUser['screen_name'] != linkedAccount.linked_screen_name:
-#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
-#                raise StampedAuthError('Unable to connect to Twitter')
-            self._verifyTwitterAccount(twitterUser['id'])
-        return True
+#    def verifyLinkedAccount(self, linkedAccount):
+#        if linkedAccount.service_name == 'facebook':
+#            try:
+#                facebookUser = self._facebook.getUserInfo(linkedAccount.token)
+#            except (StampedInputError, StampedUnavailableError) as e:
+#                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
+#            if facebookUser['id'] != linkedAccount.linked_user_id:
+#                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
+##            if facebookUser['name'] != linkedAccount.linked_name:
+##                logs.warning("The name associated with the Facebook account is different from the name provided")
+##                raise StampedAuthError('Unable to connect to Facebook')
+##            if linkedAccount.linked_screen_name is not None and \
+##               facebookUser['username'] != linkedAccount.linked_screen_name:
+##                logs.warning("The username associated with the Facebook account is different from the screen name provided")
+##                raise StampedAuthError('Unable to connect to Facebook')
+#            self._verifyFacebookAccount(facebookUser['id'])
+#        elif linkedAccount.service_name == 'twitter':
+#            try:
+#                twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
+#            except (StampedInputError, StampedUnavailableError):
+#                logs.warning("Unable to get user info from twitter %s" % e)
+#                raise StampedInputError('Unable to connect to Twitter')
+##            if twitterUser['id'] != linkedAccount.linked_user_id:
+##                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+##                raise StampedAuthError('Unable to connect to Twitter')
+##            if twitterUser['screen_name'] != linkedAccount.linked_screen_name:
+##                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+##                raise StampedAuthError('Unable to connect to Twitter')
+#            self._verifyTwitterAccount(twitterUser['id'])
+#        return True
 
-    def _verifyFacebookAccount(self, facebookId):
+    def _verifyFacebookAccount(self, facebookId, authUserId=None):
         # Check that no Stamped account is linked to the facebookId
         try:
-            self.getAccountByFacebookId(facebookId)
+            account = self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
+        if account.user_id != authUserId:
+            raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
+        return True
 
-    def _verifyTwitterAccount(self, twitterId):
+    def _verifyTwitterAccount(self, twitterId, authUserId=None):
         # Check that no Stamped account is linked to the twitterId
         try:
-            self.getAccountByTwitterId(twitterId)
+            account = self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
+        if account.user_id != authUserId:
+            raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
+        return True
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -862,7 +866,7 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide an access token for facebook account")
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
-            self._verifyFacebookAccount(userInfo['id'])
+            self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
             if 'username' in userInfo:
@@ -881,7 +885,7 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None or linkedAccount.secret is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for twitter account")
             userInfo = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
-            self._verifyTwitterAccount(userInfo['id'])
+            self._verifyTwitterAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_screen_name = userInfo['screen_name']
             
@@ -905,12 +909,12 @@ class StampedAPI(AStampedAPI):
 
         return linkedAccount
 
-    @API_CALL
-    def updateLinkedAccount(self, authUserId, linkedAccount):
-        # Before we do anything, verify that the account is valid
-        self.verifyLinkedAccount(linkedAccount)
-        self.removeLinkedAccount(authUserId, linkedAccount.service_name)
-        return self.addLinkedAccount(authUserId, linkedAccount)
+#    @API_CALL
+#    def updateLinkedAccount(self, authUserId, linkedAccount):
+#        # Before we do anything, verify that the account is valid
+#        self.verifyLinkedAccount(linkedAccount)
+#        self.removeLinkedAccount(authUserId, linkedAccount.service_name)
+#        return self.addLinkedAccount(authUserId, linkedAccount)
 
     @API_CALL
     def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
