@@ -350,52 +350,56 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
-    def verifyLinkedAccount(self, linkedAccount):
-        if linkedAccount.service_name == 'facebook':
-            try:
-                facebookUser = self._facebook.getUserInfo(linkedAccount.token)
-            except (StampedInputError, StampedUnavailableError) as e:
-                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
-            if facebookUser['id'] != linkedAccount.linked_user_id:
-                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
-#            if facebookUser['name'] != linkedAccount.linked_name:
-#                logs.warning("The name associated with the Facebook account is different from the name provided")
-#                raise StampedAuthError('Unable to connect to Facebook')
-#            if linkedAccount.linked_screen_name is not None and \
-#               facebookUser['username'] != linkedAccount.linked_screen_name:
-#                logs.warning("The username associated with the Facebook account is different from the screen name provided")
-#                raise StampedAuthError('Unable to connect to Facebook')
-            self._verifyFacebookAccount(facebookUser['id'])
-        elif linkedAccount.service_name == 'twitter':
-            try:
-                twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
-            except (StampedInputError, StampedUnavailableError):
-                logs.warning("Unable to get user info from twitter %s" % e)
-                raise StampedInputError('Unable to connect to Twitter')
-#            if twitterUser['id'] != linkedAccount.linked_user_id:
-#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
-#                raise StampedAuthError('Unable to connect to Twitter')
-#            if twitterUser['screen_name'] != linkedAccount.linked_screen_name:
-#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
-#                raise StampedAuthError('Unable to connect to Twitter')
-            self._verifyTwitterAccount(twitterUser['id'])
-        return True
+#    def verifyLinkedAccount(self, linkedAccount):
+#        if linkedAccount.service_name == 'facebook':
+#            try:
+#                facebookUser = self._facebook.getUserInfo(linkedAccount.token)
+#            except (StampedInputError, StampedUnavailableError) as e:
+#                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
+#            if facebookUser['id'] != linkedAccount.linked_user_id:
+#                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
+##            if facebookUser['name'] != linkedAccount.linked_name:
+##                logs.warning("The name associated with the Facebook account is different from the name provided")
+##                raise StampedAuthError('Unable to connect to Facebook')
+##            if linkedAccount.linked_screen_name is not None and \
+##               facebookUser['username'] != linkedAccount.linked_screen_name:
+##                logs.warning("The username associated with the Facebook account is different from the screen name provided")
+##                raise StampedAuthError('Unable to connect to Facebook')
+#            self._verifyFacebookAccount(facebookUser['id'])
+#        elif linkedAccount.service_name == 'twitter':
+#            try:
+#                twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
+#            except (StampedInputError, StampedUnavailableError):
+#                logs.warning("Unable to get user info from twitter %s" % e)
+#                raise StampedInputError('Unable to connect to Twitter')
+##            if twitterUser['id'] != linkedAccount.linked_user_id:
+##                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+##                raise StampedAuthError('Unable to connect to Twitter')
+##            if twitterUser['screen_name'] != linkedAccount.linked_screen_name:
+##                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+##                raise StampedAuthError('Unable to connect to Twitter')
+#            self._verifyTwitterAccount(twitterUser['id'])
+#        return True
 
-    def _verifyFacebookAccount(self, facebookId):
+    def _verifyFacebookAccount(self, facebookId, authUserId=None):
         # Check that no Stamped account is linked to the facebookId
         try:
-            self.getAccountByFacebookId(facebookId)
+            account = self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
+        if account.user_id != authUserId:
+            raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
+        return True
 
-    def _verifyTwitterAccount(self, twitterId):
+    def _verifyTwitterAccount(self, twitterId, authUserId=None):
         # Check that no Stamped account is linked to the twitterId
         try:
-            self.getAccountByTwitterId(twitterId)
+            account = self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
+        if account.user_id != authUserId:
+            raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
+        return True
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -862,7 +866,7 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide an access token for facebook account")
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
-            self._verifyFacebookAccount(userInfo['id'])
+            self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
             if 'username' in userInfo:
@@ -881,7 +885,7 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None or linkedAccount.secret is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for twitter account")
             userInfo = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
-            self._verifyTwitterAccount(userInfo['id'])
+            self._verifyTwitterAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_screen_name = userInfo['screen_name']
             
@@ -905,12 +909,12 @@ class StampedAPI(AStampedAPI):
 
         return linkedAccount
 
-    @API_CALL
-    def updateLinkedAccount(self, authUserId, linkedAccount):
-        # Before we do anything, verify that the account is valid
-        self.verifyLinkedAccount(linkedAccount)
-        self.removeLinkedAccount(authUserId, linkedAccount.service_name)
-        return self.addLinkedAccount(authUserId, linkedAccount)
+#    @API_CALL
+#    def updateLinkedAccount(self, authUserId, linkedAccount):
+#        # Before we do anything, verify that the account is valid
+#        self.verifyLinkedAccount(linkedAccount)
+#        self.removeLinkedAccount(authUserId, linkedAccount.service_name)
+#        return self.addLinkedAccount(authUserId, linkedAccount)
 
     @API_CALL
     def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
@@ -4662,27 +4666,15 @@ class StampedAPI(AStampedAPI):
     def mergeEntityIdAsync(self, entityId):
         self._mergeEntity(self._entityDB.getEntity(entityId))
 
-    def _mergeEntity(self, entity, depth=2):
+    def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
-
-        The resolved parameter is used to keep track of the entities we've
-        already resolved so far. It is used internally by this function during
-        recursive calls, and should be passed in an empty set at the top
-        invocation.
-
-        The depth is a way to limit the scope of the search. We will only look
-        at items within "depth" distance from the given entity.
         """
-        persistedEntities = set()
-        entity = self._enrichAndPersistEntity(entity, persistedEntities)
-        self._followOutLinks(entity, persistedEntities, depth)
+        entity = self._enrichAndPersistEntity(entity)
+        self._followOutLinks(entity, set(), 2 if entity.isType('album') else 1)
         return entity
 
 
-    def _enrichAndPersistEntity(self, entity, persisted):
-        if entity.entity_id and entity.entity_id in persisted:
-            return entity
-
+    def _enrichAndPersistEntity(self, entity):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
         logs.info('Modified: ' + str(modified))
@@ -4694,7 +4686,6 @@ class StampedAPI(AStampedAPI):
             else:
                 entity = self._entityDB.updateEntity(entity)
 
-        persisted.add(entity.entity_id)
         return entity
 
     def _resolveEntity(self, entity):
@@ -4750,6 +4741,7 @@ class StampedAPI(AStampedAPI):
 
     def _resolveRelatedEntities(self, entity):
         def _resolveStubList(entity, attr):
+            dropUnknown = attr == 'albums' or attr == 'artists' and entity.isType('track')
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
@@ -4763,7 +4755,8 @@ class StampedAPI(AStampedAPI):
                 if resolved is None:
                     # It's okay to fail resolution here, since we're only
                     # resolving against our own db
-                    resolvedList.append(stub)
+                    if not dropUnknown:
+                        resolvedList.append(stub)
                     continue
                 resolvedList.append(resolved.minimize())
                 if stubId != resolved.entity_id:
@@ -4775,6 +4768,9 @@ class StampedAPI(AStampedAPI):
         return self._iterateOutLinks(entity, _resolveStubList)
 
     def _followOutLinks(self, entity, persisted, depth):
+        if entity.entity_id in persisted:
+            return
+
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
@@ -4787,7 +4783,7 @@ class StampedAPI(AStampedAPI):
                     logs.warning('stub resolution failed: %s' % stub)
                     mergeEntityTasks.append(None)
                 else:
-                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
+                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull))
             
             modified = False
             visitedStubs = []
@@ -4802,14 +4798,10 @@ class StampedAPI(AStampedAPI):
             setattr(entity, attr, visitedStubs)
             if modified:
                 self._entityDB.updateEntity(entity)
+            persisted.add(entity.entity_id)
             if depth:
-                # HACK: To prevent the number of entities to be merged from blowing up, we will only
-                # merge one of the albums for artists.
-                if entity.isType('artist') and attr == 'albums':
-                    self._followOutLinks(random.choice(mergedEntities), persisted, depth-1)
-                else:
-                    for mergedEntity in mergedEntities:
-                        self._followOutLinks(mergedEntity, persisted, depth-1)
+                for mergedEntity in mergedEntities:
+                    self._followOutLinks(mergedEntity, persisted, depth-1)
         self._iterateOutLinks(entity, followStubList)
 
     def _resolveStub(self, stub, quickResolveOnly):
