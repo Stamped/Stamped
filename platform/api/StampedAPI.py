@@ -417,13 +417,18 @@ class StampedAPI(AStampedAPI):
         self._verifyFacebookAccount(facebookUser['id'])
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
 
-        # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
-        #  and require uniqueness
-        if account.email is None:
-            account.email = 'fb_%s' % facebookUser['id']
-        else:
-            account.email = str(account.email).lower().strip()
-            SchemaValidation.validateEmail(account.email)
+        # If the facebook account email address is already in our system, then we will use a mock email address
+        # to avoid a unique id conflict in our db
+        email = 'fb_%s' % facebookUser['id']
+        if 'email' in facebookUser:
+            try:
+                testemail = str(facebookUser['email']).lower().strip()
+                self._accountDB.getAccountByEmail(testemail)
+            except StampedAccountNotFoundError:
+                email = testemail
+                SchemaValidation.validateEmail(account.email)
+
+        account.email = email
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
@@ -465,7 +470,7 @@ class StampedAPI(AStampedAPI):
 
         # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
         #  and require uniqueness
-        if account.email is None:
+        if account.email is None or accounttest is not None:
             account.email = 'tw_%s' % twitterUser['id']
         else:
             account.email = str(account.email).lower().strip()

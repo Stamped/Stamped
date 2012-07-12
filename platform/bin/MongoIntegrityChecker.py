@@ -80,7 +80,7 @@ stats = {
 def worker(db, collection, stats):
     try:
         while True:
-            documentId = documentIds.get(timeout=1) # decrements queue size by 1
+            documentId = documentIds.get(timeout=10) # decrements queue size by 1
             
             try:
                 result = db.checkIntegrity(documentId, repair=True)
@@ -88,12 +88,6 @@ def worker(db, collection, stats):
                 stats['passed'] += 1
             except NotImplementedError:
                 logs.warning("WARNING: Collection '%s' not implemented" % collection.__name__)
-                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
-            except StampedStaleRelationshipKeyError:
-                print documentId, 'FAIL: Key deleted'
-                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
-            except StampedStaleRelationshipDataError:
-                print documentId, 'FAIL: References updated'
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
             except StampedDataError as e:
                 print documentId, 'FAIL'
@@ -111,7 +105,7 @@ def worker(db, collection, stats):
 
 def handler(db):
     # for i in db._collection.find({'user.user_id': '4e570489ccc2175fcd000000'}, fields=['_id']).limit(1000):
-    for i in db._collection.find(fields=['_id']).limit(100):
+    for i in db._collection.find(fields=['_id']).limit(100000):
         documentIds.put(i['_id'])
 
 
