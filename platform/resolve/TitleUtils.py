@@ -33,15 +33,14 @@ def applyRemovalRegexps(regexps, title):
 
 class TitleDataQualityRegexpTest(object):
     """
-    Encapsulates a test
-    , in the form of a regular expression, for potential data quality issues in a search result
+    Encapsulates a test, in the form of a regular expression, for potential data quality issues in a search result
     based on its title. When the regular expression matches the result title, we apply the score penalty and attach
     the message to the data quality score debug information.
 
     If rawName==True, we apply the regular expression to the raw_name ResolverObject field instead of the processed
     name property.
     """
-    def __init__(self, penalizedTitleRegexp, message, penalty, exceptionQueryRegexps=None, rawName=False):
+    def __init__(self, penalizedTitleRegexp, message, penalty, exceptionQueryRegexps=None, rawName=True):
         self.titleRegexp = penalizedTitleRegexp
         if isinstance(self.titleRegexp, basestring):
             self.titleRegexp = re.compile(self.titleRegexp, re.IGNORECASE)
@@ -80,6 +79,10 @@ def makeTokenRegexp(token):
     """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
     return re.compile("(^|[ ,-:\[(])%s($|[ ,-:\])])" % token, re.IGNORECASE)
 
+
+def makeTokensRegexp(*tokens):
+    """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
+    return re.compile("(^|[ ,-:\[(])(%s)($|[ ,-:\])])" % '|'.join(tokens), re.IGNORECASE)
 
 def makeDelimitedSectionRe(pattern):
     """Returns a regex that matches an entire delimited section (by () or []) if the
@@ -150,7 +153,7 @@ def isDelimitedPrefix(a, b):
 
 
 POSSESSIVE_RE = re.compile('\'s($|\s)', re.IGNORECASE)
-NON_CHAR_LETTER_RE = re.compile('[ /.,:;"\'&-]')
+NON_CHAR_LETTER_RE = re.compile('[ (\[)\]/.,:;"\'&-]')
 def tokenizeString(string):
     withoutPossessives = POSSESSIVE_RE.sub(' ', string)
     withoutPunctuation = NON_CHAR_LETTER_RE.sub(' ', withoutPossessives)
@@ -299,15 +302,23 @@ def applyMovieTitleDataQualityTests(searchResult, searchQuery):
 # These aren't things that reflect badly on a movie for being in its title.
 ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
     re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Mix|Remix|Edit|Version)[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|instrumental)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit)[ ,:\])-]*$", re.IGNORECASE),
 )
 
+BOOK_TITLE_SUSPICIOUS_TESTS = (
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Mix|Remix|Re-mix|Remixed|Re-Mixed)[ ,:\])-]*$', 'mix in title', 0.5,
+        exceptionQueryRegexps=makeTokensRegexp('mix', 'remix')),
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Cut|Edit|Version)[ ,:\])-]*$', 'version info in title', 0.5,
+        exceptionQueryRegexps=makeTokensRegexp('cut', 'edit', 'version')),
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*(Instrumental)[ ,:\])-]*$', 'instrumental in title', 0.5,
+        exceptionQueryRegexps=makeTokenRegexp('instrumental'))
+)
 def cleanTrackTitle(trackTitle):
     return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, trackTitle)
 
 TRACK_TITLE_BAD_TOKENS = (
-    Token('mix'), Token('remix'), Token('cut'), Token('edit'), Token('instrumental'),
+    Token('mix'), Token('remix'), Token('re-mix'), Token('remixed'), Token('re-mixed'),
+    Token('cut'), Token('edit'), Token('instrumental'),
     Token('cover'), Token('version'), Token('tribute'),
     Token('karaoke', penalty=0.4)
 )
