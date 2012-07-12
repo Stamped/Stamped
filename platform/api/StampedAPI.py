@@ -11,7 +11,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback
+    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback, random
 
     from api import Blacklist
     import libs.ec2_utils
@@ -42,6 +42,8 @@ try:
     from api.ActivityCollectionCache    import ActivityCollectionCache
     from libs.Memcache                   import globalMemcache
     from api.HTTPSchemas                import generateStampUrl
+
+    from crawler.RssFeedScraper     import RssFeedScraper
 
     #resolve classes
     from resolve.EntitySource       import EntitySource
@@ -278,6 +280,10 @@ class StampedAPI(AStampedAPI):
         alert_settings.alerts_replies_email     = True
         alert_settings.alerts_followers_apns    = True
         alert_settings.alerts_followers_email   = True
+        alert_settings.alerts_friends_apns      = True
+        alert_settings.alerts_friends_email     = True
+        alert_settings.alerts_actions_apns      = True
+        alert_settings.alerts_actions_email     = False
         account.alert_settings                  = alert_settings
 
         # Validate screen name
@@ -346,52 +352,56 @@ class StampedAPI(AStampedAPI):
 
     #TODO: Consolidate addFacebookAccount and addTwitterAccount?  After linked accounts get generified
 
-    def verifyLinkedAccount(self, linkedAccount):
-        if linkedAccount.service_name == 'facebook':
-            try:
-                facebookUser = self._facebook.getUserInfo(linkedAccount.token)
-            except (StampedInputError, StampedUnavailableError) as e:
-                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
-            if facebookUser['id'] != linkedAccount.linked_user_id:
-                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
-#            if facebookUser['name'] != linkedAccount.linked_name:
-#                logs.warning("The name associated with the Facebook account is different from the name provided")
-#                raise StampedAuthError('Unable to connect to Facebook')
-#            if linkedAccount.linked_screen_name is not None and \
-#               facebookUser['username'] != linkedAccount.linked_screen_name:
-#                logs.warning("The username associated with the Facebook account is different from the screen name provided")
-#                raise StampedAuthError('Unable to connect to Facebook')
-            self._verifyFacebookAccount(facebookUser['id'])
-        elif linkedAccount.service_name == 'twitter':
-            try:
-                twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
-            except (StampedInputError, StampedUnavailableError):
-                logs.warning("Unable to get user info from twitter %s" % e)
-                raise StampedInputError('Unable to connect to Twitter')
-#            if twitterUser['id'] != linkedAccount.linked_user_id:
-#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
-#                raise StampedAuthError('Unable to connect to Twitter')
-#            if twitterUser['screen_name'] != linkedAccount.linked_screen_name:
-#                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
-#                raise StampedAuthError('Unable to connect to Twitter')
-            self._verifyTwitterAccount(twitterUser['id'])
-        return True
+#    def verifyLinkedAccount(self, linkedAccount):
+#        if linkedAccount.service_name == 'facebook':
+#            try:
+#                facebookUser = self._facebook.getUserInfo(linkedAccount.token)
+#            except (StampedInputError, StampedUnavailableError) as e:
+#                raise StampedThirdPartyError("Unable to get user info from facebook %s" % e)
+#            if facebookUser['id'] != linkedAccount.linked_user_id:
+#                raise StampedLinkedAccountMismatchError('The facebook id associated with the facebook token is different from the id provided')
+##            if facebookUser['name'] != linkedAccount.linked_name:
+##                logs.warning("The name associated with the Facebook account is different from the name provided")
+##                raise StampedAuthError('Unable to connect to Facebook')
+##            if linkedAccount.linked_screen_name is not None and \
+##               facebookUser['username'] != linkedAccount.linked_screen_name:
+##                logs.warning("The username associated with the Facebook account is different from the screen name provided")
+##                raise StampedAuthError('Unable to connect to Facebook')
+#            self._verifyFacebookAccount(facebookUser['id'])
+#        elif linkedAccount.service_name == 'twitter':
+#            try:
+#                twitterUser = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
+#            except (StampedInputError, StampedUnavailableError):
+#                logs.warning("Unable to get user info from twitter %s" % e)
+#                raise StampedInputError('Unable to connect to Twitter')
+##            if twitterUser['id'] != linkedAccount.linked_user_id:
+##                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+##                raise StampedAuthError('Unable to connect to Twitter')
+##            if twitterUser['screen_name'] != linkedAccount.linked_screen_name:
+##                logs.warning("The twitter id associated with the twitter token/secret is different from the id provided")
+##                raise StampedAuthError('Unable to connect to Twitter')
+#            self._verifyTwitterAccount(twitterUser['id'])
+#        return True
 
-    def _verifyFacebookAccount(self, facebookId):
+    def _verifyFacebookAccount(self, facebookId, authUserId=None):
         # Check that no Stamped account is linked to the facebookId
         try:
-            self.getAccountByFacebookId(facebookId)
+            account = self.getAccountByFacebookId(facebookId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
+        if account.user_id != authUserId:
+            raise StampedLinkedAccountAlreadyExistsError("Account already exists for facebookId: %s" % facebookId)
+        return True
 
-    def _verifyTwitterAccount(self, twitterId):
+    def _verifyTwitterAccount(self, twitterId, authUserId=None):
         # Check that no Stamped account is linked to the twitterId
         try:
-            self.getAccountByTwitterId(twitterId)
+            account = self.getAccountByTwitterId(twitterId)
         except StampedUnavailableError:
             return True
-        raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
+        if account.user_id != authUserId:
+            raise StampedLinkedAccountAlreadyExistsError("Account already exists for twitterId: %s" % twitterId)
+        return True
 
     @API_CALL
     def addFacebookAccount(self, new_fb_account, tempImageUrl=None):
@@ -409,13 +419,18 @@ class StampedAPI(AStampedAPI):
         self._verifyFacebookAccount(facebookUser['id'])
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
 
-        # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
-        #  and require uniqueness
-        if account.email is None:
-            account.email = 'fb_%s' % facebookUser['id']
-        else:
-            account.email = str(account.email).lower().strip()
-            SchemaValidation.validateEmail(account.email)
+        # If the facebook account email address is already in our system, then we will use a mock email address
+        # to avoid a unique id conflict in our db
+        email = 'fb_%s' % facebookUser['id']
+        if 'email' in facebookUser:
+            try:
+                testemail = str(facebookUser['email']).lower().strip()
+                self._accountDB.getAccountByEmail(testemail)
+            except StampedAccountNotFoundError:
+                email = testemail
+                SchemaValidation.validateEmail(account.email)
+
+        account.email = email
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
@@ -457,7 +472,7 @@ class StampedAPI(AStampedAPI):
 
         # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
         #  and require uniqueness
-        if account.email is None:
+        if account.email is None or accounttest is not None:
             account.email = 'tw_%s' % twitterUser['id']
         else:
             account.email = str(account.email).lower().strip()
@@ -692,6 +707,8 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getLinkedAccount(self, authUserId, service_name):
         account = self.getAccount(authUserId)
+        if account.linked is None:
+            raise StampedLinkedAccountDoesNotExistError("User has no linked accounts")
         linked = getattr(account.linked, service_name)
         if linked is None:
             raise StampedLinkedAccountDoesNotExistError("User has no linked account: %s" % service_name)
@@ -856,7 +873,7 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide an access token for facebook account")
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
-            self._verifyFacebookAccount(userInfo['id'])
+            self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
             if 'username' in userInfo:
@@ -875,7 +892,7 @@ class StampedAPI(AStampedAPI):
             if linkedAccount.token is None or linkedAccount.secret is None:
                 raise StampedMissingLinkedAccountTokenError("Must provide a token and secret for twitter account")
             userInfo = self._twitter.getUserInfo(linkedAccount.token, linkedAccount.secret)
-            self._verifyTwitterAccount(userInfo['id'])
+            self._verifyTwitterAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_screen_name = userInfo['screen_name']
             
@@ -899,12 +916,12 @@ class StampedAPI(AStampedAPI):
 
         return linkedAccount
 
-    @API_CALL
-    def updateLinkedAccount(self, authUserId, linkedAccount):
-        # Before we do anything, verify that the account is valid
-        self.verifyLinkedAccount(linkedAccount)
-        self.removeLinkedAccount(authUserId, linkedAccount.service_name)
-        return self.addLinkedAccount(authUserId, linkedAccount)
+#    @API_CALL
+#    def updateLinkedAccount(self, authUserId, linkedAccount):
+#        # Before we do anything, verify that the account is valid
+#        self.verifyLinkedAccount(linkedAccount)
+#        self.removeLinkedAccount(authUserId, linkedAccount.service_name)
+#        return self.addLinkedAccount(authUserId, linkedAccount)
 
     @API_CALL
     def updateLinkedAccountShareSettings(self, authUserId, service_name, on, off):
@@ -2283,8 +2300,6 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     @HandleRollback
     def addStamp(self, authUserId, entityRequest, data):
-        t0 = time.time()
-        t1 = t0
         user        = self._userDB.getUser(authUserId)
         entity      = self._getEntityFromRequest(entityRequest)
 
@@ -2323,9 +2338,6 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.getStampFromUserEntity(user.user_id, entity.entity_id)
         else:
             stamp = Stamp()
-
-        logs.debug('### addStamp section 1: %s' % (time.time() - t1))
-        t1 = time.time()
 
         # Update content if stamp exists
         if stampExists:
@@ -2384,9 +2396,6 @@ class StampedAPI(AStampedAPI):
             stamp = self._stampDB.addStamp(stamp)
             self._rollback.append((self._stampDB.removeStamp, {'stampId': stamp.stamp_id}))
 
-        logs.debug('### addStamp section 2: %s' % (time.time() - t1))
-        t1 = time.time()
-
         if imageUrl is not None:
             self._statsSink.increment('stamped.api.stamps.images')
             tasks.invoke(tasks.APITasks.addResizedStampImages, args=[imageUrl, stamp.stamp_id, content.content_id])
@@ -2398,10 +2407,7 @@ class StampedAPI(AStampedAPI):
         # Enrich linked user, entity, todos, etc. within the stamp
         ### TODO: Pass userIds (need to scrape existing credited users)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
-        logs.info('### stampExists: %s' % stampExists)
-
-        logs.debug('### addStamp section 3: %s' % (time.time() - t1))
-        t1 = time.time()
+        logs.debug('### stampExists: %s' % stampExists)
 
         if not stampExists:
             # Add a reference to the stamp in the user's collection
@@ -2416,38 +2422,33 @@ class StampedAPI(AStampedAPI):
             self._userDB.updateUserStats(authUserId, 'num_stamps_total', increment=1)
             distribution = self._getUserStampDistribution(authUserId)
             self._userDB.updateDistribution(authUserId, distribution)
-
-            # Asynchronously add references to the stamp in follower's inboxes and
-            # add activity for credit and mentions
-            tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl])
             
             if utils.is_ec2():
                 tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
-        else:
-            # Update stamp stats
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
-        logs.debug('### addStamp section 4: %s' % (time.time() - t1))
-        t1 = time.time()
+        # Generate activity and stamp pointers
+        tasks.invoke(tasks.APITasks.addStamp, args=[user.user_id, stamp.stamp_id, imageUrl], 
+            kwargs={'stampExists': stampExists})
         
         return stamp
     
     @API_CALL
-    def addStampAsync(self, authUserId, stampId, imageUrl):
+    def addStampAsync(self, authUserId, stampId, imageUrl, stampExists=False):
         stamp   = self._stampDB.getStamp(stampId)
         entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
-        # Add references to the stamp in all relevant inboxes
-        followers = self._friendshipDB.getFollowers(authUserId)
-        self._stampDB.addInboxStampReference(followers, stampId)
+        if not stampExists:
+            # Add references to the stamp in all relevant inboxes
+            followers = self._friendshipDB.getFollowers(authUserId)
+            self._stampDB.addInboxStampReference(followers, stampId)
 
-        # If stamped entity is on the to do list, mark as complete
-        try:
-            self._todoDB.completeTodo(entity.entity_id, authUserId)
-            if entity.entity_id != stamp.entity.entity_id:
-                self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
-        except Exception:
-            pass
+            # If stamped entity is on the to do list, mark as complete
+            try:
+                self._todoDB.completeTodo(entity.entity_id, authUserId)
+                if entity.entity_id != stamp.entity.entity_id:
+                    self._todoDB.completeTodo(stamp.entity.entity_id, authUserId)
+            except Exception:
+                pass
         
         creditedUserIds = set()
         
@@ -2471,6 +2472,11 @@ class StampedAPI(AStampedAPI):
                 # Update credited user stats
                 self._userDB.updateUserStats(item.user.user_id, 'num_credits',     increment=1)
                 self._userDB.updateUserStats(item.user.user_id, 'num_stamps_left', increment=CREDIT_BENEFIT)
+
+                # Update stamp stats if stamp exists
+                creditedStamp = self._stampDB.getStampFromUserEntity(item.user.user_id, entity.entity_id)
+                if creditedStamp is not None:
+                    tasks.invoke(tasks.APITasks.updateStampStats, args=[creditedStamp.stamp_id])
 
         # Note: No activity should be generated for the user creating the stamp
 
@@ -2498,7 +2504,8 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph,
+        if not stampExists:
+            tasks.invoke(tasks.APITasks.postToOpenGraph,
                 kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
     
     @API_CALL
@@ -4666,27 +4673,15 @@ class StampedAPI(AStampedAPI):
     def mergeEntityIdAsync(self, entityId):
         self._mergeEntity(self._entityDB.getEntity(entityId))
 
-    def _mergeEntity(self, entity, depth=2):
+    def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
-
-        The resolved parameter is used to keep track of the entities we've
-        already resolved so far. It is used internally by this function during
-        recursive calls, and should be passed in an empty set at the top
-        invocation.
-
-        The depth is a way to limit the scope of the search. We will only look
-        at items within "depth" distance from the given entity.
         """
-        persistedEntities = set()
-        entity = self._enrichAndPersistEntity(entity, persistedEntities)
-        self._followOutLinks(entity, persistedEntities, depth)
+        entity = self._enrichAndPersistEntity(entity)
+        self._followOutLinks(entity, set(), 2 if entity.isType('album') else 1)
         return entity
 
 
-    def _enrichAndPersistEntity(self, entity, persisted):
-        if entity.entity_id and entity.entity_id in persisted:
-            return entity
-
+    def _enrichAndPersistEntity(self, entity):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
         logs.info('Modified: ' + str(modified))
@@ -4698,7 +4693,6 @@ class StampedAPI(AStampedAPI):
             else:
                 entity = self._entityDB.updateEntity(entity)
 
-        persisted.add(entity.entity_id)
         return entity
 
     def _resolveEntity(self, entity):
@@ -4754,6 +4748,7 @@ class StampedAPI(AStampedAPI):
 
     def _resolveRelatedEntities(self, entity):
         def _resolveStubList(entity, attr):
+            dropUnknown = attr == 'albums' or attr == 'artists' and entity.isType('track')
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
@@ -4767,7 +4762,8 @@ class StampedAPI(AStampedAPI):
                 if resolved is None:
                     # It's okay to fail resolution here, since we're only
                     # resolving against our own db
-                    resolvedList.append(stub)
+                    if not dropUnknown:
+                        resolvedList.append(stub)
                     continue
                 resolvedList.append(resolved.minimize())
                 if stubId != resolved.entity_id:
@@ -4779,6 +4775,9 @@ class StampedAPI(AStampedAPI):
         return self._iterateOutLinks(entity, _resolveStubList)
 
     def _followOutLinks(self, entity, persisted, depth):
+        if entity.entity_id in persisted:
+            return
+
         def followStubList(entity, attr):
             stubList = getattr(entity, attr)
             if not stubList:
@@ -4791,7 +4790,7 @@ class StampedAPI(AStampedAPI):
                     logs.warning('stub resolution failed: %s' % stub)
                     mergeEntityTasks.append(None)
                 else:
-                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
+                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull))
             
             modified = False
             visitedStubs = []
@@ -4806,6 +4805,7 @@ class StampedAPI(AStampedAPI):
             setattr(entity, attr, visitedStubs)
             if modified:
                 self._entityDB.updateEntity(entity)
+            persisted.add(entity.entity_id)
             if depth:
                 for mergedEntity in mergedEntities:
                     self._followOutLinks(mergedEntity, persisted, depth-1)
@@ -4885,6 +4885,27 @@ class StampedAPI(AStampedAPI):
 
         return modified
 
+
+    def crawlExternalSourcesAsync(self):
+        stampedSource = StampedSource(stamped_api=self)
+        for proxy in RssFeedScraper().fetchSources():
+            self.__mergeProxyIntoDb(proxy, stampedSource)
+
+    def __mergeProxyIntoDb(self, proxy, stampedSource):
+        entity_id = stampedSource.resolve_fast(proxy.source, proxy.key)
+
+        if entity_id is None:
+            results = stampedSource.resolve(proxy)
+            if len(results) > 0 and results[0][0]['resolved']:
+                # Source key found in the Stamped DB
+                entity_id = results[0][1].key
+        if entity_id:
+            self.mergeEntityId(entity_id)
+
+        if entity_id is None:
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
+            self.mergeEntity(entity)
 
     """
     ######

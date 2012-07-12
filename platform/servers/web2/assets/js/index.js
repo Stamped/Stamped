@@ -18,10 +18,17 @@
         // ---------------------------------------------------------------------
         
         
-        var $window     = $(window);
-        var $body       = $("body");
-        var $main       = $("#main");
-        var $main_body  = $("#main-body");
+        var $window             = $(window);
+        var $body               = $("body");
+        var $main               = $("#main");
+        var $main_body          = $("#main-body");
+        var $main_iphone        = $("#main-iphone");
+        var $tastemaker_gallery = $("#tastemaker-gallery");
+        var $tastemakers        = $(".tastemaker");
+        var $map_window_url     = $("#fake-url");
+        var $map_window         = $("#tastemaker-map-window");
+        var $map_window_iframe  = null;
+        var $app_store_button   = $("footer .app-store-button");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -118,7 +125,7 @@
         });
         
         var get_relative_offset = function(height) {
-            return Math.ceil(-100 * (height / (window.innerHeight || 1))) + "%";
+            return Math.ceil(-125 * (height / (window.innerHeight || 1))) + "%";
         };
         
         
@@ -135,7 +142,10 @@
         var index  = Math.floor(Math.random() * $texts.length);
         $texts.eq(index).addClass(active_text);
         
-        $(".line").fitText();
+        var fit_text_compression_factor = 0.7;
+        $(".line").fitText(fit_text_compression_factor, {
+            maxFontSize : '250px'
+        });
         
         var $intro_iphone   = $("#intro-iphone");
         var $intro_hero     = $("#intro-hero");
@@ -211,12 +221,12 @@
         
         
         // vertically centers the page's main content
-        // NOTE: if noop is truthy, this method will not make any modifications
+        // NOTE: if noop is false, this method will not make any modifications
         var update_main_layout = function(noop) {
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
-            if (!!noop) {
+            if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
             }
             
@@ -226,11 +236,8 @@
             };
         };
         
-        // initialize and display the main page content
-        var init_main = function() {
-            $body.addClass("main");
-            
-            var $panes = $(".pane");
+        var resize_panes = function(noop) {
+            var $panes = $(".pane").css('min-height', 0);
             var height = 0;
             
             // find max height of all panes
@@ -243,10 +250,22 @@
             // constrain the minimum pane height to the height of the tallest pane
             if (height > 0) {
                 $panes.css('min-height', height);
+                
+                if (typeof(noop) !== 'boolean' || !noop) {
+                    return update_main_layout(noop);
+                }
             }
             
+            return false;
+        };
+        
+        // initialize and display the main page content
+        var init_main = function() {
+            $body.addClass("main");
+            resize_panes(true);
+            
             var result = update_main_layout(true);
-            var start  = $window.height() + result.height;
+            var start  = window.innerHeight + result.height;
             
             // load the main content with a spiffy animation, translating in from beneath 
             // the bottom of the page
@@ -256,7 +275,7 @@
                 .animate({
                     'top'       : result.offset + "px"
                 }, {
-                    easing      : "easeOutExpo", 
+                    easing      : "easeOutCubic", 
                     duration    : 1000, 
                     step        : function(value) {
                         var percent = (value - result.offset) / (start - result.offset);
@@ -266,10 +285,90 @@
                         }
                     }, 
                     complete    : function() {
+                        if (!resize_panes()) {
+                            update_main_layout();
+                        }
+                        
                         $main.removeClass("main-animating");
-                        update_main_layout();
                     }
                 });
+            
+            // load the main content's interactive iphone with a spiffy animation, 
+            // translating in from beneath the bottom of the page
+            $main_iphone
+                .delay(300)
+                .css('top', "200%")
+                .animate({
+                    'top'       : "50%"
+                }, {
+                    easing      : "easeOutCubic", 
+                    duration    : 800
+                });
+        };
+        
+        var map_window_show = function() {
+            $app_store_button.hide(800);
+            
+            $map_window
+                .stop(true, false)
+                .show()
+                .animate({
+                    right       : "-789px"
+                }, {
+                    easing      : "easeOutExpo", 
+                    duration    : 800
+                });
+        };
+        
+        var map_window_hide = function() {
+            $map_window
+                .stop(true, false)
+                .animate({
+                    right       : "-1200px"
+                }, {
+                    easing      : "easeInQuad", 
+                    duration    : 400, 
+                    complete    : function() {
+                        $map_window.hide();
+                    }
+                });
+            
+            $app_store_button.show(400);
+        };
+        
+        var map_window_switch_user = function(screen_name) {
+            var active = $map_window.data("active");
+            
+            if (screen_name !== active) {
+                $map_window.data("active", screen_name);
+                
+                var screen_name_lower = screen_name.toLowerCase();
+                
+                if (screen_name_lower === "justinbieber") {
+                    screen_name = "robby"
+                } else if (screen_name_lower === "passionpit") {
+                    screen_name = "travis"
+                } else if (screen_name_lower === "nytimes") {
+                    screen_name = "edmuki"
+                } else if (screen_name_lower === "time") {
+                    screen_name = "bart"
+                }
+                
+                $map_window_url
+                    .attr("href", "/" + screen_name + "/map")
+                    .text("www.stamped.com/" + screen_name + "/map");
+                
+                var iframe_src = "/" + screen_name + "/map?lite=true";
+                
+                if (!$map_window_iframe) {
+                    var iframe = '<iframe id="tastemaker-map-window-iframe" frameborder="0" scrolling="no" src="' + iframe_src + '"></iframe>';
+                    
+                    $map_window.append(iframe);
+                    $map_window_iframe = $("#tastemaker-map-window-iframe");
+                } else {
+                    $map_window_iframe.attr("src", iframe_src);
+                }
+            }
         };
         
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
@@ -279,6 +378,20 @@
                 
                 if (!$main_body.hasClass(active)) {
                     $main_body.removeClass().addClass(active);
+                    index = parseInt(index);
+                    
+                    // TODO: animation here
+                    if (index >= 3) {
+                        $main_iphone.css("visibility", "hidden");
+                    } else {
+                        $main_iphone.css("visibility", "visible");
+                    }
+                    
+                    if (index === 3) {
+                        map_window_show();
+                    } else {
+                        map_window_hide();
+                    }
                     
                     return true;
                 }
@@ -311,6 +424,53 @@
             return false;
         });
         
+        $main.on("click", ".lightbox-video", function(event) {
+            event.preventDefault();
+            
+            $.fancybox({
+                'padding'       : 0,
+                'autoScale'     : false, 
+                
+                'transitionIn'  : 'none', 
+                'transitionOut' : 'none', 
+                
+                'openEffect'    : 'elastic', 
+                'openEasing'    : 'easeOutBack', 
+                'openSpeed'     : 300, 
+                
+                'closeEffect'   : 'elastic', 
+                'closeEasing'   : 'easeInBack', 
+                'closeSpeed'    : 300, 
+                
+                'tpl'           : {
+				    'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                    'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
+                }, 
+                
+                'title'         : this.title, 
+                'width'         : 680, 
+                'height'        : 495,
+                'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
+                'type'          : 'swf',
+                'swf'           : {
+                    'wmode'             : 'transparent',
+                    'allowfullscreen'   : 'true'
+                }, 
+            });
+            
+            return false;
+        });
+        
+        $main.on("click", ".tastemaker", function(event) {
+            event.preventDefault();
+            
+            var $this = $(this);
+            var screen_name = $this.data("screen-name");
+            
+            map_window_switch_user(screen_name);
+            return false;
+        });
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
@@ -326,6 +486,8 @@
             // bypass intro animation and go directly to the main page content
             init_main();
         }
+        
+        map_window_switch_user("justinbieber");
     });
 })();
 

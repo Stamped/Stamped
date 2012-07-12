@@ -180,6 +180,10 @@ def mergeEntity(*args, **kwargs):
 def mergeEntityId(*args, **kwargs):
     invoke(mergeEntityId.request, *args, **kwargs)
 
+@task(queue='enrich', **default_params)
+def crawlExternalSources(*args, **kwargs):
+    invoke(crawlExternalSources.request, *args, **kwargs)
+
 # Collage
 
 @task(queue='enrich', **default_params)

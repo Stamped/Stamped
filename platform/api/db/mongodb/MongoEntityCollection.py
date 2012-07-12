@@ -24,6 +24,8 @@ try:
     from api.ADecorationDB                  import ADecorationDB
     from errors                         import StampedUnavailableError
     from logs                           import log
+
+    from libs.SearchUtils               import addMatchCodesToMongoDocument
 except:
     report()
     raise
@@ -42,6 +44,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.netflix_id', 'sources.thetvdb_id')
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
+        self._collection.ensure_index('match_codes')
         self._collection.ensure_index('titlel')
         self._collection.ensure_index('albums.title')
         self._collection.ensure_index('artists.title')
@@ -70,6 +73,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document['timestamp'] = { 'created' : created }
 
         document.pop('titlel')
+        document.pop('match_codes', None)
 
         entity = buildEntity(document, mini=mini)
 
@@ -83,6 +87,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             return None
         if 'title' in document:
             document['titlel'] = getSimplifiedTitle(document['title'])
+        addMatchCodesToMongoDocument(document)
         return document
 
     ### INTEGRITY
@@ -108,6 +113,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         """
         
         document = self._getMongoDocumentFromId(key)
+        
+        assert document is not None
 
         modified = False
 
@@ -137,16 +144,23 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                     del(entity.sources.tombstone_id)
                     del(entity.sources.tombstone_source)
                     del(entity.sources.tombstone_timestamp)
+                    modified = True
                 else:
                     raise StampedDataError(msg)
 
-            # Raise exception if tombstone is chained
+            # Check if tombstone is chained
             if tombstone is not None and tombstone.sources.tombstone_id is not None:
                 if tombstone.sources.tombstone_id == entity.entity_id:
-                    raise StampedTombstoneError("Entities tombstoned to each other: '%s' and '%s'" % \
-                        (entity.entity_id, tombstone.entity_id))
-                raise StampedTombstoneError("Entity tombstone chain: '%s' to '%s' to '%s'" % \
-                    (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id))
+                    msg = "Entities tombstoned to each other: '%s' and '%s'" % (entity.entity_id, tombstone.entity_id)
+                    raise StampedTombstoneError(msg)
+                msg = "Entity tombstone chain: '%s' to '%s' to '%s'" % \
+                    (entity.entity_id, tombstone.entity_id, tombstone.sources.tombstone_id)
+                if repair:
+                    logs.info(msg)
+                    entity.sources.tombstone_id = tombstone.sources.tombstone_id
+                    modified = True
+                else:
+                    raise StampedTombstoneError(msg)
                 
             # Raise exception if tombstone to user-generated entity
             if tombstone is not None and tombstone.sources.user_generated_id is not None:
@@ -193,6 +207,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 if repair:
                     logs.info(msg)
                     del(entity.images)
+                    modified = True
                 else:
                     raise StampedDataError(msg)
             else:

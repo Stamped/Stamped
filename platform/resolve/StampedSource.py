@@ -37,6 +37,7 @@ try:
     from search.ScoringUtils import *
     from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
 
+    from libs.SearchUtils import formatSearchQuery
 except:
     report()
     raise
@@ -704,11 +705,10 @@ class StampedSource(GenericSource):
         return self.__querySource(query_gen(), query)
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
-        simplifiedText = queryText.lower()
+        tokenQueries = formatSearchQuery(queryText)
         if queryCategory == 'film':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                         { 'types' : { '$in' : [ 'tv', 'movie' ] } },
                         { 'subcategory' : { '$in' : [ 'tv', 'movie' ] } },
@@ -717,8 +717,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'music':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : { '$in' : [ 'artist', 'album', 'track' ] } },
                             { 'subcategory' : { '$in' : [ 'artist', 'album', 'song' ] } },
@@ -727,8 +726,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'place':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'kind' : 'place' },
                             { 'subcategory' : { '$in' : [ 'bar', 'restaurant' ] } },
@@ -737,8 +735,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'app':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : 'app' },
                             { 'subcategory' : 'app' },
@@ -747,8 +744,7 @@ class StampedSource(GenericSource):
             }
         elif queryCategory == 'book':
             query = {
-                'titlel' : simplifiedText,
-                '$and' : [ {
+                '$and' : tokenQueries + [ {
                     '$or' : [
                             { 'types' : 'book' },
                             { 'subcategory' : 'book' },
@@ -759,12 +755,8 @@ class StampedSource(GenericSource):
             raise NotImplementedError()
         # Exclude tombstoned listings.
         and_list = query.setdefault('$and',[])
-        and_list.append( {
-            '$or' : [
-                    {'sources.tombstone_id' : { '$exists':False }},
-                    {'sources.tombstone_id' : None},
-            ]
-        } )
+        and_list.append({'sources.tombstone_id' : { '$exists':False }})
+        and_list.append({'sources.user_generated_id' : { '$exists':False }})
         matches = list(self.__id_query(query))
         entityIds = [ match['_id'] for match in matches ]
         # TODO: Should just retrieve all of this from the initial query!
@@ -913,12 +905,8 @@ class StampedSource(GenericSource):
                     query[k] = v
                 
                 and_list = query.setdefault('$and',[])
-                and_list.append( {
-                    '$or' : [
-                        {'sources.tombstone_id' : { '$exists':False }},
-                        {'sources.tombstone_id' : None},
-                    ]
-                } )
+                and_list.append({'sources.tombstone_id' : { '$exists':False }})
+                and_list.append({'sources.user_generated_id' : { '$exists':False }})
                 if query_obj.source == 'stamped' and query_obj.key != '':
                     query['_id'] = { '$lt' : ObjectId(query_obj.key) }
                 matches = self.__id_query(query)
@@ -953,7 +941,7 @@ class StampedSource(GenericSource):
     def resolve_fast_batch(self, sourcesAndKeys):
         SOURCES = set(['amazon', 'spotify', 'rdio', 'opentable', 'tmdb', 'factual', 'instagram',
                 'singleplatform', 'foursquare', 'fandango', 'googleplaces', 'itunes', 'netflix',
-                'thetvdb'])
+                'thetvdb', 'nytimes'])
         mongoQueries = []
         queryPairs = []
         for source, key in sourcesAndKeys:

@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, logs
+import Globals, utils, logs, pymongo
 
 from datetime                   import datetime
 from utils                      import lazyProperty
@@ -28,6 +28,18 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
+        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING), \
+                                        ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
+                                        ('_id', pymongo.ASCENDING)])
+
+    @lazyProperty
+    def alert_apns_collection(self):
+        return MongoAlertAPNSCollection()
+
+    @lazyProperty
+    def user_linked_alerts_history_collection(self):
+        return MongoUserLinkedAlertsHistoryCollection()
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
@@ -93,11 +105,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                         netflixAcctSparse[k] = v
                 document['linked']['netflix'] = netflixAcctSparse
 
-
-        self._collection.update(
-                {'_id': document['user_id']},
-                {'$unset': { 'linked_accounts' : 1 } }
-        )
         return document
 
     def _convertFromMongo(self, document):
@@ -143,10 +150,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             }
             alertSettings = {}
             for k, v in document['alert_settings'].iteritems():
-                if k in alertMapping.values():
-                    alertSettings[k] = v 
-                elif k in alertMapping:
+                if k in alertMapping:
                     alertSettings[alertMapping[k]] = v
+                else:
+                    alertSettings[k] = v 
             document['alert_settings'] = alertSettings 
 
         if 'stats' in document and 'num_faves' in document['stats']:
@@ -162,16 +169,76 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             return self._obj().dataImport(document, overflow=self._overflow)
         else:
             return document
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=True):
+        """
+        Check the account to verify the following things:
+
+        - Proper schema 
+
+        - Verify linked accounts are unique (i.e. not linked to other users as well)
+
+        """
+        
+        document = self._getMongoDocumentFromId(key)
+        
+        assert document is not None
+
+        modified = False
+
+        # Check if old schema version
+        if 'linked_accounts' in document or 'alert_settings' not in document or 'auth_service' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                modified = True
+            else:
+                raise StampedDataError(msg)
+
+        account = self._convertFromMongo(document)
+
+        # Verify Facebook accounts are unique
+        if account.linked is not None and account.linked.facebook is not None:
+            facebookId = account.linked.facebook.linked_user_id
+            if facebookId is None:
+                logs.info("Cleaning up linked.facebook")
+                del(account.linked.facebook)
+                modified = True
+            else:
+                if self._collection.find({'linked.facebook.linked_user_id': facebookId, '_id': {'$lt': key}}).count() > 0:
+                    msg = "%s: Multiple accounts exist linked to Facebook id '%s'" % (key, facebookId)
+                    if repair:
+                        logs.info(msg)
+                        del(account.linked.facebook)
+                        modified = True
+                    else:
+                        raise StampedFacebookLinkedToMultipleAccountsError(msg)
+
+        # Verify Twitter accounts are unique
+        if account.linked is not None and account.linked.twitter is not None:
+            twitterId = account.linked.twitter.linked_user_id
+            if twitterId is None:
+                logs.info("Cleaning up linked.twitter")
+                del(account.linked.twitter)
+                modified = True
+            else:
+                if self._collection.find({'linked.twitter.linked_user_id': twitterId, '_id': {'$lt': key}}).count() > 0:
+                    msg = "%s: Multiple accounts exist linked to Twitter id '%s'" % (key, twitterId)
+                    if repair:
+                        logs.info(msg)
+                        del(account.linked.twitter)
+                        modified = True 
+                    else:
+                        raise StampedTwitterLinkedToMultipleAccountsError(msg)
+
+        if modified and repair:
+            self._collection.update({'_id' : key}, self._convertToMongo(account))
+
+        return True
     
     ### PUBLIC
-    
-    @lazyProperty
-    def alert_apns_collection(self):
-        return MongoAlertAPNSCollection()
-
-    @lazyProperty
-    def user_linked_alerts_history_collection(self):
-        return MongoUserLinkedAlertsHistoryCollection()
     
     def addAccount(self, user):
         try:
@@ -323,13 +390,21 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 missing_fields.append(k)
 
         if valid == False:
-            raise StampedInputError("Missing required linked account fields for %s: %s" % (linkedAccount.service_name, missing_fields))
+            raise StampedInputError("Missing required linked account fields for %s: %s" % \
+                (linkedAccount.service_name, missing_fields))
 
         # Construct a new LinkedAccount object which contains only valid fields
         newLinkedAccount = LinkedAccount()
+
         for k, v in linkedDict.iteritems():
-            if k in valid_fields and k is not None:
-                setattr(newLinkedAccount, k, v)
+            if k is not None and k not in valid_fields:
+                 delattr(linkedDic, k)
+
+        newLinkedAccount.dataImport(linkedDict)
+
+#        for k, v in linkedDict.iteritems():
+#            if k in valid_fields and k is not None:
+#                setattr(newLinkedAccount, k, v)
 
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},

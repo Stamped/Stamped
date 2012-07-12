@@ -17,11 +17,42 @@ from servers.web2.core.helpers  import *
 
 @stamped_view()
 def index(request, **kwargs):
-    autoplay_video = bool(request.GET.get('video', False))
+    tastemakers = [
+        {
+            'screen_name'       : 'justinbieber', 
+            'image_url'         : 'http://static.stamped.com/users/justinbieber-60x60.jpg', 
+            'color_primary'     : '84004B', 
+            'color_secondary'   : 'FF00EA', 
+        }, 
+        {
+            'screen_name'       : 'nytimes', 
+            'image_url'         : 'http://static.stamped.com/users/nytimes-60x60.jpg', 
+            'color_primary'     : '000A19', 
+            'color_secondary'   : 'CCE2FF', 
+        }, 
+        {
+            'screen_name'       : 'michaelkors', 
+            'image_url'         : 'http://static.stamped.com/users/michaelkors-60x60.jpg', 
+            'color_primary'     : '190000', 
+            'color_secondary'   : 'FFEDCC', 
+        }, 
+        {
+            'screen_name'       : 'TIME', 
+            'image_url'         : 'http://static.stamped.com/users/time-60x60.jpg', 
+            'color_primary'     : 'D50000', 
+            'color_secondary'   : 'FF2F2F', 
+        }, 
+        {
+            'screen_name'       : 'passionpit', 
+            'image_url'         : 'http://static.stamped.com/users/passionpit-60x60.jpg', 
+            'color_primary'     : 'D25D82', 
+            'color_secondary'   : 'F9E9E9', 
+        }, 
+    ]
     
     return stamped_render(request, 'index.html', {
-        'autoplay_video' : autoplay_video, 
-        'body_classes'   : "index intro", 
+        'body_classes'      : "index main", 
+        'tastemakers'       : tastemakers, 
     })
 
 @stamped_view()
@@ -163,12 +194,13 @@ def handle_profile(request, schema, **kwargs):
     }, preload=[ 'user', 'sdetail', 'mobile' ])
 
 def handle_map(request, schema, **kwargs):
-    schema.offset   = schema.offset or 0
-    schema.limit    = 1000 # TODO: customize this
     screen_name     = schema.screen_name
     stamp_id        = schema.stamp_id
     ajax            = schema.ajax
+    lite            = schema.lite
     mobile          = schema.mobile
+    schema.offset   = schema.offset or 0
+    schema.limit    = 25 if lite else 1000 # TODO: customize this
     
     uri             = request.get_full_path()
     url             = request.build_absolute_uri(uri)
@@ -182,6 +214,7 @@ def handle_map(request, schema, **kwargs):
     
     del schema.stamp_id
     del schema.ajax
+    del schema.lite
     del schema.mobile
     
     user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
@@ -213,12 +246,13 @@ def handle_map(request, schema, **kwargs):
     return stamped_render(request, 'map.html', {
         'user'          : user, 
         'stamps'        : stamps, 
+        'lite'          : lite, 
         
         'stamp_id'      : stamp_id, 
         'body_classes'  : body_classes, 
         'title'         : title, 
         'URL'           : url, 
-    }, preload=[ 'user', 'stamps', 'stamp_id' ])
+    }, preload=[ 'user', 'stamps', 'stamp_id', 'lite' ])
 
 @stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):

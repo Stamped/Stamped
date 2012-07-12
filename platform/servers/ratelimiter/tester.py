@@ -50,7 +50,7 @@ def parseCommandLine():
 import random
 
 def makeRequest(host, port, service, priority, timeout, method, url):
-    sleep(random.random()*3)
+    sleep(random.random()*10)
     if timeout == 0:
         timeout = None
     print('requesting... service: %s  priority: %s  timeout: %s  method: %s  url: %s' % (service, priority, timeout, method, url))

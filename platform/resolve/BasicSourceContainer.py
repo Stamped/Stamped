@@ -20,7 +20,7 @@ try:
     from pprint                 import pformat, pprint
     from api.Entity                 import buildEntity
     import logs                 
-    from libs.ec2_utils         import is_prod_stack
+    from libs.ec2_utils         import is_prod_stack, is_ec2
 except Exception:
     report()
     raise
@@ -40,6 +40,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.__default_max_iterations = 10
         if is_prod_stack():
             self.__global_max_age = timedelta(7)
+        elif is_ec2():
+            self.__global_max_age = timedelta(2)
         else:
             self.__global_max_age = timedelta(minutes=0)
         self.__failedValues = {}

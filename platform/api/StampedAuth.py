@@ -154,9 +154,6 @@ class StampedAuth(AStampedAuth):
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists for facebook_id: %s" % fb_user['id'])
         account = accounts[0]
 
-        if account.linked.facebook is None or account.linked.facebook.linked_user_id is None:
-            raise StampedWrongAuthServiceError("Invalid credentials: Attempting to login via facebook with an account that has no facebook linked account")
-
         logs.info("Login successful")
 
         """
@@ -196,12 +193,6 @@ class StampedAuth(AStampedAuth):
         elif len(accounts) > 1:
             raise StampedLinkedAccountAlreadyExistsError("More than one account exists using twitter_id: %s" % tw_user['id'])
         account = accounts[0]
-
-        if account.auth_service != 'twitter':
-            raise StampedWrongAuthServiceError("Attempting to login via Twitter for an account that doesn't use twitter auth")
-
-        if account.linked.twitter is None or account.linked.twitter.linked_user_id is None:
-            raise StampedMissingRequiredLinkedAccountError("Twitter Auth account does not have twitter linked account information!  user_id: %s" % account.user_id)
 
         logs.info("Login successful")
 
@@ -364,11 +355,14 @@ class StampedAuth(AStampedAuth):
             
         while True:
             try:
+                timestamp = BasicTimestamp()
+                timestamp.created = datetime.utcnow()
+
                 refreshToken = RefreshToken()
                 refreshToken.token_id = auth.generateToken(43)
                 refreshToken.client_id = clientId
                 refreshToken.user_id = userId
-                refreshToken.timestamp.created = datetime.utcnow()
+                refreshToken.timestamp = timestamp
 
                 self._refreshTokenDB.addRefreshToken(refreshToken)
                 logs.debug("Refresh Token created")
@@ -423,13 +417,16 @@ class StampedAuth(AStampedAuth):
             try:
                 rightNow = datetime.utcnow()
 
+                timestamp = BasicTimestamp()
+                timestamp.created = rightNow
+
                 accessToken = AccessToken()
                 accessToken.token_id = auth.generateToken(22)
                 accessToken.client_id = clientId
                 accessToken.refresh_token = refreshToken
                 accessToken.user_id = authUserId
                 accessToken.expires = rightNow + timedelta(seconds=expire)
-                accessToken.timestamp.created = rightNow
+                accessToken.timestamp = timestamp
                 
                 self._accessTokenDB.addAccessToken(accessToken)
                 break
@@ -479,10 +476,13 @@ class StampedAuth(AStampedAuth):
             
         while True:
             try:
+                timestamp = BasicTimestamp()
+                timestamp.created = datetime.utcnow()
+
                 token = SettingsEmailAlertToken()
                 token.token_id = auth.generateToken(43)
                 token.user_id = userId
-                token.timestamp.created = datetime.utcnow()
+                token.timestamp = timestamp
 
                 self._emailAlertDB.addToken(token)
                 logs.debug("Email Alert Token Created")
@@ -510,8 +510,8 @@ class StampedAuth(AStampedAuth):
         if token.user_id != userId:
             try:
                 token = self.addEmailAlertToken(userId)
-            except:
-                logs.warning('UNABLE TO ADD TOKEN FOR USER: %s' % userId)
+            except Exception as e:
+                logs.warning('UNABLE TO ADD TOKEN FOR USER "%s": %s' % (userId, e))
                 return None
         return token
 
@@ -527,8 +527,8 @@ class StampedAuth(AStampedAuth):
                 try:
                     token = self.addEmailAlertToken(userId)
                     result[userId] = token
-                except:
-                    logs.warning('UNABLE TO ADD TOKEN FOR USER: %s' % userId)
+                except Exception as e:
+                    logs.warning('UNABLE TO ADD TOKEN FOR USER "%s": %s' % (userId, e))
                     pass
         
         return result

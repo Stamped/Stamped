@@ -15,6 +15,8 @@
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
+        script: libs/jquery.fancybox.js
+        script: libs/helpers/jquery.fancybox-thumbs.js
         script: libs/jquery.fittext.js
     
     Third-party library dependencies:
@@ -28,6 +30,7 @@
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
+        stylesheet: libs/jquery.fancybox.css?v=2.0.6
     
     Core stamped dependencies:
         stylesheet: index.less
@@ -40,9 +43,17 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.css">-->
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
     
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/helpers/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
+    
+    <style>
+        {% for user in tastemakers %}
+            {% custom_css "index" user %}
+        {% endfor %}
+    </style>
     
     <!--[if lte IE 9]>
     <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.9.css">
@@ -143,7 +154,7 @@
         <div id="intro-iphone"></div>
     </div>
      
-    <div id="main">
+    <div id="main" class="main-content">
         <div id="main-header" class="hidden-main-animating clearfix">
             <div class="floatright">
                 <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button"></a>
@@ -176,7 +187,7 @@
                 <div id="pane-wrapper">
                     <div id="pane-0" class="pane">
                         <div class="title">
-                            Declare your favorite things, and discover new ones.
+                            Introducing Stamped 2.0
                         </div>
                         
                         <div class="desc">
@@ -189,7 +200,7 @@
                             </p>
                         </div>
                         
-                        <div class="category-illustration"></div>
+                        <div id="category-illustration"></div>
                     </div>
                     
                     <div id="pane-1" class="pane">
@@ -217,11 +228,11 @@
                         
                         <div class="desc">
                             <p>
-                                Want to try something new? Look no further than the Guide, the visual and personalized way to discover the best new things, curated completely by people you trust.
+                                Want to try something new? Look no further than The Guide, the visual and personalized way to discover the best new things, curated completely by people you trust.
                             </p>
                             
                             <p>
-                                Listen to music, find an amazing restaurant, add movies to your Instant Queue, check out new books, be the first to hear about awesome new apps -- the latest &amp; greatest is all at your fingertips in the Guide.
+                                Listen to music, find an amazing restaurant, add movies to your Instant Queue, check out new books, be the first to hear about awesome new apps -- the latest &amp; greatest is all at your fingertips in The Guide.
                             </p>
                             
                             <a href="#pane-3" class="continue-button">Continue</a>
@@ -239,12 +250,22 @@
                             </p>
                             
                             <a href="#pane-4" class="continue-button">Continue</a>
+                            
+                            <div id="tastemaker-gallery">
+                                {% for user in tastemakers %}
+                                    <div class="tastemaker" data-screen-name="{{user.screen_name}}">
+                                        {% handlebars_template "profile-image-60" user %}
+                                        
+                                        <div class="user-logo-small tastemaker-logo tastemaker-logo-{{user.screen_name}}"></div>
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                     
                     <div id="pane-4" class="pane">
                         <div class="title">
-                            Start stamping!
+                            Download Stamped and start stamping!
                         </div>
                         
                         <div class="desc">
@@ -253,8 +274,37 @@
                             </p>
                             
                             <p>
-                                Watch some of our user videos for inspiration.
+                                Watch some of our user videos for inspiration:
                             </p>
+                            
+                            <div id="user-video-gallery">
+                                <div id="user-video-preview-0" class="user-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" class="user-video-preview-image lightbox-video"></a>
+                                    
+                                    <div class="user-video-desc">
+                                        <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" class="watch-video lightbox-video">Watch</a>
+                                        <span class="screen-names"><a href="/honeybadger">@honey</a></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="user-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" class="user-video-preview-image lightbox-video"></a>
+                                    
+                                    <div class="user-video-desc">
+                                        <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" class="watch-video lightbox-video">Watch</a>
+                                        <span class="screen-names"><a href="/heman">@heman</a></span>
+                                    </div>
+                                </div>
+                                
+                                <div id="hero-video-preview" class="user-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="user-video-preview-image lightbox-video"></a>
+                                    
+                                    <div class="user-video-desc">
+                                        <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="watch-video lightbox-video">Watch</a>
+                                        <span class="screen-names"><a href="/justinbieber">@justinbieber</a></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -276,10 +326,21 @@
             </div>
         </div>
     </div>
+    
+    <div id="main-iphone" class="main-content">
+        <div id="main-iphone-0" class="iphone-hero">
+            <div class="iphone-inner"></div>
+        </div>
+    </div>
+    
+    <div id="tastemaker-map-window" class="main-content">
+        <a id="fake-url" href="/robby/map">www.stamped.com/robby/map</a>
+        
+    </div>
 {% endblock main %}
 
 {% block pre_footer %}
-    <footer class="hidden-main-animating">
+    <footer class="hidden-main-animating main-content">
 {% endblock pre_footer %}
 
 {% block footer %}
@@ -299,23 +360,24 @@
                 <a href="/blog"  class="nav">Blog</a>
                 <a href="/legal" class="nav">Legal</a>
             </div>
-
         </div>
         
-        <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button floatright replaced">Available on the App Store</a>
+        <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
     </div>
 {% endblock footer %}
 
 {% block scripts %}
     {{ block.super }}
     
-    {% if DEBUG %}
+    {% if STAMPED_DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
         <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/index.generated.js"></script>
+        <script src="{{ STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 

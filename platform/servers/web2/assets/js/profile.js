@@ -2113,7 +2113,6 @@ var g_update_stamps = null;
         
         $(document).bind('keydown', function(e) {
             // close lightboxes, sDetail, and/or map popups when the user presses ESC
-            // TODO: only close lightbox if one is up instead of closing sdetail as well
             if (e.which == 27) { // ESC
                 if ($('.fancybox-opened').length <= 0) {
                     close_sdetail();

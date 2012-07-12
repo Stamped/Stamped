@@ -20,14 +20,15 @@
                                   BASE LAYOUT
    ************************************************************************** */
 
+@base-background: #f2f2f2;
 
 body, html {
-    background: #f2f2f2;
+    background: @base-background;
     overflow: hidden !important;
 }
 
 body.intro {
-    #main, footer {
+    .main-content {
         display: none;
     }
     
@@ -37,7 +38,7 @@ body.intro {
 }
 
 body.main {
-    #main, footer {
+    .main-content {
         display: block !important;
     }
     
@@ -82,8 +83,7 @@ body.main {
             position: absolute;
             white-space: nowrap;
             display: block;
-            left: -25%;
-            width: 150%;
+            width: 100%;
             pointer-events: none;
             z-index: 1;
             
@@ -136,6 +136,7 @@ body.main {
     left: 50%;
     top: -100%;
     margin-left: -350px;
+    z-index: 3;
     
     .pane-body {
         position: relative;
@@ -162,7 +163,7 @@ body.main {
         .ribbon-wrapper-bottom {
             position: absolute;
             bottom: 0;
-            left: 0;
+            left:   0;
         }
         
         #pane-wrapper {
@@ -175,12 +176,12 @@ body.main {
                 left: 0;
                 
                 opacity: 0;
-                .transition(opacity, .4s, ease);
+                .transition(opacity, .3s, ease);
                 
                 .title {
                     .stamped-font();
                     
-                    letter-spacing: 0.05em;
+                    letter-spacing: 0.03em;
                     font-size: 3em;
                     line-height: 115%;
                     color: #333;
@@ -251,8 +252,13 @@ body.main {
 }
 
 #main-header {
-    text-align: right;
     margin-bottom: 12px;
+    text-align: right;
+    
+    .launcher-icon-button {
+        position: relative;
+        z-index: 99;
+    }
     
     #available {
         margin: 4px 12px 0 0;
@@ -314,6 +320,7 @@ body.main {
     margin-right: 12px;
     text-align: left;
     
+    background: @base-background;
     border: 1px solid #d7d7d7;
     .rounded(4px);
     
@@ -326,6 +333,65 @@ body.main {
         font-size: 80%;
         margin: 0;
     }
+}
+
+.user-video-preview {
+    display: inline-block;
+    width: 108px;
+    
+    .user-video-preview-image {
+        display: block;
+        width:  100%;
+        height: 64px;
+        margin-bottom: 8px;
+        
+        .box-shadow(0, 2px, 6px, 0, @shadow);
+        
+        background: #000;
+        
+        &:hover, &:active {
+            background: red;
+        }
+    }
+    
+    .user-video-desc {
+        .watch-video {
+            color: #438fED;
+        }
+    }
+}
+
+#user-video-preview-0 {
+    margin-right: 1em;
+}
+
+#pane-4 {
+    .title, .desc {
+        max-width: 270px;
+    }
+}
+
+#hero-video-preview {
+    position: absolute;
+    top:  50%;
+    left: 290px;
+    margin-top: -129px;
+    
+    display: none;
+    width: 470px;
+    
+    .user-video-preview-image {
+        height: 258px;
+        .box-shadow(0, 2px, 25px, 0, @shadow);
+    }
+    
+    .user-video-desc {
+        text-align: center;
+    }
+}
+
+.active-pane-4 #hero-video-preview {
+    display: block;
 }
 
 .screen-name {
@@ -351,25 +417,113 @@ body.main {
     }
 }
 
+#tastemaker-gallery {
+    margin-top: 24px;
+    .tastemaker {
+        position: relative;
+        display:  inline-block;
+        
+        margin-right: 8px;
+    }
+    
+    .tastemaker:last-child {
+        margin-right: 0;
+    }
+}
+
+.tastemaker-logo {
+    width:  36px;
+    height: 36px;
+    
+    top:   -18px;
+    right: -18px;
+}
+
+// target webkit browsers
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .tastemaker-logo {
+        @mask-image: url(/assets/img/stamped_email_mask.png);
+        
+        -webkit-mask: @mask-image no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask: @mask-image no-repeat;
+    }
+}
+
+#tastemaker-map-window {
+    background: url(/assets/img/index/chrome.png) no-repeat;
+    width:  1145px;
+    height: 732px;
+    
+    position: absolute;
+    display: none;
+    z-index: 2;
+    
+    top: 50%;
+    //right: (356px - 1145px);
+    right: -1200px;
+    
+    //width: 356px;
+    //right: 0;
+    
+    margin-top: -364px;
+    padding: 84px 0 0 42px;
+    
+    #fake-url {
+        position: absolute;
+        left: 128px;
+        top:  62px;
+        font: 10pt helvetica;
+        color: #666;
+    }
+}
+
+#tastemaker-map-window-iframe {
+    width:  100%;
+    height: 100%;
+}
+
 
 /* **************************************************************************
                       TILTED IPHONE IN CORE PAGE VIEWS
    ************************************************************************** */
 
 
-.iphone-hero {
+#main-iphone {
     position: absolute;
-    z-index: 99;
+    top:  200%;
+    left: 50%;
+    margin: -265px 0 0 70px;
+    z-index: 98;
     
-    background: url(/assets/img/index/iPhone_HERO-1.png) no-repeat;
-    width:  276px;
+    width:  377px;
     height: 530px;
 }
 
-#retina .iphone-hero {
-    background: url(/assets/img/index/iPhone_HERO-1@2x.png) no-repeat;
-    width:  551px;
-    height: 1060px;
+.iphone-hero {
+    position: absolute;
+    background: url(/assets/img/index/iphone_shadow01.png) no-repeat;
+    width:  377px;
+    height: 596px;
+    
+    .iphone-inner {
+        background: url(/assets/img/index/iPhone_HERO-1.png) no-repeat;
+        width:  276px;
+        height: 530px;
+        margin: 0 auto;
+    }
+}
+
+#retina {
+    #main-iphone {
+        margin: -530px 0 0 120px;
+    }
+    
+    .iphone-hero {
+        background: url(/assets/img/index/iPhone_HERO-1@2x.png) no-repeat;
+        width:  551px;
+        height: 1060px;
+    }
 }
 
 
@@ -379,20 +533,26 @@ body.main {
 
 
 footer {
-    position: absolute;
+    position: fixed;
+    z-index: 0;
     width: 100%;
     
     left:   0;
     bottom: 0;
     
-    padding: 0;
-    margin:  24px;
+    padding: 12px 24px;
     
     .app-store-button {
         position: absolute;
-        right:  0;
-        bottom: 0;
+        top: 50%;
+        right: 72px;
+        
+        margin-top: -18px;
     }
+}
+
+#retina footer .app-store-button {
+    margin-top: -36px;
 }
 
 #social {
@@ -532,7 +692,7 @@ footer {
     height: 45px;
 }
 
-.category-illustration {
+#category-illustration {
     background: url(/assets/img/index/illustration.png) no-repeat;
     width:  373px;
     height: 84px;
@@ -631,7 +791,7 @@ footer {
         height: 90px;
     }
     
-    .category-illustration {
+    #category-illustration {
         background: url(/assets/img/index/illustration@2x.png) no-repeat;
         width:  746px;
         height: 168px;

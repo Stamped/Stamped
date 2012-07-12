@@ -206,7 +206,7 @@ class RefreshToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class AccessToken(Schema):
     @classmethod
@@ -221,7 +221,7 @@ class AccessToken(Schema):
 
     def __init__(self):
         Schema.__init__(self)
-        self.timestamp  = UserTimestamp()
+        self.timestamp  = BasicTimestamp()
 
 class PasswordResetToken(Schema):
     @classmethod
@@ -293,6 +293,10 @@ class AccountAlertSettings(Schema):
         cls.addProperty('alerts_replies_email',             bool)
         cls.addProperty('alerts_followers_apns',            bool)
         cls.addProperty('alerts_followers_email',           bool)
+        cls.addProperty('alerts_friends_apns',              bool)
+        cls.addProperty('alerts_friends_email',             bool)
+        cls.addProperty('alerts_actions_apns',              bool)
+        cls.addProperty('alerts_actions_email',             bool)
 
 class LinkedAccountShareSettings(Schema):
     @classmethod
@@ -582,6 +586,10 @@ class EntitySources(Schema):
         cls.addProperty('amazon_source',                    basestring)
         cls.addProperty('amazon_timestamp',                 datetime)
 
+        cls.addProperty('nytimes_id',                        basestring)
+        cls.addProperty('nytimes_source',                    basestring)
+        cls.addProperty('nytimes_timestamp',                 datetime)
+
         cls.addProperty('opentable_id',                     basestring)
         cls.addProperty('opentable_url',                    basestring)
         cls.addProperty('opentable_source',                 basestring)
@@ -818,6 +826,8 @@ class BasicEntity(BasicEntityMini):
 
         # The last date/time we got some input indicating that this is currently popular.
         cls.addProperty('last_popular',                     datetime)
+        cls.addProperty('last_popular_source',              basestring)
+        cls.addProperty('last_popular_timestamp',           datetime)
         # Not to be exposed to users -- just some internal data letting us know what sort
         # of input we got indicating that this is currently popular.
         cls.addProperty('last_popular_info',                basestring)
