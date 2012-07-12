@@ -23,7 +23,11 @@
         var $main               = $("#main");
         var $main_body          = $("#main-body");
         var $main_iphone        = $("#main-iphone");
+        var $tastemaker_gallery = $("#tastemaker-gallery");
+        var $tastemakers        = $(".tastemaker");
+        var $map_window_url     = $("#fake-url");
         var $map_window         = $("#tastemaker-map-window");
+        var $map_window_iframe  = null;
         var $app_store_button   = $("footer .app-store-button");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
@@ -121,7 +125,7 @@
         });
         
         var get_relative_offset = function(height) {
-            return Math.ceil(-100 * (height / (window.innerHeight || 1))) + "%";
+            return Math.ceil(-125 * (height / (window.innerHeight || 1))) + "%";
         };
         
         
@@ -138,7 +142,10 @@
         var index  = Math.floor(Math.random() * $texts.length);
         $texts.eq(index).addClass(active_text);
         
-        $(".line").fitText();
+        var fit_text_compression_factor = 0.7;
+        $(".line").fitText(fit_text_compression_factor, {
+            maxFontSize : '250px'
+        });
         
         var $intro_iphone   = $("#intro-iphone");
         var $intro_hero     = $("#intro-hero");
@@ -258,7 +265,7 @@
             resize_panes(true);
             
             var result = update_main_layout(true);
-            var start  = $window.height() + result.height;
+            var start  = window.innerHeight + result.height;
             
             // load the main content with a spiffy animation, translating in from beneath 
             // the bottom of the page
@@ -268,7 +275,7 @@
                 .animate({
                     'top'       : result.offset + "px"
                 }, {
-                    easing      : "easeOutExpo", 
+                    easing      : "easeOutCubic", 
                     duration    : 1000, 
                     step        : function(value) {
                         var percent = (value - result.offset) / (start - result.offset);
@@ -295,7 +302,7 @@
                     'top'       : "50%"
                 }, {
                     easing      : "easeOutCubic", 
-                    duration    : 600
+                    duration    : 800
                 });
         };
         
@@ -327,6 +334,41 @@
                 });
             
             $app_store_button.show(400);
+        };
+        
+        var map_window_switch_user = function(screen_name) {
+            var active = $map_window.data("active");
+            
+            if (screen_name !== active) {
+                $map_window.data("active", screen_name);
+                
+                var screen_name_lower = screen_name.toLowerCase();
+                
+                if (screen_name_lower === "justinbieber") {
+                    screen_name = "robby"
+                } else if (screen_name_lower === "passionpit") {
+                    screen_name = "travis"
+                } else if (screen_name_lower === "nytimes") {
+                    screen_name = "edmuki"
+                } else if (screen_name_lower === "time") {
+                    screen_name = "bart"
+                }
+                
+                $map_window_url
+                    .attr("href", "/" + screen_name + "/map")
+                    .text("www.stamped.com/" + screen_name + "/map");
+                
+                var iframe_src = "/" + screen_name + "/map?lite=true";
+                
+                if (!$map_window_iframe) {
+                    var iframe = '<iframe id="tastemaker-map-window-iframe" frameborder="0" scrolling="no" src="' + iframe_src + '"></iframe>';
+                    
+                    $map_window.append(iframe);
+                    $map_window_iframe = $("#tastemaker-map-window-iframe");
+                } else {
+                    $map_window_iframe.attr("src", iframe_src);
+                }
+            }
         };
         
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
@@ -419,6 +461,16 @@
             return false;
         });
         
+        $main.on("click", ".tastemaker", function(event) {
+            event.preventDefault();
+            
+            var $this = $(this);
+            var screen_name = $this.data("screen-name");
+            
+            map_window_switch_user(screen_name);
+            return false;
+        });
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
@@ -434,6 +486,8 @@
             // bypass intro animation and go directly to the main page content
             init_main();
         }
+        
+        map_window_switch_user("justinbieber");
     });
 })();
 
