@@ -51,7 +51,7 @@ def index(request, **kwargs):
     ]
     
     return stamped_render(request, 'index.html', {
-        'body_classes'      : "index main", 
+        'body_classes'      : "index intro", 
         'tastemakers'       : tastemakers, 
     })
 
