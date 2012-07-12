@@ -34,6 +34,8 @@
 {% block styles %}
     {{ block.super }}
     
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/map.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
+    
     <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
     
     <!--[if lte IE 9]>
@@ -63,23 +65,33 @@
     <div class="stamp-map">
         <div class="stamp-map-canvas"></div>
         
-        <a class="my-location" href="#" title="My Location">
-            <div class="inner"></div>
-        </a>
-        
-        {% with share_widget_desc="Share this map" %}
-            {% handlebars_template "share-widget" %}
-        {% endwith %}
+        {% if not lite %}
+            <a class="my-location" href="#" title="My Location">
+                <div class="inner"></div>
+            </a>
+            
+            {% with share_widget_desc="Share this map" %}
+                {% handlebars_template "share-widget" %}
+            {% endwith %}
+        {% endif %}
         
         <div class="fixedwidth">
             <div class="stamp-map-nav-wrapper">
                 <div class="stamp-map-nav">
                     <div class="nav-header clearfix">
-                        {% handlebars_template "profile-image-medium-ish" user %}
+                        {% if lite %}
+                            {% handlebars_template "profile-image-medium-ish-lite" user %}
+                        {% else %}
+                            {% handlebars_template "profile-image-medium-ish" user %}
+                        {% endif %}
                         
                         <div class="nav-header-title">
                             <div class="name">
-                                {% handlebars_template "screen-name" user %}'s
+                                {% if lite %}
+                                    {{ user.screen_name }}'s
+                                {% else %}
+                                    {% handlebars_template "screen-name" user %}'s
+                                {% endif %}
                             </div>
                             
                             <div class="stamp-map-title user-primary">Stamp Map</div>
@@ -118,14 +130,18 @@
                     
                     <div class="nav-dummy-footer">
                         <div class="content">
-                            <a class="map-profile-link" href="/{{user.screen_name}}"><div class='map-profile-icon-wrapper profile-icon'><div class='map-profile-icon'><div class='inner'></div><div class='inner-shadow'></div></div></div><span class="desc"> View Full Profile</span></a>
+                            {% if not lite %}
+                                <a class="map-profile-link" href="/{{user.screen_name}}"><div class='map-profile-icon-wrapper profile-icon'><div class='map-profile-icon'><div class='inner'></div><div class='inner-shadow'></div></div></div><span class="desc"> View Full Profile</span></a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 
                 <div class="nav-footer">
                     <div class="content">
-                        <a class="map-profile-link" href="/{{user.screen_name}}"><div class='map-profile-icon-wrapper profile-icon'><div class='map-profile-icon'><div class='inner-shadow'></div><div class='inner'></div></div></div><span class="desc"> View Full Profile</span></a>
+                        {% if not lite %}
+                            <a class="map-profile-link" href="/{{user.screen_name}}"><div class='map-profile-icon-wrapper profile-icon'><div class='map-profile-icon'><div class='inner-shadow'></div><div class='inner'></div></div></div><span class="desc"> View Full Profile</span></a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -137,14 +153,14 @@
     {{ block.super }}
      
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD4uiuKac5adB9_bwQK9fgJx3SyZVzQsSc&sensor=true"></script>
-    {% if DEBUG %}
+    {% if STAMPED_DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
         <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
         <script src="{{ STATIC_URL }}js/libs/infobox.js"></script>
         <script src="{{ STATIC_URL }}js/libs/markerclusterer.js"></script>
         <script src="{{ STATIC_URL }}js/map.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/map.generated.js"></script>
+        <script src="{{ STATIC_URL }}js/map.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     {% ssi STAMPED_MAP_TEMPLATE_FILE %}

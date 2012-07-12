@@ -18,11 +18,13 @@
         // ---------------------------------------------------------------------
         
         
-        var $window         = $(window);
-        var $body           = $("body");
-        var $main           = $("#main");
-        var $main_body      = $("#main-body");
-        var $main_iphone    = $("#main-iphone");
+        var $window             = $(window);
+        var $body               = $("body");
+        var $main               = $("#main");
+        var $main_body          = $("#main-body");
+        var $main_iphone        = $("#main-iphone");
+        var $map_window         = $("#tastemaker-map-window");
+        var $app_store_button   = $("footer .app-store-button");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -297,6 +299,36 @@
                 });
         };
         
+        var map_window_show = function() {
+            $app_store_button.hide(800);
+            
+            $map_window
+                .stop(true, false)
+                .show()
+                .animate({
+                    right       : "-789px"
+                }, {
+                    easing      : "easeOutExpo", 
+                    duration    : 800
+                });
+        };
+        
+        var map_window_hide = function() {
+            $map_window
+                .stop(true, false)
+                .animate({
+                    right       : "-1200px"
+                }, {
+                    easing      : "easeInQuad", 
+                    duration    : 400, 
+                    complete    : function() {
+                        $map_window.hide();
+                    }
+                });
+            
+            $app_store_button.show(400);
+        };
+        
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
         var set_active_pane = function(index) {
             if (index >= 0 && index <= 4) {
@@ -304,11 +336,19 @@
                 
                 if (!$main_body.hasClass(active)) {
                     $main_body.removeClass().addClass(active);
+                    index = parseInt(index);
                     
-                    if (index >= 4) {
+                    // TODO: animation here
+                    if (index >= 3) {
                         $main_iphone.css("visibility", "hidden");
                     } else {
                         $main_iphone.css("visibility", "visible");
+                    }
+                    
+                    if (index === 3) {
+                        map_window_show();
+                    } else {
+                        map_window_hide();
                     }
                     
                     return true;

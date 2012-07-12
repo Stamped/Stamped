@@ -5,7 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, utils, logs
+import Globals, utils, logs, pymongo
 
 from datetime                   import datetime
 from utils                      import lazyProperty
@@ -28,6 +28,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
+        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING), \
+                                        ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
+                                        ('_id', pymongo.ASCENDING)])
 
     @lazyProperty
     def alert_apns_collection(self):
@@ -185,7 +189,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         modified = False
 
         # Check if old schema version
-        if 'linked' not in document or 'alert_settings' not in document or 'auth_service' not in document:
+        if 'linked_accounts' in document or 'alert_settings' not in document or 'auth_service' not in document:
             msg = "%s: Old schema" % key
             if repair:
                 logs.info(msg)
@@ -203,7 +207,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 del(account.linked.facebook)
                 modified = True
             else:
-                if self._collection.find({'account.linked.facebook': facebookId}).count() > 1:
+                if self._collection.find({'linked.facebook.linked_user_id': facebookId, '_id': {'$lt': key}}).count() > 0:
                     msg = "%s: Multiple accounts exist linked to Facebook id '%s'" % (key, facebookId)
                     raise StampedFacebookLinkedToMultipleAccountsError(msg)
 
@@ -215,13 +219,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                 del(account.linked.twitter)
                 modified = True
             else:
-                if self._collection.find({'account.linked.twitter': twitterId}).count() > 1:
+                if self._collection.find({'linked.twitter.linked_user_id': twitterId, '_id': {'$lt': key}}).count() > 0:
                     msg = "%s: Multiple accounts exist linked to Twitter id '%s'" % (key, twitterId)
                     raise StampedTwitterLinkedToMultipleAccountsError(msg)
 
         if modified and repair:
-            # self._collection.update({'_id' : key}, self._convertToMongo(account))
-            print self._convertToMongo(account)
+            self._collection.update({'_id' : key}, self._convertToMongo(account))
+            # print self._convertToMongo(account)
 
         return True
     
