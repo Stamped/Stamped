@@ -48,27 +48,27 @@ OUTPUT_PREFIX = 'tmp'
 
 class RunEvalResolutions(AStampedTestCase):
     @fixtureTest(useLocalDb=True)
-    def test_run_app_resolution_eval(self):
+    def test_run_app_resolution(self):
         self.__run_eval_for_category('app')
 
     @fixtureTest(useLocalDb=True)
-    def test_run_book_resolution_eval(self):
+    def test_run_book_resolution(self):
         self.__run_eval_for_category('book')
 
     @fixtureTest(useLocalDb=True)
-    def test_run_film_resolution_eval(self):
+    def test_run_film_resolution(self):
         self.__run_eval_for_category('film')
 
     @fixtureTest(useLocalDb=True)
-    def test_run_music_resolution_eval(self):
+    def test_run_music_resolution(self):
         self.__run_eval_for_category('music')
 
     @fixtureTest(useLocalDb=True)
-    def test_run_place_resolution_eval(self):
+    def test_run_place_resolution(self):
         self.__run_eval_for_category('place')
 
     @fixtureTest(useLocalDb=True)
-    def test_run_all_resolution_eval(self):
+    def test_run_all_resolution(self):
         self.__run_eval_for_category('all')
 
     def __get_search_ids_for_category(self, category):
@@ -125,12 +125,7 @@ class RunEvalResolutions(AStampedTestCase):
 
     def __convertSearchId(self, searchId, fullResolver):
         temp_id_prefix = 'T_'
-        if not search_id.startswith(temp_id_prefix):
-            # already a valid entity id
-            return search_id
-
-        # TODO: This code should be moved into a common location with BasicEntity.search_id
-        id_components = search_id[len(temp_id_prefix):].split('____')
+        id_components = searchId[len(temp_id_prefix):].split('____')
         sourceAndKeyRe = re.compile('^([A-Z]+)_([\w+-:/]+)$')
         sourcesAndKeys = []
         for component in id_components:
@@ -140,20 +135,17 @@ class RunEvalResolutions(AStampedTestCase):
             else:
                 sourcesAndKeys.append(match.groups())
         if not sourcesAndKeys:
-            raise Exception('Unable to extract and third-party ID from composite search ID: ' + search_id)
-
-        stamped = StampedSource(stamped_api=self)
+            raise Exception('Unable to extract and third-party ID from composite search ID: ' + searchId)
 
         proxies = []
         seenSourceNames = set()
         entity_ids = []
-        pool = LoggingThreadPool(len(SOURCES))
         for sourceIdentifier, key in sourcesAndKeys:
             if sourceIdentifier in seenSourceNames:
                 continue
             seenSourceNames.add(sourceIdentifier)
 
-            source = SOURCES[sourceIdentifier.lower()]
+            source = SOURCES[sourceIdentifier.lower() + '_id']
             try:
                 proxy = source.entityProxyFromKey(key)
                 proxies.append(proxy)
@@ -162,7 +154,7 @@ class RunEvalResolutions(AStampedTestCase):
                              (key, sourceIdentifier, traceback.format_exc()))
 
         if not proxies:
-            raise Exception('Completely unable to create entity from search ID: ' + search_id)
+            raise Exception('Completely unable to create entity from search ID: ' + searchId)
 
         entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
         for proxy in proxies[1:]:
