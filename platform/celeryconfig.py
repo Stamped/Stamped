@@ -84,8 +84,9 @@ CELERY_DEFAULT_ROUTING_KEY = "default"
 
 CELERYBEAT_SCHEDULE = {
     'rss-crawlers' : {
-        'task' : 'APITasks.crawlExternalSources',
+        'task' : 'tasks.APITasks.crawlExternalSources',
         'schedule' : timedelta(hours=3),
         'relative' : True,
+    },
 }
 
