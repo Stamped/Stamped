@@ -4901,6 +4901,8 @@ class StampedAPI(AStampedAPI):
             entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
             entity = entityProxy.buildEntity()
             self.mergeEntity(entity)
+        else:
+            self.mergeEntityId(entity_id)
 
     """
     ######
