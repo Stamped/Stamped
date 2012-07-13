@@ -30,7 +30,7 @@ class FandangoMovie(ResolverMediaItem):
             titlePattern = re.compile(r'\d+\.\s*(.*)\$.*$')
             match = titlePattern.match(data.title)
             if match:
-                data.title = match.group(1)
+                data.title = match.group(1).strip()
             return cls(data, True)
 
     def __init__(self, data, popular):
