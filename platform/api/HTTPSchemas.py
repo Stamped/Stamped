@@ -2785,7 +2785,7 @@ class HTTPActivity(Schema):
 
     def importEnrichedActivity(self, activity):
         data = activity.dataExport()
-        data.pop('subjects')
+        data.pop('subjects', None)
         data.pop('objects', None)
 
         self.dataImport(data, overflow=True)
@@ -3314,6 +3314,16 @@ class HTTPActivity(Schema):
                 else:
                     logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
                     self.image = None
+
+        elif self.verb == 'welcome':
+            if not activity.personal:
+                logs.debug(self)
+                raise Exception("Invalid universal news item: %s" % self.verb)
+
+            self.header = "Welcome to Stamped"
+            self.body = "Welcome to Stamped! We've given you 100 stamps to start, so go ahead, try using one now!"
+
+            self.image = _getIconURL('news_welcome')
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)
