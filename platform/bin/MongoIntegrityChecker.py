@@ -97,7 +97,8 @@ def worker(db, collection, stats, options):
                 logs.warning("%s: FAIL" % documentId)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
                 stats['errors'].append(e)
-                api.mergeEntityId(str(documentId))
+                if libs.ec2_utils.is_ec2():
+                    api.mergeEntityId(str(documentId))
 
             except StampedDataError as e:
                 logs.warning("%s: FAIL" % documentId)
