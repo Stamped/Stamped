@@ -169,6 +169,8 @@ disableStaleness = False
 # (a) the test runs the same whether or not you have an internet connection and (b) that if a third-party call failed
 # in the first run it fails in the second, though not necessarily with the same error.
 exceptionOnCacheMiss = False
+# Name of the Mongo collection.
+cacheTableName = 'cache'
 
 class CacheMissException(Exception):
     def __init__(self, functionName):
@@ -210,7 +212,7 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True, schemaClasses=[]):
             try:
                 connection = MongoDBConfig.getInstance().connection
                 dbname = MongoDBConfig.getInstance().database_name
-                table = getattr(connection, dbname).cache
+                table = getattr(getattr(connection, dbname), cacheTableName)
                 result = table.find_one({'_id':callHash})
             except AutoReconnect as exc:
                 cacheTableError = exc
@@ -246,7 +248,7 @@ import sys
 
 if __name__ == '__main__':
     connection = MongoDBConfig.getInstance().connection
-    table = connection.stamped.cache
+    table = getattr(connection.stamped, cacheTableName)
     if len(sys.argv) > 1 and sys.argv[1] == 'purge':
         table.drop()
     else:

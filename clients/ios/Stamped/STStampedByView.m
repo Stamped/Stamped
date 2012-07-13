@@ -66,18 +66,18 @@
         NSString* imagePath = nil;
         if (scope == STStampedAPIScopeFriends) {
             formatString = @"%@ friend%@";
-            imagePath = @"TEMP_friends_icon";
+            imagePath = @"stampedby_icon_friends";
         }
         else if (scope == STStampedAPIScopeEveryone) {
             formatString = @"%@ user%@ on Stamped";
-            imagePath = @"TEMP_everyone_icon";
+            imagePath = @"stampedby_icon_global";
         }
         UIImageView* iconView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:imagePath]] autorelease];
         iconView.frame = [Util centeredAndBounded:iconView.frame.size inFrame:CGRectMake(xOffset, yOffset, 15, 15)];
         [self addSubview:iconView];
         NSString* countString = [NSString stringWithFormat:@"%d", group.count.integerValue];
         UILabel* headerText = [Util viewWithText:[NSString stringWithFormat:formatString, countString, group.count.integerValue == 1 ? @"" : @"s"]
-                                            font:[UIFont stampedSubtitleFont]
+                                            font:[UIFont stampedFontWithSize:12]
                                            color:[UIColor stampedGrayColor]
                                             mode:UILineBreakModeClip
                                       andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
@@ -85,15 +85,15 @@
                                                            yOffset,
                                                            0,
                                                            0)];
-        [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, CGRectGetMaxY(headerText.frame)+yOffset)];
+        [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, CGRectGetMaxY(headerText.frame)+yOffset + 6)];
         [self addSubview:headerText];
         
+        BOOL hasImages = NO;
         if (group.stampPreviews.count > 0 && imagesEnabled) {
             NSInteger limit = 6;
             UIView* images = [[[UIView alloc] initWithFrame:CGRectMake(xOffset, 0, self.frame.size.width - (2 * xOffset), 40)] autorelease];
             NSInteger i = 0;
             CGFloat imageSpacing = 40;
-            BOOL hasImages = NO;
             for (id<STStampPreview> stampPreview in group.stampPreviews) {
                 if (![blacklist containsObject:stampPreview.user.userID]) {
                     if (i >= limit) break;
@@ -110,12 +110,19 @@
                 }
             }
             if (hasImages) {
+                [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, -8.5)];
                 CGRect imagesFrame = images.frame;
                 imagesFrame.size.width = i * imageSpacing;
                 images.frame = imagesFrame;
                 _hasImages = hasImages;
                 [Util appendView:images toParentView:self];
+                [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 10.5)];
             }
+        }
+        if (!hasImages) {
+            CGFloat extraOffset = 4.5;
+            [Util reframeView:headerText withDeltas:CGRectMake(0, extraOffset, 0, 0)];
+            [Util reframeView:iconView withDeltas:CGRectMake(0, extraOffset, 0, 0)];
         }
         CGRect buttonFrame = self.frame;
         UIView* views[2];
@@ -195,14 +202,16 @@
             [array addObject:child];
             hasImages = hasImages | child.hasImages;
         }
+        //15, 25
         if (array.count) {
             UILabel* header = [Util viewWithText:@"Stamped By"
-                                            font:[UIFont stampedFontWithSize:12]
+                                            font:[UIFont stampedBoldFontWithSize:12]
                                            color:[UIColor stampedDarkGrayColor]
                                             mode:UILineBreakModeClip
                                       andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-            [Util reframeView:header withDeltas:CGRectMake(15, 0, 0, 10)];
+            [Util reframeView:header withDeltas:CGRectMake(15, 9, 0, 10)];
             [self appendChildView:header];
+            [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, -6.5)];
             BOOL first = YES;
             UIImage* image = [UIImage imageNamed:@"eDetailBox_line"];
             for (STStampedByViewCell* cell in array) {

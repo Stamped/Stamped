@@ -1354,19 +1354,23 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_buy_primary', client=client)
             sources     = []
 
+            source              = HTTPActionSource()
+            source.name         = 'Buy from Amazon'
+            source.source       = 'amazon'
+            source.icon         = _getIconURL('src_amazon', client=client)
+            source.setCompletion(
+                action      = actionType,
+                entity_id   = entity.entity_id,
+                source      = source.source,
+                source_id   = source.source_id,
+            )
             if entity.sources.amazon_underlying is not None:
-                source              = HTTPActionSource()
-                source.name         = 'Buy from Amazon'
-                source.source       = 'amazon'
                 source.source_id    = entity.sources.amazon_underlying
-                source.icon         = _getIconURL('src_amazon', client=client)
                 source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
-                source.setCompletion(
-                    action      = actionType,
-                    entity_id   = entity.entity_id,
-                    source      = source.source,
-                    source_id   = source.source_id,
-                )
+                sources.append(source)
+            elif entity.sources.amazon_id is not None:
+                source.source_id    = entity.sources.amazon_id
+                source.link         = _buildAmazonURL(entity.sources.amazon_id)
                 sources.append(source)
 
             self._addAction(actionType, 'Buy now', sources, icon=actionIcon)

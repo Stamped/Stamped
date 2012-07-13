@@ -429,7 +429,7 @@ typedef enum {
 - (void)add:(id)sender {
     if (self.addCancellation) return;
     
-    NSMutableDictionary *entityDictionary = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *entityDictionary = [NSMutableDictionary dictionary];
     
     NSInteger section = 0;
     for (NSArray *array in self.dataSource) {

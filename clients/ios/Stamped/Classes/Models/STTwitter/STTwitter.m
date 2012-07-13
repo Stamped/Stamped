@@ -13,6 +13,8 @@
 #import "JSON.h"
 #import "STEvents.h"
 #import "Util.h"
+#import "STRestKitLoader.h"
+#import "STSimpleBooleanResponse.h"
 
 #define kTwitterConsumer @"kn1DLi7xqC6mb5PPwyXw"
 #define kTwitterSecretApersand @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU&"
@@ -285,7 +287,7 @@ static id __instance;
 - (void)requestAccess:(STTwitterAccessHandler)handler {
     
     if (!self.accountStore) {
-        self.accountStore = [[ACAccountStore alloc] init];
+        self.accountStore = [[[ACAccountStore alloc] init] autorelease];
     }
     
     ACAccountType *accountType = [_accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
@@ -449,6 +451,24 @@ static id __instance;
         }];
     }
     return cancellation;
+}
+
+
+- (STCancellation*)addTwitterWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    
+    NSMutableDictionary* params = [NSMutableDictionary dictionary];
+    STTwitter* twitter = [STTwitter sharedInstance];
+    [params setObject:twitter.twitterUsername forKey:@"linked_screen_name"];
+    [params setObject:twitter.twitterToken forKey:@"token"];
+    [params setObject:twitter.twitterTokenSecret forKey:@"secret"];
+    return [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/twitter/add.json"
+                                                        post:YES
+                                               authenticated:YES
+                                                      params:params
+                                                     mapping:[STSimpleBooleanResponse mapping]
+                                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                     block(!error, error, cancellation);
+                                                 }];
 }
 
 @end

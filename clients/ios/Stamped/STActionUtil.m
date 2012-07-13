@@ -155,7 +155,7 @@ static id _sharedInstance;
         NSString* previewURL = [STActionUtil previewURLForItem:item];
         NSString* spotifyID = [STActionUtil sourceIDForItem:item withSource:@"spotify"];
         if ((itemID && connectedToRdio) || previewURL || (spotifyID && connectedToSpotify)) {
-            STSimplePlaylistItem* simpleItem = [[STSimplePlaylistItem playlistItemWithItem:item] retain];
+            STSimplePlaylistItem* simpleItem = [STSimplePlaylistItem playlistItemWithItem:item];
             [array addObject:simpleItem];
             if (!simpleItem.images) {
                 simpleItem.images = images;

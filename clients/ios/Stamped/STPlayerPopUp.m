@@ -16,6 +16,8 @@
 #import "STRippleBar.h"
 #import "STRdio.h"
 #import "STSpotify.h"
+#import "STButton.h"
+#import "STStampedAPI.h"
 
 static const CGFloat _cellHeight = 52;
 
@@ -47,6 +49,8 @@ static const CGFloat _cellHeight = 52;
 @property (nonatomic, readonly, assign) BOOL fullFooter;
 @property (nonatomic, readonly, retain) UILabel* viaLabel;
 
+@property (nonatomic, readwrite, retain) UIView* overlayView;
+
 @end
 
 @implementation STPlayerPopUp
@@ -65,6 +69,8 @@ static const CGFloat _cellHeight = 52;
 @synthesize fullFooter = _fullFooter;
 @synthesize viaLabel = _viaLabel;
 
+@synthesize overlayView = _overlayView;
+
 - (id)init
 {
     self = [super initWithFrame:[Util fullscreenFrame]];
@@ -73,7 +79,7 @@ static const CGFloat _cellHeight = 52;
         _contentView = [[UIView alloc] initWithFrame:CGRectMake(15, 55, 290, 360)];
         _contentView.backgroundColor = [UIColor whiteColor];
         
-        _fullFooter = !([STRdio sharedRdio].connected || [STSpotify sharedInstance].connected);// YES;//![STRdio sharedRdio].loggedIn;
+        _fullFooter = LOGGED_IN && !([STRdio sharedRdio].connected && ![STSpotify sharedInstance].connected);// YES;//![STRdio sharedRdio].loggedIn;
         
         CGFloat headerHeight = 66;
         CGFloat footerHeight;
@@ -167,6 +173,25 @@ static const CGFloat _cellHeight = 52;
             _footerView.layer.shadowOpacity = .2;
             _footerView.layer.shadowColor = [UIColor blackColor].CGColor;
             
+            UIImageView* rdioImage = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"3rd_icon_l_rdio"]] autorelease];
+            UIImageView* spotifyImage = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"3rd_icon_l_spotify"]] autorelease];
+            UILabel* label = [Util viewWithText:@"Listen to full tracks\nwith Rdio or Spotify"
+                                           font:[UIFont stampedFontWithSize:12]
+                                          color:[UIColor stampedGrayColor]
+                                           mode:UILineBreakModeTailTruncation
+                                     andMaxSize:CGSizeMake(190, CGFLOAT_MAX)];
+            CGFloat padding = 10;
+            rdioImage.frame = [Util centeredAndBounded:rdioImage.frame.size inFrame:CGRectMake(padding, 0, rdioImage.frame.size.width, _footerView.frame.size.height)];
+            spotifyImage.frame = [Util centeredAndBounded:spotifyImage.frame.size
+                                                  inFrame:CGRectMake(_footerView.frame.size.width - padding - spotifyImage.frame.size.width, 0, spotifyImage.frame.size.width, _footerView.frame.size.height)];
+            label.frame = [Util centeredAndBounded:label.frame.size inFrame:CGRectMake(0, 0, _footerView.frame.size.width, _footerView.frame.size.height)];
+            label.textAlignment = UITextAlignmentCenter;
+            [_footerView addSubview:rdioImage];
+            [_footerView addSubview:spotifyImage];
+            [_footerView addSubview:label];
+            
+            [_footerView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(showOverlay:)] autorelease]];
+            
             //            _editButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
             //            [_editButton addTarget:self action:@selector(toggleEdit:) forControlEvents:UIControlEventTouchUpInside];
             //            [_editButton setImage:[UIImage imageNamed:@"menu_icon-settings"] forState:UIControlStateNormal];
@@ -210,7 +235,85 @@ static const CGFloat _cellHeight = 52;
     [_player release];
     [_pauseButton release];
     [_contentView release];
+    [_overlayView release];
     [super dealloc];
+}
+
+- (void)showOverlay:(id)notImportant {
+    self.overlayView = [[[UIView alloc] initWithFrame:self.frame] autorelease];
+    self.overlayView.backgroundColor = [UIColor colorWithWhite:0 alpha:.2];
+    
+    CGFloat cellHeight = 45;
+    
+    UIView* container = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 300, cellHeight * 2)] autorelease];
+    container.backgroundColor = [UIColor whiteColor];
+    container.layer.cornerRadius = 5;
+    container.layer.borderColor = [UIColor stampedLightGrayColor].CGColor;
+    container.layer.borderWidth = 2;
+    container.layer.shadowOpacity = .3;
+    container.layer.shadowRadius = 4;
+    container.layer.shadowOffset = CGSizeMake(0, 3);
+    container.layer.shadowColor = [UIColor blackColor].CGColor;
+    container.clipsToBounds = YES;
+    
+    
+    for (NSInteger i = 0; i < 2; i++) {
+        UIView* views[2];
+        BOOL isRdio = i == 0;
+        for (NSInteger k = 0; k < 2; k++) {
+            BOOL highlight = k == 1;
+            UIView* view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, container.frame.size.width, cellHeight)] autorelease];
+            view.layer.borderColor = [UIColor stampedLightGrayColor].CGColor;
+            view.layer.borderWidth = .5;
+            UIColor* backgroundColor = highlight ? [UIColor blueColor] : [UIColor whiteColor];
+            UIColor* textColor = highlight ? [UIColor whiteColor] : [UIColor stampedGrayColor];
+            UIImage* image = [UIImage imageNamed:isRdio ? @"3rd_icon_l_rdio" : @"3rd_icon_l_spotify"];
+            view.backgroundColor = backgroundColor;
+            UIImageView* imageView = [[[UIImageView alloc] initWithImage:image] autorelease];
+            UILabel* label = [Util viewWithText:[NSString stringWithFormat:@"Connect to %@", isRdio ? @"Rdio" : @"Spotify"]
+                                           font:[UIFont stampedFontWithSize:12]
+                                          color:textColor
+                                           mode:UILineBreakModeTailTruncation
+                                     andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+            label.frame = [Util centeredAndBounded:label.frame.size inFrame:CGRectMake(60, 0, label.frame.size.width, cellHeight)];
+            imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(10, 0, imageView.frame.size.width, cellHeight)];
+            [view addSubview:label];
+            [view addSubview:imageView];
+            views[k] = view;
+        }
+        SEL action = isRdio ? @selector(choseRdio:) : @selector(choseSpotify:);
+        STButton* button = [[[STButton alloc] initWithFrame:views[0].frame 
+                                                normalView:views[0]
+                                                activeView:views[1]
+                                                    target:self 
+                                                  andAction:action] autorelease];
+        [Util reframeView:button withDeltas:CGRectMake(0, cellHeight * i, 0, 0)];
+        [container addSubview:button];
+    }
+    container.frame = [Util centeredAndBounded:container.frame.size inFrame:CGRectMake(0, 350, self.overlayView.frame.size.width, container.frame.size.height)];
+    //[self.overlayView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(closeOverlay:)] autorelease]];
+    [self.overlayView addSubview:container];
+    
+    [self addSubview:self.overlayView];
+}
+
+- (void)closeOverlay:(id)notImportant {
+    [self.overlayView removeFromSuperview];
+    self.overlayView = nil;
+}
+
+- (void)choseSpotify:(id)notImportant {
+    self.player.paused = YES;
+    [Util setFullScreenPopUp:nil dismissible:NO animated:NO withBackground:nil];
+    [[STSpotify sharedInstance] loginWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+    }];
+}
+
+- (void)choseRdio:(id)notImportant {
+    self.player.paused = YES;
+    [Util setFullScreenPopUp:nil dismissible:NO animated:NO withBackground:nil];
+    [[STRdio sharedRdio] ensureLoginWithCompletionBlock:^{
+    }];
 }
 
 + (UIColor*)backgroundColor {

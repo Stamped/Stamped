@@ -1413,7 +1413,7 @@ static Rdio* _rdio;
             UIGraphicsBeginImageContextWithOptions(CGSizeMake(bounds.width, 40), NO, 0.0);
             CGContextRef context = UIGraphicsGetCurrentContext();
             CGRect imageBounds = CTLineGetImageBounds(lastLine, context);
-            CGContextRelease(context);
+            UIGraphicsEndImageContext();
             result = imageBounds.size.width;
         }
     }

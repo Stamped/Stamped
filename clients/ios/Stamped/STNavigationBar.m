@@ -19,7 +19,7 @@
 - (void)initialize;
 - (CGPathRef)newPathForTitle;
 
-@property (nonatomic, readonly) CALayer* ripplesLayer;
+@property (nonatomic, readonly, assign) CALayer* ripplesLayer;
 @property (nonatomic, readonly, retain) UIButton* playerIcon;
 
 @end
@@ -93,7 +93,7 @@
 
 - (void)initialize {
     
-    _playerIcon = [UIButton buttonWithType:UIButtonTypeCustom];
+    _playerIcon = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
     _playerIcon.frame = CGRectMake(205, 15, 20, 20);
     [_playerIcon setImage:[UIImage imageNamed:@"currentplaylist_icon"] forState:UIControlStateNormal];
     [_playerIcon addTarget:self action:@selector(playerButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
@@ -101,13 +101,13 @@
     self.layer.masksToBounds = NO;
     
     CGFloat ripplesY = CGRectGetMaxY(self.bounds);
-    ripplesLayer_ = [[CALayer alloc] init];
+    ripplesLayer_ = [[[CALayer alloc] init] autorelease];
     ripplesLayer_.contentsScale = [[UIScreen mainScreen] scale];
     ripplesLayer_.frame = CGRectMake(0, ripplesY, 320, 3);
     ripplesLayer_.contentsGravity = kCAGravityResizeAspect;
     ripplesLayer_.contents = (id)[UIImage imageNamed:@"nav_bar_ripple"].CGImage;
     [self.layer addSublayer:ripplesLayer_];
-    [ripplesLayer_ release];
+    //[ripplesLayer_ release];
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerStateChanged:) name:STPlayerStateChangedNotification object:nil];
     [self playerStateChanged:nil];
@@ -185,6 +185,7 @@
             CGPathRef path = CTFontCreatePathForGlyph(runFont, glyph, NULL);
             CGAffineTransform transform = CGAffineTransformMakeTranslation(position.x, position.y);
             CGPathAddPath(textPath, &transform, path);
+            CFRelease(path);
         }
     }
     return textPath;

@@ -24,6 +24,7 @@
 #import "STStampedAPI.h"
 #import "QuartzUtils.h"
 #import "STNavigationItem.h"
+#import "STTwitter.h"
 
 @interface PostStampViewController ()
 @property(nonatomic,strong) PostStampHeaderView *headerView;
@@ -256,13 +257,29 @@
 #pragma mark - PostStampBadgeTableCell
 
 - (void)postStampBadgeTableCellShare:(PostStampBadgeTableCell*)cell {
-    
-    PostStampShareView *view = [[PostStampShareView alloc] initWithFrame:self.view.bounds];
-    view.layer.zPosition = 100;
-    [self.view addSubview:view];
-    [view popIn];
-    [view release];
-    
+    if ([TWTweetComposeViewController canSendTweet]) {
+        TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
+        
+        [twitter setInitialText:[NSString stringWithFormat:@"I'm the first to stamp %@ on @stampedapp! %@", self.stamp.entity.title, self.stamp.URL]];
+        
+        if ([TWTweetComposeViewController canSendTweet]) {
+            [self presentViewController:twitter animated:YES completion:nil];
+        }
+        
+        twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
+            [self dismissModalViewControllerAnimated:YES];
+        };
+    }
+    else {
+        [[STTwitter sharedInstance] auth];
+    }
+    /*
+     PostStampShareView *view = [[PostStampShareView alloc] initWithFrame:self.view.bounds];
+     view.layer.zPosition = 100;
+     [self.view addSubview:view];
+     [view popIn];
+     [view release];
+     */
 }
 
 
@@ -271,15 +288,15 @@
 - (void)postStampFriendTableCell:(PostStampFriendsTableCell*)cell selectedStamp:(id<STStamp>)stamp {
     
     /*
-    STUserViewController *controller = [[STUserViewController alloc] initWithUser:user];
-    [self.navigationController pushViewController:controller animated:YES];
-    [controller release];
+     STUserViewController *controller = [[STUserViewController alloc] initWithUser:user];
+     [self.navigationController pushViewController:controller animated:YES];
+     [controller release];
      */
     
     STActionContext* context = [STActionContext contextInView:self.view];
     id<STAction> action = [STStampedActions actionViewStamp:stamp.stampID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
-
+    
     
 }
 
@@ -353,7 +370,6 @@
             [self.tableView endUpdates];
             [self resetContainer];
             
-            NSLog(@"stampedby:%@", stampedBy);
             self.stampedBy = stampedBy;
             
         }
