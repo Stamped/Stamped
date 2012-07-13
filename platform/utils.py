@@ -1100,23 +1100,12 @@ mention_re = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_]
 url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
 
 def findMentions(text):
-    mentionsIter = mention_re.finditer(text)
-    mentions = []
-    
-    for mention in mentionsIter:
-        mentions.append(mention)
-    
-    return mentions
+    return mention_re.finditer(text)
     
 
 def findUrls(text):
-    urlsIter = url_re.finditer(text)
-    urls = []
-    
-    for url in urlsIter:
-        urls.append(url)
-        
-    return urls
+    return url_re.finditer(text)
+
 
 #Weighted lottery function for ordering items by their scores. 
 #INPUT: A list of tuples in the form (float_score, item)
