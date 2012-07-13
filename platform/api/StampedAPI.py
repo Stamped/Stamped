@@ -4006,9 +4006,9 @@ class StampedAPI(AStampedAPI):
                                     'app': 10}
             #Magnify personal stamp score by number of stamps by other friends
             try:
-                personal_stamp_score = section_coefs[section] * personal_stamp_score * (timestamps)
+                personal_stamp_score = section_coefs[section] * personal_stamp_score * len(timestamps)
             except KeyError:
-                personal_stamp_score = personal_stamp_score * (timestamps)
+                personal_stamp_score = personal_stamp_score * len(timestamps)
                 
             ### PERSONAL TODO LIST
             personal_todo_score = 0
