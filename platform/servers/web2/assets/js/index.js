@@ -401,19 +401,6 @@
             if (screen_name !== active) {
                 $map_window.data("active", screen_name);
                 
-                // TODO: temporary until all tastemakers have valid accounts
-                var screen_name_lower = screen_name.toLowerCase();
-                
-                if (screen_name_lower === "justinbieber") {
-                    screen_name = "robby"
-                } else if (screen_name_lower === "passionpit") {
-                    screen_name = "travis"
-                } else if (screen_name_lower === "nytimes") {
-                    screen_name = "edmuki"
-                } else if (screen_name_lower === "time") {
-                    screen_name = "bart"
-                }
-                
                 $map_window_url
                     .attr("href", "/" + screen_name + "/map")
                     .text("www.stamped.com/" + screen_name + "/map");
@@ -751,7 +738,7 @@
             init_main(true);
         }
         
-        map_window_switch_user("justinbieber");
+        map_window_switch_user("mariobatali");
     });
 })();
 

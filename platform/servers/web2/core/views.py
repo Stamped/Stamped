@@ -17,18 +17,51 @@ from servers.web2.core.helpers  import *
 
 @stamped_view(schema=HTTPIndexSchema)
 def index(request, schema, **kwargs):
+    '''
+    {
+        'screen_name'       : 'nytimes', 
+        'image_url'         : 'http://static.stamped.com/users/nytimes-60x60.jpg', 
+        'color_primary'     : '000A19', 
+        'color_secondary'   : 'CCE2FF', 
+    }, 
+    {
+        'screen_name'       : 'TIME', 
+        'image_url'         : 'http://static.stamped.com/users/time-60x60.jpg', 
+        'color_primary'     : 'D50000', 
+        'color_secondary'   : 'FF2F2F', 
+    }, 
+    {
+        'screen_name'       : 'passionpit', 
+        'image_url'         : 'http://static.stamped.com/users/passionpit-60x60.jpg', 
+        'color_primary'     : 'D25D82', 
+        'color_secondary'   : 'F9E9E9', 
+    }, 
+    {
+        'screen_name'       : 'justinbieber', 
+        'image_url'         : 'http://static.stamped.com/users/justinbieber-60x60.jpg', 
+        'color_primary'     : '84004B', 
+        'color_secondary'   : 'FF00EA', 
+    }, 
+    '''
+    
     tastemakers = [
         {
-            'screen_name'       : 'justinbieber', 
-            'image_url'         : 'http://static.stamped.com/users/justinbieber-60x60.jpg', 
-            'color_primary'     : '84004B', 
-            'color_secondary'   : 'FF00EA', 
+            'screen_name'       : 'mariobatali', 
+            'image_url'         : 'http://static.stamped.com/users/mariobatali-60x60.jpg', 
+            'color_primary'     : 'FF7E00', 
+            'color_secondary'   : 'FFEA00', 
         }, 
         {
-            'screen_name'       : 'nytimes', 
-            'image_url'         : 'http://static.stamped.com/users/nytimes-60x60.jpg', 
-            'color_primary'     : '000A19', 
-            'color_secondary'   : 'CCE2FF', 
+            'screen_name'       : 'rebeccaminkoff', 
+            'image_url'         : 'http://static.stamped.com/users/rebeccaminkoff-60x60.jpg', 
+            'color_primary'     : '04004F', 
+            'color_secondary'   : '46008C', 
+        }, 
+        {
+            'screen_name'       : 'nymag', 
+            'image_url'         : 'http://static.stamped.com/users/nymag-60x60.jpg', 
+            'color_primary'     : 'A7D9ED', 
+            'color_secondary'   : 'A7D9ED', 
         }, 
         {
             'screen_name'       : 'michaelkors', 
@@ -37,16 +70,10 @@ def index(request, schema, **kwargs):
             'color_secondary'   : 'FFEDCC', 
         }, 
         {
-            'screen_name'       : 'TIME', 
-            'image_url'         : 'http://static.stamped.com/users/time-60x60.jpg', 
-            'color_primary'     : 'D50000', 
-            'color_secondary'   : 'FF2F2F', 
-        }, 
-        {
-            'screen_name'       : 'passionpit', 
-            'image_url'         : 'http://static.stamped.com/users/passionpit-60x60.jpg', 
-            'color_primary'     : 'D25D82', 
-            'color_secondary'   : 'F9E9E9', 
+            'screen_name'       : 'parislemon', 
+            'image_url'         : 'http://static.stamped.com/users/parislemon-60x60.jpg', 
+            'color_primary'     : '0049FF', 
+            'color_secondary'   : 'F4FF00', 
         }, 
     ]
     
