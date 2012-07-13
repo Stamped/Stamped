@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -86,6 +87,7 @@ class RunEvalQueries(AStampedTestCase):
         'time machine',
         'twilight',
         'unbroken hellanbrend',
+        '彼岸花 安妮宝贝',
     ]
 
     @fixtureTest(useLocalDb=True)
@@ -133,6 +135,7 @@ class RunEvalQueries(AStampedTestCase):
         'incredibles',
         'it\'s always sunny in philadelphia',
         'jeeves and wooster',
+        'la belle et la bête',
         'lord of the rings',
         'misfits',
         'mission impossible ghost protocol',
@@ -220,6 +223,7 @@ class RunEvalQueries(AStampedTestCase):
         'born this way',
         'carly rae jepsen',
         'carrie underwood',
+        'con te partirò',
         'damn it feels good to be a gangsta',
         'david guetta',
         'deadmau5',
@@ -319,6 +323,7 @@ class RunEvalQueries(AStampedTestCase):
         ('enoxel', (-23.596847, -46.688728)),
         ('evo pizza', (37.781697, -122.392146)),
         ('faramita', (25.084350, 121.556224)),
+        ('momofuku ssäm bar', (40.6, -73.9)),
         ('galleria mall', (35.995347, -114.936936)),
         ('highline park', None),
         ('kyoto japanese sushi', (53.606024, -113.379279)),
