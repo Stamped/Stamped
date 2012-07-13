@@ -16,12 +16,20 @@ COMPARE_HEADER = """
                 cells[i].style.backgroundColor = color;
         }
 
+        function setVisibility(cellId, display) {
+            cells = document.getElementsByName(cellId + '_summary');
+            for (var i = 0; i < cells.length; i++)
+                cells[i].style.display = display;
+        }
+
         function highlightCell(cellId) {
             setColor(cellId, 'pink');
+            setVisibility(cellId, 'block');
         }
 
         function unhighlightCell(cellId) {
             setColor(cellId, 'white');
+            setVisibility(cellId, 'none');
         }
     </script>
   </head>
@@ -32,6 +40,7 @@ COMPARE_HEADER = """
 
 COMPARE_FOOTER = """
     </table>
+    %s
   </body>
 </html>
 """

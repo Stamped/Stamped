@@ -89,6 +89,30 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
                 'All queries', ''.join(htmlRowTpl % row for row in allTableRows))
 
 
+def getClusteringDifference(cellId, oldCluster, newCluster):
+    def makeProxyDict(cluster):
+        proxies = (result.resolverObject for result in cluster.results)
+        return {(proxy.source, proxy.key) : proxy for proxy in proxies}
+    oldProxies = makeProxyDict(oldCluster)
+    newProxies = makeProxyDict(newCluster)
+    dropped = oldProxies.viewkeys() - newProxies.viewkeys()
+    added = newProxies.viewkeys() - oldProxies.viewkeys()
+    summary = ''
+    if dropped:
+        summary += '<h3>Elements dropped from cluster</h3><ul>'
+        for source in dropped:
+            proxy = oldProxies[source]
+            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+        summary += '</ul>'
+    if added:
+        summary += '<h3>Elements added to cluster</h3><ul>'
+        for source in added:
+            proxy = newProxies[source]
+            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+        summary += '</ul>'
+    return '<div style="display:none" name="%s">%s</div>' % (cellId + '_summary', summary)
+
+
 def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold):
     diffScores = []
     for i, left in enumerate(oldResults):
@@ -111,6 +135,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
 
     linksLeft = []
     linksRightIndexed = {}
+    clusteringChanges = []
     for i, entity in enumerate(oldResults):
         if i in movements:
             diffFileName = '%s-c%d.html' % (filenameBase, i)
@@ -122,6 +147,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             anchorTextTpl = '%s<a href="%s">%%s</a></td>' % (makeHighlightingTableCell(cellId), diffFileName)
             linksLeft.append(anchorTextTpl % extractLinkText(entity))
             linksRightIndexed[destination] = anchorTextTpl % extractLinkText(newEntity)
+            clusteringChanges.append(getClusteringDifference(cellId, entity[2], newEntity[2]))
         else:
             linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i), 'l%d' % i))
 
@@ -135,7 +161,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]
     for links in itertools.izip_longest(linksLeft, linksRight, fillvalue='<td></td>'):
         fileContent.append('<tr>%s%s</tr>' % links)
-    fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER)
+    fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER % '\n'.join(clusteringChanges))
 
     with open(path.join(outputDir, filenameBase) + '.html', 'w') as fout:
         for line in fileContent:
@@ -186,7 +212,7 @@ def ensureDirectory(pathName):
 
 def main():
     parser = optparse.OptionParser()
-    parser.add_option('-t', dest='diffThreshold', type='int', default=3)
+    parser.add_option('-t', dest='diffThreshold', type='int', default=5)
     options, args = parser.parse_args()
 
     if len(args) != 3:
