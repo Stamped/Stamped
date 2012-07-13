@@ -835,8 +835,8 @@ static const CGFloat _maxPhotoButtonOffset = 135;
 
 + (void)setupConfigurations {
     [STConfiguration addFont:[UIFont stampedTitleFontWithSize:26] forKey:_titleFontKey];
-    [STConfiguration addFont:[UIFont stampedFontWithSize:11] forKey:_subtitleFontKey];
-    [STConfiguration addFont:[UIFont stampedBoldFontWithSize:11] forKey:_addButtonFontKey];
+    [STConfiguration addFont:[UIFont stampedFontWithSize:12] forKey:_subtitleFontKey];
+    [STConfiguration addFont:[UIFont stampedBoldFontWithSize:12] forKey:_addButtonFontKey];
     [STConfiguration addFont:[UIFont stampedFontWithSize:14] forKey:_blurbFontKey];
 }
 

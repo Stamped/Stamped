@@ -10,6 +10,7 @@
 #import "STBlockUIView.h"
 #import "QuartzUtils.h"
 #import "STUnreadActivity.h"
+#import "UIFont+Stamped.h"
 
 @implementation LeftMenuTableCell
 
@@ -18,17 +19,17 @@
 @synthesize icon=_icon;
 @synthesize border=_border;
 @synthesize delegate;
-
+@synthesize whiteIcon = _whiteIcon;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {
         
-        UIFont *font = [UIFont boldSystemFontOfSize:15];
+        UIFont *font = [UIFont stampedFontWithSize:12];
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(48.0f, floorf((self.bounds.size.height - font.lineHeight)/2), 0.0f, font.lineHeight)];
         label.backgroundColor = [UIColor clearColor];
         label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         label.font = font;
-        label.textColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.6f];
+        label.textColor = [UIColor whiteColor];
         label.shadowOffset = CGSizeMake(0.0f, -1.0f);
         label.highlightedTextColor = [UIColor whiteColor];
         label.shadowColor = [UIColor colorWithWhite:0.0 alpha:0.3];
@@ -41,7 +42,7 @@
         view.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         [self addSubview:view];
         [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
-           
+            
             if (_icon) {
                 
                 // flip context
@@ -49,25 +50,34 @@
                 CGContextScaleCTM(ctx, 1.0, -1.0);
                 
                 CGRect fillRect = CGRectMake(ceilf(rect.origin.x + ((rect.size.width-_icon.size.width)/2)), ceilf(rect.origin.y + ((rect.size.height-_icon.size.height)/2)), _icon.size.width, _icon.size.height);
-
-                // draw shadow
+                
+                
                 CGContextSaveGState(ctx);
                 CGContextSetFillColorWithColor(ctx, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.2f].CGColor);
                 CGContextTranslateCTM(ctx, 0, 1.0f);
                 CGContextClipToMask(ctx, fillRect, _icon.CGImage);
                 CGContextFillRect(ctx, fillRect);
                 CGContextRestoreGState(ctx);
-                 
-                if (self.highlighted || self.selected) {
-                    [[UIColor whiteColor] setFill];
+                // draw shadow
+                BOOL selected = self.highlighted || self.selected;
+                if (selected) {
+                    
+                    if (self.whiteIcon) {
+                        
+                        CGContextDrawImage(ctx, fillRect, self.whiteIcon.CGImage);
+                    }
+                    else {
+                        [[UIColor whiteColor] setFill];
+                        CGContextClipToMask(ctx, fillRect, _icon.CGImage);
+                        CGContextClearRect(ctx, fillRect);
+                        CGContextFillRect(ctx, fillRect);
+                    }
                 } else {
-                    [[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.2f] setFill];
+                    CGContextDrawImage(ctx, fillRect, _icon.CGImage);
+                    //                    [[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.2f] setFill];
                 }
                 
                 // draw icon
-                CGContextClipToMask(ctx, fillRect, _icon.CGImage);
-                CGContextClearRect(ctx, fillRect);
-                CGContextFillRect(ctx, fillRect);
                 
             }
             
@@ -79,6 +89,7 @@
 }
 
 - (void)dealloc {
+    [_whiteIcon release];
     [_icon release], _icon=nil;
     [_titleLabel release], _titleLabel=nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -105,7 +116,7 @@
 
 - (void)showHighlightedView:(BOOL)show {
     if (self.selectionStyle != UITableViewCellSelectionStyleNone) return;
-
+    
     if (show) {
         if (!_highlightedView) {
             
@@ -133,12 +144,12 @@
     
     self.titleLabel.highlighted = show;
     self.layer.zPosition = show ? 10 : 0;
-   // [self.layer setValue:[NSNumber numberWithFloat:show ? -2.0f : 0.0f] forKeyPath:@"sublayerTransform.translation.y"];
+    // [self.layer setValue:[NSNumber numberWithFloat:show ? -2.0f : 0.0f] forKeyPath:@"sublayerTransform.translation.y"];
     
-    if ([(id)delegate respondsToSelector:@selector(leftMenuTableCellHighlighted:)]) {
-        [self.delegate leftMenuTableCellHighlighted:self];
+    if ([(id)delegate respondsToSelector:@selector(leftMenuTableCellHighlighted:highlighted:)]) {
+        [self.delegate leftMenuTableCellHighlighted:self highlighted:self.highlighted];
     }
-
+    
     if (show) {
         if (!_selectedView) {
             
@@ -147,6 +158,7 @@
             
             CGRect frame = imageView.frame;
             frame.origin.y = - 5.0f;
+            frame.size.height += 5;
             frame.size.width = self.bounds.size.width;
             [self insertSubview:imageView belowSubview:self.titleLabel];
             imageView.frame = frame;
@@ -198,19 +210,19 @@
                 CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:self.bounds.size.height/2].CGPath);
                 
                 if ([self isHighlighted] || [self isSelected]) {
-
+                    
                     [[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f] setFill];
                     CGContextFillPath(ctx);                    
                     CGContextSetBlendMode(ctx, kCGBlendModeClear);
-
+                    
                 } else {
                     
                     CGContextSetShadowWithColor(ctx, CGSizeMake(0.0f, 1.0f), 0.0f, [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.1f].CGColor);
-                    [[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.4f] setFill];
+                    [[UIColor colorWithRed:190./255. green:68./255. blue:35./255. alpha:1] setFill];
                     CGContextFillPath(ctx);
                     
                     CGContextSetShadowWithColor(ctx, CGSizeMake(0.0f, 1.0f), 0.0f, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.4f].CGColor);
-                    [[UIColor colorWithRed:0.765f green:0.765f blue:0.765f alpha:1.0f] setFill];
+                    [[UIColor whiteColor] setFill];
                     
                 }
                 
@@ -232,7 +244,7 @@
         frame.origin.y = floorf(((self.bounds.size.height-frame.size.height)/2) + 2.0f);
         _badgeView.frame = frame;
         [_badgeView setNeedsDisplay];
-
+        
     } else {
         
         if (_badgeView) {

@@ -32,6 +32,7 @@
 
 - (void)defaultHandler:(id)myself {
   if (self.block) {
+      self.on = NO;
     self.block();
   }
 }

@@ -172,7 +172,13 @@
     self.tableView=nil;
     [super viewDidUnload];
 }
-
+//
+//- (void)viewDidAppear:(BOOL)animated {
+//    [super viewDidAppear:animated];
+//    if (self.signupType ==SignupWelcomeTypeFacebook) {
+//        [[STFacebook sharedInstance] showFacebookAlert];
+//    }
+//}
 
 #pragma mark - Setters
 
@@ -231,8 +237,15 @@
         [STStampedAPI sharedInstance].currentUserImage = self.avatarImage;
     }
     FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
+    controller.navigationItem.hidesBackButton = YES;
     [self.navigationController pushViewController:controller animated:YES];
     [controller release];
+    SignupWelcomeType signupType = self.signupType;
+    [Util executeWithDelay:1 onMainThread:^{
+        if ([Util topController] == controller && signupType == SignupWelcomeTypeFacebook) {
+            [[STFacebook sharedInstance] showFacebookAlert];
+        }
+    }];
         
 }
 

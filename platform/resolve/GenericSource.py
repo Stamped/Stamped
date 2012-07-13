@@ -452,8 +452,11 @@ class GenericSource(BasicSource):
             try:
                 if proxy is None:
                     proxy = self.entityProxyFromKey(source_id, entity=entity)
+                    proxy.name
                 self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
             except Exception as e:
+                # This is a bad ID and we need to clear it.
+                delattr(entity.sources, self.idField)
                 report()
 
         # Haaaaaaaack.

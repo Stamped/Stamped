@@ -75,7 +75,7 @@
                                                           0, 0)];
         [view addSubview:titleView];
         
-        UIFont* subtitleFont = [UIFont stampedFontWithSize:11];
+        UIFont* subtitleFont = [UIFont stampedFontWithSize:12];
         UIView* subtitleView = [Util viewWithText:self.entity.subtitle
                                              font:subtitleFont
                                             color:subtitleColor

@@ -19,6 +19,6 @@
 @end
 @protocol CreateFooterViewDelegate
 - (void)createFooterView:(CreateFooterView*)view twitterSelected:(UIButton*)button;
-- (void)createFooterView:(CreateFooterView*)view facebookSelected:(UIButton*)button;
+//- (void)createFooterView:(CreateFooterView*)view facebookSelected:(UIButton*)button;
 - (void)createFooterView:(CreateFooterView*)view stampIt:(UIButton*)button;
 @end

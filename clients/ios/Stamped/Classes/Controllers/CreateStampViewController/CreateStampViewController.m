@@ -22,6 +22,8 @@
 #import "QuartzUtils.h"
 #import "STRootViewController.h"
 #import "UIImageHelper.h"
+#import "STTwitter.h"
+#import "STDebug.h"
 
 #define kEditContainerViewTag 101
 #define kRemovePhotoActionSheetTag 201
@@ -38,6 +40,8 @@
 @property(nonatomic,retain) UIButton *todoStampButton;
 @property(nonatomic,assign) BOOL waiting;
 @property(nonatomic, readwrite, retain) UITableViewCell* tableViewCell;
+@property (nonatomic, readwrite, assign) BOOL shareToTwitter;
+
 @end
 
 @implementation CreateStampViewController
@@ -53,6 +57,7 @@
 @synthesize todoStampButton;
 @synthesize waiting;
 @synthesize tableViewCell = _tableViewCell;
+@synthesize shareToTwitter = _shareToTwitter;
 
 - (void)commonInit {
     
@@ -108,16 +113,16 @@
     }];
     self.tableView.backgroundView = background;
     [background release];
-
+    
     /*
-    if (!self.navigationItem.rightBarButtonItem) {
-        STStampSwitch *control = [[STStampSwitch alloc] initWithFrame:CGRectZero];
-        [control addTarget:self action:@selector(switchToggled:) forControlEvents:UIControlEventValueChanged];
-        UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:control];
-        [control release];
-        self.navigationItem.rightBarButtonItem = item;
-        [item release];
-    }
+     if (!self.navigationItem.rightBarButtonItem) {
+     STStampSwitch *control = [[STStampSwitch alloc] initWithFrame:CGRectZero];
+     [control addTarget:self action:@selector(switchToggled:) forControlEvents:UIControlEventValueChanged];
+     UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithCustomView:control];
+     [control release];
+     self.navigationItem.rightBarButtonItem = item;
+     [item release];
+     }
      */
     if ([[self.navigationController viewControllers] count] == 1) {
         STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
@@ -161,7 +166,28 @@
     [[STStampedAPI sharedInstance] createStampWithStampNew:stampNew andCallback:^(id<STStamp> stamp, NSError *error, STCancellation* cancellation) {
         
         if (stamp) {
-            
+            if (self.shareToTwitter) {
+                NSString* suffix = @"";
+                BOOL hasBlurb = stampNew.blurb.length > 0;
+                BOOL hasPhoto = stampNew.tempImageURL.length > 0;
+                if (hasBlurb && hasPhoto) {
+                    suffix = @"w/ comment & pic";
+                }
+                else if (hasBlurb) {
+                    suffix = @"w/ comment";
+                }
+                else if (hasPhoto) {
+                    suffix = @"w/ pic";
+                }
+                if([[STTwitter sharedInstance] isSessionValid]) {
+                    [[STTwitter sharedInstance] sendTweet:[NSString stringWithFormat:@"I just stamped \"%@\"", stamp.entity.title, suffix]
+                                             withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                                                 if (error) {
+                                                     [STDebug log:[NSString stringWithFormat:@"Share tweet failed:%@", error]];
+                                                 }
+                                             }];
+                }
+            }
             PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
             controller.navigationItem.hidesBackButton = YES;
             [self.navigationController pushViewController:controller animated:YES];
@@ -208,7 +234,7 @@
         __block UIView *view = controller.view;
         [self.view addSubview:view];
         [controller.toolbar setHidden:YES];
-
+        
         CGRect frame = self.view.bounds;
         frame.origin.y = self.view.bounds.size.height;
         view.frame = frame;
@@ -230,13 +256,13 @@
         self.todoStampButton = button;
         
         [UIView animateWithDuration:0.3f animations:^{
-        
+            
             view.frame = frame;
             
         } completion:^(BOOL finished) {
             sender.userInteractionEnabled = YES;
         }];
-
+        
         
     } else {
         
@@ -245,7 +271,7 @@
             __block UIView *view = self.todoViewController.view;
             CGRect frame = self.view.bounds;
             frame.origin.y = self.view.bounds.size.height;
-
+            
             [UIView animateWithDuration:0.3f animations:^{
                 
                 view.frame = frame;
@@ -254,11 +280,11 @@
                 
                 [self.todoStampButton removeFromSuperview];
                 self.todoStampButton = nil;
-
+                
                 [view removeFromSuperview];
                 self.todoViewController = nil;
                 sender.userInteractionEnabled = YES;
-
+                
             }];
         }
         
@@ -302,11 +328,11 @@
 #pragma mark - Setters
 
 - (void)setCreditUsers:(NSArray *)creditUsers {
-        
+    
     [_creditUsers release], _creditUsers=nil;
     _creditUsers = [creditUsers retain];
     [self.editView setupWithCreditUsernames:[self creditUsernames]];
-
+    
 }
 
 
@@ -331,7 +357,7 @@
     
     self.creditUsers = users;
     [self dismissModalViewControllerAnimated:YES];
-
+    
 }
 
 - (void)creditPickerViewControllerCancelled:(CreditPickerViewController*)controller {
@@ -343,7 +369,10 @@
 
 - (void)createFooterView:(CreateFooterView*)view twitterSelected:(UIButton*)button {
     button.selected = !button.selected;
-    [Util warnWithMessage:@"Sharing is disabled" andBlock:nil];
+    self.shareToTwitter = button.selected;
+    if (![[STTwitter sharedInstance] isSessionValid]) {
+        [[STTwitter sharedInstance] auth];
+    }
 }
 
 - (void)createFooterView:(CreateFooterView*)view facebookSelected:(UIButton*)button {
@@ -376,14 +405,14 @@
         [self postStamp];
         
     }
-
+    
 }
 
 
 #pragma mark - CreateEditViewDelegate
 
 - (void)createEditViewImageTapped:(CreateEditView*)view {
-
+    
     self.navigationController.toolbar.barStyle = UIBarStyleBlackOpaque;
     UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Remove photo" otherButtonTitles:nil];
     actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
@@ -397,7 +426,7 @@
     
     CreditPickerViewController *controller = [[CreditPickerViewController alloc] initWithEntityIdentifier:(self.entity==nil) ? self.searchResult.searchID : self.entity.entityID selectedUsers:self.creditUsers];
     controller.delegate = (id<CreditPickerViewControllerDelegate>)self;
-
+    
     STRootViewController *navContorller = [[STRootViewController alloc] initWithRootViewController:controller];
     [self presentModalViewController:navContorller animated:YES];
     [controller release];
@@ -431,7 +460,7 @@
     }
     
     return [self.tableView viewWithTag:kEditContainerViewTag];
-   
+    
 }
 
 
@@ -450,7 +479,7 @@
     } else {
         
         [self dismissModalViewControllerAnimated:YES];
-
+        
     }
     
 }
@@ -483,7 +512,7 @@
         }
         self.tableViewCell = cell;
     }
-
+    
     
     return self.tableViewCell;
     
@@ -496,12 +525,12 @@
     
     [picker dismissModalViewControllerAnimated:YES];
     [self.imageUploader cancel];
-           
+    
     if ([info objectForKey:UIImagePickerControllerOriginalImage]) {
         
         UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
         image = [image aspectScaleToSize:CGSizeMake(960.0f, 960.0f)];
-
+        
         NSString *path = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 		path = [[path stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"UploadTemp"];
         [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil];
@@ -509,7 +538,7 @@
         [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
         [UIImageJPEGRepresentation(image, 0.85) writeToFile:path atomically:NO];
         self.imageUploader.filePath = path;
-              
+        
         self.editView.imageView.image = image;
         [self.editView.imageView setUploading:YES];
         [self.editView updateState];
@@ -519,7 +548,7 @@
         [self.imageUploader startWithProgress:^(float progress) {
             
         } completion:^(NSString *path, BOOL finished) {
-                        
+            
             //[self.footerView setUploading:NO animated:YES];
             self.tempImagePath = path;
             [self.editView.imageView setUploading:NO];
@@ -527,7 +556,7 @@
             if (self.waiting) {
                 [self postStamp];
             }
-
+            
         }];
         
     }
@@ -547,7 +576,7 @@
         self.tableView.tableFooterView = self.footerView;
         [self.tableView reloadData];
     }
-
+    
 }
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController*)controller {

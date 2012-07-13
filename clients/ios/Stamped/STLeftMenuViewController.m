@@ -35,6 +35,7 @@
 #import "STEvents.h"
 #import "UIFont+Stamped.h"
 #import "STAppDelegate.h"
+#import "LeftMenuLargeCell.h"
 
 #define kAvatarViewTag 101
 
@@ -47,7 +48,7 @@ static NSString* const _debugNameKey = @"Root.debugName";
 static NSString* const _todoNameKey = @"Root.todoName";
 static NSString* const _settingsNameKey = @"Root.settingsName";
 
-@interface STLeftMenuViewController ()
+@interface STLeftMenuViewController () <UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, readonly, retain) UITableView *tableView;
 @property (nonatomic, readonly, retain) UIView* titleView;
@@ -57,6 +58,11 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 @property (nonatomic, readwrite, retain) NSArray* dataSource;
 @property (nonatomic, readwrite, retain) NSDictionary* controllerStore;
 @property (nonatomic, readwrite, retain) NSIndexPath* selectedIndexPath;
+@property (nonatomic, readwrite, retain) NSNumber* loggedIn;
+
+@end
+
+@interface STLeftMenuTopCell : UITableViewCell
 
 @end
 
@@ -70,6 +76,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 @synthesize dataSource = _dataSource;
 @synthesize controllerStore = _controllerStore;
 @synthesize selectedIndexPath = _selectedIndexPath;
+@synthesize loggedIn = _loggedIn;
 
 - (id)init {
     if ((self = [super init])) {
@@ -87,12 +94,12 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [_dataSource release];
     [_controllerStore release];
     [_titleView release];
+    [_loggedIn release];
     [super dealloc];
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     
     UITableView *tableView = [[[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain] autorelease];
     tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -108,13 +115,13 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     tableView.backgroundView = imageView;
     
     imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"left_logo.png"]] autorelease];
-    UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 50.0f)] autorelease];
+    UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 75.0f)] autorelease];
     [view addSubview:imageView];
     self.tableView.tableHeaderView = view;
     _titleView = imageView;
     
     _playerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 100)];
-    _playerTitleView = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 180, 50)];
+    _playerTitleView = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 180, 70)];
     _playerTitleView.backgroundColor = [UIColor clearColor];
     _playerTitleView.textColor = [UIColor whiteColor];
     _playerTitleView.font = [UIFont stampedBoldFontWithSize:16];
@@ -199,19 +206,19 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
             return @"left_menu_icon_stamps.png";
             break;
         case 1:
-            return @"left_menu_icon_iwantto.png";
+            return @"left_menu_icon_guide";
             break;
         case 2:
-            return @"left_menu_icon_news.png";
+            return @"left_menu_icon-activity";
             break;
         case 3:
-            return @"left_menu_icon_friends.png";
+            return @"left_menu_icon-todo";
             break;
         case 4:
-            return @"left_menu_icon_stamps.png";
+            return @"left_menu_icon_addfriends";
             break;
         case 5:
-            return @"left_menu_icon_to-do.png";
+            return @"left_unused";
             break;
         case 6:
             return @"left_menu_icon_settings.png";
@@ -230,64 +237,122 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     return self.dataSource.count;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row < 2) {
+        return 72;
+    }
+    return 48.0f;
+}
+
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    static NSString *CellIdentifier = @"CellIdentifier";
-    
-    LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-    if (cell == nil) {
-        cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
-        cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.delegate = (id<LeftMenuTableCellDelegate>)self;
-    }
-    
-    [STEvents removeObserver:cell];
-    cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
-    cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
-    [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
-    
-    if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
-        [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
-        [cell countUpdated:nil];
-    } 
-    
-    if ([indexPath isEqual:_selectedIndexPath]) {
-        cell.selected = YES;
-    }
-    
-    if (indexPath.row == 4 && LOGGED_IN) {
+    if (indexPath.row < 2) {
         
-        // user row
-        id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
-        cell.titleLabel.text = [user name];
+        static NSString *CellIdentifier = @"CellIdentifier2";
         
-        if (![cell viewWithTag:kAvatarViewTag]) {
-            
-            cell.icon = nil;
-            
-            STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(12.0f, (cell.bounds.size.height-24.0f)/2, 24.0f, 24.0f)];
-            view.userInteractionEnabled = NO;
-            view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-            [cell addSubview:view];
-            view.imageURL = [NSURL URLWithString:[user imageURL]];
-            
-            view.backgroundView.layer.shadowOffset = CGSizeMake(0.0f, -1.0f);
-            view.backgroundView.layer.shadowRadius = 0.0f;
-            view.backgroundView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
-            
-            [view release];
+        LeftMenuLargeCell *cell = (LeftMenuLargeCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        if (cell == nil) {
+            cell = [[[LeftMenuLargeCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.delegate = (id<LeftMenuTableCellDelegate>)self;
         }
         
-    } else {
+        [STEvents removeObserver:cell];
+        cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
+        cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
+        if (indexPath.row == 0) {
+            NSString* c1 = @"004ab3";
+            NSString* c2 = @"0055cc";
+//            if (LOGGED_IN) {
+//                c1 = [STStampedAPI sharedInstance].currentUser.primaryColor;
+//                c2 = [STStampedAPI sharedInstance].currentUser.secondaryColor;
+//                if (!c2) {
+//                    c2 = c1;
+//                }
+//            }
+            cell.icon = [Util gradientImage:cell.icon withPrimaryColor:c1 secondary:c2];
+        }
+        [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
         
-        if ([cell viewWithTag:kAvatarViewTag]) {
-            [[cell viewWithTag:kAvatarViewTag] removeFromSuperview];
+        if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
+            [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
+            [cell countUpdated:nil];
+        } 
+        
+        if ([indexPath isEqual:_selectedIndexPath]) {
+            cell.selected = YES;
         }
         
+            
+            if ([cell viewWithTag:kAvatarViewTag]) {
+                [[cell viewWithTag:kAvatarViewTag] removeFromSuperview];
+            }
+            
+        return cell;
     }
-    
-    return cell;
-    
+    else {
+        static NSString *CellIdentifier = @"CellIdentifier";
+        
+        LeftMenuTableCell *cell = (LeftMenuTableCell*)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+        if (cell == nil) {
+            cell = [[[LeftMenuTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+            cell.selectionStyle = UITableViewCellSelectionStyleNone;
+            cell.delegate = (id<LeftMenuTableCellDelegate>)self;
+        }
+        
+        [STEvents removeObserver:cell];
+        cell.titleLabel.text = [STConfiguration value:[_dataSource objectAtIndex:indexPath.row]];
+        cell.icon = [UIImage imageNamed:[self iconTitleForTableView:tableView atIndex:indexPath.row]];
+        [cell setTop:(indexPath.row!=0) bottom:(indexPath.row<[_dataSource count]-1)];
+        
+        if ([cell.titleLabel.text isEqualToString:[STConfiguration value:_newsNameKey]]) {
+            [STEvents addObserver:cell selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
+            [cell countUpdated:nil];
+        } 
+        
+        if ([indexPath isEqual:_selectedIndexPath]) {
+            cell.selected = YES;
+        }
+        cell.whiteIcon = nil;
+        if (indexPath.row == 2) {
+            cell.whiteIcon = [UIImage imageNamed:@"left_menu_icon-activity_white"];
+        }
+        else if (indexPath.row == 3) {
+            cell.whiteIcon = [UIImage imageNamed:@"left_menu_icon-todo_white"];
+        }
+        
+        if (indexPath.row == 5 && LOGGED_IN) {
+            
+            // user row
+            id<STUser> user = [[STStampedAPI sharedInstance] currentUser];
+            cell.titleLabel.text = [user name];
+            
+            if (![cell viewWithTag:kAvatarViewTag]) {
+                
+                cell.icon = nil;
+                
+                STAvatarView *view = [[STAvatarView alloc] initWithFrame:CGRectMake(12.0f, (cell.bounds.size.height-24.0f)/2, 24.0f, 24.0f)];
+                view.userInteractionEnabled = NO;
+                view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+                [cell addSubview:view];
+                view.imageURL = [NSURL URLWithString:[user imageURL]];
+                
+                view.backgroundView.layer.shadowOffset = CGSizeMake(0.0f, -1.0f);
+                view.backgroundView.layer.shadowRadius = 0.0f;
+                view.backgroundView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
+                
+                [view release];
+            }
+            
+        } else {
+            
+            if ([cell viewWithTag:kAvatarViewTag]) {
+                [[cell viewWithTag:kAvatarViewTag] removeFromSuperview];
+            }
+            
+        }
+        
+        return cell;
+    }
 }
 
 
@@ -349,14 +414,14 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 #pragma mark - LeftMenuTableCellDelegate
 
-- (void)leftMenuTableCellHighlighted:(LeftMenuTableCell*)cell {
+- (void)leftMenuTableCellHighlighted:(UITableViewCell*)cell highlighted:(BOOL)highlighted {
     
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
     
     if (_selectedIndexPath) {
         if (![indexPath isEqual:_selectedIndexPath]) {
             UITableViewCell *selectedCell = [self.tableView cellForRowAtIndexPath:_selectedIndexPath];
-            [selectedCell setSelected:!cell.highlighted];
+            [selectedCell setSelected:!highlighted];
         }
     }
     
@@ -390,8 +455,17 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [self.tableView reloadData];
 }
 
+
+- (void)reloadDataSource {
+    [self loginStatusChanged:nil];
+}
+
 - (void)loginStatusChanged:(id)notImportant {
     
+    BOOL currentStatus = LOGGED_IN;
+    if (self.loggedIn && self.loggedIn.boolValue == currentStatus) return;
+    self.loggedIn = [NSNumber numberWithBool:currentStatus];
+    NSIndexPath* selection = self.tableView.indexPathForSelectedRow;
     [_dataSource release];
     [_controllerStore release];
     if (LOGGED_IN) {
@@ -403,17 +477,15 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
                                     @"Root.user", _userNameKey,
                                     @"Root.todo", _todoNameKey,
                                     @"Root.settings", _settingsNameKey,
-                                    @"Root.debug", _debugNameKey,
                                     nil];
         _dataSource = [[NSArray arrayWithObjects:
                         _inboxNameKey,
                         _iWantToNameKey,
                         _newsNameKey,
+                        _todoNameKey,
                         _addFriendsNameKey,
                         _userNameKey,
-                        _todoNameKey,
                         _settingsNameKey,
-                        _debugNameKey,
                         nil] retain];
         _controllerStore = [navigators retain];
         
@@ -428,6 +500,12 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         _controllerStore = [navigators retain];
     }
     [self.tableView reloadData];
+    if (selection) {
+        NSInteger rows = [self tableView:self.tableView numberOfRowsInSection:0];
+        if (selection && selection.row < rows) {
+            [self.tableView selectRowAtIndexPath:selection animated:NO scrollPosition:UITableViewScrollPositionNone];
+        }
+    }
 }
 
 

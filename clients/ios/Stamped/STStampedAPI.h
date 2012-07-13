@@ -56,6 +56,9 @@ extern NSString* const STStampedAPILogoutNotification;
 extern NSString* const STStampedAPIRefreshedTokenNotification;
 extern NSString* const STStampedAPIUserUpdatedNotification;
 extern NSString* const STStampedAPILocalStampModificationNotification;
+extern NSString* const STStampedAPILocalTodoModificationNotification;
+extern NSString* const STStampedAPIFollowNotification;
+extern NSString* const STStampedAPIUnfollowNotification;
 
 @interface STStampedAPI : NSObject <STCacheAccelerator>
 
@@ -141,6 +144,9 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (void)userDetailForUserID:(NSString*)userID andCallback:(void(^)(id<STUserDetail> userDetail, NSError* error))block;
 
+- (STCancellation*)userDetailForScreenName:(NSString*)screenName 
+                               andCallback:(void (^)(id<STUserDetail> userDetail, NSError* error, STCancellation* cancellation))block;
+
 - (STCancellation*)userDetailsForUserIDs:(NSArray*)userIDs 
                              andCallback:(void(^)(NSArray<STUserDetail>* userDetails, NSError* error, STCancellation* cancellation))block;
 
@@ -180,6 +186,11 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)todosWithGenericCollectionSlice:(STGenericCollectionSlice*)slice 
                                        andCallback:(void(^)(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)todosWithDate:(NSDate*)date 
+                           limit:(NSInteger)limit 
+                          offset:(NSInteger)offset
+                     andCallback:(void(^)(NSArray<STTodo>* todos, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)stampsWithScope:(STStampedAPIScope)scope
                               date:(NSDate*)date 
@@ -295,6 +306,12 @@ extern NSString* const STStampedAPILocalStampModificationNotification;
 
 - (STCancellation*)usersWithPhoneNumbers:(NSArray*)phoneNumbers 
                              andCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)deleteAccountWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)usersFromFacebookWithCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)usersFromTwitterWithCallback:(void (^)(NSArray<STUserDetail>* users, NSError* error, STCancellation* cancellation))block;
 
 + (void)logError:(NSString*)message;
 

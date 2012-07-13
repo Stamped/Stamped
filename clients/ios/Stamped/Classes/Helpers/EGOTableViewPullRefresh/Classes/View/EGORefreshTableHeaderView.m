@@ -47,7 +47,7 @@
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tableInset = UIEdgeInsetsZero;
 
-        UIImage *image = [UIImage imageNamed:@"shelf_background.png"];
+        UIImage *image = [UIImage imageNamed:@"DEVIN_shelf_background.png"];
         UIImageView *imageView = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
         imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self addSubview:imageView];
@@ -212,7 +212,7 @@
     _showingSearch=showingSearch;
     
     
-    UIImage *image = [UIImage imageNamed:_showingSearch ? @"shelf_search_bg.png" : @"shelf_background.png"];
+    UIImage *image = [UIImage imageNamed:_showingSearch ? @"shelf_search_bg.png" : @"DEVIN_shelf_background.png"];
     _shelftView.image = [image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0];
     
     CGRect frame = _shelftView.frame;

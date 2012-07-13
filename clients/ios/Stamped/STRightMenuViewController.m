@@ -56,7 +56,7 @@
     
     if (!_scrollView) {
         
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"menu_background"]];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"menu_background2"]];
         [self.view addSubview:imageView];
         imageView.layer.doubleSided = NO;
         imageView.layer.transform = CATransform3DMakeScale(-1.0f, 1.0f, 1.0f);

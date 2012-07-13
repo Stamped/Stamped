@@ -116,7 +116,7 @@
                     cell.action = action.type;
                     cell.source = source;
                     UIView* text = [Util viewWithText:source.name
-                                                 font:[UIFont stampedBoldFontWithSize:14] 
+                                                 font:[UIFont stampedBoldFontWithSize:12] 
                                                 color:[UIColor stampedDarkGrayColor]
                                                  mode:UILineBreakModeClip
                                            andMaxSize:CGSizeMake(width, cellHeight)];

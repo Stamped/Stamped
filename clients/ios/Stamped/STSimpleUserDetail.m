@@ -129,6 +129,7 @@
      @"website",
      @"location",
      @"identifier",
+     @"following",
      nil];
     
     [mapping mapRelationship:@"distribution" withMapping:[STSimpleDistributionItem mapping]];

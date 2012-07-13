@@ -22,6 +22,7 @@
 
 
 @property(nonatomic,retain) UIImage *icon;
+@property (nonatomic, readwrite, retain) UIImage* whiteIcon;
 @property(nonatomic,retain) UILabel *titleLabel;
 @property(nonatomic,assign) NSInteger badgeCount;
 @property(nonatomic,assign) BOOL border;
@@ -32,5 +33,5 @@
 
 @end
 @protocol LeftMenuTableCellDelegate
-- (void)leftMenuTableCellHighlighted:(LeftMenuTableCell*)cell;
+- (void)leftMenuTableCellHighlighted:(UITableViewCell*)cell highlighted:(BOOL)highlighted;
 @end

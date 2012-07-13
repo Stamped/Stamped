@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <Accounts/Accounts.h>
 #import <Twitter/Twitter.h>
+#import "STCancellation.h"
 
 typedef void(^STTwitterAccessHandler)(BOOL granted);
 typedef void(^TwitterRequestHandler)(id, NSError*);
@@ -47,5 +48,7 @@ typedef void(^TwitterRequestHandler)(id, NSError*);
 - (NSString*)twitterTokenSecret;
 - (BOOL)isSessionValid;
 - (void)getTwitterUser:(TwitterRequestHandler)handler;
+
+- (STCancellation*)sendTweet:(NSString*)tweet withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 @end

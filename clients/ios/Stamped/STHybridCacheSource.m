@@ -185,9 +185,7 @@
                 NSLog(@"%@",dirError);
             }
         }
-        
         BOOL success = [NSKeyedArchiver archiveRootObject:object toFile:fullPath];
-        //NSLog(@"Archived %@ at %@ , %d", object, fullPath, success);
         if (success) {
             [manager setAttributes:[NSDictionary dictionaryWithObjectsAndKeys:
                                     [NSDate date], NSFileModificationDate,

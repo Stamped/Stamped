@@ -54,7 +54,6 @@
                                                               limit:minimumSize 
                                                              offset:0
                                                         andCallback:^(NSArray<STStamp> *stamps, NSError *error, STCancellation *cancellation) {
-                                                            NSLog(@"stamps:%d", stamps.count);
                                                             if (stamps) {
                                                                 STCachePage* page = [[[STCachePage alloc] initWithObjects:stamps start:date end:nil created:nil andNext:nil] autorelease];
                                                                 block(page, nil, cancellation);

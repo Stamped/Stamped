@@ -117,7 +117,7 @@
         labelFrame.origin.y = 0;
         
         CGFloat labelX = 44;
-        UIFont* labelFont = [UIFont stampedBoldFontWithSize:11];
+        UIFont* labelFont = [UIFont stampedBoldFontWithSize:12];
         
         UIView* label = [Util viewWithText:action.name
                                       font:labelFont

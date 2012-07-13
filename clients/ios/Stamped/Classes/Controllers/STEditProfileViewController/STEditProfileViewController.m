@@ -28,7 +28,7 @@
 #define kDeleteActionSheetTag 101
 #define kCaptureActionSheetTag 201
 
-@interface STEditProfileViewController ()
+@interface STEditProfileViewController () <UITextFieldDelegate>
 
 @property (nonatomic, retain) STS3Uploader *avatarUploader;
 @property (nonatomic, readwrite, retain) STAccountParameters* data;
@@ -36,6 +36,7 @@
 @property (nonatomic, readonly, retain) NSDictionary* namesForKeyPaths;
 @property (nonatomic, readwrite, retain) id<STAccount> account;
 @property (nonatomic, readwrite, retain) UIImage* image;
+@property (nonatomic, readwrite, retain) UITextField* currentTextField;
 
 - (NSString*)titleForKeyPath:(NSString*)keyPath;
 - (NSInteger)totalIndexForKeyPath:(NSString*)keyPath;
@@ -53,6 +54,7 @@
 @synthesize avatarUploader = _avatarUploader;
 @synthesize namesForKeyPaths = _namesForKeyPaths;
 @synthesize image = _image;
+@synthesize currentTextField = _currentTextField;
 
 - (id)init {
     if (self = [super initWithStyle:UITableViewStyleGrouped]) {
@@ -83,6 +85,7 @@
     [_dataSource release];
     [_avatarUploader release];
     [_image release];
+    [_currentTextField release];
     [super dealloc];
 }
 
@@ -108,6 +111,7 @@
             }];
         }
         else {
+            self.data.phone = [account phone];
             if (!self.navigationItem.rightBarButtonItem) {
                 STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Save", @"Save") style:UIBarButtonItemStyleDone target:self action:@selector(save:)];
                 self.navigationItem.rightBarButtonItem = button;
@@ -141,12 +145,13 @@
         view.delegate = (id<EditProfileHeaderViewDelegate>)self;
         [view release];
     }
-
+    
 }
 
 #pragma mark - Actions
 
 - (void)save:(id)sender {
+    [self grabValueFromTextField:self.currentTextField];
     UIActivityIndicatorView* loadingView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge] autorelease];
     loadingView.frame = CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height);
     [self.view addSubview:loadingView];
@@ -430,11 +435,21 @@
 
 #pragma mark - UITextFieldDelegate
 
+- (void)grabValueFromTextField:(UITextField*)textField {
+    if (textField) {
+        NSInteger index = textField.tag;
+        NSString* keypath = [self keyPathForTotalIndex:index];
+        [self.data setValue:textField.text forKey:keypath];
+    }
+}
+
+- (void)textFieldDidBeginEditing:(UITextField *)textField {
+    self.currentTextField = textField;
+}
+
 - (void)textFieldDidEndEditing:(UITextField *)textField {
-    
-    NSInteger index = textField.tag;
-    NSString* keypath = [self keyPathForTotalIndex:index];
-    [self.data setValue:textField.text forKey:keypath];
+    [self grabValueFromTextField:textField];
+    self.currentTextField = nil;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -466,8 +481,14 @@
     
     else if (actionSheet.tag == kDeleteActionSheetTag) {
         if (actionSheet.cancelButtonIndex == buttonIndex) return;
-        
-        
+        [[STStampedAPI sharedInstance] deleteAccountWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+            if (success) {
+                [Util compareAndPopController:self animated:YES];
+            }
+            else {
+                [Util warnWithAPIError:error andBlock:nil];
+            }
+        }];
     }
     
     

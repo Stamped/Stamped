@@ -140,6 +140,7 @@ static STActionManager* _singleton;
         handled = [[STActionUtil sharedInstance] canHandleSource:source forAction:action withContext:context];
         if (handled && flag) {
             [[STActionUtil sharedInstance] didChooseSource:source forAction:action withContext:context];
+            [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
         }
     }
     if (!handled && [action isEqualToString:@"watch"] && NO) {
@@ -149,6 +150,7 @@ static STActionManager* _singleton;
             if (flag) {
                 MPMoviePlayerViewController* controller = [[[MPMoviePlayerViewController alloc] initWithContentURL:[NSURL URLWithString:previewURL]] autorelease];
                 [[Util currentNavigationController] presentMoviePlayerViewControllerAnimated:controller];
+                [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
             }
         }
     }
@@ -169,6 +171,7 @@ static STActionManager* _singleton;
         handled = [[STStampedAPI sharedInstance] canHandleSource:source forAction:action withContext:context];
         if (handled && flag) {
             [[STStampedAPI sharedInstance] didChooseSource:source forAction:action withContext:context];
+            [[STStampedAPI sharedInstance] handleCompletionWithSource:source action:action andContext:context];
         }
     }
     if (!handled && (source.link && ![action isEqualToString:@"listen"])) {

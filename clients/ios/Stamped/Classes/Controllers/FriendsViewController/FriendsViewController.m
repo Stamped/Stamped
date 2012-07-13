@@ -19,6 +19,7 @@
 #import "Util.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
+#import "STInboxViewController.h"
 
 @interface FriendsViewController ()
 @property(nonatomic,retain,readonly) Friends *friends;
@@ -339,9 +340,8 @@
 #pragma mark - Actions
 
 - (void)done:(id)sender {
-    
+    [[NSNotificationCenter defaultCenter] postNotificationName:STInboxViewControllerPrepareForAnimationNotification object:nil];
     [self.navigationController dismissModalViewControllerAnimated:YES];
-    
 }
 
 

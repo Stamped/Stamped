@@ -60,13 +60,14 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
 
 
 @require_http_methods(["GET"])
-@handleHTTPRequest(http_schema=HTTPEntitySearchRequest,
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPEntitySearchRequest,
                    exceptions=entityExceptions)
 def autosuggest(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.getEntityAutoSuggestions(authUserId=authUserId, 
-                                                 query=http_schema.query, 
+    result = stampedAPI.getEntityAutoSuggestions(query=http_schema.query, 
                                                  category=http_schema.category,
-                                                 coordinates=http_schema.exportCoordinates())
+                                                 coordinates=http_schema.exportCoordinates(),
+                                                 authUserId=authUserId)
 
     return transformOutput(result)
 
