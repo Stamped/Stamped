@@ -40,10 +40,10 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    # MongoAccountCollection,
+    MongoAccountCollection,
     MongoEntityCollection,
-    # MongoStampCollection,
-    # MongoTodoCollection,
+    MongoStampCollection,
+    MongoTodoCollection,
 ]
 
 WORKER_COUNT = 10
