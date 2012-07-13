@@ -198,8 +198,9 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
     @lazyProperty
     def mpaa_rating(self):
         try:
-            rating = filter(lambda link : '/mpaa_ratings' in link['scheme'],  self._titleObj['category'])[0]
-            return rating['label']
+            ratings = filter(lambda link : '/mpaa_ratings' in link['scheme'],  self._titleObj['category'])
+            if ratings:
+                return ratings[0]['label']
         except KeyError:
             return None
 
