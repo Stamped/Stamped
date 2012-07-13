@@ -52,14 +52,13 @@ def stripEntity(entityDict):
 
 
 def differenceScore(left, right):
-    commonKeys = left.viewkeys() & right.viewkeys()
-    score = len(left) + len(right) - len(commonKeys) * 2
-    for key in commonKeys:
-        if left[key] != right[key]:
-            # TODO(geoff): maybe consider recursing if the field is a nested
-            # message.
-            score += 1
-    return score
+    clusterKeysLeft = set(result.resolverObject.key for result in left.results)
+    clusterKeysRight = set(result.resolverObject.key for result in right.results)
+    commonKeys = clusterKeysLeft & clusterKeysRight
+    if not commonKeys:
+        return 1000
+    diffKeys = clusterKeysLeft ^ clusterKeysRight
+    return float(len(diffKeys)) / len(commonKeys)
 
 
 def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
@@ -133,7 +132,9 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     diffScores = []
     for i, left in enumerate(oldResults):
         for j, right in enumerate(newResults):
-            score = differenceScore(left[1], right[1])
+            #print 'RESULT\n\n', len(left), '\n\n', '\n\n'.join(map(str, left)), '\n\n'
+
+            score = differenceScore(left[2], right[2])
             if score <= diffThreshold:
                 diffScores.append((score, i, j))
     # Find the most similar pair. When there are ties, lower i values (higher
@@ -232,7 +233,7 @@ def ensureDirectory(pathName):
 
 def main():
     parser = optparse.OptionParser()
-    parser.add_option('-t', dest='diffThreshold', type='int', default=5)
+    parser.add_option('-t', dest='diffThreshold', type='int', default=0.5)
     options, args = parser.parse_args()
 
     if len(args) != 3:
