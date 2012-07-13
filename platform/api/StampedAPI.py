@@ -4912,6 +4912,11 @@ class StampedAPI(AStampedAPI):
     def __mergeProxyIntoDb(self, proxy, stampedSource):
         entity_id = stampedSource.resolve_fast(proxy.source, proxy.key)
 
+        if entity_id is None:
+            results = stampedSource.resolve(proxy)
+            if len(results) > 0 and results[0][0]['resolved']:
+                entity_id = results[0][1].key
+
         # The crawled sources are usually readonly sources, such as a scraped website or RSS feed.
         # We therefore can't rely on full enrichment to correctly pick up the data from those
         # sources. That is why we make sure we incorporate the data from the proxy here, either by
