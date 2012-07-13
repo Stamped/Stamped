@@ -461,7 +461,7 @@ class GooglePlacesSource(GenericSource):
         
         return None
     
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         if not controller.shouldEnrich('googleplaces', self.sourceName, entity):
             return False
         
