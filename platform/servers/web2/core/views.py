@@ -15,8 +15,8 @@ from servers.web2.core.helpers  import *
 
 # TODO: stricter input schema validation
 
-@stamped_view()
-def index(request, **kwargs):
+@stamped_view(schema=HTTPIndexSchema)
+def index(request, schema, **kwargs):
     tastemakers = [
         {
             'screen_name'       : 'justinbieber', 
@@ -50,8 +50,10 @@ def index(request, **kwargs):
         }, 
     ]
     
+    body_classes = "index %s" % ("intro" if schema.intro else "main")
+    
     return stamped_render(request, 'index.html', {
-        'body_classes'      : "index intro", 
+        'body_classes'      : body_classes, 
         'tastemakers'       : tastemakers, 
     })
 

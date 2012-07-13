@@ -47,6 +47,7 @@ TODO:
             * ESC skips intro animation
         * main:
             * iphone:
+                * ADD SHADOWS
                 * move shadow & phone above other page content
             * pane 3 (tastemakers):
                 * blue border on active tastemaker's image
