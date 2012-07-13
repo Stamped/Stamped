@@ -27,6 +27,7 @@
         var $tastemakers        = $(".tastemaker");
         var $map_window_url     = $("#fake-url");
         var $map_window         = $("#tastemaker-map-window");
+        var $map_window_overlay = $("#tastemaker-map-window-overlay");
         var $map_window_iframe  = null;
         var $app_store_button   = $("footer .app-store-button");
         
@@ -313,7 +314,7 @@
                 .stop(true, false)
                 .show()
                 .animate({
-                    right       : "-789px"
+                    left        : "50%"
                 }, {
                     easing      : "easeOutExpo", 
                     duration    : 800
@@ -324,16 +325,16 @@
             $map_window
                 .stop(true, false)
                 .animate({
-                    right       : "-1200px"
+                    left        : "100%"
                 }, {
                     easing      : "easeInQuad", 
-                    duration    : 400, 
+                    duration    : 600, 
                     complete    : function() {
                         $map_window.hide();
                     }
                 });
             
-            $app_store_button.show(400);
+            $app_store_button.show(600);
         };
         
         var map_window_switch_user = function(screen_name) {
@@ -342,6 +343,7 @@
             if (screen_name !== active) {
                 $map_window.data("active", screen_name);
                 
+                // TODO: temporary until all tastemakers have valid accounts
                 var screen_name_lower = screen_name.toLowerCase();
                 
                 if (screen_name_lower === "justinbieber") {
@@ -366,7 +368,21 @@
                     $map_window.append(iframe);
                     $map_window_iframe = $("#tastemaker-map-window-iframe");
                 } else {
-                    $map_window_iframe.attr("src", iframe_src);
+                    $map_window_iframe.attr("src", iframe_src)
+                    
+                    $map_window_overlay
+                        .stop(true, false)
+                        .fadeIn(200);
+                    
+                    $map_window_iframe.ready(function() {
+                        //console.debug("LOADED " + iframe_src);
+                        
+                        setTimeout(function() {
+                            $map_window_overlay
+                                .stop(true, false)
+                                .fadeOut(500);
+                        }, 3000);
+                    });
                 }
             }
         };
@@ -471,6 +487,42 @@
             return false;
         });
         
+        var update_debug_transform = function() {
+            /*var t = "perspective(" + $("input[title='perspective']").attr("value") + "px) " + 
+                    "scale3d(" + $("input[title='scale-x']").attr("value") + ", " + 
+                        $("input[title='scale-y']").attr("value") + ", " + 
+                        $("input[title='scale-z']").attr("value") + ") " + 
+                    "rotateY(" + $("input[title='rotate-y']").attr("value") + "deg) " + 
+                    "rotateX(" + $("input[title='rotate-x']").attr("value") + "deg) " + 
+                    "rotateZ(" + $("input[title='rotate-z']").attr("value") + "deg) " + 
+                    "translate3d(" + $("input[title='trans-x']").attr("value") + "px, " + 
+                        $("input[title='trans-y']").attr("value") + "px, " + 
+                        $("input[title='trans-z']").attr("value") + "px) ";*/
+            
+            /*var t = $("input[title='trans']").attr("value");*/
+            
+            var t = "perspective(" + $("input[title='perspective']").attr("value") + "px) " + 
+                    "rotate3d(" + $("input[title='x-axis']").attr("value") + ", " + 
+                        $("input[title='y-axis']").attr("value") + ", " + 
+                        $("input[title='z-axis']").attr("value") + ", " + 
+                        $("input[title='angle']").attr("value") + "deg) " + 
+                    "scale3d(" + $("input[title='scale-x']").attr("value") + ", " + 
+                        $("input[title='scale-y']").attr("value") + ", " + 
+                        $("input[title='scale-z']").attr("value") + ")";
+            
+            console.debug(t);
+            
+            $(".iphone-screen").css({
+                '-webkit-transform' : t, 
+                '-moz-transform'    : t, 
+                '-ms-transform'     : t, 
+                '-o-transform'      : t, 
+                'transform'         : t
+            });
+        };
+        
+        $("input").change(update_debug_transform);
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
@@ -487,6 +539,7 @@
             init_main();
         }
         
+        update_debug_transform();
         map_window_switch_user("justinbieber");
     });
 })();
