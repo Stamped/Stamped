@@ -120,6 +120,15 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
     return '<div style="display:none" name="%s">%s</div>' % (cellId + '_summary', summary)
 
 
+def getSingleClusterSummary(cellId, cluster):
+    summary = '<h3>Cluster component summary</h3><ul>'
+    for result in cluster.results:
+        proxy = result.resolverObject
+        summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+    summary += '</ul>'
+    return '<div style="display:none" name="%s">%s</div>' % (cellId + '_summary', summary)
+
+
 def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold):
     diffScores = []
     for i, left in enumerate(oldResults):
@@ -142,7 +151,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
 
     linksLeft = []
     linksRightIndexed = {}
-    clusteringChanges = []
+    clusterSummaries = []
     for i, entity in enumerate(oldResults):
         if i in movements:
             diffFileName = '%s-c%d.html' % (filenameBase, i)
@@ -154,21 +163,25 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             anchorTextTpl = '%s<a href="%s">%%s</a></td>' % (makeHighlightingTableCell(cellId), diffFileName)
             linksLeft.append(anchorTextTpl % extractLinkText(entity))
             linksRightIndexed[destination] = anchorTextTpl % extractLinkText(newEntity)
-            clusteringChanges.append(getClusteringDifference(cellId, entity[2], newEntity[2]))
+            clusterSummaries.append(getClusteringDifference(cellId, entity[2], newEntity[2]))
         else:
-            linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i), 'l%d' % i))
+            cellId = 'l%d' % i
+            linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i), cellId))
+            clusterSummaries.append(getSingleClusterSummary(cellId, entity[2]))
 
     linksRight = []
     for i, entity in enumerate(newResults):
         if i in linksRightIndexed:
             linksRight.append(linksRightIndexed[i])
         else:
-            linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), 'r%d' % i))
+            cellId = 'r%d' % i
+            linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), cellId))
+            clusterSummaries.append(getSingleClusterSummary(cellId, entity[2]))
 
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]
     for links in itertools.izip_longest(linksLeft, linksRight, fillvalue='<td></td>'):
         fileContent.append('<tr>%s%s</tr>' % links)
-    fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER % '\n'.join(clusteringChanges))
+    fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER % '\n'.join(clusterSummaries))
 
     with open(path.join(outputDir, filenameBase) + '.html', 'w') as fout:
         for line in fileContent:
