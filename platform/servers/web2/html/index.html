@@ -311,7 +311,7 @@
             </div>
         </div>
         
-        <div id="main-footer" class="hidden-main-animating">
+        <div id="main-footer" class="hidden-main-animating clearfix">
             <div class="watch-video">
                 <div class="speech-bubble clearfix">
                     <div class="default-video">
@@ -321,15 +321,16 @@
                     </div>
                     
                     <div class="overview-video">
-                        <!-- TODO: update video reference -->
-                        <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="play-video-button-small lightbox-video"></a>
+                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
                         
-                        <p class="desc"><a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="watch lightbox-video">Watch</a> the overview video to learn more.</p>
+                        <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the overview video to learn more.</p>
                     </div>
                 </div>
                 
                 <a class="bieber-video-preview-icon"></a>
             </div>
+            
+            <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
         </div>
     </div>
     
@@ -399,12 +400,6 @@
 {% block footer %}
     <div class="clearfix">
         <div class="floatleft">
-            <div id="social">
-                <div class="social-button social-button-twitter"></div>
-                <div class="social-button social-button-facebook"></div>
-                <div class="social-button social-button-google"></div>
-            </div>
-            
             <div id="footer-nav">
                 <a href="/"      class="nav">Home</a></li>
                 <a href="/about" class="nav">About</a></li>
@@ -415,7 +410,11 @@
             </div>
         </div>
         
-        <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
+        <div id="social">
+            <div class="social-button social-button-twitter"></div>
+            <div class="social-button social-button-facebook"></div>
+            <div class="social-button social-button-google"></div>
+        </div>
     </div>
 {% endblock footer %}
 

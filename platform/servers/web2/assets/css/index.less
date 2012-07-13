@@ -297,11 +297,13 @@ body.main {
 }
 
 #main-footer {
-    text-align: center;
     position: relative;
     left: 8px;
     
     .watch-video {
+        float: left;
+        margin-left: 8px;
+        
         .bieber-video-preview-icon {
             display: inline-block;
             position: relative;
@@ -311,6 +313,13 @@ body.main {
         .overview-video {
             display: none;
         }
+    }
+    
+    .app-store-button {
+        position: relative;
+        
+        float: right;
+        margin: 8px 12px;
     }
 }
 
@@ -806,14 +815,6 @@ footer {
     bottom: 0;
     
     padding: 12px 24px;
-    
-    .app-store-button {
-        position: absolute;
-        top: 50%;
-        right: 72px;
-        
-        margin-top: -18px;
-    }
 }
 
 #retina footer .app-store-button {
@@ -821,6 +822,12 @@ footer {
 }
 
 #social {
+    position: absolute;
+    top: 50%;
+    right: 72px;
+    
+    margin-top: -18px;
+    
     .social-button {
         display: inline-block;
     }
@@ -902,11 +909,11 @@ footer {
     background: url(/assets/img/index/appstore_sprite.png) no-repeat;
     display: block;
     
-    width:  110px;
-    height: 36px;
+    width:  120px;
+    height: 40px;
     
     &:hover, &:active {
-        background-position: -112px 0;
+        background-position: -122px 0;
     }
 }
 
@@ -1018,11 +1025,11 @@ footer {
     
     .app-store-button {
         background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
-        width:  220px;
-        height: 72px;
+        width:  240px;
+        height: 80px;
         
         &:hover, &:active {
-            background-position: -224px 0;
+            background-position: -244px 0;
         }
     }
     
