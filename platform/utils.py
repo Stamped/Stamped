@@ -1140,6 +1140,6 @@ def weightedLottery(items):
         
         return selected
 
-    return items
+    return map(lambda item: item[1], items)
 
 
