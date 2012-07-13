@@ -106,6 +106,7 @@ def fixtureTest(useLocalDb=False,
                 from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
                 MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
                 MongoCache.disableStaleness = True
+                MongoCache.cacheTableName = 'cache_fixture'
                 
             db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
             dbDict = {}
@@ -140,13 +141,11 @@ def fixtureTest(useLocalDb=False,
 
             # Take anything out of the database that we don't want.
             if not useDbFixture and not useLocalDb:
-                # TODO: 'cache' should really be a constant somewhere rather than being hard-coded all over the
-                # place.
                 [getattr(db, tableName).drop() for tableName in db.collection_names()
-                 if tableName not in ['cache', 'system.indexes']]
+                 if tableName not in [MongoCache.cacheTableName, 'system.indexes']]
                 pass
             if not useCacheFixture:
-                db.cache.drop()
+                getattr(db, MongoCache.cacheTableName).drop()
 
             # Generate the DB objects anew if we're not loading them from file.
             if not useDbFixture and not useLocalDb:
@@ -173,13 +172,16 @@ def fixtureTest(useLocalDb=False,
                 MongoCache.exceptionOnCacheMiss = False
                 if writeFixtureFiles:
                     dumpDbDictToFilename(dbDict, dbFixtureFilename)
-                    if db.cache.count():
-                        dumpDbDictToFilename({'cache': list(db.cache.find())}, cacheFixtureFilename)
+                    if getattr(db, MongoCache.cacheTableName).count():
+                        dumpDbDictToFilename({MongoCache.cacheTableName: list(getattr(db, MongoCache.cacheTableName).find())}, cacheFixtureFilename)
 
                 MongoDBConfig.getInstance().database_name = 'stamped'
                 from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
                 MongoDBConfig2.getInstance().database_name = 'stamped'
                 MongoCache.disableStaleness = False
+                if MongoCache.cacheTableName == 'cache_fixture':
+                    MongoCache.cacheTableName = 'cache'
+                    db.cache_fixture.drop()
 
             return testResult
 
