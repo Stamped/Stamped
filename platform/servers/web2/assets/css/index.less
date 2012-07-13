@@ -567,6 +567,19 @@ body.main {
     }
 }
 
+.third-party-logos {
+    margin: 24px auto;
+    
+    .third-party-logo {
+        display: inline-block;
+        margin-right: 20px;
+    }
+    
+    .third-party-logo-opentable {
+        margin-right: 0;
+    }
+}
+
 
 /* **************************************************************************
                       TILTED IPHONE IN CORE PAGE VIEWS
@@ -982,6 +995,43 @@ footer {
     height: 84px;
 }
 
+.third-party-logo {
+    background: url(/assets/img/index/thirdparties_sprite.png) no-repeat;
+    display: block;
+    
+    width:  54px;
+    height: 24px;
+}
+
+.third-party-logo-template(@x, @offset) {
+    @x2: (2 * @x * @offset);
+    background-position: @x2 0;
+    
+    &:hover, &:active {
+        background-position: (@x2 + @offset) 0;
+    }
+}
+
+.third-party-logo-spotify {
+    .third-party-logo-template(0, -56px);
+}
+
+.third-party-logo-rdio {
+    .third-party-logo-template(1, -56px);
+}
+
+.third-party-logo-netflix {
+    .third-party-logo-template(2, -56px);
+}
+
+.third-party-logo-fandango {
+    .third-party-logo-template(3, -56px);
+}
+
+.third-party-logo-opentable {
+    .third-party-logo-template(4, -56px);
+}
+
 #retina {
     .pane-nav-button {
         background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
@@ -1091,6 +1141,34 @@ footer {
         background: url(/assets/img/index/illustration@2x.png) no-repeat;
         width:  746px;
         height: 168px;
+    }
+    
+    .third-party-logo {
+        background: url(/assets/img/index/thirdparties_sprite@2x.png) no-repeat;
+        display: block;
+        
+        width:  108px;
+        height: 48px;
+    }
+    
+    .third-party-logo-spotify {
+        .third-party-logo-template(0, -112px);
+    }
+
+    .third-party-logo-rdio {
+        .third-party-logo-template(1, -112px);
+    }
+
+    .third-party-logo-netflix {
+        .third-party-logo-template(2, -112px);
+    }
+
+    .third-party-logo-fandango {
+        .third-party-logo-template(3, -112px);
+    }
+
+    .third-party-logo-opentable {
+        .third-party-logo-template(4, -112px);
     }
 }
 
