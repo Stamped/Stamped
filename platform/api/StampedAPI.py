@@ -1329,6 +1329,9 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
+        # Refresh guide
+        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId], kwargs={'force': True})
+
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
         user                    = self.getUserFromIdOrScreenName(userRequest)
@@ -3453,6 +3456,7 @@ class StampedAPI(AStampedAPI):
     #     # #    # # #    # #
      #####   ####  # #####  ######
     """
+
     def _mapGuideSectionToTypes(self, section=None, subsection=None):
         if subsection is not None:
             return [ subsection ]
@@ -3591,15 +3595,13 @@ class StampedAPI(AStampedAPI):
         if len(items) == 0:
             return []
         
-        #Simulated lottery to shuffle the top 20 (or whatever limit is given when offset == 0)
+        # Simulated lottery to shuffle the top 20 (or whatever limit is given when offset == 0)
         if items[0].score is not None: 
             if offset == 0 and guideRequest.section != "food":
                 lotterySize = min(limit, len(items))
                 lotteryItems = map(lambda x: (x.score,x), items[0:lotterySize])
                 items = utils.weightedLottery(lotteryItems)
                 
-                
-
         # Entities
         entities = self._entityDB.getEntities(entityIds.keys())
 
@@ -3825,14 +3827,6 @@ class StampedAPI(AStampedAPI):
             result.append(entity)
 
         return result
-
-    @API_CALL
-    def buildGuide(self, authUserId):
-        """
-        Pass if happening synchronously. The Guide only needs to be regenerated async, so it can fail if this is
-        called directly.
-        """
-        pass
 
     @API_CALL
     def buildGuideAsync(self, authUserId, force=False):
