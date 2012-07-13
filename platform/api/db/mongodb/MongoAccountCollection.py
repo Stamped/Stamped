@@ -398,7 +398,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         for k, v in linkedDict.iteritems():
             if k is not None and k not in valid_fields:
-                 delattr(linkedDict, k)
+                del(linkedDict[k])
 
         newLinkedAccount.dataImport(linkedDict)
 
