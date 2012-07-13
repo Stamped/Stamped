@@ -16,9 +16,10 @@ from resolve.Resolver import *
 from resolve.ResolverObject import *
 
 class DumbMediaItem(ResolverMediaItem):
-    def __init__(self, sourceName):
+    def __init__(self, sourceName, key):
         ResolverMediaItem.__init__(self, types=[])
         self.__sourceName = sourceName
+        self.__key = key
 
     @lazyProperty
     def source(self):
@@ -33,7 +34,7 @@ class DumbMediaItem(ResolverMediaItem):
 
     @lazyProperty
     def key(self):
-        return None
+        return self.__key
 
 class DumbSource(GenericSource):
     def __init__(self, sourceName, *args, **kwargs):
@@ -41,7 +42,7 @@ class DumbSource(GenericSource):
         self.__sourceName = sourceName
 
     def entityProxyFromKey(self, key, **kwargs):
-        return DumbMediaItem(self.__sourceName)
+        return DumbMediaItem(self.__sourceName, key)
 
     def matchSource(self, query):
         return lambda start, end: []

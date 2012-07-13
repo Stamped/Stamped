@@ -153,7 +153,6 @@ def show(request, authUserId, **kwargs):
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm,
                    exceptions=updateAccountExceptions)
 def update(request, authUserId, http_schema, schema, **kwargs):
-    logs.info('### http_schema: %s    schema: %s' % (http_schema, schema))
     account = stampedAPI.updateAccount(authUserId, schema)
 
     user    = HTTPUser().importUser(account)
