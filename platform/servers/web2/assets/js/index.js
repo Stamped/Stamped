@@ -39,7 +39,7 @@
         var $map_window             = $("#tastemaker-map-window");
         var $map_window_overlay     = $("#tastemaker-map-window-overlay");
         var $map_window_iframe      = null;
-        var $app_store_button       = $("footer .app-store-button");
+        var $social                 = $("#social");
         
         var $desc_default           = $(".desc-default");
         var $desc_overview          = $(".desc-overview");
@@ -366,7 +366,7 @@
         };
         
         var map_window_show = function() {
-            $app_store_button.hide(800);
+            $social.hide(800);
             
             $map_window
                 .stop(true, false)
@@ -392,7 +392,7 @@
                     }
                 });
             
-            $app_store_button.show(600);
+            $social.show(600);
         };
         
         var map_window_switch_user = function(screen_name) {
@@ -719,7 +719,7 @@
         $iphone_back_button.click(function(event) {
             event.preventDefault();
             
-            set_active_iphone_screen(0); // inbox
+            set_active_pane(0); // inbox
             return false;
         });
         
