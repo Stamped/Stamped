@@ -51,4 +51,6 @@ typedef void(^TwitterRequestHandler)(id, NSError*);
 
 - (STCancellation*)sendTweet:(NSString*)tweet withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)addTwitterWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
 @end

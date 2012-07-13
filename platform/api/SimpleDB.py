@@ -79,7 +79,7 @@ class SimpleDB(object):
 
             if len(data) > 0:
                 statId = str(ObjectId())
-                if data['uri'] != '/v0/ping.json' and data['uri'] != '/v0/temp/ping.json':
+                if data['uri'] != '/v1/ping.json' and data['uri'] != '/v1/temp/ping.json':
                     suffix = '0%s' % (sha1(statId).hexdigest()[0])
                     if suffix in self.domains:
                         domain = self.domains[suffix]

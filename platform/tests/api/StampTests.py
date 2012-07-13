@@ -35,6 +35,21 @@ class StampedAPIStampConsumeHttpTest(AStampedAPIHttpTestCase):
         self.deleteAccount(self.tokenA)
         self.deleteAccount(self.tokenB)
 
+class StampedAPIStampLikesHttpTest(AStampedAPIHttpTestCase):
+    def setUp(self):
+        (self.userA, self.tokenA) = self.createAccount('UserA')
+        (self.userB, self.tokenB) = self.createAccount('UserB')
+        self.createFriendship(self.tokenB, self.userA)
+        self.entity = self.createEntity(self.tokenA)
+        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
+
+    def tearDown(self):
+        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
+        self.deleteEntity(self.tokenA, self.entity['entity_id'])
+        self.deleteFriendship(self.tokenB, self.userA)
+        self.deleteAccount(self.tokenA)
+        self.deleteAccount(self.tokenB)
+
 # CREATE STAMP
 
 class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
@@ -142,7 +157,7 @@ class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
                 "oauth_token"   : self.tokenA['access_token'],
                 "entity_id"     : self.entity['entity_id'],
                 "blurb"         : self.blurbs[0],
-                "credits"       : 'asdf',
+                "credits"       : 'invalid screen name',
             }
             result = self.handlePOST(path, data)
 
@@ -297,7 +312,6 @@ class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
             self.deleteStamp(self.tokenA, result['stamp_id'])
             self.deleteAccount(self.tokenB)
             self.deleteAccount(self.tokenC)
-
 
 class StampedAPIStampsShow(StampedAPIStampConsumeHttpTest):
     def test_show(self):
@@ -489,21 +503,6 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditHttpTest):
         self.assertTrue(result['credits'][0]['stamp_id'] == self.stampA['stamp_id'])
 
 
-class StampedAPIStampLikesHttpTest(AStampedAPIHttpTestCase):
-    def setUp(self):
-        (self.userA, self.tokenA) = self.createAccount('UserA')
-        (self.userB, self.tokenB) = self.createAccount('UserB')
-        self.createFriendship(self.tokenB, self.userA)
-        self.entity = self.createEntity(self.tokenA)
-        self.stamp = self.createStamp(self.tokenA, self.entity['entity_id'])
-
-    def tearDown(self):
-        self.deleteStamp(self.tokenA, self.stamp['stamp_id'])
-        self.deleteEntity(self.tokenA, self.entity['entity_id'])
-        self.deleteFriendship(self.tokenB, self.userA)
-        self.deleteAccount(self.tokenA)
-        self.deleteAccount(self.tokenB)
-
 class StampedAPILikesPass(StampedAPIStampLikesHttpTest):
     def test_like(self):
         path = "stamps/likes/create.json"
@@ -566,7 +565,7 @@ class StampedAPILikesPass(StampedAPIStampLikesHttpTest):
 
             self.deleteAccount(token)
 
-class StampedAPILikesFail(StampedAPIStampLikesHttpTest):
+class StampedAPILikesIdempotent(StampedAPIStampLikesHttpTest):
     def test_remove(self):
         path = "stamps/likes/remove.json"
         data = { 
@@ -574,8 +573,7 @@ class StampedAPILikesFail(StampedAPIStampLikesHttpTest):
             "stamp_id": self.stamp['stamp_id']
         }
         
-        with expected_exception():
-            result = self.handlePOST(path, data)
+        result = self.handlePOST(path, data)
     
     def test_like_twice(self):
         path = "stamps/likes/create.json"

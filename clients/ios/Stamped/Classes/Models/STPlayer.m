@@ -116,11 +116,11 @@ static id _sharedInstance;
                 [SPAsyncLoading waitUntilLoaded:track timeout:kSPAsyncLoadingDefaultTimeout then:^(NSArray *tracks, NSArray *notLoadedTracks) {
                     [self.spotifyPlaybackManager playTrack:track callback:^(NSError *error) {
                         if (error) {
-                            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Cannot Play Track"
+                            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Cannot Play Track"
                                                                             message:[error localizedDescription]
                                                                            delegate:nil
                                                                   cancelButtonTitle:@"OK"
-                                                                  otherButtonTitles:nil];
+                                                                  otherButtonTitles:nil] autorelease];
                             [alert show];
                         } else {
                             NSLog(@"playing with Spotify:%@", key);

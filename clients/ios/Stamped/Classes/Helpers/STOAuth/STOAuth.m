@@ -51,7 +51,7 @@
     
 }
 
-+ (NSString *)encodedSTOAuthParameterForString:(NSString *)str {
++ (NSString *)copyEncodedSTOAuthParameterForString:(NSString *)str {
     // http://oauth.net/core/1.0a/#encoding_parameters
     
     CFStringRef originalString = (CFStringRef) str;
@@ -70,7 +70,7 @@
     return (NSString *)escapedStr;
 }
 
-+ (NSString *)stringWithBase64ForData:(NSData *)data {
++ (NSString *)copyStringWithBase64ForData:(NSData *)data {
     // Cyrus Najmabadi elegent little encoder from
     // http://www.cocoadev.com/index.pl?BaseSixtyFour
     if (data == nil) return nil;
@@ -211,8 +211,8 @@
     NSString *paramStr = [STOAuth paramStringForParams:signatureParams joiner:@"&" shouldQuote:NO shouldSort:YES];
     
     // the base string includes the method, normalized request URL, and params
-    NSString *requestURLStrEnc = [STOAuth encodedSTOAuthParameterForString:requestURLStr];
-    NSString *paramStrEnc = [STOAuth encodedSTOAuthParameterForString:paramStr];
+    NSString *requestURLStrEnc = [[STOAuth copyEncodedSTOAuthParameterForString:requestURLStr] autorelease];
+    NSString *paramStrEnc = [[STOAuth copyEncodedSTOAuthParameterForString:paramStr] autorelease];
     
     NSString *sigBaseString = [NSString stringWithFormat:@"%@&%@&%@", method, requestURLStrEnc, paramStrEnc];
         
@@ -242,13 +242,13 @@
 
 - (NSString *)encodedValue {
     NSString *value = [self value];
-    NSString *result = [STOAuth encodedSTOAuthParameterForString:value];
+    NSString *result = [[STOAuth copyEncodedSTOAuthParameterForString:value] autorelease];
     return result;
 }
 
 - (NSString *)encodedName {
     NSString *name = [self name];
-    NSString *result = [STOAuth encodedSTOAuthParameterForString:name];
+    NSString *result = [[STOAuth copyEncodedSTOAuthParameterForString:name] autorelease];
     return result;
 }
 

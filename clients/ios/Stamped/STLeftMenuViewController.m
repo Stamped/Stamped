@@ -52,8 +52,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 @property (nonatomic, readonly, retain) UITableView *tableView;
 @property (nonatomic, readonly, retain) UIView* titleView;
-@property (nonatomic, readonly, retain) UIView* playerView;
-@property (nonatomic, readonly, retain) UILabel* playerTitleView;
+//@property (nonatomic, readonly, retain) UIView* playerView;
+//@property (nonatomic, readonly, retain) UILabel* playerTitleView;
 
 @property (nonatomic, readwrite, retain) NSArray* dataSource;
 @property (nonatomic, readwrite, retain) NSDictionary* controllerStore;
@@ -70,8 +70,8 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 @synthesize tableView=_tableView;
 @synthesize titleView = _titleView;
-@synthesize playerView = _playerView;
-@synthesize playerTitleView = _playerTitleView;
+//@synthesize playerView = _playerView;
+//@synthesize playerTitleView = _playerTitleView;
 
 @synthesize dataSource = _dataSource;
 @synthesize controllerStore = _controllerStore;
@@ -120,20 +120,20 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     self.tableView.tableHeaderView = view;
     _titleView = imageView;
     
-    _playerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 100)];
-    _playerTitleView = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 180, 70)];
-    _playerTitleView.backgroundColor = [UIColor clearColor];
-    _playerTitleView.textColor = [UIColor whiteColor];
-    _playerTitleView.font = [UIFont stampedBoldFontWithSize:16];
-    _playerTitleView.lineBreakMode = UILineBreakModeTailTruncation;
-    
-    UIButton* playerButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [playerButton setImage:[UIImage imageNamed:@"menu_icon-viewplaylist"] forState:UIControlStateNormal];
-    [playerButton addTarget:self action:@selector(showPlaylist:) forControlEvents:UIControlEventTouchUpInside];
-    playerButton.frame = CGRectMake(10, 10, 30, 30);
-    [_playerView addSubview:playerButton];
-    [_playerView addSubview:_playerTitleView];
-    [view addSubview:_playerView];
+//    _playerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 100)];
+//    _playerTitleView = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 180, 70)];
+//    _playerTitleView.backgroundColor = [UIColor clearColor];
+//    _playerTitleView.textColor = [UIColor whiteColor];
+//    _playerTitleView.font = [UIFont stampedBoldFontWithSize:16];
+//    _playerTitleView.lineBreakMode = UILineBreakModeTailTruncation;
+//    
+//    UIButton* playerButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//    [playerButton setImage:[UIImage imageNamed:@"menu_icon-viewplaylist"] forState:UIControlStateNormal];
+//    [playerButton addTarget:self action:@selector(showPlaylist:) forControlEvents:UIControlEventTouchUpInside];
+//    playerButton.frame = CGRectMake(10, 10, 30, 30);
+//    [_playerView addSubview:playerButton];
+//    [_playerView addSubview:_playerTitleView];
+//    [view addSubview:_playerView];
     
     CGRect frame = imageView.frame;
     frame.origin.x = 14.0f;
@@ -157,36 +157,36 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILoginNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerStateChanged:) name:STPlayerStateChangedNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemChanged:) name:STPlayerItemChangedNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerStateChanged:) name:STPlayerStateChangedNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemChanged:) name:STPlayerItemChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:DDMenuControllerWillShowLeftMenuNotification object:nil];
-    [self playerStateChanged:nil];
+//    [self playerStateChanged:nil];
 }
+//
+//- (void)showPlaylist:(id)notImportant {
+//    [STPlayerPopUp present];
+//}
 
-- (void)showPlaylist:(id)notImportant {
-    [STPlayerPopUp present];
-}
-
-- (void)playerStateChanged:(id)notImportant {
-    STPlayer* player = [STPlayer sharedInstance];
-    if (player.paused) {
-        _titleView.hidden = NO;
-        _playerView.hidden = YES;
-    }
-    else {
-        _playerView.hidden = NO;
-        _titleView.hidden = YES;
-        [self playerItemChanged:nil];
-    }
-}
-
-- (void)playerItemChanged:(id)notImportant {
-    STPlayer* player = [STPlayer sharedInstance];
-    if (player.itemCount) {
-        id<STPlaylistItem> item = [player itemAtIndex:player.currentItemIndex];
-        _playerTitleView.text = item.name;
-    }
-}
+//- (void)playerStateChanged:(id)notImportant {
+//    STPlayer* player = [STPlayer sharedInstance];
+//    if (player.paused) {
+//        _titleView.hidden = NO;
+//        _playerView.hidden = YES;
+//    }
+//    else {
+//        _playerView.hidden = NO;
+//        _titleView.hidden = YES;
+//        [self playerItemChanged:nil];
+//    }
+//}
+//
+//- (void)playerItemChanged:(id)notImportant {
+//    STPlayer* player = [STPlayer sharedInstance];
+//    if (player.itemCount) {
+//        id<STPlaylistItem> item = [player itemAtIndex:player.currentItemIndex];
+//        _playerTitleView.text = item.name;
+//    }
+//}
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];

@@ -298,7 +298,7 @@ static NSString* const _reuseIdentifier = @"NotificationCell";
                                                             font:[UIFont stampedFontWithSize:12]
                                                            color:[UIColor stampedDarkGrayColor]] autorelease];
     titleChunk.bottomLeft = CGPointMake(_titleXOffset, 26);
-    self.title = [[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:titleChunk]];
+    self.title = [[[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:titleChunk]] autorelease];
     [self.contentView addSubview:self.title];
     for (id<STAlertToggle> toggle in item.toggles) {
         if (toggle.value && toggle.toggleID) {

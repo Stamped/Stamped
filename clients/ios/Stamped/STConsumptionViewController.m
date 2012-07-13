@@ -27,6 +27,8 @@
 #import "NoDataUtil.h"
 #import "FindFriendsViewController.h"
 
+static BOOL _hasShownPopUp = NO;
+
 typedef enum {
     _animationStateNone = 0,
     _animationStateRunning,
@@ -84,6 +86,7 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 @synthesize popUp = _popUp;
 
 - (void)update {
+    self.consumptionToolbar.scope = self.scope;
     self.tableDelegate.lazyList = [[[STConsumptionLazyList alloc] initWithScope:self.scope
                                                                         section:self.category
                                                                      subsection:self.subcategory] autorelease];
@@ -134,7 +137,7 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
     STConsumptionToolbarItem* rootItem = [[[STConsumptionToolbarItem alloc] init] autorelease];
     rootItem.type = STConsumptionToolbarItemTypeSection;
     rootItem.value = category_;
-    rootItem.children = [array retain];
+    rootItem.children = array;
     return rootItem;
 }
 
@@ -148,10 +151,10 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 
 - (void)showSmallTooltip {
     if (self.animationState != _animationStateAbort) {
-        UIImageView* tooltip = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"guide_bubble"]] autorelease];
-        [Util reframeView:tooltip withDeltas:CGRectMake(230, -40, 0, 0)];
+        UIImageView* tooltip = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"taptoaddfriends"]] autorelease];
+        [Util reframeView:tooltip withDeltas:CGRectMake(200 - 2.5, -40, 0, 0)];
         tooltip.alpha = 0;
-        UILabel* label = [Util viewWithText:@"Click below to change scope."
+        UILabel* label = [Util viewWithText:@""
                                        font:[UIFont stampedFontWithSize:10]
                                       color:[UIColor whiteColor]
                                        mode:UILineBreakModeTailTruncation
@@ -249,6 +252,9 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
     self = [super initWithHeaderHeight:0];
     if (self) {
         category_ = [category retain];
+//        if (_hasShownPopUp) {
+//            _animationState = _animationStateAbort;
+//        }
         // Custom initialization
         if (LOGGED_IN) {
             scope_ = STStampedAPIScopeFriends;
@@ -269,9 +275,17 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
                 [Util executeWithDelay:.3 onMainThread:^{
                     if ([Util topController] == self && self.animationState != _animationStateAbort) {
                         [self.consumptionToolbar.slider setScope:STStampedAPIScopeEveryone animated:YES];
-                        [Util executeWithDelay:.4 onMainThread:^{
-                            [self showScopeShiftPopup];
-                        }];
+                        if (_hasShownPopUp) {
+                            [Util executeWithDelay:.4 onMainThread:^{
+                                [self showSmallTooltip];
+                            }];
+                        }
+                        else {
+                            [Util executeWithDelay:.4 onMainThread:^{
+                                [self showScopeShiftPopup];
+                            }];
+                            _hasShownPopUp = YES;
+                        }
                     }
                 }];
             }
@@ -424,7 +438,6 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 #pragma mark - STSliderScopeViewDelegate
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
-    
     self.scope = scope;
     
 }

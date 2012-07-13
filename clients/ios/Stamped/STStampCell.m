@@ -142,13 +142,16 @@
                                 imageOrigin -= size.width;
                             }
                         }
-                        
-                        CGRect imageRect = CGRectMake(imageOrigin, 17.0f, 14.0f, 14.0f);
-                        imageRect.origin.y = floorf(rect.size.height - (17.0f+14.0f) ) - 13;
+                        // 31 , 32
+                        // 29 , 24
+                        CGRect imageRect = CGRectMake(imageOrigin, 17.0f, 18.0f, 18.0f);
+                        imageRect.origin.y = floorf(rect.size.height - (17.0f+18.0f) ) - 13;
+                        imageRect.origin.y += 4;
+                        imageRect.origin.x += 1;
                         CGContextSaveGState(ctx);
                         CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
                         CGContextScaleCTM(ctx, 1.0f, -1.0f);
-                        CGContextClipToMask(ctx, imageRect, [UIImage imageNamed:@"stamp_14pt_texture.png"].CGImage);
+                        CGContextClipToMask(ctx, imageRect, [UIImage imageNamed:@"stamp_18pt_texture.png"].CGImage);
                         
                         if (self.highlighted) {
                             

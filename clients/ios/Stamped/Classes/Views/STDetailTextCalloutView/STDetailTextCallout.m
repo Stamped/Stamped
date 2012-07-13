@@ -278,7 +278,7 @@
     
 }
 
-- (CGMutablePathRef)createCalloutPathInRect:(CGRect)rect {
+- (CGMutablePathRef)copyCalloutPathInRect:(CGRect)rect {
     
     CGFloat minX = rect.origin.x;
     CGFloat minY = rect.origin.y;
@@ -332,7 +332,7 @@
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     rect = CGRectInset(rect, kPopoverShadowRadius, kPopoverShadowRadius);
     
-    CGMutablePathRef _path = [self createCalloutPathInRect:rect];
+    CGMutablePathRef _path = [self copyCalloutPathInRect:rect];
 	
 	CGFloat minX = rect.origin.x;
 	CGFloat minY = rect.origin.y;
@@ -387,7 +387,7 @@
     CGPathRelease(_path);
     
     // inner stroke
-    _path = [self createCalloutPathInRect:CGRectInset(rect, 1.0, 1.0)];
+    _path = [self copyCalloutPathInRect:CGRectInset(rect, 1.0, 1.0)];
     [[UIColor colorWithRed:1 green:1 blue:1 alpha:.1] setStroke];
     CGContextAddPath(ctx, _path);
     CGContextStrokePath(ctx);

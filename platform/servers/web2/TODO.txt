@@ -47,6 +47,7 @@ TODO:
             * ESC skips intro animation
         * main:
             * iphone:
+                * ADD SHADOWS
                 * move shadow & phone above other page content
             * pane 3 (tastemakers):
                 * blue border on active tastemaker's image
@@ -310,3 +311,4 @@ ChangeList 6/22/2012:
                 rewrite ^/(.*)$ /mobile/$1 break;
             }
 
+rickroll: http://www.youtube.com/watch?v=ZL_Q4jBTh_8

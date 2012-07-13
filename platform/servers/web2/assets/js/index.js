@@ -25,6 +25,7 @@
         // main iphone
         var $main_body              = $("#main-body");
         var $main_iphone            = $("#main-iphone");
+        var $main_footer            = $("#main-footer");
         var $iphone_screens         = $(".iphone-screens");
         var $iphone_inbox_body      = $(".iphone-inbox-body");
         var $iphone_inbox_selection = $(".iphone-inbox-selection");
@@ -38,7 +39,10 @@
         var $map_window             = $("#tastemaker-map-window");
         var $map_window_overlay     = $("#tastemaker-map-window-overlay");
         var $map_window_iframe      = null;
-        var $app_store_button       = $("footer .app-store-button");
+        var $social                 = $("#social");
+        
+        var $desc_default           = $(".desc-default");
+        var $desc_overview          = $(".desc-overview");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -106,6 +110,8 @@
                 };
                 
                 var complete = function() {
+                    this._easer = null;
+                    
                     if (!!p_complete) {
                         p_complete(that);
                     }
@@ -164,7 +170,29 @@
         var $intro_iphone   = $("#intro-iphone");
         var $intro_hero     = $("#intro-hero");
         
-        var intro_iphone_animation = new Animation({
+        var intro_iphone_animation = {
+            start : function() {
+                /*var height = $intro_iphone.height();
+                height     = (!!height ? height : 632);
+                var offset = get_relative_offset(height);
+                
+                $intro_iphone.animate({
+                    top : offset
+                }, {
+                    duration : 1000, 
+                    easing   : "swing", 
+                    complete : function() {
+                        // intro animation is fully complete here
+                        $body.removeClass("intro");
+                    }
+                });*/
+                
+                // intro animation is fully complete here
+                init_main(true);
+            }
+        };
+        
+        /*var intro_iphone_animation = new Animation({
             start       : 1, 
             end         : 100, 
             duration    : 250, 
@@ -192,10 +220,10 @@
                         }
                     });
                     
-                    init_main();
+                    init_main(true);
                 }, 150);
             }
-        });
+        });*/
         
         var intro_animation = new Animation({
             duration    : 1600, 
@@ -222,9 +250,23 @@
                         top : offset
                     }, {
                         duration : 600, 
-                        easing   : "swing"
+                        easing   : "swing", 
+                        complete : function() {
+                            $body.removeClass("intro");
+                        }
                     });
                 }
+            }
+        });
+        
+       var main_pane_cycle_animation = new Animation({
+            duration    : 5000, 
+            complete    : function() {
+                var active  = parseInt($main_body.get(0).className.replace("active-pane-", ""));
+                var next    = ((active + 1) % 5);
+                
+                set_active_pane(next);
+                main_pane_cycle_animation.restart();
             }
         });
         
@@ -251,7 +293,7 @@
         };
         
         var resize_panes = function(noop) {
-            var $panes = $(".pane").css('min-height', 0);
+            var $panes = $(".pane");//.css('min-height', 0);
             var height = 0;
             
             // find max height of all panes
@@ -263,7 +305,7 @@
             
             // constrain the minimum pane height to the height of the tallest pane
             if (height > 0) {
-                $panes.css('min-height', height);
+                //$panes.css('min-height', height);
                 
                 if (typeof(noop) !== 'boolean' || !noop) {
                     return update_main_layout(noop);
@@ -274,7 +316,8 @@
         };
         
         // initialize and display the main page content
-        var init_main = function() {
+        var init_main = function(autoplay) {
+            autoplay = (typeof(autoplay) === 'undefined' ? true : autoplay);
             $body.addClass("main");
             resize_panes(true);
             
@@ -304,6 +347,10 @@
                         }
                         
                         $main.removeClass("main-animating");
+                        
+                        if (!!autoplay) {
+                            main_pane_cycle_animation.start();
+                        }
                     }
                 });
             
@@ -321,7 +368,7 @@
         };
         
         var map_window_show = function() {
-            $app_store_button.hide(800);
+            $social.hide(800);
             
             $map_window
                 .stop(true, false)
@@ -347,7 +394,7 @@
                     }
                 });
             
-            $app_store_button.show(600);
+            $social.show(600);
         };
         
         var map_window_switch_user = function(screen_name) {
@@ -355,19 +402,6 @@
             
             if (screen_name !== active) {
                 $map_window.data("active", screen_name);
-                
-                // TODO: temporary until all tastemakers have valid accounts
-                var screen_name_lower = screen_name.toLowerCase();
-                
-                if (screen_name_lower === "justinbieber") {
-                    screen_name = "robby"
-                } else if (screen_name_lower === "passionpit") {
-                    screen_name = "travis"
-                } else if (screen_name_lower === "nytimes") {
-                    screen_name = "edmuki"
-                } else if (screen_name_lower === "time") {
-                    screen_name = "bart"
-                }
                 
                 $map_window_url
                     .attr("href", "/" + screen_name + "/map")
@@ -409,17 +443,24 @@
                     $main_body.removeClass().addClass(active);
                     index = parseInt(index);
                     
-                    // TODO: animation here
-                    if (index >= 3) {
-                        $main_iphone.css("visibility", "hidden");
-                    } else {
+                    if (index < 3) {
+                        set_active_iphone_screen(index);
                         $main_iphone.css("visibility", "visible");
+                    } else {
+                        // TODO: animation here
+                        $main_iphone.css("visibility", "hidden");
                     }
                     
                     if (index === 3) {
                         map_window_show();
                     } else {
                         map_window_hide();
+                    }
+                    
+                    if (index === 4) {
+                        $main_footer.addClass("watch-video-overview");
+                    } else {
+                        $main_footer.removeClass("watch-video-overview");
                     }
                     
                     return true;
@@ -432,6 +473,7 @@
         // switch active pane on pane nav button click
         $main.on("click", ".pane-nav-button", function(event) {
             event.preventDefault();
+            main_pane_cycle_animation.stop();
             
             var $this   = $(this);
             var id      = $this.attr("id");
@@ -444,6 +486,7 @@
         // cycle active pane on continue button click
         $main.on("click", ".continue-button", function(event) {
             event.preventDefault();
+            main_pane_cycle_animation.stop();
             
             var $this   = $(this);
             var href    = $this.attr("href");
@@ -500,26 +543,39 @@
             return false;
         });
         
-        var get_iphone_inbox_bg_pos = function() {
-            var bg_pos = $iphone_inbox_body.css("background-position").split(" ");
-            
-            return parseInt(bg_pos[1]);
+        var iphone_screens_index_map  = {
+            "0" : "inbox", 
+            "1" : "sdetail", 
+            "2" : "guide"
         };
         
-        $iphone_inbox_body
-            .drag("start", function(event, dd) {
-                dd.orig_y  = -get_iphone_inbox_bg_pos();
-                
-                iphone_inbox_selection_hide();
-            })
-            .drag(function(event, dd) {
-                var $this  = $(this);
-                var offset = -Math.max(0, Math.min(318, dd.orig_y - dd.deltaY));
-                
-                $this.css('background-position', "0 " + offset + "px");
-            });
+        var iphone_screens_all = "iphone-screen-active-inbox iphone-screen-active-sdetail iphone-screen-active-guide";
         
-        iphone_inbox_stamps = [
+        
+        var set_active_iphone_screen = function(index) {
+            var current_classes = $iphone_screens.get(0).className.split(/\s+/);
+            var active = "iphone-screen-active-" + iphone_screens_index_map["" + index];
+            
+            console.debug(active + " -- " + current_classes[0] + " -- " + current_classes[1]);
+            for (var i = 0; i < current_classes.length; ++i) {
+                var current = current_classes[i];
+                
+                if (active === current) {
+                    // this iphone screen is already active
+                    return;
+                }
+            }
+            
+            $iphone_screens.removeClass(iphone_screens_all).addClass(active);
+        };
+        
+        
+        // ---------------------------------------------------------------------
+        // interactive iphone screen
+        // ---------------------------------------------------------------------
+        
+        
+        /*iphone_inbox_stamps = [
             {
                 id : "Son of a Gun Restaurant", 
                 y0 : 49, 
@@ -607,6 +663,25 @@
             return selection;
         };
         
+        var get_iphone_inbox_bg_pos = function() {
+            var bg_pos = $iphone_inbox_body.css("background-position").split(" ");
+            
+            return parseInt(bg_pos[1]);
+        };
+        
+        $iphone_inbox_body
+            .drag("start", function(event, dd) {
+                dd.orig_y  = -get_iphone_inbox_bg_pos();
+                
+                iphone_inbox_selection_hide();
+            })
+            .drag(function(event, dd) {
+                var $this  = $(this);
+                var offset = -Math.max(0, Math.min(318, dd.orig_y - dd.deltaY));
+                
+                $this.css('background-position', "0 " + offset + "px");
+            });
+        
         $iphone_inbox_body.click(function(event) {
             event.preventDefault();
             
@@ -615,7 +690,7 @@
             if (!!selection) {
                 console.debug(selection);
                 
-                $iphone_screens.removeClass("iphone-screen-active-inbox").addClass("iphone-screen-active-sdetail");
+                set_active_iphone_screen(1); // sdetail
             }
             
             return false;
@@ -628,12 +703,12 @@
             return false;
         });
         
-        $body.on("mouseup", iphone_inbox_selection_hide);
+        $body.on("mouseup", iphone_inbox_selection_hide);*/
         
         $iphone_back_button.click(function(event) {
             event.preventDefault();
             
-            $iphone_screens.removeClass("iphone-screen-active-sdetail").addClass("iphone-screen-active-inbox");
+            set_active_pane(0); // inbox
             return false;
         });
         
@@ -650,7 +725,7 @@
                     intro_animation.stop(true, true);
                     
                     // TODO: is this init_main redundant with the jumpToEnd from stop?
-                    init_main();
+                    init_main(false);
                 }
             }
         });
@@ -662,10 +737,10 @@
             intro_animation.start();
         } else {
             // bypass intro animation and go directly to the main page content
-            init_main();
+            init_main(true);
         }
         
-        map_window_switch_user("justinbieber");
+        map_window_switch_user("mariobatali");
     });
 })();
 

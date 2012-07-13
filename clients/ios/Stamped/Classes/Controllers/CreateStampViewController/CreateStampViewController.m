@@ -61,7 +61,7 @@
 
 - (void)commonInit {
     
-    self.imageUploader = [[STS3Uploader alloc] init];
+    self.imageUploader = [[[STS3Uploader alloc] init] autorelease];
     self.title = NSLocalizedString(@"New Stamp", @"New Stamp");
     
 }
@@ -356,12 +356,14 @@
 - (void)creditPickerViewController:(CreditPickerViewController*)controller doneWithUsers:(NSArray*)users {
     
     self.creditUsers = users;
-    [self dismissModalViewControllerAnimated:YES];
+    [Util compareAndPopController:controller animated:YES];
+    //[self dismissModalViewControllerAnimated:YES];
     
 }
 
 - (void)creditPickerViewControllerCancelled:(CreditPickerViewController*)controller {
-    [self dismissModalViewControllerAnimated:YES];
+   // [self dismissModalViewControllerAnimated:YES];
+    [Util compareAndPopController:controller animated:YES];
 }
 
 
@@ -424,13 +426,15 @@
 
 - (void)createEditViewSelectedCreditPicker:(CreateEditView*)view {
     
-    CreditPickerViewController *controller = [[CreditPickerViewController alloc] initWithEntityIdentifier:(self.entity==nil) ? self.searchResult.searchID : self.entity.entityID selectedUsers:self.creditUsers];
+    CreditPickerViewController *controller = [[[CreditPickerViewController alloc] initWithEntityIdentifier:(self.entity==nil) ? self.searchResult.searchID : self.entity.entityID selectedUsers:self.creditUsers] autorelease];
     controller.delegate = (id<CreditPickerViewControllerDelegate>)self;
     
-    STRootViewController *navContorller = [[STRootViewController alloc] initWithRootViewController:controller];
-    [self presentModalViewController:navContorller animated:YES];
-    [controller release];
-    [navContorller release];
+    [Util pushController:controller modal:YES animated:YES];
+    //    
+//    STRootViewController *navContorller = [[STRootViewController alloc] initWithRootViewController:controller];
+//    [self presentModalViewController:navContorller animated:YES];
+//    [controller release];
+//    [navContorller release];
     
 }
 

@@ -190,7 +190,7 @@ static STRdio* _sharedInstance;
             id<STPlaylistItem> item = [context.entityDetail.playlist.data objectAtIndex:i];
             NSString* itemID = [self itemIDForItem:item];
             if (itemID) {
-                STSimplePlaylistItem* simpleItem = [[STSimplePlaylistItem playlistItemWithItem:item] retain];
+                STSimplePlaylistItem* simpleItem = [STSimplePlaylistItem playlistItemWithItem:item];
                 [array addObject:simpleItem];
                 if (!simpleItem.images) {
                     simpleItem.images = images;
@@ -212,7 +212,6 @@ static STRdio* _sharedInstance;
         if (!item.subtitle) {
             item.subtitle = defaultSubtitle;
         }
-        [item retain];
         return [NSArray arrayWithObject:item];
     }
 }

@@ -23,7 +23,7 @@ from resolve.EntityProxySource  import EntityProxySource
 from api.Schemas                import PlaceEntity
 from search.SearchResultDeduper        import SearchResultDeduper
 from search.DataQualityUtils           import *
-
+from greenlet                   import GreenletExit
 
 def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
@@ -163,11 +163,15 @@ class EntitySearch(object):
                 source.sourceName, str(after - before), len(results), len(filteredResults)
             ))
             resultsDict[source] = filteredResults
+        except GreenletExit:
+            pass
         except:
             logs.report()
             resultsDict[source] = []
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
+        if not isinstance(text, unicode):
+            text = text.decode('utf-8')
         if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -235,7 +239,6 @@ class EntitySearch(object):
             else:
                 fastResolveQueries.append((result.resolverObject.source, result.resolverObject.key))
 
-        # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
         fastResolvedIds = filter(None, self.__stampedSource.resolve_fast_batch(fastResolveQueries)) if fastResolveQueries else []
 
         allIds = idsFromClusteredEntities + fastResolvedIds

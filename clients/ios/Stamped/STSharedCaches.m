@@ -58,7 +58,7 @@ static STCache* _todoCache = nil;
     }
     else {
         id<STCachePageSource> pageSource = [[[STInboxPageSource alloc] initWithScope:scope] autorelease];
-        STGenericCacheConfiguration* configuration = [[STGenericCacheConfiguration alloc] init];
+        STGenericCacheConfiguration* configuration = [[[STGenericCacheConfiguration alloc] init] autorelease];
         configuration.pageSource = pageSource;
         NSString* name = [NSString stringWithFormat:@"InboxCache%@", [[STStampedAPI sharedInstance] stringForScope:scope]];
         return [STCache cacheForName:name
@@ -105,7 +105,7 @@ static STCache* _todoCache = nil;
     }
     else {
         id<STCachePageSource> pageSource = [[[STTodosPageSource alloc] init] autorelease];
-        STGenericCacheConfiguration* configuration = [[STGenericCacheConfiguration alloc] init];
+        STGenericCacheConfiguration* configuration = [[[STGenericCacheConfiguration alloc] init] autorelease];
         configuration.pageSource = pageSource;
         NSString* name = [NSString stringWithFormat:@"TodosCache"];
         return [STCache cacheForName:name

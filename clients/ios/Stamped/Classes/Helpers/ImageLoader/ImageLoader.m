@@ -96,11 +96,11 @@ static NSMutableDictionary *_connections;
         [connection start];
         [request release];
         
-        NSMutableData *data = [[NSMutableData alloc] init];
+        NSMutableData *data = [[[NSMutableData alloc] init] autorelease];
         NSMutableDictionary *connectionData = [[NSMutableDictionary alloc] initWithObjectsAndKeys:data, @"data", [handler copy], @"handler", connection, @"connection", nil];
        
         if (style) {
-            [connectionData setObject:[style copy] forKey:@"style"];
+            [connectionData setObject:[[style copy] autorelease] forKey:@"style"];
             [connectionData setObject:identifier forKey:@"style_identifier"];
         }
         
