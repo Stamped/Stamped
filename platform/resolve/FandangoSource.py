@@ -74,11 +74,3 @@ class FandangoSource(DumbSource):
     def __init__(self):
         super(FandangoSource, self).__init__('fandango', groups=['last_popular'], kinds=['media_item'], types=['movie'])
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        super(FandangoSource, self).enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
-        if proxy.key:
-            entity.sources.fandango_id = proxy.key
-        if proxy.url:
-            entity.sources.fandango_url = proxy.url
-        return True
-

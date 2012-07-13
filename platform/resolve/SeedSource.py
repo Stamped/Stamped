@@ -52,7 +52,7 @@ class SeedSource(BasicSource):
         for group in self.__simple_groups:
             self.addGroup(group)
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         for group in self.__simple_groups:
             try:
                 source = "%s_source" % group

@@ -36,7 +36,7 @@ class SinglePlatformSource(BasicSource):
     def __singleplatform(self):
         return StampedSinglePlatform()
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         singleplatform_id = getattr(entity.sources, 'singleplatform_id')
         try:
             if singleplatform_id is not None:
@@ -51,10 +51,5 @@ class SinglePlatformSource(BasicSource):
             logs.warning("HttpError %s from SinglePlatform for %s" % (e.code,singleplatform_id))
         except Exception as e:
             report("unexpected SinglePlatformSource error: %s" % e)
-        return True
-
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.singleplatform_id = proxy.key
         return True
 

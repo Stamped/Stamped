@@ -50,7 +50,7 @@ class FormatSource(BasicSource):
     def __factual(self):
         return globalFactual()
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         if entity.kind == 'place' and len(entity.types) == 0:
             if entity['lat'] is not None and entity['lng'] is not None and entity['googleplaces_id'] is not None:
                 factual_id = self.__factual.factual_from_entity(entity)

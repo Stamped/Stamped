@@ -174,11 +174,6 @@ class TheTVDBSource(GenericSource):
     def entityProxyFromData(self, data):
         return TheTVDBSource(data=data)
     
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.thetvdb_id = proxy.key
-        return True
-    
     def matchSource(self, query):
         if query.kind == 'search':
             return self.searchAllSource(query)

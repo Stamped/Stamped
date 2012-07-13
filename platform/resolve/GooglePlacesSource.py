@@ -461,7 +461,7 @@ class GooglePlacesSource(GenericSource):
         
         return None
     
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         if not controller.shouldEnrich('googleplaces', self.sourceName, entity):
             return False
         
@@ -490,13 +490,6 @@ class GooglePlacesSource(GenericSource):
         
         return True
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.googleplaces_id = proxy.key
-        entity.sources.googleplaces_reference = proxy.key
-        ### NOTE: It looks like the proxy.key is actually the reference. Shouldn't this be the id?
-        return True
-    
     def __details(self, entity):
         try:
             details = None
