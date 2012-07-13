@@ -171,7 +171,7 @@
                     $intro_iphone.animate({
                         top : offset
                     }, {
-                        duration : 800, 
+                        duration : 1000, 
                         easing   : "swing", 
                         complete : function() {
                             // intro animation is fully complete here
