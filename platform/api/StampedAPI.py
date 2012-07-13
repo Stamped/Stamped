@@ -2410,7 +2410,7 @@ class StampedAPI(AStampedAPI):
         # Enrich linked user, entity, todos, etc. within the stamp
         ### TODO: Pass userIds (need to scrape existing credited users)
         stamp = self._enrichStampObjects(stamp, authUserId=authUserId, entityIds=entityIds)
-        logs.debug('### stampExists: %s' % stampExists)
+        logs.debug('Stamp exists: %s' % stampExists)
 
         if not stampExists:
             # Add a reference to the stamp in the user's collection
@@ -2817,7 +2817,7 @@ class StampedAPI(AStampedAPI):
 
         # for now, only post to open graph for mike and kevin
         if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
-            logs.info('Skipping Open Graph post because user not on whitelist')
+            logs.warning('### Skipping Open Graph post because user not on whitelist')
             return
 
         if account.linked is None or account.linked.facebook is None or account.linked.facebook.share_settings is None\
@@ -2869,12 +2869,6 @@ class StampedAPI(AStampedAPI):
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
         result = self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
-
-
-#        links = stamp.links
-#        if links is None:
-#            links = StampLinks()
-#        links.og_id =
 
 
     """
@@ -3117,7 +3111,8 @@ class StampedAPI(AStampedAPI):
         # Remove like (if it exists)
         if not self._stampDB.removeLike(authUserId, stampId):
             logs.warning('Attempted to remove a like that does not exist')
-            return self._stampDB.getStamp(stampId)
+            stamp = self._stampDB.getStamp(stampId)
+            return self._enrichStampObjects(stamp, authUserId=authUserId)
 
         # Get stamp object
         stamp = self._stampDB.getStamp(stampId)

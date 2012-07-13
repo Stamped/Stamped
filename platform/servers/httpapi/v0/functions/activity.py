@@ -27,7 +27,6 @@ def collection(request, authUserId, http_schema, **kwargs):
         except Exception as e:
             logs.warning("Failed to enrich activity: %s" % e)
             logs.debug("Activity: %s" % item)
-    logs.debug("### importEnrichedActivity for all HTTPActivity: %s" % (time.time() - t0))
     return transformOutput(result)
 
 @handleHTTPRequest(exceptions=exceptions)
