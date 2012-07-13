@@ -540,6 +540,8 @@
                     'pointer-events' : 'none', 
                 });
                 
+                $canvas.addClass("blur-none").removeClass("blur-nohover");
+                
                 $list.animate({
                     height : "0"
                 }, {
@@ -550,6 +552,8 @@
                     }
                 });
             } else { // expanding animation
+                $canvas.removeClass("blur-none").addClass("blur-nohover");
+                
                 $list.animate({
                     height : list_height_expanded_px
                 }, {
@@ -567,33 +571,42 @@
             return false;
         });
         
-        if (!lite) {
-            var $stamp_list_view_items = $list.find('.stamp-list-view-item');
+        var $stamp_list_view_items = $list.find('.stamp-list-view-item');
+        
+        var get_stamp_list_view_item_id = function($elem) {
+            var stamp_id = g_extract_data($elem, 'stamp-id-', null);
             
-            var get_stamp_list_view_item_id = function($elem) {
-                var stamp_id = g_extract_data($elem, 'stamp-id-', null);
-                
-                if (stamp_id === null) {
-                    console.debug("ERROR: no stamp_id for stamp-list-view-item: " + $elem);
-                }
-                
-                return stamp_id;
-            };
+            if (stamp_id === null) {
+                console.debug("ERROR: no stamp_id for stamp-list-view-item: " + $elem);
+            }
             
-            // initialize stamp-list-view functionality
-            $stamp_list_view_items.click(function(event) {
-                event.preventDefault();
-                
-                var $this       = $(this);
-                var stamp_id    = get_stamp_list_view_item_id($this);
-                
-                if (stamp_id !== null) {
+            return stamp_id;
+        };
+        
+        // initialize stamp-list-view functionality
+        $stamp_list_view_items.click(function(event) {
+            event.preventDefault();
+            
+            var $this       = $(this);
+            var stamp_id    = get_stamp_list_view_item_id($this);
+            
+            if (stamp_id !== null) {
+                if (lite) {
+                    var stamp = get_stamp(stamp_id);
+                    if (!!stamp && !!stamp.url && parent.frames.length > 0) {
+                        var url = stamp.url.replace('http://www.stamped.com', '');
+                        
+                        top.location = url;
+                    }
+                } else {
                     open_stamp_map_popup(stamp_id);
                 }
-                
-                return false;
-            });
+            }
             
+            return false;
+        });
+        
+        if (!lite) {
             // filter stamp-list-view contents w.r.t. current viewport
             var bounds_changed = function(event) {
                 var bounds = map.getBounds();

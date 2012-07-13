@@ -24,7 +24,7 @@ MIN_CLUSTER_DATA_QUALITY = 0.7
 ############################################################################################################
 
 def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
-    if movieSearchResult.release_date is None:
+    if movieSearchResult.resolverObject.release_date is None:
         # This is a non-trivial penalty because this is a key differentiator of movies with the same title. Case
         # would work, but it's very rarely present on both parties of a comparison. Having a good release date is
         # key.
@@ -32,15 +32,16 @@ def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
         movieSearchResult.dataQuality *= 1 - penalty
         movieSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
-    if movieSearchResult.director:
+    if movieSearchResult.resolverObject.directors:
         boost = 0.1
         movieSearchResult.dataQuality *= 1 + boost
         movieSearchResult.addDataQualityComponentDebugInfo("boost for director", boost)
 
-    if movieSearchResult.cast:
-        boost = 0.05 * math.log(1 + len(movieSearchResult.cast))
+    if movieSearchResult.resolverObject.cast:
+        boost = 0.05 * math.log(1 + len(movieSearchResult.resolverObject.cast))
         movieSearchResult.dataQuality *= 1 + boost
-        movieSearchResult.addDataQualityComponentDebugInfo("boost for cast of size %d" % len(movieSearchResult.cast), boost)
+        movieSearchResult.addDataQualityComponentDebugInfo(
+                "boost for cast of size %d" % len(movieSearchResult.resolverObject.cast), boost)
 
 
 def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):

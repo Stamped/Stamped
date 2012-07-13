@@ -21,9 +21,11 @@ def main():
     parser.add_option('--nuclear', action='store_true', dest='nuclear', default=False)
     parser.add_option('--max_to_remove', action='store', dest='max_to_remove', default=None)
     (options, args) = parser.parse_args()
-    if options.nuclear:
+    if options.nuclear or options.dry_run:
         print 'FUCK THE WORLD'
+        MongoEntityColleciton()._collection.drop()
         # "Welcome to the human race." --Snake Plissken
+        return
 
     entity_collection = MongoEntityCollection()._collection
     entity_ids = [result['_id'] for result in entity_collection.find(fields={'_id':True})]
@@ -38,7 +40,7 @@ def main():
             list(todos._collection.find({'entity.entity_id' : str(entity_id)}, fields={'_id':1})) or
             list(stamps._collection.find({'entity.entity_id' : str(entity_id)}, fields={'_id':1}))
         )
-        if has_attached_user_interactions and not options.nuclear:
+        if has_attached_user_interactions:
             print 'SKIPPING', entity_id
             continue
         entity_collection.remove({'_id':entity_id})

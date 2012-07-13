@@ -168,12 +168,12 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                     else:
                         raise StampedDataError(msg)
             if len(credits) > 0:
-                document['credits'] = credits
+                stamp.credits = credits
             else:
                 msg = "%s: Cleaning up credits" % key
                 logs.info(msg)
                 if repair:
-                    del(document['credits'])
+                    del(stamp.credits)
                     modified = True
 
         # Verify that entity exists
@@ -215,6 +215,11 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         duplicateStamps = self._collection.find({'user.user_id' : userId, 'stats.stamp_num' : stampNum})
         if duplicateStamps.count() > 1:
             msg = "%s: Multiple stamps exist for userId '%s' and stampNum '%s'" % (key, userId, stampNum)
+            raise StampedDataError(msg)
+
+        # Verify that this is the only stamp for this user for this entity
+        if self._collection.find({'user.user_id': userId, 'entity.entity_id': stamp.entity.entity_id}).count() > 1:
+            msg = "%s: Multiple stamps exist for user '%s' and entity '%s'" % (key, userId, stamp.entity.entity_id)
             raise StampedDataError(msg)
 
         ### TODO

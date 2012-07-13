@@ -85,21 +85,25 @@ def getComparator(entity):
         return AppEntityProxyComparator
     raise Exception('Unrecognized entity proxy type:' + str(type(entity_proxy)))
 
-def log_entity_and_proxies(entity, proxies):
+def log_entity_and_proxies(entity, proxies, report_file):
     logs.warning('\n\n' + pformat(entity) + '\n\n')
-    logs.warning('\n\n'.join(map(str, proxies)) + '\n\n')
+    logs.warning('\n\n'.join(map(str, proxies)) + '\n\n\n\n')
+    report_file.write('\n' + pformat(entity) + '\n\n')
+    report_file.write('\n\n'.join(map(str, proxies)) + '\n\n\n\n\n\n')
 
-def entityIsWellResolved(entity):
+def entityIsWellResolved(entity, report_file):
     proxies = entityToProxies(entity)
     comparator = getComparator(entity)
     entity_proxy = proxies[0]
     component_proxies = proxies[1:]
     for component_proxy in component_proxies:
         if comparator.compare_proxies(entity_proxy, component_proxy).is_definitely_not_match():
-            logs.warning('BAD RESOLUTION: Entity (%s, id:%s) disagrees with component_proxy (%s, id:%s:%s)' % (
-              entity.title, entity.entity_id, component_proxy.name, component_proxy.source, component_proxy.key
-            ))
-            log_entity_and_proxies(entity, component_proxies)
+            msg = 'BAD RESOLUTION: Entity (%s, id:%s) disagrees with component_proxy (%s, id:%s:%s)' % (
+                entity.title, entity.entity_id, component_proxy.name, component_proxy.source, component_proxy.key
+            )
+            logs.warning(msg)
+            report_file.write(msg + '\n')
+            log_entity_and_proxies(entity, component_proxies, report_file)
             return False
 
     if not component_proxies:
@@ -109,12 +113,14 @@ def entityIsWellResolved(entity):
     for i in range(len(component_proxies)):
         for j in range(i):
             if comparator.compare_proxies(component_proxies[i], component_proxies[j]).is_definitely_not_match():
-                logs.warning('BAD RESOLUTION: For entity (%s, id:%s), component (%s, id:%s:%s) disagrees with component (%s, id:%s:%s)' % (
+                msg = 'BAD RESOLUTION: For entity (%s, id:%s), component (%s, id:%s:%s) disagrees with component (%s, id:%s:%s)' % (
                     entity.title, entity.entity_id,
                     component_proxies[i].name, component_proxies[i].source, component_proxies[i].key,
                     component_proxies[j].name, component_proxies[j].source, component_proxies[j].key
-                ))
-                log_entity_and_proxies(entity, component_proxies)
+                )
+                logs.warning(msg)
+                report_file.write(msg + '\n')
+                log_entity_and_proxies(entity, component_proxies, report_file)
                 return False
 
     connected_components = set()
@@ -131,8 +137,10 @@ def entityIsWellResolved(entity):
             newly_connected_components.add(match)
 
     if unconnected_components:
-        logs.warning('BAD RESOLUTION: Entity (%s, id:%s) is not fully connected!' % (entity.title, entity.entity_id))
-        log_entity_and_proxies(entity, component_proxies)
+        msg = 'BAD RESOLUTION: Entity (%s, id:%s) is not fully connected!' % (entity.title, entity.entity_id)
+        logs.warning(msg)
+        report_file.write(msg + '\n')
+        log_entity_and_proxies(entity, component_proxies, report_file)
         return False
 
     return True
@@ -143,22 +151,26 @@ def main():
     parser = OptionParser(usage=usage, version=version)
     parser.add_option('--dry_run', action='store_true', dest='dry_run', default=None)
     # TODO: Ability to limit by vertical
-    parser.add_option('--max_checks', action='store', dest='max_checks', default=500)
-    parser.add_option('--max_errors', action='store', dest='max_errors', default=20)
+    parser.add_option('--max_checks', type='int', action='store', dest='max_checks', default=500)
+    parser.add_option('--max_errors', type='int', action='store', dest='max_errors', default=20)
     parser.add_option('--stamped_only', action='store_true', dest='stamped_only', default=True)
+    parser.add_option('--report_out', action='store', dest='report_out', default=None)
     (options, args) = parser.parse_args()
 
+    if not options.report_out:
+        raise Exception('--report_out is required!')
 
     all_entity_ids = getAllEntityIds(options.stamped_only)
     random.shuffle(all_entity_ids)
     error_entity_ids = []
     entities_checked = 0
     entity_collection = MongoEntityCollection()
+    report_file = open(options.report_out, 'w')
     for entity_id in all_entity_ids[:options.max_checks]:
         try:
             entities_checked += 1
             entity = entity_collection.getEntity(entity_id)
-            well_resolved = entityIsWellResolved(entity)
+            well_resolved = entityIsWellResolved(entity, report_file)
             if not well_resolved:
                 error_entity_ids.append(entity_id)
                 if len(error_entity_ids) >= options.max_errors:
@@ -166,9 +178,16 @@ def main():
         except ValueError:
             pass
 
+    report_file.close()
+
     print 'Of %d entities examined, %d were found to have errors!' % (entities_checked, len(error_entity_ids))
-    print sourceAttemptCounts
-    print sourceFailureCounts
+    for id in error_entity_ids:
+        print id
+
+    for (source, num_attempts) in sourceAttemptCounts.items():
+        print('source %s was seen in %d entities, and %d of those references were broken' % (
+            source, num_attempts, sourceFailureCounts[source]
+        ))
 
 if __name__ == '__main__':
     main()

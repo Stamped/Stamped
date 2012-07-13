@@ -63,7 +63,11 @@
 
 {% block profile_main_content %}
     <div class="stamp-map">
-        <div class="stamp-map-canvas"></div>
+        <div class="stamp-map-canvas blur-nohover">
+            {% if lite %}
+                <div id="static-stamp-map-canvas" class="blur_3"></div>
+            {% endif %}
+        </div>
         
         {% if not lite %}
             <a class="my-location" href="#" title="My Location">

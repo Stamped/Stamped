@@ -18,17 +18,27 @@
         // ---------------------------------------------------------------------
         
         
-        var $window             = $(window);
-        var $body               = $("body");
-        var $main               = $("#main");
-        var $main_body          = $("#main-body");
-        var $main_iphone        = $("#main-iphone");
-        var $tastemaker_gallery = $("#tastemaker-gallery");
-        var $tastemakers        = $(".tastemaker");
-        var $map_window_url     = $("#fake-url");
-        var $map_window         = $("#tastemaker-map-window");
-        var $map_window_iframe  = null;
-        var $app_store_button   = $("footer .app-store-button");
+        var $window                 = $(window);
+        var $body                   = $("body");
+        var $main                   = $("#main");
+        
+        // main iphone
+        var $main_body              = $("#main-body");
+        var $main_iphone            = $("#main-iphone");
+        var $iphone_screens         = $(".iphone-screens");
+        var $iphone_inbox_body      = $(".iphone-inbox-body");
+        var $iphone_inbox_selection = $(".iphone-inbox-selection");
+        var $iphone_back_button     = $(".iphone-screen-back-button");
+        var iphone_inbox_selection  = false;
+        
+        var $tastemaker_gallery     = $("#tastemaker-gallery");
+        var $tastemakers            = $(".tastemaker");
+        
+        var $map_window_url         = $("#fake-url");
+        var $map_window             = $("#tastemaker-map-window");
+        var $map_window_overlay     = $("#tastemaker-map-window-overlay");
+        var $map_window_iframe      = null;
+        var $app_store_button       = $("footer .app-store-button");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -121,6 +131,10 @@
                 this.stop(true, false);
                 
                 return this.start();
+            }, 
+            
+            is_running : function() {
+                return !!this._easer;
             }
         });
         
@@ -170,7 +184,7 @@
                     $intro_iphone.animate({
                         top : offset
                     }, {
-                        duration : 800, 
+                        duration : 1000, 
                         easing   : "swing", 
                         complete : function() {
                             // intro animation is fully complete here
@@ -313,7 +327,7 @@
                 .stop(true, false)
                 .show()
                 .animate({
-                    right       : "-789px"
+                    left        : "50%"
                 }, {
                     easing      : "easeOutExpo", 
                     duration    : 800
@@ -324,16 +338,16 @@
             $map_window
                 .stop(true, false)
                 .animate({
-                    right       : "-1200px"
+                    left        : "100%"
                 }, {
                     easing      : "easeInQuad", 
-                    duration    : 400, 
+                    duration    : 600, 
                     complete    : function() {
                         $map_window.hide();
                     }
                 });
             
-            $app_store_button.show(400);
+            $app_store_button.show(600);
         };
         
         var map_window_switch_user = function(screen_name) {
@@ -342,6 +356,7 @@
             if (screen_name !== active) {
                 $map_window.data("active", screen_name);
                 
+                // TODO: temporary until all tastemakers have valid accounts
                 var screen_name_lower = screen_name.toLowerCase();
                 
                 if (screen_name_lower === "justinbieber") {
@@ -366,7 +381,21 @@
                     $map_window.append(iframe);
                     $map_window_iframe = $("#tastemaker-map-window-iframe");
                 } else {
-                    $map_window_iframe.attr("src", iframe_src);
+                    $map_window_iframe.attr("src", iframe_src)
+                    
+                    $map_window_overlay
+                        .stop(true, false)
+                        .fadeIn(200);
+                    
+                    $map_window_iframe.ready(function() {
+                        //console.debug("LOADED " + iframe_src);
+                        
+                        setTimeout(function() {
+                            $map_window_overlay
+                                .stop(true, false)
+                                .fadeOut(500);
+                        }, 3000);
+                    });
                 }
             }
         };
@@ -471,11 +500,160 @@
             return false;
         });
         
+        var get_iphone_inbox_bg_pos = function() {
+            var bg_pos = $iphone_inbox_body.css("background-position").split(" ");
+            
+            return parseInt(bg_pos[1]);
+        };
+        
+        $iphone_inbox_body
+            .drag("start", function(event, dd) {
+                dd.orig_y  = -get_iphone_inbox_bg_pos();
+                
+                iphone_inbox_selection_hide();
+            })
+            .drag(function(event, dd) {
+                var $this  = $(this);
+                var offset = -Math.max(0, Math.min(318, dd.orig_y - dd.deltaY));
+                
+                $this.css('background-position', "0 " + offset + "px");
+            });
+        
+        iphone_inbox_stamps = [
+            {
+                id : "Son of a Gun Restaurant", 
+                y0 : 49, 
+                y1 : 150
+            }, 
+            {
+                id : "The Hunger Games", 
+                y1 : 220
+            }, 
+            {
+                id : "Taxi Driver", 
+                y1 : 291
+            }, 
+            {
+                id : "The Baxter Garage", 
+                y1 : 396
+            }, 
+            {
+                id : "Instagram", 
+                y1 : 466
+            }, 
+            {
+                id : "The Bourne Ultimatum (0)", 
+                y1 : 537
+            }, 
+            {
+                id : "The Bourne Ultimatum (1)", 
+                y1 : 608
+            }, 
+            {
+                id : "The Bourne Ultimatum (2)", 
+                y1 : 688
+            }
+        ];
+        
+        var get_iphone_screen_body_selection = function(event) {
+            var bg_y     = get_iphone_inbox_bg_pos();
+            var offset_y = event.pageY - $iphone_inbox_body.offset().top;
+            var offset   = offset_y - bg_y;
+            
+            var l  = iphone_inbox_stamps.length;
+            var y0 = iphone_inbox_stamps[0].y0;
+            var i, y1, stamp = null;
+            
+            //console.debug("bg_y: " + bg_y + "; offset_y: " + offset_y + "; offset: " + offset);
+            
+            for (i = 0; i < l; ++i) {
+                stamp = iphone_inbox_stamps[i];
+                y1    = stamp.y1;
+                
+                if (offset >= y0 && offset <= y1) {
+                    break;
+                } else {
+                    y0 = y1;
+                }
+            }
+            
+            return {
+                y0 : y0 + bg_y, 
+                y1 : y1 + bg_y, 
+                id : stamp.id
+            };
+        };
+        
+        var iphone_inbox_selection_hide = function(event) {
+            if (iphone_inbox_selection) {
+                $iphone_inbox_selection.css('display', 'none');
+                iphone_inbox_selection = false;
+            }
+        };
+        
+        var iphone_inbox_selection_show = function(event) {
+            var selection = get_iphone_screen_body_selection(event);
+            
+            if (!!selection) {
+                iphone_inbox_selection = true;
+                
+                $iphone_inbox_selection.css({
+                    'display'   : 'block', 
+                    'height'    : (selection.y1 - selection.y0 + 1) + "px", 
+                    'top'       : selection.y0 + "px"
+                });
+            }
+            
+            return selection;
+        };
+        
+        $iphone_inbox_body.click(function(event) {
+            event.preventDefault();
+            
+            selection = iphone_inbox_selection_show(event);
+            
+            if (!!selection) {
+                console.debug(selection);
+                
+                $iphone_screens.removeClass("iphone-screen-active-inbox").addClass("iphone-screen-active-sdetail");
+            }
+            
+            return false;
+        });
+        
+        $iphone_inbox_body.mousedown(function(event) {
+            event.preventDefault();
+            
+            iphone_inbox_selection_show(event);
+            return false;
+        });
+        
+        $body.on("mouseup", iphone_inbox_selection_hide);
+        
+        $iphone_back_button.click(function(event) {
+            event.preventDefault();
+            
+            $iphone_screens.removeClass("iphone-screen-active-sdetail").addClass("iphone-screen-active-inbox");
+            return false;
+        });
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
         // ---------------------------------------------------------------------
         
+        
+        $(document).bind('keydown', function(e) {
+            if (e.which == 27) { // ESC
+                // skip the intro animation if the user presses escape
+                if (intro_animation.is_running()) {
+                    intro_animation.stop(true, true);
+                    
+                    // TODO: is this init_main redundant with the jumpToEnd from stop?
+                    init_main();
+                }
+            }
+        });
         
         $window.resize(update_main_layout);
         

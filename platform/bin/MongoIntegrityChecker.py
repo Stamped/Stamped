@@ -22,9 +22,10 @@ from api.db.mongodb.MongoUserLikesCollection            import MongoUserLikesCol
 from api.db.mongodb.MongoUserTodosEntitiesCollection    import MongoUserTodosEntitiesCollection
 from api.db.mongodb.MongoStampCommentsCollection        import MongoStampCommentsCollection
 
-from api.db.mongodb.MongoStampCollection                import MongoStampCollection
-from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection
 from api.db.mongodb.MongoAccountCollection              import MongoAccountCollection
+from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection
+from api.db.mongodb.MongoStampCollection                import MongoStampCollection
+from api.db.mongodb.MongoTodoCollection                 import MongoTodoCollection
 
 import gevent
 from gevent.queue import Queue, Empty
@@ -39,9 +40,10 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    MongoEntityCollection,
     MongoAccountCollection,
+    MongoEntityCollection,
     MongoStampCollection,
+    MongoTodoCollection,
 ]
 
 WORKER_COUNT = 10
@@ -95,7 +97,8 @@ def worker(db, collection, stats, options):
                 logs.warning("%s: FAIL" % documentId)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
                 stats['errors'].append(e)
-                api.mergeEntityId(str(documentId))
+                if libs.ec2_utils.is_ec2():
+                    api.mergeEntityId(str(documentId))
 
             except StampedDataError as e:
                 logs.warning("%s: FAIL" % documentId)
@@ -115,7 +118,7 @@ def worker(db, collection, stats, options):
 
 def handler(db, options):
     query = {}
-    # query = {'_id': bson.objectid.ObjectId("4ecbdfcb366b3c188700035a")}
+    # query = {'_id': bson.objectid.ObjectId("4f7095cab951fe10e8000a05")}
     for i in db._collection.find(query, fields=['_id']):
         if options.sampleSetRatio < 1 and random.random() > options.sampleSetRatio:
             continue
