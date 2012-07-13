@@ -123,14 +123,14 @@ def simplify(string):
     Multipass safe and partially optimized
     """
 
-    result = unicodedata.normalize('NFKD', unicode(string))
-    result = format(result.lower().strip())
-    result = regexRemoval(result, _general_regex_removals)
+    string = unicodedata.normalize('NFKD', unicode(string)).encode('ascii', 'ignore')
+    string = format(string.lower().strip())
+    string = regexRemoval(string, _general_regex_removals)
 
     for find, replacement in _general_replacements:
-        result = result.replace(find, replacement)
+        string = string.replace(find, replacement)
 
-    return format(result)
+    return format(string)
 
 def trackSimplify(name, artist=None):
     string = simplify(name)
