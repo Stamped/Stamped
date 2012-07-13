@@ -2781,24 +2781,15 @@ class StampedAPI(AStampedAPI):
         elif len(blurb) > 0:
             length_score = 1 
             
-        mention_re = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
-        # URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
-        url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
-        
-        mentions = mention_re.finditer(blurb)
-        urls = url_re.finditer(blurb)
-        
-        mention_score = 0
-        url_score = 0
-        
-        for mention in mentions:
-            mention_score += 1
+        #Blurb has at least one mention in it
+        if len(utils.findMentions(blurb)) > 0:
+            mention_score = 1
             
-        for url in urls:
-            url_score += 1
+        if len(utils.findMentions(blurb)) > 0:
+            url_score = 1
             
         has_quote = 0
-        if blurb.find('\"') != -1:
+        if '"' in blurb:
             has_quote = 1
         
         quality = (2 * stats.num_credits) + (2 * image_score) + (1 * length_score) + (1 * mention_score) + (1* url_score) + (1 * has_quote)
@@ -3423,7 +3414,7 @@ class StampedAPI(AStampedAPI):
         assert(authUserId is not None)
 
         forceRefresh = False
-
+        
         try:
             guide = self._guideDB.getGuide(authUserId)
         except (StampedUnavailableError, KeyError):
@@ -3443,33 +3434,6 @@ class StampedAPI(AStampedAPI):
         offset = 0
         if guideRequest.offset is not None:
             offset = guideRequest.offset
-        
-        #Simulated lottery to shuffle the top 20 (or whatever limit is given when offset == 0)
-        if offset == 0 and guideRequest.section != "food":
-            lotterySize = min(limit,len(allItems))
-            lotteryItems = allItems[0:lotterySize]
-            aggScore = reduce(lambda x, y: x + (y.score if y.score is not None else 0.0),lotteryItems,0.0)
-            if aggScore > 0:
-                unselected = []
-                selected = []
-                cutoff = 0
-                for item in lotteryItems:
-                    cutoff += item.score
-                    unselected.append((cutoff,item))
-                count = 0
-                while len(selected) < lotterySize:
-                    r = random()*aggScore
-                    for cutoff,item in unselected:
-                        if r < cutoff:
-                            if item in selected:
-                                break
-                            else:
-                                selected.append(item)
-                                allItems[count] = item
-                                count += 1
-                                break
-                    
-                
             
             
         entityIds = {}
@@ -3525,8 +3489,35 @@ class StampedAPI(AStampedAPI):
 
             if i >= limit + offset:
                 break
-
+        
         items = items[offset:]
+        
+        #Simulated lottery to shuffle the top 20 (or whatever limit is given when offset == 0)
+        if items[0].score is not None: 
+            if offset == 0 and guideRequest.section != "food":
+                lotterySize = min(limit,len(items))
+                lotteryItems = items[0:lotterySize]
+                aggScore = reduce(lambda x, y: x + y.score,lotteryItems,0.0)
+                if aggScore > 0:
+                    unselected = []
+                    selected = []
+                    cutoff = 0
+                    for item in lotteryItems:
+                        cutoff += item.score
+                        unselected.append((cutoff,item))
+                    while len(selected) < lotterySize:
+                        r = random()*aggScore
+                        index = 0
+                        for cutoff,item in unselected:
+                            if r < cutoff:
+                                unselected.pop(index)
+                                selected.append(item)
+                                aggScore -= item.score
+                                unselected = map(lambda (x,y): (((x-item.score) if x > cutoff else x), y),unselected)    
+                                break
+                            else:
+                                index += 1
+                    items = selected
 
         # Entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3963,8 +3954,8 @@ class StampedAPI(AStampedAPI):
             sections[section].add(entity)
 
         def entityScore(**kwargs):
-            section = kwargs.pop('section',None)
-            avgQuality = kwargs.pop('aggQuality',[])
+            section = kwargs.pop('section', None)
+            avgQuality = kwargs.pop('aggQuality', [])
             avgPopularity = kwargs.pop('aggPopularity', [])
             timestamps = kwargs.pop('timestamps', [])
             result = 0
@@ -4019,10 +4010,12 @@ class StampedAPI(AStampedAPI):
                 avgQuality = avgQuality / len(timestamps)
                 avgPopularity = avgPopularity / len(timestamps)
             
+            image_score = 1
             if entity.images is None:
-                result = 0
-            else:
-                result = (2 * stamp_score) - (2 * personal_stamp_score) + (3 * personal_todo_score) + (1 * avgQuality) + (1 * avgPopularity)
+                image_score = 0.01
+            
+            result = ((2 * stamp_score) - (2 * personal_stamp_score) + (3 * personal_todo_score) + (1 * avgQuality) + (1 * avgPopularity))* (image_score)
+            
             return result
 
         # Build stampMap
