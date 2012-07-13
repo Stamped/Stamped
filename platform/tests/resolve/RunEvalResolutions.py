@@ -17,7 +17,7 @@ import pprint
 
 from api.MongoStampedAPI import globalMongoStampedAPI
 from api.HTTPSchemas import HTTPEntitySearchResultsItem
-from resolve import FullResolveContainer, EntityProxyContainer
+from resolve import FullResolveContainer, EntityProxyContainer, EntityProxySource
 from resolve.AmazonSource import AmazonSource
 from resolve.FactualSource import FactualSource
 from resolve.GooglePlacesSource import GooglePlacesSource
@@ -93,7 +93,7 @@ class RunEvalResolutions(AStampedTestCase):
             try:
                 entity, original = self.__convertSearchId(searchId, resolver)
                 proxyList = self.__getResolverObjects(entity)
-                resolutionResult[searchId] = (searchId, entity, original, proxyList)
+                resolutionResult[searchId] = (entity, original, proxyList)
             except Exception:
                 formattedErrors.append(traceback.format_exc())
 
@@ -158,7 +158,7 @@ class RunEvalResolutions(AStampedTestCase):
 
         entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
         for proxy in proxies[1:]:
-            entityBuilder.addSource(EntityProxySource(proxy))
+            entityBuilder.addSource(EntityProxySource.EntityProxySource(proxy))
         entity = entityBuilder.buildEntity()
         entity.third_party_ids = id_components
         original = entity.dataExport()

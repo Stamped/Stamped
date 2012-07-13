@@ -63,6 +63,13 @@ def __formatProxyList(proxies):
 
     return '\n\n'.join(str(proxy) for proxy in proxies)
 
+
+def __hasClusteringChange(oldList, newList):
+    oldSources = set([(proxy.source, proxy.key) for proxy in oldList])
+    newSources = set([(proxy.source, proxy.key) for proxy in newList])
+    return oldSources != newSources
+
+
 def writeComparisons(oldResults, newResults, outputDir):
     oldKeys = oldResults.viewkeys()
     newKeys = newResults.viewkeys()
@@ -72,11 +79,12 @@ def writeComparisons(oldResults, newResults, outputDir):
         print '%d NEW KEYS:' % len(newKeys - oldKeys), newKeys - oldKeys
 
     changedRows = []
+    clusteringChanges = []
     allRows = []
     commonKeys = oldKeys & newKeys
     for key in commonKeys:
-        original, oldResolved, oldProxy, oldProxyList = oldResults[key]
-        _, newResolved, _, newProxyList = newResults[key]
+        oldResolved, oldOriginal, oldProxyList = oldResults[key]
+        newResolved, newOriginal, newProxyList = newResults[key]
 
         filename = key[:40] + '.html'
         oldData = __stripEntity(oldResolved.dataExport())
@@ -84,13 +92,10 @@ def writeComparisons(oldResults, newResults, outputDir):
         try:
             with open(path.join(outputDir, filename), 'w') as fout:
                 print >> fout, DIFF_FILE_HEADER
-                print >> fout, '<h1>%s</h1>' % 'Input'
-                print >> fout, '<pre class="diff">'
-                pprint.pprint(original.dataExport(), fout)
-                print >> fout, '</pre><h1>%s</h1>' % 'Proxy'
-                print >> fout, '<pre class="diff">%s</pre>' % str(oldProxy)
+                print >> fout, '<h1>%s</h1>' % 'Enrich Input'
+                print >> fout, __createDiffTable(pprint.pformat(oldOriginal), pprint.pformat(newOriginal))
                 print >> fout, '<h1>%s</h1>' % 'Resolve output'
-                print >> fout, __createDiffTable(pprint.pformat(oldData), pprint.pformat(newData))
+                print >> fout, __createDiffTable(pprint.pformat(oldResolved.dataExport()), pprint.pformat(newResolved.dataExport()))
                 print >> fout, '<h1>%s</h1>' % 'List of resolver objects:'
                 print >> fout, __createDiffTable(__formatProxyList(oldProxyList), __formatProxyList(newProxyList))
                 print >> fout, '</body></html>'
@@ -99,12 +104,21 @@ def writeComparisons(oldResults, newResults, outputDir):
             logs.report()
         diffLink = '<td><a href="%s">show diffs</a></td>' % filename
 
-        tableRow = '<tr><td>%s</td>%s</tr>' % (original.title[:100], diffLink)
+        tableRow = '<tr><td>%s</td>%s</tr>' % (oldOriginal['title'][:100], diffLink)
         if oldData != newData:
             changedRows.append(tableRow)
+        if __hasClusteringChange(oldProxyList, newProxyList):
+            clusteringChanges.append(tableRow)
         allRows.append(tableRow)
     allRowsFilename = 'index_all.html'
     writeTableOfContent(allRows, 'All results', path.join(outputDir, allRowsFilename))
+
+    summary = """
+        %d out of %d (%f%%) of the rows had clustering change. Here's a shuffled list of them.
+        <a href="%s">show all</a>
+        """ % (len(clusteringChanges), len(allRows), float(len(clusteringChanges)) * 100 / len(allRows), allRowsFilename)
+    random.shuffle(clusteringChanges)
+    writeTableOfContent(clusteringChanges, summary, path.join(outputDir, 'index_cluster.html'))
 
     summary = """
         %d out of %d (%f%%) of the rows changed. Here's a shuffled list of them.
