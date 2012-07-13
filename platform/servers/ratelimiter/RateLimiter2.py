@@ -11,8 +11,9 @@ import rpyc
 import urllib
 import httplib2
 import datetime
+import traceback
 
-from time               import time, sleep
+from time               import time, gmtime, mktime
 from collections        import deque
 
 REQUEST_DUR_LOG_SIZE    = 10    # the size of the request duration log, which is used to determine the avg request duration
@@ -58,6 +59,11 @@ class WaitTooLongException(RateException):
         Exception.__init__(self, msg)
         print(msg)
 
+class DailyLimitException(RateException):
+    def __init__(self, msg=None):
+        Exception.__init__(self, msg)
+        print(msg)
+
 class TimeoutException(RateException):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
@@ -82,10 +88,19 @@ class Request():
         self.log = RequestLog()
 
 
+events = []
+
+
 def workerProcess(limit):
+    global events
+
     period = limit.period
 
     while True:
+        if (len(events) > 0):
+            for event in events:
+                print(event)
+            events = []
         limit.handleTimestep()
         if limit._isFailed():
             print('isFailed is true.  Sleeping for %s' % (limit.fail_wait - (time() - limit.fail_start)))
@@ -98,6 +113,7 @@ class RateLimiter(object):
 
     def __init__(self, limit=None, period=None, cpd=None, fail_limit=None, fail_period=None, fail_wait=None):
         print('rate limit init')
+
         self.__requests = RLPriorityQueue()
         self.__http = httplib2.Http()
 
@@ -117,6 +133,8 @@ class RateLimiter(object):
         self.__request_dur_cap = REQUEST_DUR_CAP
 
         self.__calls = 0
+        self.__day_calls = 0
+        self.__day_start = self._getDay()
 
         self.__low_count = 0
         self.__high_count = 0
@@ -154,6 +172,11 @@ class RateLimiter(object):
             print('### hit fail limit')
             self.fail_start = time()
 
+    def call(self):
+        self.__calls += 1
+        self.__day_calls += 1
+
+
     def _isFailed(self, now=None):
         if now is None:
             now = time()
@@ -166,6 +189,20 @@ class RateLimiter(object):
         self.fail_start = None
         return False
 
+    def _isDayLimit(self):
+        now = mktime(datetime.datetime.utcnow().timetuple())
+        # reset counter if day has elapsed
+        print('Day start: %s   now: %s' % (self.__day_start, now))
+        if self.__day_start + 60*60*24 < now:
+            self.__day_start = self._getDay()
+            self.__day_calls = 0
+
+        return self.__day_calls >= self.__cpd
+
+
+    def _getDay(self):
+        now = gmtime()
+        return mktime(datetime.datetime(now.tm_year, now.tm_mon, now.tm_mday).timetuple())
 
     def _addDurationLog(self, elapsed):
         """
@@ -200,33 +237,42 @@ class RateLimiter(object):
         return rate_wait + queue_wait
 
     def addRequest(self, request, priority):
-        now = time()
+        try:
+            now = time()
 
-        expected_request_time = self._getExpectedRequestTime()
-        expected_wait_time = self._getExpectedWaitTime(now, priority)
-        expected_total_time = expected_request_time + expected_wait_time
-        request.log.expected_dur = expected_total_time
+            expected_request_time = self._getExpectedRequestTime()
+            expected_wait_time = self._getExpectedWaitTime(now, priority)
+            expected_total_time = expected_request_time + expected_wait_time
+            request.log.expected_dur = expected_total_time
 
-        if priority == 0 and expected_wait_time + expected_request_time > request.timeout:
-            raise WaitTooLongException("Expected request time too long. Expected: %s Timeout: %s" %
-                                       (expected_total_time + expected_request_time, request.timeout))
+            if priority == 0 and expected_wait_time + expected_request_time > request.timeout:
+                raise WaitTooLongException("Expected request time too long. Expected: %s Timeout: %s" %
+                                           (expected_total_time + expected_request_time, request.timeout))
 
-        if priority == 0 and self._isFailed():
-            raise TooManyFailedRequestsException("Too many failed requests. Wait time remaining: %s" %
-                                                 (self.fail_wait - (now - self.fail_start)))
+            if self._isFailed():
+                raise TooManyFailedRequestsException("Too many failed requests. Wait time remaining: %s" %
+                                                     (self.fail_wait - (now - self.fail_start)))
+            if self._isDayLimit():
+                raise DailyLimitException("Hit the daily request cap.  Wait time remaining: %s minutes" %
+                                        (((self.__day_start + 60*60*24) - now) / 60))
 
-        asyncresult = AsyncResult()
 
-        if self.__curr_timeblock_start is None:
-            self.__curr_timeblock_start = now
-        if self.__calls < self.limit:
-            self.__calls += 1
-            self.doRequest(request, asyncresult)
-        else:
-            self.__requests.put((priority, request, asyncresult))
-            print('queue_size: %s' % self.__requests.qsize())
+            asyncresult = AsyncResult()
 
-        return asyncresult
+            if self.__curr_timeblock_start is None:
+                self.__curr_timeblock_start = now
+            if self.__calls < self.limit:
+                self.call()
+                self.doRequest(request, asyncresult)
+            else:
+                self.__requests.put((priority, request, asyncresult))
+                print('queue_size: %s' % self.__requests.qsize())
+
+            return asyncresult
+        except Exception as e:
+            print('### Exception: %s' % e)
+            traceback.print_exc()
+            raise e
 
     def handleTimestep(self):
         print('self.__requests.qsize: %s' % self.__requests.qsize())
@@ -238,34 +284,41 @@ class RateLimiter(object):
         while self.__calls < self.limit:
             try:
                 (priority, request, asyncresult) = self.__requests.get(block=False)
-                self.__calls += 1
+                self.call()
                 gevent.spawn(self.doRequest, request, asyncresult)
             except gevent.queue.Empty: # TODO FIND RIGHT EXCEPTION HERE
                 break
 
     def doRequest(self, request, asyncresult):
+        global events
+
         begin = time()
 
         if (begin - request.created) > request.timeout:
             print('timeout exceptions thrown')
             raise TimeoutException('The request timed out while waiting in the rate limiter queue')
 
+        events.append('sending out http request')
         try:
             response, content = self.__http.request(request.url, request.verb, headers=request.headers, body=urllib.urlencode(request.body))
         except Exception as e:
+            events.append('Exception during request: %s' % e)
             print('Exception during request: %s' % e)
             asyncresult.set_exception(e)
             raise e
         if response.status >= 400:
             self.fail()
 
+        events.append('setting asyncresult with http response, content')
         asyncresult.set((response, content))
 
         end = time()
         elapsed = end - begin
         realized_dur = end - request.created
+        events.append('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))
         print('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))
 
+        events.append('adding duration log')
         self._addDurationLog(elapsed)
 
         return response, content

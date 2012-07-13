@@ -26,7 +26,7 @@ from optparse           import OptionParser
 
 
 limiters = {
-    'netflix'       : RateLimiter(limit=4, period=1, cpd=100000, fail_limit=10, fail_period=30, fail_wait=10),
+    'netflix'       : RateLimiter(limit=4, period=1, cpd=10, fail_limit=10, fail_period=30, fail_wait=10),
     }
 
 count = 0
