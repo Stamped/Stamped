@@ -3323,10 +3323,12 @@ class HTTPActivity(Schema):
             if not activity.personal:
                 logs.debug(self)
                 raise Exception("Invalid universal news item: %s" % self.verb)
-
+                
             if self.verb == 'notification_welcome':
+                _addUserObjects()
                 self.header = "Welcome to Stamped"
                 self.image = _getIconURL('news_welcome')
+                self.action = _buildUserAction(self.objects.users[0])
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

@@ -61,7 +61,6 @@ def getTokensForIndexing(components):
     return list(set(token.text for token in NORMALIZER(tokens)))
 
 def formatSearchQuery(queryText):
-    queryText = unicode(queryText, 'utf-8')
     tokens = (token for token in TOKENIZER(queryText))
     components = []
     for token in tokens:

@@ -266,6 +266,8 @@ class Factual(object):
         params = {}
         params['prefix']    = 't'
         params['limit']     = limit
+        if isinstance(query, unicode):
+            query = query.encode('utf-8')
         params['q']         = urllib.quote(query)
         params['filters']   = urllib.quote(json.dumps({
             '$or':[
