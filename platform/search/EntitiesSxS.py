@@ -97,7 +97,14 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
     newProxies = makeProxyDict(newCluster)
     dropped = oldProxies.viewkeys() - newProxies.viewkeys()
     added = newProxies.viewkeys() - oldProxies.viewkeys()
+    same = newProxies.viewkeys() & oldProxies.viewkeys()
     summary = ''
+    if same:
+        summary += '<h3>Elements stayed the same</h3><ul>'
+        for source in same:
+            proxy = oldProxies[source]
+            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+        summary += '</ul>'
     if dropped:
         summary += '<h3>Elements dropped from cluster</h3><ul>'
         for source in dropped:
