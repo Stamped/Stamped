@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -27,6 +28,7 @@ try:
     from libs.ec2_utils             import is_prod_stack
     from pprint                     import pprint, pformat
     from operator                   import itemgetter, attrgetter
+    from random                     import seed, random
 
     from api.AStampedAPI                import AStampedAPI
     from api.AAccountDB                 import AAccountDB
@@ -2756,7 +2758,54 @@ class StampedAPI(AStampedAPI):
             # Call async process to update references
             tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
-        score = stats.num_likes + stats.num_todos + (stats.num_credits * 2) + math.floor(stats.num_comments / 2.0)
+        
+        #stamp popularity
+        popularity = stats.num_likes + stats.num_todos + stats.num_comments
+        #TODO: Add in number of activity_items with the given stamp id 
+        
+        stats.popularity = int(popularity)
+        #Stamp Quality
+        image_score = 0
+        for content in stamp.contents:
+            if content.images is not None:
+                image_score = 1
+                break
+        
+        blurb = ""
+        for content in stamp.contents:
+            blurb = "%s%s" % (blurb,content.blurb)
+        
+        length_score = 0
+        if len(blurb) > 20:
+            length_score = 2
+        elif len(blurb) > 0:
+            length_score = 1 
+            
+        mention_re = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
+        # URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
+        url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
+        
+        mentions = mention_re.finditer(blurb)
+        urls = url_re.finditer(blurb)
+        
+        mention_score = 0
+        url_score = 0
+        
+        for mention in mentions:
+            mention_score += 1
+            
+        for url in urls:
+            url_score += 1
+            
+        has_quote = 0
+        if blurb.find('\"') != -1:
+            has_quote = 1
+        
+        quality = (2 * stats.num_credits) + (2 * image_score) + (1 * length_score) + (1 * mention_score) + (1* url_score) + (1 * has_quote)
+
+        stats.quality = int(quality)
+        
+        score = (.5 * quality) + popularity
         # days = (datetime.utcnow() - stamp.timestamp.stamped).days
         # score = score - math.floor(days / 10.0)
         stats.score = int(score)
@@ -3382,7 +3431,7 @@ class StampedAPI(AStampedAPI):
             guide = self._buildUserGuide(authUserId)
 
         try:
-            allItems = getattr(guide, guideRequest.section)
+            allItems = list(getattr(guide, guideRequest.section))
             if allItems is None:
                 return []
         except AttributeError:
@@ -3394,7 +3443,35 @@ class StampedAPI(AStampedAPI):
         offset = 0
         if guideRequest.offset is not None:
             offset = guideRequest.offset
-
+        
+        #Simulated lottery to shuffle the top 20 (or whatever limit is given when offset == 0)
+        if offset == 0 and guideRequest.section != "food":
+            lotterySize = min(limit,len(allItems))
+            lotteryItems = allItems[0:lotterySize]
+            aggScore = reduce(lambda x, y: x + (y.score if y.score is not None else 0.0),lotteryItems,0.0)
+            if aggScore > 0:
+                unselected = []
+                selected = []
+                cutoff = 0
+                for item in lotteryItems:
+                    cutoff += item.score
+                    unselected.append((cutoff,item))
+                count = 0
+                while len(selected) < lotterySize:
+                    r = random()*aggScore
+                    for cutoff,item in unselected:
+                        if r < cutoff:
+                            if item in selected:
+                                break
+                            else:
+                                selected.append(item)
+                                allItems[count] = item
+                                count += 1
+                                break
+                    
+                
+            
+            
         entityIds = {}
         userIds = {}
         items = []
@@ -3696,7 +3773,7 @@ class StampedAPI(AStampedAPI):
 
         self._buildUserGuide(authUserId)
 
-    def _buildUserGuide(self, authUserId, sxs=False):
+    def _oldUserGuide(self, authUserId):
         user = self.getUser({'user_id': authUserId})
         now = datetime.utcnow()
 
@@ -3785,7 +3862,7 @@ class StampedAPI(AStampedAPI):
         guide = GuideCache()
         guide.user_id = user.user_id
         guide.updated = now
-        sxs_result = []
+        
         for section, entities in sections.items():
             r = []
             for entity in entities:
@@ -3846,18 +3923,14 @@ class StampedAPI(AStampedAPI):
                         item.todo_user_ids = userIds
                 cache.append(item)
             setattr(guide, section, cache)
-            sxs_result.extend(r)
         
         logs.info("Time to build guide: %s seconds" % (time.time() - t0))
         
-        if sxs:
-            return sxs_result
-        else:
-            self._guideDB.updateGuide(guide)
+        self._guideDB.updateGuide(guide)
             
-            return guide
+        return guide
 
-    def _joeysUserGuide(self, authUserId, sxs = False):
+    def _buildUserGuide(self, authUserId):
         user = self.getUser({'user_id': authUserId})
         now = datetime.utcnow()
 
@@ -3890,9 +3963,9 @@ class StampedAPI(AStampedAPI):
             sections[section].add(entity)
 
         def entityScore(**kwargs):
-            numStamps = kwargs.pop('numStamps', 0)
-            numLikes = kwargs.pop('numLikes', 0)
-            numTodos = kwargs.pop('numTodos', 0)
+            section = kwargs.pop('section',None)
+            avgQuality = kwargs.pop('aggQuality',[])
+            avgPopularity = kwargs.pop('aggPopularity', [])
             timestamps = kwargs.pop('timestamps', [])
             result = 0
             
@@ -3925,27 +3998,31 @@ class StampedAPI(AStampedAPI):
                 elif personal_timestamp < 290:
                     personal_stamp_score = .435 - .3/200 * personal_timestamp
             
+            section_coefs = {
+                                    'food': 0,
+                                    'music': 1.0,
+                                    'film': 0.5,
+                                    'book': 10,
+                                    'app': 10}
             #Magnify personal stamp score by number of stamps by other friends
-            personal_stamp_score = personal_stamp_score * len(timestamps)
+            try:
+                personal_stamp_score = section_coefs[section] * personal_stamp_score * (timestamps)
+            except KeyError:
+                personal_stamp_score = personal_stamp_score * (timestamps)
                 
-            ### LIKES
-            like_score = 0
-            if numLikes < 20:
-                like_score = numLikes / 20.0
-            elif numLikes >= 20:
-                like_score = 1
-            ### TODOS
-            todo_score = 0
-            if numTodos < 10:
-                todo_score = numTodos / 10.0
-            elif numTodos >= 10:
-                todo_score = 1
             ### PERSONAL TODO LIST
             personal_todo_score = 0
             if entity.entity_id in todos:
                 personal_todo_score = 1
             
-            result = (1 * stamp_score) - (1 * personal_stamp_score)+ (0 * todo_score) + (0 * like_score) + (1 * personal_todo_score)
+            if len(timestamps) > 0:
+                avgQuality = avgQuality / len(timestamps)
+                avgPopularity = avgPopularity / len(timestamps)
+            
+            if entity.images is None:
+                result = 0
+            else:
+                result = (2 * stamp_score) - (2 * personal_stamp_score) + (3 * personal_todo_score) + (1 * avgQuality) + (1 * avgPopularity)
             return result
 
         # Build stampMap
@@ -3953,7 +4030,7 @@ class StampedAPI(AStampedAPI):
             if stamp.entity.entity_id not in stampMap:
                 stampMap[stamp.entity.entity_id] = set()
             stampMap[stamp.entity.entity_id].add(stamp)
-
+                    
         # Build statsMap and todoMap
         for stat in stampStats:
             statsMap[stat.stamp_id] = stat
@@ -3967,32 +4044,42 @@ class StampedAPI(AStampedAPI):
         guide = GuideCache()
         guide.user_id = user.user_id
         guide.updated = now
-        sxs_result = []
+        
         for section, entities in sections.items():
             r = []
             for entity in entities:
-                numLikes = 0
-                numTodos = 0
+                aggQuality = 0
+                aggPopularity = 0
                 timestamps = {}
                 for stamp in stampMap[entity.entity_id]:
                     if stamp.stamp_id in statsMap:
                         stat = statsMap[stamp.stamp_id]
-                        if stat.num_likes is not None:
-                            numLikes += stat.num_likes
-                        if stat.num_todos is not None:
-                            numTodos += stat.num_todos
+                        if stat.quality is not None:
+                            aggQuality += stat.quality
+                        if stat.popularity is not None:
+                            aggPopularity += min(10,stat.popularity)
                     else:
                         # TEMP: Use embedded stats for backwards compatibility
-                        if stamp.stats.num_likes is not None:
-                            numLikes += stamp.stats.num_likes
-                        if stamp.stats.num_todos is not None:
-                            numTodos += stamp.stats.num_todos
+                        if stamp.stats.quality is not None:
+                            aggQuality += stamp.stats.quality
+                        if stamp.stats.popularity is not None:
+                            aggPopularity += min(10,stamp.stats.popularity)
                     if stamp.timestamp.stamped is not None:
-                        timestamps[stamp.user.user_id] = time.mktime(stamp.timestamp.stamped.timetuple())
+                        t = time.mktime(stamp.timestamp.stamped.timetuple())
+                        try:
+                            if t > timestamps[stamp.user.user_id]:
+                                timestamps[stamp.user.user_id] = t
+                        except KeyError:
+                            timestamps[stamp.user.user_id] = t
                     elif stamp.timestamp.created is not None:
-                        timestamps[stamp.user.user_id] = time.mktime(stamp.timestamp.created.timetuple())
+                        t = time.mktime(stamp.timestamp.created.timetuple())
+                        try:
+                            if t > timestamps[stamp.user.user_id]:
+                                timestamps[stamp.user.user_id] = t
+                        except KeyError:
+                            timestamps[stamp.user.user_id] = t
                 
-                score = entityScore(numStamps=len(stampMap[entity.entity_id]), numLikes=numLikes, numTodos=numTodos, timestamps=timestamps)
+                score = entityScore(section=section,aggQuality=aggQuality,aggPopularity=aggPopularity, timestamps=timestamps)
                 coordinates = None
                 if hasattr(entity, 'coordinates'):
                     coordinates = entity.coordinates
@@ -4008,6 +4095,7 @@ class StampedAPI(AStampedAPI):
             for result in r[:1000]:
                 item = GuideCacheItem()
                 item.entity_id = result[0]
+                item.score = result[1]
                 item.tags = result[2]
                 if result[3] is not None:
                     item.coordinates = result[3]
@@ -4028,16 +4116,13 @@ class StampedAPI(AStampedAPI):
                         item.todo_user_ids = userIds
                 cache.append(item)
             setattr(guide, section, cache)
-            sxs_result.extend(r)
+            
         
         logs.info("Time to build guide: %s seconds" % (time.time() - t0))
 
-        if sxs:
-            return sxs_result
-        else:
-            self._guideDB.updateGuide(guide)
+        self._guideDB.updateGuide(guide)
             
-            return guide
+        return guide
 
 
     """
@@ -4920,7 +5005,7 @@ class StampedAPI(AStampedAPI):
         if entity_id is None:
             entity = entityProxy.buildEntity()
         else:
-            entity = self._entityDB.getEntity(entity_id)
+            entity = self.__entityDB.getEntity(entity_id)
             entityProxy.enrichEntity(entity, {})
         self.mergeEntity(entity)
 
