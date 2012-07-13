@@ -78,7 +78,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                 if len(entity.types) > 0 and len(source.types) > 0 and not set(entity.types).intersection(source.types):
                     continue
                 # check if a source failed, and if so, whether it has cooled down for reuse
-                if source in failedSources and self.__failedValues[source] >= self.failedCutoff:
+                if source in failedSources or self.__failedValues[source] >= self.failedCutoff:
                     continue
 
                 groups = source.getGroups(entity)
