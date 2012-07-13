@@ -188,7 +188,6 @@
                 });*/
                 
                 // intro animation is fully complete here
-                $body.removeClass("intro");
                 init_main(true);
             }
         };
@@ -251,7 +250,10 @@
                         top : offset
                     }, {
                         duration : 600, 
-                        easing   : "swing"
+                        easing   : "swing", 
+                        complete : function() {
+                            $body.removeClass("intro");
+                        }
                     });
                 }
             }
