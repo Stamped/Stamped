@@ -31,22 +31,21 @@ TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter() | S
 # TODO also add common spell correction?
 NORMALIZER = TeeFilter(PassFilter(), StemFilter())
 
-def addMatchCodesToMongoDocument(document):
+def generateSearchTokens(entity):
     components = []
-    if 'title' in document:
-        components.append(document['title'])
+    if entity.title is not None:
+        components.append(entity.title)
 
     def addSubfieldTitles(field):
-        if field in document:
-            for subdoc in document[field]:
-                components.append(subdoc['title'])
+        if hasattr(entity, field) and getattr(entity, field) is not None:
+            for subdoc in getattr(entity, field):
+                if hasattr(subdoc, 'title') and subdoc.title is not None:
+                    components.append(subdoc.title)
     subfields = ('authors', 'albums', 'artists', 'tracks', 'directors', 'cast', 'publishers')
     for field in subfields:
         addSubfieldTitles(field)
-    # TODO(paul): I don't like this field name Geoff picked because I'm a dick. I'm gonna see if I
-    # can sleep with it. If I can't (and I probably won't), come back and change this to something
-    # douchy that suits my taste better.
-    document['match_codes'] = getTokensForIndexing(components)
+        
+    return getTokensForIndexing(components)
 
 def toUnicode(string):
     if isinstance(string, unicode):
@@ -61,14 +60,13 @@ def getTokensForIndexing(components):
     tokens = (token for token in TOKENIZER(fullDoc))
     return list(set(token.text for token in NORMALIZER(tokens)))
 
-
 def formatSearchQuery(queryText):
     queryText = unicode(queryText, 'utf-8')
     tokens = (token for token in TOKENIZER(queryText))
     components = []
     for token in tokens:
         normalized = set([normalized.text for normalized in NORMALIZER([token])])
-        components.append({'match_codes' : {'$in' : list(normalized)}})
+        components.append({'search_tokens' : {'$in' : list(normalized)}})
     return components
 
 
