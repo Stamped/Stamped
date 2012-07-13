@@ -11,8 +11,10 @@ monkey.patch_all()
 from gevent.pool import Pool
 
 import rpyc
+from rpyc       import AsyncResult
+import rpyc.core.async
 from optparse   import OptionParser
-from time       import sleep
+from time       import time, sleep
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
@@ -50,13 +52,23 @@ def parseCommandLine():
 import random
 
 def makeRequest(host, port, service, priority, timeout, method, url):
-    sleep(random.random()*10)
+    sleep(random.random()*3)
     if timeout == 0:
         timeout = None
     print('requesting... service: %s  priority: %s  timeout: %s  method: %s  url: %s' % (service, priority, timeout, method, url))
     conn = rpyc.connect(host, port)
-    response, content = conn.root.request(service, priority, timeout, method, url)
-    print('finished request.')
+
+    #return conn.root.request(service, priority, timeout, method, url)
+    async_request = rpyc.async(conn.root.request)
+    asyncresult = None
+    asyncresult = async_request(service, priority, timeout, method, url)
+    if asyncresult is None:
+        print('returned None')
+        return
+    asyncresult.set_expiry(timeout)
+    response, content = asyncresult.value
+
+    print('returning from makeRequest')
 
 def main():
     # parse
@@ -81,9 +93,15 @@ def main():
     #for i in range(num_requests):
     #    pool.spawn(makeRequest, None, service, priority, timeout, method, url)
     #pool.join()
+
+    begin = time()
+
     threads = [gevent.spawn(makeRequest, host, port, service, priority, timeout, method, url) for i in xrange(num_requests)]
     print ('finished thread creation')
     gevent.joinall(threads)
+
+    elapsed = time() - begin
+    print('Total elapsed time: %s seconds' % elapsed)
 
 if __name__ == '__main__':
     main()
