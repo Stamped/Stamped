@@ -4895,15 +4895,17 @@ class StampedAPI(AStampedAPI):
     def __mergeProxyIntoDb(self, proxy, stampedSource):
         entity_id = stampedSource.resolve_fast(proxy.source, proxy.key)
 
-        # We don't want to do a full resolve here against stamped source, because crawler sources
-        # are usually read-only sources (like scraping an RSS feed), so doing a full-resolve and
-        # then enrich will not help.
+        # The crawled sources are usually readonly sources, such as a scraped website or RSS feed.
+        # We therefore can't rely on full enrichment to correctly pick up the data from those
+        # sources. That is why we make sure we incorporate the data from the proxy here, either by
+        # building a new entity or enriching an existing one.
+        entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
         if entity_id is None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
             entity = entityProxy.buildEntity()
-            self.mergeEntity(entity)
         else:
-            self.mergeEntityId(entity_id)
+            entity = self.__entityDB.getEntity(entity_id)
+            entityProxy.enrichEntity(entity, {})
+        self.mergeEntity(entity)
 
     """
     ######
