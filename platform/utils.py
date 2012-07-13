@@ -24,6 +24,7 @@ from BeautifulSoup       import BeautifulSoup
 from StringIO            import StringIO
 from threading           import Lock
 from gevent.pool         import Pool
+from greenlet            import GreenletExit
 
 
 
@@ -45,6 +46,9 @@ class LoggingThreadPool(object):
         def wrapperFn():
             try:
                 return logs.runInOtherLoggingContext(userFn, currLoggingContext)
+            except GreenletExit:
+                # If we deliberately killed the thread, don't log that. Makes the search logs really noisy.
+                pass
             except:
                 logs.report()
 
