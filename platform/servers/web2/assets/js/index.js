@@ -291,7 +291,7 @@
         };
         
         var resize_panes = function(noop) {
-            var $panes = $(".pane").css('min-height', 0);
+            var $panes = $(".pane");//.css('min-height', 0);
             var height = 0;
             
             // find max height of all panes
@@ -303,7 +303,7 @@
             
             // constrain the minimum pane height to the height of the tallest pane
             if (height > 0) {
-                $panes.css('min-height', height);
+                //$panes.css('min-height', height);
                 
                 if (typeof(noop) !== 'boolean' || !noop) {
                     return update_main_layout(noop);
