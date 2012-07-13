@@ -1118,6 +1118,34 @@ def findUrls(text):
         
     return urls
 
+#Weighted lottery function for ordering items by their scores. 
+#INPUT: A list of tuples in the form (float_score, item)
+def weightedLottery(tupleList):
+    
+    aggScore = reduce(lambda x, y: x + y[0], tupleList, 0.0)
+    
+    if aggScore > 0:
+        unselected = []
+        selected = []
+        cutoff = 0
+        for tuple in tupleList:
+            cutoff += tuple[0]
+            unselected.append((cutoff,tuple))
+        
+        while len(selected) < len(tupleList):
+            r = random.random() * aggScore
+            index = 0
+            for cutoff, tuple in unselected:
+                if r < cutoff:
+                    unselected.pop(index)
+                    selected.append(tuple[1])
+                    aggScore -= tuple[0]
+                    unselected = map(lambda (x,y): (((x-tuple[0]) if x > cutoff else x), y), unselected)    
+                    break
+                else:
+                    index += 1
+        
+        return selected
 
 
 

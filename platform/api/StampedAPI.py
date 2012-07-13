@@ -3495,29 +3495,11 @@ class StampedAPI(AStampedAPI):
         #Simulated lottery to shuffle the top 20 (or whatever limit is given when offset == 0)
         if items[0].score is not None: 
             if offset == 0 and guideRequest.section != "food":
-                lotterySize = min(limit,len(items))
-                lotteryItems = items[0:lotterySize]
-                aggScore = reduce(lambda x, y: x + y.score,lotteryItems,0.0)
-                if aggScore > 0:
-                    unselected = []
-                    selected = []
-                    cutoff = 0
-                    for item in lotteryItems:
-                        cutoff += item.score
-                        unselected.append((cutoff,item))
-                    while len(selected) < lotterySize:
-                        r = random()*aggScore
-                        index = 0
-                        for cutoff,item in unselected:
-                            if r < cutoff:
-                                unselected.pop(index)
-                                selected.append(item)
-                                aggScore -= item.score
-                                unselected = map(lambda (x,y): (((x-item.score) if x > cutoff else x), y),unselected)    
-                                break
-                            else:
-                                index += 1
-                    items = selected
+                lotterySize = min(limit, len(items))
+                lotteryItems = map(lambda x: (x.score,x), items[0:lotterySize])
+                items = utils.weightedLottery(lotteryItems)
+                
+                
 
         # Entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3967,34 +3949,36 @@ class StampedAPI(AStampedAPI):
                 personal_timestamp = None
                 
             #timestamps is now a list of each friends' most recent stamp time in terms of days since stamped 
-            timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24),timestamps.values())
+            timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
             
             #stamp_score
             stamp_score = 0
             personal_stamp_score = 0
             for t in timestamps:
                 if t < 10:
-                    stamp_score += 1 - .05/10 * t
+                    stamp_score += 1 - (.05 / 10 * t)
                 elif t < 90:
-                    stamp_score += 1.03125 - .65/80 * t
+                    stamp_score += 1.03125 - (.65 / 80 * t)
                 elif t < 290:
-                    stamp_score += .435 - .3/200 * t
+                    stamp_score += .435 - (.3 / 200 * t)
             
             #Personal stamp score - higher is worse
             if personal_timestamp is not None:
                 if personal_timestamp < 10:
-                    personal_stamp_score = 1 - .05/10 * personal_timestamp
+                    personal_stamp_score = 1 - (.05 / 10 * personal_timestamp)
                 elif personal_timestamp < 90:
-                    personal_stamp_score = 1.03125 - .65/80 * personal_timestamp
+                    personal_stamp_score = 1.03125 - (.65 / 80 * personal_timestamp)
                 elif personal_timestamp < 290:
-                    personal_stamp_score = .435 - .3/200 * personal_timestamp
+                    personal_stamp_score = .435 - (.3 / 200 * personal_timestamp)
             
             section_coefs = {
-                                    'food': 0,
-                                    'music': 1.0,
-                                    'film': 0.5,
-                                    'book': 10,
-                                    'app': 10}
+                            'food': 0,
+                            'music': 1.0,
+                            'film': 0.5,
+                            'book': 10,
+                            'app': 10
+                            }
+            
             #Magnify personal stamp score by number of stamps by other friends
             try:
                 personal_stamp_score = section_coefs[section] * personal_stamp_score * len(timestamps)
@@ -4014,7 +3998,7 @@ class StampedAPI(AStampedAPI):
             if entity.images is None:
                 image_score = 0.01
             
-            result = ((2 * stamp_score) - (2 * personal_stamp_score) + (3 * personal_todo_score) + (1 * avgQuality) + (1 * avgPopularity))* (image_score)
+            result = ( (2 * stamp_score) - (2 * personal_stamp_score) + (3 * personal_todo_score) + (1 * avgQuality) + (1 * avgPopularity) ) * (image_score)
             
             return result
 
