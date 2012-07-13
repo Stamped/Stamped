@@ -534,7 +534,6 @@ class DescGroup(BasicFieldGroup):
 
 
 class LastPopularGroup(BasicFieldGroup):
-
     def __init__(self):
         BasicFieldGroup.__init__(self, 'last_popular')
         self.addNameField()
@@ -542,6 +541,11 @@ class LastPopularGroup(BasicFieldGroup):
 
     def eligible(self, entity):
         return True
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        if proxy.last_popular:
+            if entity.last_popular is None or proxy.last_popular > entity.last_popular:
+                entity.last_popular = proxy.last_popular
 
 
 class ImagesGroup(BasicFieldGroup):

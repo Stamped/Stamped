@@ -130,11 +130,6 @@ class GenericSource(BasicSource):
     def entityProxyFromKey(self, key, **kwargs):
         raise NotImplementedError(str(type(self)))
     
-            if proxy.last_popular:
-                if entity.last_popular is None or proxy.last_popular > entity.last_popular:
-                    entity.last_popular = proxy.last_popular
-                    timestamps['last_popular'] = controller.now
-        
     @property
     def idField(self):
         return "%s_id" % self.idName
@@ -175,14 +170,12 @@ class GenericSource(BasicSource):
             try:
                 if proxy is None:
                     proxy = self.entityProxyFromKey(source_id, entity=entity)
-<<<<<<< HEAD
+                # Call proxy.name, which forces a fetch from source. This will throw out any
+                # stale/broken ids we might have.
+                proxy.name
                 timestamps[self.idName] = controller.now
                 for group in groups:
                     group.enrichEntityWithEntityProxy(entity, proxy)
-=======
-                    proxy.name
-                self.enrichEntityWithEntityProxy(proxy, entity, controller, decorations, timestamps)
->>>>>>> master
             except Exception as e:
                 # This is a bad ID and we need to clear it.
                 delattr(entity.sources, self.idField)
