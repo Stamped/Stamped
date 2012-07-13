@@ -3423,7 +3423,7 @@ class StampedAPI(AStampedAPI):
             guide = self._buildUserGuide(authUserId)
 
         try:
-            allItems = list(getattr(guide, guideRequest.section))
+            allItems = getattr(guide, guideRequest.section)
             if allItems is None:
                 return []
         except AttributeError:
