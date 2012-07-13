@@ -170,6 +170,8 @@ class EntitySearch(object):
             resultsDict[source] = []
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
+        if not isinstance(text, unicode):
+            text = text.decode('utf-8')
         if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
