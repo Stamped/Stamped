@@ -25,8 +25,8 @@ FB_TOKEN        = "AAAEOIZBBUXisBAFCF2feHIs8YmbnTFNoiZBbfftMnZCwZCngUGyuZBpcr2tv
 
 _accounts  = []
 _test_case = None
-_baseurl   = "http://localhost:18000/v0"
-# _baseurl = "https://dev.stamped.com/v0"
+_baseurl   = "http://localhost:18000/v1"
+# _baseurl = "https://dev.stamped.com/v1"
 
 class StampedAPIException(Exception):
     pass
@@ -36,7 +36,7 @@ if utils.is_ec2():
     elb = libs.ec2_utils.get_elb()
     
     if elb is not None:
-        _baseurl = "https://%s/v0" % elb.dns_name
+        _baseurl = "https://%s/v1" % elb.dns_name
 
 print "BASE_URL: %s" % _baseurl
 
