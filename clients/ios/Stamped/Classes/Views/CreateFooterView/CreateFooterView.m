@@ -68,11 +68,11 @@
         button.frame = CGRectMake((self.bounds.size.width-106.0f), self.bounds.size.height - (image.size.height+6.0f), 96.0f, image.size.height);
         self.stampButton = button;
         
-        image = [UIImage imageNamed:@"share_twitter"];
+        image = [UIImage imageNamed:@"tweetbtn"];
         button = [UIButton buttonWithType:UIButtonTypeCustom];
         [button setImage:image forState:UIControlStateNormal];
-        [button setImage:[UIImage imageNamed:@"share_twitter_on"] forState:UIControlStateSelected];
-        [button setImage:[UIImage imageNamed:@"share_twitter_highlighted"] forState:UIControlStateHighlighted];
+        [button setImage:[UIImage imageNamed:@"tweetbtn_down"] forState:UIControlStateSelected];
+        [button setImage:[UIImage imageNamed:@"tweetbtn_active"] forState:UIControlStateHighlighted];
         [button addTarget:self action:@selector(twitter:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:button];
         button.frame = CGRectMake(10.0f, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
@@ -90,7 +90,7 @@
         //        
         //        
         
-        _twitterText = [[Util viewWithText:@"Share to Twitter"
+        _twitterText = [[Util viewWithText:@"" //Keep in case re-enabled
                                       font:[UIFont stampedFontWithSize:12]
                                      color:[UIColor stampedGrayColor]
                                       mode:UILineBreakModeTailTruncation

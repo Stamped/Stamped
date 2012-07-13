@@ -12,6 +12,7 @@
 @implementation STActionContext
 
 @synthesize entityDetail = _entityDetail;
+@synthesize controller = _controller;
 @synthesize entity = _entity;
 @synthesize frame = _frame;
 @synthesize stamp = _stamp;
@@ -28,11 +29,18 @@
     [_completionBlock release];
     [_playlistItem release];
     [_creditedUsers release];
+    [_controller release];
     [super dealloc];
 }
 
 + (STActionContext*)context {
     return [[[STActionContext alloc] init] autorelease];
+}
+
++ (STActionContext*)contextViewController:(UIViewController*)controller {
+    STActionContext* context = [STActionContext context];
+    context.controller = controller;
+    return context;
 }
 
 + (STActionContext*)contextInView:(UIView*)view {

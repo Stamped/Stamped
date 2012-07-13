@@ -29,7 +29,8 @@
 }
 @property (nonatomic, retain) UIImageView *iconImageView;
 @property (nonatomic, retain) NSURL *imageURL;
-- (void)removeTargets;
+@property (nonatomic, readwrite, retain) STActionPair* pair;
+
 - (void)setupWithUser:(id<STUser>)user;
 @end
 
@@ -75,7 +76,7 @@ static const NSInteger _cellsPerRow = 7;
     
     if (index < [self.views count]) {
         STPreviewView *view = [self.views objectAtIndex:index];
-        [view removeTargets];
+        view.pair = nil;
         return view;
     }
     
@@ -111,7 +112,7 @@ static const NSInteger _cellsPerRow = 7;
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:size]];
             [view setupWithUser:credit.user];
-            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
             
         }
@@ -125,7 +126,7 @@ static const NSInteger _cellsPerRow = 7;
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:size]];
             [view setupWithUser:user];
-            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
             
         }
@@ -141,7 +142,7 @@ static const NSInteger _cellsPerRow = 7;
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:size]];
             view.iconImageView.image = likeIcon;
             [view setupWithUser:nil];
-            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
             
         }
@@ -157,7 +158,7 @@ static const NSInteger _cellsPerRow = 7;
             view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:size]];
             view.iconImageView.image = todoIcon;
             [view setupWithUser:nil];
-            [view addTarget:[[STActionPair actionPairWithAction:action andContext:context] retain] action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
+            view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
             
         }
@@ -311,6 +312,7 @@ static const NSInteger _cellsPerRow = 7;
 #pragma mark - STPreviewView
 
 @implementation STPreviewView
+@synthesize pair = _pair;
 @synthesize imageURL=_imageURL;
 @synthesize iconImageView = _iconImageView;
 
@@ -353,6 +355,8 @@ static const NSInteger _cellsPerRow = 7;
         _stampView = stampView;
         [stampView release];
         
+        [self addTarget:self action:@selector(clicked:) forControlEvents:UIControlEventTouchUpInside];
+        
     }
     return self;
     
@@ -362,22 +366,15 @@ static const NSInteger _cellsPerRow = 7;
     _stampView=nil;
     _imageView=nil;
     self.iconImageView = nil;
+    [_pair release];
     [super dealloc];
 }
 
-- (void)removeTargets {
-    
-    if (self.allTargets) {
-        for (id target in [[self allTargets] allObjects]) {
-            if (target && ![target isEqual:[NSNull null]]) {
-                [self removeTarget:target action:@selector(executeActionWithArg:) forControlEvents:UIControlEventTouchUpInside];
-                [target release];
-            }
-        }
+- (void)clicked:(id)notImportant {
+    if (self.pair) {
+        [self.pair executeAction];
     }
-    
 }
-
 
 #pragma mark - Setters
 
@@ -469,6 +466,5 @@ static const NSInteger _cellsPerRow = 7;
     [super setSelected:selected];
     [self adjustHighlight:selected];
 }
-
 
 @end

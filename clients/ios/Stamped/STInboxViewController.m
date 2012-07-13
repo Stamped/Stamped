@@ -45,6 +45,8 @@
 
 NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewControllerPrepareForAnimationNotification";
 
+static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
+
 @interface STInboxViewController ()
 
 @property (nonatomic, readonly, retain) STSliderScopeView *slider;
@@ -59,6 +61,7 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
 @property (nonatomic, readwrite, assign) BOOL goingToShowIntro;
 @property (nonatomic, readwrite, retain) UIView* emptyPopupView;
 @property (nonatomic, readwrite, retain) UIView* tooltip;
+@property (nonatomic, readwrite, retain) UIView* createStampOverlay;
 
 @end
 
@@ -76,6 +79,7 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
 @synthesize goingToShowIntro = _goingToShowIntro;
 @synthesize emptyPopupView = _emptyPopupView;
 @synthesize tooltip = _tooltip;
+@synthesize createStampOverlay = _createStampOverlay;
 
 - (id)init {
     if (self = [super init]) {
@@ -98,8 +102,9 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
         _showIntro = YES;
         if ([STStampedAPI sharedInstance].currentUser == nil) {
             _scope = STStampedAPIScopeEveryone;
+            _lastScope = STStampedAPIScopeEveryone;
         } else {
-            _scope = STStampedAPIScopeFriends;
+            _scope = _lastScope;
         }
         _searchQuery = nil;
         _reloading = YES;
@@ -113,6 +118,7 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
     _slider.delegate = nil;
     [_slider release], _slider=nil;
     [_tooltip release];
+    self.createStampOverlay = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -123,7 +129,7 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
     
     if (!LOGGED_IN) {
-        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleDone  target:self action:@selector(login:)];
         self.navigationItem.rightBarButtonItem = button;
         [button release];
         
@@ -153,6 +159,7 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
     [super viewDidUnload];
     _slider.delegate = nil;
     [_slider release];
+    self.createStampOverlay = nil;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -262,6 +269,7 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
 - (void)setScope:(STStampedAPIScope)scope {
     if (_scope != scope) {
         _scope = scope;
+        _lastScope = _scope;
         [self updateCache];
         if (self.showsSearchBar) {
             [self.tableView setContentOffset:CGPointMake(0.0f, self.searchView.bounds.size.height-2.0f)];
@@ -632,11 +640,11 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
         frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
         frame.origin.y = floorf(maxY + 4.0f);
         label.frame = frame;
-        
-        UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(noDataTapped:)];
-        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
-        [view addGestureRecognizer:gesture];
-        [gesture release];
+        [Util executeOnMainThread:^{
+            if ([Util topController] == self && self.scope == STStampedAPIScopeYou) {
+                [self noDataTapped:nil];
+            }
+        }];
         
     } 
     
@@ -660,55 +668,70 @@ NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewCo
     
 }
 
-- (void)noDataTapped:(UITapGestureRecognizer*)gesture {
-    
-    UIImageView *magnifyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"no_data_magnify.png"]];
-    
-    UIGraphicsBeginImageContextWithOptions(magnifyView.bounds.size, YES, 0);
-    CGContextRef ctx = UIGraphicsGetCurrentContext();
-    CGContextScaleCTM(ctx, 1.2, 1.2);
-    CGContextTranslateCTM(ctx, -((self.view.bounds.size.width-magnifyView.bounds.size.width)+20.0f), 0.0f);
-    [self.navigationController.view.layer renderInContext:ctx];
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    UIView *view = [[UIView alloc] initWithFrame:self.navigationController.view.bounds];
-    view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.3f];
-    [self.navigationController.view addSubview:view];
-    [view release];
-    
-    CGRect frame = magnifyView.frame;
-    frame.origin.x = (view.bounds.size.width - (frame.size.width-24.0f));
-    frame.origin.y = -30.0f;
-    magnifyView.frame = frame;
-    [view addSubview:magnifyView];
-    [magnifyView release];
-    
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
-    [view insertSubview:imageView atIndex:0];
-    [imageView release];
-    
-    frame = imageView.frame;
-    frame.origin.x = (view.bounds.size.width - imageView.frame.size.width);
-    imageView.frame = frame;
-    
-    CALayer *layer = [CALayer layer];
-    layer.frame = CGRectMake(32, -26.0f, imageView.bounds.size.width-18, imageView.bounds.size.height-18);
-    layer.cornerRadius = ((imageView.bounds.size.width-18)/2);
-    layer.backgroundColor = [UIColor blackColor].CGColor;
-    imageView.layer.mask = layer;
-    
-    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
-    animation.fromValue = (id)[UIColor clearColor].CGColor;
-    animation.duration = 0.3f;
-    [view.layer addAnimation:animation forKey:nil];
-    
-    double delayInSeconds = 1.2;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        [view removeFromSuperview];
-    });
-    
+- (void)noDataTapped:(id)notImportant {
+    if (!self.createStampOverlay) {
+        UIImageView *magnifyView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"no_data_magnify.png"]];
+        
+        UIGraphicsBeginImageContextWithOptions(magnifyView.bounds.size, YES, 0);
+        CGContextRef ctx = UIGraphicsGetCurrentContext();
+        CGContextScaleCTM(ctx, 1.2, 1.2);
+        CGContextTranslateCTM(ctx, -((self.view.bounds.size.width-magnifyView.bounds.size.width)+20.0f), 0.0f);
+        [self.navigationController.view.layer renderInContext:ctx];
+        UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        UIView *view = [[UIView alloc] initWithFrame:self.navigationController.view.bounds];
+        view.backgroundColor = [UIColor colorWithWhite:0.0f alpha:0.3f];
+        [self.navigationController.view addSubview:view];
+        [view release];
+        
+        CGRect frame = magnifyView.frame;
+        frame.origin.x = (view.bounds.size.width - (frame.size.width-24.0f));
+        frame.origin.y = -30.0f;
+        magnifyView.frame = frame;
+        [view addSubview:magnifyView];
+        [magnifyView release];
+        
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+        [view insertSubview:imageView atIndex:0];
+        [imageView release];
+        
+        frame = imageView.frame;
+        frame.origin.x = (view.bounds.size.width - imageView.frame.size.width);
+        imageView.frame = frame;
+        
+        CALayer *layer = [CALayer layer];
+        layer.frame = CGRectMake(32, -26.0f, imageView.bounds.size.width-18, imageView.bounds.size.height-18);
+        layer.cornerRadius = ((imageView.bounds.size.width-18)/2);
+        layer.backgroundColor = [UIColor blackColor].CGColor;
+        imageView.layer.mask = layer;
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
+        animation.fromValue = (id)[UIColor clearColor].CGColor;
+        animation.duration = 0.3f;
+        [view.layer addAnimation:animation forKey:nil];
+        
+        UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(createStampHelper:)];
+        gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
+        [view addGestureRecognizer:gesture];
+        [gesture release];
+        self.createStampOverlay = view;
+        double delayInSeconds = 1.2;
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            [view removeFromSuperview];
+            self.createStampOverlay = nil;
+        });
+    }
+}
+
+- (void)createStampHelper:(id)notImportant {
+    [self.createStampOverlay removeFromSuperview];
+    self.createStampOverlay = nil;
+    //    id customView = self.navigationItem.rightBarButtonItem.customView;
+    //    if ([customView respondsToSelector:@selector(sendActionsForControlEvents:)]) {
+    //        [customView sendActionsForControlEvents:UIControlEventTouchUpInside];
+    //    }
 }
 
 

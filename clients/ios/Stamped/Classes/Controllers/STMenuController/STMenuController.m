@@ -7,7 +7,6 @@
 //
 
 #import "STMenuController.h"
-#import "EntityViewController.h"
 #import "STWelcomeViewController.h"
 #import "LoginViewController.h"
 #import "TwitterAccountsViewController.h"

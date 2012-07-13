@@ -1354,19 +1354,23 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_buy_primary', client=client)
             sources     = []
 
+            source              = HTTPActionSource()
+            source.name         = 'Buy from Amazon'
+            source.source       = 'amazon'
+            source.icon         = _getIconURL('src_amazon', client=client)
+            source.setCompletion(
+                action      = actionType,
+                entity_id   = entity.entity_id,
+                source      = source.source,
+                source_id   = source.source_id,
+            )
             if entity.sources.amazon_underlying is not None:
-                source              = HTTPActionSource()
-                source.name         = 'Buy from Amazon'
-                source.source       = 'amazon'
                 source.source_id    = entity.sources.amazon_underlying
-                source.icon         = _getIconURL('src_amazon', client=client)
                 source.link         = _buildAmazonURL(entity.sources.amazon_underlying)
-                source.setCompletion(
-                    action      = actionType,
-                    entity_id   = entity.entity_id,
-                    source      = source.source,
-                    source_id   = source.source_id,
-                )
+                sources.append(source)
+            elif entity.sources.amazon_id is not None:
+                source.source_id    = entity.sources.amazon_id
+                source.link         = _buildAmazonURL(entity.sources.amazon_id)
                 sources.append(source)
 
             self._addAction(actionType, 'Buy now', sources, icon=actionIcon)
@@ -3315,15 +3319,14 @@ class HTTPActivity(Schema):
                     logs.warning("Unable to set group icon for source '%s' and verb '%s'" % (self.source, self.verb[7:]))
                     self.image = None
 
-        elif self.verb == 'welcome':
+        elif self.verb.startswith('notification_'):
             if not activity.personal:
                 logs.debug(self)
                 raise Exception("Invalid universal news item: %s" % self.verb)
 
-            self.header = "Welcome to Stamped"
-            self.body = "Welcome to Stamped! We've given you 100 stamps to start, so go ahead, try using one now!"
-
-            self.image = _getIconURL('news_welcome')
+            if self.verb == 'notification_welcome':
+                self.header = "Welcome to Stamped"
+                self.image = _getIconURL('news_welcome')
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

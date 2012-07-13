@@ -517,6 +517,7 @@ NSInteger zoom;
 }
 
 - (void)update:(BOOL)clearPins {
+    self.consumptionToolbar.scope = self.scope;
     if (clearPins) {
         for (STEntityAnnotation* annotation in self.annotations) {
             [self.mapView removeAnnotation:annotation];

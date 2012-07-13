@@ -184,6 +184,7 @@
             CGPathRef path = CTFontCreatePathForGlyph(runFont, glyph, NULL);
             CGAffineTransform transform = CGAffineTransformMakeTranslation(position.x, position.y);
             CGPathAddPath(textPath, &transform, path);
+            CFRelease(path);
         }
     }
     return textPath;

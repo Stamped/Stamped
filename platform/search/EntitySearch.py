@@ -23,7 +23,7 @@ from resolve.EntityProxySource  import EntityProxySource
 from api.Schemas                import PlaceEntity
 from search.SearchResultDeduper        import SearchResultDeduper
 from search.DataQualityUtils           import *
-
+from greenlet                   import GreenletExit
 
 def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
@@ -163,6 +163,8 @@ class EntitySearch(object):
                 source.sourceName, str(after - before), len(results), len(filteredResults)
             ))
             resultsDict[source] = filteredResults
+        except GreenletExit:
+            pass
         except:
             logs.report()
             resultsDict[source] = []

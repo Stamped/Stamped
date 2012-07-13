@@ -11,7 +11,7 @@
 
 @interface WrappingTextView () 
 
-- (CGMutablePathRef)createPath;
+- (CGMutablePathRef)copyPath;
 - (CGRect)resizeBottomRect:(CGRect)bottomRect topRect:(CGRect)topRect;
 - (NSAttributedString*)attributedStringForText;
   
@@ -36,7 +36,7 @@
   [super dealloc];
 }
 
-- (CGMutablePathRef)createPath {
+- (CGMutablePathRef)copyPath {
   // Drawing origin is at bottom left.
   CGMutablePathRef path = CGPathCreateMutable();
   CGRect topRect = CGRectMake(0, self.frame.size.height - self.previewRectSize.height,
@@ -135,7 +135,7 @@
 
 - (void)setPreviewRectSize:(CGSize)newSize {
   previewRectSize_ = newSize;
-  CGPathRef path = [self createPath];
+  CGPathRef path = [self copyPath];
   textPath_ = path;
 }
 

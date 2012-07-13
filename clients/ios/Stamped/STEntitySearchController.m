@@ -244,7 +244,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
         NSInteger count = 0;
         if (self.searchSections) {
-            id<STEntitySearchSection> sectionObject;
+            id<STEntitySearchSection> sectionObject = nil;
             if (self.searchSections.count) {
                 sectionObject = [self.searchSections objectAtIndex:indexPath.section];
             }

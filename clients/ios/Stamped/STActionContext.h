@@ -14,6 +14,7 @@
 @interface STActionContext : NSObject
 
 @property (nonatomic, readwrite, retain) id<STEntityDetail> entityDetail;
+@property (nonatomic, readwrite, retain) UIViewController* controller;
 @property (nonatomic, readwrite, retain) id<STEntity> entity;
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 @property (nonatomic, readwrite, retain) id<STPlaylistItem> playlistItem;
@@ -23,6 +24,7 @@
 @property (nonatomic, readwrite, copy) void(^completionBlock)(id,NSError*);
 
 + (STActionContext*)context;
++ (STActionContext*)contextViewController:(UIViewController*)controller;
 + (STActionContext*)contextInView:(UIView*)view;
 + (STActionContext*)contextWithCompletionBlock:(void(^)(id,NSError*))block;
 

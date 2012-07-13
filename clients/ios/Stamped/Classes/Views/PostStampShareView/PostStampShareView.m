@@ -297,7 +297,7 @@
         
         if (!activityView) {
             
-            UIActivityIndicatorView *view = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+            UIActivityIndicatorView *view = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
             [self addSubview:view];
             [view startAnimating];
             view.layer.position = self.accessoryImageView.layer.position;

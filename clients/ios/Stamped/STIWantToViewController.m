@@ -44,7 +44,7 @@
     
     if (!LOGGED_IN) {
         
-        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
+        STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleDone target:self action:@selector(login:)];
         self.navigationItem.rightBarButtonItem = button;
         [button release];
         

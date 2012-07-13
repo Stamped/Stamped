@@ -30,6 +30,7 @@ extern NSString* const STConsumptionToolbarSliderWillShowNotification;
 
 @property (nonatomic, readwrite, assign) id<STConsumptionToolbarDelegate> delegate;
 @property (nonatomic, readonly, retain) STSliderScopeView* slider;
+@property (nonatomic, readwrite, assign) STStampedAPIScope scope;
 
 + (void)setupConfigurations;
 
