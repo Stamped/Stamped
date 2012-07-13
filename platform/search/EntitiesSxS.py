@@ -185,7 +185,9 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
 
     with open(path.join(outputDir, filenameBase) + '.html', 'w') as fout:
         for line in fileContent:
-            print >> fout, line.encode('utf-8')
+            if isinstance(line, unicode):
+                line = line.encode('utf-8')
+            print >> fout, line
 
     # Now compute the stats:
     same = sum(1 for i, j in movements.iteritems() if i == j)

@@ -16,6 +16,7 @@ from logs   import report
 try:
     import sys
     import json
+    import urllib
     import urllib2
     import logs
     
@@ -95,8 +96,12 @@ class TMDB(object):
         if 'api_key' not in params:
             params['api_key'] = self.__key
         
-        pairs = [ '%s=%s' % (k,urllib2.quote(str(v))) for k,v in params.items() ]
-        url = 'http://api.themoviedb.org/3/%s?%s' % (service,'&'.join(pairs))
+        encodedParams = {}
+        for k, v in params.iteritems():
+            if isinstance(v, unicode):
+                v = v.encode('utf-8')
+            encodedParams[k] = v
+        url = 'http://api.themoviedb.org/3/%s?%s' % (service, urllib.urlencode(encodedParams))
         logs.info(url)
         
         while True:

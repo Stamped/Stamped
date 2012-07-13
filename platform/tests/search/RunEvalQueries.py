@@ -87,7 +87,7 @@ class RunEvalQueries(AStampedTestCase):
         'time machine',
         'twilight',
         'unbroken hellanbrend',
-        '彼岸花 安妮宝贝',
+        'monsieur le président',
     ]
 
     @fixtureTest(useLocalDb=True)
@@ -323,7 +323,6 @@ class RunEvalQueries(AStampedTestCase):
         ('enoxel', (-23.596847, -46.688728)),
         ('evo pizza', (37.781697, -122.392146)),
         ('faramita', (25.084350, 121.556224)),
-        ('momofuku ssäm bar', (40.6, -73.9)),
         ('galleria mall', (35.995347, -114.936936)),
         ('highline park', None),
         ('kyoto japanese sushi', (53.606024, -113.379279)),
@@ -331,6 +330,7 @@ class RunEvalQueries(AStampedTestCase):
         ('le poisson rouge', (40.734466, -73.990742)),
         ('mauds cafe', (54.593507, -5.925185)),
         ('mordisco', (41.386533, 2.128773)),
+        ('momofuku ssäm bar', (40.6, -73.9)),
         ('nando\'s', (51.478148, -3.176642)),
         ('paddy\'s irish', (35.042481, -78.928133)),
         ('per se in nyc', (29.984821, -95.338962)),
