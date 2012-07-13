@@ -440,9 +440,15 @@ def isSuspiciousPrefixBookTitle(a, b):
 def cleanAppTitle(appTitle):
     return appTitle
 
+def applyAppTitleDataQualityTests(searchResult, searchQuery):
+    pass
+
 ############################################################################################################
 ################################################   PLACES   ################################################
 ############################################################################################################
 
 def cleanPlaceTitle(placeTitle):
     return placeTitle
+
+def applyPlaceTitleDataQualityTests(searchResult, searchQuery):
+    pass
