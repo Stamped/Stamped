@@ -396,9 +396,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # Construct a new LinkedAccount object which contains only valid fields
         newLinkedAccount = LinkedAccount()
 
+        remove_fields = []
         for k, v in linkedDict.iteritems():
             if k is not None and k not in valid_fields:
-                del(linkedDict[k])
+                remove_fields.append(k)
+        for field in remove_fields:
+            del(linkedDict[field])
 
         newLinkedAccount.dataImport(linkedDict)
 
