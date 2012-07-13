@@ -87,76 +87,6 @@ typedef enum {
     
 }
 
-//cls.addProperty('title',                            basestring, required=True)
-//cls.addProperty('subtitle',                         basestring, required=True)
-//cls.addProperty('category',                         basestring, required=True)
-//cls.addProperty('subcategory',                      basestring, required=True)
-//cls.addProperty('desc',                             basestring)
-//cls.addProperty('address',                          basestring)
-//cls.addProperty('coordinates',                      basestring)
-//cls.addProperty('cast',                             basestring)
-//cls.addProperty('director',                         basestring)
-//cls.addProperty('release_date',                     basestring)
-//cls.addProperty('artist',                           basestring)
-//cls.addProperty('album',                            basestring)
-//cls.addProperty('author',                           basestring)
-
-//Other
-//2012-07-01 22:37:36.196 StampedEther copy[2970:17c03] entity : {
-//    decription = Desc;
-//    name = Name;
-//    "what_is_it?" = "What is it";
-//}
-//Appentity : {
-//"app_name" = adsfafdsfdsa;
-//creator = Creator;
-//decription = "Asdfdsa ";
-//}
-//Movie{
-//decription = "Desc\n";
-//director = Director;
-//"film_title" = Title;
-//year = Year;
-//}
-//TV{
-//channel = Director;
-//decription = "Desc\n";
-//"series_title" = Title;
-//year = Year;
-//}
-//SOng {
-//"artist_name" = Artist;
-//"song_title" = Title;
-//}
-//Album{
-//"album_title" = Title;
-//"artist_name" = Artist;
-//}
-//Artist{
-//"artist_title" = Title;
-//genre = Genre;
-//}
-//Book{
-//author = Author;
-//"book_title" = afdsfdasfdsafdsa;
-//decription = desc;
-//}
-//Restaurant{
-//"address_line_1" = "Line 1";
-//"address_line_2" = "Line 2";
-//city = "City ";
-//country = "United States";
-//decription = desc;
-//name = restaurant;
-//"postal_code" = 15202;
-//state = State;
-//}
-
-
-
-
-
-
 - (NSDictionary*)paramsForItems:(NSDictionary*)items {
     NSMutableDictionary* result = [NSMutableDictionary dictionaryWithObject:self.category forKey:@"category"];
     NSDictionary* simpleMappings = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -171,9 +101,9 @@ typedef enum {
                                     //Movie
                                     @"director", @"director",
                                     @"title", @"film_title",
-                                    @"release_date", @"year",
+                                    @"year", @"year",
                                     //TV
-                                    @"artist", @"channel", //weird
+                                    @"network", @"channel",
                                     @"title", @"series_title",
                                     //Song
                                     @"artist", @"artist_name",
@@ -187,29 +117,15 @@ typedef enum {
                                     @"title", @"book_title",
                                     @"author", @"author",
                                     //Place
-                                    @"subcategory", @"type of place",
+                                    @"subtitle",            @"type of place",
+                                    @"address_street",      @"address_line_1",
+                                    @"address_street_ext",  @"address_line_2",
+                                    @"address_locality",    @"city",
+                                    @"address_region",      @"state",
+                                    @"address_postcode",    @"postal code",
+                                    @"address_country",     @"country",
+
                                     nil];
-    if ([self.category isEqualToString:@"place"]) {
-        NSMutableArray* components = [NSMutableArray array];
-        NSArray* order = [NSArray arrayWithObjects:
-                          @"address_line_1",
-                          @"address_line_2",
-                          @"city",
-                          @"state",
-                          @"postal code",
-                          @"country",
-                          nil];
-        for (NSString* key in order) {
-            NSString* value = [items objectForKey:key];
-            if (value.length) {
-                [components addObject:value];
-            }
-        }
-        if (components.count) {
-            NSString* address = [components componentsJoinedByString:@", "];
-            [result setObject:address forKey:@"address"];
-        }
-    }
     for (NSString* key in simpleMappings.allKeys) {
         NSString* value = [items objectForKey:key];
         if (value) {
@@ -566,7 +482,7 @@ typedef enum {
         switch (segmentedControl.selectedSegmentIndex) {
                 
             case 3:
-                self.subcategory = nil;
+                self.subcategory = @"establishment";
                 // other
                 [mutableDataSource replaceObjectAtIndex:0 withObject:
                  [NSArray arrayWithObjects:

@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import time
 from logs       import report
 
 try:
@@ -73,6 +74,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document['timestamp'] = { 'created' : created }
 
         document.pop('titlel')
+        document.pop('match_codes', None)
 
         entity = buildEntity(document, mini=mini)
 
@@ -116,6 +118,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         assert document is not None
 
         modified = False
+        postUpdateErrors = []
 
         # Check if old schema version
         if 'schema_version' not in document:
@@ -172,7 +175,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         # Source-specific checks
         if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
-            raise StampedItunesSourceError("%s: Missing iTunes URL" % entity.entity_id)
+            msg = "%s: Missing iTunes URL" % entity.entity_id
+            if repair and entity.sources.itunes_timestamp is not None:
+                logs.info(msg)
+                del(entity.sources.itunes_timestamp)
+                modified = True
+                postUpdateErrors.append(StampedItunesSourceError(msg))
+            else:
+                raise StampedItunesSourceError(msg)
         if entity.sources.googleplaces_id is not None and entity.sources.googleplaces_reference is None:
             raise StampedGooglePlacesSourceError("%s: Missing Google Places reference" % entity.entity_id)
 
@@ -222,26 +232,29 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                                 continue
                             else:
                                 raise StampedDataError(msg)
-                        if getHeadRequest(size.url, maxDelay=4) is None:
-                            msg = "%s: Image is unavailable (%s)" % (key, size.url)
-                            if repair:
-                                logs.info(msg)
-                                modified = True
-                                continue
-                            else:
-                                raise StampedDataError(msg)
-                        if size.width is None or size.height is None:
-                            msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
-                            if repair:
-                                logs.info(msg)
-                                try:
-                                    size.width, size.height = getWebImageSize(size.url)
-                                    modified = True
-                                except Exception as e:
-                                    logs.warning("%s: Could not get image sizes: %s" % (key, e))
-                                    raise 
-                            else:
-                                raise StampedDataError(msg)
+                        # Sleep for half a second as a poor-man's rate limiter
+                        # time.sleep(0.5)
+                        # if getHeadRequest(size.url, maxDelay=4) is None:
+                        #     msg = "%s: Image is unavailable (%s)" % (key, size.url)
+                        #     if repair:
+                        #         logs.info(msg)
+                        #         modified = True
+                        #         continue
+                        #     else:
+                        #         raise StampedDataError(msg)
+                        # NOTE: This is hitting rate limits from Amazon, so commenting out for now
+                        # if size.width is None or size.height is None:
+                        #     msg = "%s: Image dimensions not defined (%s)" % (key, size.url)
+                        #     if repair:
+                        #         logs.info(msg)
+                        #         try:
+                        #             size.width, size.height = getWebImageSize(size.url)
+                        #             modified = True
+                        #         except Exception as e:
+                        #             logs.warning("%s: Could not get image sizes: %s" % (key, e))
+                        #             raise 
+                        #     else:
+                        #         raise StampedDataError(msg)
                         sizes.append(size)
                     if len(sizes) > 0:
                         image.sizes = sizes
@@ -253,7 +266,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(entity))
-            print self._convertToMongo(entity)
+
+        if len(postUpdateErrors) > 0:
+            raise postUpdateErrors[0]
 
         return True
 

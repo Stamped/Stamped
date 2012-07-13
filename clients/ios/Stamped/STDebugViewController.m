@@ -56,7 +56,6 @@
     [super viewDidLoad];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
-    [Util addHomeButtonToController:self withBadge:YES];
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Configuration"
                                                                                style:UIBarButtonItemStyleDone
                                                                               target:self 

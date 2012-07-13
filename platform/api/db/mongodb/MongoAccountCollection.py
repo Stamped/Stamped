@@ -150,10 +150,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             }
             alertSettings = {}
             for k, v in document['alert_settings'].iteritems():
-                if k in alertMapping.values():
-                    alertSettings[k] = v 
-                elif k in alertMapping:
+                if k in alertMapping:
                     alertSettings[alertMapping[k]] = v
+                else:
+                    alertSettings[k] = v 
             document['alert_settings'] = alertSettings 
 
         if 'stats' in document and 'num_faves' in document['stats']:
@@ -209,7 +209,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             else:
                 if self._collection.find({'linked.facebook.linked_user_id': facebookId, '_id': {'$lt': key}}).count() > 0:
                     msg = "%s: Multiple accounts exist linked to Facebook id '%s'" % (key, facebookId)
-                    raise StampedFacebookLinkedToMultipleAccountsError(msg)
+                    if repair:
+                        logs.info(msg)
+                        del(account.linked.facebook)
+                        modified = True
+                    else:
+                        raise StampedFacebookLinkedToMultipleAccountsError(msg)
 
         # Verify Twitter accounts are unique
         if account.linked is not None and account.linked.twitter is not None:
@@ -221,11 +226,15 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             else:
                 if self._collection.find({'linked.twitter.linked_user_id': twitterId, '_id': {'$lt': key}}).count() > 0:
                     msg = "%s: Multiple accounts exist linked to Twitter id '%s'" % (key, twitterId)
-                    raise StampedTwitterLinkedToMultipleAccountsError(msg)
+                    if repair:
+                        logs.info(msg)
+                        del(account.linked.twitter)
+                        modified = True 
+                    else:
+                        raise StampedTwitterLinkedToMultipleAccountsError(msg)
 
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(account))
-            # print self._convertToMongo(account)
 
         return True
     

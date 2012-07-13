@@ -150,7 +150,7 @@ static const CGFloat _captionHeight = 25;
             bounds.origin.y = 0;
             bounds.size.height = _captionHeight;
             UIView* captionView = [Util viewWithText:item.caption 
-                                                font:[UIFont stampedFontWithSize:20]
+                                                font:[UIFont stampedFontWithSize:12]
                                                color:[UIColor stampedDarkGrayColor]
                                                 mode:UILineBreakModeTailTruncation
                                           andMaxSize:bounds.size];

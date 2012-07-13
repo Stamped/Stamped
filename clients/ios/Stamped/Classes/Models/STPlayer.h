@@ -9,6 +9,13 @@
 #import <Foundation/Foundation.h>
 #import "STPlaylistItem.h"
 
+typedef enum {
+    STPlayerServiceNone = 0,
+    STPlayerServicePreview = 1,
+    STPlayerServiceRdio = 2,
+    STPlayerServiceSpotify = 3,
+} STPlayerService;
+
 extern NSString* const STPlayerItemChangedNotification;
 extern NSString* const STPlayerStateChangedNotification;
 extern NSString* const STPlayerPlaylistChangedNotification;
@@ -31,6 +38,7 @@ extern NSString* const STPlayerFullFooterKey;
 - (void)clear;
 - (void)playKatyPerry;
 
+@property (nonatomic, readonly, assign) STPlayerService currentTrackService;
 @property (nonatomic, readwrite, assign) BOOL paused;
 
 + (void)setupConfigurations;

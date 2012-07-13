@@ -27,9 +27,25 @@
 
 - (id)initWithEntity:(id<STEntity>)entity andUser:(id<STUser>)user {
     UIImage* normalImage = [UIImage imageNamed:@"sDetailBar_btn_restamp"];
-    if (user && [user.screenName isEqualToString:[STStampedAPI sharedInstance].currentUser.screenName]) {
-        normalImage = [Util gradientImage:normalImage withPrimaryColor:user.primaryColor secondary:user.secondaryColor];
-    }
+//    if (user && [user.screenName isEqualToString:[STStampedAPI sharedInstance].currentUser.screenName]) {
+//        UIImage* whiteMask = [Util whiteMaskedImageUsingImage:normalImage];
+//        normalImage = [Util gradientImage:normalImage withPrimaryColor:user.primaryColor secondary:user.secondaryColor];
+//        
+//        
+//        CGFloat width = normalImage.size.width;
+//        CGFloat height = normalImage.size.height;
+//        
+//        UIGraphicsBeginImageContextWithOptions(normalImage.size, NO, 0.0);
+//        CGContextRef context = UIGraphicsGetCurrentContext();
+//        
+//        CGContextTranslateCTM(context, 0, height);
+//        CGContextScaleCTM(context, 1.0, -1.0);
+//        CGContextDrawImage(context, CGRectMake(0, 0, width, height), whiteMask.CGImage);
+//        CGContextDrawImage(context, CGRectMake(0, 0, width, height), normalImage.CGImage);
+//        UIImage* maskedImage = UIGraphicsGetImageFromCurrentImageContext();
+//        UIGraphicsEndImageContext();
+//        normalImage = maskedImage;
+//    }
     self = [super initWithNormalOffImage:normalImage offText:@"Stamp" andOnText:@"Stamped"];
     if (self) {
         self.touchedOffImage = [UIImage imageNamed:@"sDetailBar_btn_restamp_active"];

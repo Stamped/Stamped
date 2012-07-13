@@ -142,6 +142,7 @@
     }
     [_timer invalidate];
     [_timer release];
+    [_textCallout release];
     _textCallout = nil;
     [super dealloc];
 }
@@ -188,9 +189,24 @@
     _scope = scope;
     
     if (!_dragging) {
-        _draggingView.layer.position = [self positionForScope:_scope];
-        _draggingView.image = [self imageForScope:_scope];
+//        CGPoint positionBefore = _draggingView.layer.position;
+        if (animated) {
+            [[self textCallout] setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];   
+            _textCallout.hidden = YES;
+            [self moveToScope:scope animated:YES duration:0.4 completion:^{
+                _textCallout.hidden = NO;
+                if (self.delegate) {
+                    [self setScopeExplicit:scope];
+                }
+            }];
+            [self performSelector:@selector(hideTextCallout) withObject:nil afterDelay:1.5f];
+        }
+        else {
+            _draggingView.layer.position = [self positionForScope:_scope];
+            _draggingView.image = [self imageForScope:_scope];
+        }
     }
+    
 
 }
 
@@ -339,7 +355,7 @@
         if (!_textCallout) {
             STTextCalloutView *view = [[STTextCalloutView alloc] init];
             [self.superview addSubview:view];
-            _textCallout = view;
+            _textCallout = [view retain];
             [view release];
         }
     }
@@ -352,6 +368,7 @@
     
     if (_textCallout) {
         [_textCallout hide:YES];
+        [_textCallout release];
         _textCallout = nil;
     }
     

@@ -27,6 +27,9 @@
 #import "STActionManager.h"
 #import "STStampedActions.h"
 #import "STImageChunk.h"
+#import "STAttributedLabel.h"
+#import "STUsersViewController.h"
+#import "STButton.h"
 
 static const CGFloat _totalWidth = 310;
 static const CGFloat _imagePaddingX = 8;
@@ -37,16 +40,17 @@ static const CGFloat _bodyX = 64;
 static const CGFloat _minimumCellHeight = 64;
 static const CGFloat _bodyWidth = 214;
 
-@interface STStampDetailCommentsView ()
+@interface STStampDetailCommentsView () <STAttributedLabelDelegate>
 
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
 + (UIView*)viewWithUser:(id<STUser>)user 
+              isComment:(BOOL)isComment
                  header:(NSString*)header
                    date:(NSDate*)date
-                credits:(NSArray<STStampPreview>*)credits
+                credits:(NSArray<STStampPreview>*)credits 
+             references:(NSArray<STActivityReference>*)references
                 andBody:(NSString*)body;
-
 @end
 
 @interface STStampDetailBarView : UIView
@@ -82,10 +86,12 @@ static const CGFloat _bodyWidth = 214;
         UIView* userButton = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:comment.user];
         [self addSubview:userButton];
         
-        UIView* chunks = [STStampDetailCommentsView viewWithUser:comment.user
+        UIView* chunks = [STStampDetailCommentsView viewWithUser:comment.user 
+                                                       isComment:YES
                                                           header:nil
                                                             date:[comment created] 
                                                          credits:[NSArray array]
+                                                      references:comment.blurbReferences
                                                          andBody:[comment blurb]];
         
         if (chunks.frame.size.height < self.frame.size.height) {
@@ -141,15 +147,16 @@ static const CGFloat _bodyWidth = 214;
         [self addSubview:userImage];
         UIView* userButton = [Util tapViewWithFrame:userImage.frame target:self selector:@selector(userImageClicked:) andMessage:stamp.user];
         [self addSubview:userButton];
-        
+        UIView* lastChunk = nil;
         NSInteger blurbCount = stamp.contents.count;
         if (blurbCount > 0) {
             BOOL first = YES;
             for (NSInteger i = 0; i < blurbCount; i++) {
+                id<STContentItem> item = [stamp.contents objectAtIndex:i];
                 NSString* header;
                 if (!first) {
                     [self insertDots];
-                    header = @" added";
+                    header = item.blurb ? @" added" : @" restamped";
                 }
                 else {
                     NSString* subcategory = stamp.entity.subcategory;
@@ -164,16 +171,20 @@ static const CGFloat _bodyWidth = 214;
                     header = [NSString stringWithFormat:formatString, subcategory];
                     first = NO;
                 }
-                id<STContentItem> item = [stamp.contents objectAtIndex:i];
                 NSArray<STStampPreview>* credits = [NSArray array];
                 if (i == blurbCount - 1 && stamp.credits) {
                     credits = stamp.credits;
                 }
-                UIView* chunks = [STStampDetailCommentsView viewWithUser:stamp.user
+                UIView* chunks = [STStampDetailCommentsView viewWithUser:stamp.user 
+                                                               isComment:NO
                                                                   header:header
                                                                     date:[item created]
-                                                                 credits:credits
+                                                                 credits:credits 
+                                                              references:[item blurbReferences]
                                                                  andBody:[item blurb]];
+                if (blurbCount == 1) {
+                    lastChunk = chunks;
+                }
                 [Util reframeView:chunks withDeltas:CGRectMake(_bodyX, 0, 0, 0)];
                 [self appendChildView:chunks];
                 if (item.images.count) {
@@ -210,6 +221,7 @@ static const CGFloat _bodyWidth = 214;
                             [imageView addSubview:imageButton];
                             [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 12)];
                             [self appendChildView:imageView];
+                            lastChunk = nil;
                         }
                     }
                 }
@@ -217,6 +229,7 @@ static const CGFloat _bodyWidth = 214;
         }
         CGFloat previewHeight = [STPreviewsView previewHeightForStamp:stamp andMaxRows:2];
         if ( previewHeight > 0) {
+            lastChunk = nil;
             [self insertDots];
             [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 5)];
             STPreviewsView *view = [[[STPreviewsView alloc] initWithFrame:CGRectZero] autorelease];
@@ -231,7 +244,13 @@ static const CGFloat _bodyWidth = 214;
         else {
             [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 16)];
         }
-        
+        CGFloat minChunkHeight = _minimumCellHeight - 16;
+        if (lastChunk && lastChunk.frame.size.height < minChunkHeight) {
+            lastChunk.frame = [Util centeredAndBounded:lastChunk.frame.size inFrame:CGRectMake(lastChunk.frame.origin.x,
+                                                                                               lastChunk.frame.origin.y,
+                                                                                               lastChunk.frame.size.width,
+                                                                                               minChunkHeight)];
+        }
         CGRect finalFrame = self.frame;
         finalFrame.size.height = MAX(finalFrame.size.height, _minimumCellHeight);
         self.frame = finalFrame;
@@ -345,33 +364,31 @@ static const CGFloat _bodyWidth = 214;
 }
 
 + (UIView*)viewWithUser:(id<STUser>)user 
+              isComment:(BOOL)isComment
                  header:(NSString*)header
                    date:(NSDate*)date
-                credits:(NSArray<STStampPreview>*)credits
+                credits:(NSArray<STStampPreview>*)credits 
+             references:(NSArray<STActivityReference>*)references
                 andBody:(NSString*)body {
-    
-    if (!body) {
-        body = @"";
-    }
     CGFloat width = _bodyWidth;
     CGFloat lineHeight = 16;
     
     STChunk* startChunk = [[[STChunk alloc] initWithLineHeight:lineHeight start:0 end:0 width:width lineCount:1 lineLimit:NSIntegerMax] autorelease];
     NSMutableArray* chunks = [NSMutableArray array];
     
-    UIFont* userFont = [UIFont stampedBoldFontWithSize:10];
+    UIFont* userFont = [UIFont stampedBoldFontWithSize:12];
     STTextChunk* userChunk = [[[STTextChunk alloc] initWithPrev:startChunk 
                                                            text:user.screenName
                                                            font:userFont
-                                                          color:[UIColor stampedGrayColor]] autorelease];
+                                                          color:body ? [UIColor stampedGrayColor] : [UIColor stampedBlackColor]] autorelease];
     [chunks addObject:userChunk];
     
     if (header) {
-        UIFont* headerFont = [UIFont stampedFontWithSize:10];
+        UIFont* headerFont = [UIFont stampedFontWithSize:12];
         STTextChunk* headerChunk = [[[STTextChunk alloc] initWithPrev:userChunk
                                                                  text:header
                                                                  font:headerFont
-                                                                color:[UIColor stampedLightGrayColor]] autorelease];
+                                                                color:body ? [UIColor stampedLightGrayColor] : [UIColor stampedBlackColor]] autorelease];
         [chunks addObject:headerChunk];
     }
     
@@ -384,78 +401,183 @@ static const CGFloat _bodyWidth = 214;
     dateChunk.topLeft = CGPointMake(235 - dateChunk.end, 0);
     [chunks addObject:dateChunk];
     
-    STChunk* bodyStart = [STChunk newlineChunkWithPrev:startChunk];
     
-    UIFont* bodyFont = [UIFont stampedFontWithSize:12];
-    STTextChunk* bodyChunk = [[[STTextChunk alloc] initWithPrev:bodyStart
-                                                           text:body
-                                                           font:bodyFont
-                                                          color:[UIColor stampedDarkGrayColor]] autorelease];
-    [chunks addObject:bodyChunk];
-    
-    
+    //    
+    //    STTextChunk* bodyChunk = [[[STTextChunk alloc] initWithPrev:bodyStart
+    //                                                           text:body
+    //                                                           font:bodyFont
+    //                                                          color:[UIColor stampedDarkGrayColor]] autorelease];
+    //    [chunks addObject:bodyChunk];
+    //
+    STAttributedLabel* bodyLabel = nil;
+    STChunk* bodyChunk = nil;
+    if (body) {
+        UIFont* bodyFont = [UIFont stampedFontWithSize:12];
+        UIFont* bodyBoldFont = [UIFont stampedBoldFontWithSize:12];
+        NSAttributedString* bodyString = [Util attributedStringForString:body
+                                                              references:references
+                                                                    font:bodyFont
+                                                                   color:isComment ? [UIColor stampedDarkGrayColor] : [UIColor stampedBlackColor]
+                                                           referenceFont:bodyBoldFont
+                                                          referenceColor:[UIColor stampedDarkGrayColor]
+                                                              lineHeight:lineHeight
+                                                                  indent:0
+                                                                 kerning:0];
+        STChunk* bodyStart = [STChunk newlineChunkWithPrev:startChunk];
+        bodyChunk = [[[STTextChunk alloc] initWithPrev:bodyStart attributedString:bodyString andPrimaryFont:bodyFont] autorelease];
+        bodyLabel = [[[STAttributedLabel alloc] initWithAttributedString:bodyString width:bodyStart.frame.size.width andReferences:references] autorelease];
+        bodyLabel.referenceDelegate = (id)self;
+        [Util reframeView:bodyLabel withDeltas:CGRectMake(0, 3 + bodyChunk.topLeft.y, 0, 0)];
+        bodyLabel.userInteractionEnabled = YES;
+    }
     NSInteger creditCount = credits.count;
+    STButton* creditView = nil;
     if (creditCount > 0) {
-        STChunk* creditStart = [STChunk newlineChunkWithPrev:bodyChunk];
         
-        UIFont* creditFont = [UIFont stampedFontWithSize:10];
-        STTextChunk* creditPrefixChunk = [[[STTextChunk alloc] initWithPrev:creditStart
-                                                                       text:@"Credit to "
-                                                                       font:creditFont
-                                                                      color:[UIColor stampedGrayColor]] autorelease];
-        
-        [chunks addObject:creditPrefixChunk];
-        
-        id<STStampPreview> firstPreview = [credits objectAtIndex:0];
-        id<STUser> firstCreditedUser = firstPreview.user;
-        UIImage* firstCreditImage = [Util creditImageForUser:user creditUser:firstCreditedUser andSize:STStampImageSize12];
-        STImageChunk* firstCreditChunk = [[[STImageChunk alloc] initWithPrev:creditPrefixChunk 
-                                                               andFrame:CGRectMake(0,
-                                                                                   3,
-                                                                                   firstCreditImage.size.width,
-                                                                                   firstCreditImage.size.height)] autorelease];
-        firstCreditChunk.image = firstCreditImage;
-        
-        [chunks addObject:firstCreditChunk];
-        STTextChunk* firstCreditScreenNameChunk = [[[STTextChunk alloc] initWithPrev:firstCreditChunk
-                                                                              text:[NSString stringWithFormat:@" %@", firstCreditedUser.screenName]
-                                                                              font:[UIFont stampedBoldFontWithSize:10]
-                                                                             color:[UIColor stampedDarkGrayColor]] autorelease];
-        [chunks addObject:firstCreditScreenNameChunk];
-        
-        if (creditCount > 1) {
-            STTextChunk* andChunk = [[[STTextChunk alloc] initWithPrev:firstCreditScreenNameChunk
-                                                                  text:@" and "
-                                                                  font:[UIFont stampedFontWithSize:10]
-                                                                 color:[UIColor stampedGrayColor]] autorelease];
-            [chunks addObject:andChunk];
-            if (creditCount == 2) {
-                id<STStampPreview> secondPreview = [credits objectAtIndex:1];
-                id<STUser> secondUser = secondPreview.user;
-                //UIImage* secondCreditImage = [Util creditImageForUser:user creditUser:secondUser andSize:STStampImageSize12];
-                //STImageChunk* secondImageChunk = [[[STImageChunk alloc] initWithPrev:andChunk andFrame:CGRectMake(0,3, secondCreditImage.size.width, secondCreditImage.size.height)] autorelease];
-                //secondImageChunk.image = secondCreditImage;
-                //[chunks addObject:secondImageChunk];
-                STTextChunk* secondScreenNameChunk = [[[STTextChunk alloc] initWithPrev:andChunk
-                                                                                   text:[NSString stringWithFormat:@"%@", secondUser.screenName]
-                                                                                   font:[UIFont stampedBoldFontWithSize:10]
-                                                                                  color:[UIColor stampedDarkGrayColor]] autorelease];
-                [chunks addObject:secondScreenNameChunk];
-            }
-            else {
-                STTextChunk* others = [[[STTextChunk alloc] initWithPrev:andChunk
-                                                                    text:[NSString stringWithFormat:@"%d others", creditCount - 1]
-                                                                    font:[UIFont stampedBoldFontWithSize:10]
-                                                                   color:[UIColor stampedDarkGrayColor]] autorelease];
-                [chunks addObject:others];
-            }
+        UIView* creditViews[2];
+        for (NSInteger i = 0; i < 2; i++) {
+            BOOL highlight = i == 1;
+            UIColor* normalColor = [UIColor stampedGrayColor];
+            UIColor* nameColor = [UIColor stampedDarkGrayColor];
+            NSMutableArray* creditChunks = [NSMutableArray array];
+            CGFloat creditPointSize = 10;
+            STChunk* creditStart = [[[STChunk alloc] initWithLineHeight:lineHeight start:0 end:0 width:width lineCount:1 lineLimit:NSIntegerMax] autorelease];
+            creditStart = [STChunk newlineChunkWithPrev:creditStart];
+            UIFont* creditFont = [UIFont stampedFontWithSize:creditPointSize];
+            STTextChunk* creditPrefixChunk = [[[STTextChunk alloc] initWithPrev:creditStart
+                                                                           text:@"Credit to "
+                                                                           font:creditFont
+                                                                          color:normalColor] autorelease];
             
+            [creditChunks addObject:creditPrefixChunk];
+            
+            id<STStampPreview> firstPreview = [credits objectAtIndex:0];
+            id<STUser> firstCreditedUser = firstPreview.user;
+            UIImage* firstCreditImage = [Util creditImageForUser:user creditUser:firstCreditedUser andSize:STStampImageSize12];
+            STImageChunk* firstCreditChunk = [[[STImageChunk alloc] initWithPrev:creditPrefixChunk 
+                                                                        andFrame:CGRectMake(0,
+                                                                                            3,
+                                                                                            firstCreditImage.size.width,
+                                                                                            firstCreditImage.size.height)] autorelease];
+            firstCreditChunk.image = firstCreditImage;
+            
+            [creditChunks addObject:firstCreditChunk];
+            STTextChunk* firstCreditScreenNameChunk = [[[STTextChunk alloc] initWithPrev:firstCreditChunk
+                                                                                    text:[NSString stringWithFormat:@" %@", firstCreditedUser.screenName]
+                                                                                    font:[UIFont stampedBoldFontWithSize:creditPointSize]
+                                                                                   color:nameColor] autorelease];
+            [creditChunks addObject:firstCreditScreenNameChunk];
+            
+            if (creditCount > 1) {
+                STTextChunk* andChunk = [[[STTextChunk alloc] initWithPrev:firstCreditScreenNameChunk
+                                                                      text:@" and "
+                                                                      font:[UIFont stampedFontWithSize:creditPointSize]
+                                                                     color:normalColor] autorelease];
+                [creditChunks addObject:andChunk];
+                if (creditCount == 2) {
+                    id<STStampPreview> secondPreview = [credits objectAtIndex:1];
+                    id<STUser> secondUser = secondPreview.user;
+                    //UIImage* secondCreditImage = [Util creditImageForUser:user creditUser:secondUser andSize:STStampImageSize12];
+                    //STImageChunk* secondImageChunk = [[[STImageChunk alloc] initWithPrev:andChunk andFrame:CGRectMake(0,3, secondCreditImage.size.width, secondCreditImage.size.height)] autorelease];
+                    //secondImageChunk.image = secondCreditImage;
+                    //[chunks addObject:secondImageChunk];
+                    STTextChunk* secondScreenNameChunk = [[[STTextChunk alloc] initWithPrev:andChunk
+                                                                                       text:[NSString stringWithFormat:@"%@", secondUser.screenName]
+                                                                                       font:[UIFont stampedBoldFontWithSize:creditPointSize]
+                                                                                      color:nameColor] autorelease];
+                    [creditChunks addObject:secondScreenNameChunk];
+                }
+                else {
+                    STTextChunk* others = [[[STTextChunk alloc] initWithPrev:andChunk
+                                                                        text:[NSString stringWithFormat:@"%d others", creditCount - 1]
+                                                                        font:[UIFont stampedBoldFontWithSize:creditPointSize]
+                                                                       color:nameColor] autorelease];
+                    [creditChunks addObject:others];
+                }
+            }
+            STChunksView* creditChunksView = [[[STChunksView alloc] initWithChunks:creditChunks] autorelease];
+            if (highlight) {
+                creditChunksView.alpha = .5;
+            }
+            creditViews[i] = creditChunksView;
         }
+        creditView = [[[STButton alloc] initWithFrame:creditViews[0].frame 
+                                           normalView:creditViews[0] 
+                                           activeView:creditViews[1]
+                                               target:self andAction:@selector(creditsClicked:)] autorelease];
+        creditView.message = credits;
     }
     
     STChunksView* view = [[[STChunksView alloc] initWithChunks:chunks] autorelease];
+    if (bodyLabel) {
+        CGRect frame = view.frame;
+        frame.size.height =  MAX(CGRectGetMaxY(bodyLabel.frame), frame.size.height);
+        view.frame = frame;
+        [view addSubview:bodyLabel];
+    }
+    if (creditView) {
+        [Util appendView:creditView toParentView:view];
+    }
     //NSLog(@"ChunkHeight:%f",view.frame.size.height);
+    //    if (creditCount) {
+    //        CGFloat y = bodyChunk ? CGRectGetMaxY(bodyChunk.frame) : CGRectGetMaxY(userChunk.frame);
+    //        CGRect creditFrame = CGRectMake(0, y, width, view.frame.size.height - y);
+    //        UIView* creditButton = [Util tapViewWithFrame:creditFrame andCallback:^{
+    //            if (credits.count == 1) {
+    //                id<STStampPreview> first = [credits objectAtIndex:0];
+    //                [[STStampedActions sharedInstance] viewStampWithStampID:first.stampID];
+    //            }
+    //            else {
+    //                NSMutableArray* userIDs = [NSMutableArray array];
+    //                NSMutableDictionary* mapping = [NSMutableDictionary dictionary];
+    //                for (id<STStampPreview> preview in credits) {
+    //                    NSString* userID = preview.user.userID;
+    //                    if (userID) {
+    //                        [userIDs addObject:userID];
+    //                        if (preview.stampID) {
+    //                            [mapping setObject:preview.stampID forKey:userID];
+    //                        }
+    //                    }
+    //                }
+    //                STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+    //                controller.userIDToStampID = mapping;
+    //                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    //            }
+    //        }];
+    //        [view addSubview:creditButton];
+    //    }
     return view;
+}
+
++ (void)creditsClicked:(NSArray<STStampPreview>*)credits {
+    if (credits.count == 1) {
+        id<STStampPreview> first = [credits objectAtIndex:0];
+        [[STStampedActions sharedInstance] viewStampWithStampID:first.stampID];
+    }
+    else {
+        NSMutableArray* userIDs = [NSMutableArray array];
+        NSMutableDictionary* mapping = [NSMutableDictionary dictionary];
+        for (id<STStampPreview> preview in credits) {
+            NSString* userID = preview.user.userID;
+            if (userID) {
+                [userIDs addObject:userID];
+                if (preview.stampID) {
+                    [mapping setObject:preview.stampID forKey:userID];
+                }
+            }
+        }
+        STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+        controller.userIDToStampID = mapping;
+        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    }
+}
+
++ (void)attributedLabel:(STAttributedLabel *)label didSelectReference:(id<STActivityReference>)reference {
+    id<STAction> action = reference.action;
+    if (action) {
+        
+        [[STActionManager sharedActionManager] didChooseAction:action withContext:[STActionContext context]];
+    }
 }
 
 @end

@@ -13,6 +13,7 @@
 @interface STSimpleComment : NSObject <STComment, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSString* blurb;
+@property (nonatomic, readwrite, copy) NSArray<STActivityReference>* blurbReferences;
 @property (nonatomic, readwrite, copy) NSString* commentID;
 @property (nonatomic, readwrite, copy) NSString* stampID;
 @property (nonatomic, readwrite, copy) NSDate* created;

@@ -11,6 +11,7 @@
 #import "STActionManager.h"
 #import "Util.h"
 #import "STStampedAPI.h"
+#import "STSharedCaches.h"
 
 @interface STTodoButton ()
 
@@ -33,8 +34,17 @@
         self.normalOnImage = [UIImage imageNamed:@"sDetailBar_btn_todo_selected"];
         self.touchedOffImage = [UIImage imageNamed:@"sDetailBar_btn_todo_active"];
         self.touchedOnImage = [UIImage imageNamed:@"sDetailBar_btn_todo_active"];
-        if (stamp) {
-            self.on = [[self.stamp isTodod] boolValue];
+        if (stamp.isTodod.boolValue) {
+            self.on = YES;
+        }
+        else {
+            STCache* todos = [STSharedCaches cacheForTodos];
+            if (todos) {
+                STCacheSnapshot* snapshot = todos.snapshot;
+                if ([snapshot.page indexForKey:entityID]) {
+                    self.on = YES;
+                }
+            }
         }
         _entityID = [entityID retain];
     }
@@ -66,7 +76,7 @@
                 }
                 else {
                     self.on = !self.on;
-                    [Util warnWithMessage:@"Todo failed; see log" andBlock:nil];
+                    [Util warnWithAPIError:error andBlock:nil];
                 }
             }];
             context.stamp = self.stamp;
@@ -82,13 +92,24 @@
         }
         else {
             BOOL current = self.on;
-            [[STStampedAPI sharedInstance] todoWithStampID:nil entityID:self.entityID andCallback:^(id<STTodo> todo, NSError* error, STCancellation* cancellation) {
-                self.waiting = NO;
-                if (!todo) {
-                    self.on = current;
-                    [Util warnWithMessage:@"Todo failed; see log" andBlock:nil];
-                }
-            }];
+            if (current) {
+                [[STStampedAPI sharedInstance] untodoWithStampID:nil entityID:self.entityID andCallback:^(BOOL success, NSError * error, STCancellation * cancellation) {
+                    self.waiting = NO;
+                    if (error) {
+                        self.on = current;
+                        [Util warnWithAPIError:error andBlock:nil];
+                    }
+                }];
+            }
+            else {
+                [[STStampedAPI sharedInstance] todoWithStampID:nil entityID:self.entityID andCallback:^(id<STTodo> todo, NSError* error, STCancellation* cancellation) {
+                    self.waiting = NO;
+                    if (!todo) {
+                        self.on = current;
+                        [Util warnWithAPIError:error andBlock:nil];
+                    }
+                }];
+            }
             self.on = !current;
         }
     }

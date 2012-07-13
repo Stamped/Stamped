@@ -48,6 +48,8 @@ extern NSString* const STCacheDidLoadPageNotification;
 
 @property (nonatomic, readonly, assign) NSInteger count;
 
+@property (nonatomic, readonly, retain) STCachePage* page;
+
 @end
 
 @interface STCache : NSObject <STCacheConfiguration>
@@ -78,6 +80,8 @@ extern NSString* const STCacheDidLoadPageNotification;
 - (STCacheSnapshot*)snapshot;
 - (void)cancelPendingRequests;
 - (void)refreshAtIndex:(NSInteger)index force:(BOOL)force;
+
+- (void)dirty;
 
 - (BOOL)hasMore;
 

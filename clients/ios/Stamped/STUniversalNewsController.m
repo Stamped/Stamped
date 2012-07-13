@@ -19,6 +19,7 @@
 #import "STBlockUIView.h"
 #import <QuartzCore/QuartzCore.h>
 #import "QuartzUtils.h"
+#import "FindFriendsViewController.h"
 
 static NSString* const STUniversalNewWasUpdatedNotification = @"STUniversalNewsWasUpdatedNotification";
 
@@ -138,12 +139,14 @@ static BOOL _friendsHasMore = YES;
 - (id)init {
     if ((self = [super init])) {
         scope_ = STStampedAPIScopeYou;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(countUpdated:) name:UIApplicationDidBecomeActiveNotification object:nil];
     }
     return self;    
 }
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [STEvents removeObserver:self];
     [_slider release], _slider=nil;
     [super dealloc];
@@ -151,7 +154,7 @@ static BOOL _friendsHasMore = YES;
 
 - (void)countUpdated:(id)notImportant {
     if (scope_ == STStampedAPIScopeYou) {
-        [STUnreadActivity sharedInstance].count = 0;
+        [self clearBadges];
     }
 }
 
@@ -168,7 +171,6 @@ static BOOL _friendsHasMore = YES;
         self.tableView.backgroundView = background;
         [background release];
     }
-    
     if (!self.footerView) {
         STSliderScopeView *view = [[STSliderScopeView alloc] initWithStyle:STSliderScopeStyleTwo frame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 54.0f)];
         view.delegate = (id<STSliderScopeViewDelegate>)self;
@@ -178,16 +180,19 @@ static BOOL _friendsHasMore = YES;
         [view release];
         _slider = [view retain];
     }
-    
     [Util addCreateStampButtonToController:self];
     [self reloadDataSource];
     
 }
 
+- (void)clearBadges {
+    [STUnreadActivity sharedInstance].count = 0;
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+}
+
 - (void)viewDidAppear:(BOOL)animated {
     if (scope_ == STStampedAPIScopeYou) {
-        [STUnreadActivity sharedInstance].count = 0;
-        [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
+        [self clearBadges];
     }
     NSIndexPath* selection = [self.tableView indexPathForSelectedRow];
     if (selection) {
@@ -289,7 +294,7 @@ static BOOL _friendsHasMore = YES;
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-    
+    //TODO generic rule for view all subjects as default
     id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
     if (activity.action) {
         [[STActionManager sharedActionManager] didChooseAction:activity.action withContext:[STActionContext context]];
@@ -373,12 +378,19 @@ static BOOL _friendsHasMore = YES;
     return self.newsItems.count == 0;
 }
 
-- (void)noDataTapped:(id)notImportant {
-    [Util warnWithMessage:@"not implemented yet..." andBlock:nil];
+- (void)noDataAction:(id)sender {
+    
+    FindFriendsViewController *controller = [[[FindFriendsViewController alloc] init] autorelease];
+    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    
 }
 
 - (void)setupNoDataView:(NoDataView*)view {
-    [view setupWithTitle:@"No news" detailTitle:@"No news found."];
+    
+    [view setupWithButtonTitle:LOGGED_IN ? @"Find friends to follow" : @"Sign in / Create account"
+                   detailTitle:self.scope == STStampedAPIScopeYou ? @"To get more activity on your stamps" : @"To see activity for friends."
+                        target:self
+                     andAction:@selector(noDataAction:)];
 }
 
 

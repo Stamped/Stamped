@@ -12,7 +12,10 @@
 @interface NoDataView : UIView 
 
 @property(nonatomic,strong) UIImageView *imageView;
+@property (nonatomic, readwrite, assign) BOOL custom;
 
 - (void)setupWithTitle:(NSString*)title detailTitle:(NSString*)detailTitle; // setup helper
+
+- (void)setupWithButtonTitle:(NSString*)title detailTitle:(NSString*)detailTitle target:(id)target andAction:(SEL)selector;
 
 @end

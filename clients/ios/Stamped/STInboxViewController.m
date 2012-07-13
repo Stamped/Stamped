@@ -38,6 +38,12 @@
 #import "STUnreadActivity.h"
 #import "STNavigationItem.h"
 #import "STAppDelegate.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import "NoDataView.h"
+#import "NoDataUtil.h"
+
+NSString* STInboxViewControllerPrepareForAnimationNotification = @"STInboxViewControllerPrepareForAnimationNotification";
 
 @interface STInboxViewController ()
 
@@ -49,6 +55,10 @@
 @property (nonatomic, readwrite, retain) NSArray<STStamp>* searchResults;
 @property (nonatomic, readwrite, assign) BOOL reloading;
 @property (nonatomic, readwrite, assign) BOOL dirty;
+@property (nonatomic, readwrite, assign) BOOL showIntro;
+@property (nonatomic, readwrite, assign) BOOL goingToShowIntro;
+@property (nonatomic, readwrite, retain) UIView* emptyPopupView;
+@property (nonatomic, readwrite, retain) UIView* tooltip;
 
 @end
 
@@ -62,6 +72,10 @@
 @synthesize searchResults = _searchResults;
 @synthesize reloading = _reloading;
 @synthesize dirty = _dirty;
+@synthesize showIntro = _showIntro;
+@synthesize goingToShowIntro = _goingToShowIntro;
+@synthesize emptyPopupView = _emptyPopupView;
+@synthesize tooltip = _tooltip;
 
 - (id)init {
     if (self = [super init]) {
@@ -75,7 +89,13 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(localStampModification:) name:STStampedAPILocalStampModificationNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(friendsChanged:) name:STStampedAPIUnfollowNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(friendsChanged:) name:STStampedAPIFollowNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(willShowLeftMenu:) name:DDMenuControllerWillShowLeftMenuNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForAnimationRequest:) name:STInboxViewControllerPrepareForAnimationNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(popupDismissed:) name:STUtilPopupDismissedNotification object:nil];
         
+        _showIntro = YES;
         if ([STStampedAPI sharedInstance].currentUser == nil) {
             _scope = STStampedAPIScopeEveryone;
         } else {
@@ -89,9 +109,10 @@
 }
 
 - (void)dealloc {
-    
+    [_emptyPopupView release];
+    _slider.delegate = nil;
     [_slider release], _slider=nil;
-    
+    [_tooltip release];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
@@ -102,7 +123,6 @@
     self.tableView.separatorColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
     
     if (!LOGGED_IN) {
-        
         STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
         self.navigationItem.rightBarButtonItem = button;
         [button release];
@@ -131,6 +151,7 @@
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+    _slider.delegate = nil;
     [_slider release];
 }
 
@@ -141,11 +162,25 @@
     }
 }
 
+- (void)abortIntro {
+    [self.emptyPopupView removeFromSuperview];
+    self.emptyPopupView = nil;
+    [self.tooltip removeFromSuperview];
+    self.tooltip = nil;
+    self.goingToShowIntro = NO;
+    [Util setFullScreenPopUp:nil dismissible:NO withBackground:[UIColor clearColor]];
+}
+
 - (void)viewDidDisappear:(BOOL)animated {
+    [self abortIntro];
     //Todo cancel pending cache ops
     [super viewDidDisappear:animated];
 }
 
+
+- (void)willShowLeftMenu:(id)notImportant {
+    [self abortIntro];
+}
 
 #pragma mark - Actions
 
@@ -197,13 +232,13 @@
 
 - (void)cacheWillLoadPage:(NSNotification *)notification {
     self.reloading = YES;
-   // [self.tableView reloadData];
+    // [self.tableView reloadData];
 }
 
 - (void)cacheDidLoadPage:(NSNotification *)notification {
     self.reloading = NO;
     [self dataSourceDidFinishLoading];
-   // [self.tableView reloadData];
+    // [self.tableView reloadData];
 }
 
 - (void)cacheUpdate:(NSNotification *)notification {
@@ -217,6 +252,10 @@
 #pragma mark - STSliderScopeViewDelegate
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
+    if (scope != STStampedAPIScopeEveryone) {
+        [self.emptyPopupView removeFromSuperview];
+        self.emptyPopupView = nil;
+    }
     self.scope = scope;
 }
 
@@ -402,71 +441,151 @@
     return self.snapshot.count == 0;
 }
 
+- (void)exitNoDataView:(id)notImportant {
+    [self showTooltip];
+    [Util setFullScreenPopUp:nil dismissible:NO withBackground:[UIColor clearColor]];
+}
+
+- (void)showScopeShiftPopup {
+    if ([Util topController] == self) {
+        NoDataView* noDataView = [[[NoDataView alloc] initWithFrame:[Util fullscreenFrame]] autorelease];
+        //        [Util reframeView:noDataView withDeltas:CGRectMake(0, -50, 0, 0)];
+        noDataView.userInteractionEnabled = YES;
+        NSString* topString = @"Since you're not yet following anyone, we've bumped you over to the Tastemakers view.";
+        //        NSString* bottomString = @"Got it.";
+        UILabel* top = [Util viewWithText:topString
+                                     font:[UIFont stampedBoldFontWithSize:14]
+                                    color:[UIColor whiteColor]
+                                     mode:UILineBreakModeWordWrap
+                               andMaxSize:CGSizeMake(200, CGFLOAT_MAX)];
+        top.textAlignment = UITextAlignmentCenter;
+        CGRect bounds = CGRectMake(0, 0, noDataView.imageView.frame.size.width, noDataView.imageView.frame.size.height);
+        top.frame = [Util centeredAndBounded:top.frame.size inFrame:bounds];
+        [noDataView.imageView addSubview:top];
+        [Util reframeView:top withDeltas:CGRectMake(0, - 8 , 0, 0)];
+        noDataView.imageView.userInteractionEnabled = YES;
+        UIButton* exitButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [exitButton addTarget:self action:@selector(exitNoDataView:) forControlEvents:UIControlEventTouchUpInside];
+        [exitButton setImage:[UIImage imageNamed:@"closebutton_black"] forState:UIControlStateNormal];
+        exitButton.frame = CGRectMake(-6.5, - 11, 48, 48);
+        [noDataView.imageView addSubview:exitButton];
+        
+        //noDataView.frame = [Util centeredAndBounded:noDataView.frame.size inFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+        noDataView.backgroundColor = [UIColor clearColor];
+        //        [self.view addSubview:noDataView];
+        //        self.emptyPopupView = noDataView;
+        top.hidden = YES;
+        //        bottom.hidden = YES;
+        CGRect rectAfter = noDataView.imageView.frame;
+        [Util setFullScreenPopUp:noDataView dismissible:YES withBackground:[UIColor clearColor]];
+        noDataView.imageView.frame = [Util centeredAndBounded:CGSizeMake(20, 14) inFrame:rectAfter];
+        [noDataView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(exitNoDataView:)] autorelease]];
+        [UIView animateWithDuration:.2 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
+            noDataView.backgroundColor = [UIColor colorWithWhite:0 alpha:.3];
+            noDataView.imageView.frame = rectAfter;
+        } completion:^(BOOL finished) {
+            top.hidden = NO;
+            
+        }];
+        noDataView.userInteractionEnabled = YES;
+    }
+}
+
+- (void)dataSourceDidFinishLoading {
+    BOOL showIntro = self.showIntro && !self.cache.hasMore && self.snapshot.count == 0 && self.scope == STStampedAPIScopeFriends;
+    self.showIntro = NO;
+    if (showIntro) {
+        self.goingToShowIntro = YES;
+        [Util executeWithDelay:.8 onMainThread:^{
+            if ([Util topController] == self && self.goingToShowIntro) {
+                [self.slider setScope:STStampedAPIScopeEveryone animated:YES];
+                [Util executeWithDelay:1.0 onMainThread:^{
+                    if (self.goingToShowIntro) {
+                        [self showScopeShiftPopup]; 
+                    }
+                    self.goingToShowIntro = NO;
+                }];
+            }
+        }];
+        //        [self.slider moveToScope:STStampedAPIScopeEveryone animated:YES duration:.4 completion:^{
+        //            NSLog(@"yayayayay"); 
+        //        }];
+        //        [self.slider setScope:STStampedAPIScopeEveryone animated:YES];
+    }
+    [super dataSourceDidFinishLoading];
+}
+
 - (void)setupNoDataView:(NoDataView*)view {
     
     view.imageView.userInteractionEnabled = YES;
     [[view.imageView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     
     if (!LOGGED_IN || (LOGGED_IN && self.scope != STStampedAPIScopeYou)) {
-        
-        UIImage *image = [UIImage imageNamed:@"no_data_find_friends_btn.png"];
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
-        [button setTitle:LOGGED_IN ? @"Find friends to follow" : @"Sign in / Create account" forState:UIControlStateNormal];
-        [button addTarget:self action:@selector(noDataAction:) forControlEvents:UIControlEventTouchUpInside];
-        [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.9f] forState:UIControlStateNormal];
-        button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
-        [button sizeToFit];
-        [view.imageView addSubview:button];
-        CGRect frame = button.frame;
-        frame.origin.y = 34.0f;
-        frame.size.width += 48.0f;
-        frame.size.height = image.size.height;
-        frame.origin.x = (view.imageView.bounds.size.width - frame.size.width)/2;
-        button.frame = frame;
-        CGFloat maxY = CGRectGetMaxY(button.frame);
-        
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.font = [UIFont systemFontOfSize:12];
-        label.backgroundColor = [UIColor clearColor];
-        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
-        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
-        [view.imageView addSubview:label];
-        [label release];
-        
-        switch (self.scope) {
-            case STStampedAPIScopeYou:
-                label.text = @"to create stamps.";
-                break;
-            case STStampedAPIScopeFriends:
-                label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
-                break;
-            case STStampedAPIScopeFriendsOfFriends:
-                label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
-                break;
-            case STStampedAPIScopeEveryone:
-                label.text = @"to view popular stamps.";
-                break;
-                
-            default:
-                break;
+        if (self.goingToShowIntro) {
+            view.custom = YES;
+            
+            UIView* waterMark = [NoDataUtil stampWatermarkWithTitle:@"No stamps" andSubtitle:@"from friends"];
+            waterMark.frame = [Util centeredAndBounded:waterMark.frame.size inFrame:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
+            [view addSubview:waterMark];
         }
-        
-        [label sizeToFit];
-        
-        frame = label.frame;
-        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
-        frame.origin.y = floorf(maxY + 8.0f);
-        label.frame = frame;
-        
-        
-        
+        else {
+            UIImage *image = [UIImage imageNamed:@"pop-up_findfriendstofollow_btn"];
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+            [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+            [button setTitle:LOGGED_IN ? @"Find friends to follow" : @"Sign in / Create account" forState:UIControlStateNormal];
+            [button addTarget:self action:@selector(noDataAction:) forControlEvents:UIControlEventTouchUpInside];
+            [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            //[button setTitleShadowColor:[UIColor colorWithWhite:0.0f alpha:0.9f] forState:UIControlStateNormal];
+            //button.titleLabel.shadowOffset = CGSizeMake(0.0f, -1.0f);
+            button.titleLabel.font = [UIFont stampedBoldFontWithSize:12];
+            [button sizeToFit];
+            [view.imageView addSubview:button];
+            CGRect frame = button.frame;
+            frame.origin.y = 34.0f;
+            frame.size.width += 48.0f;
+            frame.size.height = image.size.height;
+            frame.origin.x = (view.imageView.bounds.size.width - frame.size.width)/2;
+            button.frame = frame;
+            CGFloat maxY = CGRectGetMaxY(button.frame);
+            
+            UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+            label.font = [UIFont systemFontOfSize:12];
+            label.backgroundColor = [UIColor clearColor];
+            label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
+            label.shadowOffset = CGSizeMake(0.0f, -1.0f);
+            label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
+            [view.imageView addSubview:label];
+            [label release];
+            
+            switch (self.scope) {
+                case STStampedAPIScopeYou:
+                    label.text = @"to create stamps.";
+                    break;
+                case STStampedAPIScopeFriends:
+                    label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
+                    break;
+                case STStampedAPIScopeFriendsOfFriends:
+                    label.text = LOGGED_IN ? @"to view their stamps" : @"to view stamps from friends.";
+                    break;
+                case STStampedAPIScopeEveryone:
+                    label.text = @"to view popular stamps.";
+                    break;
+                    
+                default:
+                    break;
+            }
+            
+            [label sizeToFit];
+            
+            frame = label.frame;
+            frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
+            frame.origin.y = floorf(maxY + 8.0f);
+            label.frame = frame;
+            
+            
+        }
     }
-    
-    if (LOGGED_IN && self.scope == STStampedAPIScopeYou) {
+    else if (LOGGED_IN && self.scope == STStampedAPIScopeYou) {
         
         view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
         view.imageView.backgroundColor = view.backgroundColor;
@@ -584,7 +703,7 @@
     animation.duration = 0.3f;
     [view.layer addAnimation:animation forKey:nil];
     
-    double delayInSeconds = 4.0;
+    double delayInSeconds = 1.2;
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         [view removeFromSuperview];
@@ -606,16 +725,43 @@
     self.dirty = YES;
 }
 
+- (void)showTooltip {
+    [Util executeWithDelay:5 onMainThread:^{
+        if ([Util topController] == self) {
+            self.tooltip = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bubble_addfriends"]] autorelease];
+            self.tooltip.frame = [Util centeredAndBounded:self.tooltip.frame.size inFrame:CGRectMake(0, 320, 320, self.tooltip.frame.size.height)];
+            [self.view addSubview:self.tooltip];
+            self.tooltip.alpha = 0;
+            [UIView animateWithDuration:.3 animations:^{
+                self.tooltip.alpha = 1;
+            } completion:^(BOOL finished) {
+                if (finished) {
+                    [Util executeWithDelay:2 onMainThread:^{
+                        if ([Util topController] == self) {
+                            [UIView animateWithDuration:.4 animations:^{
+                                self.tooltip.alpha = 0;
+                            } completion:^(BOOL finished) {
+                                [self.tooltip removeFromSuperview];
+                                self.tooltip = nil;
+                            }];
+                        }
+                    }];
+                }
+            }];
+            
+        }
+    }];}
+
 #pragma mark - Login Notifications 
 
 - (void)logginStatusChanged:(NSNotification*)notification {
     
+    _showIntro = YES;
     if (!LOGGED_IN) {
         
         STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Sign in" style:UIBarButtonItemStyleBordered target:self action:@selector(login:)];
         self.navigationItem.rightBarButtonItem = button;
         [button release];
-        
     } 
     else {
         [Util addCreateStampButtonToController:self];
@@ -629,5 +775,35 @@
 - (void)applicationDidBecomeActive:(id)notImportant {
     [self reloadDataSource];
 }
+
+- (void)friendsChanged:(id)notImportant {
+    //    _showIntro = YES;
+    self.dirty = YES;
+}
+
+- (void)prepareForAnimationRequest:(id)notImportant {
+    self.dirty = YES;
+    _showIntro = YES;
+}
+
+- (void)popupDismissed:(id)notImportant {
+    [self showTooltip];
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @end

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
 """
@@ -12,8 +13,22 @@ import Globals
 from whoosh.analysis import *
 from whoosh.support.charset import accent_map
 
+# Tokenizer and filter for text processing. For detailed explanation of each of these fields, see
+# Whoosh documentation at: http://packages.python.org/Whoosh/api/analysis.html
+# 
+# The gist here is that the RegexTokenizer will break the input string into tokens based on default
+# regex, which as far as I can tell splits on words and common punctuations. Then the tokens are
+# piped into each filter (the | operator is overloaded to behave like the unix pipe):
+#       CharsetFilter - removes common diacritics, e.g. é -> e
+#       LowercaseFilter - puts tokens into lowercase
+#       StopFilter - removes common stop words in English
 TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter() | StopFilter() 
-# TODO add spell correction here?
+
+# The TeeFilter passes the input stream to each of the filters passed in constructor, and merges the
+# outputs. The PassFilter just returns the input token, and the StemFilter removes usual word
+# endings in English, e.g. economical -> economic. The net effect of the normalizer is that for each
+# input word, we return the word itself plus a canonical version of that word.
+# TODO also add common spell correction?
 NORMALIZER = TeeFilter(PassFilter(), StemFilter())
 
 def addMatchCodesToMongoDocument(document):
@@ -28,6 +43,9 @@ def addMatchCodesToMongoDocument(document):
     subfields = ('authors', 'albums', 'artists', 'tracks', 'directors', 'cast', 'publishers')
     for field in subfields:
         addSubfieldTitles(field)
+    # TODO(paul): I don't like this field name Geoff picked because I'm a dick. I'm gonna see if I
+    # can sleep with it. If I can't (and I probably won't), come back and change this to something
+    # douchy that suits my taste better.
     document['match_codes'] = getTokensForIndexing(components)
 
 def toUnicode(string):

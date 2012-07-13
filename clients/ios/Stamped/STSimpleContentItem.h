@@ -14,6 +14,7 @@
 
 @property (nonatomic, readwrite, copy) NSDate* modified;
 @property (nonatomic, readwrite, copy) NSString* blurb;
+@property (nonatomic, readwrite, copy) NSArray<STActivityReference>* blurbReferences;
 @property (nonatomic, readwrite, copy) NSDate* created;
 @property (nonatomic, readwrite, copy) NSArray<STImageList>* images;
 
