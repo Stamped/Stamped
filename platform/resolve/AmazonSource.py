@@ -239,16 +239,19 @@ class AmazonTrack(_AmazonObject, ResolverMediaItem):
 
 class AmazonBook(_AmazonObject, ResolverMediaItem):
     @classmethod
-    def createFromRssEntry(cls, entry):
-        asinPattern = re.compile('_([0-9A-Z]{10})$')
-        match = asinPattern.search(entry.id)
-        if match:
-            return cls(match.group(1))
+    def createFromRssEntry(cls, popular):
+        def wrapped(entry):
+            asinPattern = re.compile('_([0-9A-Z]{10})$')
+            match = asinPattern.search(entry.id)
+            if match:
+                return cls(match.group(1), isPopular=popular)
+        return wrapped
 
-    def __init__(self, amazon_id, data=None, maxLookupCalls=None):
+    def __init__(self, amazon_id, data=None, maxLookupCalls=None, isPopular=False):
         _AmazonObject.__init__(self, amazon_id, data=data, ResponseGroup='AlternateVersions,Large')
         ResolverMediaItem.__init__(self, types=['book'], maxLookupCalls=maxLookupCalls)
         self._properties.append('salesRank')
+        self.__popular = isPopular
 
     def _cleanName(self, rawName):
         return cleanBookTitle(rawName)
@@ -339,6 +342,11 @@ class AmazonBook(_AmazonObject, ResolverMediaItem):
         except Exception:
             pass
         return None
+
+    @lazyProperty
+    def last_popular(self):
+        if self.__popular:
+            return datetime.now()
 
     @lazyProperty 
     def underlying(self):
@@ -652,6 +660,7 @@ class AmazonSource(GenericSource):
                 'desc',
                 'sku_number',
                 'images',
+                'last_popular',
             ],
             kinds=[
                 'media_collection',

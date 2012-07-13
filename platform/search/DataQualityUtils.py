@@ -32,15 +32,16 @@ def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
         movieSearchResult.dataQuality *= 1 - penalty
         movieSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
-    if movieSearchResult.resolverObject.director:
+    if movieSearchResult.resolverObject.directors:
         boost = 0.1
         movieSearchResult.dataQuality *= 1 + boost
         movieSearchResult.addDataQualityComponentDebugInfo("boost for director", boost)
 
     if movieSearchResult.resolverObject.cast:
-        boost = 0.05 * math.log(1 + len(movieSearchResult.cast))
+        boost = 0.05 * math.log(1 + len(movieSearchResult.resolverObject.cast))
         movieSearchResult.dataQuality *= 1 + boost
-        movieSearchResult.addDataQualityComponentDebugInfo("boost for cast of size %d" % len(movieSearchResult.cast), boost)
+        movieSearchResult.addDataQualityComponentDebugInfo(
+                "boost for cast of size %d" % len(movieSearchResult.resolverObject.cast), boost)
 
 
 def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):

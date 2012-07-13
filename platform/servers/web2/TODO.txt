@@ -42,6 +42,21 @@
 
 
 TODO:
+    * stamped.com:
+        * intro:
+            * ESC skips intro animation
+        * main:
+            * iphone:
+                * move shadow & phone above other page content
+            * pane 3 (tastemakers):
+                * blue border on active tastemaker's image
+            * pane 4 (videos):
+                * incorporate stamped v1 video
+                    * get v1 video preview asset image
+        * footer:
+            * remove 'available on the app store' button
+            * move social feedback items to lower right
+    
     * blurred FUCK MEDIOCRITY easter egg w/ f hotkey?
     /* Stop breaking my iphone font size! */
     div, p, a, li, td { -webkit-text-size-adjust:none; }

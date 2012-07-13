@@ -26,10 +26,10 @@ FEED_SOURCES = {
     'fandango_opening' : ('http://www.fandango.com/rss/openingthisweekmobile.rss?pid=5348839', FandangoMovie.createMovie),
     'fandango_popular' : ('http://www.fandango.com/rss/top10boxofficemobile.rss?pid=5348839', FandangoMovie.createMovieFromTopBoxOffice),
 
-    'amazon_book_new' : ('http://www.amazon.com/gp/rss/new-releases/books', AmazonBook.createFromRssEntry),
-    'amazon_book_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/books', AmazonBook.createFromRssEntry),
-    'amazon_kindle_new' : ('http://www.amazon.com/gp/rss/new-releases/digital-text', AmazonBook.createFromRssEntry),
-    'amazon_kindle_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/digital-text', AmazonBook.createFromRssEntry),
+    'amazon_book_new' : ('http://www.amazon.com/gp/rss/new-releases/books', AmazonBook.createFromRssEntry(False)),
+    'amazon_book_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/books', AmazonBook.createFromRssEntry(True)),
+    'amazon_kindle_new' : ('http://www.amazon.com/gp/rss/new-releases/digital-text', AmazonBook.createFromRssEntry(False)),
+    'amazon_kindle_bestseller' : ('http://www.amazon.com/gp/rss/bestsellers/digital-text', AmazonBook.createFromRssEntry(True)),
 
     'nytimes_bestseller' : ('http://feeds.nytimes.com/nyt/rss/BestSellers', NYTimesBook.parseFromRss),
 }

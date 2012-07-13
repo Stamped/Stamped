@@ -18,6 +18,7 @@
         script: libs/jquery.fancybox.js
         script: libs/helpers/jquery.fancybox-thumbs.js
         script: libs/jquery.fittext.js
+        script: libs/jquery.event.drag.js
     
     Third-party library dependencies:
     
@@ -192,7 +193,7 @@
                         
                         <div class="desc">
                             <p>
-                                Stamped is the fun and useful way to record and share all your favorite things -- restaurants, books, movies, music and more.
+                                Introducing Stamped 2.0, the fun and useful way to record and share all your favorite things -- restaurants, books, movies, music and more.
                             </p>
                             
                             <p>
@@ -210,14 +211,16 @@
                         
                         <div class="desc">
                             <p>
-                                A stamp is a personal five-star recommendation meant only for the absolute best things in your life.
+                                A stamp is a personal recommendation meant only for the absolute best things in your life.
                             </p>
                             
                             <p>
-                                Stamp that book you couldn’t put down or that song stuck in your head. Stamp the movie that made you laugh so hard you cried, and that mouth-watering BBQ joint. Stamp the things you just can’t help but recommend.
+                                Stamp that book you couldn't put down or that song stuck in your head. Stamp the movie that made you laugh so hard you cried and the burrito joint that makes your mouth water.
                             </p>
                             
-                            <a href="#pane-2" class="continue-button">Continue</a>
+                            <p>
+                                So ask yourself: what do you find stampworthy? <a href="#pane-2" class="continue-button">Continue</a>
+                            </p>
                         </div>
                     </div>
                     
@@ -232,7 +235,7 @@
                             </p>
                             
                             <p>
-                                Listen to music, find an amazing restaurant, add movies to your Instant Queue, check out new books, be the first to hear about awesome new apps -- the latest &amp; greatest is all at your fingertips in The Guide.
+                                The Guide integrates with a bunch of popular third-parties such as iTunes, Spotfiy, Rdio, Fandango, Netflix, OpenTable and Amazon, so it’s easy to listen to and download music, buy movie tickets, add movies to your queue, buy books, and even view restaurant menus, all without ever leaving Stamped.
                             </p>
                             
                             <a href="#pane-3" class="continue-button">Continue</a>
@@ -246,7 +249,7 @@
                         
                         <div class="desc">
                             <p>
-                                Stamped's great for getting opinions from trusted friends via <span class="facebook">Facebook</span> and <span class="twitter">Twitter</span>, but it's also great for getting recommendations from experts and celebrities you admire.
+                                Follow your friends from <span class="facebook">Facebook</span> and <span class="twitter">Twitter</span>, or celebrities and brands like Ellen DeGeneres or The New York Tiems. With Stamped, you can discover great content through the people whose tastes you <span style="italic">actually</span> respect.
                             </p>
                             
                             <a href="#pane-4" class="continue-button">Continue</a>
@@ -265,7 +268,7 @@
                     
                     <div id="pane-4" class="pane">
                         <div class="title">
-                            Download Stamped and start stamping!
+                            What are your favorite things?
                         </div>
                         
                         <div class="desc">
@@ -278,26 +281,26 @@
                             </p>
                             
                             <div id="user-video-gallery">
-                                <div id="user-video-preview-0" class="user-video-preview">
-                                    <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" class="user-video-preview-image lightbox-video"></a>
+                                <div id="tristanlisa-video-preview" class="user-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                     
                                     <div class="user-video-desc">
                                         <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" class="watch-video lightbox-video">Watch</a>
-                                        <span class="screen-names"><a href="/honeybadger">@honey</a></span>
+                                        <span class="screen-names"><a href="/tristan">@tristan</a> and <a href="/lisa">@lisa</a></span>
                                     </div>
                                 </div>
                                 
-                                <div class="user-video-preview">
-                                    <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" class="user-video-preview-image lightbox-video"></a>
+                                <div id="maggie-video-preview" class="user-video-preview">
+                                    <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                     
                                     <div class="user-video-desc">
                                         <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" class="watch-video lightbox-video">Watch</a>
-                                        <span class="screen-names"><a href="/heman">@heman</a></span>
+                                        <span class="screen-names"><a href="/maggie">@maggie</a></span>
                                     </div>
                                 </div>
                                 
                                 <div id="hero-video-preview" class="user-video-preview">
-                                    <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="user-video-preview-image lightbox-video"></a>
+                                    <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
                                     
                                     <div class="user-video-desc">
                                         <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="watch-video lightbox-video">Watch</a>
@@ -318,7 +321,7 @@
         <div id="main-footer" class="hidden-main-animating">
             <div class="watch-video">
                 <div class="speech-bubble clearfix">
-                    <a class="play-video-button"></a>
+                    <a class="play-video-button-small"></a>
                     <p class="desc">Watch the video with <span class="screen-name">@justinbieber</span></p>
                 </div>
                 
@@ -328,15 +331,56 @@
     </div>
     
     <div id="main-iphone" class="main-content">
-        <div id="main-iphone-0" class="iphone-hero">
-            <div class="iphone-inner"></div>
+        <div id="iphone-hero">
+            <div class="iphone-body"></div>
+            
+            <div class="iphone-screens iphone-screen-active-inbox">
+                <div class="iphone-screen iphone-screen-inbox">
+                    <div class="iphone-inbox-body"></div>
+                    <div class="iphone-inbox-selection"></div>
+                    <div class="iphone-inbox-header"></div>
+                </div>
+                
+                <div class="iphone-screen iphone-screen-sdetail iphone-screen-sdetail-active-0">
+                    <div class="iphone-screen-back-button"></div>
+                    <div class="iphone-screen-sdetail-0"></div>
+                    <div class="iphone-screen-sdetail-1"></div>
+                </div>
+            </div>
         </div>
     </div>
     
     <div id="tastemaker-map-window" class="main-content">
         <a id="fake-url" href="/robby/map">www.stamped.com/robby/map</a>
-        
+        <div id="tastemaker-map-window-overlay">
+            <div id="tastemaker-map-window-loading"></div>
+        </div>
     </div>
+    
+    <!--
+    <form id="main-iphone-dev" class="main-content">
+        <ol>
+            <br />
+            
+            <li><span class="desc">Perspective: </span><input title="perspective" type="text" maxlength=10 value="600"></li>
+            
+            <br />
+            
+            <li><span class="desc">x-axis: </span><input title="x-axis" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">y-axis: </span><input title="y-axis" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">z-axis: </span><input title="z-axis" type="text" maxlength=10 value="1.0"></li>
+            
+            <br />
+            
+            <li><span class="desc">angle:  </span><input title="angle" type="range" value=0 min=0 max=360></li>
+            
+            <br />
+            
+            <li><span class="desc">scale-x: </span><input title="scale-x" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">scale-y: </span><input title="scale-y" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">scale-z: </span><input title="scale-z" type="text" maxlength=10 value="1.0"></li>
+        </ol>
+    </form>-->
 {% endblock main %}
 
 {% block pre_footer %}
@@ -374,6 +418,7 @@
         <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
         <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jquery.event.drag.js"></script>
         <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
     {% else %}

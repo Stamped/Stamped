@@ -12,18 +12,22 @@ monkey.patch_all()
 
 import rpyc
 from GreenletServer     import GreenletServer
-from RateLimiter        import RateLimiter, Request
+from RateLimiter2       import RateLimiter, Request
 
 from optparse           import OptionParser
 
-limiters = {
-    'facebook'      : RateLimiter(                      fail_limit=10,      fail_dur=60),
-    'twitter'       : RateLimiter(                      fail_limit=10,      fail_dur=60),
-    'netflix'       : RateLimiter(cps=4,    cpd=100000, ),#fail_limit=10,      fail_dur=60),
-    'rdio'          : RateLimiter(          cpd=15000,  fail_limit=10,      fail_dur=60),
-    'spotify'       : RateLimiter(                      fail_limit=10,      fail_dur=60),
-    }
+#limiters = {
+#    'facebook'      : RateLimiter(                      fail_limit=10,      limit_dur=60*30,   wait_dur=60),
+#    'twitter'       : RateLimiter(                      fail_limit=10,      limit_dur=60*30,   wait_dur=60),
+#    'netflix'       : RateLimiter(cps=4,    cpd=100000, fail_limit=10000,      limit_dur=60*30,   wait_dur=60),
+#    'rdio'          : RateLimiter(          cpd=15000,  fail_limit=10,      limit_dur=60*30,   wait_dur=60),
+#    'spotify'       : RateLimiter(                      fail_limit=10,      limit_dur=60*30,   wait_dur=60),
+#    }
 
+
+limiters = {
+    'netflix'       : RateLimiter(limit=4, period=1, cpd=10, fail_limit=10, fail_period=30, fail_wait=10),
+    }
 
 count = 0
 
@@ -49,12 +53,19 @@ class StampedRateLimiterService(rpyc.Service):
 
         limiter = limiters[service]
 
-        asyncresult = limiter.addRequest(request, priority)
+        #asyncresult =  AsyncResult()
+        priority_int = 0
+        if priority != 'high':
+            priority_int = 10
+
+        asyncresult = limiter.addRequest(request, priority_int)
 
         # This sleep call is necessary because of a bug with the way gevent handles timeouts... Effectively resets
         # the starting time for the timeout, otherwise the starting time is the time of last pop from queue
-        #gevent.sleep(0)
-        return asyncresult.get(block=True, timeout=timeout)
+        gevent.sleep(0)
+        response = asyncresult.get(block=True, timeout=timeout)
+        print('### returning from exposed_request')
+        return response
 
 
 def runServer(port=18861):

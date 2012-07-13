@@ -1,3 +1,37 @@
+        
+        /*var update_debug_transform = function() {
+            var t = "perspective(" + $("input[title='perspective']").attr("value") + "px) " + 
+                    "scale3d(" + $("input[title='scale-x']").attr("value") + ", " + 
+                        $("input[title='scale-y']").attr("value") + ", " + 
+                        $("input[title='scale-z']").attr("value") + ") " + 
+                    "rotateY(" + $("input[title='rotate-y']").attr("value") + "deg) " + 
+                    "rotateX(" + $("input[title='rotate-x']").attr("value") + "deg) " + 
+                    "rotateZ(" + $("input[title='rotate-z']").attr("value") + "deg) " + 
+                    "translate3d(" + $("input[title='trans-x']").attr("value") + "px, " + 
+                        $("input[title='trans-y']").attr("value") + "px, " + 
+                        $("input[title='trans-z']").attr("value") + "px) ";
+            
+            t = "perspective(" + $("input[title='perspective']").attr("value") + "px) " + 
+                    "rotate3d(" + $("input[title='x-axis']").attr("value") + ", " + 
+                        $("input[title='y-axis']").attr("value") + ", " + 
+                        $("input[title='z-axis']").attr("value") + ", " + 
+                        $("input[title='angle']").attr("value") + "deg) " + 
+                    "scale3d(" + $("input[title='scale-x']").attr("value") + ", " + 
+                        $("input[title='scale-y']").attr("value") + ", " + 
+                        $("input[title='scale-z']").attr("value") + ")";
+            
+            console.debug(t);
+            
+            $(".iphone-screen").css({
+                '-webkit-transform' : t, 
+                '-moz-transform'    : t, 
+                '-ms-transform'     : t, 
+                '-o-transform'      : t, 
+                'transform'         : t
+            });
+        };
+        
+        $("input").change(update_debug_transform);*/
 
 
 

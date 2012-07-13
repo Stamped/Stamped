@@ -1046,8 +1046,8 @@ var g_update_stamps = null;
             return url;
         };
         
-        console.debug("Stamped profile page for screen_name '" + screen_name + "'");
-        console.debug(orig_url.options);
+        //console.debug("Stamped profile page for screen_name '" + screen_name + "'");
+        //console.debug(orig_url.options);
         
         
         // ---------------------------------------------------------------------
