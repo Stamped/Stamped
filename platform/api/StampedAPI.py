@@ -3424,6 +3424,7 @@ class StampedAPI(AStampedAPI):
 
         try:
             allItems = getattr(guide, guideRequest.section)
+            logs.info("Nothing in guide")
             if allItems is None:
                 return []
         except AttributeError:
@@ -3492,6 +3493,9 @@ class StampedAPI(AStampedAPI):
                 break
         
         items = items[offset:]
+
+        if len(items) == 0:
+            return []
         
         #Simulated lottery to shuffle the top 20 (or whatever limit is given when offset == 0)
         if items[0].score is not None: 
