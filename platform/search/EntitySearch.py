@@ -239,7 +239,6 @@ class EntitySearch(object):
             else:
                 fastResolveQueries.append((result.resolverObject.source, result.resolverObject.key))
 
-        # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
         fastResolvedIds = filter(None, self.__stampedSource.resolve_fast_batch(fastResolveQueries)) if fastResolveQueries else []
 
         allIds = idsFromClusteredEntities + fastResolvedIds
