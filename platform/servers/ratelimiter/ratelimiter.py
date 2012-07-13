@@ -136,7 +136,7 @@ class RateLimit(object):
 class FailLimit(object):
 
 
-    def __init__(self, limit, duration):
+    def __init__(self, limit, limit_dur, wait_dur):
         if limit is None:
             raise ValueError('limit must be a non-negative number, not None')
 
@@ -144,10 +144,11 @@ class FailLimit(object):
             raise ValueError('limit must be >= 0')
 
         self.__limit    = limit
-        self.__duration = duration
-        self.__fails    = 0
+        self.__wait_duration = wait_dur
+        self.__limit_duration = limit_dur
+        self.__fails    = deque()
         self.__start    = None
-        self.__cooldown = 0
+        #self.__cooldown = 0
 
     def __update(self, now=None):
         if self.__start is None:
@@ -158,21 +159,38 @@ class FailLimit(object):
 
         diff = now - self.__start
 
-        if diff >= self.__duration:
+        if diff >= self.__wait_duration:
             self.__start = None
-            self.__fails = 0
-            self.__cooldown = 1
+            self.__fails.clear()
+            #self.__cooldown = 1
 
     def fail(self, now=None):
-        self.__update(now)
-        self.__fails += 1
-        self.__cooldown -= 1
+        if now is None:
+            now = time()
 
-        if self.__fails >= self.__limit or self.__cooldown == 0:
+        self.__update(now)
+        self.__fails.append(now)
+        #self.__cooldown -= 1
+
+
+        cutoff = now - self.__limit_duration
+        count = 0
+        for timestamp in self.__fails:
+            if timestamp > cutoff:
+                count += 1
+            else:
+                self.__fails.popleft()
+
+        if count > self.__limit:
+            print('### hit fail limit')
             self.__start = time()
 
+#        if self.__fails >= self.__limit or self.__cooldown == 0:
+#            self.__start = time()
+
     def success(self, now=None):
-        self.__cooldown += 1
+        pass
+        #self.__cooldown += 1
 
     def wait(self, now=None):
         if self.__start is None:
@@ -187,20 +205,27 @@ class FailLimit(object):
             return 0
         else:
             diff = now - self.__start
-            return self.__duration - diff
+            return self.__wait_duration - diff
 
+
+
+def wakerLoop(limiter):
+    limit = limiter.getRateLimit
+    dur = limiter.getRateDur()
+
+    while True:
+        if
 
 def processRequestLoop(limiter):
     print('### starting up processRequestLoop')
     while True:
-        sleep(0)
         limiter.doRequest()
 
 count = 0
 
 class RateLimiter(object):
 
-    def __init__(self, cps=None, cpm=None, cph=None, cpd=None, fail_limit=None, fail_dur=None, max_wait=None):
+    def __init__(self, cps=None, cpm=None, cph=None, cpd=None, fail_limit=None, limit_dur=None, wait_dur=None, max_wait=None):
         print('rate limit init')
         self.__queue = RLPriorityQueue()
         self.__max_wait = max_wait
@@ -224,11 +249,16 @@ class RateLimiter(object):
         if cpd is not None and cpd != 0:
             self.__limits['calls per day'] = RateLimit(cpd, 60*60*24)
 
-        if fail_limit is not None and fail_dur is not None:
-            self.__fail_limit = FailLimit(fail_limit, fail_dur)
+        if fail_limit is not None and wait_dur is not None and limit_dur is not None:
+            self.__fail_limit = FailLimit(fail_limit, limit_dur, wait_dur)
 
         self.__semaphore = Semaphore()
+        self.__waker = gevent.spawn(wakerLoop, self)
         self.__workers = [gevent.spawn(processRequestLoop, self) for i in range(10 if cps is None else min(cps*2,20))]
+
+#    def wait(self):
+#        while self.__semaphore.locked():
+#            sleep(1)
 
     def _addDurationLog(self, elapsed, total_waited, total_elapsed):
         """
@@ -294,8 +324,6 @@ class RateLimiter(object):
 
         total_wait = expected_wait + avg
 
-
-
         # add to request log
         if request is not None:
             request.log.avg_wait_time = avg
@@ -303,39 +331,41 @@ class RateLimiter(object):
             request.log.items_in_queue = self.__queue.qsize_priority(priority)
             request.log.expected_dur = total_wait
 
+        print('### expected request time: %s' % total_wait)
+
         return total_wait
 
-    def _enforceWait(self):
-        locked = self.__semaphore.acquire(timeout=self.__max_wait)
-        if locked:
-            try:
-                now = time()
-
-                max_wait, max_name = self._getLimitsWait(now)
-
-                if self.__max_wait is not None and max_wait > self.__max_wait:
-                    raise RateLimitExceededException('Rate limit exceeded for service: %s' % max_name)
-
-                if max_wait > 0:
-                    end = now + max_wait
-
-                    while True:
-                        cur = time()
-                        if cur >= end:
-                            break
-                        else:
-                            sleep(end - cur)
-
-                for name, limit in self.__limits.items():
-                    wait = limit.wait()
-                    if wait > 0:
-                        logs.warning('%s wait should be 0 is %s' % (name, wait))
-
-                    limit.call()
-            finally:
-                self.__semaphore.release()
-        else:
-            raise RateException('Max wait (%s) exceeded trying to get slot' % self.__max_wait)
+#    def _enforceWait(self):
+        #locked = self.__semaphore.acquire(timeout=self.__max_wait)
+#        if locked:
+#            try:
+#                now = time()
+#
+#                max_wait, max_name = self._getLimitsWait(now)
+#
+#                if self.__max_wait is not None and max_wait > self.__max_wait:
+#                    raise RateLimitExceededException('Rate limit exceeded for service: %s' % max_name)
+#
+#                if max_wait > 0:
+#                    end = now + max_wait
+#
+#                    while True:
+#                        cur = time()
+#                        if cur >= end:
+#                            break
+#                        else:
+#                            sleep(end - cur)
+#
+#                for name, limit in self.__limits.items():
+#                    wait = limit.wait()
+#                    if wait > 0:
+#                        logs.warning('%s wait should be 0 is %s' % (name, wait))
+#
+#                    limit.call()
+#            #finally:
+#                #self.__semaphore.release()
+#        else:
+#            raise RateException('Max wait (%s) exceeded trying to get slot' % self.__max_wait)
 
 
 
@@ -354,7 +384,11 @@ class RateLimiter(object):
                                        (self._getExpectedRequestTime(now, priority_int, request), request.timeout, max_name, max_wait))
         asyncresult =  AsyncResult()
 
-        print('ADDING NUMBER: %s' % count)
+
+        #add to request queue
+
+
+        #print('ADDING NUMBER: %s' % count)
         request.number = count
         count += 1
         data = (priority_int, request, asyncresult)
@@ -364,6 +398,10 @@ class RateLimiter(object):
 
     def doRequest(self):
         priority, request, asyncresult = self.__queue.get()
+        sleep(self._getExpectedWaitTime(begin, priority))
+        for name, limit in self.__limits.items():
+            limit.call()
+
         print ('READ NUM: %s' % request.number)
 
         if (request.created + request.timeout < time()):
@@ -372,14 +410,10 @@ class RateLimiter(object):
             return
 
         begin = time()
-        self._enforceWait()
-        total_wait = time() - request.created
+
         log = request.log
         try:
-            sleep(0.5)
-            response = 1
-            content = 1
-            #response, content = self.__http.request(request.url, request.verb, headers=request.headers, body=urllib.urlencode(request.body))
+            response, content = self.__http.request(request.url, request.verb, headers=request.headers, body=urllib.urlencode(request.body))
         except Exception as e:
             asyncresult.set_exception(e)
             return
