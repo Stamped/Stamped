@@ -158,6 +158,8 @@ class StampStatsSchema(Schema):
         cls.addProperty('like_threshold_hit',               bool)
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('num_blurbs',                       int)
+        cls.addProperty('quality',                          int)
+        cls.addProperty('popularity',                       int)
 
 class StampStats(Schema):
     @classmethod
@@ -170,6 +172,8 @@ class StampStats(Schema):
         cls.addProperty('lng',                              float)
         cls.addProperty('last_stamped',                     datetime)
 
+        cls.addProperty('quality',                          int)
+        cls.addProperty('popularity',                       int)
         cls.addProperty('score',                            int)
         cls.addProperty('num_todos',                        int)
         cls.addProperty('num_likes',                        int)
@@ -1794,6 +1798,7 @@ class GuideCacheItem(Schema):
         cls.addPropertyList('todo_user_ids',                basestring)
         cls.addPropertyList('tags',                         basestring)
         cls.addNestedProperty('coordinates',                Coordinates)
+        cls.addProperty('score',                            float)
 
 class GuideCache(Schema):
     @classmethod

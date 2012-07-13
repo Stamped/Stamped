@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
     Assorted utility commands and classes
@@ -1094,3 +1095,50 @@ def getWebImageSize(url):
     img = getImage(data)
 
     return img.size[0], img.size[1]
+
+
+#Regexes for counting number of mentions and urls in a blurb or piece of text
+
+mention_re = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
+# URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
+url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
+
+def findMentions(text):
+    return mention_re.finditer(text)
+    
+
+def findUrls(text):
+    return url_re.finditer(text)
+
+
+#Weighted lottery function for ordering items by their scores. 
+#INPUT: A list of tuples in the form (float_score, item)
+def weightedLottery(tupleList):
+    
+    aggScore = reduce(lambda x, y: x + y[0], tupleList, 0.0)
+    
+    if aggScore > 0:
+        unselected = []
+        selected = []
+        cutoff = 0
+        for tuple in tupleList:
+            cutoff += tuple[0]
+            unselected.append((cutoff,tuple))
+        
+        while len(selected) < len(tupleList):
+            r = random.random() * aggScore
+            index = 0
+            for cutoff, tuple in unselected:
+                if r < cutoff:
+                    unselected.pop(index)
+                    selected.append(tuple[1])
+                    aggScore -= tuple[0]
+                    unselected = map(lambda (x,y): (((x-tuple[0]) if x > cutoff else x), y), unselected)    
+                    break
+                else:
+                    index += 1
+        
+        return selected
+
+
+
