@@ -10,6 +10,8 @@
 
 @interface STLeftMenuViewController : UIViewController
 
+- (void)reloadDataSource;
+
 + (void)setupConfigurations;
 
 @end

@@ -253,7 +253,7 @@
                             
                             <div id="tastemaker-gallery">
                                 {% for user in tastemakers %}
-                                    <div class="tastemaker">
+                                    <div class="tastemaker" data-screen-name="{{user.screen_name}}">
                                         {% handlebars_template "profile-image-60" user %}
                                         
                                         <div class="user-logo-small tastemaker-logo tastemaker-logo-{{user.screen_name}}"></div>
@@ -329,14 +329,46 @@
     
     <div id="main-iphone" class="main-content">
         <div id="main-iphone-0" class="iphone-hero">
-            <div class="iphone-inner"></div>
+            <div class="iphone-inner">
+                <div class="iphone-screen">
+                    <div class="iphone-screen-body"></div>
+                    <div class="iphone-screen-header"></div>
+                </div>
+            </div>
         </div>
     </div>
     
     <div id="tastemaker-map-window" class="main-content">
-        <a class="fake-url" href="/robby/map">www.stamped.com/robby/map</a>
-        <iframe id="tastemaker-map-window-iframe" src="/robby/map?lite=true" frameborder="0" scrolling="no"></iframe>
+        <a id="fake-url" href="/robby/map">www.stamped.com/robby/map</a>
+        <div id="tastemaker-map-window-overlay">
+            <div id="tastemaker-map-window-loading"></div>
+        </div>
     </div>
+    
+    <!--
+    <form id="main-iphone-dev" class="main-content">
+        <ol>
+            <br />
+            
+            <li><span class="desc">Perspective: </span><input title="perspective" type="text" maxlength=10 value="600"></li>
+            
+            <br />
+            
+            <li><span class="desc">x-axis: </span><input title="x-axis" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">y-axis: </span><input title="y-axis" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">z-axis: </span><input title="z-axis" type="text" maxlength=10 value="1.0"></li>
+            
+            <br />
+            
+            <li><span class="desc">angle:  </span><input title="angle" type="range" value=0 min=0 max=360></li>
+            
+            <br />
+            
+            <li><span class="desc">scale-x: </span><input title="scale-x" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">scale-y: </span><input title="scale-y" type="text" maxlength=10 value="1.0"></li>
+            <li><span class="desc">scale-z: </span><input title="scale-z" type="text" maxlength=10 value="1.0"></li>
+        </ol>
+    </form>-->
 {% endblock main %}
 
 {% block pre_footer %}

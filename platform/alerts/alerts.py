@@ -109,14 +109,14 @@ class AlertEmail(Email):
         elif self._verb == 'follow':
             msg = u'%s (@%s) is now following you on Stamped' % (self._subject.name, self._subject.screen_name)
 
-        elif self._verb == 'friend':
+        elif self._verb.startswith('friend'):
             msg = u'Your friend %s (@%s) joined Stamped' % (self._subject.name, self._subject.screen_name)
 
-        elif self._verb == 'action':
+        elif self._verb.startswith('action'):
             msg = u'%s (@%s) did something to your stamp' % (self._subject.name, self._subject.screen_name)
 
         else:
-            logs.warning("Invalid verb for title: %s" % verb)
+            logs.warning("Invalid verb for title: %s" % self.verb)
             raise
 
         if not IS_PROD:
@@ -268,7 +268,7 @@ class PushNotification(object):
         elif self._verb.startswith('friend_'):
             msg = 'Your friend %s joined Stamped' % (self._subject.screen_name)
 
-        elif self.verb.startswith('action_'):
+        elif self._verb.startswith('action_'):
             msg = '%s interacted with your stamp'
 
         else:
@@ -391,8 +391,8 @@ class NotificationQueue(object):
                     send_push   = settings.alerts_friends_apns
                     send_email  = settings.alerts_friends_email
                 elif alert.verb.startswith('action_'):
-                    send_push   = settings.alert_actions_apns
-                    send_email  = settings.alert_actions_email
+                    send_push   = settings.alerts_actions_apns
+                    send_email  = settings.alerts_actions_email
                 else:
                     send_push   = False
                     send_email  = False

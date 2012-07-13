@@ -34,12 +34,14 @@ var init_social_sharing = function($scope, params) {
 };
 
 $(document).ready(function() {
-    FB.init({
-        appId      : '297022226980395', // App ID
-        channelUrl : '//www.stamped.com/channel.html', // Channel File (TODO)
-        status     : true, // check login status
-        cookie     : true, // enable cookies to allow the server to access the session
-        xfbml      : true  // parse XFBML
-    });
+    if (typeof(FB) !== 'undefined') {
+        FB.init({
+            appId      : '297022226980395', // App ID
+            channelUrl : '//www.stamped.com/channel.html', // Channel File (TODO)
+            status     : true, // check login status
+            cookie     : true, // enable cookies to allow the server to access the session
+            xfbml      : true  // parse XFBML
+        });
+    }
 });
 

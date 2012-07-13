@@ -941,7 +941,7 @@ class StampedSource(GenericSource):
     def resolve_fast_batch(self, sourcesAndKeys):
         SOURCES = set(['amazon', 'spotify', 'rdio', 'opentable', 'tmdb', 'factual', 'instagram',
                 'singleplatform', 'foursquare', 'fandango', 'googleplaces', 'itunes', 'netflix',
-                'thetvdb'])
+                'thetvdb', 'nytimes'])
         mongoQueries = []
         queryPairs = []
         for source, key in sourcesAndKeys:

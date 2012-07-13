@@ -289,6 +289,18 @@ class iTunesGroup(AKindTypeGroup):
             entity.sources.itunes_preview = preview
 
 
+class NYTimesGroup(AKindTypeGroup):
+
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'nytimes',
+            source_path=['sources', 'nytimes_source'], 
+            timestamp_path=['sources', 'nytimes_timestamp']
+        )
+        self.addKind('media_item')
+        self.addType('book')
+        self.addField(['sources', 'nytimes_id'])
+
+
 class FormattedAddressGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'formatted_address')
@@ -519,6 +531,17 @@ class DescGroup(BasicFieldGroup):
         return True
 
     enrichEntityWithEntityProxy = moveField('description', 'desc')
+
+
+class LastPopularGroup(BasicFieldGroup):
+
+    def __init__(self):
+        BasicFieldGroup.__init__(self, 'last_popular')
+        self.addNameField()
+        self.addField(['last_popular_info'])
+
+    def eligible(self, entity):
+        return True
 
 
 class ImagesGroup(BasicFieldGroup):

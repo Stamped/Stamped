@@ -23,9 +23,6 @@ __all__ = [
     'nameSimplify',
     'videoGameSimplify', 
     'stringComparison',
-    'setComparison',
-    'sortedResults',
-    'formatResults',
 ]
 
 import Globals
@@ -48,189 +45,16 @@ try:
     from time                       import time
     from resolve.ResolverObject             import *
     from resolve.EntityProxyComparator      import *
+
+    # TODO FUCK FUCK FUCK SHOULD REALLY NOT NEED TO PULL FROM SEARCH, OR USE SEARCHRESULT AT ALL
+    from search.SearchResult import SearchResult
+    from search.DataQualityUtils import *
+    from resolve.TitleUtils import *
 except:
     report()
     raise
 
-useComparators = False
-
-# blacklist words and score
-# TODO PRELAUNCH FUCK FUCK FUCK: WORK THESE INTO THE DATA QUALITY UTIL SHIT
-_negative_weights = {
-    'remix'         : 0.1,
-    're-mix'        : 0.1,
-    'mix'           : 0.1,
-    'cover'         : 0.2,
-    'tribute'       : 0.2,
-    'version'       : 0.1,
-    'audiobook'     : 0.2,
-    'instrumental'  : 0.1,
-    'karaoke'       : 0.2,
-    'vhs'           : 0.2,
-    'dvd'           : 0.2,
-    'blu-ray'       : 0.2,
-    'bluray'        : 0.2,
-    'season'        : 0.1,
-    'edition'       : 0.05,
-}
-
-def setComparison(a, b, symmetric=False, strict=False):
-    """
-    Generic comparison of two sets.
-    
-    This method does not make any assumptions about set
-    members except equality.
-    
-    assymetric - denotes if a and b are interchangable
-    strict - avoid fuzzy matching, etc.
-    """
-    
-    def cleanSet(s):
-        clean = set()
-        for i in s:
-            clean.add(simplify(i).lower())
-        return clean
-    
-    def symmetricComparison(a, b):
-        return (asymmetricComparison(a, b) + asymmetricComparison(b, a)) / 2.0
-    
-    def asymmetricComparison(a, b):
-        score = 0
-        total = 0
-        
-        for x in a:
-            total = total + len(x)
-            if x in b:
-                score = score + len(x)
-            else:
-                x_score = 0
-                for y in b:
-                    xy_score = stringComparison(x, y, strict=strict)
-                    if xy_score > x_score:
-                        x_score = xy_score
-                
-                score = score + x_score 
-        
-        if total <= 0:
-            return 0
-        
-        return 1.0 * score / total
-    
-    if not strict:
-        a = cleanSet(a)
-        b = cleanSet(b)
-    
-    if a == b:
-        return 1.0
-    
-    if len(b) == 0 or len(a) == 0:
-        return 0
-    
-    if symmetric:
-        return symmetricComparison(a, b)
-    else:
-        return asymmetricComparison(a, b)
-
-def weightedDictComparison(a, b, symmetric=False, strict=False):
-    def _simplifyDict(d):
-        clean = {}
-        for k, v in d.iteritems():
-            k2 = simplify(k).lower()
-            clean[k2] = v
-        return clean
-    
-    def _symmetricComparison(a, b):
-        return (_asymmetricComparison(a, b) + _asymmetricComparison(b, a)) / 2.0
-    
-    def _asymmetricComparison(a, b):
-        score = 0.0
-        total = 0.0
-        
-        for x, wa in a.iteritems():
-            value  = 0.0
-            weight = 0.0
-            
-            try:
-                weight = b[x]
-                value  = 1.0
-            except KeyError:
-                for y, wb in b.iteritems():
-                    xy_value = stringComparison(x, y, strict=strict)
-                    
-                    if xy_value > value:
-                        value  = xy_value
-                        weight = wb
-            
-            weight *= wa
-            score  += value * weight
-            total  += weight
-        
-        if total <= 0:
-            return 0.0
-        
-        return score / total
-    
-    if not strict:
-        a = _simplifyDict(a)
-        b = _simplifyDict(b)
-    
-    if len(b) == 0 or len(a) == 0:
-        return 0
-    
-    if symmetric:
-        return _symmetricComparison(a, b)
-    else:
-        return _asymmetricComparison(a, b)
-
-def sortedResults(results):
-    def pairSort(pair):
-        return -pair[0]['total']
-    return sorted(results , key=pairSort)
-
-def formatResults(results, reverse=True, verbose=True):
-    n = len(results)
-    l = []
-    
-    if reverse:
-        results = list(reversed(results))
-    
-    if verbose:
-        for i in range(len(results)):
-            result = results[i]
-            l.append('\n%3s %s' % (n - i, '=' * 37))
-            
-            scores  = result[0]
-            weights = scores['weights']
-            total_weight = 0.0
-            for k, v in weights.iteritems():
-                total_weight = total_weight + float(v)
-            l.append('%16s   Val     Wght     Total' % ' ')
-            
-            for k, v in weights.iteritems():
-                s = float(scores[k])
-                w = float(weights[k])
-                t = 0
-                if total_weight > 0:
-                    t = s * w / total_weight
-                l.append('%16s %5s  * %5s  => %5s' % (k, '%.2f' % s, '%.2f' % w, '%.2f' % t))
-            
-            l.append(' ' * 37 + '%.2f' % scores['total'])
-            l.append("%s from %s with key %s" % (result[1].name, result[1].source, result[1].key))
-            l.append(str(result[1]))
-    else:
-        for i in range(len(results)):
-            result = results[i]
-            scores = result[0]
-            
-            r = result[1]
-            t = r.target.types[0] if len(r.target.types) == 1 else r.target.types
-            s = "\n%3d) %s (%s) from %s { score=%f, key=%s }" % \
-                (n - i, r.name, t, r.source, scores['total'], r.key)
-            
-            l.append(s)
-    
-    return utils.normalize('\n'.join(l), strict=True)
-
+useComparators = True
 
 class ResolverProxy(object):
 
@@ -315,353 +139,84 @@ class Resolver(object):
     @property 
     def verbose(self):
         return self.__verbose
-    
-    def setComparison(self, a, b, options):
-        score = setComparison(a, b, options['symmetric'])
-        
-        if options['negative'] and not options['symmetric']:
-            for word, weight in _negative_weights.iteritems():
-                if setComparison([word], a) < 0.4 and setComparison([word], b) > 0.6:
-                    score = score * (1.0 - abs(weight))
-        
-        return score
-    
-    def termComparison(self, query, terms, options):
-        def checkTerms(query, valid):
-            maxLenTerms = 0
-            for term in valid:
-                lenTerms = 0
-                a = query.split(term)
-                if len(a) > 1:
-                    lenTerms = len(term)
-                    for section in a:
-                        if section == ' ':
-                            lenTerms = lenTerms + 1
-                        elif len(section) > 0:
-                            lenTerms = lenTerms + checkTerms(section, valid)
-                if lenTerms > maxLenTerms:
-                    maxLenTerms = lenTerms
-            return maxLenTerms
-        
-        def score(query, terms):
-            valid = []
-            for term in terms:
-                if term.lower() in query.lower():
-                    valid.append(term.lower())
-            return checkTerms(query.lower(), valid) * 1.0 / len(query)
-        
-        return score(query, terms)
-    
-    def simplify(self, name):
-        """ Reduces a generic name to a simplified form for fuzzy comparison. """
-        return simplify(name)
-    
-    def albumSimplify(self, album):
-        """ Reduces an album name to a simplified form for fuzzy comparison. """
-        return albumSimplify(album)
-    
-    def trackSimplify(self, track, artist=None):
-        """ Reduces a track name to a simplified form for fuzzy comparison. """
-        return trackSimplify(track, artist)
-    
-    def movieSimplify(self, movie):
-        """ Reduces a movie name to a simplified form for fuzzy comparison. """
-        return movieSimplify(movie)
-    
-    def artistSimplify(self, artist):
-        """ Reduces an artist name to a simplified form for fuzzy comparison. """
-        return artistSimplify(artist)
-    
-    def actorSimplify(self, actor):
-        """ Reduces an actor name to a simplified form for fuzzy comparison. """
-        return nameSimplify(actor)
-    
-    def videoGameSimplify(self, game):
-        """ Reduces a video game name to a simplified form for fuzzy comparison. """
-        return videoGameSimplify(game)
-    
-    def nameComparison(self, a, b):
-        """ Generic fuzzy name comparison. Returns a comparison decimal [0,1] """
-        return stringComparison(a, b)
-    
-    def typesComparison(self, q, m):
-        """ Types comparison metric. """
-        types = self.__typesIntersection(q, m)
-        if len(types) == 0:
-            return 0
-        try:
-            return 2.0 * len(types) / (len(q.types) + len(m.types))
-        except Exception:
-            return 0
-    
-    def artistComparison(self, q, m):
-        """ Artist specific comparison metric. """
-        return self.nameComparison(self.artistSimplify(q), self.artistSimplify(m))
-    
-    def albumComparison(self, q, m):
-        """ Album specific comparison metric. """
-        return self.nameComparison(self.albumSimplify(q), self.albumSimplify(m))
-    
-    def trackComparison(self, q, m):
-        """ Track specific comparison metric. """
-        return self.nameComparison(self.trackSimplify(q.name), 
-                                   self.trackSimplify(m.name))
-    
-    def videoGameComparison(self, q, m):
-        """ Video Game specific comparison metric. """
-        return self.nameComparison(self.videoGameSimplify(q), self.videoGameSimplify(m))
-    
-    def movieComparison(self, q, m):
-        """ Movie specific comparison metric. """
-        return self.nameComparison(self.movieSimplify(q), self.movieSimplify(m))
-    
-    def lengthComparison(self, q, m):
-        """ Length specific comparison metric. """
-        if q <= 0 or m <= 0:
-            return 0
-        diff = abs(q - m)
-        return (1 - (float(diff)/max(q, m)))**2
-    
-    def dateComparison(self, q, m):
-        """ Date specific comparison metric. """
-        if q is None or m is None:
-            return 0
-        diff = abs((q - m).days)
-        v = 0
-        if diff <= 1:
-            v = 1.0
-        elif diff <= 31:
-            v = .90
-        elif diff <= 100:
-            v = .80
-        elif diff <= 365:
-            v = .70
-        elif diff <= 700:
-            v = .30
-        else:
-            v = 0
-        if q.year != m.year:
-            v *= .8
-        return v
 
-    def directorComparison(self, q, m):
-        """ Director specific comparison metric. """
-        return self.nameComparison(q['name'], m['name'])
+    def checkWithComparator(self, comparator, results, query, match, options, order, subcat):
+        search_result_fuckfuckfuck_hack = SearchResult(match)
+        if subcat == 'artist':
+            augmentArtistDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyArtistTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'album':
+            augmentAlbumDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyAlbumTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'track':
+            augmentTrackDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyTrackTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'tv':
+            augmentTvDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyTvTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'movie':
+            augmentMovieDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyMovieTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'book':
+            augmentBookDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyBookTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'place':
+            augmentPlaceDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyPlaceTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+        elif subcat == 'app':
+            augmentAppDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
+            applyAppTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
 
-    def authorComparison(self, q, m):
-        """ Author specific comparison metric. """
-        return self.nameComparison(q['name'], m['name'])
+        comparison_result = search_result_fuckfuckfuck_hack.dataQuality > 0.6 and \
+                            comparator.compare_proxies(query, match).is_match()
 
-    def publisherComparison(self, q, m):
-        """ Publisher specific comparison metric. """
-        return self.nameComparison(q['name'], m['name'])
+        similarity = 100 if comparison_result else 0
+        similarities = {'total': similarity}
 
-    def placeComparison(self, q, m):
-        """ Place specific comparison metric. """
-        return self.nameComparison(q['name'], m['name'])
-
-    def checkWithComparator(self, comparator, results, query, match, options, order):
-        similarities = {}
-        compare_result = comparator.compare_proxies(query, match)
-        similarity = 100 if compare_result.is_match() else 0
-        similarities['total'] = similarity
         result = (similarities, match)
         results.append(result)
         options['callback'](result, order)
 
     def checkPerson(self, results, query, match, options, order):
-        tests = [
-            ('types',           lambda q, m, s, o: self.typesComparison(q, m)), 
-        ]
-        weights = {
-            'types':            lambda q, m, s, o: self.__typesWeight(q, m, s, o), 
-        }
-
         types = self.__typesIntersection(query, match)
-
         if 'artist' in types:
-            if useComparators:
-                self.checkWithComparator(ArtistEntityProxyComparator, results, query, match, options, order)
-                return
-            tests.extend([
-                ('name',            lambda q, m, s, o: self.artistComparison(q.name, m.name)),
-                ('albums',          lambda q, m, s, o: self.albumsComparison(q, m, o)),
-                ('tracks',          lambda q, m, s, o: self.tracksComparison(q, m, o)),
-            ])
-
-            weights['name']         = lambda q, m, s, o: self.__nameWeightBoost(q, m, s, o, boost=5.0)
-            weights['albums']       = lambda q, m, s, o: self.__albumsWeight(q, m)
-            weights['tracks']       = lambda q, m, s, o: self.__tracksWeight(q, m)
-
-        self.genericCheck(tests, weights, results, query, match, options, order)
-
-    def checkPlace(self, results, query, match, options, order):
-        if useComparators:
-            self.checkWithComparator(PlaceEntityProxyComparator, results, query, match, options, order)
+            self.checkWithComparator(ArtistEntityProxyComparator, results, query, match, options, order, 'artist')
             return
 
-        tests = [
-            ('name',            lambda q, m, s, o: self.nameComparison(q.name, m.name)),
-            ('location',        self.__locationTest),
-        ]
-        weights = {
-            'name':             lambda q, m, s, o: 1.0,
-            'location':         self.__locationWeight, 
-        }
-        self.genericCheck(tests, weights, results, query, match, options, order)
+    def checkPlace(self, results, query, match, options, order):
+        self.checkWithComparator(PlaceEntityProxyComparator, results, query, match, options, order, 'place')
+        return
 
     def checkMediaCollection(self, results, query, match, options, order):
-        tests = [
-            ('types',           lambda q, m, s, o: self.typesComparison(q, m)), 
-        ]
-        weights = {
-            'types':            lambda q, m, s, o: self.__typesWeight(q, m, s, o), 
-        }
-
         types = self.__typesIntersection(query, match)
-
         if 'album' in types:
-            if useComparators:
-                self.checkWithComparator(AlbumEntityProxyComparator, results, query, match, options, order)
-                return
-            tests.extend([
-                ('name',            lambda q, m, s, o: self.albumComparison(q.name, m.name)), 
-                ('artists',         lambda q, m, s, o: self.artistsComparison(q, m, o)),
-                ('tracks',          lambda q, m, s, o: self.tracksComparison(q, m, o)), 
-            ])
-        
-            weights['name']         = lambda q, m, s, o: self.__nameWeight(q.name, m.name)
-            weights['artists']      = lambda q, m, s, o: 2.0 * self.__artistsWeight(q, m)
-            weights['tracks']       = lambda q, m, s, o: self.__tracksWeight(q, m)
+            self.checkWithComparator(AlbumEntityProxyComparator, results, query, match, options, order, 'album')
+            return
 
         if 'tv' in types:
-            if useComparators:
-                self.checkWithComparator(TvEntityProxyComparator, results, query, match, options, order)
-                return
-            tests.extend([
-                ('name',            lambda q, m, s, o: self.movieComparison(q.name, m.name)),
-                ('cast',            lambda q, m, s, o: self.castComparison(q, m, o)),
-                ('directors',       lambda q, m, s, o: self.directorsComparison(q, m, o)),
-                ('date',            lambda q, m, s, o: self.dateComparison(q.release_date, m.release_date)),
-            ])
-
-            weights['name']         = lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=8.0)
-            weights['cast']         = lambda q, m, s, o: self.__castWeight(q, m)
-            weights['directors']    = lambda q, m, s, o: self.__directorsWeight(q, m)
-            weights['date']         = lambda q, m, s, o: self.__dateWeight(q.release_date, m.release_date, exact_boost=4)
-
-
-        self.genericCheck(tests, weights, results, query, match, options, order)
+            self.checkWithComparator(TvEntityProxyComparator, results, query, match, options, order, 'tv')
+            return
 
     def checkMediaItem(self, results, query, match, options, order):
-        tests = [
-            ('types',           lambda q, m, s, o: self.typesComparison(q, m)), 
-        ]
-        weights = {
-            'types':            lambda q, m, s, o: self.__typesWeight(q, m, s, o), 
-        }
-
         types = self.__typesIntersection(query, match)
-
         if 'track' in types:
-            if useComparators:
-                self.checkWithComparator(TrackEntityProxyComparator, results, query, match, options, order)
-                return
-            tests.extend([
-                ('track_name',      lambda q, m, s, o: self.trackComparison(q, m)),
-                ('artists',         lambda q, m, s, o: self.artistsComparison(q, m, o)),
-                ('albums',          lambda q, m, s, o: self.albumsComparison(q, m, o)),
-                ('track_length',    lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
-            ])
-        
-            weights['track_name']   = lambda q, m, s, o: self.__nameWeight(q.name, m.name)
-            weights['artists']      = lambda q, m, s, o: 2.0 * self.__artistsWeight(q, m)
-            weights['albums']       = lambda q, m, s, o: 0.3 * self.__albumsWeight(q, m)
-            weights['track_length'] = lambda q, m, s, o: self.__lengthWeight(q.length, m.length)
+            self.checkWithComparator(TrackEntityProxyComparator, results, query, match, options, order, 'track')
+            return
 
         if 'movie' in types:
-            if useComparators:
-                self.checkWithComparator(MovieEntityProxyComparator, results, query, match, options, order)
-                return
-            tests.extend([
-                ('movie_name',      lambda q, m, s, o: self.movieComparison(q.name, m.name)),
-                ('cast',            lambda q, m, s, o: self.castComparison(q, m, o)),
-                ('directors',       lambda q, m, s, o: self.directorsComparison(q, m, o)),
-                ('movie_length',    lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
-                ('movie_date',      lambda q, m, s, o: self.dateComparison(q.release_date, m.release_date)),
-            ])
-
-            weights['movie_name']   = lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=2.0)
-            weights['cast']         = lambda q, m, s, o: self.__castWeight(q, m)
-            weights['directors']    = lambda q, m, s, o: self.__directorsWeight(q, m)
-            weights['movie_length'] = lambda q, m, s, o: 3.0 * self.__lengthWeight(q.length, m.length, q_empty=.2)
-            weights['movie_date']   = lambda q, m, s, o: self.__dateWeight(q.release_date, m.release_date, exact_boost=4)
+            self.checkWithComparator(MovieEntityProxyComparator, results, query, match, options, order, 'movie')
+            return
 
         if 'book' in types:
-            if useComparators:
-                self.checkWithComparator(BookEntityProxyComparator, results, query, match, options, order)
-                return
-            tests.extend([
-                ('book_name',       lambda q, m, s, o: self.movieComparison(q.name, m.name)),
-                ('authors',         lambda q, m, s, o: self.authorsComparison(q, m, o)),
-                ('publishers',      lambda q, m, s, o: self.publishersComparison(q, m, o)),
-                ('book_length',     lambda q, m, s, o: self.lengthComparison(q.length, m.length)),
-                ('book_date',       lambda q, m, s, o: self.dateComparison(q.release_date, m.release_date)),
-            ])
-
-            weights['book_name']    = lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=1.5)
-            weights['authors']      = lambda q, m, s, o: self.__authorsWeight(q, m, exact_boost=3, m_empty=7)
-            weights['publishers']   = lambda q, m, s, o: self.__publishersWeight(q, m, exact_boost=2, m_empty=4)
-            weights['book_length']  = lambda q, m, s, o: 0.5 * self.__lengthWeight(q.length, m.length)
-            weights['book_date']    = lambda q, m, s, o: 0.2 * self.__dateWeight(q.release_date, m.release_date)
-
-        self.genericCheck(tests, weights, results, query, match, options, order)
+            self.checkWithComparator(BookEntityProxyComparator, results, query, match, options, order, 'book')
+            return
 
     def checkSoftware(self, results, query, match, options, order):
-        tests = [
-            ('types',           lambda q, m, s, o: self.typesComparison(q, m)), 
-        ]
-        weights = {
-            'types':            lambda q, m, s, o: self.__typesWeight(q, m, s, o), 
-        }
-
         types = self.__typesIntersection(query, match)
 
         if 'app' in types:
-            if useComparators:
-                self.checkWithComparator(AppEntityProxyComparator, results, query, match, options, order)
-                return
-            tests.extend([
-                ('name',            lambda q, m, s, o: self.nameComparison(q.name, m.name)), 
-                ('date',            lambda q, m, s, o: self.dateComparison(q.release_date, m.release_date)),
-                ('publishers',      lambda q, m, s, o: self.publishersComparison(q, m, o)),
-            ])
-        
-            weights['name']         = lambda q, m, s, o: self.__nameWeight(q.name, m.name, exact_boost=4)
-            weights['date']         = lambda q, m, s, o: self.__dateWeight(q.release_date, m.release_date, exact_boost=4)
-            weights['publishers']   = lambda q, m, s, o: self.__publishersWeight(q, m, exact_boost=2, m_empty=4)
-
-        self.genericCheck(tests, weights, results, query, match, options, order)
-
-
-    def genericCheck(self, tests, weights, results, query, match, options, order):
-        try:
-            mins = options['mins']
-            if self.verbose:
-                print("Comparing %s and %s" % (match.name,query.name))
-            
-            success, similarities = self.__compareAll(query, match, tests, options)
-            
-            if success:
-                self.__addTotal(similarities, weights, query, match, options)
-                
-                if 'total' not in mins or similarities['total'] >= mins['total']:
-                    #print("Total %s for %s from %s" % (similarities['total'], match.name, match.source))
-                    result = (similarities, match)
-                    results.append(result)
-                    options['callback'](result, order)
-        except Exception:
-            report()
+            self.checkWithComparator(AppEntityProxyComparator, results, query, match, options, order, 'app')
+            return
     
     def resolve(self, query, source, **options):
         options = self.parseGeneralOptions(query, options)
@@ -678,96 +233,6 @@ class Resolver(object):
         
         results = self.__finish(query, results, options)
         return results
-    
-    def tracksSet(self, entity):
-        try:
-            artist = entity.artist['name']
-        except Exception:
-            artist = entity.name
-        
-        return set( [ self.trackSimplify(track['name'], artist) for track in entity.tracks ] )
-    
-    def albumsSet(self, entity):
-        if entity.albums is None:
-            return set()
-        return set( [ self.albumSimplify(album['name']) for album in entity.albums ] )
-    
-    def castSet(self, entity):
-        if entity.cast is None:
-            return set()
-        return set( [ self.actorSimplify(actor['name']) for actor in entity.cast ] )
-    
-    def artistsSet(self, entity):
-        if entity.artists is None:
-            return set()
-        return set( [ self.artistSimplify(i['name']) for i in entity.artists ] )
-    
-    def directorsSet(self, entity):
-        if entity.directors is None:
-            return set()
-        return set( [ self.simplify(i['name']) for i in entity.directors ] )
-    
-    def authorsSet(self, entity):
-        if entity.authors is None:
-            return set()
-        return set( [ self.simplify(i['name']) for i in entity.authors ] )
-    
-    def publishersSet(self, entity):
-        if entity.publishers is None:
-            return set()
-        return set( [ self.simplify(i['name']) for i in entity.publishers ] )
-
-    def albumsComparison(self, query, match, options):
-        query_album_set = self.albumsSet(query)
-        match_album_set = self.albumsSet(match)
-        
-        #if self.verbose:
-        #    self.__differenceLog('Album', query_album_set, match_album_set, query, match)
-        
-        return self.setComparison(query_album_set, match_album_set, options)
-
-    def tracksComparison(self, query, match, options):
-        query_track_set = self.tracksSet(query)
-        match_track_set = self.tracksSet(match)
-        
-        #if self.verbose:
-        #    self.__differenceLog('Track', query_track_set, match_track_set, query, match)
-        
-        return self.setComparison(query_track_set, match_track_set, options)
-
-    def castComparison(self, query, match, options):
-        query_cast_set = self.castSet(query)
-        match_cast_set = self.castSet(match)
-
-        #if self.verbose:
-        #    self.__differenceLog('Cast', query_cast_set, match_cast_set, query, match)
-
-        return self.setComparison(query_cast_set, match_cast_set, options)
-
-    def artistsComparison(self, query, match, options):
-        query_artists_set = self.artistsSet(query)
-        match_artists_set = self.artistsSet(match)
-
-        return self.setComparison(query_artists_set, match_artists_set, options)
-
-    def directorsComparison(self, query, match, options):
-        query_directors_set = self.directorsSet(query)
-        match_directors_set = self.directorsSet(match)
-
-        return self.setComparison(query_directors_set, match_directors_set, options)
-
-    def authorsComparison(self, query, match, options):
-        query_authors_set = self.authorsSet(query)
-        match_authors_set = self.authorsSet(match)
-
-        return self.setComparison(query_authors_set, match_authors_set, options)
-
-    def publishersComparison(self, query, match, options):
-        query_publishers_set = self.publishersSet(query)
-        match_publishers_set = self.publishersSet(match)
-
-        return self.setComparison(query_publishers_set, match_publishers_set, options)
-
 
     def parseGeneralOptions(self, query, options):
         """
@@ -833,180 +298,6 @@ class Resolver(object):
         except:
             return set()
 
-    def __typesWeight(self, query, match, similarities, options):
-        return 0
-
-    def __sourceWeight(self, source):
-        return 1
-
-    def __locationTest(self, query, match, similarities, options):
-        if query.kind != 'place' or match.kind != 'place':
-            return 0
-            
-        if query.coordinates is None or match.coordinates is None:
-            return 0
-        
-        try:
-            distance = utils.get_spherical_distance(query.coordinates, match.coordinates)
-            distance = abs(distance * 3959)
-        except Exception:
-            return 0
-        
-        if distance < 0 or distance > 50:
-            return 0
-        
-        # Simple parabolic curve to weight closer distances
-        return (1.0 / 2500) * distance * distance - (1.0 / 25) * distance + 1.0
-    
-    def __locationWeight(self, query, match, similarities, options):
-        if query.kind != 'place' or match.kind != 'place':
-            return 0
-            
-        weight = 1000.0
-        
-        if 'location' in similarities:
-            location = similarities['location']
-            if location > 0:
-                if location >= 0.90:
-                    return 0
-                
-                weight = 1.0 / (5 * location)
-        
-        return max(0, min(1000.0, weight))
-    
-    def __nameWeightBoost(self, query, match, similarities, options, boost=1):
-        try:
-            value = similarities['name']
-        except KeyError:
-            value = 0.0
-        
-        # note (travis):
-        # the purpose of this formula is to smoothly weight names that are 
-        # very strong matches or very weak matches heavily, with partial 
-        # name matches still being weighted proportionally to the name 
-        # similarity but with a much smaller weight because the name 
-        # signal is less important w.r.t. ranking for these cases.
-        weight = 4 * ((value - 0.5) ** 2)
-        weight = weight + (1.0 - weight) / 1.5
-        
-        return boost * weight
-
-    def __nameWeight(self, a, b, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
-        if a is None or b is None or a == '' or b == '':
-            return 1
-        
-        assert isinstance(a, basestring)
-        assert isinstance(b, basestring)
-        
-        weight = 1.0
-        
-        if a == b:
-            weight = exact_boost
-        else:
-            la = len(a)
-            lb = len(b)
-            
-            if la == 0:
-                if lb == 0:
-                    return both_empty
-                else:
-                    return q_empty
-            elif lb == 0:
-                return m_empty
-            
-            weight = 2 * float(la + lb) / (math.log(la + 1) + math.log(lb + 1))
-            
-            if len(a) > len(b):
-                b, a = a, b
-            
-            # weight string similarity comparison slightly higher if a is a substring of b
-            if a in b:
-                if b.startswith(a) or b.endswith(a):
-                    weight = weight * 3
-                else:
-                    weight = weight * 2
-        
-        return weight
-    
-    def __lengthWeight(self, q, m, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
-        if q < 0:
-            if m < 0:
-                return both_empty
-            else:
-                return q_empty
-        elif m < 0:
-            return m_empty
-        #TODO
-        weight = 4
-        if q == m:
-            weight = exact_boost * weight
-        return weight
-
-    def __dateWeight(self, q, m, exact_boost=1, q_empty=1, m_empty=1, both_empty=1):
-        if q is None:
-            if m is None:
-                return both_empty
-            else:
-                return q_empty
-        elif m is None:
-            return m_empty
-        #TODO
-        weight = 4
-        if q == m:
-            weight = exact_boost * weight
-        return weight
-
-    def __setWeight(self, query_set, match_set, exact_boost=None, q_empty=None, m_empty=None, both_empty=None):
-        if len(query_set) == 0:
-            if len(match_set) == 0 and both_empty is not None:
-                return both_empty
-            if q_empty is not None:
-                return q_empty
-        if len(match_set) == 0:
-            if m_empty is not None:
-                return m_empty
-
-        if query_set == match_set and exact_boost is not None:
-                return exact_boost
-
-        size = len( query_set | match_set )
-        if size == 0:
-            return 1
-        
-        weight = float(size)/math.log(size+1)
-        if query_set & match_set == query_set:
-            weight *= 1.2
-        
-        return weight
-    
-    def __artistsWeight(self, query, match):
-        return self.__setWeight(self.artistsSet(query), self.artistsSet(match))
-    
-    def __albumsWeight(self, query, match):
-        return self.__setWeight(self.albumsSet(query), self.albumsSet(match))
-    
-    def __tracksWeight(self, query, match):
-        return self.__setWeight(self.tracksSet(query), self.tracksSet(match))
-    
-    def __directorsWeight(self, query, match):
-        return self.__setWeight(self.directorsSet(query), self.directorsSet(match))
-    
-    def __publishersWeight(self, query, match, exact_boost=None, q_empty=None, m_empty=None, both_empty=None):
-        query_set = self.publishersSet(query)
-        match_set = self.publishersSet(match)
-        return self.__setWeight(query_set, match_set, exact_boost, q_empty, m_empty, both_empty)
-    
-    def __authorsWeight(self, query, match, exact_boost=None, q_empty=None, m_empty=None, both_empty=None):
-        query_set = self.authorsSet(query)
-        match_set = self.authorsSet(match)
-        return self.__setWeight(query_set, match_set, exact_boost, q_empty, m_empty, both_empty)
-    
-    def __castWeight(self, query, match):
-        if query.cast == []:
-            return 1
-        else:
-            return self.__setWeight(self.castSet(query), self.castSet(match))
-    
     def __sortedPairs(self, results, batch):
         results.extend(batch)
         def pairSort(pair):
@@ -1024,27 +315,7 @@ class Resolver(object):
         pool.join()
         
         return results
-    
-    def __compareAll(self, query, match, tests, options):
-        similarities = {}
-        if 'mins' in options:
-            mins = options['mins']
-        else:
-            mins = {}
-        success = True
-        for name, test in tests:
-            try:
-                before = time()
-                comparison = float(test(query, match, similarities, options))
-            except ValueError:
-                print("test %s failed with ValueError" % name)
-                raise
-            similarities[name] = comparison
-            if name in mins and comparison < mins[name]:
-                success = False
-                break
-        return (success, similarities)
-    
+
     def __shouldFinish(self, query, results, options):
         num_results = len(results)
         
@@ -1066,41 +337,6 @@ class Resolver(object):
         if len(results) > 0 and results[0][0]['total'] > options['resolvedComparison']:
             results[0][0]['resolved'] = True
         return results
-
-    def __addTotal(self, similarities, weights, query, match, options):
-        actual_weights = {}
-        total  = 0
-        weight = 0
-        
-        for k, f in weights.iteritems():
-            v = f(query, match, similarities, options)
-            
-            weight += v
-            total  += v * similarities[k]
-            
-            actual_weights[k] = v
-        if weight == 0:
-            similarities['total'] = 0
-        else:
-            similarities['total']   = total / weight
-        similarities['weights'] = actual_weights
-    
-    def __logSimilarities(self, similarities, query, match):
-        print( 'Similarities for %s:\n%s' %(match.name, pformat(similarities) ) )
-    
-    def __differenceLog(self, label, query_set, match_set, query, match):
-        diff = sorted(query_set ^ match_set)
-        
-        print('%s %s difference for %s and %s (%s %s vs %s %s)' % (
-            len(diff), label, match.name , query.name, len(match_set), match.source, len(query_set), query.source
-        ))
-        
-        for item in diff:
-            source = match.source
-            if item in query_set:
-                source = query.source
-            
-            print( "%s: %s" % (source, item))
 
 def demo(generic_source, default_title, subcategory=None):
     """

@@ -14,6 +14,8 @@
 
 @class STConsumptionToolbar;
 
+extern NSString* const STConsumptionToolbarSliderWillShowNotification;
+
 @protocol STConsumptionToolbarDelegate <NSObject>
 
 - (void)toolbar:(STConsumptionToolbar*)toolbar 

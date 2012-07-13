@@ -18,6 +18,7 @@
 #import "STSimplePlaylistItem.h"
 #import "STSimpleAction.h"
 #import "STConfiguration.h"
+#import "STRootViewController.h"
 
 static NSString* _rdioTokenKey = @"STRdio.token";
 
@@ -105,7 +106,7 @@ static STRdio* _sharedInstance;
     UIWindow* window = [[UIApplication sharedApplication] keyWindow];
     NSString* token = [[NSUserDefaults standardUserDefaults] stringForKey:_rdioTokenKey];
     if (token) {
-        [self.rdio authorizeUsingAccessToken:token fromController:window.rootViewController];
+        [self.rdio authorizeUsingAccessToken:token fromController:[Util sharedMenuController]];
     }
     else {
         [self.rdio authorizeFromController:window.rootViewController];
@@ -268,6 +269,8 @@ static STRdio* _sharedInstance;
 - (void) rdioAuthorizationFailed:(NSString *)error {
     self.loggedIn = NO;
     self.accessToken = nil;
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:_rdioTokenKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     if (self.callback) {
         self.callback();
     }
@@ -275,8 +278,14 @@ static STRdio* _sharedInstance;
 }
 
 - (void) rdioAuthorizationCancelled {
+    DDMenuController* menuController = [Util sharedMenuController];
+    if(menuController.presentedViewController && ![menuController.presentedViewController isKindOfClass:[STRootViewController class]]) {
+        [[Util sharedMenuController] dismissModalViewControllerAnimated:YES];
+    }
     self.loggedIn = NO;
     self.accessToken = nil;
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:_rdioTokenKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     if (self.callback) {
         self.callback();
     }
@@ -286,6 +295,8 @@ static STRdio* _sharedInstance;
 - (void) rdioDidLogout {
     self.loggedIn = NO;
     self.accessToken = nil;
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:_rdioTokenKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
     if (self.callback) {
         self.callback();
     }

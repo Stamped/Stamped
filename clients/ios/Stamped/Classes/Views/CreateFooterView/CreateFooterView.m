@@ -10,6 +10,11 @@
 #import <CoreText/CoreText.h>
 #import "STSimpleUserDetail.h"
 #import "STStampedAPI.h"
+#import "Util.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import "STTwitter.h"
+#import "STEvents.h"
 
 @interface CreateFooterViewTextLayer : CATextLayer
 @end
@@ -22,12 +27,23 @@
 
 @end
 
+@interface CreateFooterView ()
+
+@property (nonatomic, readonly, retain) UIButton* twitterButton;
+@property (nonatomic, readonly, retain) UILabel* twitterText;
+
+@end
+
 @implementation CreateFooterView
 @synthesize delegate;
 @synthesize stampButton;
+@synthesize twitterButton = _twitterButton;
+@synthesize twitterText = _twitterText;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
+        
+        [STEvents addObserver:self selector:@selector(twitterFailed:) event:EventTypeTwitterAuthFailed];
         
         self.backgroundColor = [UIColor clearColor];
         
@@ -37,7 +53,7 @@
         label.backgroundColor = self.backgroundColor;
         [self addSubview:label];
         [label release];
-    
+        
         UIImage *image = [UIImage imageNamed:@"create_stamp_btn.png"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         [button addTarget:self action:@selector(stamp:) forControlEvents:UIControlEventTouchUpInside];
@@ -60,17 +76,27 @@
         [button addTarget:self action:@selector(twitter:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:button];
         button.frame = CGRectMake(10.0f, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
-
-        image = [UIImage imageNamed:@"share_fb"];
-        button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setImage:image forState:UIControlStateNormal];
-        [button setImage:[UIImage imageNamed:@"share_fb_on"] forState:UIControlStateSelected];
-        [button setImage:[UIImage imageNamed:@"share_fb_highlighted"] forState:UIControlStateHighlighted];
-        [button addTarget:self action:@selector(facebook:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:button];
-        button.frame = CGRectMake(12.0f + image.size.width, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
         
+        _twitterButton = [button retain];
+        //
+        //        image = [UIImage imageNamed:@"share_fb"];
+        //        button = [UIButton buttonWithType:UIButtonTypeCustom];
+        //        [button setImage:image forState:UIControlStateNormal];
+        //        [button setImage:[UIImage imageNamed:@"share_fb_on"] forState:UIControlStateSelected];
+        //        [button setImage:[UIImage imageNamed:@"share_fb_highlighted"] forState:UIControlStateHighlighted];
+        //        [button addTarget:self action:@selector(facebook:) forControlEvents:UIControlEventTouchUpInside];
+        //        [self addSubview:button];
+        //        button.frame = CGRectMake(12.0f + image.size.width, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
+        //        
+        //        
         
+        _twitterText = [[Util viewWithText:@"Share to Twitter"
+                                      font:[UIFont stampedFontWithSize:12]
+                                     color:[UIColor stampedGrayColor]
+                                      mode:UILineBreakModeTailTruncation
+                                andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)] retain];
+        _twitterText.frame = CGRectMake(CGRectGetMaxX(button.frame) + 10, button.frame.origin.y, _twitterText.frame.size.width, button.frame.size.height);
+        [self addSubview:_twitterText];
         id <STUser> user = [[STStampedAPI sharedInstance] currentUser];
         if ([user respondsToSelector:@selector(numStampsLeft)]) {
             
@@ -89,7 +115,7 @@
             
             NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:title attributes:defaultStyle];
             [string setAttributes:boldStyle range:[string.string rangeOfString:[NSString stringWithFormat:@"%i", count]]];
-
+            
             [defaultStyle release];
             [boldStyle release];
             
@@ -105,12 +131,15 @@
             [string release];
             
         }
-    
+        
     }
     return self;
 }
 
 - (void)dealloc {
+    [_twitterButton release];
+    [STEvents removeObserver:self];
+    [_twitterText release];
     self.stampButton=nil;
     self.delegate=nil;
     [super dealloc];
@@ -147,7 +176,7 @@
     }
     
     [UIView setAnimationsEnabled:_enabled];
-
+    
     
 }
 
@@ -159,14 +188,13 @@
     if ([(id)delegate respondsToSelector:@selector(createFooterView:twitterSelected:)]) {
         [self.delegate createFooterView:self twitterSelected:sender];
     }
-    
+    UIButton* button = sender;
+    _twitterText.textColor = button.selected ? [UIColor stampedLinkColor] : [UIColor stampedGrayColor];
 }
 
-- (void)facebook:(id)sender {
-    
-    if ([(id)delegate respondsToSelector:@selector(createFooterView:facebookSelected:)]) {
-        [self.delegate createFooterView:self facebookSelected:sender];
-    }
+- (void)twitterFailed:(id)notImportant {
+    self.twitterButton.selected = YES;
+    [self twitter:self.twitterButton];
 }
 
 - (void)stamp:(id)sender {

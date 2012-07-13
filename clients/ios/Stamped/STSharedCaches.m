@@ -8,6 +8,7 @@
 
 #import "STSharedCaches.h"
 #import "STInboxPageSource.h"
+#import "STTodosPageSource.h"
 #import "STGenericCacheConfiguration.h"
 #import "Util.h"
 
@@ -18,6 +19,7 @@ NSString* const STSharedCachesDidLoadCacheNotification = @"STSharedCachesDidLoad
 static STCache* _inboxYou = nil;
 static STCache* _inboxInbox = nil;
 static STCache* _inboxEveryone = nil;
+static STCache* _todoCache = nil;
 
 + (void)initialize {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(logout:) name:STStampedAPILogoutNotification object:nil];
@@ -26,6 +28,7 @@ static STCache* _inboxEveryone = nil;
 + (void)logout:(id)notImportant {
     [_inboxYou clearCache];
     [_inboxInbox clearCache];
+    [_todoCache clearCache];
 }
 
 + (STCache*)cacheForInboxScope:(STStampedAPIScope)scope {
@@ -81,6 +84,37 @@ static STCache* _inboxEveryone = nil;
                       }
                       block(cache, error, cancellation);
                   }];
+    }
+}
+
+
++ (STCache*)cacheForTodos {
+    return _todoCache;
+}
+
++ (STCancellation*)cacheForTodosWithCallback:(void (^)(STCache* cache, NSError* error, STCancellation* cancellation))block {
+    STCache* fastCache = [self cacheForTodos];
+    if (fastCache) {
+        STCancellation* cancellation = [STCancellation cancellation];
+        [Util executeOnMainThread:^{
+            if (!cancellation.cancelled) {
+                block(fastCache, nil, cancellation);
+            }
+        }];
+        return cancellation;
+    }
+    else {
+        id<STCachePageSource> pageSource = [[[STTodosPageSource alloc] init] autorelease];
+        STGenericCacheConfiguration* configuration = [[STGenericCacheConfiguration alloc] init];
+        configuration.pageSource = pageSource;
+        NSString* name = [NSString stringWithFormat:@"TodosCache"];
+        return [STCache cacheForName:name
+                         accelerator:nil
+                       configuration:configuration
+                         andCallback:^(STCache *cache, NSError *error, STCancellation *cancellation) {
+                             _todoCache = [cache retain];
+                             block(cache, error, cancellation);
+                         }];
     }
 }
 

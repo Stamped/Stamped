@@ -126,7 +126,7 @@ static CGFloat _shelfOffset = 9;
     } else {
         [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
         if (_showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
-            [self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
+            //[self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
         }
     }
     
@@ -147,7 +147,7 @@ static CGFloat _shelfOffset = 9;
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     if (!_searching && _showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
-        [self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
+        //[self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
     }
 }
 

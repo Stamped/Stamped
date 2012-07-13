@@ -43,6 +43,8 @@ try:
     from libs.Memcache                   import globalMemcache
     from api.HTTPSchemas                import generateStampUrl
 
+    from crawler.RssFeedScraper     import RssFeedScraper
+
     #resolve classes
     from resolve.EntitySource       import EntitySource
     from resolve.EntityProxySource  import EntityProxySource
@@ -417,13 +419,18 @@ class StampedAPI(AStampedAPI):
         self._verifyFacebookAccount(facebookUser['id'])
         account = Account().dataImport(new_fb_account.dataExport(), overflow=True)
 
-        # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
-        #  and require uniqueness
-        if account.email is None:
-            account.email = 'fb_%s' % facebookUser['id']
-        else:
-            account.email = str(account.email).lower().strip()
-            SchemaValidation.validateEmail(account.email)
+        # If the facebook account email address is already in our system, then we will use a mock email address
+        # to avoid a unique id conflict in our db
+        email = 'fb_%s' % facebookUser['id']
+        if 'email' in facebookUser:
+            try:
+                testemail = str(facebookUser['email']).lower().strip()
+                self._accountDB.getAccountByEmail(testemail)
+            except StampedAccountNotFoundError:
+                email = testemail
+                SchemaValidation.validateEmail(account.email)
+
+        account.email = email
 
         account.linked                      = LinkedAccounts()
         fb_acct                             = LinkedAccount()
@@ -465,7 +472,7 @@ class StampedAPI(AStampedAPI):
 
         # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
         #  and require uniqueness
-        if account.email is None:
+        if account.email is None or accounttest is not None:
             account.email = 'tw_%s' % twitterUser['id']
         else:
             account.email = str(account.email).lower().strip()
@@ -1683,7 +1690,7 @@ class StampedAPI(AStampedAPI):
         return newlist
 
     @API_CALL
-    def getEntityAutoSuggestions(self, authUserId, query, category, coordinates=None):
+    def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
         if category == 'film':
             return self._netflix.autocomplete(query)
         elif category == 'place':
@@ -1808,7 +1815,8 @@ class StampedAPI(AStampedAPI):
             preview = StampPreview()
             preview.stamp_id = stamp.stamp_id
             preview.user = userIds[stamp.user.user_id]
-            stampPreviewList.append(preview)
+            if preview.user is not None:
+                stampPreviewList.append(preview)
 
         allUsers            = StampedByGroup()
         allUsers.stamps     = stampPreviewList
@@ -4878,6 +4886,24 @@ class StampedAPI(AStampedAPI):
 
         return modified
 
+
+    def crawlExternalSourcesAsync(self):
+        stampedSource = StampedSource(stamped_api=self)
+        for proxy in RssFeedScraper().fetchSources():
+            self.__mergeProxyIntoDb(proxy, stampedSource)
+
+    def __mergeProxyIntoDb(self, proxy, stampedSource):
+        entity_id = stampedSource.resolve_fast(proxy.source, proxy.key)
+
+        # We don't want to do a full resolve here against stamped source, because crawler sources
+        # are usually read-only sources (like scraping an RSS feed), so doing a full-resolve and
+        # then enrich will not help.
+        if entity_id is None:
+            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
+            entity = entityProxy.buildEntity()
+            self.mergeEntity(entity)
+        else:
+            self.mergeEntityId(entity_id)
 
     """
     ######

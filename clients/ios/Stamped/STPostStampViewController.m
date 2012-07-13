@@ -117,7 +117,7 @@
   
   // "You stamped" packed left x to image + padding , aligned y with top of image
   UILabel* upperText = [Util viewWithText:@"You stamped"
-                                     font:[UIFont stampedFontWithSize:10]
+                                     font:[UIFont stampedFontWithSize:12]
                                     color:[UIColor stampedGrayColor]
                                      mode:UILineBreakModeTailTruncation
                                andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
@@ -219,7 +219,7 @@
     CGFloat headerY = 5;
     UIView* headerIcon = [Util imageViewWithURL:[NSURL URLWithString:relevantItem.icon] andFrame:CGRectMake(5, headerY+5, 11, 11)];
     [header addSubview:headerIcon];
-    UIFont* normalFont = [UIFont stampedFontWithSize:14];
+    UIFont* normalFont = [UIFont stampedFontWithSize:12];
     UIView* firstText = [Util viewWithText:@"That's your "
                                       font:normalFont
                                      color:[UIColor stampedGrayColor]
@@ -228,7 +228,7 @@
     [Util reframeView:firstText withDeltas:CGRectMake(CGRectGetMaxX(headerIcon.frame)+5, headerY, 0, 0)];
     [header addSubview:firstText];
     UIView* ordinalText = [Util viewWithText:[NSString stringWithFormat:@"%@", relevantItem.count]
-                                        font:[UIFont stampedBoldFontWithSize:14]
+                                        font:[UIFont stampedBoldFontWithSize:12]
                                        color:[UIColor stampedDarkGrayColor]
                                         mode:UILineBreakModeClip
                                   andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
@@ -318,14 +318,14 @@
         imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(0, 0, cell.frame.size.height, cell.frame.size.height)];
         [cell addSubview:imageView];
         UILabel* mainText = [Util viewWithText:text
-                                          font:[UIFont stampedBoldFontWithSize:14]
+                                          font:[UIFont stampedBoldFontWithSize:12]
                                          color:[UIColor stampedDarkGrayColor]
                                           mode:UILineBreakModeTailTruncation
                                     andMaxSize:CGSizeMake(200, CGFLOAT_MAX)];
         mainText.frame = [Util centeredAndBounded:mainText.frame.size inFrame:cell.frame];
         [cell addSubview:mainText];
         
-        UIFont* font = [UIFont stampedFontWithSize:10];
+        UIFont* font = [UIFont stampedFontWithSize:12];
         UIColor* color = [UIColor stampedGrayColor];
         UILabel* topText = [Util viewWithText:topString
                                          font:font
@@ -357,7 +357,7 @@
   UIImageView* headerIcon = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"scope_drag_inner_friends"]] autorelease];
   headerIcon.frame = CGRectMake(5, headerY+5, 11, 11);
   [header addSubview:headerIcon];
-  UIFont* normalFont = [UIFont stampedFontWithSize:14];
+  UIFont* normalFont = [UIFont stampedFontWithSize:12];
   UIView* firstText = [Util viewWithText:@"You're the "
                                     font:normalFont
                                    color:[UIColor stampedGrayColor]
@@ -366,7 +366,7 @@
   [Util reframeView:firstText withDeltas:CGRectMake(CGRectGetMaxX(headerIcon.frame)+5, headerY, 0, 0)];
   [header addSubview:firstText];
   UIView* ordinalText = [Util viewWithText:[NSString stringWithFormat:@"%d", self.stampedBy.friends.count.integerValue + 1]
-                                      font:[UIFont stampedBoldFontWithSize:14]
+                                      font:[UIFont stampedBoldFontWithSize:12]
                                      color:[UIColor stampedDarkGrayColor]
                                       mode:UILineBreakModeClip
                                 andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];

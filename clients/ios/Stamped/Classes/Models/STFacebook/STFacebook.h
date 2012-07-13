@@ -9,6 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "Facebook.h"
 
+#define kFacebookUserIdentifier @"kFacebookUserIdentifier"
+
+#define kFacebookAppID @"297022226980395"
+#define kFacebookSecret @"17eb87d731f38bf68c7b40c45c35e52e"
+#define kFacebookNameSpace @"stampedapp"
+
 typedef void(^FacebookMeRequestHandler)(NSDictionary *);
 
 @interface STFacebook : NSObject <FBSessionDelegate, FBRequestDelegate>
@@ -28,5 +34,7 @@ typedef void(^FacebookMeRequestHandler)(NSDictionary *);
 // requests
 - (void)loadFriends;
 - (void)loadMe;
+
+- (void)showFacebookAlert;
 
 @end

@@ -65,6 +65,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         modified_total = False
         failedSources = set()
         #logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
+
         # We will loop through all sources multiple times, because as data is enriched, previous unresolvable sources
         # may become resolvable and can enrich in turn.  If no fields are modified by any source in a given iteration,
         # then there's no reason to loop again

@@ -251,7 +251,7 @@ def buildEntity(data=None, kind=None, mini=False):
         if data is not None:
             return new().dataImport(data, overflow=True)
     except Exception as e:
-        logs.info(e.message)
+        logs.info(e)
         raise
     return new()
 
@@ -263,8 +263,12 @@ def upgradeEntityData(entityData):
         old['entity_id'] = str(old['_id'])
         del(old['_id'])
 
-    kind    = deriveKindFromOldSubcategory(old['subcategory'])
-    types   = deriveTypesFromOldSubcategories([old['subcategory']])
+    try:
+        kind    = deriveKindFromOldSubcategory(old['subcategory'])
+        types   = deriveTypesFromOldSubcategories([old['subcategory']])
+    except KeyError as e:
+        logs.warning("Malformed entity data: missing '%s'" % e)
+        raise 
 
     if kind == 'other' and 'coordinates' in old and 'lat' in old['coordinates'] and 'lng' in old['coordinates']:
         kind = 'place'

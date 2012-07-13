@@ -33,8 +33,7 @@ def applyRemovalRegexps(regexps, title):
 
 class TitleDataQualityRegexpTest(object):
     """
-    Encapsulates a test
-    , in the form of a regular expression, for potential data quality issues in a search result
+    Encapsulates a test, in the form of a regular expression, for potential data quality issues in a search result
     based on its title. When the regular expression matches the result title, we apply the score penalty and attach
     the message to the data quality score debug information.
 
@@ -80,6 +79,10 @@ def makeTokenRegexp(token):
     """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
     return re.compile("(^|[ ,-:\[(])%s($|[ ,-:\])])" % token, re.IGNORECASE)
 
+
+def makeTokensRegexp(*tokens):
+    """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
+    return re.compile("(^|[ ,-:\[(])(%s)($|[ ,-:\])])" % '|'.join(tokens), re.IGNORECASE)
 
 def makeDelimitedSectionRe(pattern):
     """Returns a regex that matches an entire delimited section (by () or []) if the
@@ -150,7 +153,7 @@ def isDelimitedPrefix(a, b):
 
 
 POSSESSIVE_RE = re.compile('\'s($|\s)', re.IGNORECASE)
-NON_CHAR_LETTER_RE = re.compile('[ /.,:;"\'&-]')
+NON_CHAR_LETTER_RE = re.compile('[ (\[)\]/.,:;"\'&-]')
 def tokenizeString(string):
     withoutPossessives = POSSESSIVE_RE.sub(' ', string)
     withoutPunctuation = NON_CHAR_LETTER_RE.sub(' ', withoutPossessives)
@@ -159,9 +162,10 @@ def tokenizeString(string):
 
 # Tools for demoting based on title token matches.
 class Token(object):
-    def __init__(self, text, penalty=None):
+    def __init__(self, text, penalty=None, rawName=False):
         self.text = text
         self.penalty = penalty
+        self.useRawName = rawName
 
     def isIn(self, tokenList):
         if ' ' not in self.text:
@@ -171,14 +175,15 @@ class Token(object):
             return self.text in ' '.join(tokenList)
 
 
-def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1, useRawName=False):
+def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
     queryTokens = tokenizeString(searchQuery)
     # TODO: Should I use raw_name?
-    title = searchResult.resolverObject.raw_name if useRawName else searchResult.resolverObject.name
-    titleTokens = tokenizeString(title)
+    titleTokens = tokenizeString(searchResult.resolverObject.name)
+    rawTitleTokens = tokenizeString(searchResult.resolverObject.raw_name)
     anyMatches = False
     for token in tokens:
-        if token.isIn(titleTokens) and not token.isIn(queryTokens):
+        currTitleTokens = rawTitleTokens if token.useRawName else titleTokens
+        if token.isIn(currTitleTokens) and not token.isIn(queryTokens):
             penalty = token.penalty if token.penalty else defaultPenalty
             searchResult.dataQuality *= 1 - penalty
             searchResult.addDataQualityComponentDebugInfo("token '%s' in title but not query" % token.text, penalty)
@@ -262,25 +267,31 @@ def getMovieReleaseYearFromTitle(rawTitle):
 # something wrong with a movie. Most likely, it's actually a TV show or a box set.
 MOVIE_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' in title", 0.35,
-                               exceptionQueryRegexps=makeTokenRegexp('complete')),
+                               exceptionQueryRegexps=makeTokenRegexp('complete'), rawName=True),
     TitleDataQualityRegexpTest(TV_SEASON1_REGEX_CONFIDENT, "season specification in title", 0.5,
-                               exceptionQueryRegexps=makeTokenRegexp('season')),
+                               exceptionQueryRegexps=makeTokenRegexp('season'), rawName=True),
     TitleDataQualityRegexpTest(TV_SEASON2_REGEX_CONFIDENT, "season specification in title", 0.5,
-                               exceptionQueryRegexps=makeTokenRegexp('season')),
-    TitleDataQualityRegexpTest(TV_BOXED_SET_REGEX_CONFIDENT, "box set in title", 0.5),
+                               exceptionQueryRegexps=makeTokenRegexp('season'), rawName=True),
+    TitleDataQualityRegexpTest(TV_BOXED_SET_REGEX_CONFIDENT, "box set in title", 0.5, rawName=True),
     TitleDataQualityRegexpTest(TV_VOLUMES_REGEX_CONFIDENT, "volume specification in title", 0.5,
-                               exceptionQueryRegexps=makeTokenRegexp('volume')),
+                               exceptionQueryRegexps=makeTokenRegexp('volume'), rawName=True),
     TitleDataQualityRegexpTest(TV_BEST_OF_REGEX_CONFIDENT, "'best of' in title", 0.5,
-                               exceptionQueryRegexps=makeTokenRegexp('best'))
+                               exceptionQueryRegexps=makeTokenRegexp('best'), rawName=True)
 )
 
 MOVIE_TITLE_BAD_TOKENS = (
-    Token('season'), Token('seasons'),
-    Token('volume'), Token('volumes'),
-    Token('box set', penalty=0.35), Token('boxed set', penalty=0.35),
-    Token('trilogy', penalty=0.35),
-    Token('collection'),
-    Token('edition')
+    # Raw name tests -- these are things that, if they are in the raw name, indicate that this may not be a single
+    # movie, it may be a collection, or a TV show.
+    Token('season', rawName=True), Token('seasons', rawName=True),
+    Token('volume', rawName=True), Token('volumes', rawName=True),
+    Token('box set', penalty=0.35, rawName=True), Token('boxed set', penalty=0.35, rawName=True),
+    Token('trilogy', penalty=0.35, rawName=True),
+    Token('collection', rawName=True),
+    # Processed name tests -- these aren't things that indicate that this isn't a movie, but they're things that
+    # indicate we weren't able to fix the title completely.
+    Token('edition', rawName=False, penalty=0.15),
+    Token('remastered', rawName=False, penalty=0.15),
+    Token('HD', rawName=False, penalty=0.15),
 )
 
 def applyMovieTitleDataQualityTests(searchResult, searchQuery):
@@ -299,22 +310,32 @@ def applyMovieTitleDataQualityTests(searchResult, searchQuery):
 # These aren't things that reflect badly on a movie for being in its title.
 ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
     re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Mix|Remix|Edit|Version)[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|instrumental)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|single)[ ,:\])-]*$", re.IGNORECASE),
 )
 
+TRACK_TITLE_SUSPICIOUS_TESTS = (
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Mix|Remix|Re-mix|Remixed|Re-Mixed)[ ,:\])-]*$', 'mix in title', 0.5,
+        exceptionQueryRegexps=makeTokensRegexp('mix', 'remix'), rawName=True),
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Cut|Edit|Version)[ ,:\])-]*$', 'version info in title', 0.5,
+        exceptionQueryRegexps=makeTokensRegexp('cut', 'edit', 'version'), rawName=True),
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*(Instrumental)[ ,:\])-]*$', 'instrumental in title', 0.5,
+        exceptionQueryRegexps=makeTokenRegexp('instrumental'), rawName=True)
+)
 def cleanTrackTitle(trackTitle):
     return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, trackTitle)
 
 TRACK_TITLE_BAD_TOKENS = (
-    Token('mix'), Token('remix'), Token('cut'), Token('edit'), Token('instrumental'),
-    Token('cover'), Token('version'), Token('tribute'),
-    Token('karaoke', penalty=0.4)
+    Token('mix', rawName=True), Token('remix', rawName=True),
+    Token('re-mix', rawName=True), Token('remixed', rawName=True), Token('re-mixed', rawName=True),
+    Token('cut', rawName=True), Token('edit', rawName=True), Token('instrumental', rawName=True),
+    Token('cover', rawName=True), Token('version', rawName=True), Token('tribute', rawName=True),
+    Token('karaoke', rawName=True, penalty=0.4)
 )
 def applyTrackTitleDataQualityTests(searchResult, searchQuery):
     # Even though we cut this mix/edit/etc. bullshit out of the title we want to demote results that had these terms
     # in their raw names in order to favor the non-mixed/edited/whatever versions.
-    applyTokenTests(TRACK_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.25, useRawName=True)
+    if not applyTitleTests(TRACK_TITLE_SUSPICIOUS_TESTS, searchResult, searchQuery):
+        applyTokenTests(TRACK_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.25)
 
 # Album titles don't really have problems.
 def cleanAlbumTitle(albumTitle):
@@ -322,13 +343,13 @@ def cleanAlbumTitle(albumTitle):
 
 ALBUM_TITLE_BAD_TOKENS = (
     Token('ep', penalty=0.25),
-    Token('karaoke', penalty=0.4),
+    Token('karaoke', penalty=0.4, rawName=True),
 )
 def applyAlbumTitleDataQualityTests(searchResult, searchQuery):
-    applyTokenTests(ALBUM_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2, useRawName=True)
+    applyTokenTests(ALBUM_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
 
 ARTIST_TITLE_BAD_TOKENS = (
-    Token('karaoke', penalty=0.4),
+    Token('karaoke', penalty=0.4, rawName=True),
     Token('featuring')
 )
 # Artist titles don't really have problems, either.
