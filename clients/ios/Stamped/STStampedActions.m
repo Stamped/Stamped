@@ -74,15 +74,17 @@ static STStampedActions* _sharedInstance;
             else {
                 handled = YES;
                 if (flag) {
-                    [Util globalLoadingLock];
+                    [STActionManager lock];
                     [[STStampedAPI sharedInstance] stampForStampID:source.sourceID andCallback:^(id<STStamp> stamp, NSError* error, STCancellation* cancellation) {
-                        [Util globalLoadingUnlock];
-                        if (stamp) {
-                            [[Util sharedNavigationController] pushViewController:[[[STStampDetailViewController alloc] initWithStamp:stamp] autorelease]
-                                                                         animated:YES];
-                        }
-                        else {
-                            [Util warnWithAPIError:error andBlock:nil];
+                        BOOL unlocked = [STActionManager unlock];
+                        if (unlocked) {
+                            if (stamp) {
+                                [[Util sharedNavigationController] pushViewController:[[[STStampDetailViewController alloc] initWithStamp:stamp] autorelease]
+                                                                             animated:YES];
+                            }
+                            else {
+                                [Util warnWithAPIError:error andBlock:nil];
+                            }
                         }
                     }];
                 }
@@ -93,52 +95,58 @@ static STStampedActions* _sharedInstance;
         }
         else if ([action isEqualToString:@"stamped_view_user"] && source.sourceID != nil) {
             handled = YES;
-            UIViewController* controller = nil;
-            if (context.user) {
-                controller = [[[STUserViewController alloc] initWithUser:context.user] autorelease];
-            }
-            else {
-                [STActionManager lock];
-                [[STStampedAPI sharedInstance] userDetailForUserID:source.sourceID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
-                    BOOL unlocked = [STActionManager unlock];
-                    if (unlocked) {
-                        if (userDetail) {
-                            [[Util sharedNavigationController] pushViewController:[[[STUserViewController alloc] initWithUser:userDetail] autorelease] 
-                                                                         animated:YES];
+            if (flag) {
+                UIViewController* controller = nil;
+                if (context.user) {
+                    controller = [[[STUserViewController alloc] initWithUser:context.user] autorelease];
+                }
+                if (controller) {
+                    [Util pushController:controller modal:NO animated:YES];
+                }
+                else {
+                    [STActionManager lock];
+                    [[STStampedAPI sharedInstance] userDetailForUserID:source.sourceID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+                        BOOL unlocked = [STActionManager unlock];
+                        if (unlocked) {
+                            if (userDetail) {
+                                [Util pushController:[[[STUserViewController alloc] initWithUser:userDetail] autorelease] 
+                                               modal:NO
+                                            animated:YES];
+                            }
+                            else {
+                                [Util warnWithMessage:@"User not found" andBlock:nil];
+                            }
                         }
-                        else {
-                            [Util warnWithMessage:@"User not found" andBlock:nil];
-                        }
-                    }
-                }];
-            }
-            if (controller) {
-                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                    }];
+                }
             }
         }
         else if ([action isEqualToString:@"stamped_view_screen_name"] && source.sourceID != nil) {
             handled = YES;
-            UIViewController* controller = nil;
-            if (context.user) {
-                controller = [[[STUserViewController alloc] initWithUser:context.user] autorelease];
-            }
-            else {
-                [STActionManager lock];
-                [[STStampedAPI sharedInstance] userDetailForScreenName:source.sourceID andCallback:^(id<STUserDetail> userDetail, NSError *error, STCancellation *cancellation) {
-                    BOOL unlocked = [STActionManager unlock];
-                    if (unlocked) {
-                        if (userDetail) {
-                            [[Util sharedNavigationController] pushViewController:[[[STUserViewController alloc] initWithUser:userDetail] autorelease] 
-                                                                         animated:YES];
+            if (flag) {
+                UIViewController* controller = nil;
+                if (context.user) {
+                    controller = [[[STUserViewController alloc] initWithUser:context.user] autorelease];
+                }
+                
+                if (controller) {
+                    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                }
+                else {
+                    [STActionManager lock];
+                    [[STStampedAPI sharedInstance] userDetailForScreenName:source.sourceID andCallback:^(id<STUserDetail> userDetail, NSError *error, STCancellation *cancellation) {
+                        BOOL unlocked = [STActionManager unlock];
+                        if (unlocked) {
+                            if (userDetail) {
+                                [[Util sharedNavigationController] pushViewController:[[[STUserViewController alloc] initWithUser:userDetail] autorelease] 
+                                                                             animated:YES];
+                            }
+                            else {
+                                [Util warnWithAPIError:error andBlock:nil];
+                            }
                         }
-                        else {
-                            [Util warnWithAPIError:error andBlock:nil];
-                        }
-                    }
-                }];
-            }
-            if (controller) {
-                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                    }];
+                }
             }
         }
         else if ([action isEqualToString:@"stamped_like_stamp"] && source.sourceID != nil) {
@@ -211,7 +219,7 @@ static STStampedActions* _sharedInstance;
         else if ([action isEqualToString:@"stamped_view_image"] && source.sourceID != nil) {
             handled = YES;
             if (flag) {
-                STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:source.sourceID]];
+                STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:source.sourceID]] autorelease];
                 [[Util sharedNavigationController] pushViewController:controller animated:YES];
             }
         }
@@ -219,7 +227,7 @@ static STStampedActions* _sharedInstance;
             handled = YES;
             if (flag) {
                 
-                STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:context.user.imageURL]];
+                STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:context.user.imageURL]] autorelease];
                 [[Util sharedNavigationController] pushViewController:controller animated:YES];
             }
         }

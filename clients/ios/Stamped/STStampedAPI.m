@@ -331,6 +331,7 @@ static STStampedAPI* _sharedInstance;
                                           andCallback:^(id stamp, NSError* error, STCancellation* cancellation) {
                                               if (stamp) {
                                                   [self.stampCache removeObjectForKey:stampID];
+                                                  [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:nil];
                                               }
                                               block(stamp != nil, error);
                                           }];

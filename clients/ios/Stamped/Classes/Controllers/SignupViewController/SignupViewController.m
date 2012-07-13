@@ -245,10 +245,10 @@
         }
         
     }
-    if (cfLastName!=NULL) {
+    if (cfFirstName != NULL) {
         CFRelease(cfFirstName);
     }
-    if (cfLastName!=NULL) {
+    if (cfLastName != NULL) {
         CFRelease(cfLastName);
     }
     
@@ -283,6 +283,7 @@
         STTextFieldTableCell *cell = (STTextFieldTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
         cell.textField.text = email;
     }
+    [email release];
     
     return NO;
 }

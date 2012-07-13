@@ -879,7 +879,7 @@ static const CGFloat _headerHeight = _cellHeight;
                                                             font:[UIFont stampedFontWithSize:12]
                                                            color:[UIColor stampedGrayColor]] autorelease];
     titleChunk.bottomLeft = CGPointMake(26, 26);
-    self.title = [[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:titleChunk]];
+    self.title = [[[STChunksView alloc] initWithChunks:[NSArray arrayWithObject:titleChunk]] autorelease];
     [self.contentView addSubview:self.title];
     if (item.toggles.count) {
         id<STAlertToggle> toggle = [item.toggles objectAtIndex:0];

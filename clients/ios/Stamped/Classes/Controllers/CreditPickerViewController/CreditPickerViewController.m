@@ -56,7 +56,7 @@
         id<STStampedBy> stampedBy = [[STStampedAPI sharedInstance] cachedStampedByForEntityID:identifier];
         if (stampedBy.friends.count.integerValue > 0) {
             
-            NSMutableArray *stampedByUsers = [[NSMutableArray alloc] init];
+            NSMutableArray *stampedByUsers = [NSMutableArray array];
             id<STStampedByGroup> friends = stampedBy.friends;
             for (id <STStampPreview> preview in friends.stampPreviews) {
                 [stampedByUsers addObject:preview.user];
@@ -72,14 +72,14 @@
 }
 
 - (void)dealloc {
-    
-    [_headerView release], _headerView=nil;
-    [_usernames release], _usernames=nil;
-    [_searchUsers release], _searchUsers=nil;
-    [_selectedUsers release], _selectedUsers=nil;
-    [_entityIdentifier release], _entityIdentifier=nil;
-    [_stampedByFriends release], _stampedByFriends=nil;
-    [_users release], _users=nil;
+//    
+//    [_headerView release], _headerView=nil;
+//    [_usernames release], _usernames=nil;
+//    [_searchUsers release], _searchUsers=nil;
+//    [_selectedUsers release], _selectedUsers=nil;
+//    [_entityIdentifier release], _entityIdentifier=nil;
+//    [_stampedByFriends release], _stampedByFriends=nil;
+//    [_users release], _users=nil;
     [super dealloc];
     
 }
@@ -384,7 +384,7 @@
     
     if ([self.usernames containsObject:user.screenName]) {
         
-        NSArray *usersCopy = [self.selectedUsers copy];
+        NSArray *usersCopy = [[self.selectedUsers copy] autorelease];
         for (id <STUser> aUser in usersCopy) {
             if ([aUser.screenName isEqualToString:user.screenName]) {
                 [self.selectedUsers removeObject:aUser];

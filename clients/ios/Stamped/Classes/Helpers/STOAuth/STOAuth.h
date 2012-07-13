@@ -12,8 +12,8 @@
 @interface STOAuth : NSObject
 
 + (NSString*)MD5Hash:(NSString*)string;
-+ (NSString *)encodedSTOAuthParameterForString:(NSString *)str;
-+ (NSString *)stringWithBase64ForData:(NSData *)data;
++ (NSString *)copyEncodedSTOAuthParameterForString:(NSString *)str;
++ (NSString *)copyStringWithBase64ForData:(NSData *)data;
 + (void)addParamValue:(id)value forName:(id)name toArray:(NSMutableArray*)array;
 + (NSString *)paramStringForParams:(NSArray *)params joiner:(NSString *)joiner shouldQuote:(BOOL)shouldQuote shouldSort:(BOOL)shouldSort;
 + (NSString *)signClearText:(NSString *)text withSecret:(NSString *)secret;

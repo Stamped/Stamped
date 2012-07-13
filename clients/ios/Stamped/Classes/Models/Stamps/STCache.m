@@ -353,11 +353,11 @@ NSString* const STCacheDidLoadPageNotification = @"STCacheDidLoadPageNotificatio
 }
 
 - (void)clearCache {
-    self.page = [[STCachePage alloc] initWithObjects:[NSArray array]
+    self.page = [[[STCachePage alloc] initWithObjects:[NSArray array]
                                    start:[NSDate date]
                                      end:nil 
                                  created:[NSDate dateWithTimeIntervalSinceNow:-2 * _pageFaultAge]
-                                 andNext:nil];
+                                 andNext:nil] autorelease];
     // TODO enable if possible self.saveInProgress = NO;
     [self.refreshStack removeAllObjects];
     [self.cancellation cancel];
