@@ -25,6 +25,7 @@
         // main iphone
         var $main_body              = $("#main-body");
         var $main_iphone            = $("#main-iphone");
+        var $main_footer            = $("#main-footer");
         var $iphone_screens         = $(".iphone-screens");
         var $iphone_inbox_body      = $(".iphone-inbox-body");
         var $iphone_inbox_selection = $(".iphone-inbox-selection");
@@ -39,6 +40,9 @@
         var $map_window_overlay     = $("#tastemaker-map-window-overlay");
         var $map_window_iframe      = null;
         var $app_store_button       = $("footer .app-store-button");
+        
+        var $desc_default           = $(".desc-default");
+        var $desc_overview          = $(".desc-overview");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -462,6 +466,12 @@
                         map_window_show();
                     } else {
                         map_window_hide();
+                    }
+                    
+                    if (index === 4) {
+                        $main_footer.addClass("watch-video-overview");
+                    } else {
+                        $main_footer.removeClass("watch-video-overview");
                     }
                     
                     return true;

@@ -197,7 +197,7 @@
                             </p>
                             
                             <p>
-                                Everyone gets a limited number of stamps to start, so you’ll discover only the best recommendations from people you trust. Try it out, it’s free! <a href="#pane-1" class="continue-button">Continue</a>
+                                Everyone gets a limited number of stamps to start, so you’ll discover only the best recommendations from people you trust. Try it out, it’s free!
                             </p>
                         </div>
                         
@@ -219,7 +219,7 @@
                             </p>
                             
                             <p>
-                                If you love something, stamp it! <a href="#pane-2" class="continue-button">Continue</a>
+                                If you love something, stamp it!
                             </p>
                         </div>
                     </div>
@@ -237,8 +237,6 @@
                             <p>
                                 It's a visual and personalized way to discover great new things to try.
                             </p>
-                            
-                            <a href="#pane-3" class="continue-button">Continue</a>
                         </div>
                     </div>
                     
@@ -255,8 +253,6 @@
                             <p>
                                 With Stamped, you can discover great content through the people whose tastes you <span style="italic">actually</span> respect.
                             </p>
-                            
-                            <a href="#pane-4" class="continue-button">Continue</a>
                             
                             <div id="tastemaker-gallery">
                                 {% for user in tastemakers %}
@@ -285,8 +281,7 @@
                                     <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                     
                                     <div class="user-video-desc">
-                                        <a href="http://www.youtube.com/watch?v=4r7wHMg5Yjg&autoplay=1" class="watch-video lightbox-video">Watch</a>
-                                        <span class="screen-names"><a href="/tristan">@tristan</a> and <a href="/lisa">@lisa</a></span>
+                                        <div class="screen-names"><a href="/tristan">@tristan</a> and <a href="/lisa">@lisa</a></div>
                                     </div>
                                 </div>
                                 
@@ -294,8 +289,7 @@
                                     <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                     
                                     <div class="user-video-desc">
-                                        <a href="http://www.youtube.com/watch?v=ZZ5LpwO-An4&autoplay=1" class="watch-video lightbox-video">Watch</a>
-                                        <span class="screen-names"><a href="/maggie">@maggie</a></span>
+                                        <div class="screen-names"><a href="/maggie">@maggie</a></div>
                                     </div>
                                 </div>
                                 
@@ -303,8 +297,7 @@
                                     <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
                                     
                                     <div class="user-video-desc">
-                                        <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="watch-video lightbox-video">Watch</a>
-                                        <span class="screen-names"><a href="/justinbieber">@justinbieber</a></span>
+                                        <div class="screen-names"><a href="/justinbieber">@justinbieber</a></div>
                                     </div>
                                 </div>
                             </div>
@@ -321,8 +314,18 @@
         <div id="main-footer" class="hidden-main-animating">
             <div class="watch-video">
                 <div class="speech-bubble clearfix">
-                    <a class="play-video-button-small"></a>
-                    <p class="desc">Watch the video with <span class="screen-name">@justinbieber</span></p>
+                    <div class="default-video">
+                        <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="play-video-button-small lightbox-video"></a>
+                        
+                        <p class="desc"><a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="watch lightbox-video">Watch</a> the video with <span class="screen-name">@justinbieber</span></p>
+                    </div>
+                    
+                    <div class="overview-video">
+                        <!-- TODO: update video reference -->
+                        <a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="play-video-button-small lightbox-video"></a>
+                        
+                        <p class="desc"><a href="http://www.youtube.com/watch?v=oHg5SJYRHA0&autoplay=1" class="watch lightbox-video">Watch</a> the overview video to learn more.</p>
+                    </div>
                 </div>
                 
                 <a class="bieber-video-preview-icon"></a>

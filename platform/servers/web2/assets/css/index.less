@@ -192,11 +192,6 @@ body.main {
                     color: #888;
                     font-weight: 200;
                     font-size: 80%;
-                    
-                    .continue-button {
-                        color: #438fED;
-                        margin-bottom: 1em;
-                    }
                 }
             }
             
@@ -312,6 +307,20 @@ body.main {
             position: relative;
             top: 12px;
         }
+        
+        .overview-video {
+            display: none;
+        }
+    }
+}
+
+.watch-video-overview {
+    .default-video, .bieber-video-preview-icon {
+        display: none !important;
+    }
+    
+    .overview-video {
+        display: block !important;
     }
 }
 
@@ -382,11 +391,10 @@ body.main {
         }
     }
     
-    .user-video-desc {
-        .watch-video {
-            color: #438fED;
-        }
-    }
+}
+
+.watch {
+    color: #438fED;
 }
 
 #pane-4 {
@@ -417,10 +425,6 @@ body.main {
 }
 
 #maggie-video-preview {
-    .screen-names {
-        display: block;
-    }
-    
     .user-video-preview-image {
         background: url(/assets/img/index/user_video_preview_maggie.jpg) no-repeat;
         background-size: 100% 100%;
@@ -615,7 +619,7 @@ body.main {
     position: absolute;
     
     top:  100px;
-    left: 64px;
+    left: 63px;
     
     width:  244px;
     height: 366px;

@@ -24,7 +24,7 @@ from django.utils.functional    import wraps
 
 # initialize several useful globals
 IS_PROD  = libs.ec2_utils.is_prod_stack()
-_baseurl = "https://dev.stamped.com/v0"
+_baseurl = "https://dev.stamped.com/v1"
 
 # extract all of the settings from django's settings.py which begin with STAMPED_
 # note that these settings will be included in the context of every rendered template.
