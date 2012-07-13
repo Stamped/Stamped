@@ -501,6 +501,8 @@ class StampedAPI(AStampedAPI):
     def addAccountAsync(self, userId):
         account = self._accountDB.getAccount(userId)
 
+        self._addWelcomeActivity(userId)
+
         # Send welcome email
         if account.email is not None and account.auth_service == 'stamped':
 
@@ -3371,6 +3373,8 @@ class StampedAPI(AStampedAPI):
     def getUserGuide(self, guideRequest, authUserId):
         assert(authUserId is not None)
 
+        forceRefresh = False
+
         try:
             guide = self._guideDB.getGuide(authUserId)
         except (StampedUnavailableError, KeyError):
@@ -3470,6 +3474,10 @@ class StampedAPI(AStampedAPI):
         result = []
         for item in items:
             entity = entityIds[item.entity_id]
+            if entity is None:
+                logs.warning("Missing entity: %s" % item.entity_id)
+                forceRefresh = True
+                continue
             previews = Previews()
             if item.stamps is not None:
                 stamps = []
@@ -3484,7 +3492,7 @@ class StampedAPI(AStampedAPI):
             result.append(entity)
 
         # Refresh guide
-        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
+        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId], kwargs={'force': forceRefresh})
 
         return result
 
@@ -3678,10 +3686,10 @@ class StampedAPI(AStampedAPI):
         pass
 
     @API_CALL
-    def buildGuideAsync(self, authUserId):
+    def buildGuideAsync(self, authUserId, force=False):
         try:
             guide = self._guideDB.getGuide(authUserId)
-            if guide.updated is not None and datetime.utcnow() < guide.updated + timedelta(days=1):
+            if guide.updated is not None and datetime.utcnow() < guide.updated + timedelta(days=1) and not force:
                 return
         except (StampedUnavailableError, KeyError):
             pass
@@ -4279,6 +4287,7 @@ class StampedAPI(AStampedAPI):
     def getStampTodos(self, authUserId, stamp_id):
         return self._todoDB.getTodosFromStampId(stamp_id)
     
+
     """
        #
       # #    ####  ##### # #    # # ##### #   #
@@ -4288,7 +4297,6 @@ class StampedAPI(AStampedAPI):
     #     # #    #   #   #  #  #  #   #     #
     #     #  ####    #   #   ##   #   #     #
     """
-
 
     def _addFollowActivity(self, userId, friendId):
         objects = ActivityObjectIds()
@@ -4395,6 +4403,15 @@ class StampedAPI(AStampedAPI):
                                                              group = True,
                                                              groupRange = timedelta(days=1),
                                                              unique = True)
+
+    def _addWelcomeActivity(self, recipientId):
+        objects = ActivityObjectIds()
+        objects.user_ids = [ recipientId ]
+        self._activityDB.addActivity(verb           = 'welcome', 
+                                     recipientIds   = [ recipientId ], 
+                                     objects        = objects, 
+                                     benefit        = 100, 
+                                     unique         = True)
 
     def _addActivity(self, verb,
                            userId,
