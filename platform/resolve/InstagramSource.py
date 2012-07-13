@@ -55,10 +55,12 @@ class InstagramPlace(ResolverPlace):
 #           gallery_item['thumb_url']           = item['images']['thumbnail']['url']
 #           gallery_item['thumb_height']        = item['images']['thumbnail']['height']
 #           gallery_item['thumb_width']         = item['images']['thumbnail']['width']
-            if item.get('caption', None) and 'text' in item['caption']:
-                gallery_item['caption']         = item['caption']['text']
-            else:
-                gallery_item['caption']         = None
+
+            # Removing captions per Robby's request.  Perhaps we can reformat in the future?
+#            if item.get('caption', None) and 'text' in item['caption']:
+#                gallery_item['caption']         = item['caption']['text']
+#            else:
+#                gallery_item['caption']         = None
 
             gallery_item['source']              = 'instagram'
             gallery.append(gallery_item)
