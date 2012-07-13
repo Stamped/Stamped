@@ -18,18 +18,27 @@
         // ---------------------------------------------------------------------
         
         
-        var $window             = $(window);
-        var $body               = $("body");
-        var $main               = $("#main");
-        var $main_body          = $("#main-body");
-        var $main_iphone        = $("#main-iphone");
-        var $tastemaker_gallery = $("#tastemaker-gallery");
-        var $tastemakers        = $(".tastemaker");
-        var $map_window_url     = $("#fake-url");
-        var $map_window         = $("#tastemaker-map-window");
-        var $map_window_overlay = $("#tastemaker-map-window-overlay");
-        var $map_window_iframe  = null;
-        var $app_store_button   = $("footer .app-store-button");
+        var $window                 = $(window);
+        var $body                   = $("body");
+        var $main                   = $("#main");
+        
+        // main iphone
+        var $main_body              = $("#main-body");
+        var $main_iphone            = $("#main-iphone");
+        var $iphone_screens         = $(".iphone-screens");
+        var $iphone_inbox_body      = $(".iphone-inbox-body");
+        var $iphone_inbox_selection = $(".iphone-inbox-selection");
+        var $iphone_back_button     = $(".iphone-screen-back-button");
+        var iphone_inbox_selection  = false;
+        
+        var $tastemaker_gallery     = $("#tastemaker-gallery");
+        var $tastemakers            = $(".tastemaker");
+        
+        var $map_window_url         = $("#fake-url");
+        var $map_window             = $("#tastemaker-map-window");
+        var $map_window_overlay     = $("#tastemaker-map-window-overlay");
+        var $map_window_iframe      = null;
+        var $app_store_button       = $("footer .app-store-button");
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -122,6 +131,10 @@
                 this.stop(true, false);
                 
                 return this.start();
+            }, 
+            
+            is_running : function() {
+                return !!this._easer;
             }
         });
         
@@ -487,47 +500,160 @@
             return false;
         });
         
-        var update_debug_transform = function() {
-            /*var t = "perspective(" + $("input[title='perspective']").attr("value") + "px) " + 
-                    "scale3d(" + $("input[title='scale-x']").attr("value") + ", " + 
-                        $("input[title='scale-y']").attr("value") + ", " + 
-                        $("input[title='scale-z']").attr("value") + ") " + 
-                    "rotateY(" + $("input[title='rotate-y']").attr("value") + "deg) " + 
-                    "rotateX(" + $("input[title='rotate-x']").attr("value") + "deg) " + 
-                    "rotateZ(" + $("input[title='rotate-z']").attr("value") + "deg) " + 
-                    "translate3d(" + $("input[title='trans-x']").attr("value") + "px, " + 
-                        $("input[title='trans-y']").attr("value") + "px, " + 
-                        $("input[title='trans-z']").attr("value") + "px) ";*/
+        var get_iphone_inbox_bg_pos = function() {
+            var bg_pos = $iphone_inbox_body.css("background-position").split(" ");
             
-            /*var t = $("input[title='trans']").attr("value");*/
-            
-            var t = "perspective(" + $("input[title='perspective']").attr("value") + "px) " + 
-                    "rotate3d(" + $("input[title='x-axis']").attr("value") + ", " + 
-                        $("input[title='y-axis']").attr("value") + ", " + 
-                        $("input[title='z-axis']").attr("value") + ", " + 
-                        $("input[title='angle']").attr("value") + "deg) " + 
-                    "scale3d(" + $("input[title='scale-x']").attr("value") + ", " + 
-                        $("input[title='scale-y']").attr("value") + ", " + 
-                        $("input[title='scale-z']").attr("value") + ")";
-            
-            console.debug(t);
-            
-            $(".iphone-screen").css({
-                '-webkit-transform' : t, 
-                '-moz-transform'    : t, 
-                '-ms-transform'     : t, 
-                '-o-transform'      : t, 
-                'transform'         : t
-            });
+            return parseInt(bg_pos[1]);
         };
         
-        $("input").change(update_debug_transform);
+        $iphone_inbox_body
+            .drag("start", function(event, dd) {
+                dd.orig_y  = -get_iphone_inbox_bg_pos();
+                
+                iphone_inbox_selection_hide();
+            })
+            .drag(function(event, dd) {
+                var $this  = $(this);
+                var offset = -Math.max(0, Math.min(318, dd.orig_y - dd.deltaY));
+                
+                $this.css('background-position', "0 " + offset + "px");
+            });
+        
+        iphone_inbox_stamps = [
+            {
+                id : "Son of a Gun Restaurant", 
+                y0 : 49, 
+                y1 : 150
+            }, 
+            {
+                id : "The Hunger Games", 
+                y1 : 220
+            }, 
+            {
+                id : "Taxi Driver", 
+                y1 : 291
+            }, 
+            {
+                id : "The Baxter Garage", 
+                y1 : 396
+            }, 
+            {
+                id : "Instagram", 
+                y1 : 466
+            }, 
+            {
+                id : "The Bourne Ultimatum (0)", 
+                y1 : 537
+            }, 
+            {
+                id : "The Bourne Ultimatum (1)", 
+                y1 : 608
+            }, 
+            {
+                id : "The Bourne Ultimatum (2)", 
+                y1 : 688
+            }
+        ];
+        
+        var get_iphone_screen_body_selection = function(event) {
+            var bg_y     = get_iphone_inbox_bg_pos();
+            var offset_y = event.pageY - $iphone_inbox_body.offset().top;
+            var offset   = offset_y - bg_y;
+            
+            var l  = iphone_inbox_stamps.length;
+            var y0 = iphone_inbox_stamps[0].y0;
+            var i, y1, stamp = null;
+            
+            //console.debug("bg_y: " + bg_y + "; offset_y: " + offset_y + "; offset: " + offset);
+            
+            for (i = 0; i < l; ++i) {
+                stamp = iphone_inbox_stamps[i];
+                y1    = stamp.y1;
+                
+                if (offset >= y0 && offset <= y1) {
+                    break;
+                } else {
+                    y0 = y1;
+                }
+            }
+            
+            return {
+                y0 : y0 + bg_y, 
+                y1 : y1 + bg_y, 
+                id : stamp.id
+            };
+        };
+        
+        var iphone_inbox_selection_hide = function(event) {
+            if (iphone_inbox_selection) {
+                $iphone_inbox_selection.css('display', 'none');
+                iphone_inbox_selection = false;
+            }
+        };
+        
+        var iphone_inbox_selection_show = function(event) {
+            var selection = get_iphone_screen_body_selection(event);
+            
+            if (!!selection) {
+                iphone_inbox_selection = true;
+                
+                $iphone_inbox_selection.css({
+                    'display'   : 'block', 
+                    'height'    : (selection.y1 - selection.y0 + 1) + "px", 
+                    'top'       : selection.y0 + "px"
+                });
+            }
+            
+            return selection;
+        };
+        
+        $iphone_inbox_body.click(function(event) {
+            event.preventDefault();
+            
+            selection = iphone_inbox_selection_show(event);
+            
+            if (!!selection) {
+                console.debug(selection);
+                
+                $iphone_screens.removeClass("iphone-screen-active-inbox").addClass("iphone-screen-active-sdetail");
+            }
+            
+            return false;
+        });
+        
+        $iphone_inbox_body.mousedown(function(event) {
+            event.preventDefault();
+            
+            iphone_inbox_selection_show(event);
+            return false;
+        });
+        
+        $body.on("mouseup", iphone_inbox_selection_hide);
+        
+        $iphone_back_button.click(function(event) {
+            event.preventDefault();
+            
+            $iphone_screens.removeClass("iphone-screen-active-sdetail").addClass("iphone-screen-active-inbox");
+            return false;
+        });
         
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
         // ---------------------------------------------------------------------
         
+        
+        $(document).bind('keydown', function(e) {
+            if (e.which == 27) { // ESC
+                // skip the intro animation if the user presses escape
+                if (intro_animation.is_running()) {
+                    intro_animation.stop(true, true);
+                    
+                    // TODO: is this init_main redundant with the jumpToEnd from stop?
+                    init_main();
+                }
+            }
+        });
         
         $window.resize(update_main_layout);
         
@@ -539,7 +665,6 @@
             init_main();
         }
         
-        update_debug_transform();
         map_window_switch_user("justinbieber");
     });
 })();
