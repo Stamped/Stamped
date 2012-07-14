@@ -26,11 +26,6 @@ class EntityProxySource(AExternalSource):
         self.__proxy    = proxy
         self.__source   = getSource(proxy.source)
         
-        # Enrich all groups, except the source specific fields
-        allGroupNames = set([group().groupName for group in allGroups])
-        allSourceNames = set([source().sourceName for source in allSources])
-        self.__groups = allGroupNames - allSourceNames
-        self.__groups.add(proxy.source)
         
     @property
     def sourceName(self):
@@ -38,21 +33,14 @@ class EntityProxySource(AExternalSource):
 
     @property 
     def kinds(self):
-        return set([
-            'place',
-            'person',
-            'media_collection',
-            'media_item',
-            'software',
-            'search',
-        ])
+        return self.__source.kinds
 
     @property 
     def types(self):
-        return set()
+        return self.__source.types
 
     def getGroups(self, entity=None):
-        return self.__groups
+        return self.__source.getGroups(entity)
 
     def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         for group in groups:

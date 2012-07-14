@@ -134,9 +134,6 @@ class SinglePlatformGroup(APlaceGroup):
         self.addField(['sources', 'singleplatform_id'])
         self.addField(['sources', 'singleplatform_url'])
 
-    def enrichEntityWithEntityProxy(self, entity, proxy):
-        entity.sources.singleplatform_id = proxy.key
-
 
 class GooglePlacesGroup(APlaceGroup):
     def __init__(self):
@@ -355,12 +352,14 @@ class PhoneGroup(APlaceGroup):
 
     enrichEntityWithEntityProxy = moveField('phone')
     
+
 class SiteGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'site')
         self.addNameField()
 
     enrichEntityWithEntityProxy = moveField('url', 'site')
+
 
 class GalleryGroup(APlaceGroup):
     def __init__(self):
@@ -429,6 +428,7 @@ class MPAARatingGroup(AKindTypeGroup):
 
     enrichEntityWithEntityProxy = moveField('mpaa_rating')
 
+
 class GenresGroup(AKindTypeGroup):
     def __init__(self):
         AKindTypeGroup.__init__(self, 'genres')
@@ -441,6 +441,7 @@ class GenresGroup(AKindTypeGroup):
     def enrichEntityWithEntityProxy(self, entity, proxy):
         if len(proxy.genres) > 0:
             entity.genres = proxy.genres
+
 
 class ArtistsGroup(AKindTypeGroup):
     def __init__(self):

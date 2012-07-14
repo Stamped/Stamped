@@ -179,15 +179,16 @@ class FactualSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'factual',
             groups=[
-                'singleplatform',
                 'address',
-                'price_range',
-                'phone',
-                'site',
-                'cuisine',
                 'alcohol_flag',
-                'opentable',
+                'coordinates',
+                'cuisine',
                 'foursquare',
+                'opentable',
+                'phone',
+                'price_range',
+                'singleplatform',
+                'site',
             ],
             kinds=[
                 'place',

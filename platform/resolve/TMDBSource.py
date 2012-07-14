@@ -208,7 +208,6 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
             if not self.full_data:
                 return []
             if not self.full_data.get('genres', None):
-                logs.debug('No genres for %s (%s:%s)' % (self.name, self.source, self.key))
                 return []
             return [ entry['name'] for entry in self.full_data['genres'] ]
         except LookupRequiredError:
@@ -230,9 +229,10 @@ class TMDBSource(GenericSource):
                 'directors',
                 'cast',
                 'desc',
-                # 'short_description',
                 'genres',
                 'imdb',
+                'length',
+                'release_date',
             ],
             kinds=[
                 'media_item',
