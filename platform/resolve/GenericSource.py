@@ -163,7 +163,6 @@ class GenericSource(BasicSource):
                         proxy = best[1]
             except ValueError:
                 logs.report()
-                pass
 
         source_id = self.getId(entity)
         if source_id is not None:

@@ -184,8 +184,9 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty
     def release_date(self):
         try:
-            string = self.data['release_date']
-            return parseDateString(string)
+            if self.data:
+                string = self.data['release_date']
+                return parseDateString(string)
         except KeyError:
             pass
         return None
@@ -193,6 +194,8 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty
     def length(self):
         try:
+            if not self.full_data:
+                return []
             if not self.full_data.get('runtime', None):
                 return -1  # TODO: Would None be more appropriate here?
             return self.full_data['runtime'] * 60
@@ -202,6 +205,8 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty 
     def genres(self):
         try:
+            if not self.full_data:
+                return []
             if not self.full_data.get('genres', None):
                 logs.debug('No genres for %s (%s:%s)' % (self.name, self.source, self.key))
                 return []

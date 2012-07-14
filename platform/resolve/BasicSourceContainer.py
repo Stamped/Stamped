@@ -104,7 +104,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                 try:
                     enriched = source.enrichEntity(copy, groupObjs, self, localDecorations, timestamps)
                     if enriched:
-                        enrichedOutput = set()
                         for group in targetGroups:
                             localTimestamp = self.now
                             if group in timestamps:
@@ -118,9 +117,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                     groupObj.setTimestamp(entity, localTimestamp)
                                     groupObj.setSource(entity, source.sourceName)
                                     modified = True
-                                    enrichedOutput.add(groupObj.groupName)
-                        #if len(enrichedOutput) > 0:
-                        #    logs.debug("Output from enrich: %s" % enrichedOutput)
                     self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                 except Exception as e:
                     exc_type, exc_value, exc_traceback = sys.exc_info()

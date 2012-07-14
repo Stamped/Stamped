@@ -26,7 +26,7 @@ def importEntityMinisFromProxyField(field, entityClass, entityType):
         results = []
         for subfield in subfieldList:
             try:
-                entityMini = MediaItemEntityMini()
+                entityMini = entityClass()
                 entityMini.title = subfield['name']
                 entityMini.types = [entityType]
                 if 'key' in subfield:
@@ -40,6 +40,7 @@ def importEntityMinisFromProxyField(field, entityClass, entityType):
                 logs.info('%s import failure: %s for %s' % (field, subfield['name'], proxy.name))
         if results:
             setattr(entity, field, results)
+    return wrapper
         
 
 class IMDBGroup(AFilmGroup):
@@ -111,9 +112,6 @@ class InstagramGroup(APlaceGroup):
             timestamp_path=['sources', 'instagram_timestamp']
         )
         self.addField(['sources', 'instagram_id'])
-
-    def enrichEntityWithEntityProxy(self, entity, proxy):
-        entity.sources.instagram_id = proxy.key
 
 
 class OpenTableGroup(APlaceGroup):
