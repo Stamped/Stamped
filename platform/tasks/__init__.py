@@ -94,7 +94,7 @@ def invoke(task, args=None, kwargs=None, **options):
                 if num_errors == max_errors:
                     import celeryconfig
                     
-                    msg = "Error: API unable to contact Celery's asnc task broker: %s" % celeryconfig.BROKER_URL
+                    msg = "Error: API unable to contact Celery's async task broker: %s" % celeryconfig.BROKER_URL
                     logs.warn(msg)
                     utils.log(msg)
                     
