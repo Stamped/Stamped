@@ -37,9 +37,10 @@ def generateSearchTokens(entity):
         components.append(entity.title)
 
     def addSubfieldTitles(field):
-        if hasattr(entity, field) and getattr(entity, field) is not None:
-            for subdoc in getattr(entity, field):
-                if hasattr(subdoc, 'title') and subdoc.title is not None:
+        subfield = getattr(entity, field, None)
+        if subfield is not None:
+            for subdoc in subfield:
+                if getattr(subdoc, 'title', None) is not None:
                     components.append(subdoc.title)
     subfields = ('authors', 'albums', 'artists', 'tracks', 'directors', 'cast', 'publishers')
     for field in subfields:
@@ -61,7 +62,6 @@ def getTokensForIndexing(components):
     return list(set(token.text for token in NORMALIZER(tokens)))
 
 def formatSearchQuery(queryText):
-    queryText = unicode(queryText, 'utf-8')
     tokens = (token for token in TOKENIZER(queryText))
     components = []
     for token in tokens:

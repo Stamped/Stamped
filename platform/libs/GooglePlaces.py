@@ -306,15 +306,7 @@ class GooglePlaces(AKeyBasedAPI):
             'key'      : apiKey, 
         }
         
-        if optionalParams is not None:
-            for key in optionalParams:
-                params[key] = optionalParams[key]
-        
-        for k in params:
-            v = params[k]
-            
-            if isinstance(v, unicode):
-                params[k] = v.encode("ascii", "xmlcharrefreplace")
+        self._handleParams(params, optionalParams)
         
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
@@ -422,9 +414,8 @@ class GooglePlaces(AKeyBasedAPI):
         
         for k in params:
             v = params[k]
-            
             if isinstance(v, unicode):
-                params[k] = v.encode("ascii", "xmlcharrefreplace")
+                params[k] = v.encode('utf-8')
     
     def addressToLatLng(self, address):
         latLng = self._geocoder.addressToLatLng(address)

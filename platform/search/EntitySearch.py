@@ -170,6 +170,8 @@ class EntitySearch(object):
             resultsDict[source] = []
 
     def search(self, category, text, timeout=None, limit=10, coords=None):
+        if not isinstance(text, unicode):
+            text = text.decode('utf-8')
         if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
@@ -237,7 +239,6 @@ class EntitySearch(object):
             else:
                 fastResolveQueries.append((result.resolverObject.source, result.resolverObject.key))
 
-        # TODO PRELAUNCH: MAKE SURE FAST RESOLUTION HANDLES TOMBSTONES PROPERLY
         fastResolvedIds = filter(None, self.__stampedSource.resolve_fast_batch(fastResolveQueries)) if fastResolveQueries else []
 
         allIds = idsFromClusteredEntities + fastResolvedIds

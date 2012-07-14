@@ -750,14 +750,14 @@
             resize_map();
             init_marker_clusterer();
             
-            setTimeout(resize_map, 150);
-            
             setTimeout(function() {
                 if (typeof(g_init_social_sharing) !== 'undefined') {
                     g_init_social_sharing();
                 }
             }, 1000);
         }
+        
+        setTimeout(resize_map, 150);
     });
 })();
 
