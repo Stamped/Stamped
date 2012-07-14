@@ -3878,13 +3878,13 @@ class StampedAPI(AStampedAPI):
             timestamps = kwargs.pop('timestamps', [])
             result = 0
             
-            #Remove personal stamp from timestamps if it exists
+            # Remove personal stamp from timestamps if it exists
             try:
                 personal_timestamp = (time.mktime(now.timetuple()) - timestamps.pop(authUserId)) / 60 / 60 / 24
             except KeyError:
                 personal_timestamp = None
                 
-            #timestamps is now a list of each friends' most recent stamp time in terms of days since stamped 
+            # timestamps is now a list of each friends' most recent stamp time in terms of days since stamped 
             timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
             
             #stamp_score
@@ -3934,7 +3934,11 @@ class StampedAPI(AStampedAPI):
             if entity.images is None:
                 image_score = 0.01
             
-            result = ( (2 * stamp_score) - (2 * personal_stamp_score) + (3 * personal_todo_score) + (1 * avgQuality) + (1 * avgPopularity) ) * (image_score)
+            result = ( (2 * stamp_score) 
+                    - (2 * personal_stamp_score) 
+                    + (3 * personal_todo_score) 
+                    + (1 * avgQuality) 
+                    + (1 * avgPopularity) ) * (image_score)
             
             return result
 
@@ -4133,7 +4137,11 @@ class StampedAPI(AStampedAPI):
             if entity.images is None:
                 image_score = 0.01
             
-            result = ( (coeffs['stamp'] * stamp_score) - (coeffs['personal_stamp'] * personal_stamp_score) + (coeffs['todo'] * personal_todo_score) + (coeffs['qual'] * avgQuality) + (coeffs['pop'] * avgPopularity) ) * (image_score)
+            result = ( (coeffs['stamp'] * stamp_score) 
+                        - (coeffs['personal_stamp'] * personal_stamp_score) 
+                        + (coeffs['todo'] * personal_todo_score) 
+                        + (coeffs['qual'] * avgQuality) 
+                        + (coeffs['pop'] * avgPopularity) ) * (image_score)
             
             return result
 
