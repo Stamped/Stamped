@@ -1,4 +1,4 @@
-{% extends "base2.html" %}
+{% extends "base.html" %}
 {% load stamped_tags %}
 
 <!-- 
@@ -40,6 +40,10 @@
 <!-- HTML Template Dependencies => profile.generated.html
      - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -->
+
+{% block viewport %}
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+{% endblock viewport %}
 
 {% block styles %}
     {{ block.super }}
@@ -151,8 +155,6 @@
                 <div class="line">DOWNLOAD STAMPED</div>
             </div>
         </div>
-        
-        <div id="intro-iphone"></div>
     </div>
      
     <div id="main" class="main-content">
