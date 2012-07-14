@@ -128,7 +128,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=False, api=None):
         document = self._getMongoDocumentFromId(key)
         
         assert document is not None

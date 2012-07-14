@@ -20,8 +20,7 @@ from api.StatsDSink             import StatsDSink
 from libs.notify            import StampedNotificationHandler
 
 from api.db.mongodb.MongoAccountCollection          import MongoAccountCollection
-from api.db.mongodb.MongoEntityCollection           import MongoEntityCollection
-from api.db.mongodb.MongoEntityStatsCollection      import MongoEntityStatsCollection
+from api.db.mongodb.MongoEntityCollection           import MongoEntityCollection, MongoEntityStatsCollection
 from api.db.mongodb.MongoUserCollection             import MongoUserCollection
 from api.db.mongodb.MongoStampCollection            import MongoStampCollection
 from api.db.mongodb.MongoStampStatsCollection       import MongoStampStatsCollection
