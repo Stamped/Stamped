@@ -67,6 +67,7 @@ defaultExceptions = [
     (StampedPermissionsError,           403,    'forbidden',            'Insufficient privileges'),
     (StampedDuplicationError,           409,    'already_exists',       'An error occurred. Please try again later'),
     (StampedUnavailableError,           404,    'not_found',            'Not found'),
+    (SchemaException,                   400,    'invalid_request',      'Invalid form'),
     (StampedInternalError,              500,    'internal',             'An error occurred. Please try again later'),
 ]
 
@@ -445,8 +446,6 @@ def parseRequest(schema, request, **kwargs):
         msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
-        
-        raise StampedHTTPError(400, "invalid_form")
 
 def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
@@ -503,8 +502,6 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         msg = "Unable to parse form (%s)" % e
         logs.warning(msg)
         utils.printException()
-        
-        raise StampedHTTPError(400, "invalid_form")
 
 def transformOutput(value, **kwargs):
     """
