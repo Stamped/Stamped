@@ -731,7 +731,6 @@ body.music, body.book, body.film, body.app {
     width:  100%;
     min-width: @stamp-gallery-item-min-width;
     
-    /* note: to look correct, these transitions should match isotope's */
     .rounded(4px);
     
     &:hover {
@@ -1034,6 +1033,10 @@ body.music, body.book, body.film, body.app {
     .stamp-category-place .stamp-icon {
         background: url(/assets/img/entity_fallbacks/place.png) no-repeat;
         height: 140px;
+    }
+    
+    .stamp-category-app img {
+        .rounded(8px);
     }
 }
 

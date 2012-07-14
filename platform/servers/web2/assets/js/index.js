@@ -204,6 +204,12 @@
             }
         });
         
+        
+        // ---------------------------------------------------------------------
+        // core page content
+        // ---------------------------------------------------------------------
+        
+        
         // auto-cycles the active pane until the user stops the animation by 
         // clicking one of the pane nav buttons
         var main_pane_cycle_animation = new Animation({
@@ -216,18 +222,14 @@
                 main_pane_cycle_animation.restart();
             }
         });
-        
-        
-        // ---------------------------------------------------------------------
-        // core page content
-        // ---------------------------------------------------------------------
-        
-        
+
         // vertically centers the page's main content
         // NOTE: if noop is true, this method will not make any modifications
         var update_main_layout = function(noop) {
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
+            
+            console.log("height: " + height + "; offset: " + offset);
             
             if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
@@ -682,17 +684,19 @@
         
         $window.resize(update_main_layout);
         
-        if ($body.hasClass("intro")) {
-            // start the intro animation sequence
-            intro_animation.start();
-        } else {
-            // bypass intro animation and go directly to the main page content
-            init_main(true);
-        }
-        
-        // note: we load the initial embedded map window here as opposed to including it in 
-        // the page's raw html as an optimization because iframes block initial page load
-        map_window_switch_user("mariobatali");
+        $window.bind("load", function() {
+            if ($body.hasClass("intro")) {
+                // start the intro animation sequence
+                intro_animation.start();
+            } else {
+                // bypass intro animation and go directly to the main page content
+                init_main(true);
+            }
+            
+            // note: we load the initial embedded map window here as opposed to including it in 
+            // the page's raw html as an optimization because iframes block initial page load
+            map_window_switch_user("mariobatali");
+        });
     });
 })();
 
