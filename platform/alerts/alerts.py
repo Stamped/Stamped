@@ -339,7 +339,7 @@ class NotificationQueue(object):
             return
         
         for alert in alerts:
-            if alert.subject not in self._users:
+            if alert.subject is not None and alert.subject not in self._users:
                 self._users[str(alert.subject)] = None
             if alert.recipient_id not in self._users:
                 self._users[str(alert.recipient_id)] = None
@@ -358,6 +358,10 @@ class NotificationQueue(object):
         
         for alert in alerts:
             try:
+                # Break if subject is not set (e.g. welcome emails). TODO: Add this later.
+                if alert.subject is None:
+                    continue 
+
                 if self._users[str(alert.recipient_id)] is None or self._users[str(alert.subject)] is None:
                     msg = "Recipient (%s) or user (%s) not found" % (alert.recipient_id, alert.subject)
                     raise StampedUnavailableError(msg)
