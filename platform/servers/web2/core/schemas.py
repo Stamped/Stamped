@@ -93,9 +93,11 @@ class HTTPIndexSchema(Schema):
     
     def __init__(self, *args, **kwargs):
         Schema.__init__(self, *args, **kwargs)
-        self.intro = False
+        self.intro  = False
+        self.mobile = False
     
     @classmethod
     def setSchema(cls):
         cls.addProperty('intro',                            bool)
+        cls.addProperty('mobile',                           bool)
 

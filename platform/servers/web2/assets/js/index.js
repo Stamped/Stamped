@@ -4,11 +4,7 @@
  */
 
 /*jslint plusplus: true */
-/*global STAMPED_PRELOAD, jQuery, $, History, moment */
-
-/* TODO:
-    * what easing function should we use for the iPhone reveal animation?
- */
+/*global window, jQuery, $ */
 
 (function() {
     $(document).ready(function() {
@@ -22,7 +18,7 @@
         var $body                   = $("body");
         var $main                   = $("#main");
         
-        // main iphone
+        // main iphone elements
         var $main_body              = $("#main-body");
         var $main_iphone            = $("#main-iphone");
         var $main_footer            = $("#main-footer");
@@ -32,17 +28,24 @@
         var $iphone_back_button     = $(".iphone-screen-back-button");
         var iphone_inbox_selection  = false;
         
+        // tastemaker gallery
         var $tastemaker_gallery     = $("#tastemaker-gallery");
         var $tastemakers            = $(".tastemaker");
         
+        // embedded map window
         var $map_window_url         = $("#fake-url");
         var $map_window             = $("#tastemaker-map-window");
         var $map_window_overlay     = $("#tastemaker-map-window-overlay");
         var $map_window_iframe      = null;
+        
+        // social links
         var $social                 = $("#social");
         
-        var $desc_default           = $(".desc-default");
-        var $desc_overview          = $(".desc-overview");
+        // intro animation elements
+        var $intro_iphone           = $("#intro-iphone");
+        var $intro_hero             = $("#intro-hero");
+        var active_text             = 'active-text';
+        var active_line             = 'active-line';
         
         jQuery.ease = function(start, end, duration, easing, callback, complete) {
             // create a jQuery element that we'll be animating internally
@@ -72,6 +75,8 @@
             return easer.css("easingIndex", start).animate({ easingIndex : end }, params);
         };
         
+        // utility class to control higher-level animations which are not tied directly 
+        // to one or more CSS attributes
         var Animation = Class.extend({
             init : function(params) {
                 this.params = {
@@ -154,9 +159,6 @@
         // ---------------------------------------------------------------------
         
         
-        var active_text = 'active-text';
-        var active_line = 'active-line';
-        
         // choose a random stanza of text to use for the intro animation
         var $texts = $(".text");
         var index  = Math.floor(Math.random() * $texts.length);
@@ -166,9 +168,6 @@
         $(".line").fitText(fit_text_compression_factor, {
             maxFontSize : '250px'
         });
-        
-        var $intro_iphone   = $("#intro-iphone");
-        var $intro_hero     = $("#intro-hero");
         
         var intro_iphone_animation = {
             start : function() {
@@ -225,6 +224,7 @@
             }
         });*/
         
+        // intro hero text animation
         var intro_animation = new Animation({
             duration    : 1600, 
             complete    : function() {
@@ -259,7 +259,9 @@
             }
         });
         
-       var main_pane_cycle_animation = new Animation({
+        // auto-cycles the active pane until the user stops the animation by 
+        // clicking one of the pane nav buttons
+        var main_pane_cycle_animation = new Animation({
             duration    : 5000, 
             complete    : function() {
                 var active  = parseInt($main_body.get(0).className.replace("active-pane-", ""));
@@ -277,7 +279,7 @@
         
         
         // vertically centers the page's main content
-        // NOTE: if noop is false, this method will not make any modifications
+        // NOTE: if noop is true, this method will not make any modifications
         var update_main_layout = function(noop) {
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
@@ -318,6 +320,7 @@
         // initialize and display the main page content
         var init_main = function(autoplay) {
             autoplay = (typeof(autoplay) === 'undefined' ? true : autoplay);
+            
             $body.addClass("main");
             resize_panes(true);
             
@@ -367,6 +370,7 @@
                 });
         };
         
+        // reveals the embedded map window via a translation from the right-hand-side of the window onto the page
         var map_window_show = function() {
             $social.hide(800);
             
@@ -381,6 +385,7 @@
                 });
         };
         
+        // hides the embedded map window via a translation off the right-hand-side of the window
         var map_window_hide = function() {
             $map_window
                 .stop(true, false)
@@ -397,6 +402,7 @@
             $social.show(600);
         };
         
+        // reloads the embedded map iframe with the specified user's map page via a simple opacity animation + loading spinner
         var map_window_switch_user = function(screen_name) {
             var active = $map_window.data("active");
             
@@ -484,7 +490,7 @@
         });
         
         // cycle active pane on continue button click
-        $main.on("click", ".continue-button", function(event) {
+        /*$main.on("click", ".continue-button", function(event) {
             event.preventDefault();
             main_pane_cycle_animation.stop();
             
@@ -494,7 +500,7 @@
             
             set_active_pane(index);
             return false;
-        });
+        });*/
         
         $main.on("click", ".lightbox-video", function(event) {
             event.preventDefault();
@@ -550,7 +556,6 @@
         };
         
         var iphone_screens_all = "iphone-screen-active-inbox iphone-screen-active-sdetail iphone-screen-active-guide";
-        
         
         var set_active_iphone_screen = function(index) {
             var current_classes = $iphone_screens.get(0).className.split(/\s+/);
@@ -740,6 +745,8 @@
             init_main(true);
         }
         
+        // note: we load the initial embedded map window here as opposed to including it in 
+        // the page's raw html as an optimization because iframes block initial page load
         map_window_switch_user("mariobatali");
     });
 })();
