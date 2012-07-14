@@ -446,6 +446,7 @@ def parseRequest(schema, request, **kwargs):
         msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
+        raise e
 
 def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
@@ -502,6 +503,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         msg = "Unable to parse form (%s)" % e
         logs.warning(msg)
         utils.printException()
+        raise e
 
 def transformOutput(value, **kwargs):
     """
