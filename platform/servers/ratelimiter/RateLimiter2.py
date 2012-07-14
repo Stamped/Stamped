@@ -87,23 +87,14 @@ class Request():
         self.headers = headers
         self.log = RequestLog()
 
-
-events = []
-
-
 def workerProcess(limit):
-    global events
 
     period = limit.period
 
     while True:
-#        if (len(events) > 0):
-#            for event in events:
-#                print(event)
-#            events = []
         limit.handleTimestep()
         if limit._isFailed():
-            print('isFailed is true.  Sleeping for %s' % (limit.fail_wait - (time() - limit.fail_start)))
+            print('Fail limit reached.  Sleeping for %s' % (limit.fail_wait - (time() - limit.fail_start)))
             gevent.sleep(limit.fail_wait - (time() - limit.fail_start))
         else:
             gevent.sleep(period)
@@ -297,27 +288,19 @@ class RateLimiter(object):
         while self.__calls < self.limit:
             try:
                 (priority, request, asyncresult) = self.__requests.get(block=False)
-                events.append('pulled from queue')
                 self.call()
                 gevent.spawn(self.doRequest, request, asyncresult)
             except gevent.queue.Empty: # TODO FIND RIGHT EXCEPTION HERE
                 break
 
     def doRequest(self, request, asyncresult):
-        global events
-
         begin = time()
 
         if (begin - request.created) > request.timeout:
-            print('timeout exceptions thrown')
             raise TimeoutException('The request timed out while waiting in the rate limiter queue')
-
         try:
-            print('%s   %s   headers:  %s     body: %s' % (request.url, request.verb, request.headers, urllib.urlencode(request.body)))
             response, content = self.__http.request(request.url, request.verb, headers=request.headers, body=urllib.urlencode(request.body))
         except Exception as e:
-            events.append('Exception during request: %s' % e)
-            print('Exception during request: %s' % e)
             asyncresult.set_exception(e)
             raise e
         if response.status >= 400:
@@ -328,7 +311,6 @@ class RateLimiter(object):
         end = time()
         elapsed = end - begin
         realized_dur = end - request.created
-        events.append('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))
         print('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))
 
         self._addDurationLog(elapsed)
