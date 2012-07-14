@@ -21,7 +21,7 @@ static NSString* _buttonInnerPaddingKey = @"Consumption.toolbar.button.inner_pad
 static NSString* _buttonCornerRadiusKey = @"Consumption.toolbar.button.corner_radius";
 
 
-extern NSString* const STConsumptionToolbarSliderWillShowNotification = @"STConsumptionToolbarSliderWillShowNotification";
+NSString* const STConsumptionToolbarSliderWillShowNotification = @"STConsumptionToolbarSliderWillShowNotification";
 
 @interface STConsumptionToolbar ()
 
@@ -32,6 +32,7 @@ extern NSString* const STConsumptionToolbarSliderWillShowNotification = @"STCons
 @property (nonatomic, readwrite, retain) UIView* toolbarContents;
 @property (nonatomic, readwrite, retain) STConsumptionToolbarItem* currentItem;
 @property (nonatomic, readonly, retain) UIView* backButton;
+@property (nonatomic, readonly, retain) UIButton* viewScopeButton;
 
 @end
 
@@ -44,6 +45,46 @@ extern NSString* const STConsumptionToolbarSliderWillShowNotification = @"STCons
 @synthesize currentItem = currentItem_;
 @synthesize slider = slider_;
 @synthesize backButton = _backButton;
+@synthesize viewScopeButton = _viewScopeButton;
+@synthesize scope = _scope;
+
+- (void)setScope:(STStampedAPIScope)scope {
+    _scope = scope;
+    UIImage* image = nil;
+    if (scope == STStampedAPIScopeYou) {
+        UIImage* userImage = [[STStampedAPI sharedInstance] currentUserImageForSize:STProfileImageSize48];
+        
+        CGFloat width = 35;
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, width), NO, 0);
+        CGContextRef ctx = UIGraphicsGetCurrentContext();
+        CGRect rect = CGContextGetClipBoundingBox(ctx);
+        rect.origin.y = 0;
+        rect.origin.x = 0;
+        rect.size =  CGSizeMake(width, width);
+        
+        CGContextSaveGState(ctx);
+        CGPathRef path = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:width/2].CGPath;
+        CGContextAddPath(ctx, path);
+        CGContextClip(ctx);
+        [userImage drawInRect:rect];
+        CGContextSetStrokeColorWithColor(ctx, [UIColor stampedDarkGrayColor].CGColor);
+        CGContextSetLineWidth(ctx, 2);
+        CGContextStrokeEllipseInRect(ctx, rect);
+        CGContextRestoreGState(ctx);
+        //[overlay drawAtPoint:CGPointZero];
+        
+        image = [UIGraphicsGetImageFromCurrentImageContext() retain];        
+        UIGraphicsEndImageContext();
+        
+    }
+    else if (scope == STStampedAPIScopeFriends) {
+        image = [UIImage imageNamed:@"guide_toolbar_scopebtn"];
+    }
+    else {
+        image = [UIImage imageNamed:@"guide_toolbar_scopebtn2"];
+    }
+    [_viewScopeButton setImage:image forState:UIControlStateNormal];
+}
 
 - (id)initWithRootItem:(STConsumptionToolbarItem*)item andScope:(STStampedAPIScope)scope
 {
@@ -53,19 +94,29 @@ extern NSString* const STConsumptionToolbarSliderWillShowNotification = @"STCons
         toolbarContents_ = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.frame.size.width * 2, self.frame.size.height)];
         [self addSubview:toolbarContents_];
         if (LOGGED_IN) {
-        CGPoint buttonOrigin = CGPointMake(280, 10);
-        UIImage* normalImage = [UIImage imageNamed:@"scope_drag_inner_friends"];
-        UIImage* activeImage = [Util whiteMaskedImageUsingImage:normalImage];
-        STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(viewScopeButtonClicked:)];
-        [Util reframeView:button withDeltas:CGRectMake(buttonOrigin.x, buttonOrigin.y, 0, 0)];
-        [toolbarContents_ addSubview:button];
+            _viewScopeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+            _viewScopeButton.frame = CGRectMake(280, 10, 35, 35);
+            _viewScopeButton.layer.cornerRadius = _viewScopeButton.frame.size.width / 2;
+            [_viewScopeButton addTarget:self action:@selector(viewScopeButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+            [toolbarContents_ addSubview:_viewScopeButton];
+            self.scope = STStampedAPIScopeFriends;
+//        UIImage* normalImage = [UIImage imageNamed:@"scope_drag_inner_friends"];
+//        UIImage* activeImage = [Util whiteMaskedImageUsingImage:normalImage];
+//        STButton* button = [STButton buttonWithNormalImage:normalImage activeImage:activeImage target:self andAction:@selector(viewScopeButtonClicked:)];
+//        [Util reframeView:button withDeltas:CGRectMake(buttonOrigin.x, buttonOrigin.y, 0, 0)];
+//        [toolbarContents_ addSubview:button];
         }
-        UIImage* categoryImage = [UIImage imageNamed:@"scope_drag_inner_fof"];
-        UIImage* activeCategory = [Util whiteMaskedImageUsingImage:categoryImage];
-        STButton* backButton = [STButton buttonWithNormalImage:categoryImage activeImage:activeCategory target:self andAction:@selector(categoriesButtonClicked:)];
+
+        UIButton* backButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [backButton setImage:[UIImage imageNamed:@"guide_toolbar_backarrow"] forState:UIControlStateNormal];
+        [backButton addTarget:self action:@selector(categoriesButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+//        backButton.hidden = YES;
+//        UIImage* categoryImage = [UIImage imageNamed:@"scope_drag_inner_fof"];
+//        UIImage* activeCategory = [Util whiteMaskedImageUsingImage:categoryImage];
+//        STButton* backButton = [STButton buttonWithNormalImage:categoryImage activeImage:activeCategory target:self andAction:@selector(categoriesButtonClicked:)];
         _backButton = [backButton retain];
         backButton.hidden = YES;
-        [Util reframeView:backButton withDeltas:CGRectMake(self.frame.size.width + 10, 10, 0, 0)];
+        backButton.frame = CGRectMake(self.frame.size.width + 10, 13.5, 30, 25);
         [toolbarContents_ addSubview:backButton];
         
         slider_ = [[STSliderScopeView alloc] initWithFrame:CGRectMake(self.frame.size.width + 60, 0.0f, self.bounds.size.width - 120, self.bounds.size.height)];

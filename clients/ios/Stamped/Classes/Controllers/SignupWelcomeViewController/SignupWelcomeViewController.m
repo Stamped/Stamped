@@ -53,7 +53,7 @@
         [STEvents addObserver:self selector:@selector(signupFinished:) event:EventTypeSignupFinished];
         [STEvents addObserver:self selector:@selector(signupFailed:) event:EventTypeSignupFailed];
         self.navigationItem.hidesBackButton = YES;
-        self.avatarUploader = [[STS3Uploader alloc] init];
+        self.avatarUploader = [[[STS3Uploader alloc] init] autorelease];
     }
     return self;
 }

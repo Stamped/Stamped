@@ -556,9 +556,9 @@ def getInstance(name):
 def getDomain():
     if self.is_ec2():
         if libs.ec2_utils.is_prod_stack():
-            return "https://api.stamped.com/v0/"
-        return "https://dev.stamped.com/v0/"
-    return "localhost:18000/v0/"
+            return "https://api.stamped.com/v1/"
+        return "https://dev.stamped.com/v1/"
+    return "localhost:18000/v1/"
 
 
 def is_ec2():

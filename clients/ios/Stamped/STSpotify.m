@@ -202,11 +202,11 @@ static id _sharedInstance;
 
 
 -(void)session:(SPSession *)aSession recievedMessageForUser:(NSString *)aMessage {
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Message from Spotify"
+	UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Message from Spotify"
 													message:aMessage
 												   delegate:nil
 										  cancelButtonTitle:@"OK"
-										  otherButtonTitles:nil];
+										  otherButtonTitles:nil] autorelease];
 	[alert show];
 }
 

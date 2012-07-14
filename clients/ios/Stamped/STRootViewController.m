@@ -22,6 +22,7 @@ static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
 static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
 @interface STRootViewController ()
+
 @end
 
 @implementation STRootViewController

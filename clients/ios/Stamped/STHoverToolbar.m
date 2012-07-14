@@ -45,7 +45,7 @@
                 }
             }] autorelease];
             
-            buttons = [[NSArray arrayWithObjects:
+            buttons = [NSArray arrayWithObjects:
                         [[[STLikeButton alloc] initWithStamp:stamp] autorelease],
                         commentButton,
                         [[[STStampButton alloc] initWithStamp:stamp] autorelease],
@@ -54,13 +54,13 @@
                 if (weakSelf.target && weakSelf.shareAction) {
                     [weakSelf.target performSelector:weakSelf.shareAction];
                 }
-            }] autorelease], nil] retain];
+            }] autorelease], nil];
         }
         else {
-            buttons = [[NSArray arrayWithObjects:
+            buttons = [NSArray arrayWithObjects:
                         [[[STStampButton alloc] initWithEntity:entityDetail] autorelease],
                         [[[STTodoButton alloc] initWithEntityID:entityDetail.entityID] autorelease],
-                        nil] retain];
+                        nil];
         }
         for (NSInteger i = 0; i < buttons.count; i++) {
             UIView* button = [buttons objectAtIndex:i];

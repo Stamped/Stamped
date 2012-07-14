@@ -954,13 +954,13 @@ class StampedSource(GenericSource):
         query = mongoQueries[0] if len(mongoQueries) == 1 else {'$or' : mongoQueries}
         results = self.__entityDB._collection.find(query, fields=['sources'])
 
-        # TODO PRELAUNCH FUCK FUCK FUCK CHECK FOR TOMBSTONE IDS
         sourceIdsToEntityId = {}
         for result in results:
             sourceIds = result['sources']
+            finalId = sourceIds.get('tombstone_id', str(result['_id']))
             for k, v in sourceIds.iteritems():
                 if k.endswith('_id'):
-                    sourceIdsToEntityId[k,v] = str(result['_id'])
+                    sourceIdsToEntityId[k,v] = finalId
 
         return [sourceIdsToEntityId.get(query, None) for query in queryPairs]
 
