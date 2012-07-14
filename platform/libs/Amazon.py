@@ -17,7 +17,7 @@ try:
     from libs.LRUCache       import lru_cache
     from libs.CachedFunction import cachedFn
     from libs.CountedFunction import countedFn
-    from libs.RateLimiter            import RateLimiter, RateException
+    from libs.RateLimiter     import RateLimiter, RateException
 except:
     report()
     raise

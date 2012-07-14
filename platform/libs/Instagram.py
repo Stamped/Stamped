@@ -27,6 +27,7 @@ try:
     from libs.RateLimiter    import RateLimiter, RateException
     from libs.LRUCache       import lru_cache
     from libs.Memcache       import memcached_function
+    from libs.Request        import service_request
 except:
     report()
     raise
@@ -42,7 +43,6 @@ class Instagram(object):
         self.__client_secret=client_secret
         self.__consumer = oauth.OAuthConsumer(self.__client_id, self.__client_secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-        self.__limiter = RateLimiter(cps=10)
 
     #def place_search(self, **kwargs):
     #    return self.__instagram('locations/search', **kwargs)
@@ -73,16 +73,10 @@ class Instagram(object):
         else:
             url = "%s/%s" % (HOST, service)
 
-        pairs = [ '%s=%s' % (k,urllib2.quote(str(v))) for k,v in params.items() ]
-        url += '?%s' % '&'.join(pairs)
-        logs.info(url)
+        response, content = service_request('instagram', 'GET', url, query_params=params, header={ 'Accept' : 'application/json' })
 
-        with self.__limiter:
-            req = urllib2.Request(url, headers={ 'Accept' : 'application/json' })
-            response = urllib2.urlopen(req).read()
-        data = json.loads(response)
+        data = json.loads(content)
         return data
-
 
 __globalInstagram = None
 

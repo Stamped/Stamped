@@ -53,36 +53,28 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import utils
 import json
 import urllib
 from libs import oauth
-import urllib2
 import sys
-import time
 import random
-import logs
 
 from urlparse               import urlparse, parse_qsl
-from libs.LRUCache               import lru_cache
-from libs.CachedFunction         import cachedFn
+from libs.LRUCache          import lru_cache
+from libs.CachedFunction    import cachedFn
 from libs.CountedFunction   import countedFn
 from api.Schemas            import BasicEntity
-from libs.SinglePlatform         import StampedSinglePlatform
+from libs.SinglePlatform    import StampedSinglePlatform
 from pprint                 import pprint
-from pymongo                import Connection
-from gevent.queue           import Queue
-from gevent.pool            import Pool
 from functools              import partial
 from urllib2                import HTTPError
 from gevent                 import sleep
-from itertools              import combinations
 from re                     import match
-from threading              import Lock
 from datetime               import datetime
 from datetime               import timedelta
 from utils                  import lazyProperty
-from libs.RateLimiter            import RateLimiter
+from libs.RateLimiter       import RateLimiter
+from libs.Request           import service_request
 
 _API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
 # Random (but seemingly functional API Key)
@@ -571,19 +563,16 @@ class Factual(object):
 
         The custom end parses the JSON response and abstracts the data portion if successful.
         """
-        pairs = [ '%s=%s' % (k,v) for k,v in args.items() ]
-        url =  "http://api.v3.factual.com/%s/%s?%s" % (prefix,service,'&'.join(pairs))
+        url =  "http://api.v3.factual.com/%s/%s" % (prefix, service)
         params    = parse_qsl(urlparse(url).query)
         consumer  = oauth.OAuthConsumer(key=self.__v3_key, secret=self.__v3_secret)
         request   = oauth.OAuthRequest.from_consumer_and_token(consumer, http_method='GET', http_url=url, parameters=params)
 
         request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
 
-        with self.__limiter:
-            req = urllib2.Request(url, None, request.to_header())
-            logs.info(req.get_full_url())
-            res = urllib2.urlopen(req)
-        return res.read()
+        response, content = service_request('factual', 'GET', url, header=request.to_header(), query_params=args)
+        return content
+        #return res.read()
 
     def __factual(self, service, prefix='places', **args):
         """

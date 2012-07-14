@@ -41,6 +41,7 @@ try:
     from urllib2                import HTTPError
     from urllib                 import quote_plus
     from django.utils.encoding  import iri_to_uri
+    from libs.Request           import service_request
     
     try:
         import json
@@ -86,24 +87,11 @@ class Rdio(object):
                 kwargs[k] = v.encode('utf-8')
         
         urlish = 'http://api.rdio.com/1/ POST %s' % urlencode_utf8(kwargs)
-        try:
-            with self.__limiter:
-                logs.info(urlish)
-                response = client.request('http://api.rdio.com/1/', 
-                                          'POST', 
-                                          urlencode_utf8(kwargs),
-                                          headers={'Accept-encoding':'gzip'})
-        except HTTPError as e:
-            logs.warning("Rdio threw an exception (%s): %s" % (e.code, e.message))
-            raise
-        
-        status = int(response[0]['status'])
-        if status == 200:
-            return json.loads(response[1])
-        else:
-            logs.warning("Rdio returned a failure response (%s): %s" % (status, response[1]))
-            raise Exception('rdio returned a failure response %d' % status) 
-    
+
+        response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/', header={'Accept-encoding':'gzip'},body=kwargs)
+
+        return json.loads(content)
+
     def userMethod(self, token, token_secret, method, **kwargs): 
         kwargs['method'] = method 
         access_token = oauth.Token(token, token_secret)   

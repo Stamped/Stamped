@@ -10,7 +10,7 @@ __license__   = "TODO"
 
 import Globals
 import base64, hashlib, hmac
-import json, urllib, urllib2, utils
+import json, urllib
 import datetime, logs, sys, time
 
 from pprint         import pprint
@@ -21,9 +21,8 @@ from api.Schemas    import Submenu
 from api.Schemas    import MenuSection
 from api.Schemas    import MenuItem
 from api.Schemas    import MenuPrice
-from urllib2        import HTTPError
 from threading      import Lock
-from gevent         import sleep
+from libs.Request   import service_request
 
 _spicy_map = {
     'none':0,
@@ -155,28 +154,14 @@ class SinglePlatform(object):
         uri = "%s%sclient=%s" % (uri, '?' if params is None else '&', self._client_id)
         uri = uri.encode('utf-8')
         url = "%s%s&sig=%s" % (self.BASE_URL, uri, self._sign(uri))
-        
-        request = urllib2.Request(url)
-        request.add_header('Accept-encoding', 'gzip')
-        request.add_header('Accept', 'application/json')
+
+        header = {
+            'Accept-encoding': 'gzip',
+            'Accept' : 'application/json',
+        }
+        response, content = service_request('singleplatform', 'GET', url, header=header)
         logs.info(url)
-        result = None
-        try:
-            with self.__lock:
-                if self.__throttled > 5:
-                    raise HTTPError(url,403,'Internal rate limit exceeded',None,None)
-                elapsed = time.time() - self.__last_call
-                self.__last_call = time.time()
-                cooldown = self.__cooldown - elapsed
-                if cooldown > 0:
-                    sleep(cooldown)
-                result = json.loads(utils.getFile(url, request))
-                self.__last_call = time.time()
-        except HTTPError as e:
-            if e.code == 403:
-                self.__throttled += 1
-                sleep(1)
-            raise
+        result = json.loads(content)
         return result
     
     def _sign(self, uri):

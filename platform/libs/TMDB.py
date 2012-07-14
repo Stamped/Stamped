@@ -27,6 +27,7 @@ try:
     from libs.LRUCache        import lru_cache
     from libs.CachedFunction  import cachedFn
     from libs.CountedFunction import countedFn
+    from libs.Request         import *
 except:
     report()
     raise
@@ -35,8 +36,7 @@ class TMDB(object):
     
     def __init__(self):
         self.__key = 'b4aaa79e39e12f8d066903b8574ee538'
-        self.__limiter = RateLimiter(cps=5)
-    
+
     def configuration(self):
         return self.__tmdb('configuration')
     
@@ -103,22 +103,11 @@ class TMDB(object):
             encodedParams[k] = v
         url = 'http://api.themoviedb.org/3/%s?%s' % (service, urllib.urlencode(encodedParams))
         logs.info(url)
-        
-        while True:
-            try:
-                with self.__limiter:
-                    req = urllib2.Request(url, headers={ 'Accept' : 'application/json' })
-                    response = urllib2.urlopen(req).read()
-                    data = json.loads(response)
-                    return data
-            except HTTPError as e:
-                logs.warning('error', exc_info=1)
-                
-                if e.code == 403 and max_retries > 0:
-                    max_retries -= 1
-                    sleep(1)
-                else:
-                    return None
+
+        response, content = service_request('tmdb', 'GET', url, header={ 'Accept' : 'application/json' })
+        data = json.loads(content)
+        return data
+
 
 __globalTMDB = None
 

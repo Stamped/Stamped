@@ -5,17 +5,17 @@ __date_ = "$Date$"
 import Globals
 import sys
 from libs import oauth as oauth
-import httplib
 import json
 import utils
 import logs
 from errors import *
 
-from datetime           import datetime, timedelta
-from libs.RateLimiter        import RateLimiter
-from libs.LRUCache               import lru_cache
-from libs.CachedFunction         import cachedFn
+from datetime               import datetime, timedelta
+from libs.LRUCache          import lru_cache
+from libs.CachedFunction    import cachedFn
 from libs.CountedFunction   import countedFn
+from libs.Request           import *
+
 
 HOST              = 'api-public.netflix.com'
 PORT              = '80'
@@ -42,8 +42,6 @@ class Netflix(object):
         self.__secret=secret
         self.__consumer = oauth.OAuthConsumer(self.__key, self.__secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-        self.__cpsLimiter = RateLimiter(cps=10, max_wait=15)          # 4 requests per second for all requests
-        self.__cpdLimiter = RateLimiter(cpd=25000)
 
         # the blacklist contains a dict of users and their 401/403 count. When a threshold is reached, all requests
         # from that user will be ignored until the blacklist is cleared
@@ -87,7 +85,6 @@ class Netflix(object):
         #if a user is specified, and she is in the blacklist, return None
         if user_id is not None and self.__isUserBlacklisted(user_id):
             return None
-        connection = httplib.HTTPConnection("%s:%s" % (HOST, PORT))
         if service.startswith('http'):
             url = service
         else:
@@ -96,7 +93,7 @@ class Netflix(object):
             else:
                 url = "http://%s/users/%s/%s" % (HOST, user_id, service)
         parameters['output'] = 'json'
-        # parameters['v'] = '1.5' # v1.5 isn't returning expanded information, so never mind it
+
         oauthRequest = oauth.OAuthRequest.from_consumer_and_token(self.__consumer,
             http_url=url,
             parameters=parameters,
@@ -107,32 +104,26 @@ class Netflix(object):
         print oauthRequest.to_url()
 
         headers = {'Content-Type' :'application/x-www-form-urlencoded'} if verb =='POST' else {}
-        body = oauthRequest.to_postdata() if verb == 'POST' else None
-        if verb != 'POST':
-            url = oauthRequest.to_url()
+        params = oauthRequest.parameters
         logs.info(url)
 
-        with self.__cpsLimiter:
-            # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
-            if user_id is None:
-                with self.__cpdLimiter:
-                    connection.request(verb, url, body, headers)
-                    response = connection.getresponse()
-            else:
-                connection.request(verb, url, body, headers)
-                response = connection.getresponse()
-                # if the response is a 401 or 403, blacklist the user until the day expires
-                if response.status in (401,403):
-                    if self.__addToBlacklistCount(user_id):
-                        logs.warning('Too many 401/403 responses.  User added to blacklist')
+        # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
+        if verb == 'POST':
+            response, content = service_request('netflix', verb, url, body=params, header=headers)
+        else:
+            response, content = service_request('netflix', verb, url, query_params=params, header=headers)
+
+        # if the response is a 401 or 403, blacklist the user until the day expires
+        if user_id is not None and response.status in (401, 403):
+            if self.__addToBlacklistCount(user_id):
+                logs.warning('Too many 401/403 responses.  User added to blacklist')
 
         if response.status < 300:
-            return json.loads(response.read())
+            return json.loads(content)
         else:
-            logs.info('Failed with status code %d' % response.status)
-            responseData = response.read()
+            logs.info('Failed with status code %d' % response['status'])
             try:
-                failData = json.loads(responseData)['status']
+                failData = json.loads(content)['status']
                 status = failData['status_code']
                 subcode = failData.get('sub_code', None)
                 message = failData['message']
@@ -427,7 +418,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'addToQueue'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

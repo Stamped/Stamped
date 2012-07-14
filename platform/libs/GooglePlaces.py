@@ -15,6 +15,7 @@ from api.Schemas    import PlaceEntity, Coordinates
 from libs.LRUCache       import lru_cache
 from libs.CachedFunction import *
 from libs.CountedFunction import countedFn
+from libs.Request         import service_request
 
 class GooglePlaces(AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
@@ -342,13 +343,16 @@ class GooglePlaces(AKeyBasedAPI):
         # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('details', params)
         utils.log('[GooglePlaces] ' + url)
-        
-        try:
-            # GET the data and parse the response as json
-            return json.loads(utils.getFile(url))
-        except:
-            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
-        
+
+
+        service_request('googleplaces', 'GET', url, query_params=params)
+
+#        try:
+#            # GET the data and parse the response as json
+#            return json.loads(utils.getFile(url))
+#        except:
+#            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
+#
         return None
 
     def addPlaceReport(self, entity):
@@ -370,16 +374,20 @@ class GooglePlaces(AKeyBasedAPI):
         
         url = self._getAPIURL('add', params)
         #utils.log(url)
-        
-        try:
-            data = json.dumps(post_params)
-            request = urllib2.Request(url, data, {'Content-Type': 'application/json'})
-            request = urllib2.urlopen(request)
-            response = request.read()
-            return response
-        except:
-            return None
-    
+
+        response, content = service_request('googleplaces', 'POST', url, query_params=params, body=post_params)
+        return content
+
+#
+#        try:
+#            data = json.dumps(post_params)
+#            request = urllib2.Request(url, data, {'Content-Type': 'application/json'})
+#            request = urllib2.urlopen(request)
+#            response = request.read()
+#            return response
+#        except:
+#            return None
+#
     def _getAutocompleteResponse(self, latLng, query, apiKey, optionalParams=None):
         params = {
             'input'  : query, 
@@ -397,16 +405,10 @@ class GooglePlaces(AKeyBasedAPI):
         # https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
         url = self._getAPIURL('autocomplete', params)
         utils.log('[GooglePlaces] ' + url)
-        
-        try:
-            # GET the data and parse the response as json
-            return json.loads(utils.getFile(url))
-        except:
-            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
-            return None
-        
-        return None
-    
+
+        response, content = service_request('googleplaces', 'GET', url, query_params=params)
+        return json.loads(content)
+
     def _handleParams(self, params, optionalParams):
         if optionalParams is not None:
             for key in optionalParams:

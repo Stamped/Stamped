@@ -11,6 +11,7 @@ import feedparser, gevent, os, re
 from datetime       import datetime
 from optparse       import OptionParser
 from libs.LibUtils  import parseDateString
+from libs.Request   import service_request
 from api.Schemas    import *
 
 __all__ = [ "Fandango" ]
@@ -117,7 +118,7 @@ class Fandango(object):
             try:
                 if self._verbose:
                     utils.log(url)
-                soup = utils.getSoup(url)
+                soup = utils.getSoupService('fandango', url)
                 info = soup.find('div', {'id' : 'info'}).findAll('li')[1].getText()
                 
                 try:

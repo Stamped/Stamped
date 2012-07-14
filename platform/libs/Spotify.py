@@ -21,6 +21,7 @@ try:
     from libs.CachedFunction import cachedFn
     from libs.CountedFunction import countedFn
     from errors import StampedThirdPartyError
+    from libs.Request import service_request
     
     try:
         import json
@@ -43,22 +44,15 @@ class Spotify(object):
     @cachedFn()
     @countedFn('Spotify (after caching)')
     def method(self, service, method, **params):
-        with self.__limiter:
-            try:
-                base_url = 'http://ws.spotify.com/%s/1/%s.json' % (service, method)
-                for k,v in params.items():
-                    if isinstance(v,int) or isinstance(v,float):
-                        params[k] = str(v)
-                    elif isinstance(v,unicode):
-                        params[k] = v.encode('utf-8')
-                url = '%s?%s' % (base_url, urllib.urlencode(params))
-                logs.info( url )
-                result = urllib.urlopen(url)
-            except IOError as e:
-                logs.warning("Spotify threw an exception (%s): %s" % (e.code, e.message))
-                raise
-        if result.getcode() == httplib.OK:
-            return json.loads(result.read())
+        base_url = 'http://ws.spotify.com/%s/1/%s.json' % (service, method)
+        for k,v in params.items():
+            if isinstance(v,int) or isinstance(v,float):
+                params[k] = str(v)
+            elif isinstance(v,unicode):
+                params[k] = v.encode('utf-8')
+        response, content = service_request('spotify', 'GET', base_url, query_params=params)
+        if response.status >= 200 and response.status < 300:
+            return json.loads(content)
         raise StampedThirdPartyError('Spotify returned error code: ' + str(result.getcode()))
         
     

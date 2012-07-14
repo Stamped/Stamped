@@ -18,6 +18,7 @@ from pprint          import pprint
 from libs.LRUCache        import lru_cache
 from libs.CachedFunction  import cachedFn
 from libs.CountedFunction import countedFn
+from libs.Request        import service_request
 from api.Schemas         import MediaCollectionEntity
 
 
@@ -34,9 +35,11 @@ class TheTVDB(object):
     @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
     def searchRaw(self, query):
-        url = self._get_url(query)
+
+        url = 'http://www.thetvdb.com/api/GetSeries.php'
+        params = { 'seriesname' : query }
         try:
-            xml = utils.getFile(url)
+            response, xml = service_request('tvdb', 'GET', url, query_params=params)
         except:
             return None
 
@@ -85,7 +88,8 @@ class TheTVDB(object):
     def lookup(self, thetvdb_id):
         details_url = 'http://www.thetvdb.com/api/%s/series/%s/all/' % \
                       (self.api_key, thetvdb_id)
-        xml   = utils.getFile(details_url)
+
+        response, xml = service_request('tvdb', 'GET', details_url)
         tree  = objectify.fromstring(xml)
         items = tree.findall('.//Series')
         
@@ -181,11 +185,6 @@ class TheTVDB(object):
             utils.printException()
             return None
     
-    def _get_url(self, query):
-        if isinstance(query, unicode):
-            query = query.encode('utf-8')
-        params = { 'seriesname' : query }
-        return 'http://www.thetvdb.com/api/GetSeries.php?%s' % (urllib.urlencode(params))
 
 __globalTheTVDB = None
 

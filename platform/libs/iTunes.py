@@ -19,11 +19,12 @@ try:
     
     from utils                  import getFile
     from urllib2                import HTTPError
-    from libs.RateLimiter            import RateLimiter, RateException
-    from libs.LRUCache               import lru_cache
-    from libs.CachedFunction         import cachedFn
+    from libs.RateLimiter       import RateLimiter, RateException
+    from libs.LRUCache          import lru_cache
+    from libs.CachedFunction    import cachedFn
     from libs.CountedFunction   import countedFn
-    
+    from libs.Request           import service_request
+
     try:
         import json
     except ImportError:
@@ -49,24 +50,9 @@ class iTunes(object):
     @cachedFn()
     @countedFn('iTunes (after caching)')
     def method(self, method, **params):
-        try:
-            url = 'http://itunes.apple.com/%s' % method
-            with self.__limiter:
-                try:
-                    logs.info("%s?%s" % (url, urllib.urlencode(params)))
-                except Exception:
-                    report()
-
-                result = getFile(url, params=params)
-        except HTTPError as e:
-            logs.warning("iTunes threw an exception (%s): %s" % (e.code, e.message))
-            raise Exception
-        
-        result = json.loads(result)
-
-        if result is None:
-            raise Exception('iTunes returned "None" result')
-
+        url = 'http://itunes.apple.com/%s' % method
+        response, content = service_request('itunes', 'GET',  url, query_params=params)
+        result = json.loads(content)
         return result
 
 __globaliTunes = None
@@ -87,7 +73,7 @@ def demo(method, **params):
 if __name__ == '__main__':
     import sys
     method = 'search'
-    params = {'term':'Katy Perry'}
+    params = {'term':'Katy'}
     if len(sys.argv) > 1:
         method = sys.argv[1]
     if len(sys.argv) > 2:
