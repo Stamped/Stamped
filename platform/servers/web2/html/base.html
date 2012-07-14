@@ -1,5 +1,12 @@
 <!doctype html>
-<html lang="en">
+
+<!--[if lte IE 9]>
+<html class="ie" lang="en">
+<![endif]-->
+<!--[if gt IE 9]><!-->
+<html lang="en" {% block html_tags %}{% endblock %}>
+<!--<![endif]-->
+    
     {% block pre_head %}
     <head>
         {% endblock pre_head %}
@@ -8,82 +15,108 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         
-        <title>Stamped</title>
-        
-        <meta name="description"        content="Stamped is a new way to recommend only 
-                                                 what you like best -- restaurants, books, 
-                                                 movies, music and more.">
+        <title>{% if title %}{{title}}{% else %}Stamped{% endif %}</title>
         
         <meta name="author"             content="Stamped, Inc.">
         <meta name="copyright"          content="Stamped, Inc.">
         <meta name="robots"             content="index,follow">
-        <meta name="viewport"           content="width=device-width, initial-scale=0.36">
-        <meta name="application-name"   content="Stamped">
         
-        <!-- properties -->
-        <meta property="og:image"       content="{{ STATIC_URL }}img/stamped-logo.png"/>
-        <meta property="og:title"       content="Stamped"/>
-        <meta property="og:site_name"   content="Stamped"/>
-        <meta property="og:type"        content="website"/>
+        {% block viewport %}
+            <meta name="viewport"       content="width=device-width, initial-scale=0.36">
+        {% endblock viewport %}
+        
+        <meta name="application-name"   content="Stamped">
         
         <!-- icons -->
         <link rel="shortcut icon"       href="{{ STATIC_URL }}img/favicon.ico"/>
         <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
+        {% endblock head %}
         
+        {% block opengraph %}
+        <meta property="og:image"       content="http://static.stamped.com/assets/img/stamped-logo.png"/>
+        <meta property="og:title"       content="Stamped"/>
+        <meta property="og:site_name"   content="Stamped"/>
+        <meta property="og:type"        content="website"/>
+        {% endblock opengraph %}
+        
+        {% block styles %}
         <!-- styles -->
         <link rel="stylesheet"          href="{{ STATIC_URL }}css/styles.css">
-         
-        <!-- scripts loaded pre-document-body (most are loaded post-document-body) -->
-        <script src="{{ STATIC_URL }}js/libs/modernizr-2.5.3.min.js"></script>
-        {% endblock head %}
+        
+        <!--[if lte IE 9]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.9.css">
+        <![endif]-->
+        
+        <!--[if lte IE 8]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.8.css">
+        <![endif]-->
+        
+        <!--[if lte IE 7]>
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.7.css">
+        <![endif]-->
+        
+        {% endblock styles %}
         
         {% block post_head %}
     </head>
     {% endblock post_head %}
     
     {% block pre_body %}
-    <body>
+    <body {% if body_classes %}class="{{ body_classes }}"{% endif %}>
+        <div id="fb-root"></div>
         {% endblock pre_body %}
-        {% block header %}
-        <div class="wrap flood">
-            <a href="/" class="brand replaced">Stamped</a>
-            <div class="card">
-                <div class="top-wave"></div>
-                {% endblock header %}
+        
+        {% block pre_header %}
+        <header>
+            {% endblock pre_header %}
+            
+            {% block header %}
+            <div class="header-body fixedwidth clearfix">
+                <p class="join">
+                    <span class='desc'>Put your stamp of approval on the world.</span>
+                    <a class='button' href='#'></a>
+                </p>
                 
-                {% block pre_main %}
-                <div role="main" class="inner">
+                <p class="login">
+                    <span class='desc'>Already stamping?</span>
+                    <a class='button' href='#'></a>
+                </p>
+                
+                <a href="/{{user.screen_name}}" class="user-logo-large"></a>
+            </div>
+            {% endblock header %}
+            
+            {% block post_header %}
+            <div class="post-header">
+                <div class="post-header-overlay"></div>
+                <div class="ribbon-top"></div>
+            </div>
+        </header>
+        {% endblock post_header %}
+        
+        {% block pre_main %}
+        <div id="main-page-content" class="main">
+            <div id='main-page-content-body' class='main-page-content-body'>
                 {% endblock pre_main %}
                 
-                {% block main %}{% endblock main %}
+                {% block main %}
+                {% endblock main %}
                 
                 {% block post_main %}
-                </div> <!-- /main -->
-                <div class="bottom-wave"></div>
-            </div> <!-- /card -->
-            {% endblock post_main %}
+            </div>
+        </div>
+        {% endblock post_main %}
+        
+        {% block pre_footer %}
+        <footer>
+            {% endblock pre_footer %}
             
-            {% block pre_footer %}
-            <footer>
-                {% endblock pre_footer %}
-                
-                {% block footer %}
-                <a href="/about">About Us</a>
-                <a href="/faq">FAQ</a>
-                <a href="http://help.stamped.com">Help</a>
-                <a href="http://blog.stamped.com">Blog</a>
-                <a href="/terms-of-service">Terms of Service</a>
-                <a href="/privacy">Privacy Policy</a>
-                <span class="copyright">
-                    <a href="http://nytm.org/made/" class="made">Made in NY</a>
-                    &copy;2012 Stamped, Inc.
-                </span>
-                {% endblock footer %}
-                
-                {% block post_footer %}
-            </footer>
-            {% endblock post_footer %}
-        </div> <!-- /home -->
+            {% block footer %}
+            {% endblock footer %}
+            
+            {% block post_footer %}
+        </footer>
+        {% endblock post_footer %}
         
         <!-- scripts loaded post-document-body -->
         {% block pre_scripts %}
@@ -92,12 +125,8 @@
             
             {% block scripts %}
             <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
-            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-            <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.1.min.js"><\/script>')</script>
-            
-            <script src="{{ STATIC_URL }}js/script.js"></script>
-            <script src="{{ STATIC_URL }}js/libs/underscore{% if IS_PROD %}.min{% endif %}.js"></script>
-            <script src="{{ STATIC_URL }}js/libs/backbone{% if IS_PROD %}.min{% endif %}.js"></script>
+            <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
+            <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
             
             <script>
                 var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];

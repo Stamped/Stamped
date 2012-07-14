@@ -44,7 +44,7 @@
 TODO:
     * stamped.com:
         * intro:
-            * ESC skips intro animation
+            * FIX ESC skips intro animation
         * main:
             * iphone:
                 * ADD SHADOWS
@@ -52,11 +52,7 @@ TODO:
             * pane 3 (tastemakers):
                 * blue border on active tastemaker's image
             * pane 4 (videos):
-                * incorporate stamped v1 video
-                    * get v1 video preview asset image
-        * footer:
-            * remove 'available on the app store' button
-            * move social feedback items to lower right
+                * get v1 video preview asset image
     
     * blurred FUCK MEDIOCRITY easter egg w/ f hotkey?
     /* Stop breaking my iphone font size! */
@@ -312,3 +308,4 @@ ChangeList 6/22/2012:
             }
 
 rickroll: http://www.youtube.com/watch?v=ZL_Q4jBTh_8
+

@@ -95,7 +95,7 @@
                 }
                 
                 this._easer = null;
-            },
+            }, 
             
             start : function() {
                 if (!!this._easer) {
@@ -169,61 +169,6 @@
             maxFontSize : '250px'
         });
         
-        var intro_iphone_animation = {
-            start : function() {
-                /*var height = $intro_iphone.height();
-                height     = (!!height ? height : 632);
-                var offset = get_relative_offset(height);
-                
-                $intro_iphone.animate({
-                    top : offset
-                }, {
-                    duration : 1000, 
-                    easing   : "swing", 
-                    complete : function() {
-                        // intro animation is fully complete here
-                        $body.removeClass("intro");
-                    }
-                });*/
-                
-                // intro animation is fully complete here
-                init_main(true);
-            }
-        };
-        
-        /*var intro_iphone_animation = new Animation({
-            start       : 1, 
-            end         : 100, 
-            duration    : 250, 
-            
-            step        : function(value) {
-                var v = -400 * Math.floor(value / 10);
-                
-                $intro_iphone.css('background-position', v + "px 0");
-            }, 
-            
-            complete    : function() {
-                var height = $intro_iphone.height();
-                height     = (!!height ? height : 632);
-                var offset = get_relative_offset(height);
-                
-                setTimeout(function() {
-                    $intro_iphone.animate({
-                        top : offset
-                    }, {
-                        duration : 1000, 
-                        easing   : "swing", 
-                        complete : function() {
-                            // intro animation is fully complete here
-                            $body.removeClass("intro");
-                        }
-                    });
-                    
-                    init_main(true);
-                }, 150);
-            }
-        });*/
-        
         // intro hero text animation
         var intro_animation = new Animation({
             duration    : 1600, 
@@ -239,8 +184,8 @@
                     
                     intro_animation.restart();
                 } else {
-                    // otherwise, start the iphone flipping animation and hero text translation
-                    intro_iphone_animation.start();
+                    // otherwise, start the main page content animation and hide the intro hero text
+                    init_main(true);
                     
                     var height = $active.height();
                     var offset = get_relative_offset(height);
@@ -561,7 +506,7 @@
             var current_classes = $iphone_screens.get(0).className.split(/\s+/);
             var active = "iphone-screen-active-" + iphone_screens_index_map["" + index];
             
-            console.debug(active + " -- " + current_classes[0] + " -- " + current_classes[1]);
+            //console.debug(active + " -- " + current_classes[0] + " -- " + current_classes[1]);
             for (var i = 0; i < current_classes.length; ++i) {
                 var current = current_classes[i];
                 
