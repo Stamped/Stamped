@@ -239,7 +239,7 @@ class Facebook(object):
         logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
         args = {}
         if action == 'like':
-            path = path = "%s/og.likes" % fb_user_id
+            path = "%s/og.likes" % fb_user_id
             args['object'] = object_url
         else:
             args[object_type] = object_url
