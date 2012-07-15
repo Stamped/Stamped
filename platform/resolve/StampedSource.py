@@ -723,7 +723,6 @@ class StampedSource(GenericSource):
                     'sources.tombstone_id' : {'$exists' : False},
                     'sources.user_generated_id' : {'$exists' : False},
                     'search_tokens' : formatSearchQuery(query),
-                    'types' : entity_type,
                 }
                 mongo_query.update(kwargs)
                 if query_obj.source == 'stamped' and query_obj.key:
