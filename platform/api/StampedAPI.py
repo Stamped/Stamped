@@ -3651,7 +3651,7 @@ class StampedAPI(AStampedAPI):
                     stampPreviewUser = userIds[stampPreview.user.user_id]
                     if stampPreviewUser is None:
                         logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
-                            (stampPreview.user.user_id, stat.entity_id))
+                            (stampPreview.user.user_id, item.entity_id))
                         # Trigger update to entity stats
                         tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
                         continue
