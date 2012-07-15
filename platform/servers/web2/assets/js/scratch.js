@@ -1,4 +1,37 @@
+var intro_iphone_animation = new Animation({
+    start       : 1, 
+    end         : 100, 
+    duration    : 250, 
+    
+    step        : function(value) {
+        var v = -400 * Math.floor(value / 10);
         
+        $intro_iphone.css('background-position', v + "px 0");
+    }, 
+    
+    complete    : function() {
+        var height = $intro_iphone.height();
+        height     = (!!height ? height : 632);
+        var offset = get_relative_offset(height);
+        
+        setTimeout(function() {
+            $intro_iphone.animate({
+                top : offset
+            }, {
+                duration : 1000, 
+                easing   : "swing", 
+                complete : function() {
+                    // intro animation is fully complete here
+                    $body.removeClass("intro");
+                }
+            });
+            
+            init_main(true);
+        }, 150);
+    }
+});
+
+
         /*var update_debug_transform = function() {
             var t = "perspective(" + $("input[title='perspective']").attr("value") + "px) " + 
                     "scale3d(" + $("input[title='scale-x']").attr("value") + ", " + 

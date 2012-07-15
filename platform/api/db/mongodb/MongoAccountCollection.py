@@ -172,7 +172,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=False, api=None):
         """
         Check the account to verify the following things:
 

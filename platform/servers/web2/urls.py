@@ -54,6 +54,9 @@ urlpatterns = patterns('',
     # ------------------------------- TEST -------------------------------------
     # e.g., stamped.com/test
     url(r'^test$',                              'core.views.test_view'), 
+    # e.g., stamped.com/temp
+    url(r'^temp$',                              'core.views.temp_view'), 
+    
     
     
     # ------------------------------ POPUPS ------------------------------------

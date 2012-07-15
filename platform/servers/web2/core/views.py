@@ -352,16 +352,6 @@ def menu(request, schema, **kwargs):
         'entity' : entity, 
     })
 
-@stamped_view()
-def test_view(request, **kwargs):
-    user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
-    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
-    
-    return stamped_render(request, 'test.html', {
-        'user'  : user, 
-        'stamp' : stamp
-    })
-
 @stamped_view(schema=HTTPStampId)
 def popup_sdetail_social(request, schema, **kwargs):
     params = schema.dataExport()
@@ -421,5 +411,21 @@ def popup_following(request, schema, **kwargs):
         'popup_title' : "Following %d" % num_users, 
         'popup_class' : 'popup-following', 
         'users'       : users, 
+    })
+
+@stamped_view()
+def test_view(request, **kwargs):
+    user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
+    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
+    
+    return stamped_render(request, 'test.html', {
+        'user'  : user, 
+        'stamp' : stamp
+    })
+
+@stamped_view()
+def temp_view(request, **kwargs):
+    return stamped_render(request, 'temp.html', {
+        'N' : range(10)
     })
 

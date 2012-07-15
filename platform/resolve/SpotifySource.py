@@ -322,12 +322,6 @@ class SpotifySource(GenericSource):
         
         return None
 
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.spotify_id = proxy.key
-        
-        return True
-
     def matchSource(self, query):
         if query.kind == 'person' and query.isType('artist'):
             return self.artistSource(query)

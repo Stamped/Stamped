@@ -601,6 +601,7 @@ body.app {
 
 .stamp-gallery-header {
     margin: 1em 24px;
+    .transform(translateZ(0));
     
     /*.stamp-gallery-sort {
         position: relative;
@@ -689,11 +690,11 @@ body.app {
     }
 }
 
-body.music, body.book, body.film, body.app {
+/*body.music, body.book, body.film, body.app {
     .stamp-gallery-view-map {
         display: none;
     }
-}
+}*/
 
 
 /* **************************************************************************
@@ -708,10 +709,10 @@ body.music, body.book, body.film, body.app {
     width: 75%;
     clear: both;
     text-align: center;
+    left: -24px;
     
     padding: 1.5em 0;
     margin:  0;
-    left: -24px;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) repeat-x;
@@ -731,7 +732,7 @@ body.music, body.book, body.film, body.app {
     width:  100%;
     min-width: @stamp-gallery-item-min-width;
     
-    /* note: to look correct, these transitions should match isotope's */
+    .transform(translateZ(0));
     .rounded(4px);
     
     &:hover {
@@ -1035,12 +1036,15 @@ body.music, body.book, body.film, body.app {
         background: url(/assets/img/entity_fallbacks/place.png) no-repeat;
         height: 140px;
     }
+    
+    .stamp-category-app img {
+        .rounded(8px);
+    }
 }
 
 .blurb, .normal_blurb {
     display: block;
     text-align: left;
-    quotes: "\201C" "\201D";
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
     color: #666;    
@@ -1060,10 +1064,12 @@ body.music, body.book, body.film, body.app {
     text-overflow: ellipsis;
 }
 
+/*
+quotes: "\201C" "\201D";
 .stamp-inner-content {
     .normal_blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
     .normal_blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
-}
+}*/
 
 .subtitle-line {
     position: relative;
@@ -1094,9 +1100,12 @@ body.music, body.book, body.film, body.app {
 
 .loading {
     background: url(/assets/img/loading.gif) no-repeat;
+    position: absolute;
+    top:  140px;
+    left: 50%;
+    
+    margin-left: (-24px -16px);
     display: none;
-    text-align: center;
-    margin:  2em auto;
     
     width:  32px;
     height: 32px;
@@ -1233,7 +1242,13 @@ body.music, body.book, body.film, body.app {
     }
     
     ol {
+        margin:  0;
+        padding: 0;
+        
         li {
+            margin:  0;
+            padding: 0;
+            
             a {
                 position: relative;
                 display: block;
