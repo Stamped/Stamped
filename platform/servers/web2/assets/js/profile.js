@@ -658,6 +658,8 @@ var g_update_stamps = null;
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
                 
+                console.log(offset);
+                
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                     
@@ -1764,6 +1766,7 @@ var g_update_stamps = null;
                     $target.replaceWith($target2);
                     init_sdetail($target2);
                     
+                    resize_sdetail_wrapper($target2);
                     $target2.removeClass('sdetail-loading');
                 }
             };
