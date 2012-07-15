@@ -406,6 +406,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                  '$set': {'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
 
+    def updateStampOGActionId(self, stampId, og_action_id):
+        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, {'$set': {'og_action_id': og_action_id}})
+
     def updateStampEntity(self, stampId, entity):
         self._collection.update({'_id': self._getObjectIdFromString(stampId)}, {'$set': {'entity': entity.dataExport()}})
 

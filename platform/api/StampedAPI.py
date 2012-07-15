@@ -1714,16 +1714,16 @@ class StampedAPI(AStampedAPI):
             for name in names:
                 completions.append( { 'completion' : name } )
             return completions
-        elif category == 'music':
-            result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
-            if 'result' not in result:
-                return []
-            #names = list(set([i['name'] for i in result['result']]))[:10]
-            names = self._orderedUnique([i['name'] for i in result['result']])[:10]
-            completions = []
-            for name in names:
-                completions.append( { 'completion' : name})
-            return completions
+        # elif category == 'music':
+        #     result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
+        #     if 'result' not in result:
+        #         return []
+        #     #names = list(set([i['name'] for i in result['result']]))[:10]
+        #     names = self._orderedUnique([i['name'] for i in result['result']])[:10]
+        #     completions = []
+        #     for name in names:
+        #         completions.append( { 'completion' : name})
+        #     return completions
         return []
 
     @API_CALL
@@ -2685,18 +2685,20 @@ class StampedAPI(AStampedAPI):
         # Verify user has permission to delete
         if stamp.user.user_id != authUserId:
             raise StampedRemoveStampPermissionsError("Insufficient privileges to remove stamp")
-        
+
+        og_action_id = stamp.og_action_id
+
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
         
-        tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits])
+        tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits, og_action_id])
         
         if utils.is_ec2():
             tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
         
         return True
     
-    def removeStampAsync(self, authUserId, stampId, entityId, credits=None):
+    def removeStampAsync(self, authUserId, stampId, entityId, credits=None, og_action_id=None):
         # Remove from user collection
         self._stampDB.removeUserStampReference(authUserId, stampId)
 
@@ -2748,6 +2750,10 @@ class StampedAPI(AStampedAPI):
 
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[entityId])
+
+        # Remove OG activity item, if it was created
+        if og_action_id is not None:
+            tasks.invoke(tasks.APITasks.deleteFromOpenGraph, kwargs={'authUserId': authUserId,'og_action_id': og_action_id})
 
     @API_CALL
     def getStamp(self, stampId, authUserId=None, enrich=True):
@@ -2952,6 +2958,14 @@ class StampedAPI(AStampedAPI):
         if user is not None:
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
+    def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
+        account = self.getAccount(authUserId)
+        if account.linked is not None and account.linked.facebook is not None \
+           and account.linked.facebook.token is not None:
+            token = account.linked.facebook.token
+            result = self._facebook.deleteFromOpenGraph(og_action_id, token)
+
+
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
 
@@ -3010,7 +3024,9 @@ class StampedAPI(AStampedAPI):
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
         result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
-        print('### result: %s' % result)
+        if stampId is not None and 'id' in result:
+            og_action_id = result['id']
+            self._stampDB.updateStampOGActionId(stampId, og_action_id)
 
 
     """
@@ -3632,13 +3648,14 @@ class StampedAPI(AStampedAPI):
             if item.stamps is not None:
                 stamps = []
                 for stampPreview in item.stamps:
-                    stampPreview.user = userIds[stampPreview.user.user_id]
-                    if stampPreview.user is None:
+                    stampPreviewUser = userIds[stampPreview.user.user_id]
+                    if stampPreviewUser is None:
                         logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
-                            (stat.popular_users[i], stat.entity_id))
+                            (stampPreview.user.user_id, item.entity_id))
                         # Trigger update to entity stats
                         tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
                         continue
+                    stampPreview.user = stampPreviewUser
                     stamps.append(stampPreview)
                 previews.stamps = stamps
             if item.todo_user_ids is not None:
@@ -3771,6 +3788,9 @@ class StampedAPI(AStampedAPI):
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
         elif guideSearchRequest.scope == 'popular':
             stampIds = None
+        elif guideSearchRequest.scope == 'me':
+            ### TODO: Return actual search across my todos. For now, just return nothing.
+            return []
         else:
             # TODO: What should we return for other search queries (not inbox and not popular)?
             stampIds = None
@@ -4911,12 +4931,14 @@ class StampedAPI(AStampedAPI):
     def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
         """
-        entity = self._enrichAndPersistEntity(entity)
-        self._followOutLinks(entity, set(), 2 if entity.isType('album') else 1)
+        persisted = set()
+        entity = self._enrichAndPersistEntity(entity, persisted)
+        self._followOutLinks(entity, persisted, 0)
         return entity
 
-
-    def _enrichAndPersistEntity(self, entity):
+    def _enrichAndPersistEntity(self, entity, persisted):
+        if entity.entity_id in persisted:
+            return entity
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
         logs.info('Modified: ' + str(modified))
@@ -4927,7 +4949,7 @@ class StampedAPI(AStampedAPI):
                 entity = self._entityDB.addEntity(entity)
             else:
                 entity = self._entityDB.updateEntity(entity)
-
+        persisted.add(entity.entity_id)
         return entity
 
     def _resolveEntity(self, entity):
@@ -4983,7 +5005,6 @@ class StampedAPI(AStampedAPI):
 
     def _resolveRelatedEntities(self, entity):
         def _resolveStubList(entity, attr):
-            dropUnknown = attr == 'albums' or attr == 'artists' and entity.isType('track')
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
@@ -4995,25 +5016,37 @@ class StampedAPI(AStampedAPI):
                 stubId = stub.entity_id
                 resolved = self._resolveStub(stub, True)
                 if resolved is None:
-                    # It's okay to fail resolution here, since we're only
-                    # resolving against our own db
-                    if not dropUnknown:
+                    # It's okay to fail resolution here, since we're only resolving against our own
+                    # db. We never try to resolve an unknown album, for performance reasons. Also
+                    # we don't go from albums to artists, since we will to to the tracks, which lead
+                    # to the artists.
+                    if attr != 'albums' or entity.isType('album') and attr == 'artists':
                         resolvedList.append(stub)
                     continue
                 resolvedList.append(resolved.minimize())
                 if stubId != resolved.entity_id:
                     stubsModified = True
 
+            if entity.isType('artist'):
+                resolvedList = resolvedList[:20]
             setattr(entity, attr, resolvedList)
             return stubsModified
 
         return self._iterateOutLinks(entity, _resolveStubList)
 
-    def _followOutLinks(self, entity, persisted, depth):
-        if entity.entity_id in persisted:
-            return
+    def _shouldFollowLink(self, entity, attribute, depth):
+        if attribute == 'albums':
+            return False
+        if entity.isType('album'):
+            return attribute == 'tracks'
+        if entity.isType('artist'):
+            return True
+        return depth == 0
 
+    def _followOutLinks(self, entity, persisted, depth):
         def followStubList(entity, attr):
+            if not self._shouldFollowLink(entity, attr, depth):
+                return
             stubList = getattr(entity, attr)
             if not stubList:
                 return
@@ -5025,7 +5058,7 @@ class StampedAPI(AStampedAPI):
                     logs.warning('stub resolution failed: %s' % stub)
                     mergeEntityTasks.append(None)
                 else:
-                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull))
+                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
             
             modified = False
             visitedStubs = []
@@ -5040,10 +5073,9 @@ class StampedAPI(AStampedAPI):
             setattr(entity, attr, visitedStubs)
             if modified:
                 self._entityDB.updateEntity(entity)
-            persisted.add(entity.entity_id)
-            if depth:
-                for mergedEntity in mergedEntities:
-                    self._followOutLinks(mergedEntity, persisted, depth-1)
+
+            for mergedEntity in mergedEntities:
+                self._followOutLinks(mergedEntity, persisted, depth+1)
         self._iterateOutLinks(entity, followStubList)
 
     def _resolveStub(self, stub, quickResolveOnly):
