@@ -1969,15 +1969,12 @@ class StampedAPI(AStampedAPI):
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
 
-        logs.debug('Popular User Ids: %s' % popularUserIds)
-
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
             stats.popular_stamps = popularStampIds
-            self._entityStatsDB.updateNumStamps(entityId, numStamps)
-            self._entityStatsDB.setPopular(entityId, popularUserIds, popularStampIds)
+            self._entityStatsDB.updateEntityStats(stats)
         except StampedUnavailableError:
             stats = EntityStats()
             stats.entity_id = entityId
@@ -2904,7 +2901,7 @@ class StampedAPI(AStampedAPI):
         score = (.5 * quality) + popularity
         stats.score = int(score)
 
-        self._stampStatsDB.saveStampStats(stats)
+        self._stampStatsDB.updateStampStats(stats)
 
         return stats
 
