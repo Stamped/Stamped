@@ -718,21 +718,25 @@ class StampedSource(GenericSource):
     def __querySource(self, token_queries, query_obj, **kwargs):
         def entityGenerator():
             id_set = set()
-            for query in token_queries:
-                mongo_query = {
-                    'sources.tombstone_id' : {'$exists' : False},
-                    'sources.user_generated_id' : {'$exists' : False},
-                    'search_tokens' : formatSearchQuery(query),
-                }
-                mongo_query.update(kwargs)
-                if query_obj.source == 'stamped' and query_obj.key:
-                    mongo_query['_id'] = {'$lt' : ObjectId(query_obj.key)}
-                matches = self.__id_query(mongo_query)
-                for match in matches:
-                    entity_id = match['_id']
-                    if entity_id not in id_set:
-                        yield entity_id
-                        id_set.add(entity_id)
+            try:
+                for query in token_queries:
+                    mongo_query = {
+                        'sources.tombstone_id' : {'$exists' : False},
+                        'sources.user_generated_id' : {'$exists' : False},
+                        '$and' : formatSearchQuery(query),
+                    }
+                    mongo_query.update(kwargs)
+                    if query_obj.source == 'stamped' and query_obj.key:
+                        mongo_query['_id'] = {'$lt' : ObjectId(query_obj.key)}
+                    matches = self.__id_query(mongo_query)
+                    for match in matches:
+                        entity_id = match['_id']
+                        if entity_id not in id_set:
+                            id_set.add(entity_id)
+                            yield entity_id
+            except GeneratorExit:
+                pass
+            logs.debug('Consumed %d results from query: %s' % (len(id_set), id_set))
         def constructor(entity_id):
             return self.proxyFromEntity(self.__entityDB.getEntity(str(entity_id)))
         return self.generatorSource(entityGenerator(), constructor, unique=True, tolerant=True)
