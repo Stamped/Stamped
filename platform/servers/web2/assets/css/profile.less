@@ -127,32 +127,28 @@
                 .profile-header-body-fixedwidth {
                     padding: 34px 0;
                     
-                    .profile-image-column {
-                        position: relative;
-                        float: left;
-                        
-                        a.follow-button {
-                            position: absolute;
-                            bottom: -15px;
-                            left: 50%;
-                            margin-left: -43px;
-                        }
-                        
-                        .profile-image-large, .profile-image-medium {
-                            float: none;
-                        }
-                    }
-                    
                     .lhs {
                         position: relative;
-                        top:  0;
-                        left: 0;
                         
                         float: left;
-                        margin-left: 24px;
-                        min-width: 50%;
-                        
+                        width: 70%;
                         color: #333;
+                        
+                        .profile-image-column {
+                            position: relative;
+                            float: left;
+                            
+                            a.follow-button {
+                                position: absolute;
+                                bottom: -15px;
+                                left: 50%;
+                                margin-left: -43px;
+                            }
+                            
+                            .profile-image-large, .profile-image-medium {
+                                float: none;
+                            }
+                        }
                         
                         a.screen-name {
                             color: #000;
@@ -209,12 +205,19 @@
                             width: 33%;
                         }
                         
+                        .header-subsections {
+                            position: relative;
+                            width: 70%;
+                            float: left;
+                            margin-left: 24px;
+                        }
+                        
                         .header-subsection {
                             display: block;
-                            width: 100%;
-                            opacity: 0;
                             display: none;
+                            width: 100%;
                             
+                            opacity: 0;
                             .transition(opacity, .3s, ease-out);
                         }
                         
@@ -350,6 +353,7 @@
                     
                     .rhs {
                         float: right;
+                        width: 25%;
                         
                         #subnav {
                             width: 256px;
@@ -1280,15 +1284,17 @@ quotes: "\201C" "\201D";
                 .icon {
                     background: url(/assets/img/sidenav_sprite.png) no-repeat;
                     position: absolute;
-                    left: 15px;
-                    top:  15px;
+                    left: 14px;
+                    top:  14px;
                     
                     .transform(scale(.8, .8));
                     .transition-transform(0.3s, ease-out);
                     
+                    border: 1px solid transparent;
+                    
                     display: block;
-                    width:  30px;
-                    height: 30px;
+                    width:  32px;
+                    height: 32px;
                 }
                 
                 .desc-overlay {
@@ -1319,7 +1325,7 @@ quotes: "\201C" "\201D";
             a.active {
                 &:hover, &:active {
                     .icon {
-                        .transform(scale(1.0, 1.0));
+                        .transform(translateZ(0));
                         .transition-transform(0s, ease-out);
                         // TODO
                     }
@@ -1450,7 +1456,7 @@ body.film       #stamp-category-nav-bar ol li.film,
 body.app        #stamp-category-nav-bar ol li.app {
     a, a:hover {
         .icon {
-            .transform(scale(1.0, 1.0));
+            .transform(translateZ(0));
         }
         
         .selection {
@@ -1515,9 +1521,7 @@ ul.user-category-distribution {
     
     position: fixed;
     overflow-y: scroll;
-    //position: absolute;
     
-    top: 15%;
     z-index: 125;
 }
 
