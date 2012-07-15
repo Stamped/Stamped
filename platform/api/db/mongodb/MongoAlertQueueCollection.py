@@ -18,7 +18,7 @@ from AMongoCollection import AMongoCollection
 class MongoAlertQueueCollection(AMongoCollection):
     
     def __init__(self):
-        AMongoCollection.__init__(self, collection='alertqueue', primary_key='alert_id', obj=Alert)
+        AMongoCollection.__init__(self, collection='alertqueueold', primary_key='alert_id', obj=Alert)
         # AAlertDB.__init__(self)
 
         self._collection.ensure_index('created', unique=False)
