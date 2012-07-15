@@ -328,10 +328,11 @@ class S3ImageDB(AImageDB):
     def _removeFromS3(self, name):
         num_retries = 0
         max_retries = 5
+        logs.info('### removing from S3 with name: %s' % name)
         
         while True:
             try:
-                if self.bucket.get_key(name):
+                if self.bucket.get_key(name) is not None:
                     self.bucket.delete_key(name)
                 return True
             except Exception as e:
