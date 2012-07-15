@@ -235,11 +235,15 @@ class Facebook(object):
             path,
         )
 
-    def postToOpenGraph(self, action, access_token, object_type, object_url, message=None, imageUrl=None):
+    def postToOpenGraph(self, fb_user_id, action, access_token, object_type, object_url, message=None, imageUrl=None):
         logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
-        path = "me/stampedapp:%s" % action
         args = {}
-        args[object_type] = object_url
+        if action == 'like':
+            path = "%s/og.likes" % fb_user_id
+            args['object'] = object_url
+        else:
+            args[object_type] = object_url
+            path = "me/stampedapp:%s" % action
         if message is not None:
             args['message'] = message
         if imageUrl is not None:

@@ -2967,6 +2967,7 @@ class StampedAPI(AStampedAPI):
         share_settings = account.linked.facebook.share_settings
 
         token = account.linked.facebook.token
+        fb_user_id = account.linked.facebook.linked_user_id
         action = None
         ogType = None
         url = None
@@ -3008,7 +3009,7 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        result = self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
+        result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
 
 
     """
@@ -3631,6 +3632,12 @@ class StampedAPI(AStampedAPI):
                 stamps = []
                 for stampPreview in item.stamps:
                     stampPreview.user = userIds[stampPreview.user.user_id]
+                    if stampPreview.user is None:
+                        logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
+                            (stat.popular_users[i], stat.entity_id))
+                        # Trigger update to entity stats
+                        tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
+                        continue
                     stamps.append(stampPreview)
                 previews.stamps = stamps
             if item.todo_user_ids is not None:
@@ -3723,6 +3730,12 @@ class StampedAPI(AStampedAPI):
                     stampPreview = StampPreview()
                     stampPreview.user = userIds[stat.popular_users[i]]
                     stampPreview.stamp_id = stat.popular_stamps[i]
+                    if stampPreview.user is None:
+                        logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
+                            (stat.popular_users[i], stat.entity_id))
+                        # Trigger update to entity stats
+                        tasks.invoke(tasks.APITasks.updateEntityStats, args=[stat.entity_id])
+                        continue
                     stampPreviews.append(stampPreview)
                 entityStampPreviews[stat.entity_id] = stampPreviews
 
