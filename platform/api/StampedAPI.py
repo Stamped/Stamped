@@ -2685,18 +2685,20 @@ class StampedAPI(AStampedAPI):
         # Verify user has permission to delete
         if stamp.user.user_id != authUserId:
             raise StampedRemoveStampPermissionsError("Insufficient privileges to remove stamp")
-        
+
+        og_action_id = stamp.og_action_id
+
         # Remove stamp
         self._stampDB.removeStamp(stamp.stamp_id)
         
-        tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits])
+        tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits, og_action_id])
         
         if utils.is_ec2():
             tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
         
         return True
     
-    def removeStampAsync(self, authUserId, stampId, entityId, credits=None):
+    def removeStampAsync(self, authUserId, stampId, entityId, credits=None, og_action_id=None):
         # Remove from user collection
         self._stampDB.removeUserStampReference(authUserId, stampId)
 
@@ -2748,6 +2750,10 @@ class StampedAPI(AStampedAPI):
 
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[entityId])
+
+        # Remove OG activity item, if it was created
+        if og_action_id is not None:
+            tasks.invoke(tasks.APITasks.deleteFromOpenGraph, kwargs={'authUserId': authUserId,'og_action_id': og_action_id})
 
     @API_CALL
     def getStamp(self, stampId, authUserId=None, enrich=True):
@@ -2951,6 +2957,14 @@ class StampedAPI(AStampedAPI):
             return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
         if user is not None:
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
+
+    def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
+        account = self.getAccount(authUserId)
+        if account.linked is not None and account.linked.facebook is not None \
+           and account.linked.facebook.facebook_token is not None:
+            token = account.linked.facebook.facebook_token
+            result = self._facebook.deleteFromOpenGraph(og_action_id, token)
+
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
