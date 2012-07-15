@@ -675,11 +675,8 @@ var g_update_stamps = null;
                                 top : 'easeInOutCubic'
                             }, 
                             complete : function() {
-                                /*$sdetail_wrapper.css({
-                                    'top' : 0, 
-                                });*/
-                                
                                 $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
+                                $sdetail_wrapper.removeClass('animating');
                                 $window.scrollTop(0);
                                 
                                 if (!!anim_callback) {
@@ -688,10 +685,11 @@ var g_update_stamps = null;
                             }
                         });
                 } else if (sdetail_status == 'closing') {
-                    //$body.removeClass('sdetail_popup_animation sdetail_popup');
-                    
                     $sdetail_wrapper
                         .stop(true, false)
+                        .css({
+                            'top' : offset, 
+                        })
                         .addClass('animating')
                         .animate({
                             top : hidden, 
@@ -702,6 +700,7 @@ var g_update_stamps = null;
                             }, 
                             complete : function() {
                                 $body.removeClass('sdetail_popup_animation');
+                                $sdetail_wrapper.removeClass('animating');
                                 
                                 if (!!anim_callback) {
                                     anim_callback();
@@ -1752,7 +1751,7 @@ var g_update_stamps = null;
             }
             
             $(sdetail_wrapper_sel).hide().remove();
-            $target.insertAfter($('#main-page-content-body').get(0));
+            $target.insertAfter($('#main-page-content-body'));
             $target = $(sdetail_wrapper_sel);
             
             update_dynamic_header();
@@ -1782,7 +1781,6 @@ var g_update_stamps = null;
             
             close_sdetail_func = function() {
                 close_sdetail_func = null;
-                
                 $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                 
                 if (!!$gallery) {
