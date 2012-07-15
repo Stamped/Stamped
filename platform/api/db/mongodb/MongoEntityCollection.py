@@ -283,19 +283,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 valid = []
                 for item in getattr(entity, field):
                     if hasattr(item, 'entity_id') and item.entity_id is not None:
-                        if self._collection.find({'_id': self._getObjectIdFromString(item.entity_id)}).count() == 1:
-                            # Link is valid
-                            valid.append(item)
-                        else:
+                        if self._collection.find({'_id': self._getObjectIdFromString(item.entity_id)}).count() == 0:
                             msg = "%s: Invalid link within %s (%s)" % (key, field, item.entity_id)
                             if repair:
                                 logs.info(msg)
                                 del(item.entity_id)
-                                valid.append(item)
+                                modified = True
                             else:
                                 raise StampedDataError(msg)
-                    else:
-                        valid.append(item)
+                    valid.append(item)
                 setattr(entity, field, valid)
 
         linkedFields = ['artists', 'albums', 'tracks', 'directors', 'movies', 'books', 'authors', 'cast']
