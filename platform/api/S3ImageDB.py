@@ -138,7 +138,7 @@ class S3ImageDB(AImageDB):
             return square
 
 
-        image = self.cropImageToSquare(image)
+        image = cropImageToSquare(image)
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
     
     def removeProfileImage(self, screen_name):
