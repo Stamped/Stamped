@@ -269,7 +269,7 @@ class PushNotification(object):
             msg = 'Your friend %s joined Stamped' % (self._subject.screen_name)
 
         elif self._verb.startswith('action_'):
-            msg = '%s interacted with your stamp'
+            msg = '%s interacted with your stamp' % (self._subject.screen_name)
 
         else:
             raise Exception("Unrecognized verb: %s" % verb)

@@ -24,7 +24,7 @@ from api.db.mongodb.MongoStampCommentsCollection        import MongoStampComment
 
 from api.db.mongodb.MongoAccountCollection              import MongoAccountCollection
 from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection, MongoEntityStatsCollection
-from api.db.mongodb.MongoStampCollection                import MongoStampCollection
+from api.db.mongodb.MongoStampCollection                import MongoStampCollection, MongoStampStatsCollection
 from api.db.mongodb.MongoTodoCollection                 import MongoTodoCollection
 
 import gevent
@@ -40,13 +40,14 @@ collections = [
     # MongoUserTodosEntitiesCollection, 
 
     # Documents
-    # MongoAccountCollection,
+    MongoAccountCollection,
     MongoEntityCollection,
-    # MongoStampCollection,
-    # MongoTodoCollection,
+    MongoStampCollection,
+    MongoTodoCollection,
 
     # Stats
     MongoEntityStatsCollection,
+    MongoStampStatsCollection, 
 ]
 
 WORKER_COUNT = 10
@@ -117,7 +118,7 @@ def worker(db, collection, api, stats, options):
 
 def handler(db, options):
     query = {}
-    # query = {'_id': bson.objectid.ObjectId("4f7095cab951fe10e8000a05")}
+    # query = {'_id': bson.objectid.ObjectId("4e4c691ddb6bbe2bcd00034d")}
     for i in db._collection.find(query, fields=['_id']):
         if options.sampleSetRatio < 1 and random.random() > options.sampleSetRatio:
             continue

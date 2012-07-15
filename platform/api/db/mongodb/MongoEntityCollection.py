@@ -18,7 +18,6 @@ try:
     from api.Entity                         import getSimplifiedTitle, buildEntity
 
     from api.db.mongodb.AMongoCollection            import AMongoCollection
-    from api.db.mongodb.MongoEntitySeedCollection   import MongoEntitySeedCollection
     from api.db.mongodb.MongoMenuCollection         import MongoMenuCollection
     from api.AEntityDB                              import AEntityDB
     from difflib                                    import SequenceMatcher
@@ -278,6 +277,31 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 else:
                     del(entity.images)
 
+        # Check that any existing links are valid
+        def _checkLink(field):
+            if hasattr(entity, field) and getattr(entity, field) is not None:
+                valid = []
+                for item in getattr(entity, field):
+                    if hasattr(item, 'entity_id') and item.entity_id is not None:
+                        if self._collection.find({'_id': self._getObjectIdFromString(item.entity_id)}).count() == 1:
+                            # Link is valid
+                            valid.append(item)
+                        else:
+                            msg = "%s: Invalid link within %s (%s)" % (key, field, item.entity_id)
+                            if repair:
+                                logs.info(msg)
+                                del(item.entity_id)
+                                valid.append(item)
+                            else:
+                                raise StampedDataError(msg)
+                    else:
+                        valid.append(item)
+                setattr(entity, field, valid)
+
+        linkedFields = ['artists', 'albums', 'tracks', 'directors', 'movies', 'books', 'authors', 'cast']
+        for field in linkedFields:
+            _checkLink(field)
+
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(entity))
 
@@ -489,4 +513,41 @@ class MongoEntityStatsCollection(AMongoCollection):
             { '$set' : { 'popular_users' : userIds, 'popular_stamps' : stampIds } }
         )
         return True
+
+
+class MongoEntitySeedCollection(AMongoCollection, AEntityDB):
+    
+    def __init__(self, collection='entities'):
+        AMongoCollection.__init__(self, collection='seedentities', primary_key='entity_id', overflow=True)
+        AEntityDB.__init__(self)
+    
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        document.pop('titlel')
+
+        entity = buildEntity(document)
+        
+        return entity
+    
+    def _convertToMongo(self, entity):
+        if entity.entity_id is not None and entity.entity_id.startswith('T_'):
+            del entity.entity_id
+        document = AMongoCollection._convertToMongo(self, entity)
+        if document is None:
+            return None
+        if 'title' in document:
+            document['titlel'] = getSimplifiedTitle(document['title'])
+        return document
+    
+    ### PUBLIC
+    
+    def addEntity(self, entity):
+        return self._addObject(entity)
+
 
