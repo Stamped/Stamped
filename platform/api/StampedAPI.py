@@ -3648,13 +3648,14 @@ class StampedAPI(AStampedAPI):
             if item.stamps is not None:
                 stamps = []
                 for stampPreview in item.stamps:
-                    stampPreview.user = userIds[stampPreview.user.user_id]
-                    if stampPreview.user is None:
+                    stampPreviewUser = userIds[stampPreview.user.user_id]
+                    if stampPreviewUser is None:
                         logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
-                            (stampPreview.user.user_id, stat.entity_id))
+                            (stampPreview.user.user_id, item.entity_id))
                         # Trigger update to entity stats
                         tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
                         continue
+                    stampPreview.user = stampPreviewUser
                     stamps.append(stampPreview)
                 previews.stamps = stamps
             if item.todo_user_ids is not None:
@@ -3787,6 +3788,9 @@ class StampedAPI(AStampedAPI):
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
         elif guideSearchRequest.scope == 'popular':
             stampIds = None
+        elif guideSearchRequest.scope == 'me':
+            ### TODO: Return actual search across my todos. For now, just return nothing.
+            return []
         else:
             # TODO: What should we return for other search queries (not inbox and not popular)?
             stampIds = None
