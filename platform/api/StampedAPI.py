@@ -4898,9 +4898,16 @@ class StampedAPI(AStampedAPI):
         """Enriches the entity and possibly follow any links it may have.
         """
         entity = self._enrichAndPersistEntity(entity)
-        self._followOutLinks(entity, set(), 2 if entity.isType('album') else 1)
+        if entity.isType('artist'):
+            depth = 1  # Only go to the tracks.
+        elif entity.isType('track'):
+            depth = 2  # To artist, then her tracks.
+        elif entity.isType('album'):
+            depth = 3  # To tracks, to artist, then to tracks.
+        else:
+            depth = 0
+        self._followOutLinks(entity, set([entity.entity_id]), depth)
         return entity
-
 
     def _enrichAndPersistEntity(self, entity):
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
@@ -4969,7 +4976,6 @@ class StampedAPI(AStampedAPI):
 
     def _resolveRelatedEntities(self, entity):
         def _resolveStubList(entity, attr):
-            dropUnknown = attr == 'albums' or attr == 'artists' and entity.isType('track')
             stubList = getattr(entity, attr)
             if not stubList:
                 return False
@@ -4981,22 +4987,26 @@ class StampedAPI(AStampedAPI):
                 stubId = stub.entity_id
                 resolved = self._resolveStub(stub, True)
                 if resolved is None:
-                    # It's okay to fail resolution here, since we're only
-                    # resolving against our own db
-                    if not dropUnknown:
+                    # It's okay to fail resolution here, since we're only resolving against our own
+                    # db. We never try to resolve an unknown album, for performance reasons. Also
+                    # we don't go from albums to artists, since we will to to the tracks, which lead
+                    # to the artists.
+                    if attr != 'albums' or entity.isType('album') and attr == 'artists':
                         resolvedList.append(stub)
                     continue
                 resolvedList.append(resolved.minimize())
                 if stubId != resolved.entity_id:
                     stubsModified = True
 
+            if entity.isType('artist'):
+                resolvedList = resolvedList[:20]
             setattr(entity, attr, resolvedList)
             return stubsModified
 
         return self._iterateOutLinks(entity, _resolveStubList)
 
     def _followOutLinks(self, entity, persisted, depth):
-        if entity.entity_id in persisted:
+        if entity.entity_id in persisted or depth == 0:
             return
 
         def followStubList(entity, attr):
@@ -5027,9 +5037,9 @@ class StampedAPI(AStampedAPI):
             if modified:
                 self._entityDB.updateEntity(entity)
             persisted.add(entity.entity_id)
-            if depth:
-                for mergedEntity in mergedEntities:
-                    self._followOutLinks(mergedEntity, persisted, depth-1)
+
+            for mergedEntity in mergedEntities:
+                self._followOutLinks(mergedEntity, persisted, depth-1)
         self._iterateOutLinks(entity, followStubList)
 
     def _resolveStub(self, stub, quickResolveOnly):
