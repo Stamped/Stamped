@@ -3724,6 +3724,10 @@ class StampedAPI(AStampedAPI):
                     stampPreview = StampPreview()
                     stampPreview.user = userIds[stat.popular_users[i]]
                     stampPreview.stamp_id = stat.popular_stamps[i]
+                    if stampPreview.user is None:
+                        logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
+                            (stat.popular_users[i], stat.entity_id))
+                        continue
                     stampPreviews.append(stampPreview)
                 entityStampPreviews[stat.entity_id] = stampPreviews
 
