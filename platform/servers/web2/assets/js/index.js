@@ -234,7 +234,7 @@
             var height = $main.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
-            console.log("height: " + height + "; offset: " + offset);
+            //console.log("height: " + height + "; offset: " + offset);
             
             if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
@@ -532,7 +532,7 @@
         // ---------------------------------------------------------------------
         
         
-        /*iphone_inbox_stamps = [
+        iphone_inbox_stamps = [
             {
                 id : "Son of a Gun Restaurant", 
                 y0 : 49, 
@@ -660,12 +660,14 @@
             return false;
         });
         
-        $body.on("mouseup", iphone_inbox_selection_hide);*/
+        $body.on("mouseup", iphone_inbox_selection_hide);
         
         $iphone_back_button.click(function(event) {
             event.preventDefault();
             
+            main_pane_cycle_animation.stop();
             set_active_pane(0); // inbox
+            
             return false;
         });
         

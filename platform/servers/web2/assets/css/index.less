@@ -266,6 +266,7 @@ body.main {
     left:  -90px;
     
     opacity: 1;
+    .transform(translateZ(0));
     .transition-transform(.3s, ease);
 }
 
@@ -511,6 +512,62 @@ body.main {
         font: 10pt helvetica;
         color: #666;
     }
+    
+    .chrome-button {
+        position: absolute;
+        
+        background: url(/assets/img/index/chrome_buttons_sprite.png) no-repeat;
+        width:  27px;
+        height: 28px;
+    }
+    
+    #back-button {
+        top:  56px;
+        left: 37px;
+        
+        background-position: 0 0;
+        background-position: -29px 0;
+        
+        &:hover {
+            background-position: -58px 0;
+        }
+        
+        &:active {
+            background-position: -87px 0;
+        }
+    }
+    
+    #forward-button {
+        top:  56px;
+        left: 64px;
+        
+        background-position: 0 -60px;
+        background-position: -29px -60px;
+        
+        &:hover {
+            background-position: -58px -60px;
+        }
+        
+        &:active {
+            background-position: -87px -60px;
+        }
+    }
+    
+    #refresh-button {
+        top:  56px;
+        left: 91px;
+        
+        background-position: 0 -30px;
+        background-position: -29px -30px;
+        
+        &:hover {
+            background-position: -58px -30px;
+        }
+        
+        &:active {
+            background-position: -87px -30px;
+        }
+    }
 }
 
 #tastemaker-map-window-iframe {
@@ -668,6 +725,54 @@ body.main {
     pointer-events: auto;
 }
 
+@-webkit-keyframes -webkit-iphone-lighting-animation {
+    0%   { background-position: 75px 0; }
+    100% { background-position: -1245px 0; }
+}
+
+.iphone-body-lighting {
+    position: absolute;
+    top:  0;
+    left: 50%;
+    margin-left: (-144.5px);
+    
+    //background: url(/assets/img/index/iphone_sprite.png) no-repeat;
+    background: url(/assets/img/index/iphone_main_lighting_0.png) no-repeat;
+    //background-position: -466px 0;
+    opacity: .15;
+    
+    width:  289px;
+    height: 564px;
+    
+    //.transition(background-position, 0.3s, ease-out);
+    pointer-events: none;
+    
+    -webkit-animation-name:             -webkit-iphone-lighting-animation;
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function:  linear;
+    //-webkit-animation-direction:        alternate;
+    -webkit-animation-duration:         15s;
+}
+
+.iphone-body-lighting-1 {
+    -webkit-animation-delay:            7.5s;
+}
+
+.iphone-body-overlay {
+    position: absolute;
+    top:  0;
+    left: 50%;
+    margin-left: -134px;
+    
+    background: url(/assets/img/index/iphone_sprite.png) no-repeat;
+    background-position: -300px 0;
+    width:  289px;
+    height: 564px;
+    
+    pointer-events: none;
+
+}
+
 .iphone-screens {
     position: absolute;
     
@@ -699,7 +804,7 @@ body.main {
     .iphone-inbox-header {
         background: url(/assets/img/index/iphone_main_inbox_header.png) no-repeat;
         width:  100%;
-        height: 366px;
+        height: 51px;
         
         position: absolute;
         top:  0;
@@ -715,7 +820,17 @@ body.main {
         top:  0;
         left: 0;
     }
-
+    
+    .iphone-inbox-footer {
+        background: url(/assets/img/index/iphone_main_inbox_footer.png) no-repeat;
+        width:  100%;
+        height: 42px;
+        
+        position: absolute;
+        bottom: 0;
+        left:   0;
+    }
+    
     .iphone-inbox-selection {
         position: absolute;
         display:  none;
@@ -792,6 +907,8 @@ body.main {
     }
 }
 
+//.iphone-screen-active-inbox + .iphone-body-lighting-0 { }
+
 .iphone-screen-active-sdetail {
     .iphone-screen-inbox {
         left: -244px !important;
@@ -806,6 +923,8 @@ body.main {
     }
 }
 
+//.iphone-screen-active-sdetail + .iphone-body-lighting-0 { }
+
 .iphone-screen-active-guide {
     .iphone-screen-inbox {
         left: -244px !important;
@@ -819,6 +938,8 @@ body.main {
         left: 0 !important;
     }
 }
+
+//.iphone-screen-active-guide + .iphone-body-lighting-0 { }
 
 #retina {
     #main-iphone {

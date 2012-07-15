@@ -601,6 +601,7 @@ body.app {
 
 .stamp-gallery-header {
     margin: 1em 24px;
+    .transform(translateZ(0));
     
     /*.stamp-gallery-sort {
         position: relative;
@@ -689,11 +690,11 @@ body.app {
     }
 }
 
-body.music, body.book, body.film, body.app {
+/*body.music, body.book, body.film, body.app {
     .stamp-gallery-view-map {
         display: none;
     }
-}
+}*/
 
 
 /* **************************************************************************
@@ -708,10 +709,10 @@ body.music, body.book, body.film, body.app {
     width: 75%;
     clear: both;
     text-align: center;
+    left: -24px;
     
     padding: 1.5em 0;
     margin:  0;
-    left: -24px;
     
     .top-wave {
         background: url(/assets/img/main-topcap.png) repeat-x;
@@ -731,6 +732,7 @@ body.music, body.book, body.film, body.app {
     width:  100%;
     min-width: @stamp-gallery-item-min-width;
     
+    .transform(translateZ(0));
     .rounded(4px);
     
     &:hover {
@@ -956,11 +958,11 @@ body.music, body.book, body.film, body.app {
         display:  block;
         width: 100%;
         
-        .transition-transform(0.5s, ease-out);
+        /*.transition-transform(0.5s, ease-out);
         
         &:hover {
             .transform(perspective(600));
-        }
+        }*/
     }
     
     .stamp-user-image {
@@ -1097,9 +1099,12 @@ body.music, body.book, body.film, body.app {
 
 .loading {
     background: url(/assets/img/loading.gif) no-repeat;
+    position: absolute;
+    top:  140px;
+    left: 50%;
+    
+    margin-left: (-24px -16px);
     display: none;
-    text-align: center;
-    margin:  2em auto;
     
     width:  32px;
     height: 32px;
@@ -1236,7 +1241,13 @@ body.music, body.book, body.film, body.app {
     }
     
     ol {
+        margin:  0;
+        padding: 0;
+        
         li {
+            margin:  0;
+            padding: 0;
+            
             a {
                 position: relative;
                 display: block;
