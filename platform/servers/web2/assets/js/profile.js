@@ -1188,9 +1188,11 @@ var g_update_stamps = null;
                 // TODO: clamp logo size when sdetail is animating
                 // TODO: does logo collapsing only repro on chrome? or is it FF as well?
                 
+                //console.log("width: " + cur_logo_width + "; bg-size: " + cur_logo_size);
+                
                 $user_logo.css({
-                    width               : cur_logo_width, 
-                    height              : cur_logo_width, 
+                    'width'             : cur_logo_width, 
+                    'height'            : cur_logo_width, 
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size, 
                     //top                 : cur_logo_top, 
