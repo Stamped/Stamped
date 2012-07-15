@@ -1499,6 +1499,7 @@ class Stamp(Schema):
         cls.addProperty('via',                              basestring)
         cls.addNestedProperty('previews',                   Previews)
         cls.addNestedProperty('links',                      StampLinks)
+        cls.addNestedProperty('og_action_id',               basestring)
 
     def __init__(self):
         Schema.__init__(self)
