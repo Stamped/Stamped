@@ -3648,13 +3648,14 @@ class StampedAPI(AStampedAPI):
             if item.stamps is not None:
                 stamps = []
                 for stampPreview in item.stamps:
-                    stampPreview.user = userIds[stampPreview.user.user_id]
-                    if stampPreview.user is None:
+                    stampPreviewUser = userIds[stampPreview.user.user_id]
+                    if stampPreviewUser is None:
                         logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
-                            (stampPreview.user, stat.entity_id))
+                            (stampPreview.user.user_id, stat.entity_id))
                         # Trigger update to entity stats
                         tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
                         continue
+                    stampPreview.user = stampPreviewUser
                     stamps.append(stampPreview)
                 previews.stamps = stamps
             if item.todo_user_ids is not None:
