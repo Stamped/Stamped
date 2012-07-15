@@ -84,33 +84,6 @@ class S3ImageDB(AImageDB):
             '31x31': (31, 31),  # 1x
         }
     
-    def addProfileImage(self, screen_name, image):
-        assert isinstance(image, Image.Image)
-        
-        # Filename is lowercase screen name
-        prefix = 'users/%s' % screen_name.lower()
-        width, height = image.size
-        
-        if width != height:
-            # Extract a square aspect ratio image by cropping the longer side
-            diff = abs(height - width) / 2
-            
-            if width > height:
-                box = (diff, 0, width - diff, height)
-            else:
-                box = (0, diff, width, height - diff)
-            
-            square = image.crop(box)
-        else:
-            # image is already square
-            square = image
-        
-        max_size = self.profileImageMaxSize
-        
-        # Add original profile image
-        self._addImageSizes(prefix, square, max_size)
-        return 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
-    
     def addResizedProfileImages(self, screen_name, image_url):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
@@ -138,7 +111,7 @@ class S3ImageDB(AImageDB):
             return square
 
 
-        image = self.cropImageToSquare(image)
+        image = cropImageToSquare(image)
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
     
     def removeProfileImage(self, screen_name):

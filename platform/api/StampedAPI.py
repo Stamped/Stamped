@@ -776,25 +776,6 @@ class StampedAPI(AStampedAPI):
     def updateProfileImageAsync(self, screen_name, image_url):
         self._imageDB.addResizedProfileImages(screen_name.lower(), image_url)
 
-    def _addProfileImage(self, data, user_id=None, screen_name=None):
-        assert user_id is not None or screen_name is not None
-        user = None
-
-        if user_id is not None:
-            user = self._userDB.getUser(user_id)
-            screen_name = user.screen_name
-
-        image = self._imageDB.getImage(data)
-        image_url = self._imageDB.addProfileImage(screen_name.lower(), image)
-
-        if user is not None:
-            image_cache = datetime.utcnow()
-            user.timestamp.image_cache = image_cache
-            self._accountDB.updateUserTimestamp(user.user_id, 'image_cache', image_cache)
-
-        tasks.invoke(tasks.APITasks.updateProfileImage, args=[screen_name, image_url])
-        return user
-
     def checkAccount(self, login):
         ### TODO: Clean this up (along with HTTP API function)
         valid = False
@@ -954,6 +935,23 @@ class StampedAPI(AStampedAPI):
 
         self._accountDB.updateLinkedAccount(authUserId, linkedAccount)
         return linkedAccount
+
+    def _getOpenGraphShareSettings(self, authUserId):
+        account = self.getAccount(authUserId)
+
+        # for now, only post to open graph for mike and kevin
+        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
+            logs.warning('### Skipping Open Graph post because user not on whitelist')
+            return
+
+        if account.linked is None or\
+           account.linked.facebook is None or\
+           account.linked.facebook.share_settings is None or\
+           account.linked.facebook.token is None:
+            return None
+
+        return account.linked.facebook.share_settings
+
 
     @API_CALL
     def removeLinkedAccount(self, authUserId, service_name):
@@ -1326,11 +1324,13 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(authUserId, 'num_friends',   increment=1)
         self._userDB.updateUserStats(userId,     'num_followers', increment=1)
 
-        # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
-
         # Refresh guide
         tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId], kwargs={'force': True})
+
+        # Post to Facebook Open Graph if enabled
+        share_settings = self._getOpenGraphShareSettings(authUserId)
+        if share_settings is not None and share_settings.share_follows:
+            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -1967,7 +1967,12 @@ class StampedAPI(AStampedAPI):
 
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
+        popularStampIds = map(lambda x: x.stamp_id, popularStamps)
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
+
+        if len(popularStampIds) != len(popularUserIds):
+            logs.warning("%s: Length of popularStampIds doesn't equal length of popularUserIds" % entityId)
+            raise Exception
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
@@ -2606,8 +2611,10 @@ class StampedAPI(AStampedAPI):
 
         # Post to Facebook Open Graph if enabled
         if not stampExists:
-            tasks.invoke(tasks.APITasks.postToOpenGraph,
-                kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
+            share_settings = self._getOpenGraphShareSettings(authUserId)
+            if share_settings is not None and share_settings.share_stamps:
+                tasks.invoke(tasks.APITasks.postToOpenGraph,
+                    kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
     
     @API_CALL
     def updateUserImageCollageAsync(self, user_id, category):
@@ -2751,8 +2758,8 @@ class StampedAPI(AStampedAPI):
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[entityId])
 
-        # Remove OG activity item, if it was created
-        if og_action_id is not None:
+        # Remove OG activity item, if it was created, and if the user still has a linked FB account
+        if og_action_id is not None and self._getOpenGraphShareSettings(authUserId) is not None:
             tasks.invoke(tasks.APITasks.deleteFromOpenGraph, kwargs={'authUserId': authUserId,'og_action_id': og_action_id})
 
     @API_CALL
@@ -2959,26 +2966,12 @@ class StampedAPI(AStampedAPI):
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
-        account = self.getAccount(authUserId)
-        if account.linked is not None and account.linked.facebook is not None \
-           and account.linked.facebook.token is not None:
-            token = account.linked.facebook.token
+
             result = self._facebook.deleteFromOpenGraph(og_action_id, token)
 
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
-
-        # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
-            logs.warning('### Skipping Open Graph post because user not on whitelist')
-            return
-
-        if account.linked is None or account.linked.facebook is None or account.linked.facebook.share_settings is None\
-           or account.linked.facebook.token is None:
-            return
-
-        share_settings = account.linked.facebook.share_settings
 
         token = account.linked.facebook.token
         fb_user_id = account.linked.facebook.linked_user_id
@@ -2991,7 +2984,7 @@ class StampedAPI(AStampedAPI):
         user = None
         if imageUrl is not None:
             kwargs['imageUrl'] = imageUrl
-        if stampId is not None and share_settings.share_stamps == True:
+        if stampId is not None:
             action = 'stamp'
             stamp = self.getStamp(stampId)
             kind = stamp.entity.kind
@@ -2999,21 +2992,21 @@ class StampedAPI(AStampedAPI):
             ogType = self._kindTypeToOpenGraphType(kind, types)
             url = self._getOpenGraphUrl(stamp = stamp)
             kwargs['message'] = stamp.contents[-1].blurb
-        elif likeStampId is not None and share_settings.share_likes == True:
+        elif likeStampId is not None:
             action = 'like'
             stamp = self.getStamp(likeStampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
             url = self._getOpenGraphUrl(stamp = stamp)
-        elif todoStampId is not None and share_settings.share_todos == True:
+        elif todoStampId is not None:
             action = 'todo'
             stamp = self.getStamp(todoStampId)
             kind = stamp.entity.kind
             types = stamp.entity.types
             ogType = self._kindTypeToOpenGraphType(kind, types)
             url = self._getOpenGraphUrl(stamp = stamp)
-        elif followUserId is not None and share_settings.share_follows == True:
+        elif followUserId is not None:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
             ogType = 'user'
@@ -3262,7 +3255,9 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
+        share_settings = self._getOpenGraphShareSettings(authUserId)
+        if share_settings is not None and share_settings.share_likes:
+            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'likeStampId':stamp.stamp_id})
 
     @API_CALL
     def removeLike(self, authUserId, stampId):
@@ -4412,9 +4407,11 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
-        # for now, we only post to OpenGraph if the Todo was off of a stamp
+        # for now, we only post to OpenGraph if the todo was created off of a stamp
         if stampId is not None:
-            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId, 'todoStampId':stampId})
+            share_settings = self._getOpenGraphShareSettings(authUserId)
+            if share_settings is not None and share_settings.share_todos:
+                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId, 'todoStampId':stampId})
 
     @API_CALL
     def completeTodo(self, authUserId, entityId, complete):
