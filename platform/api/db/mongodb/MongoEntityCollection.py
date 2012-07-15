@@ -10,23 +10,23 @@ import time
 from logs       import report
 
 try:
-    from datetime                       import datetime
+    from datetime                       import datetime, timedelta
     from utils                          import lazyProperty, getHeadRequest, getWebImageSize
     from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
     from api.Entity                         import getSimplifiedTitle, buildEntity
 
-    from api.db.mongodb.AMongoCollection               import AMongoCollection
-    from api.db.mongodb.MongoEntitySeedCollection      import MongoEntitySeedCollection
-    from api.db.mongodb.MongoMenuCollection            import MongoMenuCollection
-    from api.AEntityDB                      import AEntityDB
-    from difflib                        import SequenceMatcher
-    from api.ADecorationDB                  import ADecorationDB
-    from errors                         import StampedUnavailableError
-    from logs                           import log
+    from api.db.mongodb.AMongoCollection            import AMongoCollection
+    from api.db.mongodb.MongoEntitySeedCollection   import MongoEntitySeedCollection
+    from api.db.mongodb.MongoMenuCollection         import MongoMenuCollection
+    from api.AEntityDB                              import AEntityDB
+    from difflib                                    import SequenceMatcher
+    from api.ADecorationDB                          import ADecorationDB
+    from errors                                     import StampedUnavailableError
+    from logs                                       import log
 
-    from libs.SearchUtils               import generateSearchTokens
+    from libs.SearchUtils                           import generateSearchTokens
 except:
     report()
     raise
@@ -55,6 +55,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     @lazyProperty
     def seed_collection(self):
         return MongoEntitySeedCollection()
+
+    @lazyProperty
+    def entity_stats(self):
+        return MongoEntityStatsCollection()
 
     def _convertFromMongo(self, document, mini=False):
         if document is None:
@@ -103,7 +107,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=False, api=None):
         """
         Check the entity to verify the following things:
 
@@ -128,7 +132,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         assert document is not None
 
         modified = False
-        postUpdateErrors = []
 
         # Check if old schema version
         if 'schema_version' not in document or 'search_tokens' not in document:
@@ -186,11 +189,12 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         # Source-specific checks
         if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
             msg = "%s: Missing iTunes URL" % entity.entity_id
-            if repair and entity.sources.itunes_timestamp is not None:
+            if repair and entity.sources.itunes_timestamp is not None and api is not None:
                 logs.info(msg)
                 del(entity.sources.itunes_timestamp)
+                # Warning: Possible race condition. Should really apply after object has been saved.
+                # api.mergeEntityId(entity.entity_id)
                 modified = True
-                postUpdateErrors.append(StampedItunesSourceError(msg))
             else:
                 raise StampedItunesSourceError(msg)
         if entity.sources.googleplaces_id is not None and entity.sources.googleplaces_reference is None:
@@ -277,8 +281,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(entity))
 
-        if len(postUpdateErrors) > 0:
-            raise postUpdateErrors[0]
+        # Check integrity for stats
+        self.entity_stats.checkIntegrity(key, repair=repair, api=api)
 
         return True
 
@@ -369,4 +373,120 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def updateDecoration(self, name, value):
         if name == 'menu':
             self.__menu_db.updateMenu(value)
+
+
+
+class MongoEntityStatsCollection(AMongoCollection):
+    
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='entitystats', primary_key='entity_id', obj=EntityStats)
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=False, api=None):
+        """
+        Check an entity's stats to verify the following things:
+
+        - Entity still exists 
+
+        - Stats are not out of date 
+
+        """
+
+        regenerate = False
+        document = None
+
+        # Remove stat if entity no longer exists
+        if self._collection._database['entities'].find({'_id': key}).count() == 0:
+            msg = "%s: Entity no longer exists"
+            if repair:
+                logs.info(msg)
+                self._removeMongoDocument(key)
+                return True
+            else:
+                raise StampedDataError(msg)
+        
+        # Verify stat exists
+        try:
+            document = self._getMongoDocumentFromId(key)
+        except StampedDocumentNotFoundError:
+            msg = "%s: Stat not found" % key
+            if repair:
+                logs.info(msg)
+                regenerate = True
+            else:
+                raise StampedDataError(msg)
+
+        # Check if old schema version
+        if document is not None and 'timestamp' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                regenerate = True
+            else:
+                raise StampedDataError(msg)
+
+        # Check if stats are stale
+        elif document is not None and 'timestamp' in document:
+            generated = document['timestamp']['generated']
+            if generated < datetime.utcnow() - timedelta(days=2):
+                msg = "%s: Stale stats" % key
+                if repair:
+                    logs.info(msg)
+                    regenerate = True 
+                else:
+                    raise StampedDataError(msg)
+
+        # Rebuild
+        if regenerate and repair:
+            if api is not None:
+                api.updateEntityStatsAsync(str(key))
+            else:
+                raise Exception("%s: API required to regenerate stats" % key)
+
+        return True
+    
+    ### PUBLIC
+    
+    def addEntityStats(self, stats):
+        if stats.timestamp is None:
+            stats.timestamp = StatTimestamp()
+        stats.timestamp.generated = datetime.utcnow()
+
+        return self._addObject(stats)
+    
+    def getEntityStats(self, entityId):
+        documentId = self._getObjectIdFromString(entityId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
+
+    def getStatsForEntities(self, entityIds):
+        documentIds = map(self._getObjectIdFromString, entityIds)
+        documents = self._getMongoDocumentsFromIds(documentIds)
+        return map(self._convertFromMongo, documents)
+    
+    def updateEntityStats(self, stats):
+        if stats.timestamp is None:
+            stats.timestamp = StatTimestamp()
+        stats.timestamp.generated = datetime.utcnow()
+
+        return self.update(stats)
+    
+    def removeEntityStats(self, entityId):
+        documentId = self._getObjectIdFromString(entityId)
+        return self._removeMongoDocument(documentId)
+
+    def updateNumStamps(self, entityId, numStamps):
+        self._collection.update(
+            { '_id' : self._getObjectIdFromString(entityId) }, 
+            { '$set' : { 'num_stamps' : numStamps } }
+        )
+        return True
+
+    def setPopular(self, entityId, userIds, stampIds):
+        self._collection.update(
+            { '_id' : self._getObjectIdFromString(entityId) }, 
+            { '$set' : { 'popular_users' : userIds, 'popular_stamps' : stampIds } }
+        )
+        return True
 

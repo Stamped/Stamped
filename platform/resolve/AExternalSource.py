@@ -24,7 +24,7 @@ class AExternalSource(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         """
         Hook for creating/updating external resources associated with an entity, writing to decorator-specific entity
         fields if necessary.

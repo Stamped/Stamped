@@ -66,6 +66,11 @@ class StampTimestamp(BasicTimestamp):
     def setSchema(cls):
         cls.addProperty('stamped',                          datetime)
 
+class StatTimestamp(Schema):
+    @classmethod 
+    def setSchema(cls):
+        cls.addProperty('generated',                        datetime)
+
 class SettingsEmailAlertToken(Schema):
     @classmethod
     def setSchema(cls):
@@ -183,6 +188,7 @@ class StampStats(Schema):
         cls.addPropertyList('preview_likes',                basestring) # UserIds
         cls.addPropertyList('preview_credits',              basestring) # StampIds
         cls.addPropertyList('preview_comments',             basestring) # CommentIds
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 class EntityStats(Schema):
     @classmethod
@@ -191,6 +197,7 @@ class EntityStats(Schema):
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
         cls.addPropertyList('popular_stamps',               basestring)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 
 # #### #

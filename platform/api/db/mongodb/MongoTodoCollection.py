@@ -55,7 +55,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=True, api=None):
         """
         Check the raw todo to verify the following things:
 

@@ -36,7 +36,7 @@ class EntitySource(BasicSource):
             if group.groupName != 'stamped':
                 self.addGroup(group.groupName)
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         modified = False
         for group in self.__groups:
             mod = group.syncFields(self.__entity, entity)
