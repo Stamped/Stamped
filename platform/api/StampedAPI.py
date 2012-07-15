@@ -3788,6 +3788,9 @@ class StampedAPI(AStampedAPI):
             stampIds = self._getScopeStampIds(scope='inbox', authUserId=authUserId)
         elif guideSearchRequest.scope == 'popular':
             stampIds = None
+        elif guideSearchRequest.scope == 'me':
+            ### TODO: Return actual search across my todos. For now, just return nothing.
+            return []
         else:
             # TODO: What should we return for other search queries (not inbox and not popular)?
             stampIds = None
