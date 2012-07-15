@@ -4897,19 +4897,14 @@ class StampedAPI(AStampedAPI):
     def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
         """
-        entity = self._enrichAndPersistEntity(entity)
-        if entity.isType('artist'):
-            depth = 1  # Only go to the tracks.
-        elif entity.isType('track'):
-            depth = 2  # To artist, then her tracks.
-        elif entity.isType('album'):
-            depth = 3  # To tracks, to artist, then to tracks.
-        else:
-            depth = 0
-        self._followOutLinks(entity, set([entity.entity_id]), depth)
+        persisted = set()
+        entity = self._enrichAndPersistEntity(entity, persisted)
+        self._followOutLinks(entity, persisted, 0)
         return entity
 
-    def _enrichAndPersistEntity(self, entity):
+    def _enrichAndPersistEntity(self, entity, persisted):
+        if entity.entity_id in persisted:
+            return entity
         logs.info('Merge Entity Async: "%s" (id = %s)' % (entity.title, entity.entity_id))
         entity, modified = self._resolveEntity(entity)
         logs.info('Modified: ' + str(modified))
@@ -4920,7 +4915,7 @@ class StampedAPI(AStampedAPI):
                 entity = self._entityDB.addEntity(entity)
             else:
                 entity = self._entityDB.updateEntity(entity)
-
+        persisted.add(entity.entity_id)
         return entity
 
     def _resolveEntity(self, entity):
@@ -5005,11 +5000,19 @@ class StampedAPI(AStampedAPI):
 
         return self._iterateOutLinks(entity, _resolveStubList)
 
-    def _followOutLinks(self, entity, persisted, depth):
-        if entity.entity_id in persisted or depth == 0:
-            return
+    def _shouldFollowLink(self, entity, attribute, depth):
+        if attribute == 'albums':
+            return False
+        if entity.isType('album'):
+            return attribute == 'tracks'
+        if entity.isType('artist'):
+            return True
+        return depth == 0
 
+    def _followOutLinks(self, entity, persisted, depth):
         def followStubList(entity, attr):
+            if not self._shouldFollowLink(entity, attr, depth):
+                return
             stubList = getattr(entity, attr)
             if not stubList:
                 return
@@ -5021,7 +5024,7 @@ class StampedAPI(AStampedAPI):
                     logs.warning('stub resolution failed: %s' % stub)
                     mergeEntityTasks.append(None)
                 else:
-                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull))
+                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
             
             modified = False
             visitedStubs = []
@@ -5036,10 +5039,9 @@ class StampedAPI(AStampedAPI):
             setattr(entity, attr, visitedStubs)
             if modified:
                 self._entityDB.updateEntity(entity)
-            persisted.add(entity.entity_id)
 
             for mergedEntity in mergedEntities:
-                self._followOutLinks(mergedEntity, persisted, depth-1)
+                self._followOutLinks(mergedEntity, persisted, depth+1)
         self._iterateOutLinks(entity, followStubList)
 
     def _resolveStub(self, stub, quickResolveOnly):
