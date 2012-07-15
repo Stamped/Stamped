@@ -2967,6 +2967,7 @@ class StampedAPI(AStampedAPI):
         share_settings = account.linked.facebook.share_settings
 
         token = account.linked.facebook.token
+        fb_user_id = account.linked.facebook.linked_user_id
         action = None
         ogType = None
         url = None
@@ -3008,11 +3009,7 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-<<<<<<< HEAD
         result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
-=======
-        result = self._facebook.postToOpenGraph(action, token, ogType, url, **kwargs)
->>>>>>> .
 
 
     """
