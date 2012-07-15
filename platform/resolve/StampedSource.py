@@ -716,7 +716,7 @@ class StampedSource(GenericSource):
         return self.__entityDB._collection.find(mongo_query, fields=['_id'], limit=1000).sort('_id',pymongo.ASCENDING)
 
     def __querySource(self, token_queries, query_obj, **kwargs):
-        def gen():
+        def entityGenerator():
             id_set = set()
             for query in token_queries:
                 mongo_query = {
@@ -736,7 +736,7 @@ class StampedSource(GenericSource):
                         id_set.add(entity_id)
         def constructor(entity_id):
             return self.proxyFromEntity(self.__entityDB.getEntity(str(entity_id)))
-        return self.generatorSource(gen(), constructor=constructor, unique=True, tolerant=True)
+        return self.generatorSource(entityGenerator(), constructor, unique=True, tolerant=True)
 
     def entityProxyFromKey(self, entity_id, **kwargs):
         return self.proxyFromEntity(self.__entityDB.getEntity(entity_id))
