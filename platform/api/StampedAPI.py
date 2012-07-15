@@ -1967,7 +1967,12 @@ class StampedAPI(AStampedAPI):
 
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
+        popularStampIds = map(lambda x: x.stamp_id, popularStamps)
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
+
+        if len(popularStampIds) != len(popularUserIds):
+            logs.warning("%s: Length of popularStampIds doesn't equal length of popularUserIds" % entityId)
+            raise Exception
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
