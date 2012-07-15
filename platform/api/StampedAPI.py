@@ -2961,8 +2961,8 @@ class StampedAPI(AStampedAPI):
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
         account = self.getAccount(authUserId)
         if account.linked is not None and account.linked.facebook is not None \
-           and account.linked.facebook.facebook_token is not None:
-            token = account.linked.facebook.facebook_token
+           and account.linked.facebook.token is not None:
+            token = account.linked.facebook.token
             result = self._facebook.deleteFromOpenGraph(og_action_id, token)
 
 
