@@ -1714,16 +1714,16 @@ class StampedAPI(AStampedAPI):
             for name in names:
                 completions.append( { 'completion' : name } )
             return completions
-        elif category == 'music':
-            result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
-            if 'result' not in result:
-                return []
-            #names = list(set([i['name'] for i in result['result']]))[:10]
-            names = self._orderedUnique([i['name'] for i in result['result']])[:10]
-            completions = []
-            for name in names:
-                completions.append( { 'completion' : name})
-            return completions
+        # elif category == 'music':
+        #     result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
+        #     if 'result' not in result:
+        #         return []
+        #     #names = list(set([i['name'] for i in result['result']]))[:10]
+        #     names = self._orderedUnique([i['name'] for i in result['result']])[:10]
+        #     completions = []
+        #     for name in names:
+        #         completions.append( { 'completion' : name})
+        #     return completions
         return []
 
     @API_CALL
@@ -3651,7 +3651,7 @@ class StampedAPI(AStampedAPI):
                     stampPreview.user = userIds[stampPreview.user.user_id]
                     if stampPreview.user is None:
                         logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
-                            (stat.popular_users[i], stat.entity_id))
+                            (stampPreview.user.user_id, stat.entity_id))
                         # Trigger update to entity stats
                         tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
                         continue
