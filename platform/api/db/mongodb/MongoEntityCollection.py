@@ -10,6 +10,8 @@ import time
 from logs       import report
 
 try:
+    import libs.ec2_utils
+
     from datetime                       import datetime, timedelta
     from utils                          import lazyProperty, getHeadRequest, getWebImageSize
     from bson.objectid                  import ObjectId
@@ -130,6 +132,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         
         assert document is not None
 
+        resolve = False
         modified = False
 
         # Check if old schema version
@@ -185,17 +188,31 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         if entity.sources is None or len(entity.sources.dataExport().keys()) == 0:
             raise StampedInvalidSourcesError("%s: Missing sources" % key)
 
-        # Source-specific checks
+        # iTunes: Verify 'url' exists
         if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
-            msg = "%s: Missing iTunes URL" % entity.entity_id
-            if repair and entity.sources.itunes_timestamp is not None and api is not None:
+            msg = "%s: Missing iTunes URL" % key
+            if repair:
                 logs.info(msg)
                 del(entity.sources.itunes_timestamp)
-                # Warning: Possible race condition. Should really apply after object has been saved.
-                # api.mergeEntityId(entity.entity_id)
+                resolve = True
                 modified = True
             else:
-                raise StampedItunesSourceError(msg)
+                raise StampedDataError(msg)
+
+        # iTunes: Verify 'url' points to 'http://itunes.apple.com'
+        elif entity.sources.itunes_id is not None and entity.sources.itunes_url is not None:
+            if not entity.sources.itunes_url.startswith('http://itunes.apple.com'):
+                msg = "%s: Invalid iTunes URL" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.sources.itunes_timestamp)
+                    del(entity.sources.itunes_url)
+                    resolve = True
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+
+        # Google: Verify 'reference' exists
         if entity.sources.googleplaces_id is not None and entity.sources.googleplaces_reference is None:
             raise StampedGooglePlacesSourceError("%s: Missing Google Places reference" % entity.entity_id)
 
@@ -300,6 +317,16 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(entity))
+
+        if resolve and repair:
+            msg = "%s: Re-resolve entity" % key
+            # Only run this on EC2 (for now)
+            if api is not None:
+                if libs.ec2_utils.is_ec2():
+                    logs.info(msg)
+                    api.mergeEntityId(str(key))
+            else:
+                raise StampedDataError(msg)
 
         # Check integrity for stats
         self.entity_stats.checkIntegrity(key, repair=repair, api=api)
