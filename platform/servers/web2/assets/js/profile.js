@@ -1725,6 +1725,9 @@ var g_update_stamps = null;
         
         // loads and opens the specified sdetail popup
         var open_sdetail = function(href, html) {
+            var sdetail_initialized = false;
+            var sdetail_anim_loaded = false;
+            var sdetail_ajax_loaded = false;
             var scroll_top = 0;
             var $target;
             
@@ -1749,9 +1752,22 @@ var g_update_stamps = null;
             
             update_dynamic_header();
             
+            var init_sdetail_async = function() {
+                if (sdetail_ajax_loaded && sdetail_anim_loaded && !sdetail_initialized) {
+                    sdetail_initialized = true;
+                    
+                    // TODO: which order should these two statements appear in?
+                    init_sdetail($target);
+                    $target.removeClass('sdetail-loading');
+                }
+            };
+            
             if (!!href) {
                 resize_sdetail_wrapper($target, 'opening', function() {
                     $target.removeClass('animating');
+                    
+                    sdetail_anim_loaded = true;
+                    init_sdetail_async();
                 });
             } else {
                 resize_sdetail_wrapper($target, '');
@@ -1805,11 +1821,12 @@ var g_update_stamps = null;
                         
                         alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
                         
+                        close_sdetail();
                         return;
                     }
                     
-                    $target.removeClass('sdetail-loading');
-                    init_sdetail($target);
+                    sdetail_ajax_loaded = true;
+                    init_sdetail_async();
                 });
             } else {
                 init_sdetail($target);

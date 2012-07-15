@@ -169,6 +169,25 @@
             maxFontSize : '250px'
         });
         
+        var hide_intro = function(autoplay) {
+            // start the main page content animation
+            init_main(autoplay);
+            
+            var height = $active.height();
+            var offset = get_relative_offset(height);
+            
+            // hide the intro hero text by translating it off the top of the screen
+            $intro_hero.animate({
+                top : offset
+            }, {
+                duration : 600, 
+                easing   : "swing", 
+                complete : function() {
+                    $body.removeClass("intro");
+                }
+            });
+        };
+        
         // intro hero text animation
         var intro_animation = new Animation({
             duration    : 1600, 
@@ -185,21 +204,7 @@
                     intro_animation.restart();
                 } else {
                     // otherwise, start the main page content animation and hide the intro hero text
-                    init_main(true);
-                    
-                    var height = $active.height();
-                    var offset = get_relative_offset(height);
-                    
-                    // hide the intro hero text by translating it off the top of the screen
-                    $intro_hero.animate({
-                        top : offset
-                    }, {
-                        duration : 600, 
-                        easing   : "swing", 
-                        complete : function() {
-                            $body.removeClass("intro");
-                        }
-                    });
+                    hide_intro(true);
                 }
             }
         });
@@ -676,8 +681,7 @@
                 if (intro_animation.is_running()) {
                     intro_animation.stop(true, true);
                     
-                    // TODO: is this init_main redundant with the jumpToEnd from stop?
-                    init_main(false);
+                    hide_intro(false);
                 }
             }
         });

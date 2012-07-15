@@ -44,11 +44,11 @@
 TODO:
     * stamped.com:
         * intro:
-            * FIX ESC skips intro animation
+            * DONE - FIX ESC skips intro animation
         * main:
             * iphone:
-                * ADD SHADOWS
-                * move shadow & phone above other page content
+                * DONE - ADD SHADOWS
+                * DONE - move shadow & phone above other page content
             * pane 3 (tastemakers):
                 * blue border on active tastemaker's image
             * pane 4 (videos):
