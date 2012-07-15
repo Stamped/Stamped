@@ -3010,6 +3010,7 @@ class StampedAPI(AStampedAPI):
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
         result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
+        print('### result: %s' % result)
 
 
     """
