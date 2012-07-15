@@ -7,13 +7,14 @@ from gevent.event       import AsyncResult
 from gevent.coros       import Semaphore
 
 import Globals
-import rpyc
 import urllib
 import httplib2
 import datetime
 import traceback
 
-from time               import time, gmtime, mktime
+import utils
+
+from time               import time, gmtime, mktime, strftime, localtime
 from collections        import deque
 
 REQUEST_DUR_LOG_SIZE    = 10    # the size of the request duration log, which is used to determine the avg request duration
@@ -102,9 +103,10 @@ def workerProcess(limit):
 
 class RateLimiter(object):
 
-    def __init__(self, limit=None, period=None, cpd=None, fail_limit=None, fail_period=None, fail_wait=None):
+    def __init__(self, service_name=None, limit=None, period=None, cpd=None, fail_limit=None, fail_period=None, fail_wait=None):
         print('rate limit init')
 
+        self.__service_name = service_name
         self.__requests = RLPriorityQueue()
         self.__http = httplib2.Http()
 
@@ -150,17 +152,68 @@ class RateLimiter(object):
         if self.fail_wait != fail_wait:
             self.fail_wait = fail_wait
 
+    class FailLog(object):
+        def __init__(self, status_code, content):
+            self.timestamp = time()
+            self.status_code = status_code
+            self.content = content
 
-    def fail(self, now=None):
+    def sendFailLogEmail(self):
+        if len(self.__fails) == 0:
+            return
+
+
+
+
+        output = '<html>'
+        output += "<h3>RateLimiter Fail Limit reached</h3>"
+        output += "<p><i>There were %s failed requests to service '%s' within the last %s seconds</p></i>" %  \
+                  (self.fail_limit, self.__service_name, self.fail_period)
+        back_online = strftime('%m/%d/%Y %H:%M:%S', localtime(self.fail_start + self.fail_wait)) # Timestamp
+        output += "<p>Waiting for %s seconds.  Service will be active again at: %s</p>" % (self.fail_wait, back_online)
+
+        output += '<h3>Fail Log</h3>'
+
+        output += '<table border=1 cellpadding=5>'
+        output += '<tr>'
+        labels = ['Timestamp', 'Code', 'Content']
+        for label in labels:
+            output += '<td style="font-weight:bold">%s</td>' % label
+        output += '</tr>'
+
+        for fail in self.__fails:
+            output += '<tr>'
+            output += '<td valign=top>%s</td>' % strftime('%m/%d/%Y %H:%M:%S', localtime(fail.timestamp)) # Timestamp
+            output += '<td valign=top>%s</td>' % fail.status_code
+            output += '<td valign=top><code>%s</code></td>' % fail.content
+            output += '</tr>'
+
+        output += '</table>'
+        output += '</html>'
+
+
+        try:
+            email = {}
+            email['from'] = 'Stamped <noreply@stamped.com>'
+            email['to'] = 'dev@stamped.com'
+            email['subject'] = "RateLimiter '%s' fail limit reached" % self.__service_name
+            email['body'] = output
+            utils.sendEmail(email, format='html')
+        except Exception as e:
+            print('UNABLE TO SEND EMAIL: %s' % e)
+
+        return output
+
+    def fail(self, response, content):
         if self.__fails is None:
             return
 
-        if now is None:
-            now = time()
+        now = time()
 
+        ### Was getting deque() corruption error when the server was uploaded with requests.  This is to help prevent that.
         self.__semaphore.acquire()
 
-        self.__fails.append(now)
+        self.__fails.append(self.FailLog(response.status, content))
 
         cutoff = now - self.fail_period
         count = 0
@@ -173,10 +226,13 @@ class RateLimiter(object):
 
         self.__semaphore.release()
 
-
         if count > self.fail_limit:
             print('### hit fail limit')
             self.fail_start = time()
+
+            # Email dev if a fail limit was reached
+            if libs.ec2_utils.is_ec2():
+                self.sendFailLogEmail()
 
     def call(self):
         self.__calls += 1
@@ -304,7 +360,7 @@ class RateLimiter(object):
             asyncresult.set_exception(e)
             raise e
         if response.status >= 400:
-            self.fail()
+            self.fail(response, content)
 
         asyncresult.set((response, content))
 

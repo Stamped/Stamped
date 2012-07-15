@@ -30,11 +30,10 @@ def configLoaderLoop(service):
         sleep(config_load_interval)
         service.loadLimiters()
 
+class StampedRateLimiterService():
 
-class StampedRateLimiterService(rpyc.Service):
-
-    def __init__(self, port, throttle=False):
-        rpyc.Service.__init__(self, port)
+    def __init__(self, throttle=False):
+        print('calling ratelimiterService init')
         self.__throttle = throttle
         self.__limiters = {}
         self.loadLimiters()
@@ -57,11 +56,11 @@ class StampedRateLimiterService(rpyc.Service):
             for l in limits:
                 limit   = max(1, l['limit'] / 10)
                 cpd     = max(1, l['cpd'] / 10)
-                limiter = RateLimiter(limit, l['period'], cpd, l['fail_limit'], l['fail_period'], l['fail_wait'])
+                limiter = RateLimiter(l['service_name'], limit, l['period'], cpd, l['fail_limit'], l['fail_period'], l['fail_wait'])
                 limiters[l['service_name']] = limiter
         else:
             for l in limits:
-                limiter = RateLimiter(l['limit'], l['period'], l['cpd'], l['fail_limit'], l['fail_period'], l['fail_wait'])
+                limiter = RateLimiter(l['service_name'], l['limit'], l['period'], l['cpd'], l['fail_limit'], l['fail_period'], l['fail_wait'])
                 limiters[l['service_name']] = limiter
 
         if self.__limiters is None:
@@ -74,19 +73,10 @@ class StampedRateLimiterService(rpyc.Service):
             else:
                 self.__limiters[k] = v
 
-    def on_connect(self):
-        # code that runs when a connection is created
-        # (to init the serivce, if needed
-        pass
-
-    def on_disconnect(self):
-        # code that runs when the connection has already closed
-        # (to finalize the service, if needed)
-        pass
-
-    def exposed_request(self, service, priority, timeout, verb, url, body = {}, headers = {}):
+    def handleRequest(self, service, priority, timeout, verb, url, body = {}, headers = {}):
         global count
         count += 1
+        print ('calling exposed_request')
         if timeout is None:
             raise StampedInputError("Timeout period must be provided")
         request = Request(timeout, verb, url, body, headers)
@@ -107,9 +97,36 @@ class StampedRateLimiterService(rpyc.Service):
         #print('### returning from exposed_request')
         return response
 
+__rlServiceGlobal = None
+def globalRateLimiterService():
+    global __rlServiceGlobal
+    if __rlServiceGlobal is None:
+        __rlServiceGlobal = StampedRateLimiterService()
+    return __rlServiceGlobal
+
+class StampedRateLimiterRPCService(rpyc.Service):
+
+    def __init__(self, port):
+        print('calling ratelimiterRPCService init')
+        rpyc.Service.__init__(self, port)
+        self.__rl_service = globalRateLimiterService()
+
+    def on_connect(self):
+        # code that runs when a connection is created
+        # (to init the serivce, if needed
+        pass
+
+    def on_disconnect(self):
+        # code that runs when the connection has already closed
+        # (to finalize the service, if needed)
+        pass
+
+    def exposed_request(self, service, priority, timeout, verb, url, body = {}, headers = {}):
+        return self.__rl_service.handleRequest(service, priority, timeout, verb, url, body, headers)
+
 
 def runServer(port=18861):
-    t = GreenletServer(StampedRateLimiterService, port = port)
+    t = GreenletServer(StampedRateLimiterRPCService, port =port)
     t.start()
 
 def parseCommandLine():
