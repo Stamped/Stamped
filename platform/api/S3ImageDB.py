@@ -118,7 +118,27 @@ class S3ImageDB(AImageDB):
         image    = utils.getWebImage(image_url, "profile")
         sizes    = self.profileImageSizes
         max_size = self.profileImageMaxSize
-        
+
+        def cropImageToSquare(image):
+            width, height = image.size
+
+            if width != height:
+                # Extract a square aspect ratio image by cropping the longer side
+                diff = abs(height - width) / 2
+
+                if width > height:
+                    box = (diff, 0, width - diff, height)
+                else:
+                    box = (0, diff, width, height - diff)
+
+                square = image.crop(box)
+            else:
+                # image is already square
+                square = image
+            return square
+
+
+        image = self.cropImageToSquare(image)
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
     
     def removeProfileImage(self, screen_name):
