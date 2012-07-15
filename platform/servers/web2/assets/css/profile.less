@@ -958,11 +958,11 @@ body.app {
         display:  block;
         width: 100%;
         
-        /*.transition-transform(0.5s, ease-out);
+        .transition-transform(0.5s, ease-out);
         
         &:hover {
             .transform(perspective(600));
-        }*/
+        }
     }
     
     .stamp-user-image {
@@ -1045,7 +1045,6 @@ body.app {
 .blurb, .normal_blurb {
     display: block;
     text-align: left;
-    quotes: "\201C" "\201D";
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
     color: #666;    
@@ -1065,10 +1064,12 @@ body.app {
     text-overflow: ellipsis;
 }
 
+/*
+quotes: "\201C" "\201D";
 .stamp-inner-content {
     .normal_blurb:before { content: open-quote;  font-size: 200%; font-weight: bold; padding-right: .2em; }
     .normal_blurb:after  { content: close-quote; font-size: 200%; font-weight: bold; padding-left:  .2em; }
-}
+}*/
 
 .subtitle-line {
     position: relative;
@@ -1549,12 +1550,12 @@ body.sdetail_popup_animation, body.sdetail_popup {
         visibility: visible !important;
         display: block;
         
-        #stamp-category-nav-bar {
-            opacity: 0;
-        }
-        
         #main-content {
             display: block;
+        }
+        
+        #stamp-category-nav-bar {
+            opacity: 0;
         }
     }
 }

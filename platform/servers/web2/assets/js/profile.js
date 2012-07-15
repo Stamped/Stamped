@@ -675,11 +675,8 @@ var g_update_stamps = null;
                                 top : 'easeInOutCubic'
                             }, 
                             complete : function() {
-                                /*$sdetail_wrapper.css({
-                                    'top' : 0, 
-                                });*/
-                                
                                 $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
+                                $sdetail_wrapper.removeClass('animating');
                                 $window.scrollTop(0);
                                 
                                 if (!!anim_callback) {
@@ -688,10 +685,11 @@ var g_update_stamps = null;
                             }
                         });
                 } else if (sdetail_status == 'closing') {
-                    //$body.removeClass('sdetail_popup_animation sdetail_popup');
-                    
                     $sdetail_wrapper
                         .stop(true, false)
+                        .css({
+                            'top' : offset, 
+                        })
                         .addClass('animating')
                         .animate({
                             top : hidden, 
@@ -702,6 +700,7 @@ var g_update_stamps = null;
                             }, 
                             complete : function() {
                                 $body.removeClass('sdetail_popup_animation');
+                                $sdetail_wrapper.removeClass('animating');
                                 
                                 if (!!anim_callback) {
                                     anim_callback();
@@ -1188,9 +1187,11 @@ var g_update_stamps = null;
                 // TODO: clamp logo size when sdetail is animating
                 // TODO: does logo collapsing only repro on chrome? or is it FF as well?
                 
+                //console.log("width: " + cur_logo_width + "; bg-size: " + cur_logo_size);
+                
                 $user_logo.css({
-                    width               : cur_logo_width, 
-                    height              : cur_logo_width, 
+                    'width'             : cur_logo_width, 
+                    'height'            : cur_logo_width, 
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size, 
                     //top                 : cur_logo_top, 
@@ -1729,7 +1730,7 @@ var g_update_stamps = null;
             var sdetail_anim_loaded = false;
             var sdetail_ajax_loaded = false;
             var scroll_top = 0;
-            var $target;
+            var $target, $target2;
             
             $(sdetail_wrapper_sel).remove();
             
@@ -1739,15 +1740,18 @@ var g_update_stamps = null;
             
             if (!!href) {
                 $target     = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
+                $target2    = $("<div class='" + sdetail_wrapper + " sdetail-loading'></div>");
+                
                 scroll_top  = $window.scrollTop();
                 
                 console.debug("AJAX: " + href);
             } else {
                 $target     = $("<div class='" + sdetail_wrapper + "'></div>").html(html);
+                $target2    = $target;
             }
             
             $(sdetail_wrapper_sel).hide().remove();
-            $target.insertAfter($('#main-page-content-body').get(0));
+            $target.insertAfter($('#main-page-content-body'));
             $target = $(sdetail_wrapper_sel);
             
             update_dynamic_header();
@@ -1757,8 +1761,10 @@ var g_update_stamps = null;
                     sdetail_initialized = true;
                     
                     // TODO: which order should these two statements appear in?
-                    init_sdetail($target);
-                    $target.removeClass('sdetail-loading');
+                    $target.replaceWith($target2);
+                    init_sdetail($target2);
+                    
+                    $target2.removeClass('sdetail-loading');
                 }
             };
             
@@ -1775,7 +1781,6 @@ var g_update_stamps = null;
             
             close_sdetail_func = function() {
                 close_sdetail_func = null;
-                
                 $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                 
                 if (!!$gallery) {
@@ -1800,7 +1805,7 @@ var g_update_stamps = null;
                     init_header_subsections();
                 }
                 
-                resize_sdetail_wrapper($target, 'closing', function() {
+                resize_sdetail_wrapper($target2, 'closing', function() {
                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
                     
                     update_gallery_layout(true);
@@ -1813,7 +1818,7 @@ var g_update_stamps = null;
             
             if (!!href) {
                 // initialize sDetail popup after AJAX load
-                $target.load(href, { 'ajax' : true }, function(response, status, xhr) {
+                $target2.load(href, { 'ajax' : true }, function(response, status, xhr) {
                     if (status == "error") {
                         console.debug("AJAX ERROR (sdetail): " + url);
                         console.debug(response);
