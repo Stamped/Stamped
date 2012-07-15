@@ -50,7 +50,7 @@ TODO:
                 * DONE - ADD SHADOWS
                 * DONE - move shadow & phone above other page content
             * pane 3 (tastemakers):
-                * blue border on active tastemaker's image
+                * DONE - blue border on active tastemaker's image
             * pane 4 (videos):
                 * get v1 video preview asset image
     

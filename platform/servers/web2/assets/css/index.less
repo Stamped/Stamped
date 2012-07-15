@@ -458,11 +458,22 @@ body.main {
 
 #tastemaker-gallery {
     margin-top: 24px;
+    
     .tastemaker {
         position: relative;
         display:  inline-block;
         
         margin-right: 18px;
+    }
+    
+    .active {
+        img {
+            border-color: #438fED !important;
+            
+            &:active {
+                border-color: #438fED !important;
+            }
+        }
     }
     
     .tastemaker:last-child {
@@ -619,7 +630,7 @@ body.main {
 
 
 .screen-name {
-    color: #438fed !important;
+    color: #438FED !important;
 }
 
 .watch {
@@ -1017,7 +1028,7 @@ footer {
 
 
 /* **************************************************************************
-                                 BUTTONS
+                                   BUTTONS
    ************************************************************************** */
 
 
@@ -1186,6 +1197,12 @@ footer {
 .third-party-logo-opentable {
     .third-party-logo-template(4, -56px);
 }
+
+
+/* **************************************************************************
+                            RETINA DISPLAY BUTTONS
+   ************************************************************************** */
+
 
 #retina {
     .pane-nav-button {

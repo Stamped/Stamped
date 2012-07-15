@@ -266,7 +266,7 @@
                             
                             <div id="tastemaker-gallery">
                                 {% for user in tastemakers %}
-                                    <div class="tastemaker" data-screen-name="{{user.screen_name}}">
+                                    <div class="tastemaker tastemaker-{{user.screen_name}}" data-screen-name="{{user.screen_name}}">
                                         {% handlebars_template "profile-image-60" user %}
                                         
                                         <div class="user-logo-small tastemaker-logo tastemaker-logo-{{user.screen_name}}"></div>

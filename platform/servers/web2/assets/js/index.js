@@ -29,7 +29,7 @@
         var iphone_inbox_selection  = false;
         
         // tastemaker gallery
-        var $tastemaker_gallery     = $("#tastemaker-gallery");
+        //var $tastemaker_gallery     = $("#tastemaker-gallery");
         var $tastemakers            = $(".tastemaker");
         
         // embedded map window
@@ -360,6 +360,8 @@
             
             if (screen_name !== active) {
                 $map_window.data("active", screen_name);
+                $tastemakers.removeClass("active");
+                $(".tastemaker-" + screen_name).addClass("active");
                 
                 $map_window_url
                     .attr("href", "/" + screen_name + "/map")
