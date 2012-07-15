@@ -1758,7 +1758,9 @@ var g_update_stamps = null;
                     
                     // TODO: which order should these two statements appear in?
                     init_sdetail($target);
-                    $target.removeClass('sdetail-loading');
+                    setTimeout(function() {
+                        $target.removeClass('sdetail-loading');
+                    }, 250);
                 }
             };
             
