@@ -5133,7 +5133,14 @@ class StampedAPI(AStampedAPI):
                     logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
                     continue
         if entity_id is not None:
-            entity = self._entityDB.getEntity(entity_id)
+            try:
+                entity = self._entityDB.getEntity(entity_id)
+            except StampedDocumentNotFoundError:
+                logs.warning("Entity id is invalid: %s" % entity_id)
+                entity_id = None
+
+        if entity_id is not None:
+            pass
         elif source_id is not None and proxy is not None:
             entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
             entity = entityProxy.buildEntity()
