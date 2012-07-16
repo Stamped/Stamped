@@ -210,8 +210,9 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             raise Exception
 
     def getTodo(self, userId, entityId):
-        document = self._collection.find_one(\
-                {'entity.entity_id': entityId, 'user_id': userId})
+        document = self._collection.find_one({'entity.entity_id': entityId, 'user_id': userId})
+        if document is None:
+            raise StampedDocumentNotFoundError("Unable to find document (userId=%s, entityId=%s)" % (userId, entityId))
         todo = self._convertFromMongo(document)
         return todo
 
