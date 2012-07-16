@@ -205,26 +205,30 @@ def is_prod_stack():
         return False
     
     stack = get_stack()
-    prod  = get_prod_stack()
+    prodStacks  = get_prod_stacks()
     
-    if stack is not None and prod is not None:
-        return stack.instance.stack == prod
+    if stack is not None and prodStacks is not None:
+        return stack.instance.stack in prodStacks
     
     return False
 
-def get_prod_stack():
+def get_prod_stacks():
     if not is_ec2():
         return None
     
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.prod_stack.txt')
     
     if os.path.exists(path):
-        f = open(path, 'r')
-        name = f.read()
-        f.close()
-        
-        if len(name) > 1:
-            return name
+        try:
+            f = open(path, 'r')
+            names = set(json.loads(f.read()))
+            f.close()
+            
+            if len(names) > 1:
+                return names
+        except:
+            utils.log("error getting cached prod stack info; recomputing")
+            utils.printException()
     
     conn  = Route53Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     zones = conn.get_all_hosted_zones()
@@ -236,20 +240,20 @@ def get_prod_stack():
             host = zone
             break
     
+    names = set()
     if host is not None:
         records = conn.get_all_rrsets(host['Id'][12:])
         
         for record in records:
-            if record.name == 'api.stamped.com.':
-                name = record.alias_dns_name.split('-')[0].strip()
-                break
+            if record.name == 'api.stamped.com.' or record.name == 'api1.stamped.com.':
+                names.add(record.alias_dns_name.split('-')[0].strip())
     
-    if name is not None:
+    if len(names) > 0:
         f = open(path, 'w')
-        f.write(name)
+        f.write(json.dumps(list(names)))
         f.close()
     
-    return name
+    return names
 
 def is_ec2():
     """ returns whether or not this python program is running on EC2 """
