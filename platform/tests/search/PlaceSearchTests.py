@@ -8,11 +8,23 @@ __license__   = "TODO"
 import Globals, utils
 
 from tests.StampedTestUtils       import *
-from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
+from tests.framework.FixtureTest  import fixtureTest, main
+from tests.search.SearchTestsRunner import SearchTestsRunner
+from tests.search.SearchResultMatcher import *
+from tests.search.SearchResultsScorer import *
 
-class PlaceSearchTests(ASearchTestSuite):
-    
-    def test_basic(self):
+def makeTestCase(query, coords, expected_results):
+    if coords:
+        query = {'query': query, 'coords': coords}
+    return SearchTestCase('place', query, expected_results)
+
+class PlaceSearchTests(AStampedTestCase, SearchTestsRunner):
+    def __init__(self):
+        AStampedTestCase.__init__(self)
+        SearchTestsRunner.__init__(self)
+
+    @fixtureTest
+    def test_place_search(self):
         """ Test basic place searches """
 
         """
@@ -23,38 +35,24 @@ class PlaceSearchTests(ASearchTestSuite):
             * target opentable
             * 
         """
-        
+
+        test_cases = (
+            makeTestCase('bourbon and branch', None,
+                PlaceResultMatcher(title=Equals('Bourbon and Branch'), all_components_must_match=True, unique=True)),
+            makeTestCase('empire state building', (40.736, -73.989),
+                PlaceResultMatcher(title=Equals('Empire State Building'))),
+            makeTestCase('beer bistro', (43.654828, -79.375191),
+                PlaceResultMatcher(title=Equals('Beer Bistro'))),
+            makeTestCase('disney world', (28.344178, -81.575242),
+                PlaceResultMatcher(title=Equals('Disney World'))),
+            makeTestCase('le poisson rouge', (40.734466, -73.990742),
+                PlaceResultMatcher(title=Equals('le poisson rouge'))),
+
+            )
+
+        """
         tests = [
-            ({ 'query' : 'bourbon and branch', 'category' : 'place', }, [ # TODO: 'bourbon & branch' query doesn't work...
-                SearchResultConstraint(title='bourbon and branch', 
-                                       types='place'), 
-            ]), 
-            ({ 'query' : 'empire state building', 'category' : 'place', 'coords' : (40.736, -73.989) }, [ 
-                SearchResultConstraint(title='empire state building', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'beer bistro', 'category' : 'place', 'coords' : (43.654828, -79.375191) }, [ 
-                SearchResultConstraint(title='beer bistro', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'disney world', 'category' : 'place', 'coords' : (28.344178, -81.575242) }, [ 
-                SearchResultConstraint(title='disney world', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            #({ 'query' : 'paddy\'s irish', 'category' : 'place', 'coords' : (35.042481, -78.928133) }, [ 
-            #    SearchResultConstraint(title='paddy\'s irish pub', 
-            #                           types='place', 
-            #                           index=0), 
-            #]), 
-            ({ 'query' : 'le poisson rouge', 'category' : 'place', 'coords' : (40.734466, -73.990742) }, [ 
-                SearchResultConstraint(title='le poisson rouge', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'kyoto japanese sushi', 'category' : 'place', 'coords' : (53.606024, -113.379279) }, [ 
+            ({ 'query' : 'kyoto japanese sushi', 'category' : 'place', 'coords' : (53.606024, -113.379279) }, [
                 SearchResultConstraint(title='kyoto japanese sushi', 
                                        types='place', 
                                        match='prefix', 
@@ -214,7 +212,7 @@ class PlaceSearchTests(ASearchTestSuite):
             ]), 
             ({ 'query' : 'rocket science lab', 'category' : 'place', 'coords' : (18.393496, -66.006503) }, [ 
                 SearchResultConstraint(title='rocket science lab', 
-                                       types='place', 
+                                       types='place',
                                        index=0), 
             ]), 
             ({ 'query' : 'cincinnati zoo', 'category' : 'place', 'coords' : (39.149059, -84.437150) }, [ 
@@ -224,9 +222,10 @@ class PlaceSearchTests(ASearchTestSuite):
                                        index=0), 
             ]), 
         ]
+        """
         
-        self._run_tests(tests, {}, test_coords=False)
+        self._run_tests('place_tests', test_cases)
 
 if __name__ == '__main__':
-    StampedTestRunner().run()
+    main()
 
