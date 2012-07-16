@@ -5141,7 +5141,15 @@ class StampedAPI(AStampedAPI):
                     stubsModified = True
 
             if entity.isType('artist'):
-                resolvedList = resolvedList[:20]
+                # Do a quick dedupe of songs in case the same song appears in different albums.
+                # TODO(geoff): this should be more robust...
+                seenTitles = set()
+                dedupedList = []
+                for resolved in resolvedList:
+                    if resolved.title not in seenTitles:
+                        dedupedList.append(resolved)
+                        seenTitles.add(resolved.title)
+                resolvedList = dedupedList[:20]
             setattr(entity, attr, resolvedList)
             return stubsModified
 
