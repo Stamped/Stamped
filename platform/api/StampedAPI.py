@@ -3666,7 +3666,7 @@ class StampedAPI(AStampedAPI):
             result.append(entity)
 
         # Refresh guide
-        if guide.timestamp is not None and datetime.utcnow() > guide.timestamp.generated + timedelta(days=1)
+        if guide.timestamp is not None and datetime.utcnow() > guide.timestamp.generated + timedelta(days=1):
             tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         return result
