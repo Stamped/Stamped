@@ -71,7 +71,7 @@ class logsQuery(object):
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
             #Just use collections inbox for speed
-            pool.spawn(self.performQuery,self.domains[suffix],'uid',"/v0/activity/unread.json",t0,t1)
+            pool.spawn(self.performQuery,self.domains[suffix],'uid',"/v1/activity/unread.json",t0,t1)
         
         pool.join()
         
@@ -79,7 +79,7 @@ class logsQuery(object):
     
     def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist):
         if uri is None:
-            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v0%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
+            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
         else:
             query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (domain.name,uri,t0.isoformat(),t1.isoformat())
         stats = domain.select(query)

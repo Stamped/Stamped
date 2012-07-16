@@ -438,6 +438,8 @@ class MongoEntityStatsCollection(AMongoCollection):
 
         - Stats are not out of date 
 
+        - Length of popular stamps equals length of popular users
+
         """
 
         regenerate = False
@@ -478,6 +480,15 @@ class MongoEntityStatsCollection(AMongoCollection):
             generated = document['timestamp']['generated']
             if generated < datetime.utcnow() - timedelta(days=2):
                 msg = "%s: Stale stats" % key
+                if repair:
+                    logs.info(msg)
+                    regenerate = True 
+                else:
+                    raise StampedDataError(msg)
+
+        if document is not None and 'popular_users' in document and 'popular_stamps' in document:
+            if len(document['popular_users']) != len(document['popular_stamps']):
+                msg = "%s: Popular users != Popular stamps" % key 
                 if repair:
                     logs.info(msg)
                     regenerate = True 
