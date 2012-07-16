@@ -5171,7 +5171,7 @@ class StampedAPI(AStampedAPI):
         if entity_id is None:
             entity = entityProxy.buildEntity()
         else:
-            entity = self.__entityDB.getEntity(entity_id)
+            entity = self._entityDB.getEntity(entity_id)
             entityProxy.enrichEntity(entity, {})
         self.mergeEntity(entity)
 
