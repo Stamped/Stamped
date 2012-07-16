@@ -9,21 +9,18 @@ import Globals, utils
 
 from tests.StampedTestUtils       import *
 from tests.framework.FixtureTest  import fixtureTest, main
-from tests.search.SearchTestsRunner import SearchTestsRunner
+from tests.search.SearchTestsRunner import *
 from tests.search.SearchResultMatcher import *
 from tests.search.SearchResultsScorer import *
 
-def makeTestCase(query, coords, expected_results):
+def makeTestCase(query, coords, *expected_results):
+    print 'EXPECTED RESULTS IS', expected_results
     if coords:
         query = {'query': query, 'coords': coords}
-    return SearchTestCase('place', query, expected_results)
+    return SearchTestCase('place', query, *expected_results)
 
 class PlaceSearchTests(AStampedTestCase, SearchTestsRunner):
-    def __init__(self):
-        AStampedTestCase.__init__(self)
-        SearchTestsRunner.__init__(self)
-
-    @fixtureTest
+    @fixtureTest()
     def test_place_search(self):
         """ Test basic place searches """
 
@@ -38,72 +35,36 @@ class PlaceSearchTests(AStampedTestCase, SearchTestsRunner):
 
         test_cases = (
             makeTestCase('bourbon and branch', None,
-                PlaceResultMatcher(title=Equals('Bourbon and Branch'), all_components_must_match=True, unique=True)),
+                PlaceResultMatcher(title=Equals('Bourbon and Branch'), all_components_must_match=True)),
             makeTestCase('empire state building', (40.736, -73.989),
-                PlaceResultMatcher(title=Equals('Empire State Building'))),
+                PlaceResultMatcher(title=Equals('Empire State Building'), all_components_must_match=True)),
             makeTestCase('beer bistro', (43.654828, -79.375191),
-                PlaceResultMatcher(title=Equals('Beer Bistro'))),
+                PlaceResultMatcher(title=Equals('The Beer Bistro'))),
             makeTestCase('disney world', (28.344178, -81.575242),
                 PlaceResultMatcher(title=Equals('Disney World'))),
             makeTestCase('le poisson rouge', (40.734466, -73.990742),
-                PlaceResultMatcher(title=Equals('le poisson rouge'))),
-
-            )
+                PlaceResultMatcher(title=Equals('le poisson rouge'), all_components_must_match=True, unique=False)),
+            makeTestCase('Galata Balikcisi', (41.025593, 28.974618),
+                PlaceResultMatcher(title=Equals('Furreyya Galata Balikcisi'), all_components_must_match=True)),
+            makeTestCase('Empanada Mama', (40.754632, -73.994261),
+                PlaceResultMatcher(title=Equals('Empanada Mama'), all_components_must_match=True)),
+            makeTestCase('Amber India', (37.765037, -122.412568),
+                PlaceResultMatcher(title=Equals('Amber India'), all_components_must_match=True, unique=False)),
+            makeTestCase('Evo Pizza', (37.781697, -122.392146),
+                PlaceResultMatcher(title=Equals('Evo Pizza'), all_components_must_match=True)),
+            makeTestCase('Azul Tequila',  (44.783160, -91.436092),
+                PlaceResultMatcher(title=Equals('Azul Tequila'), all_components_must_match=True)),
+            makeTestCase('Times Square', (39.481461, -6.373380),
+                PlaceResultMatcher(title=Equals('Times Square'))),
+            makeTestCase('galleria mall', (35.995347, -114.936936),
+                PlaceResultMatcher(title=Equals('Galleria Mall'))),
+            makeTestCase('SXSW', (50.172962, 8.721237),
+                PlaceResultMatcher(title=Equals('SXSW'))),
+        )
 
         """
         tests = [
-            ({ 'query' : 'kyoto japanese sushi', 'category' : 'place', 'coords' : (53.606024, -113.379279) }, [
-                SearchResultConstraint(title='kyoto japanese sushi', 
-                                       types='place', 
-                                       match='prefix', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'el pomodoro', 'category' : 'place', 'coords' : (20.727698, -103.437507) }, [ 
-                SearchResultConstraint(title='pizzeria el pomodoro', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'Galata Balikcisi', 'category' : 'place', 'coords' : (41.025593, 28.974618) }, [ 
-                SearchResultConstraint(title='Furreyya Galata Balikcisi', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'empanada mama', 'category' : 'place', 'coords' : (40.754632, -73.994261) }, [ 
-                SearchResultConstraint(title='empanada mama', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'amber india', 'category' : 'place', 'coords' : (37.765037, -122.412568) }, [ 
-                SearchResultConstraint(title='amber india', 
-                                       types='place', 
-                                       match='prefix', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'evo pizza', 'category' : 'place', 'coords' : (37.781697, -122.392146) }, [ 
-                SearchResultConstraint(title='evo pizza', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'azul tequila', 'category' : 'place', 'coords' : (44.783160, -91.436092) }, [ 
-                SearchResultConstraint(title='azul tequila', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'times square', 'category' : 'place', 'coords' : (39.481461, -6.373380) }, [ 
-                SearchResultConstraint(title='times square', 
-                                       types='place'), 
-            ]), 
-            ({ 'query' : 'SXSW', 'category' : 'place', 'coords' : (50.172962, 8.721237) }, [ 
-                SearchResultConstraint(title='SXSW', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'galleria mall', 'category' : 'place', 'coords' : (35.995347, -114.936936) }, [ 
-                SearchResultConstraint(title='galleria mall', 
-                                       types='place', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'apotheke', 'category' : 'place', 'coords' : (29.984821, -95.338962) }, [ 
+            ({ 'query' : 'apotheke', 'category' : 'place', 'coords' : (29.984821, -95.338962) }, [
                 SearchResultConstraint(title='apotheke', 
                                        types='place'), 
             ]), 

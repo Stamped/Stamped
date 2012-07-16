@@ -54,6 +54,7 @@ class Equals(StringMatcher):
         self.__string = string.lower()
 
     def matches(self, string):
+        print '\nCOMPARING %s TO %s\n' % (repr(self.__string), repr(string.lower()))
         return self.__string == string.lower()
 
     def __repr__(self):
@@ -84,16 +85,16 @@ class MatchesRegex(StringMatcher):
 
 
 class SearchResultMatcher(object):
-    def __init__(self, _type,
+    def __init__(self, kind, _type,
                  title = None,
                  expected_sources = None,
                  all_components_must_match = False,
                  unique = True):
         if not isinstance(title, StringMatcher):
             raise Exception('title param to SearchResultMatcher must be a StringMatcher!')
+        self.__kind = kind
         self.__type = _type
         self._title = title
-        self.__title_regexp = title_regexp
         self.__expected_sources = expected_sources
         self.__all_components_must_match = all_components_must_match
         self.__must_be_unique = unique
@@ -111,7 +112,13 @@ class SearchResultMatcher(object):
         return self.__must_be_unique
 
     def matches(self, proxy):
-        return self.__type in proxy.types and self._title.matches(proxy.name)
+        if self.__type and self.__type not in proxy.types:
+            print '\nDISQUALIFYING FOR TYPE: %s not in %s\n' % (repr(self.__type), repr(proxy.types))
+            return False
+        if self.__kind and self.__kind != proxy.kind:
+            print '\nDISQUALIFYING FOR KIND: %s != %s\n' % (repr(self.__kind), repr(proxy.kind))
+            return False
+        return self._title.matches(proxy.name)
 
     @property
     def all_sources(self):
@@ -132,7 +139,7 @@ class SearchResultMatcher(object):
 
 class ArtistResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
-        super(ArtistSearchResultMatcher, self).__init__('artist', **kwargs)
+        super(ArtistResultMatcher, self).__init__(None, 'artist', **kwargs)
 
     @property
     def all_sources(self):
@@ -144,7 +151,7 @@ class AlbumResultMatcher(SearchResultMatcher):
         self.__artist = kwargs.pop('artist', None)
         if not isinstance(self.__artist, StringMatcher):
             raise Exception('artist param to AlbumSearchResultMatcher must be a StringMatcher!')
-        super(AlbumSearchResultMatcher, self).__init__('album', **kwargs)
+        super(AlbumResultMatcher, self).__init__(None, 'album', **kwargs)
 
     @property
     def all_sources(self):
@@ -171,7 +178,7 @@ class TrackResultMatcher(SearchResultMatcher):
         self.__artist = kwargs.pop('artist', None)
         if not isinstance(self.__artist, StringMatcher):
             raise Exception('artist param to TrackSearchResultMatcher must be a StringMatcher!')
-        super(TrackSearchResultMatcher, self).__init__('track', **kwargs)
+        super(TrackResultMatcher, self).__init__(None, 'track', **kwargs)
 
     @property
     def all_sources(self):
@@ -195,7 +202,7 @@ class TrackResultMatcher(SearchResultMatcher):
 
 class MovieResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
-        super(MovieSearchResultMatcher, self).__init__('movie', **kwargs)
+        super(MovieResultMatcher, self).__init__(None, 'movie', **kwargs)
 
     @property
     def all_sources(self):
@@ -204,7 +211,7 @@ class MovieResultMatcher(SearchResultMatcher):
 
 class TvResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
-        super(TvSearchResultMatcher, self).__init__('tv', **kwargs)
+        super(TvResultMatcher, self).__init__(None, 'tv', **kwargs)
 
     @property
     def all_sources(self):
@@ -216,7 +223,7 @@ class BookResultMatcher(SearchResultMatcher):
         self.__author = kwargs.pop('author', None)
         if not isinstance(self.__author, StringMatcher):
             raise Exception('author param to AlbumSearchResultMatcher must be a StringMatcher!')
-        super(BookSearchResultMatcher, self).__init__('book', **kwargs)
+        super(BookResultMatcher, self).__init__(None, 'book', **kwargs)
 
     def matches(self, proxy):
         return (self.type in proxy.types and
@@ -240,7 +247,7 @@ class BookResultMatcher(SearchResultMatcher):
 
 class PlaceResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
-        super(PlaceSearchResultMatcher, self).__init__('place', **kwargs)
+        super(PlaceResultMatcher, self).__init__('place', None, **kwargs)
 
     @property
     def all_sources(self):
@@ -249,7 +256,7 @@ class PlaceResultMatcher(SearchResultMatcher):
 
 class AppResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
-        super(AppSearchResultMatcher, self).__init__('app', **kwargs)
+        super(AppResultMatcher, self).__init__(None, 'app', **kwargs)
 
     @property
     def all_sources(self):

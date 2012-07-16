@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals, utils, logs, math, re
 from collections import defaultdict
 from resolve.StampedSource import StampedSource
+from search import DataQualityUtils
 
 stamped_source = StampedSource()
 
@@ -20,6 +21,7 @@ def summarize_entity_for_error_text(entity):
 
 class ExpectedResults(object):
     def __init__(self, *matchers):
+        print 'MATCHERS IS', matchers
         self.__matchers = tuple(matchers)
 
     @property
@@ -32,7 +34,6 @@ class ExpectedResults(object):
             matchers_to_matched_idxs.append([])
 
         for idx, (entity, cluster) in enumerate(entities_and_clusters):
-            idx = idx + 1
             matched_idx = False
             entity_as_proxy = stamped_source.proxyFromEntity(entity)
             for (matcher_idx, matcher) in enumerate(self.matchers):
@@ -62,8 +63,8 @@ class ExpectedResults(object):
             if len(matched_idxs) > 1 and matcher.must_be_unique:
                 errors.append('Found %i results matching SearchResultMatcher: %s' % (len(matched_idxs), repr(matcher)))
                 match_score *= 0.7 ** (len(matched_idxs) - 1)
-            score *= self.calculate_match_sources_penalty(matcher, entities_and_clusters[matched_idxs[0]], errors)
-            score += max_score
+            match_score *= self.calculate_match_sources_penalty(matcher, entities_and_clusters[matched_idxs[0]], errors)
+            score += match_score
 
         return float(score) / max_score
 
@@ -80,7 +81,7 @@ class ExpectedResults(object):
             weight = 5 if expected_source else 1
             denominator += weight
             if source in result_sources:
-                numerator += 5
+                numerator += weight
             elif expected_source:
                 missing_expected_sources.append(expected_source)
         if missing_expected_sources:
@@ -128,10 +129,10 @@ class ClusterConsistencyPenalty(object):
     def __check_full_cluster_matches(self, matcher, entity_as_proxy, cluster, score, errors):
         failed_match_descriptions = []
         for result in cluster.results:
-            if not matcher.matches(result):
-                failed_match_descriptions.append(matcher.repr_proxy(result))
+            if not matcher.matches(result.resolverObject):
+                failed_match_descriptions.append(matcher.repr_proxy(result.resolverObject))
         if not failed_match_descriptions:
-            return
+            return score
         proportion_failed = float(len(failed_match_descriptions)) / len(cluster.results)
         penalty = 0.2 * (proportion_failed ** 0.5)
         errors.append('For result %s, matching %s, %d results within cluster were inconsistent: [%s]' % (
@@ -150,6 +151,10 @@ class SearchResultsScorer(object):
     def score_results(self, expected_results, entities_and_clusters):
         errors = []
         score = expected_results.score_results(entities_and_clusters, errors)
+        if score is None:
+            raise Exception('Fuck')
         for penalty in self.__standard_penalties:
             score = penalty.assess_penalty(score, entities_and_clusters, expected_results, errors)
+            if score is None:
+                raise Exception('Fuck %s' % penalty.__class__.__name__)
         return score, errors

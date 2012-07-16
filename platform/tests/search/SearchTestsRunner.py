@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import os, sys, re, functools
 from gevent.pool import Pool
-from search.EntitySearch import EntitySearch
+from search import EntitySearch
 from tests.search.SearchResultsScorer import ExpectedResults, SearchResultsScorer
 
 class SearchTestCase(object):
@@ -21,7 +21,7 @@ class SearchTestCase(object):
             assert(isinstance(query, dict))
             self.query = query.pop('query')
             self.query_kwargs = query
-        self.expected_results = ExpectedResults(result_matchers)
+        self.expected_results = ExpectedResults(*result_matchers)
 
     def simple_repr(self):
         return '(%s, %s, %s)' % (repr(self.category), repr(self.query), repr(self.query_kwargs))
@@ -86,8 +86,10 @@ record_results = False
 
 class SearchTestsRunner(object):
     def _run_tests(self, test_set_name, test_cases):
+        EntitySearch.shouldLogTiming = False
+
         test_case_outcomes = [None] * len(test_cases)
-        search = EntitySearch()
+        search = EntitySearch.EntitySearch()
         scorer = SearchResultsScorer()
 
         results_file = TestResultsFile(self.__class__, test_set_name)
@@ -122,9 +124,9 @@ class SearchTestsRunner(object):
             else:
                 status_string = 'IMPROVED'
             if not errors:
-                print '%s   :   %f (%s)  ...  PASS' % (test_case.simple_repr(), score, status_string)
+                print '%s   :   %.3f (%s)  ...  PASS' % (test_case.simple_repr(), score, status_string)
             else:
-                print '%s   :   %f (%s)  ...  %d ERRORS\n%s' % (
+                print '%s   :   %.3f (%s)  ...  %d ERRORS\n%s\n' % (
                     test_case.simple_repr(),
                     score,
                     status_string,
