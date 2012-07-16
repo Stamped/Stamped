@@ -1,0 +1,561 @@
+/* about.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "common.less";
+@import "libs/elements.less";
+
+
+/* **************************************************************************
+                                  BASE LAYOUT
+   ************************************************************************** */
+
+
+html {
+    overflow: scroll !important;
+    overflow-x: hidden !important;
+}
+
+p {
+    margin: 0;
+}
+
+.screen-name {
+    color: lighten(#2F6FC8, 10%) !important;
+    
+    &:hover {
+        color: #0855C0 !important;
+    }
+    
+    &:active {
+        color: #000 !important;
+    }
+}
+
+footer {
+    z-index: 12;
+}
+
+
+/* **************************************************************************
+                               CORE PAGE CONTENT
+   ************************************************************************** */
+
+
+#main {
+    top: -100%;
+    
+    width:     50%;
+    min-width: 640px;
+    
+    margin: -10% 0 24px -25%;
+    z-index: 10;
+    font-size: 90%;
+    
+    #main-header {
+        color: #888;
+        
+        .address {
+            float: right;
+        }
+        
+        .contact {
+            float: left;
+            margin-left: 200px;
+            text-align: left;
+            
+            .desc {
+                font-weight: 700;
+            }
+            
+            li {
+                display: inline-block;
+                margin-right: 1em;
+                font-size: 90%;
+            }
+        }
+    }
+    
+    .pane-body {
+        width: 100%;
+        
+        margin:  0 0 18px 0;
+        padding-bottom: 15px;
+        
+        .box-shadow(0, 4px, 20px, 0, fade(@shadow, 55%));
+        
+        #pane-wrapper {
+            .pane {
+                position: relative !important;
+                opacity: 1 !important;
+                
+                .lhs {
+                    float: left;
+                    max-width: 50%;
+                    
+                    .title {
+                        margin-bottom: 24px;
+                        font-size: 3.0em;
+                        line-height: 125%;
+                    }
+                }
+                
+                .rhs {
+                    position: relative;
+                    float: right;
+                    
+                    max-width: 40%;
+                    text-align: left;
+                    
+                    .jobs {
+                        font-weight: 700;
+                    }
+                    
+                    .bg-images {
+                        position: relative;
+                        margin: 22px auto 0;
+                        
+                        width:  245px;
+                        height: 180px;
+                    }
+                    
+                    .bg-image {
+                        position: absolute;
+                        width:  100%;
+                        height: 100%;
+                        
+                        opacity: 0;
+                        .transition(opacity, .3s, ease);
+                    }
+                    
+                    .bg-image-active-0 .bg-image-0 {
+                        opacity: 1;
+                    }
+                    
+                    .bg-image-0 {
+                        background: url(/assets/img/about/teamphotobooth.jpg) no-repeat;
+                        background-size: 100% 100%;
+                    }
+                }
+            }
+        }
+    }
+    
+    .post-main {
+        margin: 0 48px 10%;
+        
+        .post-main-section {
+            margin-bottom: 24px;
+            width: 100%;
+        }
+        
+        .advisors {
+            width: 65%;
+        }
+        
+        .investors {
+            float: right;
+            width: 20%;
+            max-width: 20%;
+            overflow: visible;
+            margin-bottom: 0;
+            
+            .investor-bain {
+                background: url(/assets/img/about/baincapitalventures.png) no-repeat;
+                
+                width:  222px;
+                height: 22px;
+                
+                margin-bottom: 12px;
+            }
+            
+            .investor-google {
+                background: url(/assets/img/about/googleventures.png) no-repeat;
+                
+                width:  140px;
+                height: 48px;
+            }
+        }
+        
+        h1 {
+            font-family: helvetica, sans-serif;
+            display: inline-block;
+            
+            font-size: 1.2em;
+            color: #999;
+            
+            margin: 24px 0;
+        }
+        
+        .team-member {
+            margin-bottom: 24px;
+            
+            .headshot {
+                position: relative;
+                display:  block;
+                float:    left;
+                
+                width:  160px;
+                height: 160px;
+                
+                margin: 0 24px 24px 0;
+                
+                border: 2px solid #fff;
+                .box-shadow(0, 2px, 8px, 0, @shadow);
+                .rounded(8px);
+
+                .inner {
+                    position: absolute;
+                    width:  100%;
+                    height: 100%;
+                    opacity: 0;
+                    
+                    background-size: 100% 100%;
+                    pointer-events: none;
+                    
+                    .rounded(4px);
+                    .transition(opacity, .3s, ease);
+                }
+                
+                &:hover {
+                    .inner-0 {
+                        opacity: 1;
+                    }
+                }
+                
+                &:active {
+                    .inner-0, .inner-1 {
+                        opacity: 1;
+                    }
+                }
+            }
+            
+            .content {
+                float: left;
+                width: 70%;
+                margin-top: -10px;
+                
+                .subtitle {
+                    font-weight: 700;
+                    font-size: 105%;
+                    margin: 0;
+                }
+            }
+        }
+        
+        .advisor {
+            margin-bottom: 24px;
+        }
+        
+        .advisor:last-child {
+            margin-bottom: 0;
+        }
+        
+        .title {
+            position: relative;
+            display: inline-block;
+            
+            .user-logo-small {
+                top: 0;
+            }
+        }
+        
+        .desc, .links {
+            font-size: 90%;
+        }
+        
+        .desc {
+            margin-top: .2em;
+            
+            //text-align: justify;
+            color: #888;
+        }
+        
+        .links {
+            margin-top: .5em;
+            
+            a {
+                display: block;
+            }
+        }
+        
+        .non-founders .team-member .headshot {
+            width:  96px;
+            height: 96px;
+            background-size: 100% 100%;
+        }
+        
+        .non-founders .team-member {
+            padding-left: (160px - 96px);
+        }
+        
+        .press {
+            clear: both;
+            
+            .press-links {
+                .press-link {
+                    display: block;
+                    float: left;
+                    
+                    height: 32px;
+                    margin: 0 24px 24px 0;
+                    
+                    &:hover {
+                        background-position: 0 -32px;
+                    }
+                }
+                
+                .press-link-techcrunch {
+                    background: url(/assets/img/about/press/press-techcrunch-sprite.png) no-repeat;
+                    width:  198px;
+                }
+                
+                .press-link-wsj {
+                    background: url(/assets/img/about/press/press-wsj-sprite.png) no-repeat;
+                    width:  279px;
+                }
+                
+                .press-link-daringfireball {
+                    background: url(/assets/img/about/press/press-daringfireball-sprite.png) no-repeat;
+                    width:  194px;
+                }
+                
+                .press-link-mashable {
+                    background: url(/assets/img/about/press/press-mashable-sprite.png) no-repeat;
+                    width:  130px;
+                }
+                
+                .press-link-gigaom {
+                    background: url(/assets/img/about/press/press-gigaom-sprite.png) no-repeat;
+                    width:  157px;
+                }
+            }
+        }
+        
+        .made-in-nyc-logo {
+            margin: 24px auto 0;
+        }
+    }
+}
+
+.post-main-overlay {
+    position: fixed;
+    left:   50%;
+    bottom: 0;
+    
+    width:     50%;
+    min-width: 640px;
+    
+    height: 15%;
+    margin-left: -25%;
+    pointer-events: none;
+    
+    @c0: fade(#f2f2f2, 100%);
+    @c1: fade(#f2f2f2, 0%);
+    @angle: 90deg;
+    
+    background: transparent;
+    background: -webkit-linear-gradient(@angle, @c0, @c1);
+    background: -moz-linear-gradient(@angle, @c0, @c1);
+    background: -o-linear-gradient(@angle, @c0, @c1);
+    background: linear-gradient(@angle, @c0, @c1);
+}
+
+.social {
+    white-space: nowrap;
+    
+    .social-button-twitter {
+        position: relative;
+        display:  inline-block;
+        top: 4px;
+        
+        background-position: 0 -22px !important;
+    }
+    
+    .social-button-stamped {
+        position: relative;
+        display:  inline-block;
+        top: 4px;
+    }
+}
+
+.twitter {
+    &:hover {
+        color: #4099FF !important;
+    }
+    
+}
+
+#retina {
+    #main .pane-body #pane-wrapper .pane .lhs .social-button-twitter {
+        background-position: 0 -44px;
+    }
+}
+
+.social-button-stamped {
+    display: block;
+    background: url(/assets/img/about/stampbadge.png) no-repeat;
+    
+    margin: 1px 0;
+    width:  20px;
+    height: 20px;
+}
+
+.robby .headshot {
+    background: url(/assets/img/about/headshots/robby.png) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/mario0.gif) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/mario1.jpeg) no-repeat;
+    }
+    .inner-2 {
+        background: url(/assets/img/about/fun/mario2.png) no-repeat;
+    }
+}
+
+.kevin .headshot {
+    background: url(/assets/img/about/headshots/kevin.png) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/luigi0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/luigi1.jpeg) no-repeat;
+    }
+}
+
+.bart .headshot {
+    background: url(/assets/img/about/headshots/bart.png) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/wario0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/wario1.jpeg) no-repeat;
+    }
+    .inner-2 {
+        background: url(/assets/img/about/fun/wario2.jpeg) no-repeat;
+    }
+
+}
+
+.pauleastlund .headshot {
+    background: url(/assets/img/about/headshots/pauleastlund.jpeg) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/goldeneye0.jpeg) no-repeat;
+    }
+}
+
+.travis .headshot {
+    background: url(/assets/img/about/headshots/travis.jpeg) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/peach0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/peach1.jpeg) no-repeat;
+    }
+    .inner-2 {
+        background: url(/assets/img/about/fun/peach2.jpeg) no-repeat;
+    }
+}
+
+.anthony .headshot {
+    background: url(/assets/img/about/headshots/anthony.png) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/waluigi0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/waluigi1.jpeg) no-repeat;
+    }
+}
+
+.landon .headshot {
+    background: url(/assets/img/about/headshots/landon.jpeg) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/bowser0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/bowser1.jpeg) no-repeat;
+    }
+    .inner-2 {
+        background: url(/assets/img/about/fun/bowser2.jpeg) no-repeat;
+    }
+}
+
+.lizwalton .headshot {
+    background: url(/assets/img/about/headshots/lizwalton.jpeg) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/yoshi0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/yoshi1.jpeg) no-repeat;
+    }
+}
+
+.michaellowin .headshot {
+    background: url(/assets/img/about/headshots/michaellowin.jpeg) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/dk0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/dk1.jpeg) no-repeat;
+    }
+}
+
+.geoffliu .headshot {
+    background: url(/assets/img/about/headshots/geoffliu.jpeg) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/diddy0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/diddy1.jpeg) no-repeat;
+    }
+}
+
+.joeystaehle .headshot {
+    background: url(/assets/img/about/headshots/joeystaehle.jpeg) no-repeat;
+    
+    .inner-0 {
+        background: url(/assets/img/about/fun/toad0.jpeg) no-repeat;
+    }
+    .inner-1 {
+        background: url(/assets/img/about/fun/toad1.jpeg) no-repeat;
+    }
+
+}
+
+.made-in-nyc-logo {
+    background: url(/assets/img/about/nyctoken.png) no-repeat;
+    
+    display: block;
+    width:  204px;
+    height: 205px;
+}
+
+#retina {
+    .made-in-nyc-logo {
+        background: url(/assets/img/about/nyctoken@2x.png) no-repeat;
+        width:  408px;
+        height: 410px;
+    }
+}
+

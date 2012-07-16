@@ -17,33 +17,6 @@ from servers.web2.core.helpers  import *
 
 @stamped_view(schema=HTTPIndexSchema)
 def index(request, schema, **kwargs):
-    '''
-    {
-        'screen_name'       : 'nytimes', 
-        'image_url'         : 'http://static.stamped.com/users/nytimes-60x60.jpg', 
-        'color_primary'     : '000A19', 
-        'color_secondary'   : 'CCE2FF', 
-    }, 
-    {
-        'screen_name'       : 'TIME', 
-        'image_url'         : 'http://static.stamped.com/users/time-60x60.jpg', 
-        'color_primary'     : 'D50000', 
-        'color_secondary'   : 'FF2F2F', 
-    }, 
-    {
-        'screen_name'       : 'passionpit', 
-        'image_url'         : 'http://static.stamped.com/users/passionpit-60x60.jpg', 
-        'color_primary'     : 'D25D82', 
-        'color_secondary'   : 'F9E9E9', 
-    }, 
-    {
-        'screen_name'       : 'justinbieber', 
-        'image_url'         : 'http://static.stamped.com/users/justinbieber-60x60.jpg', 
-        'color_primary'     : '84004B', 
-        'color_secondary'   : 'FF00EA', 
-    }, 
-    '''
-    
     tastemakers = [
         {
             'screen_name'       : 'mariobatali', 
@@ -82,6 +55,154 @@ def index(request, schema, **kwargs):
     return stamped_render(request, 'index.html', {
         'body_classes'      : body_classes, 
         'tastemakers'       : tastemakers, 
+        'page'              : 'index', 
+    })
+
+@stamped_view()
+def about(request, **kwargs):
+    body_classes = "about main"
+    
+    founders = [
+        {
+            'name'              : 'Robby Stein', 
+            'subtitle'          : 'CEO &amp; Co-Founder', 
+            'screen_name'       : 'robby', 
+            'color_primary'     : '00119F', 
+            'color_secondary'   : '6C7DFF', 
+            'desc'              : 'Robby worked at Google for 4 years, on Gmail launches and most recently as Product Manager for the Ad Exchange team. He built the first Stamped prototype in his tiny NYC apartment. He graduated from Northwestern, and though he may share brotherly love with Bart Stein, the two founders are not related.', 
+            'twitter'           : 'rmstein', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Kevin Palms', 
+            'subtitle'          : 'Co-Founder, Technology', 
+            'screen_name'       : 'kevin', 
+            'color_primary'     : '070067', 
+            'color_secondary'   : '005B9A', 
+            'desc'              : 'Kevin previously led development of risk analytics technology at a hedge fund in New York. He and Robby also built a social calendering app together at Northwestern; a movie about it, "The Social Calender," has not yet been made.', 
+            'twitter'           : 'kevinpalms', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Bart Stein', 
+            'subtitle'          : 'Co-Founder, Marketing &amp; Partnerships', 
+            'screen_name'       : 'bart', 
+            'color_primary'     : '010048', 
+            'color_secondary'   : '570000', 
+            'desc'              : 'Bart previously worked at the Google Creative Lab, where he contributed to Google\'s first Super Bowl campaign. He also worked for David Pogue, the NY Times tech columnist. He graduated from Brown and is not Robby\'s brother.', 
+            'twitter'           : 'bartjstein', 
+            'inner'             : range(2), 
+        }, 
+    ]
+    
+    team = [
+        {
+            'name'              : 'Paul Eastlund', 
+            'subtitle'          : 'VP, Engineering', 
+            'screen_name'       : 'pauleastlund', 
+            'color_primary'     : 'FF7E00', 
+            'color_secondary'   : 'FFEA00', 
+            'desc'              : 'Paul previously worked at Google for 5 years as an engineer where he led development teams on Google Maps. The ultimate startup hipster, Paul lives in rural Connecticut with his wife, three children, and dog. He holds a B.A. and M.Eng. in Computer Science from Cornell.', 
+            'twitter'           : 'pauleastlund', 
+            'inner'             : range(1), 
+        }, 
+        {
+            'name'              : 'Travis Fischer', 
+            'subtitle'          : 'Backend Architect &amp; Web Lead', 
+            'screen_name'       : 'travis', 
+            'color_primary'     : 'FF6000', 
+            'color_secondary'   : 'FF6000', 
+            'desc'              : 'Travis previously worked at Microsoft on a next-generation OS incubator and before that at Pixar on the film Up. He got his start programming TI calculator <a href="http://www.ticalc.org/archives/files/authors/78/7869.html">games</a> in high school and graduated from Brown with a B.S. in Computer Science &amp; Math.', 
+            'twitter'           : 'fisch0920', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Anthony Cafaro', 
+            'subtitle'          : 'Lead Product Designer', 
+            'screen_name'       : 'anthony', 
+            'color_primary'     : 'FFF2C7', 
+            'color_secondary'   : 'FFE1B4', 
+            'desc'              : 'Anthony was previously at the Google Creative Lab as a designer. He graduated from the School of Visual Arts and is by far the coolest person at Stamped.', 
+            'twitter'           : 'anthonycafaro', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Landon Judkins', 
+            'subtitle'          : 'Software Engineer, Mobile Lead', 
+            'screen_name'       : 'landon', 
+            'color_primary'     : '004AB2', 
+            'color_secondary'   : '066800', 
+            'desc'              : 'Landon previously built software for a large European manufacturing company. He also designs programming languages in his spare time. He graduated from Brown with an B.A. in Computer Science and is the best disc golf player on the Stamped team.', 
+            'twitter'           : 'landonjudkins', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Liz Walton', 
+            'subtitle'          : 'Marketing Manager', 
+            'screen_name'       : 'lizwalton', 
+            'color_primary'     : '00BBAD', 
+            'color_secondary'   : '9CFFFA', 
+            'desc'              : 'Liz was previously at Weber Shandwick where she managed social media for large consumer brands. She is the best female employee at Stamped, and graduated from Northwestern University.', 
+            'twitter'           : 'lizwalton', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Mike Lowin', 
+            'subtitle'          : 'Software Engineer', 
+            'screen_name'       : 'michaellowin', 
+            'color_primary'     : 'FF7E00', 
+            'color_secondary'   : 'FFEA00', 
+            'desc'              : 'Mike previously worked with Kevin at a hedge fund building analytics software, and apparently liked him enough to want to join Stamped (we were surprised too). He graduated from Vassar College with a B.A. in Computer Science.', 
+            'twitter'           : 'michaellowin', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Geoff Liu', 
+            'subtitle'          : 'Software Engineer', 
+            'screen_name'       : 'geoffliu', 
+            'color_primary'     : 'FAD1CC', 
+            'color_secondary'   : 'E70D4B', 
+            'desc'              : 'Geoff worked at Google as an engineer on Google Maps. He is fluent in both Mandarin and English and can translate in both directions synchronously. He graduated from Cornell with a B.A. in Math and Computer Science.', 
+            'twitter'           : 'geoff_liu', 
+            'inner'             : range(2), 
+        }, 
+        {
+            'name'              : 'Joey Staehle', 
+            'subtitle'          : 'Software Engineering Intern', 
+            'screen_name'       : 'joeystaehle', 
+            'color_primary'     : 'E00058', 
+            'color_secondary'   : 'FFD494', 
+            'desc'              : 'Joey is Stamped\'s first intern and has spent the summer honing his engineering and video game skills. He is currently enrolled at Cornell and plans to graduate with a B.S. in Computer Science in 2013.', 
+            'twitter'           : 'joeystaehle', 
+            'inner'             : range(2), 
+        }, 
+    ]
+    
+    advisors = [
+        {
+            'name'              : 'Mario Batali', 
+            'screen_name'       : 'mariobatali', 
+            'color_primary'     : 'FF7E00', 
+            'color_secondary'   : 'FFEA00', 
+            'desc'              : "With nineteen restaurants, nine cookbooks and a host of television shows including ABC's The Chew, Mario Batali is one of the most recognized and respected chefs working in America today. In 2008, Mario started the Mario Batali Foundation with the mission of feeding, protecting, educating, and empowering children. To learn more about Mario's mission, visit <a href='http://www.mariobatalifoundation.org'>www.mariobatalifoundation.org</a>.", 
+            'twitter'           : 'mariobatali', 
+        }, 
+        {
+            'name'              : 'Kevin Systrom', 
+            'screen_name'       : 'kevinsystrom', 
+            'color_primary'     : '51C4BB', 
+            'color_secondary'   : '91EDE8', 
+            'desc'              : "Kevin Systrom is the CEO and co-founder of <a href='http://instagram.com/'>Instagram</a>, the popular photo-sharing service with over 50 million users and was recently acquired by Facebook. got his first taste of the startup world as an intern at Odeo, which later became Twitter. He also spent two years at Google, working on Gmail and Google Reader. Kevin graduated from Stanford University in 2006 with a BS in Management Science &amp; Engineering.", 
+            'twitter'           : 'kevin', 
+        }, 
+    ]
+    
+    return stamped_render(request, 'about.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'about', 
+        'founders'          : founders, 
+        'team'              : team, 
+        'advisors'          : advisors, 
     })
 
 @stamped_view()

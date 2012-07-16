@@ -151,9 +151,9 @@ def main():
     parser = OptionParser(usage=usage, version=version)
     parser.add_option('--dry_run', action='store_true', dest='dry_run', default=None)
     # TODO: Ability to limit by vertical
-    parser.add_option('--max_checks', type='int', action='store', dest='max_checks', default=500)
-    parser.add_option('--max_errors', type='int', action='store', dest='max_errors', default=20)
-    parser.add_option('--stamped_only', action='store_true', dest='stamped_only', default=True)
+    parser.add_option('--max_checks', type='int', action='store', dest='max_checks', default=-1)
+    parser.add_option('--max_errors', type='int', action='store', dest='max_errors', default=-1)
+    parser.add_option('--stamped_only', action='store_true', dest='stamped_only', default=False)
     parser.add_option('--report_out', action='store', dest='report_out', default=None)
     (options, args) = parser.parse_args()
 
@@ -166,15 +166,17 @@ def main():
     entities_checked = 0
     entity_collection = MongoEntityCollection()
     report_file = open(options.report_out, 'w')
-    for entity_id in all_entity_ids[:options.max_checks]:
+    if options.max_checks > 0:
+        all_entity_ids = all_entity_ids[:options.max_checks]
+    for entity_id in all_entity_ids:
+        if options.max_errors > 0 and len(error_entity_ids) >= options.max_errors:
+            break
         try:
             entities_checked += 1
             entity = entity_collection.getEntity(entity_id)
             well_resolved = entityIsWellResolved(entity, report_file)
             if not well_resolved:
                 error_entity_ids.append(entity_id)
-                if len(error_entity_ids) >= options.max_errors:
-                    break
         except ValueError:
             pass
 

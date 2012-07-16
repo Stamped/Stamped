@@ -8,7 +8,7 @@ __license__   = "TODO"
 
 from servers.httpapi.v0.helpers import *
 
-exceptions = [
+stampExceptions = [
     (StampedAccountNotFoundError, 404, 'not_found', 'There was an error retrieving account information'),
     (StampedOutOfStampsError, 403, 'forbidden', 'No more stamps remaining'),
     (StampedNotLoggedInError, 401, 'bad_request', 'You must be logged in to perform this action.'),
@@ -17,8 +17,16 @@ exceptions = [
     (StampedAddCommentPermissionsError, 403, "forbidden", "Insufficient privileges to add comment"),
     (StampedRemoveCommentPermissionsError, 403, "forbidden", "Insufficient privileges to remove comment"),
     (StampedViewCommentPermissionsError, 403, "forbidden", "Insufficient privileges to view comment"),
+    (StampedPermissionsError, 403, "forbidden", "Insufficient privileges to view stamp"),
     (StampedBlockedUserError, 403, 'forbidden', "User is blocked"),
 ]
+
+stampShareExceptions = [
+    (StampedMissingParametersError, 400, 'bad_request', 'Missing third party service name'),
+    (StampedFacebookTokenError,     401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
+    (StampedLinkedAccountError,     401, 'invalid_credentials', "Missing credentials for linked account."),
+    (StampedThirdPartyError,        400, 'third_party', "There was an error connecting to the third-party service."),
+] + stampExceptions
 
 def transformStamps(stamps):
     """
@@ -37,9 +45,10 @@ def transformStamps(stamps):
     
     return transformOutput(result)
 
-@handleHTTPRequest(http_schema=HTTPStampNew,
-                   exceptions=exceptions)
+
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPStampNew,
+                   exceptions=stampExceptions)
 def create(request, authUserId, data, **kwargs):
     entityRequest = {
         'entity_id' : data.pop('entity_id', None),
@@ -54,15 +63,10 @@ def create(request, authUserId, data, **kwargs):
     
     return transformOutput(stamp.dataExport())
 
-exceptions_share = [
-    (StampedMissingParametersError, 400, 'bad_request', 'Missing third party service name'),
-    (StampedFacebookTokenError,     401, 'facebook_auth', "Facebook login failed. Please reauthorize your account."),
-    (StampedLinkedAccountError,     401, 'invalid_credentials', "Missing credentials for linked account."),
-    (StampedThirdPartyError,        400, 'third_party', "There was an error connecting to the third-party service."),
-]
-@handleHTTPRequest(http_schema=HTTPStampShare,
-                   exceptions=exceptions + exceptions_share)
+
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPStampShare,
+                   exceptions=stampShareExceptions)
 def share(request, authUserId, http_schema, data, **kwargs):
     if http_schema.service_name is None:
         if 'service_name' not in kwargs:
@@ -76,17 +80,16 @@ def share(request, authUserId, http_schema, data, **kwargs):
 
 
 @require_http_methods(["POST"])
-@handleHTTPRequest(http_schema=HTTPStampId, exceptions=exceptions)
+@handleHTTPRequest(http_schema=HTTPStampId, exceptions=stampExceptions)
 def remove(request, authUserId, http_schema, **kwargs):
     stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
     return transformOutput(True)
 
 
-exceptions_show = [ (StampedPermissionsError, 403, "forbidden", "Insufficient privileges to view stamp") ]
+@require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False,
                   http_schema=HTTPStampRef,
-                  exceptions=exceptions + exceptions_show)
-@require_http_methods(["GET"])
+                  exceptions=stampExceptions)
 def show(request, authUserId, http_schema, **kwargs):
     if http_schema.stamp_id is not None:
         stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
@@ -100,21 +103,21 @@ def show(request, authUserId, http_schema, **kwargs):
 
 
 # Collection
+@require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPTimeSlice,
                    conversion=HTTPTimeSlice.exportTimeSlice,
-                   exceptions=exceptions)
-@require_http_methods(["GET"])
+                   exceptions=stampExceptions)
 def collection(request, authUserId, schema, **kwargs):
     stamps = stampedAPI.getStampCollection(schema, authUserId)
     return transformStamps(stamps)
 
 
 # Search
+@require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPSearchSlice,
                   conversion=HTTPSearchSlice.exportSearchSlice,
-                  exceptions=exceptions)
-@require_http_methods(["GET"])
+                  exceptions=stampExceptions)
 def search(request, authUserId, schema, **kwargs):
     stamps = stampedAPI.searchStampCollection(schema, authUserId)
     return transformStamps(stamps)
@@ -125,7 +128,7 @@ def search(request, authUserId, schema, **kwargs):
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPGuideRequest,
                    conversion=HTTPGuideRequest.exportGuideRequest,
-                   exceptions=exceptions)
+                   exceptions=stampExceptions)
 def guide(request, authUserId, schema, **kwargs):
     entities = stampedAPI.getGuide(schema, authUserId)
     result = []
@@ -145,7 +148,7 @@ def guide(request, authUserId, schema, **kwargs):
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPGuideSearchRequest,
                    conversion=HTTPGuideSearchRequest.exportGuideSearchRequest,
-                   exceptions=exceptions)
+                   exceptions=stampExceptions)
 def searchGuide(request, authUserId, schema, **kwargs):
     entities = stampedAPI.searchGuide(schema, authUserId)
     result = []
@@ -160,9 +163,9 @@ def searchGuide(request, authUserId, schema, **kwargs):
     return transformOutput(result)
 
 
-@handleHTTPRequest(http_schema=HTTPStampId,
-                   exceptions=exceptions)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPStampId,
+                   exceptions=stampExceptions)
 def likesCreate(request, authUserId, http_schema, **kwargs):
     stamp = stampedAPI.addLike(authUserId, http_schema.stamp_id)
     stamp = HTTPStamp().importStamp(stamp)
@@ -170,9 +173,9 @@ def likesCreate(request, authUserId, http_schema, **kwargs):
     return transformOutput(stamp.dataExport())
 
 
-@handleHTTPRequest(http_schema=HTTPStampId,
-                   exceptions=exceptions)
 @require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPStampId,
+                   exceptions=stampExceptions)
 def likesRemove(request, authUserId, http_schema, **kwargs):
     stamp = stampedAPI.removeLike(authUserId, http_schema.stamp_id)
     stamp = HTTPStamp().importStamp(stamp)
@@ -180,10 +183,10 @@ def likesRemove(request, authUserId, http_schema, **kwargs):
     return transformOutput(stamp.dataExport())
 
 
+@require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPStampId,
-                   exceptions=exceptions)
-@require_http_methods(["GET"])
+                   exceptions=stampExceptions)
 def likesShow(request, authUserId, http_schema, **kwargs):
     ### TODO: Add paging
     userIds = stampedAPI.getLikes(authUserId, http_schema.stamp_id)
@@ -192,10 +195,10 @@ def likesShow(request, authUserId, http_schema, **kwargs):
     return transformOutput(output)
 
 
+@require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPStampId,
-                   exceptions=exceptions)
-@require_http_methods(["GET"])
+                   exceptions=stampExceptions)
 def todosShow(request, authUserId, http_schema, **kwargs):
     ### TODO: Add paging
     userIds = stampedAPI.getStampTodos(authUserId, http_schema.stamp_id)

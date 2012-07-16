@@ -14,14 +14,19 @@
         // ---------------------------------------------------------------------
         
         
+        // high-level containers
         var $window                 = $(window);
         var $body                   = $("body");
         var $main                   = $("#main");
+        var $vertically_centered    = $(".vertically-centered");
         
-        // main iphone elements
+        // main elements
         var $main_body              = $("#main-body");
         var $main_iphone            = $("#main-iphone");
         var $main_footer            = $("#main-footer");
+        var $main_stamped_logo      = $("#stamped-logo");
+        
+        // main iphone elements
         var $iphone_screens         = $(".iphone-screens");
         var $iphone_inbox_body      = $(".iphone-inbox-body");
         var $iphone_inbox_selection = $(".iphone-inbox-selection");
@@ -227,17 +232,48 @@
                 main_pane_cycle_animation.restart();
             }
         });
-
+        
+        var stamped_logo_top  = parseFloat($main_stamped_logo.css("top"));
+        var stamped_logo_left = parseFloat($main_stamped_logo.css("left"));
+        
+        var update_stamped_logo_layout = function() {
+            var scrollY     = $window.scrollTop();
+            var min_offset  = -50;
+            
+            if ($main_stamped_logo.hasClass("stamped-logo-fixed")) {
+                var p_offset    = $main_stamped_logo.parent().offset();
+                
+                if (p_offset.top + stamped_logo_top - scrollY >= min_offset) {
+                    $main_stamped_logo.removeClass("stamped-logo-fixed").css({
+                        "top"  : stamped_logo_top  + "px", 
+                        "left" : stamped_logo_left + "px"
+                    });
+                }
+            } else {
+                var offset  = $main_stamped_logo.offset();
+                
+                if (offset.top - scrollY < min_offset) {
+                    $main_stamped_logo.addClass("stamped-logo-fixed").css({
+                        "top"  : min_offset  + "px", 
+                        "left" : offset.left + "px"
+                    });
+                }
+            }
+        };
+        
         // vertically centers the page's main content
         // NOTE: if noop is true, this method will not make any modifications
         var update_main_layout = function(noop) {
-            var height = $main.height();
+            var height = $vertically_centered.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
             //console.log("height: " + height + "; offset: " + offset);
             
             if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
+                
+                update_stamped_logo_layout();
+                
             }
             
             return {
@@ -356,6 +392,10 @@
         
         // reloads the embedded map iframe with the specified user's map page via a simple opacity animation + loading spinner
         var map_window_switch_user = function(screen_name) {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             var active = $map_window.data("active");
             
             if (screen_name !== active) {
@@ -396,6 +436,10 @@
         
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
         var set_active_pane = function(index) {
+            if (!$body.hasClass("index")) {
+                return;
+            }
+            
             if (index >= 0 && index <= 4) {
                 var active  = "active-pane-" + index;
                 
@@ -512,6 +556,10 @@
         var iphone_screens_all = "iphone-screen-active-inbox iphone-screen-active-sdetail iphone-screen-active-guide";
         
         var set_active_iphone_screen = function(index) {
+            if ($iphone_screens.length <= 0) {
+                return;
+            }
+            
             var current_classes = $iphone_screens.get(0).className.split(/\s+/);
             var active = "iphone-screen-active-" + iphone_screens_index_map["" + index];
             
@@ -691,6 +739,7 @@
         });
         
         $window.resize(update_main_layout);
+        $window.scroll(update_stamped_logo_layout);
         
         $window.bind("load", function() {
             if ($body.hasClass("intro")) {

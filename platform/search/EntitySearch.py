@@ -397,7 +397,8 @@ def main():
 
     queryParams = {}
     if options.latlng:
-        queryParams['coords'] = options.latlng.split(',')
+        lat, lng = options.latlng.split(',')
+        queryParams['coords'] = float(lat), float(lng)
     elif options.address:
         queryParams['coords'] = Geocoder().addressToLatLng(options.address)
 
