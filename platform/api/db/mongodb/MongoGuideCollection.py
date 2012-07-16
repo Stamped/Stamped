@@ -88,7 +88,7 @@ class MongoGuideCollection(AMongoCollection):
         # Rebuild
         if regenerate and repair:
             if api is not None:
-                api.buildGuideAsync(str(key), force=True)
+                api.buildGuideAsync(str(key))
             else:
                 raise Exception("%s: API required to regenerate stats" % key)
 
