@@ -1325,7 +1325,7 @@ class StampedAPI(AStampedAPI):
         self._userDB.updateUserStats(userId,     'num_followers', increment=1)
 
         # Refresh guide
-        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId], kwargs={'force': True})
+        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         # Post to Facebook Open Graph if enabled
         share_settings = self._getOpenGraphShareSettings(authUserId)
@@ -3666,7 +3666,8 @@ class StampedAPI(AStampedAPI):
             result.append(entity)
 
         # Refresh guide
-        tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId], kwargs={'force': forceRefresh})
+        if guide.timestamp is not None and datetime.utcnow() > guide.timestamp.generated + timedelta(days=1)
+            tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         return result
 
@@ -3860,17 +3861,7 @@ class StampedAPI(AStampedAPI):
         return result
 
     @API_CALL
-    def buildGuideAsync(self, authUserId, force=False):
-        if force:
-            return self._buildUserGuide(authUserId)
-
-        try:
-            guide = self._guideDB.getGuide(authUserId)
-            if guide.timestamp is not None and datetime.utcnow() < guide.timestamp.generated + timedelta(days=1):
-                return
-        except (StampedUnavailableError, KeyError):
-            pass
-
+    def buildGuideAsync(self, authUserId):
         self._buildUserGuide(authUserId)
 
     def _buildUserGuide(self, authUserId):
