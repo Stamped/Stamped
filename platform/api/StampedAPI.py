@@ -2617,8 +2617,13 @@ class StampedAPI(AStampedAPI):
                     kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
     
     @API_CALL
-    def updateUserImageCollageAsync(self, user_id, category):
-        user        = self._userDB.getUser(user_id)
+    def updateUserImageCollageAsync(self, userId, category):
+        try:
+            user = self._userDB.getUser(userId)
+        except StampedDocumentNotFoundError as e:
+            logs.warning("User not found: %s" % userId)
+            return 
+        
         categories  = [ 'default', category ]
         
         self._userImageCollageDB.process_user(user, categories)
