@@ -84,14 +84,8 @@
                                     We're hiring! Check out our <a href="/jobs" class="screen-name">jobs page</a> for more info.
                                 </div>
                                 
-                                <div class="bg-images bg-image-active-4">
+                                <div class="bg-images bg-image-active-0">
                                     <div class="bg-image bg-image-0"></div>
-                                    <div class="bg-image bg-image-1"></div>
-                                    <div class="bg-image bg-image-2"></div>
-                                    <div class="bg-image bg-image-3"></div>
-                                    <div class="bg-image bg-image-4"></div>
-                                    <div class="bg-image bg-image-5"></div>
-                                    <div class="bg-image bg-image-6"></div>
                                 </div>
                             </div>
                         </div>
@@ -104,25 +98,30 @@
             </div>
         </div>
         
-        <div class="post-main hidden-main-animating">
-            <div class="post-main-section founders">
-                <h1>The Founders</h1>
+        <div class="post-main hidden-main-animating clearfix">
+            <div class="post-main-section team">
+                <h1>THE TEAM</h1>
                 
                 {% for member in founders %}
                     {% include "team-member.html" %}
                 {% endfor %}
+                
+                <div class="non-founders">
+                    {% for member in team %}
+                        {% include "team-member.html" %}
+                    {% endfor %}
+                </div>
             </div>
             
-            <div class="post-main-section team">
-                <h1>The Team</h1>
+            <div class="post-main-section investors">
+                <h1>INVESTORS</h1>
                 
-                {% for member in team %}
-                    {% include "team-member.html" %}
-                {% endfor %}
+                <div class="investor investor-bain"></div>
+                <div class="investor investor-google"></div>
             </div>
             
             <div class="post-main-section advisors">
-                <h1>Advisors</h1>
+                <h1>ADVISORS</h1>
                 
                 {% for advisor in advisors %}
                     <div class="advisor advisor-{{advisor.screen_name}}">
@@ -135,7 +134,7 @@
                         <div class="desc">{{advisor.desc|safe}}</div>
                         
                         <div class="links">
-                            <a href="/{{advisor.screen_name}}" title="Follow @{{advisor.screen_name}} on Stamped" class="screen-name">@{{advisor.screen_name}}</a>
+                            <a href="/{{advisor.screen_name}}" title="@{{advisor.screen_name}} on Stamped" class="social stamped screen-name"><div class="social-button-stamped"></div> @{{advisor.screen_name}}</a>
                             <a href="https://twitter.com/{{advisor.twitter}}" title="Follow @{{advisor.twitter}} on Twitter" class="social twitter"><div class="social-button social-button-twitter"></div> @{{advisor.twitter}}</a>
                         </div>
                     </div>
@@ -145,9 +144,7 @@
             <div class="made-in-nyc-logo"></div>
         </div>
         
-        <div class="post-main-overlay">
-            
-        </div>
+        <div class="post-main-overlay"></div>
     </div>
 {% endblock main %}
 

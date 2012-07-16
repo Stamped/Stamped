@@ -105,7 +105,8 @@ footer {
                     
                     .title {
                         margin-bottom: 24px;
-                        font-size: 3.7em;
+                        font-size: 3.0em;
+                        line-height: 125%;
                     }
                 }
                 
@@ -122,11 +123,10 @@ footer {
                     
                     .bg-images {
                         position: relative;
-                        margin-top: 12px;
+                        margin: 22px auto 0;
                         
-                        // 720x540px
-                        width:  288px;
-                        height: 216px;
+                        width:  245px;
+                        height: 180px;
                     }
                     
                     .bg-image {
@@ -134,55 +134,16 @@ footer {
                         width:  100%;
                         height: 100%;
                         
-                        .box-shadow(0, 2px, 8px, 0, @shadow);
-                        .rounded(2px);
-                        
                         opacity: 0;
                         .transition(opacity, .3s, ease);
                     }
                     
-                    .bg-image-active-0 .bg-image-0, 
-                    .bg-image-active-1 .bg-image-1, 
-                    .bg-image-active-2 .bg-image-2, 
-                    .bg-image-active-3 .bg-image-3, 
-                    .bg-image-active-4 .bg-image-4, 
-                    .bg-image-active-5 .bg-image-5, 
-                    .bg-image-active-6 .bg-image-6 {
+                    .bg-image-active-0 .bg-image-0 {
                         opacity: 1;
                     }
                     
                     .bg-image-0 {
-                        background: url(/assets/img/about/bg/about_bg0.jpeg) no-repeat;
-                        background-size: 100% 100%;
-                    }
-                    
-                    .bg-image-1 {
-                        background: url(/assets/img/about/bg/about_bg1.jpeg) no-repeat;
-                        background-size: 100% 100%;
-                    }
-                    
-                    .bg-image-2 {
-                        background: url(/assets/img/about/bg/about_bg2.jpeg) no-repeat;
-                        background-size: 100% 100%;
-                    }
-                    
-                    .bg-image-3 {
-                        background: url(/assets/img/about/bg/about_bg3.jpeg) no-repeat;
-                        background-size: 100% 100%;
-                    }
-                    
-                    .bg-image-4 {
-                        background: url(/assets/img/about/bg/about_bg4.jpeg) no-repeat;
-                        background-size: 100% 100%;
-                    }
-                    
-                    .bg-image-5 {
-                        background: url(/assets/img/about/bg/about_bg5.jpeg) no-repeat;
-                        background-size: 100% 100%;
-                    }
-                    
-                    .bg-image-6 {
-                        background: url(/assets/img/about/bg/about_bg6.jpeg) no-repeat;
+                        background: url(/assets/img/about/teamphotobooth.jpg) no-repeat;
                         background-size: 100% 100%;
                     }
                 }
@@ -191,23 +152,49 @@ footer {
     }
     
     .post-main {
-        margin-bottom: 10%;
+        margin: 0 48px 10%;
         
         .post-main-section {
             margin-bottom: 24px;
             width: 100%;
         }
         
+        .advisors {
+            width: 65%;
+        }
+        
+        .investors {
+            float: right;
+            width: 20%;
+            max-width: 20%;
+            overflow: visible;
+            margin-bottom: 0;
+            
+            .investor-bain {
+                background: url(/assets/img/about/baincapitalventures.png) no-repeat;
+                
+                width:  222px;
+                height: 22px;
+                
+                margin-bottom: 12px;
+            }
+            
+            .investor-google {
+                background: url(/assets/img/about/googleventures.png) no-repeat;
+                
+                width:  140px;
+                height: 48px;
+            }
+        }
+        
         h1 {
-            .stamped-font();
+            font-family: helvetica, sans-serif;
+            display: inline-block;
             
-            text-shadow: 0px 2px 4px fade(#fff, 25%);
-            font-size: 5em;
-            line-height: 100%;
-            letter-spacing: 0.03em;
-            color: #333;
+            font-size: 1.2em;
+            color: #999;
             
-            margin: .5em 0;
+            margin: 24px 0;
         }
         
         .team-member {
@@ -263,16 +250,6 @@ footer {
                     font-size: 105%;
                     margin: 0;
                 }
-                
-                .desc {
-                    text-align: justify;
-                }
-            }
-        }
-        
-        .team {
-            .content {
-                width: 80%;
             }
         }
         
@@ -299,6 +276,8 @@ footer {
         
         .desc {
             margin-top: .2em;
+            
+            //text-align: justify;
             color: #888;
         }
         
@@ -306,18 +285,22 @@ footer {
             margin-top: .5em;
             
             a {
-                margin-right: 24px;
+                display: block;
             }
         }
         
-        .team .team-member .headshot {
+        .non-founders .team-member .headshot {
             width:  96px;
             height: 96px;
             background-size: 100% 100%;
         }
         
+        .non-founders .team-member {
+            padding-left: (160px - 96px);
+        }
+        
         .made-in-nyc-logo {
-            margin: 24px auto;
+            margin: 24px auto 0;
         }
     }
 }
@@ -348,23 +331,41 @@ footer {
 .social {
     white-space: nowrap;
     
+    .social-button-twitter {
+        position: relative;
+        display:  inline-block;
+        top: 4px;
+        
+        background-position: 0 -22px !important;
+    }
+    
+    .social-button-stamped {
+        position: relative;
+        display:  inline-block;
+        top: 4px;
+    }
+}
+
+.twitter {
     &:hover {
         color: #4099FF !important;
     }
     
-    .social-button-twitter {
-        position: relative;
-        top: 4px;
-        
-        background-position: 0 -22px !important;
-        display: inline-block;
-    }
 }
 
 #retina {
     #main .pane-body #pane-wrapper .pane .lhs .social-button-twitter {
         background-position: 0 -44px;
     }
+}
+
+.social-button-stamped {
+    display: block;
+    background: url(/assets/img/about/stampbadge.png) no-repeat;
+    
+    margin: 1px 0;
+    width:  20px;
+    height: 20px;
 }
 
 .robby .headshot {
@@ -500,18 +501,18 @@ footer {
 }
 
 .made-in-nyc-logo {
-    background: url(/assets/img/proudlymadeinnyc.png) no-repeat;
+    background: url(/assets/img/about/nyctoken.png) no-repeat;
     
     display: block;
-    width:  102px;
-    height: 103px;
+    width:  204px;
+    height: 205px;
 }
 
 #retina {
     .made-in-nyc-logo {
-        background: url(/assets/img/proudlymadeinnyc@2x.png) no-repeat;
-        width:  204px;
-        height: 205px;
+        background: url(/assets/img/about/nyctoken@2x.png) no-repeat;
+        width:  408px;
+        height: 410px;
     }
 }
 
