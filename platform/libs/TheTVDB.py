@@ -34,12 +34,12 @@ class TheTVDB(object):
     @lru_cache(maxsize=64)
     @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
-    def searchRaw(self, query):
+    def searchRaw(self, query, priority='low'):
 
         url = 'http://www.thetvdb.com/api/GetSeries.php'
         params = { 'seriesname' : query }
         try:
-            response, xml = service_request('tvdb', 'GET', url, query_params=params)
+            response, xml = service_request('tvdb', 'GET', url, query_params=params, priority=priority)
         except:
             return None
 
@@ -48,8 +48,8 @@ class TheTVDB(object):
         # other side.
         return xml.decode('utf-8')
 
-    def search(self, query, transform=True, detailed=False):
-        xml = self.searchRaw(query)
+    def search(self, query, transform=True, detailed=False, priority='low'):
+        xml = self.searchRaw(query, priority)
         if xml is None:
             return []
 
@@ -85,11 +85,11 @@ class TheTVDB(object):
     @lru_cache(maxsize=64)
     @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
-    def lookup(self, thetvdb_id):
+    def lookup(self, thetvdb_id, priority='low'):
         details_url = 'http://www.thetvdb.com/api/%s/series/%s/all/' % \
                       (self.api_key, thetvdb_id)
 
-        response, xml = service_request('tvdb', 'GET', details_url)
+        response, xml = service_request('tvdb', 'GET', details_url, priority=priority)
         tree  = objectify.fromstring(xml)
         items = tree.findall('.//Series')
         

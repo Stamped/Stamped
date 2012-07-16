@@ -26,7 +26,7 @@ class Facebook(object):
         self.app_namespace  = app_namespace
         pass
 
-    def _http(self, method, accessToken, path, parse_json=True, **params):
+    def _http(self, method, accessToken, path, priority='high', parse_json=True, **params):
         if params is None:
             params = {}
 
@@ -45,9 +45,9 @@ class Facebook(object):
         url     = "%s%s" % (baseurl, path)
 
         if method == 'get':
-            response, content = service_request('facebook', method, url, query_params=params)
+            response, content = service_request('facebook', method, url, query_params=params, priority=priority)
         else:
-            response, content = service_request('facebook', method, url, body=params)
+            response, content = service_request('facebook', method, url, body=params, priority=priority)
         if parse_json:
             result = json.loads(content)
         else:
@@ -76,14 +76,14 @@ class Facebook(object):
             #time.sleep(0.5)
         return result
 
-    def _get(self, accessToken, path, **params):
-        return self._http('get', accessToken, path, **params)
+    def _get(self, accessToken, path, priority='high', **params):
+        return self._http('get', accessToken, path, priority, **params)
 
-    def _post(self, accessToken, path, **params):
-        return self._http('post', accessToken, path, **params)
+    def _post(self, accessToken, path, priority='high', **params):
+        return self._http('post', accessToken, path, priority, **params)
 
-    def _delete(self, accessToken, path, **params):
-        return self._http('delete', accessToken, path, **params)
+    def _delete(self, accessToken, path, priority='high', **params):
+        return self._http('delete', accessToken, path, priority, **params)
 
     def authorize(self, code, state):
         path = 'oauth/access_token'
@@ -244,6 +244,7 @@ class Facebook(object):
         return self._post(
             access_token,
             path,
+            priority='low',
             **args
         )
 
@@ -259,6 +260,7 @@ class Facebook(object):
         return self._post(
             access_token,
             path,
+            priority='low',
             **args
         )
 
@@ -279,6 +281,7 @@ class Facebook(object):
         self._post(
             access_token,
             path,
+            priority='low',
             **params
         )
 
@@ -315,7 +318,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getTestUsers'
+    methods = 'getUserInfo'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

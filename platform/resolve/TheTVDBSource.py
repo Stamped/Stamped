@@ -216,7 +216,7 @@ class TheTVDBSource(GenericSource):
         if queryCategory != 'film':
             raise NotImplementedError()
         # Ugh. Why are we using entities?
-        rawResults = self.__thetvdb.search(queryText, transform=True, detailed=False)
+        rawResults = self.__thetvdb.search(queryText, transform=True, detailed=False, priority='high')
         if logRawResults:
             logComponents = ['\n\n\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\n\n\n']
             for rawResult in rawResults:

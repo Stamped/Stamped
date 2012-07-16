@@ -289,10 +289,10 @@ class FactualSource(GenericSource):
 
         def getLocalResults():
             # Radius is == the radius used with Google Places.
-            results = self.__factual.search(queryText, coordinates=coords, radius=20000)
+            results = self.__factual.search(queryText, coordinates=coords, radius=20000, priority="high")
             local_results.extend(results)
         def getNationalResults():
-            results = self.__factual.search(queryText)
+            results = self.__factual.search(queryText, priority="high")
             national_results.extend(results)
         if coords is not None:
             pool = Pool(2)
@@ -363,7 +363,7 @@ class FactualSource(GenericSource):
                 timestamps['foursquare'] = controller.now
 
             # all further enrichments require place/restaurant data so return if not present
-            data = self.__factual.data(factual_id,entity=entity)
+            data = self.__factual.data(factual_id,entity=entity, priority="low")
 
             if data is None:
                 return True

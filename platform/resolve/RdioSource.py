@@ -384,7 +384,7 @@ class   RdioSource(GenericSource):
         if queryCategory != 'music':
             raise Exception('Rdio only supports music!')
         response = self.__rdio.method('search', query=queryText, count=25, types='Artist,Album,Track',
-            extras='albumCount,label,isCompilation')
+            extras='albumCount,label,isCompilation', priority='high')
         if response['status'] != 'ok':
             # TODO: Proper error handling here. Tracking of how often this happens.
             print "Rdio error; see response:"

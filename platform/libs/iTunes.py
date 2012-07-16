@@ -49,9 +49,9 @@ class iTunes(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('iTunes (after caching)')
-    def method(self, method, **params):
+    def method(self, method, priority='low', **params):
         url = 'http://itunes.apple.com/%s' % method
-        response, content = service_request('itunes', 'GET',  url, query_params=params)
+        response, content = service_request('itunes', 'GET',  url, query_params=params, priority=priority)
         result = json.loads(content)
         return result
 

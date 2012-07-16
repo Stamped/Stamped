@@ -125,28 +125,28 @@ class SinglePlatform(object):
         self.__cooldown = .4
         self.__throttled = 0
     
-    def search(self, query, page=0, count=20):
+    def search(self, query, page=0, count=20, priority='low'):
         params = {
             'q'     : query, 
             'page'  : page, 
             'count' : count, 
         }
         
-        return self._get_uri('/restaurants/search', params)
+        return self._get_uri('/restaurants/search', priority, params)
     
-    def lookup(self, location_id):
-        return self._get_uri('/restaurants/%s' % location_id)
+    def lookup(self, location_id, priority='low'):
+        return self._get_uri('/restaurants/%s' % location_id, priority)
     
-    def get_menu(self, location_id):
-        return self._get_uri('/restaurants/%s/menu' % location_id)
+    def get_menu(self, location_id, priority='low'):
+        return self._get_uri('/restaurants/%s/menu' % location_id, priority)
 
-    def get_menu_schema(self, location_id):
-        return toMenu(self.get_menu(location_id))
+    def get_menu_schema(self, location_id, priority='low'):
+        return toMenu(self.get_menu(location_id, priority))
     
-    def get_short_menu(self, location_id):
-        return self._get_uri('/restaurants/%s/shortmenu' % location_id)
+    def get_short_menu(self, location_id, priority='low'):
+        return self._get_uri('/restaurants/%s/shortmenu' % location_id, priority)
     
-    def _get_uri(self, uri, params=None):
+    def _get_uri(self, uri, priority='low', params=None):
         if params is not None:
             uri = "%s?%s" % (uri, urllib.urlencode(params))
         
@@ -159,7 +159,7 @@ class SinglePlatform(object):
             'Accept-encoding': 'gzip',
             'Accept' : 'application/json',
         }
-        response, content = service_request('singleplatform', 'GET', url, header=header)
+        response, content = service_request('singleplatform', 'GET', url, header=header, priority=priority)
         logs.info(url)
         result = json.loads(content)
         return result

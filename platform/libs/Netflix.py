@@ -76,7 +76,7 @@ class Netflix(object):
     def __isUserBlacklisted(self, user_id):
         return self.__blacklist.get(user_id, 0) >= self.__blacklistThreshold
 
-    def __http(self, verb, service, user_id=None, token=None, **parameters):
+    def __http(self, verb, service, user_id=None, token=None, priority='low', **parameters):
         """
         Makes a request to the Netflix API
         """
@@ -109,9 +109,9 @@ class Netflix(object):
 
         # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
         if verb == 'POST':
-            response, content = service_request('netflix', verb, url, body=params, header=headers)
+            response, content = service_request('netflix', verb, url, body=params, header=headers, priority=priority)
         else:
-            response, content = service_request('netflix', verb, url, query_params=params, header=headers)
+            response, content = service_request('netflix', verb, url, query_params=params, header=headers, priority=priority)
 
         # if the response is a 401 or 403, blacklist the user until the day expires
         if user_id is not None and response.status in (401, 403):
@@ -138,14 +138,14 @@ class Netflix(object):
             else:
                 raise StampedThirdPartyError(message)
 
-    def __get(self, service, user_id=None, token=None, **parameters):
-        return self.__http('GET', service, user_id, token, **parameters)
+    def __get(self, service, user_id=None, token=None, priority='low', **parameters):
+        return self.__http('GET', service, user_id, token, priority, **parameters)
 
-    def __post(self, service, user_id=None, token=None, **parameters):
-        return self.__http('POST', service, user_id, token, **parameters)
+    def __post(self, service, user_id=None, token=None, priority='low', **parameters):
+        return self.__http('POST', service, user_id, token, priority, **parameters)
 
-    def __delete(self, service, user_id=None, token=None, **parameters):
-        return self.__http('DELETE', service, user_id, token, **parameters)
+    def __delete(self, service, user_id=None, token=None, priority='low', **parameters):
+        return self.__http('DELETE', service, user_id, token, priority, **parameters)
     
     def __asList(self, elmt):
         if isinstance(elmt, list):
@@ -171,10 +171,11 @@ class Netflix(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Netflix (after caching)')
-    def autocomplete(self, term):
+    def autocomplete(self, term, priority='high'):
         results = self.__get(
             service         = 'catalog/titles/autocomplete',
             term            = term,
+            priority        = priority,
         )
         autocomplete = results.pop('autocomplete', None)
         if autocomplete is None or 'autocomplete_item' not in self.__asList(autocomplete)[0]:
@@ -193,7 +194,7 @@ class Netflix(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Netflix (after caching)')
-    def searchTitles(self, title, start=0, count=100):
+    def searchTitles(self, title, start=0, count=100, priority='low'):
         """
         Searches the netflix catalog for titles with a given search string.
         returns the json result as a dict
@@ -203,6 +204,7 @@ class Netflix(object):
                         term            = title,
                         start_index     = start,
                         max_results     = count,
+                        priority        = priority,
                         expand          ='synopsis,cast,directors,formats,delivery_formats'
                     )
         return results.get('catalog_titles', None)
@@ -214,14 +216,15 @@ class Netflix(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Netflix (after caching)')
-    def getTitleDetails(self, netflix_id):
+    def getTitleDetails(self, netflix_id, priority='low'):
         results = self.__get(
             service         = netflix_id,
-            expand          ='synopsis,cast,directors,formats,delivery_formats'
+            expand          = 'synopsis,cast,directors,formats,delivery_formats',
+            priority        = priority,
         )
         return results.get('catalog_title', None)
 
-    def getInstantQueue(self, user_id, user_token, user_secret, start=0, count=100):
+    def getInstantQueue(self, user_id, user_token, user_secret, start=0, count=100, priority='low'):
         """
         Returns a list of netflix ids for the user id
         """
@@ -231,6 +234,7 @@ class Netflix(object):
                             token                   = token,
                             start_index             = start,
                             max_results             = count,
+                            priority                = priority,
                         )
         queue = []
         for item in self.__asList(results.get('queue', None).get('queue_item', None)):
@@ -239,7 +243,7 @@ class Netflix(object):
 
         return results.get('queue', None)
 
-    def getRentalHistory(self, user_id, user_token, user_secret, start=0, count=100):
+    def getRentalHistory(self, user_id, user_token, user_secret, start=0, count=100, priority='low'):
         """
         Returns a list of (date, {netflix_id:<ID>}) tuples for the user identified by auth
         """
@@ -250,6 +254,7 @@ class Netflix(object):
             token                   = token,
             start_index             = start,
             max_results             = count,
+            priority                = priority,
         )
         if results is None:
             return None
@@ -261,7 +266,7 @@ class Netflix(object):
                 recent.append( (date, {'netflix_id': netflix_id}) )
         return recent
 
-    def getRecommendations(self, user_id, user_token, user_secret, start=0, count=100):
+    def getRecommendations(self, user_id, user_token, user_secret, start=0, count=100, priority='low'):
         """
         Returns a list of netflix_ids
         """
@@ -271,12 +276,10 @@ class Netflix(object):
             token                   = token,
             start_index             = start,
             max_results             = count,
+            priority                = priority,
         )
         recs = self.__asList(results['recommendations']['recommendation'])
         return [self._getFromLinks(self.__asList(x['link']), 'rel', 'catalog/title', 'href') for x in recs]
-
-    def getViewingHistory(self, user_id, user_token, user_secret, start=0, count=100):
-        pass
 
     def _getETag(self, user_id, user_token, user_secret, netflix_id):
         token = oauth.OAuthToken(user_token, user_secret)
@@ -301,26 +304,29 @@ class Netflix(object):
             etag                    = etag,
             user_id                 = user_id,
             token                   = token,
+            priority                = 'high',
         )
 
-    def getUserInfo(self, user_token, user_secret):
+    def getUserInfo(self, user_token, user_secret, priority='high'):
         token = oauth.OAuthToken(user_token, user_secret)
         userInfo = self.__get(
             'users/current',
-            token = token,
+            token           = token,
+            priority        = priority,
         )
         userUrl = userInfo['resource']['link']['href']
         userId = userUrl[userUrl.rfind('/')+1:]
         return self.getUserInfoWithId(userId, user_token, user_secret)
 
-    def getUserInfoWithId(self, user_id, user_token, user_secret):
+    def getUserInfoWithId(self, user_id, user_token, user_secret, priority='high'):
         token = oauth.OAuthToken(user_token, user_secret)
         return self.__get(
             'users/%s' % user_id,
-            token = token,
+            token       = token,
+            priority    = priority,
         )['user']
 
-    def getUserRatings(self, user_id, user_token, user_secret, netflix_ids=None):
+    def getUserRatings(self, user_id, user_token, user_secret, netflix_ids=None, priority='low'):
         # Returns a list of tuples (netflix_id, rating), where rating is an int value
         # netflix_ids should be a comma delimited list of titles to get the user ratings of (if they exist)
         # if no ids are provided, then we'll use the user's rental history
@@ -332,6 +338,7 @@ class Netflix(object):
             user_id                 = user_id,
             token                   = token,
             title_refs              = netflix_ids,
+            priority                = priority,
         )
         ratings = []
         for x in self.__asList(results['ratings']['ratings_item']):
@@ -371,6 +378,7 @@ class Netflix(object):
         result = self.__get(
            'oauth/access_token',
             token                   = token,
+            priority                = 'high',
             #parameters              = { 'application_name': 'Stamped' },
         )
         return result

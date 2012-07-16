@@ -432,7 +432,7 @@ class SpotifySource(GenericSource):
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=None):
         tracks, albums, artists = [], [], []
         def conductTypeSearch((target, proxyClass, typeString, resultsKey)):
-            rawResults = self.__spotify.search(typeString, q=queryText)[resultsKey]
+            rawResults = self.__spotify.search(typeString, priority='high', q=queryText)[resultsKey]
             target.extend([proxyClass(rawResult['href'], data=rawResult, maxLookupCalls=0) for rawResult in rawResults])
         typeSearches = (
             (tracks, SpotifyTrack, 'track', 'tracks'),

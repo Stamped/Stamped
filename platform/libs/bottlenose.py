@@ -96,7 +96,9 @@ class AmazonCall(object):
         
         api_string = "http://" + service_domain + "/onca/xml?" + quoted_strings + "&Signature=%s" % signature
 
-        response, content = service_request('amazon', 'GET', api_string, header={"Accept-Encoding": "gzip"})
+        priority = kwargs.get('priority', 'low')
+        header={"Accept-Encoding": "gzip"}
+        response, content = service_request('amazon', 'GET', api_string, header=header, priority=priority)
 
         if response.get('Content-Encoding', None) == 'gzip':
             gzipped_file  = gzip.GzipFile(fileobj=StringIO.StringIO(content))

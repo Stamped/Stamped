@@ -254,7 +254,7 @@ class Factual(object):
         self.__max_crosswalk_age = timedelta(30)
         self.__max_resolve_age = timedelta(30)
     
-    def search(self, query, limit=_limit, coordinates=None, radius=5000):
+    def search(self, query, limit=_limit, coordinates=None, radius=5000, priority="low"):
         params = {}
         params['prefix']    = 't'
         params['limit']     = limit
@@ -270,12 +270,12 @@ class Factual(object):
         
         if coordinates is not None:
             params['geo'] = urllib.quote(json.dumps({
-                '$circle':{'$center':[coordinates[0], coordinates[1]],'$meters':radius}
+                '$circle':{'$center':[coordinates[0], coordinates[1]], '$meters':radius}
             }))
-        
-        return self.__factual('global', **params)
+
+        return self.__factual('global', priority=priority, **params)
     
-    def resolve(self, data, limit=_limit):
+    def resolve(self, data, limit=_limit, priority="low"):
         """
         Use Resolve service to match entities to limited attributes, including partial names.
         
@@ -287,26 +287,26 @@ class Factual(object):
         and will operate on partial names.
         """
         string = json.dumps(data)
-        r = self.__factual('resolve',limit=limit,values=urllib.quote(string))
+        r = self.__factual('resolve', limit=limit, values=urllib.quote(string), priority=priority)
         if r != None and len(r) > limit:
             r = r[:limit]
         return r
     
-    def places(self, data, limit=_limit):
+    def places(self, data, limit=_limit, priority="low"):
         """
         A stricter search than resolve. Seems to only produce entities which exactly match the given fields (at least for name).
         """
         string = urllib.quote(json.dumps(data))
-        return self.__factual('global', prefix='t', limit=limit, filters=string)
+        return self.__factual('global', prefix='t', limit=limit, filters=string, priority=priority)
     
-    def place(self, factual_id):
-        result = self.places({'factual_id':factual_id},1)
+    def place(self, factual_id, priority="low"):
+        result = self.places({'factual_id':factual_id}, 1, priority)
         if result:
             return result[0]
         else:
             return None
     
-    def crosswalk_id(self, factual_id, namespace=None, limit=_limit, namespaces=None):
+    def crosswalk_id(self, factual_id, namespace=None, limit=_limit, namespaces=None, priority="low"):
         """
         Use Crosswalk service to find urls and ids that match the given entity.
         
@@ -328,9 +328,9 @@ class Factual(object):
         elif namespaces != None:
             args['only'] = ','.join(namespaces)
             del args['limit']
-        return self.__factual('crosswalk',**args)
+        return self.__factual('crosswalk', priority=priority, **args)
     
-    def crosswalk_external(self, space, space_id, namespace=None, limit=_limit):
+    def crosswalk_external(self, space, space_id, namespace=None, limit=_limit, priority="low"):
         """
         Use Crosswalk service to find urls and ids that match the given external entity.
         
@@ -345,26 +345,26 @@ class Factual(object):
         args = {'limit':limit,'namespace':space,'namespace_id':space_id}
         if namespace != None:
             args['only'] = namespace
-        return self.__factual('crosswalk',**args)
+        return self.__factual('crosswalk', priority=priority, **args)
     
-    def crossref_id(self, factual_id, limit=_limit):
+    def crossref_id(self, factual_id, limit=_limit, priority="low"):
         """
         Use Crossref service to find urls that pertain to the given entity.
         """
-        return self.__factual('crossref',factual_id=factual_id,limit=limit)
+        return self.__factual('crossref', factual_id=factual_id, limit=limit, priority=priority)
     
-    def crossref_url(self, url, limit=_limit):
+    def crossref_url(self, url, limit=_limit, priority="low"):
         """
         User Crossref service to find the entities related/mentioned at the given url.
         """
-        return self.__factual('crossref',url=urllib.quote(url),limit=limit)
+        return self.__factual('crossref', url=urllib.quote(url), limit=limit, priority=priority)
     
-    def restaurant(self, factual_id):
+    def restaurant(self, factual_id, priority="low"):
         """
         Get Factual restaurant data for a given factual_id.
         """
         string = json.dumps({'factual_id':factual_id})
-        result = self.__factual('restaurants-us','t',filters=urllib.quote(string))
+        result = self.__factual('restaurants-us', 't', filters=urllib.quote(string), priority=priority)
         if result:
             return result[0]
         else:
@@ -520,15 +520,15 @@ class Factual(object):
             return None
 
 
-    def data(self, factual_id, entity=None):
+    def data(self, factual_id, entity=None, priority="low"):
         """
         Generate Factual data for given factual_id.
 
         The entity argument is optional but may allow the method to run more efficiently.
         """
-        data = self.restaurant(factual_id)
+        data = self.restaurant(factual_id, priority)
         if data is None:
-            data = self.place(factual_id)
+            data = self.place(factual_id, priority=priority)
         return data
 
     def menu(self, factual_id):
@@ -551,7 +551,7 @@ class Factual(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='Factual (after caching)')
-    def __rawFactual(self, service, prefix='places', **args):
+    def __rawFactual(self, service, prefix='places', priority="low", **args):
         """
         Helper method for making OAuth Factual API calls.
 
@@ -570,16 +570,16 @@ class Factual(object):
 
         request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
 
-        response, content = service_request('factual', 'GET', url, header=request.to_header(), query_params=args)
+        response, content = service_request('factual', 'GET', url, header=request.to_header(), query_params=args, priority=priority)
         return content
         #return res.read()
 
-    def __factual(self, service, prefix='places', **args):
+    def __factual(self, service, prefix='places', priority="low", **args):
         """
         Factual results are difficult to turn into mongo objects for the mongo cache because sometimes they contain
         dicts that use "$distance" as a key which is a problem for mongo. So we cache the result before it's parsed.
         """
-        m = json.loads(self.__rawFactual(service, prefix, **args))
+        m = json.loads(self.__rawFactual(service, prefix, priority **args))
         try:
             return m['response']['data']
         except:

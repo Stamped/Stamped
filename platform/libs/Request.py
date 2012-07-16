@@ -68,7 +68,7 @@ def _rpc_service_request(host, port, service, method, url, body={}, header={}, p
     return response, content
 
 def _local_service_request(service, method, url, body={}, header={}, priority='high', timeout=5):
-    response, content = local_rlservice.exposed_request(service, priority, timeout, method, url, body, header)
+    response, content = local_rlservice.handleRequest(service, priority, timeout, method, url, body, header)
     return response, content
 
 
@@ -92,9 +92,9 @@ def service_request(service, method, url, body={}, header={}, query_params = {},
 
     if local_rlservice is None:
         if utils.is_ec2():
-            local_rlservice = StampedRateLimiterService(RL_PORT, throttle=True)
+            local_rlservice = StampedRateLimiterService(throttle=True)
         else:
-            local_rlservice = StampedRateLimiterService(RL_PORT, throttle=True)
+            local_rlservice = StampedRateLimiterService(throttle=False)
 
     if not utils.is_ec2() or _isFailed():
         return _local_service_request(service, method.upper(), url, body, header, priority, timeout)

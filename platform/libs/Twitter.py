@@ -19,7 +19,7 @@ class Twitter(object):
         self.__signature_method     = oauth.OAuthSignatureMethod_HMAC_SHA1()
         self.__httpObj              = httplib2.Http()
 
-    def __http(self, verb, service, user_token=None, user_secret=None, **params):
+    def __http(self, verb, service, user_token=None, user_secret=None, priority='high', **params):
 
         url = 'https://api.twitter.com/%s' % service
 
@@ -45,17 +45,17 @@ class Twitter(object):
         logs.debug(url)
 
         # Send the http request
-        response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header)
+        response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
         result = json.loads(content)
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
         return result
 
-    def __get(self, service, user_token=None, user_secret=None, **params):
-        return self.__http('GET', service, user_token, user_secret, **params)
+    def __get(self, service, user_token=None, user_secret=None, priority='high', **params):
+        return self.__http('GET', service, user_token, user_secret, priority, **params)
 
-    def __post(self, service, user_token=None, user_secret=None, **params):
-        return self.__http('POST', service, user_token, user_secret, **params)
+    def __post(self, service, user_token=None, user_secret=None, priority='high', **params):
+        return self.__http('POST', service, user_token, user_secret, priority, **params)
 
     def getUserInfo(self, user_token, user_secret):
         result = self.__get(

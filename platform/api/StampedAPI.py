@@ -1705,7 +1705,8 @@ class StampedAPI(AStampedAPI):
                 latLng = None
             else:
                 latLng = [ coordinates.lat, coordinates.lng ]
-            results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'})
+            results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'},
+                                                                priority='high')
             #make list of names from results, remove duplicate entries, limit to 10
             if results is None:
                 return []
@@ -1715,7 +1716,7 @@ class StampedAPI(AStampedAPI):
                 completions.append( { 'completion' : name } )
             return completions
         elif category == 'music':
-            result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
+            result = self._rdio.searchSuggestions(query, types="Artist,Album,Track", priority='high')
             if 'result' not in result:
                 return []
             #names = list(set([i['name'] for i in result['result']]))[:10]

@@ -87,7 +87,7 @@ class GooglePlaces(AKeyBasedAPI):
     def _run(self):
         pass
     
-    def getPlaceDetails(self, reference, params=None):
+    def getPlaceDetails(self, reference, params=None, priority='low'):
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
@@ -96,7 +96,7 @@ class GooglePlaces(AKeyBasedAPI):
             if apiKey is None:
                 return None
             
-            response = self.getPlaceDetailsResponse(reference, apiKey, params)
+            response = self.getPlaceDetailsResponse(reference, apiKey, params, priority)
             
             if response is None:
                 return None
@@ -114,7 +114,7 @@ class GooglePlaces(AKeyBasedAPI):
             
             return response['result']
     
-    def getSearchResultsByAddress(self, address, params=None):
+    def getSearchResultsByAddress(self, address, params=None, priority='low'):
         latLng = self.addressToLatLng(address)
         
         if latLng is None:
@@ -122,24 +122,24 @@ class GooglePlaces(AKeyBasedAPI):
             # be unable to cross-reference this address with google places.
             return None
         
-        return self.getSearchResultsByLatLng(latLng, params)
+        return self.getSearchResultsByLatLng(latLng, params, priority)
     
-    def getEntityResultsByLatLng(self, latLng, params=None, detailed=False):
-        results = self.getSearchResultsByLatLng(latLng, params)
+    def getEntityResultsByLatLng(self, latLng, params=None, detailed=False, priority='low'):
+        results = self.getSearchResultsByLatLng(latLng, params, priority)
         output  = []
         
         if results is None:
             return None
         
         for result in results:
-            entity = self.getEntityFromResult(result, detailed=detailed)
+            entity = self.getEntityFromResult(result, detailed, priority)
             
             if entity is not None:
                 output.append(entity)
         
         return output
     
-    def getEntityFromResult(self, result, detailed=False):
+    def getEntityFromResult(self, result, detailed=False, priority='low'):
         if result is None:
             return None
         
@@ -150,7 +150,7 @@ class GooglePlaces(AKeyBasedAPI):
         
         if detailed:
             # fetch a google places details request to fill in any missing data
-            details = self.getPlaceDetails(result['reference'])
+            details = self.getPlaceDetails(result['reference'], priority=priority)
             
             self.parseEntityDetail(details, entity)
         
@@ -204,7 +204,7 @@ class GooglePlaces(AKeyBasedAPI):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='GooglePlaces (after caching)')
-    def getSearchResultsByLatLng(self, latLng, params=None):
+    def getSearchResultsByLatLng(self, latLng, params=None, priority="low"):
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
@@ -213,7 +213,7 @@ class GooglePlaces(AKeyBasedAPI):
             if apiKey is None:
                 return None
             
-            response = self._getSearchResponseByLatLng(latLng, apiKey, params)
+            response = self._getSearchResponseByLatLng(latLng, apiKey, params, priority)
             
             if response is None:
                 return None
@@ -243,7 +243,7 @@ class GooglePlaces(AKeyBasedAPI):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='GooglePlaces (after caching)')
-    def getAutocompleteResults(self, latLng, query, params=None):
+    def getAutocompleteResults(self, latLng, query, params=None, priority='low'):
         (offset, count) = self._initAPIKeyIndices()
         
         while True:
@@ -252,7 +252,7 @@ class GooglePlaces(AKeyBasedAPI):
             if apiKey is None:
                 return None
             print apiKey
-            response = self._getAutocompleteResponse(latLng, query, apiKey, params)
+            response = self._getAutocompleteResponse(latLng, query, apiKey, params, priority)
 
             if response is None:
                 return None
@@ -272,8 +272,8 @@ class GooglePlaces(AKeyBasedAPI):
             
             return response['predictions']
     
-    def getEntityAutocompleteResults(self, query, latLng=None, params=None):
-        results = self.getAutocompleteResults(latLng, query, params)
+    def getEntityAutocompleteResults(self, query, latLng=None, params=None, priority='low'):
+        results = self.getAutocompleteResults(latLng, query, params, priority)
         output  = []
         
         if results is not None:
@@ -299,7 +299,7 @@ class GooglePlaces(AKeyBasedAPI):
         
         return output
     
-    def _getSearchResponseByLatLng(self, latLng, apiKey, optionalParams=None):
+    def _getSearchResponseByLatLng(self, latLng, apiKey, optionalParams=None, priority="low"):
         params = {
             'location' : self._geocoder.getEncodedLatLng(latLng), 
             'radius'   : self.DEFAULT_RADIUS, 
@@ -311,17 +311,16 @@ class GooglePlaces(AKeyBasedAPI):
         
         # example URL:
         # https://maps.googleapis.com/maps/api/place/search/json?location=-33.8670522,151.1957362&radius=500&types=food&name=harbour&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
-        url = self._getAPIURL('search', params)
+        url = self._getAPIURL('search')
         utils.log('[GooglePlaces] ' + url)
-        
+
         try:
             # GET the data and parse the response as json
-            return json.loads(utils.getFile(url))
+            response, content = service_request('googleplaces', 'GET', url, query_params=params, priority=priority)
+            return json.loads(content)
         except:
             utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
-            return None
-        
-        return None
+            raise
 
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
@@ -330,7 +329,7 @@ class GooglePlaces(AKeyBasedAPI):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='GooglePlaces (after caching)')
-    def getPlaceDetailsResponse(self, reference, apiKey, optionalParams=None):
+    def getPlaceDetailsResponse(self, reference, apiKey, optionalParams=None, priority='low'):
         params = {
             'reference' : reference, 
             'sensor'    : 'false', 
@@ -341,21 +340,18 @@ class GooglePlaces(AKeyBasedAPI):
         
         # example URL:
         # https://maps.googleapis.com/maps/api/place/details/json?reference=...&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
-        url = self._getAPIURL('details', params)
+        url = self._getAPIURL('details')
         utils.log('[GooglePlaces] ' + url)
 
 
-        service_request('googleplaces', 'GET', url, query_params=params)
+        try:
+            response, content = service_request('googleplaces', 'GET', url, query_params=params, priority=priority)
+            return json.loads(content)
+        except:
+            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
+            raise
 
-#        try:
-#            # GET the data and parse the response as json
-#            return json.loads(utils.getFile(url))
-#        except:
-#            utils.log('[GooglePlaces] unexpected error searching "' + url + '"')
-#
-        return None
-
-    def addPlaceReport(self, entity):
+    def addPlaceReport(self, entity, priority='low'):
         params = {
             'sensor' : 'false', 
             'key'    : self._getAPIKey(0, 0), 
@@ -372,23 +368,13 @@ class GooglePlaces(AKeyBasedAPI):
             'language' : 'en-US', 
         }
         
-        url = self._getAPIURL('add', params)
+        url = self._getAPIURL('add')
         #utils.log(url)
 
-        response, content = service_request('googleplaces', 'POST', url, query_params=params, body=post_params)
+        response, content = service_request('googleplaces', 'POST', url, query_params=params, body=post_params, priority='low')
         return content
 
-#
-#        try:
-#            data = json.dumps(post_params)
-#            request = urllib2.Request(url, data, {'Content-Type': 'application/json'})
-#            request = urllib2.urlopen(request)
-#            response = request.read()
-#            return response
-#        except:
-#            return None
-#
-    def _getAutocompleteResponse(self, latLng, query, apiKey, optionalParams=None):
+    def _getAutocompleteResponse(self, latLng, query, apiKey, optionalParams=None, priority='low'):
         params = {
             'input'  : query, 
             'sensor' : 'false', 
@@ -403,10 +389,10 @@ class GooglePlaces(AKeyBasedAPI):
         
         # example URL:
         # https://maps.googleapis.com/maps/api/place/autocomplete/json?input=test&sensor=false&key=AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok
-        url = self._getAPIURL('autocomplete', params)
+        url = self._getAPIURL('autocomplete')
         utils.log('[GooglePlaces] ' + url)
 
-        response, content = service_request('googleplaces', 'GET', url, query_params=params)
+        response, content = service_request('googleplaces', 'GET', url, query_params=params, priority=priority)
         return json.loads(content)
 
     def _handleParams(self, params, optionalParams):
@@ -428,8 +414,8 @@ class GooglePlaces(AKeyBasedAPI):
         
         return latLng
     
-    def _getAPIURL(self, method, params):
-        return "%s/%s/%s?%s" % (self.BASE_URL, method, self.FORMAT, urllib.urlencode(params))
+    def _getAPIURL(self, method):
+        return "%s/%s/%s" % (self.BASE_URL, method, self.FORMAT)
     
     def getSubcategoryFromTypes(self, types):
         establishment = False

@@ -910,7 +910,7 @@ class iTunesSource(GenericSource):
         try:
             if isinstance(queryText, unicode):
                 queryText = queryText.encode('utf-8')
-            resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText)['results']
+            resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText, priority='high')['results']
         except Exception:
             logs.report()
 

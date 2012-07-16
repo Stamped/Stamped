@@ -47,14 +47,14 @@ class Instagram(object):
     #def place_search(self, **kwargs):
     #    return self.__instagram('locations/search', **kwargs)
 
-    def place_search(self, foursquare_id):
-        return self.__instagram('locations/search', foursquare_v2_id=foursquare_id)
+    def place_search(self, foursquare_id, priority='low'):
+        return self.__instagram('locations/search', priority, foursquare_v2_id=foursquare_id)
 
-    def place_lookup(self, instagram_id):
-        return self.__instagram('locations/' + instagram_id)
+    def place_lookup(self, instagram_id, priority='low'):
+        return self.__instagram('locations/' + instagram_id, priority)
 
-    def place_recent_media(self, instagram_id):
-        return self.__instagram('locations/%s/media/recent' % instagram_id)
+    def place_recent_media(self, instagram_id, priority='low'):
+        return self.__instagram('locations/%s/media/recent' % instagram_id, priority)
 
 #    def place_recent_media(self, **kwargs):
 #        return self.
@@ -64,7 +64,7 @@ class Instagram(object):
     # and also cached remotely via memcached with a TTL of 7 days
 #    @lru_cache(maxsize=64)
 #    @memcached_function(time=7*24*60*60)
-    def __instagram(self, service, max_retries=3, verb='GET', **params):
+    def __instagram(self, service, priority='low', max_retries=3, verb='GET', **params):
         if 'client_id' not in params:
             params['client_id'] = self.__client_id
 
@@ -73,7 +73,12 @@ class Instagram(object):
         else:
             url = "%s/%s" % (HOST, service)
 
-        response, content = service_request('instagram', 'GET', url, query_params=params, header={ 'Accept' : 'application/json' })
+        response, content = service_request('instagram',
+                                            'GET',
+                                            url,
+                                            query_params=params,
+                                            header={ 'Accept' : 'application/json' },
+                                            priority=priority)
 
         data = json.loads(content)
         return data

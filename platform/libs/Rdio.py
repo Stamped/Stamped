@@ -85,10 +85,11 @@ class Rdio(object):
                 kwargs[k] = str(v)
             elif isinstance(v,unicode):
                 kwargs[k] = v.encode('utf-8')
-        
-        urlish = 'http://api.rdio.com/1/ POST %s' % urlencode_utf8(kwargs)
 
-        response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/', header={'Accept-encoding':'gzip'},body=kwargs)
+        priority = kwargs.get('priority', 'low')
+
+        response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/',
+                header={'Accept-encoding':'gzip'}, body=kwargs, priority=priority)
 
         return json.loads(content)
 
@@ -96,14 +97,16 @@ class Rdio(object):
         kwargs['method'] = method 
         access_token = oauth.Token(token, token_secret)   
         client = oauth.Client(self.__consumer, access_token)
-        
+
+        #TODO: add service_request call here.  This method isn't being called right now, s
+
         with self.__limiter:
             logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
             response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
         
         return json.loads(response[1])
 
-    def searchSuggestions(self, query, types="Artist,Album,Track", extras=None):
+    def searchSuggestions(self, query, types="Artist,Album,Track", extras=None, priority='low'):
         """
         query:  required - the search prefix
         types:  optional - object types to include in results - a comma separated list of: "Artist", "Album", "Track", "Playlist" or "User"
