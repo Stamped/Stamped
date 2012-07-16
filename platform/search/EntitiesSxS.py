@@ -93,7 +93,7 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
 
 
 def getProxySummary(proxy):
-    return ('%s, %s:%s' % (proxy.name, proxy.source, proxy.key[:15]))
+    return ('%s, %s:%s' % (proxy.name, proxy.source, str(proxy.key)[:15]))
 
 
 def getClusteringDifference(cellId, oldCluster, newCluster):
@@ -149,7 +149,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     for i, left in enumerate(oldResults):
         for j, right in enumerate(newResults):
             score = differenceScore(left[1], right[1])
-            if score <= diffThreshold:
+            if left[0].title == right[0].title and left[0].subtitle == right[0].subtitle or score <= diffThreshold:
                 diffScores.append((score, i, j))
     # Find the most similar pair. When there are ties, lower i values (higher
     # ranked items in the original list) come first, since they are probably
@@ -243,10 +243,16 @@ def writeCompareEntity(left, right, outputDir, filename):
 
 
 def extractLinkText(entity):
-    subtitle = entity[0].subtitle
-    if isinstance(entity[0], PlaceEntity) and entity[0].formatAddress():
-        subtitle = entity[0].formatAddress()
-    return '<p>%s</p><p style="text-indent:4em">%s</p>' % (entity[0].title, subtitle)
+    entity = entity[0]
+    subtitle = entity.subtitle
+    if isinstance(entity, PlaceEntity) and entity.formatAddress():
+        subtitle = entity.formatAddress()
+    if entity.images:
+        imageUrl = entity.images[0].sizes[0].url
+        imageTag = '<img src="%s" style="float:right" />' % imageUrl
+    else:
+        imageTag = ''
+    return '%s<p>%s</p><p style="text-indent:4em">%s</p>' % (imageTag, entity.title, subtitle)
 
 
 def ensureDirectory(pathName):
