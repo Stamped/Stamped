@@ -404,7 +404,7 @@
         
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
         var set_active_pane = function(index) {
-            if (!$main_body.hasClass("index")) {
+            if (!$body.hasClass("index")) {
                 return;
             }
             
