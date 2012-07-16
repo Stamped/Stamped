@@ -609,14 +609,6 @@ def _get_guide_search(scope, section, query, subsection=None, viewport=None, off
 
 
 
-# /users/show.json
-def _getUsersShow(userId, token=None):
-    pass
-
-def _getStampsAlsoStampedBy(url):
-    pass
-
-
 
 
 
@@ -686,7 +678,7 @@ class User(object):
 
 
     def viewProfile(self, userId,fromAF):
-        user = _getusersShow(userId)
+        user = _get_users_show(userId)
         userStamps = _getUserStampCollection(userId, offset=0)
 
         # Wait
@@ -881,20 +873,20 @@ class PowerUser(ExistingUser):
     def root(self):    	
     	r = random.random()
     	try:
-	       if r < 0.2:
-	           self.viewInbox()
-	       elif r < 0.7:
-	           self.viewGuide()
-	       elif r < 0.8:
-	           self.viewActivity()
-	       elif r < 0.85:
-	           self.viewTodoList()
-	       elif r < 0.9:
-	           self.viewAddFriends()
-	       elif r < 0.95:
-	           self.viewProfile()
-	       else:
-	    		self.viewSettings()
+            if r < 0.2:
+                self.viewInbox()
+            elif r < 0.7:
+                self.viewGuide()
+            elif r < 0.8:
+                self.viewActivity()
+            elif r < 0.85:
+                self.viewTodoList()
+            elif r < 0.9:
+                self.viewAddFriends()
+            elif r < 0.95:
+                self.viewProfile()
+            else:
+                self.viewSettings()
         except DoneException:
         	pass
 
@@ -925,15 +917,15 @@ class BeiberUser(NewUser):
     def root(self):    	
     	r = random.random()
     	try:
-	       if r < 0.3:
-	           self.viewInbox()
-	       elif r < 0.8:
-	           self.viewGuide()
-	       elif r < 0.85:
-	           self.viewActivity()
-	       elif r < 0.9:
-	           self.viewSettings()
-	       else:
+            if r < 0.3:
+	            self.viewInbox()
+	        elif r < 0.8:
+	            self.viewGuide()
+	        elif r < 0.85:
+	            self.viewActivity()
+	        elif r < 0.9:
+	            self.viewSettings()
+	        else:
 	    		self.viewAddFriends()
         except DoneException:
         	pass
