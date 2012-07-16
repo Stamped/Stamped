@@ -1818,4 +1818,4 @@ class GuideCache(Schema):
         cls.addNestedPropertyList('food',                   GuideCacheItem)
         cls.addNestedPropertyList('app',                    GuideCacheItem)
         cls.addNestedPropertyList('other',                  GuideCacheItem)
-        cls.addProperty('updated',                          datetime)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)

@@ -172,41 +172,48 @@
             <div class="entity-actions">
                 {% for a in entity.actions %}
                     {% with action=a.action %}
-                        {% if action.sources.0.link and action.sources|length == 1 %}
-                            <a class='action-link' href="{{action.sources.0.link}}">
-                        {% else %}
-                            <a class='action-link' href="">
-                        {% endif %}
-                            
-                            <div class="action action-{{action.type}} clearfix">
-                                <div class='entity-title' style="display: none;">
-                                    {{stamp.entity.title}}
-                                </div>
-                                
-                                <div class='lhs'>
-                                    <div class='action-icon action-icon-{{action.type}}'></div>
-                                    
-                                    <!--{% if a.icon %}
-                                        <img class='action-icon' src="{{a.icon}}" />
-                                    {% endif %}-->
-                                    
-                                    <div class='action-name'>{{a.name}}</div>
-                                </div>
-                                
-                                {% if action.sources.0 %}
-                                    <div class="rhs">
-                                        {% for source in action.sources %}
-                                            <div class="source source-{{source.source}}">
-                                                <!--{% if source.icon %}
-                                                    <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
-        />
-                                                {% endif %}-->
-                                            </div>
-                                        {% endfor %}
-                                    </div>
+                        {% if action.type != "playlist" %}
+                            {% if action.type != "listen" or action.sources|length > 1 or action.sources.0.source != "rdio" %}
+                                {% if action.sources.0.link and action.sources|length == 1 %}
+                                    <a class='action-link' href="{{action.sources.0.link}}">
+                                {% else %}
+                                    <a class='action-link' href="">
                                 {% endif %}
-                            </div>
-                        </a>
+                                    
+                                    <div class="action action-{{action.type}} clearfix">
+                                        <div class='entity-title' style="display: none;">
+                                            {{stamp.entity.title}}
+                                        </div>
+                                        
+                                        <div class='lhs'>
+                                            <div class='action-icon action-icon-{{action.type}}'></div>
+                                            
+                                            <!--{% if a.icon %}
+                                                <img class='action-icon' src="{{a.icon}}" />
+                                            {% endif %}-->
+                                            
+                                            <div class='action-name'>{{a.name}}</div>
+                                        </div>
+                                        
+                                        {% if action.sources.0 %}
+                                            <div class="rhs">
+                                                {% for source in action.sources %}
+                                                    {% if source.source != "rdio" %}
+                                                        <div class="source source-{{source.source}}" {% if source.completion_data.source_id %} data-source-id="{{source.completion_data.source_id}}" {% endif %} {% if source.source_data.preview_url %} data-source-preview-url="{{source.source_data.preview_url}}" {% endif %}>
+                                                            <!--{% if source.icon %}
+                                                                <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
+                    />
+                                                            {% endif %}-->
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            
+                                        {% endif %}
+                                    </div>
+                                </a>
+                            {% endif %}
+                        {% endif %}
                     {% endwith %}
                 {% endfor %}
             </div>

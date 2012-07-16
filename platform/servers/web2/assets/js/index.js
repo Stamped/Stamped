@@ -14,14 +14,18 @@
         // ---------------------------------------------------------------------
         
         
+        // high-level containers
         var $window                 = $(window);
         var $body                   = $("body");
         var $main                   = $("#main");
+        var $vertically_centered    = $(".vertically-centered");
         
-        // main iphone elements
+        // main elements
         var $main_body              = $("#main-body");
         var $main_iphone            = $("#main-iphone");
         var $main_footer            = $("#main-footer");
+        
+        // main iphone elements
         var $iphone_screens         = $(".iphone-screens");
         var $iphone_inbox_body      = $(".iphone-inbox-body");
         var $iphone_inbox_selection = $(".iphone-inbox-selection");
@@ -231,7 +235,7 @@
         // vertically centers the page's main content
         // NOTE: if noop is true, this method will not make any modifications
         var update_main_layout = function(noop) {
-            var height = $main.height();
+            var height = $vertically_centered.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
             //console.log("height: " + height + "; offset: " + offset);
@@ -356,6 +360,10 @@
         
         // reloads the embedded map iframe with the specified user's map page via a simple opacity animation + loading spinner
         var map_window_switch_user = function(screen_name) {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             var active = $map_window.data("active");
             
             if (screen_name !== active) {
@@ -396,6 +404,10 @@
         
         // sets the active (visible) pane to the given index (valid indexes are in [0,4] inclusive)
         var set_active_pane = function(index) {
+            if (!$body.hasClass("index")) {
+                return;
+            }
+            
             if (index >= 0 && index <= 4) {
                 var active  = "active-pane-" + index;
                 
@@ -512,6 +524,10 @@
         var iphone_screens_all = "iphone-screen-active-inbox iphone-screen-active-sdetail iphone-screen-active-guide";
         
         var set_active_iphone_screen = function(index) {
+            if ($iphone_screens.length <= 0) {
+                return;
+            }
+            
             var current_classes = $iphone_screens.get(0).className.split(/\s+/);
             var active = "iphone-screen-active-" + iphone_screens_index_map["" + index];
             

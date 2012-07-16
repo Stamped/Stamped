@@ -2090,11 +2090,12 @@ class StampedAPI(AStampedAPI):
 
         return []
 
-    def _enrichStampObjects(self, stampObjects, mini=False, **kwargs):
+    def _enrichStampObjects(self, stampObjects, **kwargs):
         t0 = time.time()
         t1 = t0
 
-        previewLength = 10
+        previewLength = kwargs.pop('previews', 10)
+        mini        = kwargs.pop('mini', False)
 
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
@@ -2617,8 +2618,13 @@ class StampedAPI(AStampedAPI):
                     kwargs={'authUserId': authUserId,'stampId':stamp.stamp_id, 'imageUrl':imageUrl})
     
     @API_CALL
-    def updateUserImageCollageAsync(self, user_id, category):
-        user        = self._userDB.getUser(user_id)
+    def updateUserImageCollageAsync(self, userId, category):
+        try:
+            user = self._userDB.getUser(userId)
+        except StampedDocumentNotFoundError as e:
+            logs.warning("User not found: %s" % userId)
+            return 
+
         categories  = [ 'default', category ]
         
         self._userImageCollageDB.process_user(user, categories)
@@ -2873,7 +2879,7 @@ class StampedAPI(AStampedAPI):
         
         stats.popularity = int(popularity)
 
-        #Stamp Quality
+        # Stamp Quality
         image_score = 0
         for content in stamp.contents:
             if content.images is not None:
@@ -3787,8 +3793,7 @@ class StampedAPI(AStampedAPI):
             ### TODO: Return actual search across my todos. For now, just return nothing.
             return []
         else:
-            # TODO: What should we return for other search queries (not inbox and not popular)?
-            stampIds = None
+            raise StampedInputError("Invalid scope for guide: %s" % guideSearchRequest.scope)
 
         searchSlice             = SearchSlice()
         searchSlice.limit       = 100
@@ -3856,9 +3861,12 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def buildGuideAsync(self, authUserId, force=False):
+        if force:
+            return self._buildUserGuide(authUserId)
+
         try:
             guide = self._guideDB.getGuide(authUserId)
-            if guide.updated is not None and datetime.utcnow() < guide.updated + timedelta(days=1) and not force:
+            if guide.timestamp is not None and datetime.utcnow() < guide.timestamp.generated + timedelta(days=1):
                 return
         except (StampedUnavailableError, KeyError):
             pass
@@ -3986,7 +3994,8 @@ class StampedAPI(AStampedAPI):
 
         guide = GuideCache()
         guide.user_id = user.user_id
-        guide.updated = now
+        guide.timestamp = StatTimestamp()
+        guide.timestamp.generated = now
         
         for section, entities in sections.items():
             r = []
@@ -4270,6 +4279,7 @@ class StampedAPI(AStampedAPI):
             
         return guide
 
+
     """
      #######
         #     ####  #####   ####   ####
@@ -4279,6 +4289,160 @@ class StampedAPI(AStampedAPI):
         #    #    # #    # #    # #    #
         #     ####  #####   ####   ####
     """
+
+    def _enrichTodoObjects(self, rawTodos, **kwargs):
+
+        previewLength = kwargs.pop('previews', 10)
+
+        authUserId  = kwargs.pop('authUserId', None)
+        entityIds   = kwargs.pop('entityIds', {})
+        stampIds    = kwargs.pop('stampIds', {})
+        userIds     = kwargs.pop('userIds', {})
+
+        singleTodo = False
+        if not isinstance(rawTodos, list):
+            singleTodo = True
+            rawTodos = [rawTodos]
+
+        """
+        ENTITIES
+
+        Enrich the underlying entity object for all todos
+        """
+        allEntityIds = set()
+
+        for todo in rawTodos:
+            allEntityIds.add(todo.entity.entity_id)
+
+        # Enrich missing entity ids
+        missingEntityIds = allEntityIds.difference(set(entityIds.keys()))
+        entities = self._entityDB.getEntityMinis(list(missingEntityIds))
+
+        for entity in entities:
+            if entity.sources.tombstone_id is not None:
+                # Convert to newer entity
+                replacement = self._entityDB.getEntityMini(entity.sources.tombstone_id)
+                entityIds[entity.entity_id] = replacement
+                # Call async process to update references
+                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
+            else:
+                entityIds[entity.entity_id] = entity
+
+        """
+        STAMPS
+
+        Enrich the underlying stamp objects from sourced stamps or if the user has created a stamp
+        """
+        allStampIds  = set()
+
+        for todo in rawTodos:
+            if todo.stamp_id is not None:
+                allStampIds.add(todo.stamp_id)
+            if todo.source_stamp_ids is not None:
+                for stampId in todo.source_stamp_ids:
+                    allStampIds.add(stampId)
+
+        # Enrich underlying stamp ids
+        stamps = self._stampDB.getStamps(list(allStampIds))
+
+        for stamp in stamps:
+            stampIds[stamp.stamp_id] = stamp
+
+        """
+        USERS
+
+        Enrich the underlying user objects. This includes:
+        - To-do owner
+        - Sourced stamps
+        - Also to-do'd by
+        """
+        allUserIds    = set()
+
+        # Add owner
+        for todo in rawTodos:
+            allUserIds.add(todo.user_id)
+
+        # Add sourced stamps
+        for stamp in stamps:
+            allUserIds.add(stamp.user.user_id)
+
+        # Add to-dos from friends if logged in
+        friendTodos = {}
+        if authUserId is not None:
+            friendIds = self._friendshipDB.getFriends(authUserId)
+            for todo in rawTodos:
+                todoUserIds = self._todoDB.getTodosFromUsersForEntity(friendIds, todo.entity.entity_id, limit=10)
+                if todoUserIds is not None and len(todoUserIds) > 0:
+                    friendTodos[todo.todo_id] = todoUserIds
+                    allUserIds = allUserIds.union(set(todoUserIds))
+
+        # Enrich missing user ids
+        missingUserIds = allUserIds.difference(set(userIds.keys()))
+        users = self._userDB.lookupUsers(list(missingUserIds))
+
+        for user in users:
+            userIds[user.user_id] = user.minimize()
+
+        """
+        APPLY DATA
+        """
+        todos = []
+
+        for todo in rawTodos:
+            try:
+                # User
+                user = userIds[todo.user_id]
+                if user is None:
+                    logs.warning("%s: User not found (%s)" % (todo.todo_id, todo.user_id))
+                    continue 
+
+                # Entity
+                entity = entityIds[todo.entity.entity_id]
+                if entity is None:
+                    logs.warning("%s: Entity not found (%s)" % (todo.todo_id, todo.entity.entity_id))
+
+                # Source stamps
+                sourceStamps = []
+                if todo.source_stamp_ids is not None:
+                    for stampId in todo.source_stamp_ids:
+                        if stampIds[stampId] is None:
+                            logs.warning("%s: Source stamp not found (%s)" % (todo.todo_id, stampId))
+                            continue
+                        sourceStamps.append(stampIds[stampId])
+
+                # Stamp
+                stamp = None 
+                if todo.stamp_id is not None:
+                    stamp = stampIds[todo.stamp_id]
+                    if stamp is None:
+                        logs.warning("%s: Stamp not found (%s)" % (todo.todo_id, todo.stamp_id))
+
+                # Also to-do'd by
+                previews = None 
+                if todo.todo_id in friendTodos and len(friendTodos[todo.todo_id]) > 0:
+                    friends = []
+                    for friendId in friendTodos[todo.todo_id]:
+                        if userIds[friendId] is None:
+                            logs.warning("%s: Friend preview not found (%s)" % (todo.todo_id, friendId))
+                            continue
+                        friends.append(userIds[friendId])
+                    if len(friends) > 0:
+                        previews = Previews()
+                        previews.todos = friends 
+
+                todos.append(todo.enrich(user, entity, previews=previews, sourceStamps=sourceStamps, stamp=stamp))
+
+            except KeyError, e:
+                logs.warning("Fatal key error: %s" % e)
+                logs.debug("Todo: %s" % todo)
+                continue
+            except Exception:
+                raise
+
+        if singleTodo:
+            return todos[0]
+
+        return todos
 
     def _enrichTodo(self, rawTodo, user=None, entity=None, sourceStamps=None, stamp=None, friendIds=None, authUserId=None):
         if user is None or user.user_id != rawTodo.user_id:
@@ -4318,12 +4482,6 @@ class StampedAPI(AStampedAPI):
         # Entity
         entity = self._getEntityFromRequest(entityRequest)
 
-        # User
-        user = self._userDB.getUser(authUserId).minimize()
-
-        # Friends
-        friendIds = self._friendshipDB.getFriends(user.user_id)
-
         todo                    = RawTodo()
         todo.entity             = entity.minimize()
         todo.user_id            = authUserId
@@ -4331,25 +4489,24 @@ class StampedAPI(AStampedAPI):
         todo.timestamp.created  = datetime.utcnow()
 
         if stampId is not None:
-            todo.source_stamp_ids = [stampId]
+            # Verify stamp exists
+            try:
+                source = self._stampDB.getStamp(stampId)
+                todo.source_stamp_ids = [source.stamp_id]
+            except StampedUnavailableError:
+                stampId = None
 
         # Check to verify that user hasn't already todo'd entity
         try:
-            testTodo = self._todoDB.getTodo(authUserId, entity.entity_id)
-            if testTodo.todo_id is None:
-                raise
-            exists = True
-        except Exception:
-            exists = False
-
-        if exists:
-            return self._enrichTodo(testTodo, user=user, entity=entity, friendIds=friendIds, authUserId=authUserId)
+            return self._enrichTodoObjects(self._todoDB.getTodo(authUserId, entity.entity_id), authUserId=authUserId)
+        except StampedUnavailableError:
+            pass
 
         # Check if user has already stamped the todo entity, mark as complete and provide stamp_id, if so
-        users_stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
-        if users_stamp is not None:
+        stamp = self._stampDB.getStampFromUserEntity(authUserId, entity.entity_id)
+        if stamp is not None:
             todo.complete = True
-            todo.stamp_id = users_stamp.stamp_id
+            todo.stamp_id = stamp.stamp_id
 
         # Check if user has todoed the stamp previously; if so, don't send activity alerts
         previouslyTodoed = False
@@ -4363,7 +4520,7 @@ class StampedAPI(AStampedAPI):
         self._statsSink.increment('stamped.api.stamps.todos')
 
         # Enrich todo
-        todo = self._enrichTodo(todo, user=user, entity=entity, stamp=users_stamp, friendIds=friendIds, authUserId=authUserId)
+        todo = self._enrichTodoObjects(todo, authUserId=authUserId)
 
         tasks.invoke(tasks.APITasks.addTodo, 
                         args=[authUserId, entity.entity_id], 
@@ -4415,17 +4572,16 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def completeTodo(self, authUserId, entityId, complete):
-        ### TODO: Fail gracefully if todo doesn't exist
-        RawTodo = self._todoDB.getTodo(authUserId, entityId)
-
-        if not RawTodo or not RawTodo.todo_id:
+        try:
+            RawTodo = self._todoDB.getTodo(authUserId, entityId)
+        except StampedUnavailableError:
             raise StampedTodoNotFoundError('Invalid todo: %s' % RawTodo)
 
         self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
         # Enrich todo
         RawTodo.complete = complete
-        todo = self._enrichTodo(RawTodo, authUserId=authUserId)
+        todo = self._enrichTodoObjects(RawTodo, authUserId=authUserId)
 
         # TODO: Add activity item
 
@@ -4442,10 +4598,9 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def removeTodo(self, authUserId, entityId):
-        ### TODO: Fail gracefully if todo doesn't exist
-        rawTodo = self._todoDB.getTodo(authUserId, entityId)
-
-        if not rawTodo or not rawTodo.todo_id:
+        try:
+            rawTodo = self._todoDB.getTodo(authUserId, entityId)
+        except StampedUnavailableError:
             return True
 
         self._todoDB.removeTodo(authUserId, entityId)
@@ -4468,52 +4623,8 @@ class StampedAPI(AStampedAPI):
         if timeSlice.before is not None:
             timeSlice.before = timeSlice.before + timedelta(seconds=1)
 
-        todoData = self._todoDB.getTodos(authUserId, timeSlice)
-
-        # Extract entities & stamps
-        entityIds = {}
-        sourceStampIds = {}
-
-        for rawTodo in todoData:
-            entityIds[str(rawTodo.entity.entity_id)] = None
-
-            if rawTodo.source_stamp_ids is not None:
-                for stamp_id in rawTodo.source_stamp_ids:
-                    sourceStampIds[str(stamp_id)] = None
-
-        # User
-        user = self._userDB.getUser(authUserId).minimize()
-
-        # Enrich entities
-        entities = self._entityDB.getEntityMinis(entityIds.keys())
-
-        for entity in entities:
-            entityIds[str(entity.entity_id)] = entity
-
-        # Enrich stamps
-        stamps = self._stampDB.getStamps(sourceStampIds.keys())
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, entityIds=entityIds, mini=True)
-
-        for stamp in stamps:
-            sourceStampIds[str(stamp.stamp_id)] = stamp
-
-        friendIds = self._friendshipDB.getFriends(user.user_id)
-
-        result = []
-        for rawTodo in todoData:
-            try:
-                entity      = entityIds[rawTodo.entity.entity_id]
-                stamps       = None
-                if rawTodo.source_stamp_ids is not None:
-                    stamps = [sourceStampIds[sid] for sid in rawTodo.source_stamp_ids]
-                todo    = self._enrichTodo(rawTodo, user, entity, stamps, friendIds=friendIds, authUserId=authUserId)
-                result.append(todo)
-            except Exception as e:
-                logs.debug("RAW TODO: %s" % rawTodo)
-                logs.warning("Enrich todo failed: %s" % e)
-                continue
-
-        return result
+        todos = self._todoDB.getTodos(authUserId, timeSlice)
+        return self._enrichTodoObjects(todos, authUserId=authUserId)
 
     @API_CALL 
     def getStampTodos(self, authUserId, stamp_id):
@@ -4923,7 +5034,12 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
 
     def mergeEntityIdAsync(self, entityId):
-        self._mergeEntity(self._entityDB.getEntity(entityId))
+        try:
+            entity = self._entityDB.getEntity(entityId)
+        except StampedDocumentNotFoundError:
+            logs.warning("Entity not found: %s" % entityId)
+            return
+        self._mergeEntity(entity)
 
     def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
@@ -5123,7 +5239,14 @@ class StampedAPI(AStampedAPI):
                     logs.info('Threw exception while trying to resolve source %s: %s' % (sourceName, e.message))
                     continue
         if entity_id is not None:
-            entity = self._entityDB.getEntity(entity_id)
+            try:
+                entity = self._entityDB.getEntity(entity_id)
+            except StampedDocumentNotFoundError:
+                logs.warning("Entity id is invalid: %s" % entity_id)
+                entity_id = None
+
+        if entity_id is not None:
+            pass
         elif source_id is not None and proxy is not None:
             entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
             entity = entityProxy.buildEntity()

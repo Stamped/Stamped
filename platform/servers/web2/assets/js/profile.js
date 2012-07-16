@@ -2020,6 +2020,40 @@ var g_update_stamps = null;
                 }
             }*/
             
+            // initialize listen action
+            var $action_listen = $sdetail.find('.action-listen');
+            
+            if ($action_listen.length == 1) {
+                var $link = $action_listen.parent('a.action-link');
+                var $source_spotify = $action_listen.find(".source-spotify");
+                var $source_spotify = $action_listen.find(".source-itunes");
+                
+                if ($source_spotify.length === 1) {
+                    // TODO
+                }
+                
+                //var href  = "https://embed.spotify.com/?uri={{source.completion_data.source_id}}";
+                
+                $link.click(function(event) {
+                    event.preventDefault();
+                    
+                    var popup_options = get_fancybox_popup_options({
+                        href  : "http://www.stamped.com"
+                    });
+                    
+                    $.fancybox.open(popup_options);
+                    return false;
+                });
+                
+                var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
+                    m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
+                }, {
+                    cssSelectorAncestor: "#cp_container_1"
+                });
+                
+                // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
+            }
+            
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
                 var $elem  = $(elem);
