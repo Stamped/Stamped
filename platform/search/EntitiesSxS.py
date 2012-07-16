@@ -92,6 +92,10 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
                 'All queries', ''.join(htmlRowTpl % row for row in allTableRows))
 
 
+def getProxySummary(proxy):
+    return ('%s, %s:%s' % (proxy.name, proxy.source, proxy.key[:15]))
+
+
 def getClusteringDifference(cellId, oldCluster, newCluster):
     def makeProxyDict(cluster):
         proxyDict = {}
@@ -109,14 +113,14 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
         summary += '<h3>Elements stayed the same</h3><ul>'
         for source in same:
             proxy, _ = oldProxies[source]
-            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+            summary += '<li>%s</li>' % getProxySummary(proxy)
         summary += '</ul>'
     majorChange = False
     if dropped:
         summary += '<h3>Elements dropped from cluster</h3><ul>'
         for source in dropped:
             proxy, score = oldProxies[source]
-            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+            summary += '<li>%s</li>' % getProxySummary(proxy)
             if score > MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
                 majorChange = True
         summary += '</ul>'
@@ -124,7 +128,7 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
         summary += '<h3>Elements added to cluster</h3><ul>'
         for source in added:
             proxy, score = newProxies[source]
-            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+            summary += '<li>%s</li>' % getProxySummary(proxy)
             if score > MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
                 majorChange = True
         summary += '</ul>'
@@ -135,7 +139,7 @@ def getSingleClusterSummary(cellId, cluster):
     summary = '<h3>Cluster component summary</h3><ul>'
     for result in cluster.results:
         proxy = result.resolverObject
-        summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+        summary += '<li>%s</li>' % getProxySummary(proxy)
     summary += '</ul>'
     return summary
 
