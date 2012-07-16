@@ -24,6 +24,7 @@
         var $main_body              = $("#main-body");
         var $main_iphone            = $("#main-iphone");
         var $main_footer            = $("#main-footer");
+        var $main_stamped_logo      = $("#stamped-logo");
         
         // main iphone elements
         var $iphone_screens         = $(".iphone-screens");
@@ -231,7 +232,35 @@
                 main_pane_cycle_animation.restart();
             }
         });
-
+        
+        var stamped_logo_top  = parseFloat($main_stamped_logo.css("top"));
+        var stamped_logo_left = parseFloat($main_stamped_logo.css("left"));
+        
+        var update_stamped_logo_layout = function() {
+            var scrollY     = $window.scrollTop();
+            var min_offset  = -50;
+            
+            if ($main_stamped_logo.hasClass("stamped-logo-fixed")) {
+                var p_offset    = $main_stamped_logo.parent().offset();
+                
+                if (p_offset.top + stamped_logo_top - scrollY >= min_offset) {
+                    $main_stamped_logo.removeClass("stamped-logo-fixed").css({
+                        "top"  : stamped_logo_top  + "px", 
+                        "left" : stamped_logo_left + "px"
+                    });
+                }
+            } else {
+                var offset  = $main_stamped_logo.offset();
+                
+                if (offset.top - scrollY < min_offset) {
+                    $main_stamped_logo.addClass("stamped-logo-fixed").css({
+                        "top"  : min_offset  + "px", 
+                        "left" : offset.left + "px"
+                    });
+                }
+            }
+        };
+        
         // vertically centers the page's main content
         // NOTE: if noop is true, this method will not make any modifications
         var update_main_layout = function(noop) {
@@ -242,6 +271,9 @@
             
             if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
+                
+                update_stamped_logo_layout();
+                
             }
             
             return {
@@ -707,6 +739,7 @@
         });
         
         $window.resize(update_main_layout);
+        $window.scroll(update_stamped_logo_layout);
         
         $window.bind("load", function() {
             if ($body.hasClass("intro")) {
