@@ -21,14 +21,17 @@ from optparse           import OptionParser
 
 
 limits_path = os.path.dirname(RateLimiter2.__file__) + '/limits.conf'
-config_load_interval = 60*5
+config_load_interval = 10*1
 count = 0
 
 
 def configLoaderLoop(service):
     while True:
         sleep(config_load_interval)
-        service.loadLimiters()
+        try:
+            service.loadLimiters()
+        except:
+            pass
 
 class StampedRateLimiterService():
 
@@ -40,38 +43,57 @@ class StampedRateLimiterService():
         self.__config_loader = gevent.spawn(configLoaderLoop, self)
 
     def loadLimiters(self):
-        meta = {}
-        if os.path.exists(limits_path):
-            with open(limits_path, "rb") as fp:
-                source = fp.read()
+        print('checking config file for updates')
+        try:
+            meta = {}
+            if os.path.exists(limits_path):
+                with open(limits_path, "rb") as fp:
+                    source = fp.read()
 
-            exec compile(source, limits_path, "exec") in meta
-        else:
-            print("### Could not find limits.conf: no limits defined")
-            return
-
-        limits = meta['limits']
-        limiters = {}
-        if self.__throttle:
-            for l in limits:
-                limit   = max(1, l['limit'] / 10)
-                cpd     = max(1, l['cpd'] / 10)
-                limiter = RateLimiter(l['service_name'], limit, l['period'], cpd, l['fail_limit'], l['fail_period'], l['fail_wait'])
-                limiters[l['service_name']] = limiter
-        else:
-            for l in limits:
-                limiter = RateLimiter(l['service_name'], l['limit'], l['period'], l['cpd'], l['fail_limit'], l['fail_period'], l['fail_wait'])
-                limiters[l['service_name']] = limiter
-
-        if self.__limiters is None:
-            self.__limiters = limiters
-            return
-
-        for k,v in limiters.iteritems():
-            if self.__limiters.get(k, None) is not None:
-                self.__limiters[k].update_limits(v.limit, v.period, v.cpd, v.fail_limit, v.fail_period, v.fail_wait)
+                exec compile(source, limits_path, "exec") in meta
             else:
-                self.__limiters[k] = v
+                print("### Could not find limits.conf: no limits defined")
+                return
+        except Exception as e:
+            print('Exception while trying to execute limits.conf file: %s' % e)
+            return
+
+        try:
+            limits = meta['limits']
+        except:
+            print('limits var is not being set in limits.conf.  skipping load step')
+            return
+
+        for l in limits:
+            service_name = None
+            try:
+                service_name = l['service_name']
+                limit = l.get('limit', None)
+                period = l.get('period', None)
+                cpd = l.get('cpd', None)
+                fail_limit = l.get('fail_limit', None)
+                fail_period = l.get('fail_period', None)
+                fail_wait = l.get('fail_wait', None)
+                if self.__throttle:
+                    limit = max(1, limit / 10)
+                    cpd = max(1, cpd / 10)
+            except Exception as e:
+                if service_name is not None:
+                    print ("Exception while reading limiter for service '%s' in limits.conf, skipping" % service_name)
+                else:
+                    print ('Exception while reading limiter in limits.conf, skipping')
+                continue
+
+            try:
+                limiter = self.__limiters.get(service_name, None)
+                if limiter is not None:
+                    limiter.update_limits(limit, period, cpd, fail_limit, fail_period, fail_wait)
+                else:
+                    print("adding rate limiter for service '%s'" % service_name)
+                    self.__limiters[service_name] = RateLimiter(service_name, limit, period, cpd, fail_limit, fail_period, fail_wait)
+            except:
+                print ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
+                return
 
     def handleRequest(self, service, priority, timeout, verb, url, body = {}, headers = {}):
         global count
