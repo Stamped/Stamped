@@ -4976,7 +4976,7 @@ class StampedAPI(AStampedAPI):
                     continue
                 seenSourceNames.add(sourceIdentifier)
 
-                def loadProxy():
+                def loadProxy(sourceIdentifier, key):
                     source = sources[sourceIdentifier.lower()]()
                     try:
                         proxy = source.entityProxyFromKey(key)
@@ -4994,7 +4994,7 @@ class StampedAPI(AStampedAPI):
                         logs.warning('Failed to load key %s from source %s; exception body:\n%s' %
                                      (key, sourceIdentifier, traceback.format_exc()))
 
-                pool.spawn(loadProxy)
+                pool.spawn(loadProxy, sourceIdentifier, key)
 
             MAX_LOOKUP_TIME=2.5
             pool.join(timeout=MAX_LOOKUP_TIME)
