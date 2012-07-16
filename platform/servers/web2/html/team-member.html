@@ -1,0 +1,26 @@
+
+<div class="team-member {{member.screen_name}} clearfix">
+    <a href="/{{member.screen_name}}" class="headshot">
+        {% for index in member.inner %}
+            <div class="inner inner-{{index}}"></div>
+        {% endfor %}
+    </a>
+    
+    <div class="content">
+        <div class="pronounced-title">
+            <a class="title" href="/{{member.screen_name}}">{{member.name}}
+                <div class="user-logo-small tastemaker-logo tastemaker-logo-{{member.screen_name}}"></div>
+            </a>
+        </div>
+        
+        <div class="subtitle">{{member.subtitle|safe}}</div>
+        
+        <div class="desc">{{member.desc|safe}}</div>
+        
+        <div class="links">
+            <a href="/{{member.screen_name}}" title="Follow @{{member.screen_name}} on Stamped" class="screen-name">@{{member.screen_name}}</a>
+            <a href="https://twitter.com/{{member.twitter}}" title="Follow @{{member.twitter}} on Twitter" class="social twitter"><div class="social-button social-button-twitter"></div> @{{member.twitter}}</a>
+        </div>
+    </div>
+</div>
+

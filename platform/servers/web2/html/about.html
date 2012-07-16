@@ -1,0 +1,153 @@
+{% extends "index.html" %}
+{% load stamped_tags %}
+
+<!-- CSS Dependencies => about.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+    
+    Core stamped dependencies:
+        stylesheet: about.less
+-->
+
+<!-- HTML Template Dependencies => about.generated.html
+     - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+{% block styles %}
+    {{ block.super }}
+    
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/about.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/about.css">
+    
+    <style>
+        {% for user in founders %}
+            {% custom_css "index" user %}
+        {% endfor %}
+        
+        {% for user in team %}
+            {% custom_css "index" user %}
+        {% endfor %}
+        
+        {% for user in advisors %}
+            {% custom_css "index" user %}
+        {% endfor %}
+    </style>
+{% endblock styles %}
+
+{% block main %}
+    <div id="main" class="main-content main-animating">
+        <div class="vertically-centered">
+            <div id="main-header" class="hidden-main-animating clearfix">
+                <div class="contact">
+                    <p>&nbsp;</p>
+                    <p class="desc">CONTACT US</p>
+                    
+                    <ul>
+                        <li><a href="mailto:press@stamped.com" class="screen-name">press</a></li>
+                        <li><a href="mailto:partners@stamped.com" class="screen-name">partners</a></li>
+                        <li><a href="http://help.stamped.com" class="screen-name">help</a></li>
+                        <li><a href="/jobs" class="screen-name">jobs</a></li>
+                    </ul>
+                </div>
+                
+                <div class="address">
+                    <p>Stamped Inc.</p>
+                    <p>126 Fifth Ave. Suite 10B</p>
+                    <p>New York, NY 10011</p>
+                </div>
+            </div>
+            
+            <div id="main-body" class="active-pane-0">
+                <div id="stamped-logo" class="replaced">Stamped</div>
+                
+                <div class="pane-body">
+                    <div class="ribbon-wrapper">
+                        <div class="ribbon-bottom"></div>
+                    </div>
+                    
+                    <div id="pane-wrapper">
+                        <div class="pane clearfix">
+                            <div class="lhs">
+                                <div class="title">
+                                    Our mission is to build a platform for friends to help each other discover the best parts of their world.
+                                </div>
+                                
+                                <a href="https://twitter.com/stampedapp" title="Follow @stampedapp on Twitter" class="social twitter"><div class="social-button social-button-twitter"></div> Follow us on Twitter</a>
+                            </div>
+                            
+                            <div class="rhs">
+                                <div class="jobs">JOBS</div>
+                                
+                                <div class="jobs-desc">
+                                    We're hiring! Check out our <a href="/jobs" class="screen-name">jobs page</a> for more info.
+                                </div>
+                                
+                                <div class="bg-images bg-image-active-4">
+                                    <div class="bg-image bg-image-0"></div>
+                                    <div class="bg-image bg-image-1"></div>
+                                    <div class="bg-image bg-image-2"></div>
+                                    <div class="bg-image bg-image-3"></div>
+                                    <div class="bg-image bg-image-4"></div>
+                                    <div class="bg-image bg-image-5"></div>
+                                    <div class="bg-image bg-image-6"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ribbon-wrapper ribbon-wrapper-bottom">
+                        <div class="ribbon-top"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="post-main hidden-main-animating">
+            <div class="post-main-section founders">
+                <h1>The Founders</h1>
+                
+                {% for member in founders %}
+                    {% include "team-member.html" %}
+                {% endfor %}
+            </div>
+            
+            <div class="post-main-section team">
+                <h1>The Team</h1>
+                
+                {% for member in team %}
+                    {% include "team-member.html" %}
+                {% endfor %}
+            </div>
+            
+            <div class="post-main-section advisors">
+                <h1>Advisors</h1>
+                
+                {% for advisor in advisors %}
+                    <div class="advisor advisor-{{advisor.screen_name}}">
+                        <div class="pronounced-title">
+                            <a class="title" href="/{{advisor.screen_name}}">{{advisor.name}}
+                                <div class="user-logo-small tastemaker-logo tastemaker-logo-{{advisor.screen_name}}"></div>
+                            </a>
+                        </div>
+
+                        <div class="desc">{{advisor.desc|safe}}</div>
+                        
+                        <div class="links">
+                            <a href="/{{advisor.screen_name}}" title="Follow @{{advisor.screen_name}} on Stamped" class="screen-name">@{{advisor.screen_name}}</a>
+                            <a href="https://twitter.com/{{advisor.twitter}}" title="Follow @{{advisor.twitter}} on Twitter" class="social twitter"><div class="social-button social-button-twitter"></div> @{{advisor.twitter}}</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="made-in-nyc-logo"></div>
+        </div>
+        
+        <div class="post-main-overlay">
+            
+        </div>
+    </div>
+{% endblock main %}
+
