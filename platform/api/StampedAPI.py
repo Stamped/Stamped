@@ -3993,7 +3993,7 @@ class StampedAPI(AStampedAPI):
 
         guide = GuideCache()
         guide.user_id = user.user_id
-        guide.timestamp = StatTimstamp()
+        guide.timestamp = StatTimestamp()
         guide.timestamp.generated = now
         
         for section, entities in sections.items():
