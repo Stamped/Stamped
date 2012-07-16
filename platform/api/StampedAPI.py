@@ -2623,7 +2623,7 @@ class StampedAPI(AStampedAPI):
         except StampedDocumentNotFoundError as e:
             logs.warning("User not found: %s" % userId)
             return 
-        
+
         categories  = [ 'default', category ]
         
         self._userImageCollageDB.process_user(user, categories)
@@ -4928,7 +4928,12 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
 
     def mergeEntityIdAsync(self, entityId):
-        self._mergeEntity(self._entityDB.getEntity(entityId))
+        try:
+            entity = self._entityDB.getEntity(entityId)
+        except StampedDocumentNotFoundError:
+            logs.warning("Entity not found: %s" % entityId)
+            return
+        self._mergeEntity(entity)
 
     def _mergeEntity(self, entity):
         """Enriches the entity and possibly follow any links it may have.
