@@ -17,10 +17,13 @@ import utils
 from time               import time, gmtime, mktime, strftime, localtime
 from collections        import deque
 
+from django.utils.html  import escape
 from libs.ec2_utils     import is_ec2
 
 REQUEST_DUR_LOG_SIZE    = 10    # the size of the request duration log, which is used to determine the avg request duration
-REQUEST_DUR_CAP         = 5.0   # the cap for an individual request duration when determining the avg request duration
+REQUEST_DUR_CAP         = 10.0   # the cap for an individual request duration when determining the avg request duration
+
+
 
 
 #def schedulerLoop(limiter):
@@ -181,7 +184,7 @@ class RateLimiter(object):
             output += '<tr>'
             output += '<td valign=top>%s</td>' % strftime('%m/%d/%Y %H:%M:%S', localtime(fail.timestamp)) # Timestamp
             output += '<td valign=top>%s</td>' % fail.status_code
-            output += '<td valign=top><code>%s</code></td>' % fail.content
+            output += '<td valign=top>%s</td>' % escape(fail.content)
             output += '</tr>'
 
         output += '</table>'
@@ -200,7 +203,7 @@ class RateLimiter(object):
         return output
 
     def fail(self, response, content):
-        if self.fail_limit is None or self.fail_period is None or self.fail_wait is None or self.fail_wait:
+        if self.fail_limit is None or self.fail_period is None or self.fail_wait is None:
             return
 
         now = time()
@@ -313,7 +316,7 @@ class RateLimiter(object):
                                            (expected_total_time + expected_request_time, request.timeout))
 
             if self._isFailed():
-                raise TooManyFailedRequestsException("Too many failed requests. Wait time remaining: %s" %
+                raise TooManyFailedRequestsException("Too many failed requests. Wait time remaining: %s seconds" %
                                                      (self.fail_wait - (now - self.fail_start)))
             if self._isDayLimit():
                 raise DailyLimitException("Hit the daily request cap.  Wait time remaining: %s minutes" %
@@ -346,7 +349,7 @@ class RateLimiter(object):
                 (priority, request, asyncresult) = self.__requests.get(block=False)
                 self.call()
                 gevent.spawn(self.doRequest, request, asyncresult)
-            except gevent.queue.Empty: # TODO FIND RIGHT EXCEPTION HERE
+            except gevent.queue.Empty:
                 break
 
     def doRequest(self, request, asyncresult):

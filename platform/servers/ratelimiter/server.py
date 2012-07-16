@@ -21,7 +21,7 @@ from optparse           import OptionParser
 
 
 limits_path = os.path.dirname(RateLimiter2.__file__) + '/limits.conf'
-config_load_interval = 10*1
+config_load_interval = 60*5
 count = 0
 
 
