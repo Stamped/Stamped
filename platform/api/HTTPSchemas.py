@@ -8,6 +8,7 @@ __license__   = "TODO"
 
 import Globals
 import copy, urllib, urlparse, re, logs, string, time, utils
+from datetime           import datetime, date, timedelta
 import libs.ec2_utils
 from api import Entity
 
@@ -19,8 +20,8 @@ from api.SchemaValidation   import *
 
 from libs.LibUtils      import parseDateString
 from libs.CountryData   import countries
-from datetime           import datetime, date, timedelta
 
+from MongoStampedAPI    import globalMongoStampedAPI
 
 # ####### #
 # PRIVATE #
@@ -31,6 +32,10 @@ COMPLETION_ENDPOINT = 'actions/complete.json'
 LINKSHARE_TOKEN = 'QaV3NQJNPRA'
 FANDANGO_TOKEN  = '5348839'
 AMAZON_TOKEN    = 'stamped01-20'
+
+imageDB  = globalMongoStampedAPI()._imageDB
+
+
 
 amazon_image_re = re.compile('(.*)\.[^/.]+\.jpg')
 non_numeric_re  = re.compile('\D')
@@ -84,15 +89,16 @@ def _profileImageURL(screenName, cache=None, size=None):
         image = "%s-%dx%d.jpg" % (str(screenName).lower(), size, size)
 
     if not cache:
-        url = 'http://static.stamped.com/users/default.jpg'
-    elif cache + timedelta(days=1) <= datetime.utcnow():
-        url = 'http://static.stamped.com/users/%s?%s' % \
-              (image, int(time.mktime(cache.timetuple())))
+        return 'http://static.stamped.com/users/default.jpg'
+    if not is_prod_stack() and imageDB.isImageInDev(image):
+        filename = 'dev/users/%s?%s' % (image, int(time.mktime(cache.timetuple())))
     else:
-        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s?%s' % \
-              (image, int(time.mktime(cache.timetuple())))
+        filename = 'users/%s?%s' % (image, int(time.mktime(cache.timetuple())))
 
-    return url
+    if cache + timedelta(days=1) <= datetime.utcnow():
+        return 'http://static.stamped.com/%s' % filename
+    else:
+        return 'http://stamped.com.static.images.s3.amazonaws.com/%s' % filename
 
 def _formatURL(url):
     try:

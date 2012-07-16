@@ -9,14 +9,14 @@ import Globals, utils
 import json, logs, time
 import libs.ec2_utils
 
-from api.Entity                 import *
+from api.Entity             import *
 from api.Schemas            import *
 from utils                  import lazyProperty
 from pprint                 import pformat
-from api.StampedAPI             import StampedAPI
-from api.S3ImageDB              import S3ImageDB
-from api.SimpleDB               import SimpleDB
-from api.StatsDSink             import StatsDSink
+from api.StampedAPI         import StampedAPI
+from api.S3ImageDB          import S3ImageDB
+from api.SimpleDB           import SimpleDB
+from api.StatsDSink         import StatsDSink
 from libs.notify            import StampedNotificationHandler
 
 from api.db.mongodb.MongoAccountCollection          import MongoAccountCollection

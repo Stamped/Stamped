@@ -27,6 +27,10 @@ from boto.s3.connection import S3Connection
 from boto.s3.key        import Key
 # from boto.s3.bucket     import Bucket
 
+import libs.ec2_utils
+
+IS_PROD = libs.ec2_utils.is_prod_stack()
+
 class S3ImageDB(AImageDB):
     
     def __init__(self, bucket_name='stamped.com.static.images'):
@@ -87,6 +91,8 @@ class S3ImageDB(AImageDB):
     def addResizedProfileImages(self, screen_name, image_url):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
+        if not IS_PROD:
+            prefix = 'dev/' + prefix
         
         image    = utils.getWebImage(image_url, "profile")
         sizes    = self.profileImageSizes
@@ -117,22 +123,32 @@ class S3ImageDB(AImageDB):
     def removeProfileImage(self, screen_name):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
+        if not IS_PROD:
+            prefix = 'dev/' + prefix
         suffix = '.jpg'
         
         sizes = self.profileImageSizes
-        
+
         try:
-            self._removeFromS3('%s%s') % (prefix, suffix)
+            self._removeFromS3('%s%s' % (prefix, suffix))
             
             for size in sizes:
-                self._removeFromS3('%s-%s%s') % (prefix, size, suffix)
+                self._removeFromS3('%s-%s%s' % (prefix, size, suffix))
         except Exception:
             logs.warning('Warning: Failed to remove file')
-    
+
+    def isImageInDev(self, filename):
+        """ Determine if the profile image exists within the dev directory. If not, default to prod dir """
+        path = 'dev/users/%s' % filename
+        return self.bucket.get_key(name)
+
+
     def addEntityImage(self, entityId, image):
         assert isinstance(image, Image.Image)
         
         prefix   = 'entities/%s' % entityId
+        if not IS_PROD:
+            prefix = 'dev/' + prefix
         max_size = (960, 960)
         
         sizes = {
@@ -147,6 +163,8 @@ class S3ImageDB(AImageDB):
         assert isinstance(image, Image.Image)
         
         prefix   = 'stamps/%s' % stampId
+        if not IS_PROD:
+            prefix = 'dev/' + prefix
         url      = 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
         max_size = (960, 960)
         
@@ -157,6 +175,8 @@ class S3ImageDB(AImageDB):
     def addResizedStampImages(self, sourceUrl, imageId, maxSize, sizes):
         image    = utils.getWebImage(sourceUrl, "stamp")
         prefix   = 'stamps/%s' % imageId
+        if not IS_PROD:
+            prefix = 'dev/' + prefix
 
         return self._addImageSizes(prefix, image, maxSize, sizes, original_url=sourceUrl)
     
@@ -164,6 +184,9 @@ class S3ImageDB(AImageDB):
         # Filename is lowercase screen name
         oldPrefix = 'users/%s' % oldScreenName.lower()
         newPrefix = 'users/%s' % newScreenName.lower()
+        if not IS_PROD:
+            oldPrefix = 'dev/' + oldPrefix
+            newPrefix = 'dev/' + newPrefix
         suffix = '.jpg'
         
         sizes = self.profileImageSizes
@@ -240,6 +263,8 @@ class S3ImageDB(AImageDB):
         image    = utils.getWebImage(image_url)
         suffix   = os.path.basename(image_url)
         filename = "entities/%s" % suffix
+        if not IS_PROD:
+            filename = 'dev/' + filename
         
         return self.addImage(filename, image)
     
@@ -328,8 +353,7 @@ class S3ImageDB(AImageDB):
     def _removeFromS3(self, name):
         num_retries = 0
         max_retries = 5
-        logs.info('### removing from S3 with name: %s' % name)
-        
+
         while True:
             try:
                 if self.bucket.get_key(name) is not None:
