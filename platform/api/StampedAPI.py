@@ -2878,7 +2878,7 @@ class StampedAPI(AStampedAPI):
         
         stats.popularity = int(popularity)
 
-        #Stamp Quality
+        # Stamp Quality
         image_score = 0
         for content in stamp.contents:
             if content.images is not None:
@@ -3792,8 +3792,7 @@ class StampedAPI(AStampedAPI):
             ### TODO: Return actual search across my todos. For now, just return nothing.
             return []
         else:
-            # TODO: What should we return for other search queries (not inbox and not popular)?
-            stampIds = None
+            raise StampedInputError("Invalid scope for guide: %s" % guideSearchRequest.scope)
 
         searchSlice             = SearchSlice()
         searchSlice.limit       = 100
@@ -3861,9 +3860,12 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def buildGuideAsync(self, authUserId, force=False):
+        if force:
+            return self._buildUserGuide(authUserId)
+
         try:
             guide = self._guideDB.getGuide(authUserId)
-            if guide.updated is not None and datetime.utcnow() < guide.updated + timedelta(days=1) and not force:
+            if guide.timestamp is not None and datetime.utcnow() < guide.timestamp.generated + timedelta(days=1):
                 return
         except (StampedUnavailableError, KeyError):
             pass
@@ -3991,7 +3993,8 @@ class StampedAPI(AStampedAPI):
 
         guide = GuideCache()
         guide.user_id = user.user_id
-        guide.updated = now
+        guide.timestamp = StatTimstamp()
+        guide.timestamp.generated = now
         
         for section, entities in sections.items():
             r = []
