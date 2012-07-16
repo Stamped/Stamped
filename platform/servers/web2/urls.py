@@ -24,6 +24,11 @@ urlpatterns = patterns('',
     url(r'^mobile/index\.html?$',                       'mobile.views.index'), 
     url(r'^mobile/?$',                                  'mobile.views.index'), 
     
+    # ------------------------------ ABOUT -------------------------------------
+    # e.g., stamped.com/mobile/about, stamped.com/mobile/about.html
+    url(r'^mobile/about$',                              'mobile.views.about'), 
+    url(r'^mobile/about\.html?$',                       'mobile.views.about'), 
+    
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
     url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',    'mobile.views.profile'), 
@@ -54,6 +59,9 @@ urlpatterns = patterns('',
     # ------------------------------- TEST -------------------------------------
     # e.g., stamped.com/test
     url(r'^test$',                              'core.views.test_view'), 
+    # e.g., stamped.com/temp
+    url(r'^temp$',                              'core.views.temp_view'), 
+    
     
     
     # ------------------------------ POPUPS ------------------------------------
@@ -80,6 +88,10 @@ urlpatterns = patterns('',
     url(r'^index\.html?$',                      'core.views.index'), 
     url(r'^/?$',                                'core.views.index'), 
     
+    # ------------------------------ ABOUT -------------------------------------
+    # e.g., stamped.com/about, stamped.com/about.html
+    url(r'^about$',                             'core.views.about'), 
+    url(r'^about\.html?$',                      'core.views.about'), 
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/travis

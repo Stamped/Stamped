@@ -97,6 +97,8 @@ class RunEvalResolutions(AStampedTestCase):
             except Exception:
                 formattedErrors.append(traceback.format_exc())
 
+        printFunctionCounts()
+
         outputMessage = """
         /---------------------------------------------
         |    Resolution results for %s written to:
@@ -112,7 +114,6 @@ class RunEvalResolutions(AStampedTestCase):
                 print('\n\n')
             print outputMessage % (category, output.name)
 
-        printFunctionCounts()
 
 
     def __getResolverObjects(self, entity):

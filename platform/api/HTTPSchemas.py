@@ -2717,20 +2717,20 @@ class HTTPTodo(Schema):
     def importTodo(self, todo):
         self.todo_id                = todo.todo_id
         self.user_id                = todo.user.user_id
-        self.source                 = HTTPTodoSource()
-        self.source.entity          = HTTPEntityMini().importEntity(todo.entity)
-        if todo.stamp is not None:
-            self.source.stamp_ids   = [ todo.stamp.stamp_id ]
-        self.previews               = HTTPPreviews()
-        if todo.previews is not None and todo.previews.todos is not None:
-            self.previews.todos     = [HTTPUserMini().importUserMini(u) for u in todo.previews.todos]
-        if todo.source_stamps is not None:
-            self.previews.stamps    = [HTTPStampPreview().importStamp(s) for s in todo.source_stamps]
         self.created                = todo.timestamp.created
         self.complete               = todo.complete
 
+        self.source                 = HTTPTodoSource()
+        self.source.entity          = HTTPEntityMini().importEntity(todo.entity)
+        if todo.source_stamps is not None:
+            self.source.stamp_ids   = map(lambda x: getattr(x, 'stamp_id'), todo.source_stamps)
+            
+        self.previews               = HTTPPreviews()
+        if todo.previews is not None and todo.previews.todos is not None:
+            self.previews.todos     = [HTTPUserMini().importUserMini(u) for u in todo.previews.todos]
+
         if todo.stamp is not None:
-            self.stamp_id              = todo.stamp.stamp_id #= HTTPStamp().importStampMini(todo.stamp)
+            self.stamp_id              = todo.stamp.stamp_id 
 
         return self
 

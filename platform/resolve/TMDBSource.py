@@ -184,8 +184,9 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty
     def release_date(self):
         try:
-            string = self.data['release_date']
-            return parseDateString(string)
+            if self.data:
+                string = self.data['release_date']
+                return parseDateString(string)
         except KeyError:
             pass
         return None
@@ -193,6 +194,8 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty
     def length(self):
         try:
+            if not self.full_data:
+                return []
             if not self.full_data.get('runtime', None):
                 return -1  # TODO: Would None be more appropriate here?
             return self.full_data['runtime'] * 60
@@ -202,8 +205,9 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
     @lazyProperty 
     def genres(self):
         try:
+            if not self.full_data:
+                return []
             if not self.full_data.get('genres', None):
-                logs.debug('No genres for %s (%s:%s)' % (self.name, self.source, self.key))
                 return []
             return [ entry['name'] for entry in self.full_data['genres'] ]
         except LookupRequiredError:
@@ -225,9 +229,10 @@ class TMDBSource(GenericSource):
                 'directors',
                 'cast',
                 'desc',
-                # 'short_description',
                 'genres',
                 'imdb',
+                'length',
+                'release_date',
             ],
             kinds=[
                 'media_item',
@@ -257,11 +262,6 @@ class TMDBSource(GenericSource):
             return self.searchAllSource(query)
         
         return self.emptySource
-
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.tmdb_id = proxy.key
-        return True
 
     def movieSource(self, query):
         def gen():

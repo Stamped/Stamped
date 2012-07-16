@@ -66,6 +66,11 @@ class StampTimestamp(BasicTimestamp):
     def setSchema(cls):
         cls.addProperty('stamped',                          datetime)
 
+class StatTimestamp(Schema):
+    @classmethod 
+    def setSchema(cls):
+        cls.addProperty('generated',                        datetime)
+
 class SettingsEmailAlertToken(Schema):
     @classmethod
     def setSchema(cls):
@@ -183,6 +188,7 @@ class StampStats(Schema):
         cls.addPropertyList('preview_likes',                basestring) # UserIds
         cls.addPropertyList('preview_credits',              basestring) # StampIds
         cls.addPropertyList('preview_comments',             basestring) # CommentIds
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 class EntityStats(Schema):
     @classmethod
@@ -191,6 +197,7 @@ class EntityStats(Schema):
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
         cls.addPropertyList('popular_stamps',               basestring)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 
 # #### #
@@ -1504,6 +1511,7 @@ class Stamp(Schema):
         cls.addProperty('via',                              basestring)
         cls.addNestedProperty('previews',                   Previews)
         cls.addNestedProperty('links',                      StampLinks)
+        cls.addProperty('og_action_id',                     basestring)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1822,4 +1830,4 @@ class GuideCache(Schema):
         cls.addNestedPropertyList('food',                   GuideCacheItem)
         cls.addNestedPropertyList('app',                    GuideCacheItem)
         cls.addNestedPropertyList('other',                  GuideCacheItem)
-        cls.addProperty('updated',                          datetime)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)

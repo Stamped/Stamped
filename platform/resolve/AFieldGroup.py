@@ -57,3 +57,5 @@ class AFieldGroup(object):
     def eligible(self, entity):
         pass
 
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        pass

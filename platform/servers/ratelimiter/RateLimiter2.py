@@ -97,10 +97,10 @@ def workerProcess(limit):
     period = limit.period
 
     while True:
-        if (len(events) > 0):
-            for event in events:
-                print(event)
-            events = []
+#        if (len(events) > 0):
+#            for event in events:
+#                print(event)
+#            events = []
         limit.handleTimestep()
         if limit._isFailed():
             print('isFailed is true.  Sleeping for %s' % (limit.fail_wait - (time() - limit.fail_start)))
@@ -119,12 +119,12 @@ class RateLimiter(object):
 
         self.limit = limit
         self.period = period
-        self.__cpd = cpd
+        self.cpd = cpd
         self.__curr_timeblock_start =  time()
 
         self.__fails = deque()
-        self.__fail_limit = fail_limit
-        self.__fail_period = fail_period
+        self.fail_limit = fail_limit
+        self.fail_period = fail_period
         self.fail_wait = fail_wait
         self.fail_start = None
 
@@ -145,6 +145,21 @@ class RateLimiter(object):
 
         self.__worker = gevent.spawn(workerProcess, self)
 
+    def update_limits(self, limit, period, cpd, fail_limit, fail_period, fail_wait):
+        if self.limit != limit:
+            self.limit = limit
+        if self.period != period:
+            self.period = period
+        if self.cpd != cpd:
+            self.cpd = cpd
+        if self.fail_limit != fail_limit:
+            self.fail_limit = fail_limit
+        if self.fail_period != fail_period:
+            self.fail_period = fail_period
+        if self.fail_wait != fail_wait:
+            self.fail_wait = fail_wait
+
+
     def fail(self, now=None):
         if self.__fails is None:
             return
@@ -156,7 +171,7 @@ class RateLimiter(object):
 
         self.__fails.append(now)
 
-        cutoff = now - self.__fail_period
+        cutoff = now - self.fail_period
         count = 0
 
         for timestamp in self.__fails:
@@ -168,7 +183,7 @@ class RateLimiter(object):
         self.__semaphore.release()
 
 
-        if count > self.__fail_limit:
+        if count > self.fail_limit:
             print('### hit fail limit')
             self.fail_start = time()
 
@@ -192,12 +207,12 @@ class RateLimiter(object):
     def _isDayLimit(self):
         now = mktime(datetime.datetime.utcnow().timetuple())
         # reset counter if day has elapsed
-        print('Day start: %s   now: %s' % (self.__day_start, now))
+        #print('Day start: %s   now: %s' % (self.__day_start, now))
         if self.__day_start + 60*60*24 < now:
             self.__day_start = self._getDay()
             self.__day_calls = 0
 
-        return self.__day_calls >= self.__cpd
+        return self.__day_calls >= self.cpd
 
 
     def _getDay(self):
@@ -256,7 +271,6 @@ class RateLimiter(object):
                 raise DailyLimitException("Hit the daily request cap.  Wait time remaining: %s minutes" %
                                         (((self.__day_start + 60*60*24) - now) / 60))
 
-
             asyncresult = AsyncResult()
 
             if self.__curr_timeblock_start is None:
@@ -275,8 +289,7 @@ class RateLimiter(object):
             raise e
 
     def handleTimestep(self):
-        print('self.__requests.qsize: %s' % self.__requests.qsize())
-
+        #print('self.__requests.qsize: %s' % self.__requests.qsize())
         self.__calls = 0
         now = time()
         while (self.__curr_timeblock_start + self.period < now):
@@ -284,6 +297,7 @@ class RateLimiter(object):
         while self.__calls < self.limit:
             try:
                 (priority, request, asyncresult) = self.__requests.get(block=False)
+                events.append('pulled from queue')
                 self.call()
                 gevent.spawn(self.doRequest, request, asyncresult)
             except gevent.queue.Empty: # TODO FIND RIGHT EXCEPTION HERE
@@ -298,8 +312,8 @@ class RateLimiter(object):
             print('timeout exceptions thrown')
             raise TimeoutException('The request timed out while waiting in the rate limiter queue')
 
-        events.append('sending out http request')
         try:
+            print('%s   %s   headers:  %s     body: %s' % (request.url, request.verb, request.headers, urllib.urlencode(request.body)))
             response, content = self.__http.request(request.url, request.verb, headers=request.headers, body=urllib.urlencode(request.body))
         except Exception as e:
             events.append('Exception during request: %s' % e)
@@ -309,7 +323,6 @@ class RateLimiter(object):
         if response.status >= 400:
             self.fail()
 
-        events.append('setting asyncresult with http response, content')
         asyncresult.set((response, content))
 
         end = time()
@@ -318,7 +331,6 @@ class RateLimiter(object):
         events.append('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))
         print('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))
 
-        events.append('adding duration log')
         self._addDurationLog(elapsed)
 
         return response, content

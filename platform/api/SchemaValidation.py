@@ -37,7 +37,7 @@ def validateHexColor(color):
         raise
     except:
         logs.warning("Invalid hex color: %s" % color)
-        raise StampedInputError("Invalid color value.")
+        raise StampedInvalidColorError("Invalid color value.")
 
 def validateString(string):
     if string is None or string == '':
@@ -57,7 +57,7 @@ def validateURL(url):
     try:
         val(url)
     except ValidationError, e:
-        raise StampedInvalidWebsiteError("Invalid URL: %s" % url)
+        raise StampedInvalidURLError("Invalid URL: %s" % url)
     return url
 
 def validateObjectId(string):
@@ -67,7 +67,7 @@ def validateObjectId(string):
         r = ObjectId(string)
     except Exception as e:
         logs.warning("Invalid id: %s" % e)
-        raise StampedInputError("Invalid id")
+        raise StampedObjectIdError("Invalid id")
     return string
 
 def validateUserId(userId):

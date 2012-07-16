@@ -35,7 +35,7 @@ try:
     # TODO GET RID OF SEARCH IMPORTS
     from search.SearchResult import SearchResult
     from search.ScoringUtils import *
-    from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+    from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection
 
     from libs.SearchUtils import formatSearchQuery
 except:
@@ -865,32 +865,6 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query, constructor_proxy=EntitySearchAll)
 
-    """
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        if controller.shouldEnrich('tombstone', self.sourceName, entity):
-            try:
-                query = self.wrapperFromEntity(entity)
-                timestamps['tombstone'] = controller.now
-                mins = None
-                if query.type == 'artist':
-                    mins = {
-                        'name':.1,
-                        'albums':.1,
-                        'tracks':-1,
-                        'total':-1,
-                    }
-                results = self.resolver.resolve(query, self.matchSource(query), mins=mins)
-                if len(results) != 0:
-                    best = results[0]
-                    if best[0]['resolved']:
-                        entity[self.idField] = best[1].key
-                        if self.urlField is not None and best[1].url is not None:
-                            entity[self.urlField] = best[1].url
-            except ValueError:
-                pass
-        return True
-        """
-    
     def __id_query(self, mongo_query):
         import pymongo
         #print(pformat(mongo_query))

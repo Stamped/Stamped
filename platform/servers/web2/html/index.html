@@ -1,14 +1,5 @@
-{% extends "base2.html" %}
+{% extends "base.html" %}
 {% load stamped_tags %}
-
-<!-- 
-    NOTE: this is a workaround because the built-in ssi tag doesn't support 
-    context variables as arguments. We use ssi to include other html files 
-    which contain non-django templates that the django templating system 
-    should not attempt to parse. Note that we would use the built-in include 
-    tag if we wanted to parse an external template before inclusion.
--->
-{% load ssi from future %}
 
 <!-- Javascript Dependencies => index.generated.js
      - - - - - - - - - - - - - - - - - - - - - - - -
@@ -41,14 +32,18 @@
      - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -->
 
+{% block viewport %}
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+{% endblock viewport %}
+
 {% block styles %}
     {{ block.super }}
     
     <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/helpers/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
     
     <style>
         {% for user in tastemakers %}
@@ -151,194 +146,194 @@
                 <div class="line">DOWNLOAD STAMPED</div>
             </div>
         </div>
-        
-        <div id="intro-iphone"></div>
     </div>
      
     <div id="main" class="main-content">
-        <div id="main-header" class="hidden-main-animating clearfix">
-            <div class="floatright">
-                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button"></a>
-            </div>
-            
-            <div id="available" class="floatright">
-                <div class="desc">Available on the App Store</div>
-                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button"></a>
-            </div>
-        </div>
-        
-        <div id="main-body" class="active-pane-0">
-            <div id="stamped-logo" class="replaced">Stamped</div>
-            
-            <div id="pane-nav">
-                <ol>
-                    <li><a href="#pane-0" id="pane-nav-0" class="pane-nav-button"></a></li>
-                    <li><a href="#pane-1" id="pane-nav-1" class="pane-nav-button"></a></li>
-                    <li><a href="#pane-2" id="pane-nav-2" class="pane-nav-button"></a></li>
-                    <li><a href="#pane-3" id="pane-nav-3" class="pane-nav-button"></a></li>
-                    <li><a href="#pane-4" id="pane-nav-4" class="pane-nav-button"></a></li>
-                </ol>
-            </div>
-            
-            <div class="pane-body">
-                <div class="ribbon-wrapper">
-                    <div class="ribbon-bottom"></div>
+        <div class="vertically-centered">
+            <div id="main-header" class="hidden-main-animating clearfix">
+                <div class="floatright">
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button"></a>
                 </div>
                 
-                <div id="pane-wrapper">
-                    <div id="pane-0" class="pane">
-                        <div class="title">
-                            Introducing Stamped 2.0
-                        </div>
-                        
-                        <div class="desc">
-                            <p>
-                                Stamped is a fun and useful way to record and share all of your favorite things -- restaurants, books, movies, music and more.
-                            </p>
-                            
-                            <p>
-                                Everyone gets a limited number of stamps to start, so you’ll discover only the best recommendations from people you trust. Try it out, it’s free!
-                            </p>
-                        </div>
-                        
-                        <div id="category-illustration"></div>
+                <div id="available" class="floatright">
+                    <div class="desc">Available on the App Store</div>
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button"></a>
+                </div>
+            </div>
+            
+            <div id="main-body" class="active-pane-0">
+                <div id="stamped-logo" class="replaced">Stamped</div>
+                
+                <div id="pane-nav">
+                    <ol>
+                        <li><a href="#pane-0" id="pane-nav-0" class="pane-nav-button"></a></li>
+                        <li><a href="#pane-1" id="pane-nav-1" class="pane-nav-button"></a></li>
+                        <li><a href="#pane-2" id="pane-nav-2" class="pane-nav-button"></a></li>
+                        <li><a href="#pane-3" id="pane-nav-3" class="pane-nav-button"></a></li>
+                        <li><a href="#pane-4" id="pane-nav-4" class="pane-nav-button"></a></li>
+                    </ol>
+                </div>
+                
+                <div class="pane-body">
+                    <div class="ribbon-wrapper">
+                        <div class="ribbon-bottom"></div>
                     </div>
                     
-                    <div id="pane-1" class="pane">
-                        <div class="title">
-                            Put your stamp of approval on the world.
-                        </div>
-                        
-                        <div class="desc">
-                            <p>
-                                <span class="bolded">A stamp is for only the things you like best.</span>
-                            </p>
-                            
-                            <p>
-                                Use it on that book you couldn’t put down or that song stuck in your head. Stamp the movie that made you laugh so hard you cried.
-                            </p>
-                            
-                            <p>
-                                If you love something, stamp it!
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div id="pane-2" class="pane">
-                        <div class="title">
-                            The Guide - find what you want, when you want it.
-                        </div>
-                        
-                        <div class="desc">
-                            <p>
-                                The Guide integrates with third-parties so it’s easy to listen to and download music, buy movie tickets, add movies to your queue, buy books, and even view restaurant menus, all without ever leaving Stamped.
-                            </p>
-                            
-                            <div class="third-party-logos">
-                                <div class="third-party-logo third-party-logo-spotify"></div>
-                                <div class="third-party-logo third-party-logo-rdio"></div>
-                                <div class="third-party-logo third-party-logo-netflix"></div>
-                                <div class="third-party-logo third-party-logo-fandango"></div>
-                                <div class="third-party-logo third-party-logo-opentable"></div>
+                    <div id="pane-wrapper">
+                        <div id="pane-0" class="pane">
+                            <div class="title">
+                                Introducing Stamped 2.0
                             </div>
                             
-                            <p>
-                                It's a visual and personalized way to discover great new things to try.
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div id="pane-3" class="pane">
-                        <div class="title">
-                            Follow the people you trust and respect.
+                            <div class="desc">
+                                <p>
+                                    Stamped is a fun and useful way to record and share all of your favorite things -- restaurants, books, movies, music and more.
+                                </p>
+                                
+                                <p>
+                                    Everyone gets a limited number of stamps to start, so you’ll discover only the best recommendations from people you trust. Try it out, it’s free!
+                                </p>
+                            </div>
+                            
+                            <div id="category-illustration"></div>
                         </div>
                         
-                        <div class="desc">
-                            <p>
-                                Follow your friends from <span class="facebook">Facebook</span> and <span class="twitter">Twitter</span>, or celebrities and brands like <a href="/mariobatali" class="bolded">Mario Batali</a> and <a href="/nymag" class="bolded">New York Magazine</a>.
-                            </p>
+                        <div id="pane-1" class="pane">
+                            <div class="title">
+                                Put your stamp of approval on the world.
+                            </div>
                             
-                            <p>
-                                With Stamped, you can discover great content through the people whose tastes you <span style="italic">actually</span> respect.
-                            </p>
+                            <div class="desc">
+                                <p>
+                                    <span class="bolded">A stamp is for only the things you like best.</span>
+                                </p>
+                                
+                                <p>
+                                    Use it on that book you couldn’t put down or that song stuck in your head. Stamp the movie that made you laugh so hard you cried.
+                                </p>
+                                
+                                <p>
+                                    If you love something, stamp it!
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div id="pane-2" class="pane">
+                            <div class="title">
+                                The Guide - find what you want, when you want it.
+                            </div>
                             
-                            <div id="tastemaker-gallery">
-                                {% for user in tastemakers %}
-                                    <div class="tastemaker" data-screen-name="{{user.screen_name}}">
-                                        {% handlebars_template "profile-image-60" user %}
+                            <div class="desc">
+                                <p>
+                                    The Guide integrates with third-parties so it’s easy to listen to and download music, buy movie tickets, add movies to your queue, buy books, and even view restaurant menus, all without ever leaving Stamped.
+                                </p>
+                                
+                                <div class="third-party-logos">
+                                    <div class="third-party-logo third-party-logo-spotify"></div>
+                                    <div class="third-party-logo third-party-logo-rdio"></div>
+                                    <div class="third-party-logo third-party-logo-netflix"></div>
+                                    <div class="third-party-logo third-party-logo-fandango"></div>
+                                    <div class="third-party-logo third-party-logo-opentable"></div>
+                                </div>
+                                
+                                <p>
+                                    It's a visual and personalized way to discover great new things to try.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div id="pane-3" class="pane">
+                            <div class="title">
+                                Follow the people you trust and respect.
+                            </div>
+                            
+                            <div class="desc">
+                                <p>
+                                    Follow your friends from <span class="facebook">Facebook</span> and <span class="twitter">Twitter</span>, or celebrities and brands like <a href="/mariobatali" class="bolded">Mario Batali</a> and <a href="/nymag" class="bolded">New York Magazine</a>.
+                                </p>
+                                
+                                <p>
+                                    With Stamped, you can discover great content through the people whose tastes you <span style="italic">actually</span> respect.
+                                </p>
+                                
+                                <div id="tastemaker-gallery">
+                                    {% for user in tastemakers %}
+                                        <div class="tastemaker tastemaker-{{user.screen_name}}" data-screen-name="{{user.screen_name}}">
+                                            {% handlebars_template "profile-image-60" user %}
+                                            
+                                            <div class="user-logo-small tastemaker-logo tastemaker-logo-{{user.screen_name}}"></div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="pane-4" class="pane">
+                            <div class="title">
+                                What are your favorite things?
+                            </div>
+                            
+                            <div class="desc">
+                                <p>
+                                    Check out videos of people discussing what they like best.
+                                </p>
+                                
+                                <div id="user-video-gallery">
+                                    <div id="tristanlisa-video-preview" class="user-video-preview">
+                                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                         
-                                        <div class="user-logo-small tastemaker-logo tastemaker-logo-{{user.screen_name}}"></div>
+                                        <div class="user-video-desc">
+                                            <div class="screen-names"><a href="/tristan">@tristan</a> and <a href="/lisa">@lisa</a></div>
+                                        </div>
                                     </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="pane-4" class="pane">
-                        <div class="title">
-                            What are your favorite things?
-                        </div>
-                        
-                        <div class="desc">
-                            <p>
-                                Check out videos of people discussing what they like best.
-                            </p>
-                            
-                            <div id="user-video-gallery">
-                                <div id="tristanlisa-video-preview" class="user-video-preview">
-                                    <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                     
-                                    <div class="user-video-desc">
-                                        <div class="screen-names"><a href="/tristan">@tristan</a> and <a href="/lisa">@lisa</a></div>
+                                    <div id="maggie-video-preview" class="user-video-preview">
+                                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
+                                        
+                                        <div class="user-video-desc">
+                                            <div class="screen-names"><a href="/maggie">@maggie</a></div>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                <div id="maggie-video-preview" class="user-video-preview">
-                                    <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                     
-                                    <div class="user-video-desc">
-                                        <div class="screen-names"><a href="/maggie">@maggie</a></div>
-                                    </div>
-                                </div>
-                                
-                                <div id="hero-video-preview" class="user-video-preview">
-                                    <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
-                                    
-                                    <div class="user-video-desc">
-                                        <div class="screen-names"><a href="/justinbieber">@justinbieber</a></div>
+                                    <div id="hero-video-preview" class="user-video-preview">
+                                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
+                                        
+                                        <div class="user-video-desc">
+                                            <div class="screen-names"><a href="/justinbieber">@justinbieber</a></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="ribbon-wrapper ribbon-wrapper-bottom">
-                    <div class="ribbon-top"></div>
-                </div>
-            </div>
-        </div>
-        
-        <div id="main-footer" class="hidden-main-animating clearfix">
-            <div class="watch-video">
-                <div class="speech-bubble clearfix">
-                    <div class="default-video">
-                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
-                        
-                        <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the video with <a href="/justinbieber" class="bolded">@justinbieber</a></p>
-                    </div>
                     
-                    <div class="overview-video">
-                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
-                        
-                        <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the overview video to learn more.</p>
+                    <div class="ribbon-wrapper ribbon-wrapper-bottom">
+                        <div class="ribbon-top"></div>
                     </div>
                 </div>
-                
-                <a class="bieber-video-preview-icon"></a>
             </div>
             
-            <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
+            <div id="main-footer" class="hidden-main-animating clearfix">
+                <div class="watch-video">
+                    <div class="speech-bubble clearfix">
+                        <div class="default-video">
+                            <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
+                            
+                            <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the video with <a href="/justinbieber" class="bolded">@justinbieber</a></p>
+                        </div>
+                        
+                        <div class="overview-video">
+                            <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
+                            
+                            <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the overview video to learn more.</p>
+                        </div>
+                    </div>
+                    
+                    <a class="bieber-video-preview-icon"></a>
+                </div>
+                
+                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
+            </div>
         </div>
     </div>
     
@@ -353,6 +348,7 @@
                     <div class="iphone-inbox-body"></div>
                     <div class="iphone-inbox-selection"></div>
                     <div class="iphone-inbox-header"></div>
+                    <div class="iphone-inbox-footer"></div>
                 </div>
                 
                 <div class="iphone-screen iphone-screen-sdetail iphone-screen-sdetail-active-0">
@@ -365,11 +361,20 @@
                     <div class="iphone-screen-guide-0"></div>
                 </div>
             </div>
+            
+            <div class="iphone-body-lighting iphone-body-lighting-0"></div>
+            <div class="iphone-body-lighting iphone-body-lighting-1"></div>
+            <div class="iphone-body-overlay"></div>
         </div>
     </div>
     
-    <div id="tastemaker-map-window" class="main-content">
+    <div id="tastemaker-map-window" class="main-content forward-button-active refresh-button-active">
+        <div id="back-button"    class="chrome-button"></div>
+        <div id="forward-button" class="chrome-button"></div>
+        <div id="refresh-button" class="chrome-button"></div>
+        
         <a id="fake-url" href="/robby/map">www.stamped.com/robby/map</a>
+        
         <div id="tastemaker-map-window-overlay">
             <div id="tastemaker-map-window-loading"></div>
         </div>
@@ -409,11 +414,11 @@
     <div class="clearfix">
         <div class="floatleft">
             <div id="footer-nav">
-                <a href="http://stamped.com/about" class="nav">About Us</a></li>
-                <a href="http://help.stamped.com" class="nav">Help</a></li>
-                <a href="http://blog.stamped.com" class="nav">Blog</a>
-                <a href="http://stamped.com/terms-of-service" class="nav">Terms of Service</a>
-                <a href="http://stamped.com/privacy" class="nav">Privacy Policy</a>
+                <a href="/" class="nav {% if page == 'index' %}active{% endif %}">Home</a></li>
+                <a href="/about" class="nav {% if page == 'about' %}active{% endif %}">About Us</a></li>
+                <a href="http://help.stamped.com" class="nav {% if page == 'help' %}active{% endif %}">Help</a></li>
+                <a href="http://blog.stamped.com" class="nav {% if page == 'blog' %}active{% endif %}">Blog</a>
+                <a href="/legal" class="nav {% if page == 'legal' %}active{% endif %}">Legal</a>
             </div>
         </div>
         
@@ -434,6 +439,7 @@
         <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.event.drag.js"></script>
+        
         <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
     {% else %}

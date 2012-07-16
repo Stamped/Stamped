@@ -331,6 +331,7 @@ class RunEvalQueries(AStampedTestCase):
         ('mauds cafe', (54.593507, -5.925185)),
         ('mordisco', (41.386533, 2.128773)),
         ('momofuku ssäm bar', (40.6, -73.9)),
+        ('momofuku ssam bar', (40.6, -73.9)),
         ('nando\'s', (51.478148, -3.176642)),
         ('paddy\'s irish', (35.042481, -78.928133)),
         ('per se in nyc', (29.984821, -95.338962)),

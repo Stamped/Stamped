@@ -57,30 +57,30 @@ class weeklyScore(object):
         
         scores = {
             #2 points for likes
-            '/v0/stamps/likes/create.json': 2,
-            '/v0/stamps/likes/remove.json': -2,
+            '/v1/stamps/likes/create.json': 2,
+            '/v1/stamps/likes/remove.json': -2,
             
             #2 points for todos
-            '/v0/todos/create.json': 2,
-            '/v0/todos/remove.json': -2,
+            '/v1/todos/create.json': 2,
+            '/v1/todos/remove.json': -2,
             
             #3 points for comments
-            '/v0/comments/create.json': 3,
-            '/v0/comments/remove.json': -3,
+            '/v1/comments/create.json': 3,
+            '/v1/comments/remove.json': -3,
             
             #3 points for adding a friend
-            '/v0/friendships/create.json': 3,
-            '/v0/friendships/remove.json': -3,
+            '/v1/friendships/create.json': 3,
+            '/v1/friendships/remove.json': -3,
             
             #3 points for taking an action
-            '/v0/actions/complete.json': 2,
+            '/v1/actions/complete.json': 2,
             
             #5 points for a stamp
-            '/v0/stamps/create.json': 5,
-            '/v0/stamps/remove.json': -5,
+            '/v1/stamps/create.json': 5,
+            '/v1/stamps/remove.json': -5,
             
             #5 points for an invite
-            '/v0/frienships/invite.json': 5,
+            '/v1/frienships/invite.json': 5,
             
             }
         

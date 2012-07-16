@@ -19,6 +19,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 include $(PROJECT_BASE_LIB)/defines.mk
 
 ASSET_VERSION_NUMBER		= 1.0.0
+GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 
 LESS_CSS_DIRS               = assets/css assets/css/libs assets/css/ie assets/css/mobile
@@ -42,8 +43,8 @@ GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | 
 GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^[ \t]*stylesheet:[ \t]*' $1 | sed 's/[ \t]*stylesheet:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
 GET_TEMPLATE_DEPENDENCIES	= $(foreach FILE,$(shell grep '^[ \t]*template:[ \t]*' $1 | sed 's/[ \t]*template:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(TEMPLATE_BASE_DIR)/$(FILE))
 
-JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE).generated$(ASSET_VERSION_SUFFIX).js)
-CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(CSS_BASE_DIR)/$(PAGE).generated$(ASSET_VERSION_SUFFIX).css)
+JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)
+CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(CSS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).css)
 TEMPLATE_TARGETS			= $(foreach PAGE,$(HTML_PAGES),$(TEMPLATE_BASE_DIR)/$(PAGE).generated.html)
 
 #TEMPLATE_DIRS				= templates
@@ -63,14 +64,14 @@ $1/%.$(LESS_CSS_TARGET_SUFFIX): $1/%.$(LESS_CSS_SOURCE_SUFFIX)
 endef
 
 define ADD_JS_TARGET
-$(JS_BASE_DIR)/$1.generated$(ASSET_VERSION_SUFFIX).js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
+$(JS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(call REST,$$^)$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break 120 > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
 	@cat $$(call REST,$$^) | java -jar bin/compressor.jar --type js --nomunge --line-break 120 > $$@
 	@echo
 endef
 
 define ADD_CSS_TARGET
-$(CSS_BASE_DIR)/$1.generated$(ASSET_VERSION_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
+$(CSS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	cat $$(call REST,$$^) | java -jar bin/compressor.jar --type css --line-break 120 > $$@
 	@echo
 endef
@@ -99,7 +100,7 @@ $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_TEMPLATE_TARGET,$(PAGE))))
 
 deploy: $(ALL_TARGETS)
 	@echo "TODO: upload all JS assets to S3"
-	@echo "$(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE).generated$(ASSET_VERSION_SUFFIX).js)"
+	@echo "$(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)"
 	@echo "TODO: upload all CSS assets to S3"
 	@echo "$(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.LESS_CSS_TARGET_SUFFIX))"
 

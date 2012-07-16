@@ -39,7 +39,6 @@ class EntityProxyContainer(BasicSourceContainer):
 
     def buildEntity(self):
         entity              = Entity.buildEntity(kind=self.__proxy.kind)
-        # entity.entity_id    = 'T_%s_%s' % (self.__proxy.source.upper(), self.__proxy.key)
         entity.title        = self.__proxy.name
         entity.kind         = self.__proxy.kind 
         entity.types        = self.__proxy.types

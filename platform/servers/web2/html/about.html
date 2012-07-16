@@ -1,0 +1,162 @@
+{% extends "index.html" %}
+{% load stamped_tags %}
+
+<!-- CSS Dependencies => about.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+    
+    Core stamped dependencies:
+        stylesheet: about.less
+-->
+
+<!-- HTML Template Dependencies => about.generated.html
+     - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+{% block styles %}
+    {{ block.super }}
+    
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/about.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/about.css">
+    
+    <style>
+        {% for user in founders %}
+            {% custom_css "index" user %}
+        {% endfor %}
+        
+        {% for user in team %}
+            {% custom_css "index" user %}
+        {% endfor %}
+        
+        {% for user in advisors %}
+            {% custom_css "index" user %}
+        {% endfor %}
+    </style>
+{% endblock styles %}
+
+{% block main %}
+    <div id="main" class="main-content main-animating">
+        <div class="vertically-centered">
+            <div id="main-header" class="hidden-main-animating clearfix">
+                <div class="contact">
+                    <p>&nbsp;</p>
+                    <p class="desc">CONTACT US</p>
+                    
+                    <ul>
+                        <li><a href="mailto:press@stamped.com" class="screen-name">press</a></li>
+                        <li><a href="mailto:partners@stamped.com" class="screen-name">partners</a></li>
+                        <li><a href="http://help.stamped.com" class="screen-name">help</a></li>
+                        <li><a href="/jobs" class="screen-name">jobs</a></li>
+                    </ul>
+                </div>
+                
+                <div class="address">
+                    <p>Stamped Inc.</p>
+                    <p>126 Fifth Ave. Suite 10B</p>
+                    <p>New York, NY 10011</p>
+                </div>
+            </div>
+            
+            <div id="main-body" class="active-pane-0">
+                <a href="/" id="stamped-logo" class="replaced">Stamped</a>
+                
+                <div class="pane-body">
+                    <div class="ribbon-wrapper">
+                        <div class="ribbon-bottom"></div>
+                    </div>
+                    
+                    <div id="pane-wrapper">
+                        <div class="pane clearfix">
+                            <div class="lhs">
+                                <div class="title">
+                                    Our mission is to build a platform for friends to help each other discover the best parts of their world.
+                                </div>
+                                
+                                <a href="https://twitter.com/stampedapp" title="Follow @stampedapp on Twitter" class="social twitter"><div class="social-button social-button-twitter"></div> Follow us on Twitter</a>
+                            </div>
+                            
+                            <div class="rhs">
+                                <div class="jobs">JOBS</div>
+                                
+                                <div class="jobs-desc">
+                                    We're hiring! Check out our <a href="/jobs" class="screen-name">jobs page</a> for more info.
+                                </div>
+                                
+                                <div class="bg-images bg-image-active-0">
+                                    <div class="bg-image bg-image-0"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ribbon-wrapper ribbon-wrapper-bottom">
+                        <div class="ribbon-top"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="post-main hidden-main-animating clearfix">
+            <div class="post-main-section team">
+                <h1>THE TEAM</h1>
+                
+                {% for member in founders %}
+                    {% include "team-member.html" %}
+                {% endfor %}
+                
+                <div class="non-founders">
+                    {% for member in team %}
+                        {% include "team-member.html" %}
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="post-main-section investors">
+                <h1>INVESTORS</h1>
+                
+                <div class="investor investor-bain"></div>
+                <div class="investor investor-google"></div>
+            </div>
+            
+            <div class="post-main-section advisors">
+                <h1>ADVISORS</h1>
+                
+                {% for advisor in advisors %}
+                    <div class="advisor advisor-{{advisor.screen_name}}">
+                        <div class="pronounced-title">
+                            <a class="title" href="/{{advisor.screen_name}}">{{advisor.name}}
+                                <div class="user-logo-small tastemaker-logo tastemaker-logo-{{advisor.screen_name}}"></div>
+                            </a>
+                        </div>
+
+                        <div class="desc">{{advisor.desc|safe}}</div>
+                        
+                        <div class="links">
+                            <a href="/{{advisor.screen_name}}" title="@{{advisor.screen_name}} on Stamped" class="social stamped screen-name"><div class="social-button-stamped"></div> @{{advisor.screen_name}}</a>
+                            <a href="https://twitter.com/{{advisor.twitter}}" title="Follow @{{advisor.twitter}} on Twitter" class="social twitter"><div class="social-button social-button-twitter"></div> @{{advisor.twitter}}</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="post-main-section press">
+                <h1>AS FEATURED IN</h1>
+                
+                <div class="press-links clearfix">
+                    <a href="http://techcrunch.com/2011/11/21/stamped-approval/" class="press-link press-link-techcrunch"></a>
+                    <a href="http://blogs.wsj.com/digits/2011/11/22/new-ratings-app-takes-on-a-chef/" class="press-link press-link-wsj"></a>
+                    <a href="http://daringfireball.net/linked/2011/11/21/stamped" class="press-link press-link-daringfireball"></a>
+                    <a href="http://mashable.com/2011/11/25/stamped-iphone-recommendation-app/" class="press-link press-link-mashable"></a>
+                    <a href="http://gigaom.com/2011/11/21/stamped-recommendation-app/" class="press-link press-link-gigaom"></a>
+                </div>
+            </div>
+            
+            <div class="made-in-nyc-logo"></div>
+        </div>
+        
+        <div class="post-main-overlay"></div>
+    </div>
+{% endblock main %}
+
