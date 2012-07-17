@@ -12,9 +12,11 @@ from tests.framework.FixtureTest  import fixtureTest
 from tests.search.SearchTestsRunner import SearchTestCase, SearchTestsRunner, main
 from tests.search.SearchResultMatcher import *
 from tests.search.SearchResultsScorer import *
+from libs.applerss          import AppleRSS
+
 
 def makeTestCase(query, *expected_results):
-    return AppTestCase('app', query, *expected_results)
+    return SearchTestCase('app', query, *expected_results)
 
 Matcher = AppResultMatcher
 
@@ -31,7 +33,7 @@ class AppSearchTests(SearchTestsRunner):
             makeTestCase('doodle jump', Matcher(title=Equals('doodle jump'))), # 307727765
             makeTestCase('tiny wings', Matcher(title=Equals('tiny wings'))), # 417817520
             makeTestCase('flipboard', Matcher(title=StartsWith('flipboard'))), # 358801284
-            makeTestCase('facebook app', Matcher(title=StartsWith('facebook'))), # 284882215
+            makeTestCase('facebook app', Matcher(title=StartsWith('facebook'), unique=False)), # 284882215
             makeTestCase('facebook', Matcher(title=Equals('facebook'))), # 284882215
             makeTestCase('temple run', Matcher(title=Equals('temple run'))), # 420009108
             makeTestCase('pandora', Matcher(title=Equals('pandora radio'))) # 284035177
