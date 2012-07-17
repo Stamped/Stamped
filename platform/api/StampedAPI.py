@@ -3761,6 +3761,9 @@ class StampedAPI(AStampedAPI):
         # Results
         result = []
         for entityId in rankedEntityIds:
+            if entityId not in entityIds:
+                logs.warning("Missing entityId: %s" % entityId)
+                continue
             entity = entityIds[entityId]
             if entityId in entityStampPreviews:
                 previews = Previews()

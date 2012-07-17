@@ -72,6 +72,30 @@ def handlePOST(path, data, handleExceptions=True):
     
     return result
 
+coordinates = [
+    (42.667, 73.75), (35.083, 106.65), (35.183, 101.83), (61.21667, 149.9), (33.75, 84.383), (30.267, 97.733), 
+    (44.783, 117.83), (39.3, 76.633), (44.8, 68.783), (33.5, 86.833), (46.8, 100.7833), (43.6, 116.2167), 
+    (42.35, 71.083), (42.91667, 78.833), (51.01667, 114.0167), (32.433, 104.25), (32.783, 79.933), (38.35, 81.633), 
+    (35.233, 80.833), (41.15, 104.8667), (41.833, 87.61667), (39.133, 84.5), (41.467, 81.61667), (34, 81.033), 
+    (40, 83.01667), (32.767, 96.767), (39.75, 105), (41.583, 93.61667), (42.3, 83.05), (42.51667, 90.667), 
+    (46.81667, 92.083), (44.9, 67), (53.567, 113.4667), (32.633, 115.55), (31.767, 106.4833), (44.05, 123.0833), 
+    (46.867, 96.8), (35.21667, 111.6833), (32.71667, 97.31667), (36.733, 119.8), (39.083, 108.55), (42.967, 85.667), 
+    (48.55, 109.7167), (46.583, 112.03), (21.3, 157.83), (34.51667, 93.05), (29.75, 95.35), (43.5, 112.0167), 
+    (39.767, 86.167), (32.3, 90.2), (30.367, 81.667), (58.3, 134.4), (39.1, 94.583), (24.55, 81.8), 
+    (44.25, 76.5), (42.167, 121.73), (35.95, 83.933), (36.167, 115.2), (46.4, 117.03), (40.833, 96.667), 
+    (43.033, 81.567), (33.767, 118.1833), (34.05, 118.25), (38.25, 85.767), (43, 71.5), (35.15, 90.05), 
+    (25.767, 80.2), (43.033, 87.91667), (44.983, 93.233), (30.7, 88.05), (32.35, 86.3), (44.25, 72.533), 
+    (45.5, 73.583), (50.61667, 105.5167), (36.167, 86.783), (49.5, 117.2833), (40.733, 74.167), (41.31667, 72.91667), 
+    (29.95, 90.067), (40.783, 73.967), (64.41667, 165.5), (37.8, 122.2667), (35.433, 97.467), (41.25, 95.933), 
+    (45.4, 75.71667), (39.95, 75.167), (33.483, 112.0667), (44.367, 100.35), (40.45, 79.95), (43.667, 70.25), 
+    (45.51667, 122.6833), (41.833, 71.4), (46.81667, 71.183), (35.767, 78.65), (39.5, 119.8167), (38.767, 112.0833), 
+    (37.55, 77.483), (37.283, 79.95), (38.583, 121.5), (45.3, 66.167), (38.583, 90.2), (40.767, 111.9), 
+    (29.383, 98.55), (32.7, 117.1667), (37.783, 122.43), (37.3, 121.8833), (18.5, 66.167), (35.683, 105.95), 
+    (32.083, 81.083), (47.61667, 122.33), (32.467, 93.7), (43.55, 96.733), (57.167, 135.25), (47.667, 117.43), 
+    (39.8, 89.633), (42.1, 72.567), (37.21667, 93.283), (43.033, 76.133), (27.95, 82.45), (41.65, 83.55), 
+    (43.667, 79.4), (36.15, 95.983), (49.21667, 123.1), (48.41667, 123.35), (36.85, 75.967), (38.883, 77.033), 
+    (37.71667, 97.283), (34.233, 77.95), (49.9, 97.11667), 
+]
 
 """
 
@@ -771,6 +795,9 @@ class StampDetail(View):
         self.setAction('profile', self._viewProfile)
         self.setWeight('profile', 20)
 
+        self.setAction('entity', self._viewEntity)
+        self.setWeight('entity', 20)
+
         self.setAction('credit', self._viewCredit)
         self.setWeight('credit', 2)
 
@@ -795,6 +822,12 @@ class StampDetail(View):
         time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
         self.setWeight('profile', 0)
         self.addToStack(Profile, kwargs={'userId': self.stamp['user']['user_id']})
+
+    # View entity details
+    def _viewEntity(self):
+        time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+        self.setWeight('entity', 0)
+        self.addToStack(EntityDetail, kwargs={'entity': self.entity})
 
     def _viewCredit(self):
         if 'previews' in self.stamp and self.stamp['previews'] is not None:
@@ -859,6 +892,252 @@ class Profile(View):
             self.setWeight('page', 0)
 
 
+class EntityDetail(View):
+
+    def __init__(self, user, entity=None, entityId=None, alsoStampedBy=None):
+        View.__init__(self, user)
+    
+        self.entity = entity
+        self.entityId = entityId
+        self.alsoStampedBy = alsoStampedBy
+
+        self.setAction('back', self._back)
+        self.setWeight('back', 20)
+
+        self.setAction('also', self._viewAlsoStampedBy)
+        self.setWeight('also', 10)
+
+
+    def load(self):
+        if self.entity is None:
+            self.entity = _get_entities_show(self.entityId, token=self.user.token)
+
+        self.entityId = self.entity['entity_id']
+
+        if self.alsoStampedBy is None:
+            self.alsoStampedBy = _get_entities_stamped_by(self.entityId, token=self.user.token)
+
+    """
+    Define possible actions the user can take, including wait time
+    """
+    
+    def _viewAlsoStampedBy(self):
+        if 'friends' in self.alsoStampedBy and 'stamps' in self.alsoStampedBy['friends']:
+            stamps = self.alsoStampedBy['friends']['stamps']
+            if len(stamps) > 0:
+                time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+                self.addToStack(StampDetail, kwargs={'stampId': random.choice(stamps)['stamp_id']})
+                return
+
+        if 'all' in self.alsoStampedBy and 'stamps' in self.alsoStampedBy['all']:
+            stamps = self.alsoStampedBy['all']['stamps']
+            if len(stamps) > 0:
+                time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+                self.addToStack(StampDetail, kwargs={'stampId': random.choice(stamps)['stamp_id']})
+                return
+
+        self.setWeight('also', 0)
+
+
+class GuideMenu(View):
+
+    def __init__(self, user):
+        View.__init__(self, user)
+
+        self.setAction('back', self._back)
+        self.setWeight('back', 20)
+
+        self.setAction('food', self._viewFood)
+        self.setWeight('food', 50)
+
+        self.setAction('music', self._viewMusic)
+        self.setWeight('music', 30)
+
+        self.setAction('book', self._viewBook)
+        self.setWeight('book', 30)
+
+        self.setAction('film', self._viewFilm)
+        self.setWeight('film', 30)
+
+        self.setAction('app', self._viewApp)
+        self.setWeight('app', 30)
+
+    def load(self):
+        pass
+
+    def _viewMusic(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        self.addToStack(GuideList, kwargs={'section': 'music'})
+
+    def _viewBook(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        self.addToStack(GuideList, kwargs={'section': 'book'})
+
+    def _viewFilm(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        self.addToStack(GuideList, kwargs={'section': 'film'})
+
+    def _viewApp(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        self.addToStack(GuideList, kwargs={'section': 'app'})
+
+    def _viewFood(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        self.addToStack(GuideMap, kwargs={'section': 'food'})
+
+
+
+
+class GuideList(View):
+
+    def __init__(self, user, section, scope='popular'):
+        View.__init__(self, user)
+
+        self.section = section
+        self.scope = scope
+        self.entities = []
+        self.stampIds = set()
+        self.offset = 0
+
+        self.setAction('back', self._back)
+        self.setWeight('back', 20)
+
+        self.setAction('entity', self._viewEntity)
+        self.setWeight('entity', 45)
+
+        self.setAction('page', self._page)
+        self.setWeight('page', 10)
+
+    def load(self):
+        self.loadEntities()
+        self.loadEntities()
+
+    def loadEntities(self):
+        entities = _get_guide_collection(section=self.section, scope=self.scope, 
+                                            offset=self.offset, token=self.user.token)
+        for entity in entities:
+            if 'previews' in entity and 'stamps' in entity['previews']:
+                stamps = entity['previews']['stamps']
+                if stamps is not None and len(stamps) > 0:
+                    self.stampIds.union(set(map(lambda x: x['stamp_id'], stamps)))
+        self.offset += 20
+        self.entities += entities
+
+    # View stamp detail
+    def _viewStamp(self):
+        if len(self.stampIds) > 0:
+            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
+            self.addToStack(StampDetail, kwargs={'stampId': random.choice(self.stampIds)})
+        else:
+            self.setWeight('stamp', 0)
+            self.setWeight('entity', 0)
+
+    # View entity details
+    def _viewEntity(self):
+        if len(self.entities) > 0:
+            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
+            self.addToStack(EntityDetail, kwargs={'entity': random.choice(self.entities)})
+        else:
+            self.setWeight('stamp', 0)
+            self.setWeight('entity', 0)
+
+    # Load more entities
+    def _page(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        numEntities = len(self.entities)
+        self.loadEntities()
+        if numEntities == len(self.entities):
+            # Nothing loaded!
+            self.setWeight('page', 0)
+
+
+class GuideMap(View):
+
+    def __init__(self, user, section, scope='popular'):
+        View.__init__(self, user)
+
+        self.section = section
+        self.scope = scope
+        self.entities = []
+        self.stampIds = set()
+        self.viewport = None
+
+        self.setAction('back', self._back)
+        self.setWeight('back', 20)
+
+        self.setAction('entity', self._viewEntity)
+        self.setWeight('entity', 45)
+
+        self.setAction('pan', self._pan)
+        self.setWeight('pan', 40)
+
+        self.setAction('zoom', self._zoom)
+        self.setWeight('zoom', 40)
+
+    def load(self):
+        self.setViewport()
+        self.loadEntities()
+
+    def setViewport(self):
+        coordinate = random.choice(coordinates)
+        zoom = random.uniform(0, 0.1)
+        self.viewport = (coordinate[0]-zoom, coordinate[1]-zoom, coordinate[0]+zoom, coordinate[1]+zoom)
+
+    def loadEntities(self):
+        viewport = ','.join(map(lambda x: str(x), self.viewport))
+        entities = _get_guide_collection(section=self.section, scope=self.scope, viewport=viewport, 
+                                            token=self.user.token, limit=50)
+        for entity in entities:
+            if 'previews' in entity and 'stamps' in entity['previews']:
+                stamps = entity['previews']['stamps']
+                if stamps is not None and len(stamps) > 0:
+                    self.stampIds.union(set(map(lambda x: x['stamp_id'], stamps)))
+        self.entities = entities
+
+    # View stamp detail
+    def _viewStamp(self):
+        if len(self.stampIds) > 0:
+            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
+            self.addToStack(StampDetail, kwargs={'stampId': random.choice(self.stampIds)})
+        else:
+            self.setWeight('stamp', 0)
+            self.setWeight('entity', 0)
+
+    # View entity details
+    def _viewEntity(self):
+        if len(self.entities) > 0:
+            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
+            self.addToStack(EntityDetail, kwargs={'entity': random.choice(self.entities)})
+        else:
+            self.setWeight('stamp', 0)
+            self.setWeight('entity', 0)
+
+    # Pan over the map
+    def _pan(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        v = random.uniform(-0.1, 0.1)
+        self.viewport = (
+            self.viewport[0] + v,
+            self.viewport[1] + v,
+            self.viewport[2] + v,
+            self.viewport[3] + v,
+        )
+        self.loadEntities()
+
+    # Zoom in / out of the map
+    def _zoom(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        latDiff = self.viewport[2] - self.viewport[0]
+        lngDiff = self.viewport[3] - self.viewport[1]
+        v = random.uniform(-0.9, 0.9)
+        self.viewport = (
+            self.viewport[0] - (latDiff * v),
+            self.viewport[1] - (lngDiff * v),
+            self.viewport[2] + (latDiff * v),
+            self.viewport[3] + (latDiff * v),
+        )
+        self.loadEntities()
+
 
 
 
@@ -873,6 +1152,29 @@ class User(object):
 
         self.stack = []
 
+        self.__weights = {}
+        self.__actions = {}
+
+    @property 
+    def weights(self):
+        return self.__weights
+
+    @property 
+    def actions(self):
+        return self.__actions
+
+    def setWeight(self, key, value):
+        self.__weights[key] = value
+
+    def getWeight(self, key):
+        return self.__weights[key]
+
+    def setAction(self, key, value):
+        self.__actions[key] = value
+
+    def getAction(self, key):
+        return self.__actions[key]
+
     def addToStack(self, obj, args=None, kwargs=None):
         if args is None:
             args = []
@@ -884,7 +1186,31 @@ class User(object):
 
     # Start and root defined in subclasses
     def run(self):
-        raise NotImplementedError
+        logs.debug("Running %s" % self.__class__.__name__)
+
+        self.expiration = datetime.datetime.utcnow() + datetime.timedelta(seconds=self._userSessionLength)
+        logs.debug("Expiration: %s" % self.expiration)
+
+        while datetime.datetime.utcnow() < self.expiration:
+            logs.info("BEGIN: %s" % self.__class__.__name__)
+            try:
+
+                totalWeight = sum(v for k, v in self.weights.items())
+                cumulativeWeight = 0
+                r = random.randint(0, totalWeight)
+
+                for key, weight in self.weights.items():
+                    if r < weight:
+                        break
+                    r -= weight
+                logs.debug("CHOSE ACTION: %s" % (key))
+                self.actions[key]()
+
+            except (DoneException, RootException):
+                time.sleep(3)
+
+            logs.info("DONE: %s" % (self.__class__.__name__))
+            print
 
 
 # Class representing users who do not log in or create an account throughout their session
@@ -895,42 +1221,22 @@ class LoggedOutUser(User):
         self._userWaitSpeed = 0
         self._userSessionLength = 10 #200 + (random.random() * 200)
         
-    def run(self):
-        logs.debug("Begin: %s" % self)
+        self.setAction('inbox', self._viewInbox)
+        self.setWeight('inbox', 10)
+        
+        self.setAction('guide', self._viewGuide)
+        self.setWeight('guide', 30)
 
-        self.expiration = datetime.datetime.utcnow() + datetime.timedelta(seconds=self._userSessionLength)
-        logs.debug("Expiration: %s" % self.expiration)
 
-
+    # View stamp
+    def _viewInbox(self):
+        time.sleep(random.randint(4, 12) * self._userWaitSpeed)
         self.addToStack(TastemakerInbox)
 
-
-
-        # """
-        # Define possible actions the user can take, including wait time
-        # """
-        # actions = {}
-        # weights = {}
-
-        # # View the user's profile
-        # def _viewInbox():
-        #     return self.viewTastemakerInbox()
-
-        # actions['inbox'] = _viewInbox
-        # weights['inbox'] = 20
-
-        # assert len(actions) == len(weights)
-
-        # """
-        # Run the actions
-        # """
-        # while datetime.datetime.utcnow() < self.expiration:
-        #     try:
-        #         return self._runAction(actions, weights)
-        #     except RootException:
-        #         continue
-
-
+    # View guide
+    def _viewGuide(self):
+        time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+        self.addToStack(GuideMenu)
 
 
 
