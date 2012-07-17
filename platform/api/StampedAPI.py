@@ -673,38 +673,41 @@ class StampedAPI(AStampedAPI):
         logs.info('### test: %s' %
                   ('color_primary' in fields and account.color_primary != fields['color_primary']) or\
                   ('color_secondary' in fields and account.color_secondary != fields['color_secondary']))
+        try:
+            if 'name' in fields and account.name != fields['name'] and fields['name'] is not None:
+                if fields['name'] is None:
+                    raise StampedUnsetRequiredFieldError("Cannot unset name")
+                account.name = fields['name']
+            if 'phone' in fields and account.phone != fields['phone']:
+                account.phone = fields['phone']
 
-        if 'name' in fields and account.name != fields['name'] and fields['name'] is not None:
-            if fields['name'] is None:
-                raise StampedUnsetRequiredFieldError("Cannot unset name")
-            account.name = fields['name']
-        if 'phone' in fields and account.phone != fields['phone']:
-            account.phone = fields['phone']
-
-        if 'bio' in fields and account.bio != fields['bio']:
-            account.bio = fields['bio']
-        if 'website' in fields and account.website != fields['website']:
-            url = SchemaValidation.validateURL(fields['website'])
-            account.website = url
-        if 'location' in fields and account.location != fields['location']:
-            account.location = fields['location']
-        if 'color_primary' in fields and account.color_primary != fields['color_primary']:
-            account.color_primary = fields['color_primary']
-        if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
-            account.color_secondary = fields['color_secondary']
-        if ('color_primary' in fields and account.color_primary != fields['color_primary']) or \
-           ('color_secondary' in fields and account.color_secondary != fields['color_secondary']):
-            # Asynchronously generate stamp image
-            logs.info('about to update stamp colors')
-            color_primary = fields.get('color_primary', account.color_primary)
-            color_secondary = fields.get('color_secondary', account.color_secondary)
-            logs.info('updating stamp color: %s, %s' % (color_primary, color_secondary))
-            tasks.invoke(tasks.APITasks.customizeStamp, args=[color_primary, color_secondary])
-        if 'temp_image_url' in fields:
-            image_cache_timestamp = datetime.utcnow()
-            account.timestamp.image_cache = image_cache_timestamp
-            self._accountDB.updateUserTimestamp(account.user_id, 'image_cache', image_cache_timestamp)
-            tasks.invoke(tasks.APITasks.updateProfileImage, args=[account.screen_name, fields['temp_image_url']])
+            if 'bio' in fields and account.bio != fields['bio']:
+                account.bio = fields['bio']
+            if 'website' in fields and account.website != fields['website']:
+                url = SchemaValidation.validateURL(fields['website'])
+                account.website = url
+            if 'location' in fields and account.location != fields['location']:
+                account.location = fields['location']
+            if 'color_primary' in fields and account.color_primary != fields['color_primary']:
+                account.color_primary = fields['color_primary']
+            if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
+                account.color_secondary = fields['color_secondary']
+            if ('color_primary' in fields and account.color_primary != fields['color_primary']) or \
+               ('color_secondary' in fields and account.color_secondary != fields['color_secondary']):
+                # Asynchronously generate stamp image
+                logs.info('about to update stamp colors')
+                color_primary = fields.get('color_primary', account.color_primary)
+                color_secondary = fields.get('color_secondary', account.color_secondary)
+                logs.info('updating stamp color: %s, %s' % (color_primary, color_secondary))
+                tasks.invoke(tasks.APITasks.customizeStamp, args=[color_primary, color_secondary])
+            if 'temp_image_url' in fields:
+                image_cache_timestamp = datetime.utcnow()
+                account.timestamp.image_cache = image_cache_timestamp
+                self._accountDB.updateUserTimestamp(account.user_id, 'image_cache', image_cache_timestamp)
+                tasks.invoke(tasks.APITasks.updateProfileImage, args=[account.screen_name, fields['temp_image_url']])
+        except Exception as e:
+            print('### exception %s' % e)
+            raise
 
         return self._accountDB.updateAccount(account)
 
