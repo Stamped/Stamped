@@ -8,124 +8,86 @@ __license__   = "TODO"
 import Globals, utils
 
 from tests.StampedTestUtils       import *
-from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
-from libs.Fandango          import Fandango
+from tests.framework.FixtureTest  import fixtureTest
+from tests.search.SearchTestsRunner import SearchTestCase, SearchTestsRunner, main
+from tests.search.SearchResultMatcher import *
+from tests.search.SearchResultsScorer import *
 
-class MovieSearchTests(ASearchTestSuite):
+Matcher = MovieResultMatcher
+
+def makeTestCase(query, *expected_results):
+    return SearchTestCase('film', query, *expected_results)
+
+def makeSimpleTestCase(query):
+    return makeTestCase(query, Matcher(title=Equals(query)))
+
+
+class MovieSearchTests(SearchTestsRunner):
     
     def test_basic(self):
-        tests = [
-            ({ 'query' : 'teenage mutant ninja turtles', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='teenage mutant ninja turtles', 
-                                       types='movie', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'teenage mutant ninja turtles II', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='teenage mutant ninja turtles II', 
-                                       types='movie', 
-                                       match='prefix'), 
-            ]), 
-            ({ 'query' : 'teenage mutant ninja turtles III', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='teenage mutant ninja turtles III', 
-                                       types='movie', 
-                                       match='prefix'), 
-            ]), 
-            ({ 'query' : 'the godfather', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='the godfather', 
-                                       types='movie', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'godfather', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='the godfather', 
-                                       types='movie'), 
-            ]), 
-            ({ 'query' : 'the hunger games', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='the hunger games', 
-                                       types='movie', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'hunger games', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='the hunger games', 
-                                       types='movie', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'drive', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='drive', 
-                                       types='movie', 
-                                       # imdb_id='tt0780504', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'drive (2011)', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='drive', 
-                                       types='movie', 
-                                       # imdb_id='tt0780504', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'inception', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='inception', 
-                                       types='movie', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'die hard', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='die hard', 
-                                       types='movie', 
-                                       # imdb_id='tt0095016', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'the fifth element', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='the fifth element', 
-                                       types='movie', 
-                                       # imdb_id='tt0119116', 
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'raiders of the lost ark', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='raiders of the lost ark', 
-                                       types='movie', 
-                                       # imdb_id='tt0082971', 
-                                       match='contains',
-                                       index=0), 
-            ]), 
-            ({ 'query' : 'tomorrow never dies', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='tomorrow never dies', 
-                                       types='movie', 
-                                       # imdb_id='tt0120347', 
-                                       index=0), 
-            ]), 
-        ]
-        
-        self._run_tests(tests, {})
+        test_cases = (
+            makeSimpleTestCase('teenage mutant ninja turtles'),
+            makeSimpleTestCase('teenage mutant ninja turtles II'),
+            makeSimpleTestCase('teenage mutant ninja turtles III'),
+            # TODO make this ordering-agnostic
+            makeTestCase('the godfather',
+                Matcher(title=Equals('the godfather')),
+                Matcher(title=LooselyEquals('the godfather part ii')),
+                Matcher(title=LooselyEquals('the godfather part iii'))),
+            # TODO make this ordering-agnostic
+            makeTestCase('godfather',
+                Matcher(title=Equals('the godfather')),
+                Matcher(title=LooselyEquals('the godfather part ii')),
+                Matcher(title=LooselyEquals('the godfather part iii'))),
+            makeSimpleTestCase('the hunger games'),
+            makeTestCase('hunger games', Matcher(title=Equals('the hunger games'))),
+            makeSimpleTestCase('drive'),
+            # TODO: test that drive 2011 gets the right version of 'drive'
+            # TODO: ugh, that movie sucked a lot of balls
+            makeSimpleTestCase('inception'),
+            makeTestCase('die hard',
+                Matcher(title=Equals('die hard')),
+                Matcher(title=Equals('live free or die hard')),
+                Matcher(title=Equals('die hard 2')),
+                Matcher(title=LooselyEquals('die hard: with a vengeance'))),
+            makeSimpleTestCase('the fifth element'),
+            makeSimpleTestCase('raiders of the lost ark'),
+            makeSimpleTestCase('tomorrow never dies'),
+            # TODO make this ordering-agnostic
+            makeTestCase('indiana jones',
+                Matcher(title=Equals('raiders of the lost ark')),
+                Matcher(title=Equals('indiana jones and the last crusade')),
+                Matcher(title=Equals('indiana jones and the temple of doom')),
+                Matcher(title=Equals('indiana jones and the kingdom of the crystal skull'))),
+            # The rest of them were garbage and I don't give a fuck if Attack of the Clones comes before Phantom Menace
+            # or whatever, but when people say Star Wars, these are the movies they mean.
+            makeTestCase('star wars',
+                Matcher(title=LooselyEquals('star wars episode iv a new hope')),
+                Matcher(title=LooselyEquals('star wars episode v the empire strikes back')),
+                Matcher(title=LooselyEquals('star wars episode vi return of the jedi'))),
+        )
+
+        self._run_tests('basic_film', test_cases)
     
     def test_fuzzy(self):
-        tests = [
-            ({ 'query' : 'futurama movie', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='futurama: bender\'s game', 
-                                       types='movie'), 
-                SearchResultConstraint(title='futurama: into the wild green yonder', 
-                                       types='movie'), 
-                SearchResultConstraint(title='futurama: the beast with a billion backs', 
-                                       types='movie'), 
-            ]), 
-            ({ 'query' : 'mission impossible ghost protocol', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='mission: impossible - ghost protocol', 
-                                       types='movie', 
-                                       index=0), 
-            ]), 
-        ]
-        
-        self._run_tests(tests, {})
+        test_cases = (
+            # TODO make this ordering-agnostic
+            makeTestCase('futurama movie',
+                Matcher(title=LooselyEquals('futurama: bender\'s game')),
+                Matcher(title=LooselyEquals('futurama: into the wild green yonder')),
+                Matcher(title=LooselyEquals('futurama: the beast with a billion backs'))),
+            makeTestCase('mission impossible ghost', Matcher(title=Contains('ghost protocol')))
+        )
+
+        self._run_tests('fuzzy_film', test_cases)
     
     def test_international(self):
-        tests = [
-            ({ 'query' : 'Le ragazze di Piazza di Spagna', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='Le ragazze di Piazza di Spagna', 
-                                       types='movie', 
-                                       index=0), 
-            ]), 
-            
-            # TODO: add more international movie coverage
-        ]
-        
-        self._run_tests(tests, {})
+        # TODO: add more international movie coverage
+        test_cases = (
+            makeTestCase('ragazze di piazza', Matcher(title=Equals('le ragazze di piazza di spagna'))),
+        )
+
+        self._run_tests('i18n_film', test_cases)
     
     def test_top_box_office(self):
         fandango = Fandango(verbose=True)
@@ -152,18 +114,14 @@ class MovieSearchTests(ASearchTestSuite):
         return self.__test_movie_search(movies)
     """
     
-    def __test_movie_search(self, movies, **extra_constraint_args):
-        tests = []
+    def __test_movie_search(self, test_name, movies):
+        test_cases = []
         
         for movie in movies:
-            tests.append( ({ 'query' : movie.title, 'category' : 'film', }, [ 
-                SearchResultConstraint(title=movie.title, 
-                                       types='movie', 
-                                       **extra_constraint_args), 
-            ]))
-        
-        self._run_tests(tests, {})
+            test_cases.append(makeSimpleTestCase(movie.title))
+
+        self._run_tests(test_name, test_cases)
 
 if __name__ == '__main__':
-    StampedTestRunner().run()
+    main()
 

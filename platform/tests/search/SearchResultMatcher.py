@@ -43,7 +43,7 @@ class StartsWith(StringMatcher):
 
     def matches(self, string):
         # TODO: Check for word boundaries around prefix.
-        return string.lower().startswith(prefix)
+        return string.lower().startswith(self.__prefix)
 
     def __repr__(self):
         return 'StartsWith(%s)' % repr(self.__prefix)
@@ -54,7 +54,6 @@ class Equals(StringMatcher):
         self.__string = string.lower()
 
     def matches(self, string):
-        print '\nCOMPARING %s TO %s\n' % (repr(self.__string), repr(string.lower()))
         return self.__string == string.lower()
 
     def __repr__(self):
@@ -88,7 +87,7 @@ class SearchResultMatcher(object):
     def __init__(self, kind, _type,
                  title = None,
                  expected_sources = None,
-                 all_components_must_match = False,
+                 consistent = True,
                  unique = True):
         if not isinstance(title, StringMatcher):
             raise Exception('title param to SearchResultMatcher must be a StringMatcher!')
@@ -96,7 +95,7 @@ class SearchResultMatcher(object):
         self.__type = _type
         self._title = title
         self.__expected_sources = expected_sources
-        self.__all_components_must_match = all_components_must_match
+        self.__all_components_must_match = consistent
         self.__must_be_unique = unique
 
     @property
@@ -113,10 +112,8 @@ class SearchResultMatcher(object):
 
     def matches(self, proxy):
         if self.__type and self.__type not in proxy.types:
-            print '\nDISQUALIFYING FOR TYPE: %s not in %s\n' % (repr(self.__type), repr(proxy.types))
             return False
         if self.__kind and self.__kind != proxy.kind:
-            print '\nDISQUALIFYING FOR KIND: %s != %s\n' % (repr(self.__kind), repr(proxy.kind))
             return False
         return self._title.matches(proxy.name)
 
@@ -149,7 +146,7 @@ class ArtistResultMatcher(SearchResultMatcher):
 class AlbumResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
         self.__artist = kwargs.pop('artist', None)
-        if not isinstance(self.__artist, StringMatcher):
+        if self.__artist is not None and not isinstance(self.__artist, StringMatcher):
             raise Exception('artist param to AlbumSearchResultMatcher must be a StringMatcher!')
         super(AlbumResultMatcher, self).__init__(None, 'album', **kwargs)
 
@@ -158,9 +155,11 @@ class AlbumResultMatcher(SearchResultMatcher):
         return set(['itunes', 'rdio', 'spotify', 'amazon'])
 
     def matches(self, proxy):
-        return (self.type in proxy.types and
-                self._title.matches(proxy.name) and
-                proxy.artists and len(proxy.artists) == 1 and self.__artist.matches(proxy.artists[0]['name']))
+        if not super(AlbumResultMatcher, self).matches(proxy):
+            return False
+        if self.__artist is None:
+            return True
+        return proxy.artists and len(proxy.artists) == 1 and self.__artist.matches(proxy.artists[0]['name'])
 
     def repr_proxy(self, proxy):
         return '(title=%s, artists=[%s], key=%s:%s)' % (
@@ -176,7 +175,7 @@ class AlbumResultMatcher(SearchResultMatcher):
 class TrackResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
         self.__artist = kwargs.pop('artist', None)
-        if not isinstance(self.__artist, StringMatcher):
+        if self.__artist is not None and not isinstance(self.__artist, StringMatcher):
             raise Exception('artist param to TrackSearchResultMatcher must be a StringMatcher!')
         super(TrackResultMatcher, self).__init__(None, 'track', **kwargs)
 
@@ -185,9 +184,11 @@ class TrackResultMatcher(SearchResultMatcher):
         return set(['itunes', 'rdio', 'spotify', 'amazon'])
 
     def matches(self, proxy):
-        return (self.type in proxy.types and
-                self._title.matches(proxy.name) and
-                proxy.artists and len(proxy.artists) == 1 and self.__artist.matches(proxy.artists[0]['name']))
+        if not super(TrackResultMatcher, self).matches(proxy):
+            return False
+        if self.__artist is None:
+            return True
+        return proxy.artists and len(proxy.artists) == 1 and self.__artist.matches(proxy.artists[0]['name'])
 
     def repr_proxy(self, proxy):
         return '(title=%s, artists=[%s], key=%s:%s)' % (
@@ -221,14 +222,16 @@ class TvResultMatcher(SearchResultMatcher):
 class BookResultMatcher(SearchResultMatcher):
     def __init__(self, **kwargs):
         self.__author = kwargs.pop('author', None)
-        if not isinstance(self.__author, StringMatcher):
+        if self.__author is not None and not isinstance(self.__author, StringMatcher):
             raise Exception('author param to AlbumSearchResultMatcher must be a StringMatcher!')
         super(BookResultMatcher, self).__init__(None, 'book', **kwargs)
 
     def matches(self, proxy):
-        return (self.type in proxy.types and
-                self._title.matches(proxy.name) and
-                proxy.authors and len(proxy.authors) == 1 and self.__author.matches(proxy.authors[0]['name']))
+        if not super(BookResultMatcher, self).matches(proxy):
+            return False
+        if self.__author is None:
+            return True
+        return proxy.authors and len(proxy.authors) == 1 and self.__author.matches(proxy.authors[0]['name'])
 
     @property
     def all_sources(self):

@@ -10,6 +10,8 @@ import os, sys, re, functools
 from gevent.pool import Pool
 from search import EntitySearch
 from tests.search.SearchResultsScorer import ExpectedResults, SearchResultsScorer
+from tests.StampedTestUtils       import *
+from tests.framework import FixtureTest
 
 class SearchTestCase(object):
     def __init__(self, category, query, *result_matchers):
@@ -84,7 +86,7 @@ class TestResultsFile(object):
 
 record_results = False
 
-class SearchTestsRunner(object):
+class SearchTestsRunner(AStampedTestCase):
     def _run_tests(self, test_set_name, test_cases):
         EntitySearch.shouldLogTiming = False
 
@@ -133,3 +135,14 @@ class SearchTestsRunner(object):
                     len(errors),
                     '\n'.join('    ' + error for error in errors)
                 )
+
+def main():
+    argv = sys.argv
+
+    record_results_flag = '--record_results'
+    if record_results_flag in argv:
+        del argv[argv.index(record_results_flag)]
+        global record_results
+        record_results = True
+
+    FixtureTest.main()

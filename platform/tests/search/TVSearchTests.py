@@ -8,122 +8,77 @@ __license__   = "TODO"
 import Globals, utils
 
 from tests.StampedTestUtils       import *
-from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
+from tests.framework.FixtureTest  import fixtureTest
+from tests.search.SearchTestsRunner import SearchTestCase, SearchTestsRunner, main
+from tests.search.SearchResultMatcher import *
+from tests.search.SearchResultsScorer import *
 
-class TVSearchTests(ASearchTestSuite):
+Matcher = TvResultMatcher
+
+def makeTestCase(query, *expected_results):
+    return SearchTestCase('film', query, *expected_results)
+
+def makeSimpleTestCase(title):
+    return makeTestCase(title, Matcher(title=Equals(title)))
+
+class TVSearchTests(SearchTestsRunner):
     
     def test_basic(self):
         """ Test basic tv searches """
 
-        tests = [
-            ({ 'query' : 'game of thrones', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='game of thrones', types='tv'), 
-            ]), 
-            ({ 'query' : 'dexter', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='dexter', types='tv'), 
-            ]), 
-            ({ 'query' : 'family guy', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='family guy', types='tv'), 
-            ]), 
-            ({ 'query' : 'american idol', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='american idol', types='tv'), 
-            ]), 
-            ({ 'query' : 'spongebob squarepants', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='spongebob squarepants', types='tv'), 
-            ]), 
-            ({ 'query' : 'spongebob', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='spongebob squarepants', types='tv'), 
-            ]), 
-            ({ 'query' : 'trailer park boys', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='trailer park boys', types='tv'), 
-                SearchResultConstraint(title='trailer park boys', types='movie'), 
-            ]), 
-            ({ 'query' : 'new girl', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='new girl', types='tv'), 
-            ]), 
-            ({ 'query' : 'up all night', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='up all night', types='tv'), 
-            ]), 
-            ({ 'query' : 'breaking bad', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='breaking bad', types='tv'), 
-            ]), 
-            ({ 'query' : 'LOST', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='LOST', types='tv'), 
-            ]), 
-            ({ 'query' : 'the sopranos', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='the sopranos', types='tv'), 
-            ]), 
-            ({ 'query' : 'the simpsons', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='the simpsons', types='tv'), 
-            ]), 
-            ({ 'query' : 'south park', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='south park', types='tv'), 
-            ]), 
-            ({ 'query' : 'saturday night live', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='saturday night live', types='tv'), 
-            ]), 
-            ({ 'query' : 'dark angel', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='dark angel', types='tv'), 
-            ]), 
-            ({ 'query' : 'misfits', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='misfits', types='tv'), 
-            ]), 
-            ({ 'query' : 'arrested development', 'category' : 'film', }, [ 
-                SearchResultConstraint(title='arrested development', types='tv'), 
-            ]), 
-            ({ 'query' : 'big bang theory', 'category' : 'film', }, [
-                SearchResultConstraint(title='the big bang theory', types='tv'), 
-            ]), 
-            ({ 'query' : 'how i met your mother', 'category' : 'film', }, [
-                SearchResultConstraint(title='how i met your mother', types='tv'), 
-            ]), 
-            # TODO (travis): fails because of invalid location hint
-            #({ 'query' : 'it\'s always sunny in philadelphia', 'category' : 'film', }, [
-            #    SearchResultConstraint(title='it\'s always sunny in philadelphia', types='tv'), 
-            #]), 
-            ({ 'query' : 'the walking dead', 'category' : 'film', }, [
-                SearchResultConstraint(title='the walking dead', types='tv'), 
-                SearchResultConstraint(title='the walking dead', types='movie'), 
-            ]), 
-            ({ 'query' : 'friends', 'category' : 'film', }, [
-                SearchResultConstraint(title='friends', types='tv'), 
-            ]), 
-            ({ 'query' : 'firefly', 'category' : 'film', }, [
-                SearchResultConstraint(title='firefly', types='tv'), 
-                SearchResultConstraint(title='serenity', types='movie'), 
-            ]), 
-            ({ 'query' : 'futurama', 'category' : 'film', }, [
-                SearchResultConstraint(title='futurama', types='tv'), 
-            ]), 
-            ({ 'query' : '90210', 'category' : 'film', }, [
-                SearchResultConstraint(title='90210', types='tv'), 
-            ]), 
-        ]
-        
-        self._run_tests(tests, {})
-    
+        test_cases = (
+            makeSimpleTestCase('game of thrones'),
+            makeSimpleTestCase('dexter'),
+            makeSimpleTestCase('family guy'),
+            makeSimpleTestCase('american idol'),
+            makeSimpleTestCase('spongebob squarepants'),
+            makeTestCase('spongebob', Matcher(title=Equals('spongebob squarepants'))),
+            makeTestCase('trailer park boys',
+                TvResultMatcher(title=Equals('trailer park boys')),
+                MovieResultMatcher(title=Equals('trailer park boys'))),
+            makeSimpleTestCase('new girl'),
+            makeSimpleTestCase('up all night'),
+            makeSimpleTestCase('breaking bad'),
+            makeSimpleTestCase('lost'),
+            makeSimpleTestCase('the sopranos'),
+            makeSimpleTestCase('the simpsons'),
+            makeSimpleTestCase('south park'),
+            makeSimpleTestCase('saturday night live'),
+            makeTestCase('snl', Matcher(title=Equals('Saturday Night Live'))),
+            makeSimpleTestCase('dark angel'),
+            makeSimpleTestCase('misfits'),
+            makeSimpleTestCase('arrested development'),
+            makeSimpleTestCase('big bang theory'),
+            makeSimpleTestCase('how i met your mother'),
+            makeTestCase('the walking dead',
+                TvResultMatcher(title=Equals('the walking dead')),
+                MovieResultMatcher(title=Equals('the walking dead'))),
+            makeSimpleTestCase('friends'),
+            makeTestCase('firefly',
+                TvResultMatcher(title=Equals('firefly')),
+                MovieResultMatcher(title=Equals('serenity'))),
+            makeSimpleTestCase('futurama'),
+            makeSimpleTestCase('90210'),
+            makeTestCase('always sunny philadelphia', Matcher(title=Equals('It\'s Always Sunny in Philadelphia')))
+        )
+
+        self._run_tests('basic_tv_tests', test_cases)
+
     def test_international(self):
         """ Test international tv searches """
-        
-        tests = [
-            ({ 'query' : 'footballer\'s wives', 'category' : 'film', }, [    # popular U.K. TV show (2002)
-                SearchResultConstraint(title='footballer\'s wives', types='tv'), 
-            ]), 
-            ({ 'query' : 'hotel babylon', 'category' : 'film', }, [          # popular U.K. TV show (2006)
-                SearchResultConstraint(title='hotel babylon', types='tv'), 
-            ]), 
-            ({ 'query' : 'jeeves and wooster', 'category' : 'film', }, [     # popular U.K. TV show (1990)
-                SearchResultConstraint(title='jeeves and wooster', types='tv'), 
-            ]), 
-            ({ 'query' : 'coupling', 'category' : 'film', }, [               # popular U.K. TV show (2000-2004)
-                SearchResultConstraint(title='coupling', types='tv'), 
-            ]), 
-            
-            # TODO: add more popular foreign shows with exotic names
-        ]
-        
-        self._run_tests(tests, {})
+
+        # TODO: add more popular foreign shows with exotic names
+        test_cases = (
+            makeSimpleTestCase('footballer\'s wives'),
+            makeTestCase('football wives', Matcher(title=Equals('footballer\'s wives'))),
+            makeSimpleTestCase('hotel babylon'),
+            makeSimpleTestCase('jeeves and wooster'),
+            makeSimpleTestCase('coupling')
+        )
+
+        self._run_tests('i18n_tv_tests', test_cases)
+
 
 if __name__ == '__main__':
-    StampedTestRunner().run()
+    main()
 
