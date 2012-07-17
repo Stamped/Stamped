@@ -878,7 +878,7 @@ class User(object):
             args = []
         if kwargs is None:
             kwargs = {}
-        self.stack.append(obj(self.user, *args, **kwargs))
+        self.stack.append(obj(self, *args, **kwargs))
         self.stack[-1].run()
         self.stack.pop()
 
