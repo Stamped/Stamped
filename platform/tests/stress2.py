@@ -1422,7 +1422,20 @@ class ExistingUser(User):
 
 
 
+import gevent
 
-user = ExistingUser('kevin', '12345')
-user.run()
-print 'DONE'
+def worker(user):
+    user.run()
+    print 'DONE'
+
+greenlets = [ 
+    gevent.spawn(worker, LoggedOutUser()),
+    # gevent.spawn(worker, LoggedOutUser()),
+    # gevent.spawn(worker, LoggedOutUser()),
+]
+
+gevent.joinall(greenlets)
+
+# user = ExistingUser('kevin', '12345')
+# user.run()
+# print 'DONE'
