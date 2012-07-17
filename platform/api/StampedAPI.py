@@ -695,6 +695,7 @@ class StampedAPI(AStampedAPI):
         if ('color_primary' in fields and account.color_primary != fields['color_primary']) or \
            ('color_secondary' in fields and account.color_secondary != fields['color_secondary']):
             # Asynchronously generate stamp image
+            logs.info('about to update stamp colors')
             color_primary = fields.get('color_primary', account.color_primary)
             color_secondary = fields.get('color_secondary', account.color_secondary)
             logs.info('updating stamp color: %s, %s' % (color_primary, color_secondary))
