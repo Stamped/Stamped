@@ -684,13 +684,12 @@ class StampedAPI(AStampedAPI):
             account.website = url
         if 'location' in fields and account.location != fields['location']:
             account.location = fields['location']
-        if 'color_primary' in fields and account.color_primary != fields['color_primary']:
-            account.color_primary = fields['color_primary']
-        if 'color_secondary' in fields and account.color_secondary != fields['color_secondary']:
-            account.color_secondary = fields['color_secondary']
         if ('color_primary' in fields and account.color_primary != fields['color_primary']) or \
            ('color_secondary' in fields and account.color_secondary != fields['color_secondary']):
             # Asynchronously generate stamp image
+            account.color_primary = fields.get('color_primary', account.color_primary)
+            account.color_secondary = fields.get('color_secondary', account.color_secondary)
+            logs.info('updating stamp color: %s, %s' % (account.color_primary, account.color_secondary))
             tasks.invoke(tasks.APITasks.customizeStamp, args=[account.color_primary, account.color_secondary])
         if 'temp_image_url' in fields:
             image_cache_timestamp = datetime.utcnow()
