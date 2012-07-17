@@ -75,7 +75,7 @@ class Rdio(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Rdio (after caching)')
-    def method(self, method, **kwargs):
+    def method(self, method, priority='low', **kwargs):
         # create the OAuth consumer credentials
         client = oauth.Client(self.__consumer)
         kwargs['method'] = method 
@@ -85,8 +85,6 @@ class Rdio(object):
                 kwargs[k] = str(v)
             elif isinstance(v,unicode):
                 kwargs[k] = v.encode('utf-8')
-
-        priority = kwargs.get('priority', 'low')
 
         response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/',
                 header={'Accept-encoding':'gzip'}, body=kwargs, priority=priority)
@@ -103,7 +101,7 @@ class Rdio(object):
         with self.__limiter:
             logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
             response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
-        
+
         return json.loads(response[1])
 
     def searchSuggestions(self, query, types="Artist,Album,Track", extras=None, priority='low'):

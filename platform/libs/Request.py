@@ -10,72 +10,89 @@ from time                       import time, sleep
 from servers.ratelimiter.server import StampedRateLimiterService
 
 
+FAIL_WAIT = 60*5
 RL_HOST = 'localhost'
 RL_PORT = 18861
 
-request_fails = 0
-fail_threshold = 200
-fail_start = None
-fail_wait = 60*5
 
-local_rlservice = None
+class RateLimiterState(object):
+    def __init__(self, fail_wait, host, port):
+        self.__local_rlservice = None
+        self.__host = host
+        self.__port = port
+        self.__request_fails = 0
+        self.__fail_threshold = 0
+        self.__fail_start = None
+        self.__fail_wait = fail_wait
+        self.__is_ec2 = utils.is_ec2()
 
-def _isRpcServiceAvailable():
-    pass
+    @property
+    def _local_rlservice(self):
+        if self.__local_rlservice is None:
+            if self.__is_ec2:
+                self.__local_rlservice = StampedRateLimiterService(throttle=True)
+            else:
+                self.__local_rlservice = StampedRateLimiterService(throttle=False)
 
-def _fail():
-    global request_fails, fail_start
+        return self.__local_rlservice
 
-    if fail_start is not None:
-        return
+    def _fail(self):
+        if self.__fail_start is not None:
+            return
 
-    request_fails += 1
-    if request_fails >= fail_threshold:
-        fail_start = time()
-
-def _isFailed():
-    global request_fails, fail_start
-
-    if fail_start is None:
-        return False
-    if fail_start + fail_wait > time():
-        return True
-    else:
-        fail_start = None
-        request_fails = 0
-        return False
-
-
-def _rpc_service_request(host, port, service, method, url, body={}, header={}, priority='high', timeout=5):
-    global request_fails
-
-    conn = rpyc.connect(host, port)
-
-    async_request = rpyc.async(conn.root.request)
-    try:
-        asyncresult = async_request(service, priority, timeout, method, url)
-        asyncresult.set_expiry(timeout)
-        response, content = asyncresult.value
-    except RateException as e:
-        logs.info('RateException occurred during third party request: %s' % e)
-        return
-    except Exception as e:
-        request_fails += 1
-        logs.error('RPC service request fail: %s' % e)
-        if frequest_fails >= fail_threshold:
+        self.__request_fails += 1
+        if self.__request_fails >= self.__fail_threshold:
+            self.__fail_start = time()
             logs.error('RPC service FAIL THRESHOLD REACHED')
-        raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request")
-    return response, content
 
-def _local_service_request(service, method, url, body={}, header={}, priority='high', timeout=5):
-    response, content = local_rlservice.handleRequest(service, priority, timeout, method, url, body, header)
-    return response, content
+    def _isFailed(self):
+        if self.__fail_start is None:
+            return False
+        if self.__fail_start + self.__fail_wait > time():
+            return True
+        else:
+            self.__fail_start = None
+            self.__request_fails = 0
+            return False
 
+    def _rpc_service_request(self, host, port, service, method, url, body={}, header={}, priority='low', timeout=5):
+        conn = rpyc.connect(host, port)
 
+        async_request = rpyc.async(conn.root.request)
+        try:
+            asyncresult = async_request(service, priority, timeout, method, url)
+            asyncresult.set_expiry(timeout)
+            response, content = asyncresult.value
+        except RateException as e:
+            logs.info('RateException occurred during third party request: %s' % e)
+            raise e
+        except Exception as e:
+            logs.error('RPC service request fail: %s' % e)
+            raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request")
+        return response, content
+
+    def _local_service_request(self, service, method, url, body={}, header={}, priority='low', timeout=5):
+        response, content = self._local_rlservice.handleRequest(service, priority, timeout, method, url, body, header)
+        return response, content
+
+    def request(self, service, method, url, body={}, header={}, priority='low', timeout=5):
+        if not self.__is_ec2 or self._isFailed():
+            return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
+        try:
+            return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
+        except:
+            self._fail()
+            return _local_service_request(service, method.upper(), url, body, header, priority, timeout)
+
+__rl_state = None
+def rl_state():
+    global __rl_state
+    if __rl_state is not None:
+        return __rl_state
+    __rl_state = RateLimiterState(FAIL_WAIT, RL_HOST, RL_PORT)
+    return __rl_state
 
 def service_request(service, method, url, body={}, header={}, query_params = {}, priority='high', timeout=5):
-    global local_rlservice, request_fails
-
     if body is None:
         body = {}
     if header is None:
@@ -90,16 +107,9 @@ def service_request(service, method, url, body={}, header={}, query_params = {},
         else:
             url += "&%s" % encoded_params
 
-    if local_rlservice is None:
-        if utils.is_ec2():
-            local_rlservice = StampedRateLimiterService(throttle=True)
-        else:
-            local_rlservice = StampedRateLimiterService(throttle=False)
+    response, content = rl_state().request(service, method, url, body, header, priority, timeout)
 
-    if not utils.is_ec2() or _isFailed():
-        return _local_service_request(service, method.upper(), url, body, header, priority, timeout)
-    try:
-        return _rpc_service_request(RL_HOST, RL_PORT, service, method.upper(), url, body, header, priority, timeout)
-    except:
-        request_fails += 1
-        return _local_service_request(service, method.upper(), url, body, header, priority, timeout)
+    if response.status > 400:
+        logs.warning('service request returned an error response.  status code: %s  content: %s' % (response.status, content))
+
+    return response, content
