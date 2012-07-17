@@ -120,7 +120,7 @@ class Netflix(object):
         if response.status < 300:
             return json.loads(content)
         else:
-            logs.info('Failed with status code %d' % response['status'])
+            logs.info('Failed with status code %s' % response['status'])
             try:
                 failData = json.loads(content)['status']
                 status = failData['status_code']

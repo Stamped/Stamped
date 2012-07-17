@@ -24,7 +24,7 @@ class RateLimiterState(object):
         self.__port = port
         self.__request_fails = 0
         self.__fail_limit = fail_limit
-        self.__fail_start = None
+        self.__blackout_start = None
         self.__fail_wait = fail_wait
         self.__is_ec2 = utils.is_ec2()
 
@@ -39,21 +39,21 @@ class RateLimiterState(object):
         return self.__local_rlservice
 
     def _fail(self):
-        if self.__fail_start is not None:
+        if self.__blackout_start is not None:
             return
 
         self.__request_fails += 1
         if self.__request_fails >= self.__fail_limit:
-            self.__fail_start = time()
+            self.__blackout_start = time()
             logs.error('RPC service FAIL THRESHOLD REACHED')
 
-    def _isFailed(self):
-        if self.__fail_start is None:
+    def _isBlackout(self):
+        if self.__blackout_start is None:
             return False
-        if self.__fail_start + self.__fail_wait > time():
+        if self.__blackout_start + self.__fail_wait > time():
             return True
         else:
-            self.__fail_start = None
+            self.__blackout_start = None
             self.__request_fails = 0
             return False
 
@@ -78,7 +78,7 @@ class RateLimiterState(object):
         return response, content
 
     def request(self, service, method, url, body, header, priority, timeout):
-        if not self.__is_ec2 or self._isFailed():
+        if not self.__is_ec2 or self._isBlackout():
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)

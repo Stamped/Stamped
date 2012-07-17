@@ -99,16 +99,16 @@ def workerProcess(limit):
 
     while True:
         limit.handleTimestep()
-        if limit._isFailed():
-            print('Fail limit reached.  Sleeping for %s' % (limit.fail_wait - (time() - limit.fail_start)))
-            gevent.sleep(limit.fail_wait - (time() - limit.fail_start))
+        if limit._isBlackout():
+            print('Fail limit reached.  Sleeping for %s' % (limit.blackout_wait - (time() - limit.blackout_start)))
+            gevent.sleep(limit.blackout_wait - (time() - limit.blackout_start))
         else:
             gevent.sleep(period)
         sleep(0)
 
 class RateLimiter(object):
 
-    def __init__(self, service_name=None, limit=None, period=None, cpd=None, fail_limit=None, fail_period=None, fail_wait=None):
+    def __init__(self, service_name=None, limit=None, period=None, cpd=None, fail_limit=None, fail_period=None, blackout_wait=None):
         self.__service_name = service_name
         self.__requests = RLPriorityQueue()
 
@@ -120,8 +120,8 @@ class RateLimiter(object):
         self.__fails = deque()
         self.fail_limit = fail_limit
         self.fail_period = fail_period
-        self.fail_wait = fail_wait
-        self.fail_start = None
+        self.blackout_wait = blackout_wait
+        self.blackout_start = None
 
         self.__request_dur_log = deque()
         self.__request_dur_log_size = REQUEST_DUR_LOG_SIZE
@@ -140,7 +140,7 @@ class RateLimiter(object):
 
         self.__worker = gevent.spawn(workerProcess, self)
 
-    def update_limits(self, limit, period, cpd, fail_limit, fail_period, fail_wait):
+    def update_limits(self, limit, period, cpd, fail_limit, fail_period, blackout_wait):
         if self.limit != limit:
             self.limit = limit
         if self.period != period:
@@ -151,8 +151,8 @@ class RateLimiter(object):
             self.fail_limit = fail_limit
         if self.fail_period != fail_period:
             self.fail_period = fail_period
-        if self.fail_wait != fail_wait:
-            self.fail_wait = fail_wait
+        if self.blackout_wait != blackout_wait:
+            self.blackout_wait = blackout_wait
 
     class FailLog(object):
         def __init__(self, status_code, content):
@@ -168,8 +168,8 @@ class RateLimiter(object):
         output += "<h3>RateLimiter Fail Limit reached</h3>"
         output += "<p><i>There were %s failed requests to service '%s' within the last %s seconds</p></i>" %  \
                   (self.fail_limit, self.__service_name, self.fail_period)
-        back_online = strftime('%m/%d/%Y %H:%M:%S', localtime(self.fail_start + self.fail_wait)) # Timestamp
-        output += "<p>Waiting for %s seconds.  Service will be active again at: %s</p>" % (self.fail_wait, back_online)
+        back_online = strftime('%m/%d/%Y %H:%M:%S', localtime(self.blackout_start + self.blackout_wait)) # Timestamp
+        output += "<p>Waiting for %s seconds.  Service will be active again at: %s</p>" % (self.blackout_wait, back_online)
 
         output += '<h3>Fail Log</h3>'
 
@@ -203,7 +203,7 @@ class RateLimiter(object):
         return output
 
     def fail(self, response, content):
-        if self.fail_limit is None or self.fail_period is None or self.fail_wait is None:
+        if self.fail_limit is None or self.fail_period is None or self.blackout_wait is None:
             return
 
         now = time()
@@ -226,7 +226,7 @@ class RateLimiter(object):
 
         if count > self.fail_limit:
             print('### hit fail limit')
-            self.fail_start = time()
+            self.blackout_start = time()
 
             # Email dev if a fail limit was reached
             if is_ec2():
@@ -237,16 +237,16 @@ class RateLimiter(object):
         self.__day_calls += 1
 
 
-    def _isFailed(self, now=None):
+    def _isBlackout(self, now=None):
         if now is None:
             now = time()
 
-        if self.fail_start is None:
+        if self.blackout_start is None:
             return False
-        if (now - self.fail_start) < self.fail_wait:
+        if (now - self.blackout_start) < self.blackout_wait:
             return True
 
-        self.fail_start = None
+        self.blackout_start = None
         return False
 
     def _isDayLimit(self):
@@ -315,9 +315,9 @@ class RateLimiter(object):
                 raise WaitTooLongException("Expected request time too long. Expected: %s Timeout: %s" %
                                            (expected_total_time + expected_request_time, request.timeout))
 
-            if self._isFailed():
+            if self._isBlackout():
                 raise TooManyFailedRequestsException("Too many failed requests. Wait time remaining: %s seconds" %
-                                                     (self.fail_wait - (now - self.fail_start)))
+                                                     (self.blackout_wait - (now - self.blackout_start)))
             if self._isDayLimit():
                 raise DailyLimitException("Hit the daily request cap.  Wait time remaining: %s minutes" %
                                         (((self.__day_start + 60*60*24) - now) / 60))
