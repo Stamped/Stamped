@@ -83,7 +83,7 @@ class RateLimiterState(object):
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
         except:
             self._fail()
-            return _local_service_request(service, method.upper(), url, body, header, priority, timeout)
+            return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 
 __rl_state = None
 def rl_state():
