@@ -693,6 +693,7 @@ class StampedAPI(AStampedAPI):
             # Asynchronously generate stamp image
             color_primary = fields.get('color_primary', account.color_primary)
             color_secondary = fields.get('color_secondary', account.color_secondary)
+            logs.info('updating stamp color: %s, %s' % (color_primary, color_secondary))
             tasks.invoke(tasks.APITasks.customizeStamp, args=[color_primary, color_secondary])
         if 'temp_image_url' in fields:
             image_cache_timestamp = datetime.utcnow()
