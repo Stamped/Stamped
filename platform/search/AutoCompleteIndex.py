@@ -10,6 +10,7 @@ import pickle
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from collections import namedtuple
+from contextlib import closing
 from datetime import datetime
 from tempfile import TemporaryFile
 from whoosh.analysis import *
@@ -22,11 +23,23 @@ from search.AutoCompleteTrie import AutoCompleteTrie
 EntityTuple = namedtuple('EntityTuple', ['entity_id', 'title', 'last_popular', 'types'])
 TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter()
 
-def entityScoringFn(entity):
-    # TODO(geoff): factor in how many stamps are on the entity
-    # TODO(geoff): add in creation timestamp
-    return entity.last_popular - datetime.now()
+def normalizeTitle(title):
+    return ' '.join(tokenizeTitleAndNormalize(title))
 
+def tokenizeTitleAndNormalize(title):
+    tokens = [token.text for token in TOKENIZER(title)]
+    while True:
+        try:
+            index = tokens.index('s', 1)
+        except ValueError:
+            break
+        tokens[index-1] = tokens[index-1] + 's'
+        del tokens[index]
+    return tokens
+
+def entityScoringFn(entity, prefix):
+    # TODO(geoff): factor in how many stamps are on the entity
+    return entity.last_popular
 
 def convertEntity(entityDict):
     if 'last_popular' not in entityDict:
@@ -47,19 +60,27 @@ def categorizeEntity(entity):
         return 'app'
 
 
+def emptyIndex():
+    return dict([(category, AutoCompleteTrie()) for category in ('music', 'book', 'film', 'app')])
+
+
 def buildAutoCompleteIndex():
     entityDb = MongoEntityCollection()
     allEntities = (convertEntity(entity) for entity in entityDb._collection.find(
         fields=['title', 'last_popular', 'types']))
-    categoryMapping = dict([(category, AutoCompleteTrie()) for category in ('music', 'book', 'film', 'app')])
+    categoryMapping = emptyIndex()
     for entity in allEntities:
-        tokens = [token.text for token in TOKENIZER(entity.title)]
         category = categorizeEntity(entity)
         if not category:
             continue
+        tokens = tokenizeTitleAndNormalize(entity.title)
         trie = categoryMapping[category]
-        for i in range(len(tokens)):
-            trie.addBinding(' '.join(tokens[i:]), entity)
+        while tokens:
+            trie.addBinding(' '.join(tokens), entity)
+            if tokens[0] in STOP_WORDS:
+                tokens = tokens[1:]
+            else:
+                break
     for trie in categoryMapping.itervalues():
         trie.pruneAndCompress(entityScoringFn, 5, 50)
         trie.modify(lambda x: x.title)
@@ -71,10 +92,10 @@ def getS3Key():
     FILE_NAME = 'search/v2/autocomplete'
 
     conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-    bucket = conn.create_bucket(bucket_name)
-    key = Key(bucket)
-    key.key = FILE_NAME
-    key.set_acl('private')
+    bucket = conn.create_bucket(BUCKET_NAME)
+    key = bucket.get_key(FILE_NAME)
+    if key is None:
+        key = bucket.new_key(FILE_NAME)
     return key
 
 
@@ -82,13 +103,14 @@ def saveIndexToS3(index):
     with TemporaryFile() as tmpFile:
         pickle.dump(index, tmpFile)
         tmpFile.seek(0)
-        with getS3Key() as key:
+        with closing(getS3Key()) as key:
             key.set_contents_from_file(tmpFile)
+            key.set_acl('private')
 
 
 def loadIndexFromS3():
     with TemporaryFile() as tmpFile:
-        with getS3Key() as key:
+        with closing(getS3Key()) as key:
             key.get_contents_to_file(tmpFile)
         tmpFile.seek(0)
         return pickle.load(tmpFile)

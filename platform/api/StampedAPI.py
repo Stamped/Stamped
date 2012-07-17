@@ -71,6 +71,8 @@ try:
     from libs.Twitter                    import *
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
+
+    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -143,6 +145,12 @@ class StampedAPI(AStampedAPI):
         self.__version = 0
         if 'version' in kwargs:
             self.setVersion(kwargs['version'])
+
+        if utils.is_ec2():
+            self.__autocomplete = loadIndexFromS3()
+        else:
+            self.__autocomplete = emptyIndex()
+        self.__autocomplete_last_loaded = datetime.now()
 
     def setVersion(self, version):
         try:
@@ -1698,9 +1706,13 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
-        if category == 'film':
-            return self._netflix.autocomplete(query)
-        elif category == 'place':
+        # TODO(geoff): We're loading the index synchronously here, which means once a day we're
+        # going to have a few autocomplete requests that will take a long time (~10 seconds). Find
+        # out if we can do this asynchronously.
+        if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
+            self.__autocomplete_last_loaded = datetime.now()
+            self.__autocomplete = loadIndexFromS3()
+        if category == 'place':
             if coordinates is None:
                 latLng = None
             else:
@@ -1714,17 +1726,8 @@ class StampedAPI(AStampedAPI):
             for name in names:
                 completions.append( { 'completion' : name } )
             return completions
-        # elif category == 'music':
-        #     result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
-        #     if 'result' not in result:
-        #         return []
-        #     #names = list(set([i['name'] for i in result['result']]))[:10]
-        #     names = self._orderedUnique([i['name'] for i in result['result']])[:10]
-        #     completions = []
-        #     for name in names:
-        #         completions.append( { 'completion' : name})
-        #     return completions
-        return []
+
+        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(query)]]
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):

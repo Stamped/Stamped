@@ -74,13 +74,13 @@ class CompressedNode(object):
                 return child.get(key[len(k):])
         return []
 
-    def applyScoringFn(self, scoringFn, nodeLimit):
+    def applyScoringFn(self, scoringFn, nodeLimit, prefix):
         uniqueData = set(self.data)
         for k, child in self.children:
-            child.applyScoringFn(scoringFn, nodeLimit)
+            child.applyScoringFn(scoringFn, nodeLimit, prefix+k)
             uniqueData.update(child.data)
         dataList = list(uniqueData)
-        dataList.sort(key=scoringFn, reverse=True)
+        dataList.sort(key=lambda x: scoringFn(x, prefix), reverse=True)
         self.data = dataList[:nodeLimit]
 
     def modify(self, mutation):
@@ -133,7 +133,7 @@ class AutoCompleteTrie(object):
             self.root = CompressedNode(None, {prefix : node})
         else:
             self.root = node
-        self.root.applyScoringFn(scoringFn, nodeLimit)
+        self.root.applyScoringFn(scoringFn, nodeLimit, '')
         self.root = self.root.prune(collapseThreshold)
 
     def modify(self, mutation):
