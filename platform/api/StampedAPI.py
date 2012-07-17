@@ -72,7 +72,7 @@ try:
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
 
-    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex
+    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -1728,6 +1728,9 @@ class StampedAPI(AStampedAPI):
             return completions
 
         return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(query)]]
+
+    def updateAutoCompleteIndexAsync(self):
+        pushNewIndexToS3()
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):

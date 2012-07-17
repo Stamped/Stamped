@@ -108,6 +108,10 @@ def saveIndexToS3(index):
             key.set_acl('private')
 
 
+def pushNewIndexToS3():
+    saveIndexToS3(buildAutoCompleteIndex())
+
+
 def loadIndexFromS3():
     with TemporaryFile() as tmpFile:
         with closing(getS3Key()) as key:
