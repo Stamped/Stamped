@@ -38,6 +38,7 @@ class StampedAPIURLOpener(urllib.FancyURLopener):
         return ('iphone8@2x', 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu')
 opener = StampedAPIURLOpener()
 
+
 def handleGET(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
     url    = "%s/%s?%s" % (baseurl, path, params)
@@ -713,7 +714,7 @@ class View(object):
         return self.__actions[key]
 
     def load(self):
-        raise NotImplementedError
+        pass
 
     def run(self):
         # Import data
@@ -745,13 +746,18 @@ class View(object):
         raise DoneException("Done!")
 
 
-class TastemakerInbox(View):
+class Inbox(View):
 
     def __init__(self, user):
         View.__init__(self, user)
         
         self.stamps = []
         self.offset = 0
+
+        if self.user.token is not None:
+            self.scope = 'inbox'
+        else:
+            self.scope = 'popular'
 
         self.setAction('back', self._back)
         self.setWeight('back', 2)
@@ -762,12 +768,15 @@ class TastemakerInbox(View):
         self.setAction('page', self._page)
         self.setWeight('page', 10)
 
+        self.setAction('scope', self._changeScope)
+        self.setWeight('scope', 10)
+
     def load(self):
         self.loadStamps()
         self.loadStamps()
 
     def loadStamps(self):
-        self.stamps += _get_stamps_collection(scope='popular', offset=self.offset, token=self.user.token)
+        self.stamps += _get_stamps_collection(scope=self.scope, offset=self.offset, token=self.user.token)
         self.offset += 20
 
     # View the stamp detail
@@ -787,6 +796,29 @@ class TastemakerInbox(View):
             # Nothing loaded!
             self.setWeight('page', 0)
 
+    # Change scope
+    def _changeScope(self):
+        if self.user.token is not None:
+            # Quick and dirty
+            r = random.random()
+            if r < 0.7:
+                scope = 'inbox'
+            elif r < 0.85:
+                scope = 'popular'
+            else:
+                scope = 'me'
+            if self.scope != scope:
+                self.scope = scope 
+                self.stamps = []
+                self.offset = 0
+                self.setWeight('stamp', 20)
+                self.setWeight('page', 10)
+                self.loadStamps()
+                self.setWeight('scope', int(self.getWeight('scope') * 0.6))
+        else:
+            self.scope = 'popular'
+            self.setWeight('scope', 0)
+
 
 class StampDetail(View):
 
@@ -795,6 +827,9 @@ class StampDetail(View):
     
         self.stamp = stamp
         self.stampId = stampId
+        
+        self.isLiked = False
+        self.isTodo = False
 
         self.setAction('back', self._back)
         self.setWeight('back', 20)
@@ -811,14 +846,28 @@ class StampDetail(View):
         self.setAction('comment', self._viewComment)
         self.setWeight('comment', 2)
 
+        self.setAction('addLike', self._addLike)
+        self.setWeight('addLike', 15)
+
+        self.setAction('removeLike', self._removeLike)
+        self.setWeight('removeLike', 15)
+
     def load(self):
         if self.stamp is None:
             self.stamp = _get_stamps_show(self.stampId, token=self.user.token)
+
+        assert self.stamp is not None
 
         self.stampId = self.stamp['stamp_id']
         self.entityId = self.stamp['entity']['entity_id']
         self.entity = _get_entities_show(self.entityId, token=self.user.token)
         self.alsoStampedBy = _get_entities_stamped_by(self.entityId, token=self.user.token)
+
+        if 'is_todo' in self.stamp:
+            self.isTodo = self.stamp['is_todo']
+
+        if 'is_liked' in self.stamp:
+            self.isLiked = self.stamp['is_liked']
 
     """
     Define possible actions the user can take, including wait time
@@ -853,6 +902,30 @@ class StampDetail(View):
                 self.addToStack(Profile, kwargs={'userId': random.choice(previews['comments'])['user']['user_id']})
             else:
                 self.setWeight('comment', 0)
+
+    # Add like
+    def _addLike(self):
+        if self.user.token is not None:
+            time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+            if not self.isLiked:
+                _post_stamps_likes_create(self.user.token, self.stampId)
+                self.isLiked = True
+            self.setWeight('addLike', 0)
+        else:
+            self.setWeight('addLike', 0)
+            self.setWeight('removeLike', 0)
+
+    # Remove like
+    def _removeLike(self):
+        if self.user.token is not None:
+            time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+            if self.isLiked:
+                _post_stamps_likes_remove(self.user.token, self.stampId)
+                self.isLiked = False
+            self.setWeight('removeLike', 0)
+        else:
+            self.setWeight('addLike', 0)
+            self.setWeight('removeLike', 0)
 
 
 class Profile(View):
@@ -969,9 +1042,6 @@ class GuideMenu(View):
         self.setAction('app', self._viewApp)
         self.setWeight('app', 30)
 
-    def load(self):
-        pass
-
     def _viewMusic(self):
         time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
         self.addToStack(GuideList, kwargs={'section': 'music'})
@@ -1041,6 +1111,10 @@ class GuideView(View):
                 scope = 'me'
             if self.scope != scope:
                 self.scope = scope 
+                self.entities = []
+                self.stampIds = set()
+                self.setWeight('entity', 45)
+                self.setWeight('stamp', 25)
                 self.loadEntities()
                 self.setWeight('scope', int(self.getWeight('scope') * 0.6))
         else:
@@ -1060,6 +1134,9 @@ class GuideList(GuideView):
 
         self.setAction('entity', self._viewEntity)
         self.setWeight('entity', 45)
+
+        self.setAction('stamp', self._viewStamp)
+        self.setWeight('stamp', 25)
 
         self.setAction('scope', self._changeScope)
         self.setWeight('scope', 20)
@@ -1106,6 +1183,9 @@ class GuideMap(GuideView):
         self.setAction('entity', self._viewEntity)
         self.setWeight('entity', 45)
 
+        self.setAction('stamp', self._viewStamp)
+        self.setWeight('stamp', 25)
+
         self.setAction('scope', self._changeScope)
         self.setWeight('scope', 20)
 
@@ -1150,12 +1230,13 @@ class GuideMap(GuideView):
     # Pan over the map
     def _pan(self):
         time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
-        v = random.uniform(-0.1, 0.1)
+        latMove = random.uniform(-0.1, 0.1)
+        lngMove = random.uniform(-0.1, 0.1)
         self.viewport = (
-            self.viewport[0] + v,
-            self.viewport[1] + v,
-            self.viewport[2] + v,
-            self.viewport[3] + v,
+            self.viewport[0] + latMove,
+            self.viewport[1] + lngMove,
+            self.viewport[2] + latMove,
+            self.viewport[3] + lngMove,
         )
         self.loadEntities()
 
@@ -1291,7 +1372,7 @@ class LoggedOutUser(User):
     # View stamp
     def _viewInbox(self):
         time.sleep(random.randint(4, 12) * self._userWaitSpeed)
-        self.addToStack(TastemakerInbox)
+        self.addToStack(Inbox)
 
     # View guide
     def _viewGuide(self):
@@ -1331,7 +1412,7 @@ class ExistingUser(User):
     # View stamp
     def _viewInbox(self):
         time.sleep(random.randint(4, 12) * self._userWaitSpeed)
-        self.addToStack(TastemakerInbox)
+        self.addToStack(Inbox)
 
     # View guide
     def _viewGuide(self):
