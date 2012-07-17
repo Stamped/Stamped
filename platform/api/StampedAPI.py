@@ -670,6 +670,10 @@ class StampedAPI(AStampedAPI):
             tasks.invoke(tasks.APITasks.changeProfileImageName, args=[
                 old_screen_name.lower(), account.screen_name.lower()])
 
+        logs.info('### test: %s' %
+                  ('color_primary' in fields and account.color_primary != fields['color_primary']) or\
+                  ('color_secondary' in fields and account.color_secondary != fields['color_secondary']))
+
         if 'name' in fields and account.name != fields['name'] and fields['name'] is not None:
             if fields['name'] is None:
                 raise StampedUnsetRequiredFieldError("Cannot unset name")
