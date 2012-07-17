@@ -699,6 +699,9 @@ class View(object):
     def getWeight(self, key):
         return self.__weights[key]
 
+    def getTotalWeight(self):
+        return sum(v for k, v in self.__weights.items())
+
     def setAction(self, key, value):
         self.__actions[key] = value
 
@@ -986,17 +989,40 @@ class GuideMenu(View):
         self.addToStack(GuideMap, kwargs={'section': 'food'})
 
 
+class GuideView(View):
 
-
-class GuideList(View):
-
-    def __init__(self, user, section, scope='popular'):
+    def __init__(self, user, section, scope):
         View.__init__(self, user)
 
         self.section = section
         self.scope = scope
         self.entities = []
         self.stampIds = set()
+
+    # View stamp detail
+    def _viewStamp(self):
+        if len(self.stampIds) > 0:
+            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
+            self.addToStack(StampDetail, kwargs={'stampId': random.choice(self.stampIds)})
+        else:
+            self.setWeight('stamp', 0)
+            self.setWeight('entity', 0)
+
+    # View entity details
+    def _viewEntity(self):
+        if len(self.entities) > 0:
+            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
+            self.addToStack(EntityDetail, kwargs={'entity': random.choice(self.entities)})
+        else:
+            self.setWeight('stamp', 0)
+            self.setWeight('entity', 0)
+
+
+class GuideList(GuideView):
+
+    def __init__(self, user, section, scope='popular'):
+        GuideView.__init__(self, user, section, scope)
+
         self.offset = 0
 
         self.setAction('back', self._back)
@@ -1023,24 +1049,6 @@ class GuideList(View):
         self.offset += 20
         self.entities += entities
 
-    # View stamp detail
-    def _viewStamp(self):
-        if len(self.stampIds) > 0:
-            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
-            self.addToStack(StampDetail, kwargs={'stampId': random.choice(self.stampIds)})
-        else:
-            self.setWeight('stamp', 0)
-            self.setWeight('entity', 0)
-
-    # View entity details
-    def _viewEntity(self):
-        if len(self.entities) > 0:
-            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
-            self.addToStack(EntityDetail, kwargs={'entity': random.choice(self.entities)})
-        else:
-            self.setWeight('stamp', 0)
-            self.setWeight('entity', 0)
-
     # Load more entities
     def _page(self):
         time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
@@ -1051,16 +1059,13 @@ class GuideList(View):
             self.setWeight('page', 0)
 
 
-class GuideMap(View):
+class GuideMap(GuideView):
 
     def __init__(self, user, section, scope='popular'):
-        View.__init__(self, user)
+        GuideView.__init__(self, user, section, scope)
 
-        self.section = section
-        self.scope = scope
-        self.entities = []
-        self.stampIds = set()
         self.viewport = None
+        self.query = None
 
         self.setAction('back', self._back)
         self.setWeight('back', 20)
@@ -1074,6 +1079,12 @@ class GuideMap(View):
         self.setAction('zoom', self._zoom)
         self.setWeight('zoom', 40)
 
+        self.setAction('search', self._search)
+        self.setWeight('search', 40)
+
+        self.setAction('clearSearch', self._clearSearch)
+        self.setWeight('clearSearch', 0)
+
     def load(self):
         self.setViewport()
         self.loadEntities()
@@ -1085,32 +1096,20 @@ class GuideMap(View):
 
     def loadEntities(self):
         viewport = ','.join(map(lambda x: str(x), self.viewport))
-        entities = _get_guide_collection(section=self.section, scope=self.scope, viewport=viewport, 
+
+        if self.query is not None:
+            entities = _get_guide_search(query=self.query, section=self.section, scope=self.scope, viewport=viewport, 
                                             token=self.user.token, limit=50)
+        else:
+            entities = _get_guide_collection(section=self.section, scope=self.scope, viewport=viewport, 
+                                                token=self.user.token, limit=50)
+
         for entity in entities:
             if 'previews' in entity and 'stamps' in entity['previews']:
                 stamps = entity['previews']['stamps']
                 if stamps is not None and len(stamps) > 0:
                     self.stampIds.union(set(map(lambda x: x['stamp_id'], stamps)))
         self.entities = entities
-
-    # View stamp detail
-    def _viewStamp(self):
-        if len(self.stampIds) > 0:
-            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
-            self.addToStack(StampDetail, kwargs={'stampId': random.choice(self.stampIds)})
-        else:
-            self.setWeight('stamp', 0)
-            self.setWeight('entity', 0)
-
-    # View entity details
-    def _viewEntity(self):
-        if len(self.entities) > 0:
-            time.sleep(random.randint(1, 8) * self.user._userWaitSpeed)
-            self.addToStack(EntityDetail, kwargs={'entity': random.choice(self.entities)})
-        else:
-            self.setWeight('stamp', 0)
-            self.setWeight('entity', 0)
 
     # Pan over the map
     def _pan(self):
@@ -1138,10 +1137,23 @@ class GuideMap(View):
         )
         self.loadEntities()
 
+    def _search(self):
+        queries = ['sushi', 'indian', 'mexican', 'chinese', 'korean', 'japanese', 'bbq', 'coffee', 
+                    'tea', 'bakery', 'burger', 'cuban', 'italian', 'kosher', 'thai', 'sandwich', 
+                    'salad', 'pizza', 'organic', 'wings', 'vegan']
+        self.query = random.choice(queries)
+        self.loadEntities()
+        self.setWeight('clearSearch', max(1, int(self.getTotalWeight() * 0.3)))
+
+    def _clearSearch(self):
+        self.query = None
+        self.setWeight('clearSearch', 0)
 
 
 
-#Base user class - Should not be called directly
+
+
+# Base user class - Should not be called directly
 class User(object):
     def __init__(self):
         self.token = None
