@@ -163,8 +163,9 @@ class StampStatsSchema(Schema):
         cls.addProperty('like_threshold_hit',               bool)
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('num_blurbs',                       int)
-        cls.addProperty('quality',                          int)
-        cls.addProperty('popularity',                       int)
+        cls.addProperty('quality',                          float)
+        cls.addProperty('popularity',                       float)
+        cls.addProperty('score',                            float)
 
 class StampStats(Schema):
     @classmethod
@@ -177,9 +178,9 @@ class StampStats(Schema):
         cls.addProperty('lng',                              float)
         cls.addProperty('last_stamped',                     datetime)
 
-        cls.addProperty('quality',                          int)
-        cls.addProperty('popularity',                       int)
-        cls.addProperty('score',                            int)
+        cls.addProperty('quality',                          float)
+        cls.addProperty('popularity',                       float)
+        cls.addProperty('score',                            float)
         cls.addProperty('num_todos',                        int)
         cls.addProperty('num_likes',                        int)
         cls.addProperty('num_credits',                      int)
