@@ -2926,7 +2926,14 @@ class StampedAPI(AStampedAPI):
 
         stats.quality = quality
         
-        score = max(quality, float(quality * popularity))
+        
+        #Entity quality for now is just a matter of it having a picture or not
+        image_score = 1
+        if entity.kind in ['media_item','media_collection','person','software']:
+            if entity.images is None:
+                image_score = 0.01
+
+        score = image_score * (max(quality, float(quality * popularity)))
         stats.score = score
 
         self._stampStatsDB.updateStampStats(stats)
