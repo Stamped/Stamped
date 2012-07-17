@@ -130,6 +130,8 @@ def _post_oauth2_login(screenName, password):
     params = {
         'login': screenName,
         'password': password,
+        'client_id': 'iphone8@2x', 
+        'client_secret': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
     }
     
     return handlePOST('oauth2/login.json', params)
@@ -139,6 +141,8 @@ def _post_oauth2_token(refreshToken):
     params = {
         'refresh_token': refreshToken,
         'grant_type': 'refresh_token',
+        'client_id': 'iphone8@2x', 
+        'client_secret': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
     }
     
     return handlePOST('oauth2/token.json', params)
@@ -618,7 +622,7 @@ def _get_guide_collection(scope, section, subsection=None, viewport=None, offset
         params['viewport'] = viewport
     
     if token is not None:
-        params['token'] = token
+        params['oauth_token'] = token
     
     return handleGET('guide/collection.json', params)
 
@@ -639,7 +643,7 @@ def _get_guide_search(scope, section, query, subsection=None, viewport=None, off
         params['viewport'] = viewport
     
     if token is not None:
-        params['token'] = token
+        params['oauth_token'] = token
     
     return handleGET('guide/search.json', params)
 
@@ -991,13 +995,20 @@ class GuideMenu(View):
 
 class GuideView(View):
 
-    def __init__(self, user, section, scope):
+    def __init__(self, user, section):
         View.__init__(self, user)
 
         self.section = section
-        self.scope = scope
         self.entities = []
         self.stampIds = set()
+
+        if self.user.token is not None:
+            self.scope = 'inbox'
+        else:
+            self.scope = 'popular'
+
+    def loadEntities(self):
+        raise NotImplementedError
 
     # View stamp detail
     def _viewStamp(self):
@@ -1017,11 +1028,30 @@ class GuideView(View):
             self.setWeight('stamp', 0)
             self.setWeight('entity', 0)
 
+    # Change scope
+    def _changeScope(self):
+        if self.user.token is not None:
+            # Quick and dirty
+            r = random.random()
+            if r < 0.7:
+                scope = 'inbox'
+            elif r < 0.85:
+                scope = 'popular'
+            else:
+                scope = 'me'
+            if self.scope != scope:
+                self.scope = scope 
+                self.loadEntities()
+                self.setWeight('scope', int(self.getWeight('scope') * 0.6))
+        else:
+            self.scope = 'popular'
+            self.setWeight('scope', 0)
+
 
 class GuideList(GuideView):
 
-    def __init__(self, user, section, scope='popular'):
-        GuideView.__init__(self, user, section, scope)
+    def __init__(self, user, section):
+        GuideView.__init__(self, user, section)
 
         self.offset = 0
 
@@ -1030,6 +1060,9 @@ class GuideList(GuideView):
 
         self.setAction('entity', self._viewEntity)
         self.setWeight('entity', 45)
+
+        self.setAction('scope', self._changeScope)
+        self.setWeight('scope', 20)
 
         self.setAction('page', self._page)
         self.setWeight('page', 10)
@@ -1061,8 +1094,8 @@ class GuideList(GuideView):
 
 class GuideMap(GuideView):
 
-    def __init__(self, user, section, scope='popular'):
-        GuideView.__init__(self, user, section, scope)
+    def __init__(self, user, section):
+        GuideView.__init__(self, user, section)
 
         self.viewport = None
         self.query = None
@@ -1072,6 +1105,9 @@ class GuideMap(GuideView):
 
         self.setAction('entity', self._viewEntity)
         self.setWeight('entity', 45)
+
+        self.setAction('scope', self._changeScope)
+        self.setWeight('scope', 20)
 
         self.setAction('pan', self._pan)
         self.setWeight('pan', 40)
@@ -1137,6 +1173,7 @@ class GuideMap(GuideView):
         )
         self.loadEntities()
 
+    # Search for something
     def _search(self):
         queries = ['sushi', 'indian', 'mexican', 'chinese', 'korean', 'japanese', 'bbq', 'coffee', 
                     'tea', 'bakery', 'burger', 'cuban', 'italian', 'kosher', 'thai', 'sandwich', 
@@ -1145,6 +1182,7 @@ class GuideMap(GuideView):
         self.loadEntities()
         self.setWeight('clearSearch', max(1, int(self.getTotalWeight() * 0.3)))
 
+    # Clear search
     def _clearSearch(self):
         self.query = None
         self.setWeight('clearSearch', 0)
@@ -1196,12 +1234,17 @@ class User(object):
         self.stack[-1].run()
         self.stack.pop()
 
+    def load(self):
+        pass
+
     # Start and root defined in subclasses
     def run(self):
         logs.debug("Running %s" % self.__class__.__name__)
 
         self.expiration = datetime.datetime.utcnow() + datetime.timedelta(seconds=self._userSessionLength)
         logs.debug("Expiration: %s" % self.expiration)
+
+        self.load()
 
         while datetime.datetime.utcnow() < self.expiration:
             logs.info("BEGIN: %s" % self.__class__.__name__)
@@ -1239,6 +1282,51 @@ class LoggedOutUser(User):
         self.setAction('guide', self._viewGuide)
         self.setWeight('guide', 30)
 
+    def load(self):
+        try:
+            self._viewInbox()
+        except DoneException:
+            pass
+
+    # View stamp
+    def _viewInbox(self):
+        time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+        self.addToStack(TastemakerInbox)
+
+    # View guide
+    def _viewGuide(self):
+        time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+        self.addToStack(GuideMenu)
+
+
+class ExistingUser(User):
+
+    def __init__(self, login, password):
+        User.__init__(self)
+        self._userWaitSpeed = 0
+        self._userSessionLength = 10 #200 + (random.random() * 200)
+
+        self._login = login
+        self._password = password
+        
+        self.setAction('inbox', self._viewInbox)
+        self.setWeight('inbox', 10)
+        
+        self.setAction('guide', self._viewGuide)
+        self.setWeight('guide', 30)
+
+
+    def load(self):
+        login = _post_oauth2_login(self._login, self._password)
+
+        self.token = login['token']['access_token']
+        self.userId = login['user']['user_id']
+        self.screenName = login['user']['screen_name']
+
+        try:
+            self._viewInbox()
+        except DoneException:
+            pass
 
     # View stamp
     def _viewInbox(self):
@@ -1254,8 +1342,6 @@ class LoggedOutUser(User):
 
 
 
-
-
-user = LoggedOutUser()
+user = ExistingUser('kevin', '12345')
 user.run()
 print 'DONE'
