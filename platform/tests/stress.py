@@ -23,6 +23,7 @@ HTTP Helper Functions
 """
 
 baseurl = "https://dev.stamped.com/v1"
+baseurl = "http://localhost:18000/v1"
 
 class StampedAPIURLOpener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
@@ -112,7 +113,8 @@ def _post_oauth2_token(refreshToken):
 ### ACCOUNT
 
 # /account/create.json
-def _post_account_create(screenName, phone=None, bio=None, website=None, location=None, colorPrimary=None, colorSecondary=None, tempImageUrl=None):
+def _post_account_create(screenName, phone=None, bio=None, website=None, location=None, colorPrimary=None, 
+                            colorSecondary=None, tempImageUrl=None):
     params = {
         'name': 'User %s' % screenName,
         'screen_name': screenName,
@@ -148,7 +150,8 @@ def _post_account_remove(token):
     raise NotImplementedError
 
 # /account/update.json
-def _post_account_update(token, name=None, screenName=None, phone=None, bio=None, website=None, location=None, colorPrimary=None, colorSecondary=None, tempImageUrl=None):
+def _post_account_update(token, name=None, screenName=None, phone=None, bio=None, website=None, location=None, 
+                            colorPrimary=None, colorSecondary=None, tempImageUrl=None):
     params = {
         'oauth_token': token,
     }
@@ -490,7 +493,8 @@ def _post_stamps_remove(token, stampId):
     return handlePOST('stamps/remove.json', params)
 
 # /stamps/collection.json
-def _get_stamps_collection(scope, token=None, limit=20, before=None, offset=None, userId=None, category=None, viewport=None):
+def _get_stamps_collection(scope, token=None, limit=20, before=None, offset=None, 
+                            userId=None, category=None, viewport=None):
     params = {
         'scope': scope,
         'limit': limit,
@@ -516,7 +520,8 @@ def _get_stamps_collection(scope, token=None, limit=20, before=None, offset=None
     return handleGET('stamps/collection.json', params)
 
 # /stamps/search.json
-def _get_stamps_search(scope, query, token=None, limit=20, before=None, offset=None, userId=None, category=None, viewport=None):
+def _get_stamps_search(scope, query, token=None, limit=20, before=None, offset=None, 
+                        userId=None, category=None, viewport=None):
     params = {
         'scope': scope,
         'query': query,
@@ -731,6 +736,7 @@ class User(object):
         # Follow some tastemakers
         for i in range (0,tastemakersToFollow):
             r = random.random()
+
             tastemaker = suggested[int(random.random() * len(suggested))]
             if r < 0.2:
                 self.viewProfile(tastemaker[user_id],fromAddFriends=True)
@@ -748,11 +754,11 @@ class User(object):
                 friends.append(_post_friendships_create(self.token,users[0][user_id]))
 
         return friends
-
         
     # Inbox Functions
 
     def viewTastemakerInbox(self, offset=None):
+        logs.debug("Begin")
         if offset is not None:
             raise NotImplementedError
         stamps = _get_stamps_collection(scope='popular')
@@ -895,7 +901,8 @@ class User(object):
         pass
 
 
-#Specific instances of different types of users
+# Specific instances of different types of users
+
 
 #Base class for a user creating a new account - should not be called directly
 class NewUser(User):
@@ -913,13 +920,7 @@ class NewUser(User):
         user, token = _post_oauth2_login(screenName, "12345")
         self.token = token
         self.userId = user[user_id]
-        
-    # Start and root defined in subclasses
-    def start(self):
-        raise NotImplementedError
 
-    def root(self):
-        raise NotImplementedError
 
 #Base class for a user with an existing account - should not be called directly
 class ExistingUser(User):
@@ -933,13 +934,7 @@ class ExistingUser(User):
         user, token = _post_oauth2_login(self.screen_name, "12345")
         self.token = token
         self.userId = user[user_id]
-        
-    # Start and root defined in subclasses
-    def start(self):
-        raise NotImplementedError
 
-    def root(self):
-        raise NotImplementedError
 
 
 #Class representing users who do not log in or create an account throughout their session
@@ -950,28 +945,34 @@ class LoggedOutUser(User):
         self._userSessionLength = 10 #200 + (random.random() * 200)
         
     def start(self):
+        logs.debug("Begin: %s" % self)
+
         self.expiration = datetime.datetime.utcnow() + datetime.timedelta(seconds=self._userSessionLength)
-        
-        #Start out in the inbox
+        logs.debug("Expiration: %s" % self.expiration)
+
+        # Start out in the inbox
         try:
             self.viewTastemakerInbox()
         except DoneException:
             pass
         
-        #Move to root menu upon return or exception
+        # Move to root menu upon return or exception
         while datetime.datetime.utcnow() < self.expiration:
             self.root()
-        self.root()
+
+        logs.debug("Finish: %s" % self)
             
     def root(self):
+
     	r = random.random()
     	try:
         	if r < 0.8:
         		self.viewGuide()
         	else:
 	    		self.viewTastemakerInbox()
+
         except DoneException:
-        	pass
+            pass
         
 #Class representing either a new or existing user who 
 class PowerUser(ExistingUser):
@@ -1008,9 +1009,9 @@ class PowerUser(ExistingUser):
         while datetime.datetime.utcnow() < self.expiration:
             self.root()
 
-    def root(self):    	
-    	r = random.random()
-    	try:
+    def root(self):     
+        r = random.random()
+        try:
             if r < 0.2:
                 self.viewInbox()
             elif r < 0.7:
@@ -1026,7 +1027,7 @@ class PowerUser(ExistingUser):
             else:
                 self.viewSettings()
         except DoneException:
-        	pass
+            pass
 
 #Class representing a fan of justin beiber (or other tastemaker)
 class BeiberUser(NewUser):
@@ -1053,9 +1054,9 @@ class BeiberUser(NewUser):
         while datetime.datetime.utcnow() < self.expiration:
             self.root()
 
-    def root(self):    	
-    	r = random.random()
-    	try:
+    def root(self):     
+        r = random.random()
+        try:
             if r < 0.3:
 	            self.viewInbox()
             elif r < 0.8:
@@ -1066,8 +1067,9 @@ class BeiberUser(NewUser):
 	            self.viewSettings()
             else:
 	    		self.viewAddFriends()
+
         except DoneException:
-        	pass
+            pass
 
 class CasualUser(ExistingUser):
     def __init__(self,bExisting,screenName=None):
@@ -1102,19 +1104,19 @@ class CasualUser(ExistingUser):
         while datetime.datetime.utcnow() < self.expiration:
             self.root()
 
-    def root(self):    	
-    	r = random.random()
-    	try:
-	       if r < 0.4:
-	           self.viewInbox()
-	       elif r < 0.4:
-	           self.viewGuide()
-	       elif r < 0.95:
-	           self.viewActivity()
-	       else:
-	    		self.viewSettings()
+    def root(self):     
+        r = random.random()
+        try:
+           if r < 0.4:
+               self.viewInbox()
+           elif r < 0.4:
+               self.viewGuide()
+           elif r < 0.95:
+               self.viewActivity()
+           else:
+                self.viewSettings()
         except DoneException:
-        	pass
+            pass
 
 
 
