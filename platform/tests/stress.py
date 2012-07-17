@@ -18,6 +18,9 @@ from errors import *
 class DoneException(Exception):
     pass
 
+class FinishedException(Exception):
+    pass
+
 class RootException(Exception):
     pass
 
@@ -658,6 +661,15 @@ class User(object):
         raise NotImplementedError
 
     def _runAction(self, actions, weights):
+
+        if len(self._stack) >= 4:
+            def _root():
+                time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+                raise RootException("Root!")
+
+            actions['root'] = _root 
+            weights['root'] = sum(v for k, v in weights.items()) * len(self._stack) / 8
+
         while datetime.datetime.utcnow() < self.expiration:
             try:
                 totalWeight = sum(v for k, v in weights.items())
@@ -666,28 +678,27 @@ class User(object):
 
                 for key, weight in weights.items():
                     if r < weight:
-                        logs.debug("%sCHOSE ACTION: %s" % ((' '*2*len(self._stack)), key))
-                        if key != 'pass':
-                            self._stack.append(key)
                         break
                     r -= weight
+                logs.debug("%sCHOSE ACTION: %s" % ((' '*2*len(self._stack)), key))
+                self._stack.append(key)
                 actions[key]()
 
             except DoneException:
-                print self._stack
+                action = self._stack.pop()
                 action = self._stack.pop()
                 logs.debug("%s  DONE: %s" % ((' '*2*len(self._stack)), action))
-                print self._stack
-                # logs.debug("STACK LENGTH: %s" % len(self._stack))
-                raise
+                raise FinishedException
+            except FinishedException:
+                continue
             except RootException:
-                logs.debug("GOING TO ROOT")
+                action = self._stack.pop()
+                logs.debug("%sGOING TO ROOT" % (' '*2*len(self._stack)))
                 raise
 
     # Functions for viewing different pages in the stamped app
     def viewStampDetail(self, stamp=None, stampId=None):
         logs.debug("%sView Stamp Detail" % (' '*2*len(self._stack)))
-        print self._stack
 
         """
         Make API calls
@@ -709,21 +720,17 @@ class User(object):
         weights = {}
 
         # Go back to inbox
-        def _pass():
+        def _back():
             time.sleep(random.randint(4, 12) * self._userWaitSpeed)
             raise DoneException("Done!")
 
-        actions['pass'] = _pass
-        weights['pass'] = 5
+        actions['back'] = _back
+        weights['back'] = 20
 
         # View the user's profile
         def _viewProfile():
             time.sleep(random.randint(4, 12) * self._userWaitSpeed)
-            try:
-                return self.viewProfile(userId=stamp['user']['user_id'])
-            except DoneException:
-                if random.random() < 0.3:
-                    raise
+            return self.viewProfile(userId=stamp['user']['user_id'])
 
         actions['profile'] = _viewProfile
         weights['profile'] = 20
@@ -761,7 +768,6 @@ class User(object):
     # denoting whether or not the profile was viewed from the Add Friends page
     def viewProfile(self, userId, fromAddFriends=False):
         logs.debug("%sView Profile (%s)" % ((' '*2*len(self._stack)), userId))
-        print self._stack
 
         #Initial API Calls
         user = _get_users_show(userId)
@@ -784,11 +790,7 @@ class User(object):
         # View stamp
         def _viewStamp():
             time.sleep(random.randint(4, 12) * self._userWaitSpeed)
-            try:
-                return self.viewStampDetail(stamp=userStamps[0])
-            except DoneException:
-                if random.random() < 0.75:
-                    raise
+            return self.viewStampDetail(stamp=userStamps[0])
 
         actions['stamp'] = _viewStamp
         weights['stamp'] = 10
@@ -855,7 +857,6 @@ class User(object):
         # Go back to root
         def _pass():
             time.sleep(random.randint(4, 12) * self._userWaitSpeed)
-            print 'RAISE PASS FROM INBOX'
             raise DoneException("Done!")
 
         actions['pass'] = _pass
@@ -864,12 +865,7 @@ class User(object):
         # View the user's profile
         def _viewStamp():
             time.sleep(random.randint(2, 6) * self._userWaitSpeed)
-            try:
-                return self.viewStampDetail(stamp=random.choice(stamps))
-            except DoneException:
-                if random.random() < 0.3:
-                    print 'RAISE VIEW STAMP FROM INBOX'
-                    raise
+            return self.viewStampDetail(stamp=random.choice(stamps))
 
         actions['stamp'] = _viewStamp
         weights['stamp'] = 20
@@ -1098,7 +1094,12 @@ class LoggedOutUser(User):
         """
         Run the actions
         """
-        return self._runAction(actions, weights)
+        while datetime.datetime.utcnow() < self.expiration:
+            try:
+                return self._runAction(actions, weights)
+            except RootException:
+                continue
+
 
 
 
