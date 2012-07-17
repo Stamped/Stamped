@@ -136,6 +136,9 @@ class SearchTestsRunner(AStampedTestCase):
                     '\n'.join('    ' + error for error in errors)
                 )
 
+        print '\n\n(Press <ENTER> to continue...)\n\n'
+        sys.stdin.readline()
+
 def main():
     argv = sys.argv
 
