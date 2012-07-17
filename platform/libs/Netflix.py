@@ -107,7 +107,6 @@ class Netflix(object):
         params = oauthRequest.parameters
         logs.info(url)
 
-        # if we're not making a user-signed request, then we need to enforce the 5000 request per day limit
         if verb == 'POST':
             response, content = service_request('netflix', verb, url, body=params, header=headers, priority=priority)
         else:
