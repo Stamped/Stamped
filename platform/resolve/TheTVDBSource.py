@@ -8,7 +8,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-__all__ = [ 'TheTVDBSource', 'TheTVDBShow', 'TheTVDBSearchAll' ]
+__all__ = ['TheTVDBSource', 'TheTVDBShow']
 
 import Globals
 from logs import report
@@ -137,16 +137,8 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
         except Exception:
             return ''
     
-class TheTVDBSearchAll(ResolverProxy, ResolverSearchAll):
-
-    def __init__(self, data):
-        target = TheTVDBShow(data)
-        
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
 
 class TheTVDBSource(GenericSource):
-    
     def __init__(self):
         GenericSource.__init__(self, 'thetvdb', 
             groups=[
@@ -175,9 +167,6 @@ class TheTVDBSource(GenericSource):
         return TheTVDBSource(data=data)
     
     def matchSource(self, query):
-        if query.kind == 'search':
-            return self.searchAllSource(query)
-
         if query.isType('tv'):
             return self.tvSource(query)
         
@@ -186,20 +175,6 @@ class TheTVDBSource(GenericSource):
     def tvSource(self, query):
         return self.generatorSource(self.__queryGen(query=query.name), 
                                     constructor=TheTVDBShow)
-    
-    def searchAllSource(self, query, timeout=None):
-        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.info('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
-            return self.emptySource
-
-        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
-            logs.info('Skipping %s (types: %s)' % (self.sourceName, query.types))
-            return self.emptySource
-
-        logs.info('Searching %s...' % self.sourceName)
-        
-        return self.generatorSource(self.__queryGen(query=query.query_string),
-                                    constructor=TheTVDBSearchAll)
     
     def __queryGen(self, **params):
         results = self.__thetvdb.search(transform=True, detailed=True, **params)
