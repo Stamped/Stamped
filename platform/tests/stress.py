@@ -15,7 +15,10 @@ import copy
 from errors import *
 
 
-def DoneException(Exception):
+class DoneException(Exception):
+    pass
+
+class RootException(Exception):
     pass
 
 """
@@ -35,6 +38,7 @@ def handleGET(path, data, handleExceptions=True):
     url    = "%s/%s?%s" % (baseurl, path, params)
     
     raw = opener.open(url).read()
+    # logs.info("GET: %s" % url)
     
     try:
         result = json.loads(raw)
@@ -51,6 +55,7 @@ def handlePOST(path, data, handleExceptions=True):
     url    = "%s/%s" % (baseurl, path)
     
     raw = opener.open(url, params).read()
+    # logs.info("POST: %s" % url)
     
     try:
         result = json.loads(raw)
@@ -642,7 +647,8 @@ class User(object):
         self.expiration = None
         self._userSessionLength = None
         self._userWaitSpeed = None
-        
+
+        self._stack = []
 
     # Start and root defined in subclasses
     def start(self):
@@ -651,131 +657,251 @@ class User(object):
     def root(self):
         raise NotImplementedError
 
-    # Functions for viewing different pages in the stamped app
-    def viewSdetail(self, stampId):
-        # Make API calls
-        stamp = _getStampsShow()
-        alsoStampedBy = _getStampsAlsoStampedBy
-
-        # Wait
-        expectedWaitTime = 10
-        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
-
+    def _runAction(self, actions, weights):
         while datetime.datetime.utcnow() < self.expiration:
             try:
-                # Go somewhere else
-                r = random.random()
-                if r < .5:
-                    # Go to user profile!
-                    self.viewProfile(stamp[user][user_id])
-                elif r < .6:
-                    # Click on a preview
-                    self.viewProfile(stamp.previews.credits.user.user_id)
-                elif r < .7:
-                    # Click on a user's comment
-                    self.viewProfile(stamp.previews.comments[0].user.user_id)
+                totalWeight = sum(v for k, v in weights.items())
+                cumulativeWeight = 0
+                r = random.randint(0, totalWeight)
 
-                else:
-                    time.sleep(5) # Wait five seconds to page back to the root page!
-                    raise DoneException("DONE!")
+                for key, weight in weights.items():
+                    if r < weight:
+                        logs.debug("%sCHOSE ACTION: %s" % ((' '*2*len(self._stack)), key))
+                        if key != 'pass':
+                            self._stack.append(key)
+                        break
+                    r -= weight
+                actions[key]()
+
             except DoneException:
-                if random.random() < .3:
-                    continue
-                if random.random() < .9:
-                    return 
+                print self._stack
+                action = self._stack.pop()
+                logs.debug("%s  DONE: %s" % ((' '*2*len(self._stack)), action))
+                print self._stack
+                # logs.debug("STACK LENGTH: %s" % len(self._stack))
                 raise
+            except RootException:
+                logs.debug("GOING TO ROOT")
+                raise
+
+    # Functions for viewing different pages in the stamped app
+    def viewStampDetail(self, stamp=None, stampId=None):
+        logs.debug("%sView Stamp Detail" % (' '*2*len(self._stack)))
+        print self._stack
+
+        """
+        Make API calls
+        """
+        if stampId is not None:
+            stamp = _get_stamps_show(stampId, token=self.token)
+
+        assert stamp is not None 
+
+        stampId = stamp['stamp_id']
+        entityId = stamp['entity']['entity_id']
+        entity = _get_entities_show(entityId, token=self.token)
+        alsoStampedBy = _get_entities_stamped_by(entityId, token=self.token)
+
+        """
+        Define possible actions the user can take, including wait time
+        """
+        actions = {}
+        weights = {}
+
+        # Go back to inbox
+        def _pass():
+            time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+            raise DoneException("Done!")
+
+        actions['pass'] = _pass
+        weights['pass'] = 5
+
+        # View the user's profile
+        def _viewProfile():
+            time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+            try:
+                return self.viewProfile(userId=stamp['user']['user_id'])
+            except DoneException:
+                if random.random() < 0.3:
+                    raise
+
+        actions['profile'] = _viewProfile
+        weights['profile'] = 20
+
+        # View a credit given to the stamp
+        if 'previews' in stamp and stamp['previews'] is not None:
+            previews = stamp['previews']
+            if 'credits' in previews and previews['credits'] is not None and len(previews['credits']) > 0:
+                def _viewCredit():
+                    time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+                    return self.viewProfile(stampId=random.choice(previews['credits'])['stamp_id'])
+            
+                actions['credit'] = _viewCredit
+                weights['credit'] = 1
+
+        # View the profile of a commenting user
+        if 'previews' in stamp and stamp['previews'] is not None:
+            previews = stamp['previews']
+            if 'comments' in previews and previews['comments'] is not None and len(previews['comments']) > 0:
+                def _viewComment():
+                    time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+                    return self.viewProfile(userId=random.choice(previews['comments'])['user']['user_id'])
+
+                actions['comment'] = _viewComment
+                weights['comment'] = 1
+
+        assert len(actions) == len(weights)
+
+        """
+        Run the actions
+        """
+        return self._runAction(actions, weights)
 
     # Function to simulate the viewing of a profile. Takes a user id and fromAddFriends, a boolean 
     # denoting whether or not the profile was viewed from the Add Friends page
-    def viewProfile(self, userId,fromAddFriends=False):
+    def viewProfile(self, userId, fromAddFriends=False):
+        logs.debug("%sView Profile (%s)" % ((' '*2*len(self._stack)), userId))
+        print self._stack
+
         #Initial API Calls
         user = _get_users_show(userId)
-        userStamps = _getUserStampCollection(userId, offset=0)
+        userStamps = _get_stamps_collection(scope='user', userId=userId, token=self.token)
 
-        # Wait
-        expectedWaitTime = 10
-        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
-        
-        #Users won't go anywhere but back if viewing from Add Friends
-        if not fromAddFreinds:
-            while datetime.datetime.utcnow() < self.expiration:
-                try:
-                    # Go somewhere else
-                    r = random.random()
-                    if r < .5:
-                        # Go to user profile!
-                        self.viewProfile(stamp.user.user_id)
-                    elif r < .6:
-                        # Click on a preview
-                        self.viewProfile(stamp.previews.credits.user.user_id)
-                    elif r < .7:
-                        # Click on a user's comment
-                        self.viewProfile(stamp.previews.comments[0].user.user_id)
-    
-                    else:
-                        time.sleep(5) # Wait five seconds to page back to the root page!
-                        raise DoneException("DONE!")
-                except DoneException:
-                    if random.random() < .3:
-                        continue
-                    if random.random() < .9:
-                        return 
+        """
+        Define possible actions the user can take, including wait time
+        """
+        actions = {}
+        weights = {}
+
+        # Go back
+        def _pass():
+            time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+            raise DoneException("Done!")
+
+        actions['pass'] = _pass
+        weights['pass'] = 50
+
+        # View stamp
+        def _viewStamp():
+            time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+            try:
+                return self.viewStampDetail(stamp=userStamps[0])
+            except DoneException:
+                if random.random() < 0.75:
                     raise
-        return
+
+        actions['stamp'] = _viewStamp
+        weights['stamp'] = 10
+
+        assert len(actions) == len(weights)
+
+        """
+        Run the actions
+        """
+        return self._runAction(actions, weights)
 
 
-    def viewAddFriends(self,tastemakersToFollow=None,screenNamesToFollow=[]):
-        #Initial API Call
-        suggested = _get_users_suggested(self.token)
-        friends = []
+    # def viewAddFriends(self,tastemakersToFollow=None,screenNamesToFollow=[]):
+    #     logs.debug("View Add Friends")
+
+    #     #Initial API Call
+    #     suggested = _get_users_suggested(self.token)
+    #     friends = []
         
-        # Wait
-        expectedWaitTime = 5
-        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
+    #     # Wait
+    #     expectedWaitTime = 5
+    #     time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
         
-        # Follow some tastemakers
-        for i in range (0,tastemakersToFollow):
-            r = random.random()
+    #     # Follow some tastemakers
+    #     for i in range (0,tastemakersToFollow):
+    #         r = random.random()
 
-            tastemaker = suggested[int(random.random() * len(suggested))]
-            if r < 0.2:
-                self.viewProfile(tastemaker[user_id],fromAddFriends=True)
+    #         tastemaker = suggested[int(random.random() * len(suggested))]
+    #         if r < 0.2:
+    #             self.viewProfile(tastemaker[user_id],fromAddFriends=True)
             
-            friends.append(_post_friendships_create(self.token, tastemaker[user_id]))
+    #         friends.append(_post_friendships_create(self.token, tastemaker[user_id]))
 
 
-        #Search for some friends and follow them
-        for screenName in screenNamesToFollow:
-            users = _post_users_search(self.token, screenName)
-            if len(users) > 0:
-                r = random.random()
-                if r < 0.2:
-                    self.viewProfile(users[0][user_id],fromAddFriends=True)
-                friends.append(_post_friendships_create(self.token,users[0][user_id]))
+    #     #Search for some friends and follow them
+    #     for screenName in screenNamesToFollow:
+    #         users = _post_users_search(self.token, screenName)
+    #         if len(users) > 0:
+    #             r = random.random()
+    #             if r < 0.2:
+    #                 self.viewProfile(users[0][user_id],fromAddFriends=True)
+    #             friends.append(_post_friendships_create(self.token,users[0][user_id]))
 
-        return friends
+    #     return friends
         
     # Inbox Functions
 
-    def viewTastemakerInbox(self, offset=None):
-        logs.debug("Begin")
-        if offset is not None:
-            raise NotImplementedError
-        stamps = _get_stamps_collection(scope='popular')
-        print stamps
-        return stamps
+    def viewTastemakerInbox(self, offset=0):
+        logs.debug("%sView Tastemaker Inbox" % (' '*2*len(self._stack)))
+        
+        # API Calls
+        stamps = []
+        stamps += _get_stamps_collection(scope='popular', offset=offset)
+        offset += 20
+        stamps += _get_stamps_collection(scope='popular', offset=offset)
+        offset += 20
+
+        """
+        Define possible actions the user can take, including wait time
+        """
+        actions = {}
+        weights = {}
+
+        # Go back to root
+        def _pass():
+            time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+            print 'RAISE PASS FROM INBOX'
+            raise DoneException("Done!")
+
+        actions['pass'] = _pass
+        weights['pass'] = 2
+
+        # View the user's profile
+        def _viewStamp():
+            time.sleep(random.randint(2, 6) * self._userWaitSpeed)
+            try:
+                return self.viewStampDetail(stamp=random.choice(stamps))
+            except DoneException:
+                if random.random() < 0.3:
+                    print 'RAISE VIEW STAMP FROM INBOX'
+                    raise
+
+        actions['stamp'] = _viewStamp
+        weights['stamp'] = 20
+
+        # Load more stamps
+        def _page():
+            time.sleep(random.randint(1, 2) * self._userWaitSpeed)
+            stamps += _get_stamps_collection(scope='popular', offset=offset)
+            offset += 20
+
+        actions['page'] = _page
+        weights['page'] = 0
+
+        assert len(actions) == len(weights)
+
+        """
+        Run the actions
+        """
+        return self._runAction(actions, weights)
+
 
     def viewInbox(self,offset=None):
-    	if offset is not None:
+        if offset is not None:
             raise NotImplementedError
         stamps = _get_stamps_collection(scope='inbox',token=self.token)
         return stamps
-    	
+        
 
     # Guide functions
 
     def viewGuide(self):
-    	# No API calls on main guide page
+        # No API calls on main guide page
         
         # Wait (user is studying the options)
         expectedWaitTime = 4
@@ -803,16 +929,16 @@ class User(object):
                     return
                 raise
 
-    	
+        
     # TODO for all of these: Implement paging
 
-    def viewPlacesGuide(self,scope='inbox'):
+    def viewPlacesGuide(self, scope='inbox'):
         
         if self.token == None:
             scope = 'popular'
 
         # API Calls
-        guide = _get_guide_collection(scope=scope,section='food',token=self.token)
+        guide = _get_guide_collection(scope=scope, section='food', token=self.token)
         
         # Wait
         expectedWaitTime = 4
@@ -820,13 +946,13 @@ class User(object):
         
         return guide
 
-    def viewBookGuide(self,scope='inbox'):
+    def viewBookGuide(self, scope='inbox'):
         
         if self.token == None:
             scope = 'popular'
 
         # API Calls
-        guide = _get_guide_collection(scope=scope,section='book',token=self.token)
+        guide = _get_guide_collection(scope=scope, section='book', token=self.token)
         
         # Wait
         expectedWaitTime = 4
@@ -834,13 +960,13 @@ class User(object):
         
         return guide
 
-    def viewMusicGuide(self,scope='inbox'):
+    def viewMusicGuide(self, scope='inbox'):
         
         if self.token == None:
             scope = 'popular'
 
         # API Calls
-        guide = _get_guide_collection(scope=scope,section='music',token=self.token)
+        guide = _get_guide_collection(scope=scope, section='music', token=self.token)
         
         # Wait
         expectedWaitTime = 4
@@ -854,7 +980,7 @@ class User(object):
             scope = 'popular'
 
         # API Calls
-        guide = _get_guide_collection(scope=scope,section='film',token=self.token)
+        guide = _get_guide_collection(scope=scope, section='film', token=self.token)
         
         # Wait
         expectedWaitTime = 4
@@ -862,13 +988,13 @@ class User(object):
         
         return guide
 
-    def viewSoftwareGuide(self,scope='inbox'):
+    def viewSoftwareGuide(self, scope='inbox'):
         
         if self.token == None:
             scope = 'popular'
 
         # API Calls
-        guide = _get_guide_collection(scope=scope,section='app',token=self.token)
+        guide = _get_guide_collection(scope=scope, section='app', token=self.token)
         
         # Wait
         expectedWaitTime = 4
@@ -904,7 +1030,7 @@ class User(object):
 # Specific instances of different types of users
 
 
-#Base class for a user creating a new account - should not be called directly
+# Base class for a user creating a new account - should not be called directly
 class NewUser(User):
     def __init__(self):
         User.__init__(self)
@@ -922,7 +1048,7 @@ class NewUser(User):
         self.userId = user[user_id]
 
 
-#Base class for a user with an existing account - should not be called directly
+# Base class for a user with an existing account - should not be called directly
 class ExistingUser(User):
     def __init__(self,screenName=None):
         User.__init__(self)
@@ -937,12 +1063,13 @@ class ExistingUser(User):
 
 
 
-#Class representing users who do not log in or create an account throughout their session
+# Class representing users who do not log in or create an account throughout their session
 class LoggedOutUser(User):
+
     def __init__(self):
         User.__init__(self)
-        self._userWaitSpeed = 1
-        self._userSessionLength = 10 #200 + (random.random() * 200)
+        self._userWaitSpeed = 0
+        self._userSessionLength = 30 #200 + (random.random() * 200)
         
     def start(self):
         logs.debug("Begin: %s" % self)
@@ -950,31 +1077,62 @@ class LoggedOutUser(User):
         self.expiration = datetime.datetime.utcnow() + datetime.timedelta(seconds=self._userSessionLength)
         logs.debug("Expiration: %s" % self.expiration)
 
-        # Start out in the inbox
-        try:
-            self.viewTastemakerInbox()
-        except DoneException:
-            pass
-        
-        # Move to root menu upon return or exception
-        while datetime.datetime.utcnow() < self.expiration:
-            self.root()
 
-        logs.debug("Finish: %s" % self)
+
+
+        """
+        Define possible actions the user can take, including wait time
+        """
+        actions = {}
+        weights = {}
+
+        # View the user's profile
+        def _viewInbox():
+            return self.viewTastemakerInbox()
+
+        actions['inbox'] = _viewInbox
+        weights['inbox'] = 20
+
+        assert len(actions) == len(weights)
+
+        """
+        Run the actions
+        """
+        return self._runAction(actions, weights)
+
+
+
+
+
+
+
+    #     # Start out in the inbox
+    #     try:
+    #         self.viewTastemakerInbox()
+    #     except DoneException:
+    #         pass
+        
+    #     # Move to root menu upon return or exception
+    #     while datetime.datetime.utcnow() < self.expiration:
+    #         self.root()
+
+    #     logs.debug("Finish: %s" % self)
             
-    def root(self):
+    # def root(self):
+    #     logs.debug("ROOT")
+    #     self._stack = []
 
-    	r = random.random()
-    	try:
-        	if r < 0.8:
-        		self.viewGuide()
-        	else:
-	    		self.viewTastemakerInbox()
+    #     r = random.random()
+    #     try:
+    #         if r < 0.0:
+    #             self.viewGuide()
+    #         else:
+    #             self.viewTastemakerInbox()
 
-        except DoneException:
-            pass
+    #     except DoneException:
+    #         pass
         
-#Class representing either a new or existing user who 
+# Class representing either a new or existing user who 
 class PowerUser(ExistingUser):
     def __init__(self, bExisting, screenName=None):
         if bExisting:
@@ -1058,15 +1216,15 @@ class BeiberUser(NewUser):
         r = random.random()
         try:
             if r < 0.3:
-	            self.viewInbox()
+                self.viewInbox()
             elif r < 0.8:
-	            self.viewGuide()
+                self.viewGuide()
             elif r < 0.85:
-	            self.viewActivity()
+                self.viewActivity()
             elif r < 0.9:
-	            self.viewSettings()
+                self.viewSettings()
             else:
-	    		self.viewAddFriends()
+                self.viewAddFriends()
 
         except DoneException:
             pass
@@ -1107,19 +1265,19 @@ class CasualUser(ExistingUser):
     def root(self):     
         r = random.random()
         try:
-           if r < 0.4:
-               self.viewInbox()
-           elif r < 0.4:
-               self.viewGuide()
-           elif r < 0.95:
-               self.viewActivity()
-           else:
+            if r < 0.4:
+                self.viewInbox()
+            elif r < 0.4:
+                self.viewGuide()
+            elif r < 0.95:
+                self.viewActivity()
+            else:
                 self.viewSettings()
         except DoneException:
             pass
 
 
 
-# user = LoggedOutUser()
-# user.start()
-# print 'DONE'
+user = LoggedOutUser()
+user.start()
+print 'DONE'
