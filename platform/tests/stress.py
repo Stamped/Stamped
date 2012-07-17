@@ -668,7 +668,7 @@ class User(object):
                 raise RootException("Root!")
 
             actions['root'] = _root 
-            weights['root'] = sum(v for k, v in weights.items()) * len(self._stack) / 8
+            weights['root'] = sum(v for k, v in weights.items()) * len(self._stack) / 16
 
         while datetime.datetime.utcnow() < self.expiration:
             try:
@@ -698,7 +698,10 @@ class User(object):
 
     # Functions for viewing different pages in the stamped app
     def viewStampDetail(self, stamp=None, stampId=None):
-        logs.debug("%sView Stamp Detail" % (' '*2*len(self._stack)))
+        if stampId is not None:
+            logs.debug("%sView Stamp Detail (%s)" % ((' '*2*len(self._stack)), stampId))
+        else:
+            logs.debug("%sView Stamp Detail (%s)" % ((' '*2*len(self._stack)), stamp['stamp_id']))
 
         """
         Make API calls
@@ -730,6 +733,7 @@ class User(object):
         # View the user's profile
         def _viewProfile():
             time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+            weights['profile'] = 0
             return self.viewProfile(userId=stamp['user']['user_id'])
 
         actions['profile'] = _viewProfile
