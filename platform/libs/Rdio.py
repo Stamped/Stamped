@@ -62,45 +62,54 @@ def urlencode_utf8(params):
 
 class Rdio(object):
 
-    def __init__(self, key='bzj2pmrs283kepwbgu58aw47', secret='xJSZwBZxFp', cps=5, cpd=15000):
+    def __init__(self, key='bzj2pmrs283kepwbgu58aw47', secret='xJSZwBZxFp'):
         self.__key      = key
         self.__secret   = secret
         self.__consumer = oauth.Consumer(self.__key, self.__secret)
-        self.__limiter  = RateLimiter(cps=cps, cpd=cpd)
+        self.__signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1()
 
-    # note: these decorators add tiered caching to this function, such that 
-    # results will be cached locally with a very small LRU cache of 64 items 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @countedFn('Rdio (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Rdio (after caching)')
     def method(self, method, priority='low', **kwargs):
-        # create the OAuth consumer credentials
-        client = oauth.Client(self.__consumer)
-        kwargs['method'] = method 
-        
         for k,v in kwargs.items():
             if isinstance(v,int) or isinstance(v,float):
                 kwargs[k] = str(v)
             elif isinstance(v,unicode):
                 kwargs[k] = v.encode('utf-8')
 
-        response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/',
-                header={'Accept-encoding':'gzip'}, body=kwargs, priority=priority)
+        kwargs['method'] = method
 
+        oauthRequest = oauth.Request.from_consumer_and_token(self.__consumer,
+                            http_url='http://api.rdio.com/1/',
+                            http_method='POST',
+                            token = None,
+                            parameters=kwargs)
+        oauthRequest.sign_request(self.__signature_method_hmac_sha1, self.__consumer, None)
+
+        body = oauthRequest
+        body.update(kwargs)
+        headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept-encoding':'gzip'
+        }
+        response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/',
+                                            header=headers, body=body, priority=priority)
         return json.loads(content)
 
-    def userMethod(self, token, token_secret, method, **kwargs): 
-        kwargs['method'] = method 
-        access_token = oauth.Token(token, token_secret)   
+    def userMethod(self, token, token_secret, method, **kwargs):
+        kwargs['method'] = method
+        access_token = oauth.Token(token, token_secret)
         client = oauth.Client(self.__consumer, access_token)
 
         #TODO: add service_request call here.  This method isn't being called right now, s
 
-        with self.__limiter:
-            logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
-            response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
+        logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
+        response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
 
         return json.loads(response[1])
 
