@@ -13,6 +13,8 @@ from tests.search.SearchTestsRunner import SearchTestCase, SearchTestsRunner, ma
 from tests.search.SearchResultMatcher import *
 from tests.search.SearchResultsScorer import *
 
+from libs.Fandango                import Fandango
+
 Matcher = MovieResultMatcher
 
 def makeTestCase(query, *expected_results):
@@ -27,18 +29,19 @@ class MovieSearchTests(SearchTestsRunner):
     def test_basic(self):
         test_cases = (
             makeSimpleTestCase('teenage mutant ninja turtles'),
-            makeSimpleTestCase('teenage mutant ninja turtles II'),
+            makeTestCase('teenage mutant ninja turtles II',
+                Matcher(title=LooselyEquals('teenage mutant ninja turtles ii: the secret of the ooze'))),
             makeSimpleTestCase('teenage mutant ninja turtles III'),
             # TODO make this ordering-agnostic
             makeTestCase('the godfather',
                 Matcher(title=Equals('the godfather')),
-                Matcher(title=LooselyEquals('the godfather part ii')),
-                Matcher(title=LooselyEquals('the godfather part iii'))),
+                Matcher(title=LooselyEquals('the godfather: part ii')),
+                Matcher(title=LooselyEquals('the godfather: part iii'))),
             # TODO make this ordering-agnostic
             makeTestCase('godfather',
                 Matcher(title=Equals('the godfather')),
-                Matcher(title=LooselyEquals('the godfather part ii')),
-                Matcher(title=LooselyEquals('the godfather part iii'))),
+                Matcher(title=LooselyEquals('the godfather: part ii')),
+                Matcher(title=LooselyEquals('the godfather: part iii'))),
             makeSimpleTestCase('the hunger games'),
             makeTestCase('hunger games', Matcher(title=Equals('the hunger games'))),
             makeSimpleTestCase('drive'),
@@ -48,8 +51,8 @@ class MovieSearchTests(SearchTestsRunner):
             makeTestCase('die hard',
                 Matcher(title=Equals('die hard')),
                 Matcher(title=Equals('live free or die hard')),
-                Matcher(title=Equals('die hard 2')),
-                Matcher(title=LooselyEquals('die hard: with a vengeance'))),
+                Matcher(title=Equals('die hard 2: die harder')),
+                Matcher(title=LooselyEquals('die hard with a vengeance'))),
             makeSimpleTestCase('the fifth element'),
             makeSimpleTestCase('raiders of the lost ark'),
             makeSimpleTestCase('tomorrow never dies'),
@@ -62,9 +65,9 @@ class MovieSearchTests(SearchTestsRunner):
             # The rest of them were garbage and I don't give a fuck if Attack of the Clones comes before Phantom Menace
             # or whatever, but when people say Star Wars, these are the movies they mean.
             makeTestCase('star wars',
-                Matcher(title=LooselyEquals('star wars episode iv a new hope')),
-                Matcher(title=LooselyEquals('star wars episode v the empire strikes back')),
-                Matcher(title=LooselyEquals('star wars episode vi return of the jedi'))),
+                Matcher(title=LooselyEquals('star wars: episode iv - a new hope')),
+                Matcher(title=LooselyEquals('star wars: episode v - the empire strikes back')),
+                Matcher(title=LooselyEquals('star wars: episode vi - return of the jedi'))),
         )
 
         self._run_tests('basic_film', test_cases)
@@ -93,7 +96,7 @@ class MovieSearchTests(SearchTestsRunner):
         fandango = Fandango(verbose=True)
         movies   = fandango.get_top_box_office_movies()
         
-        return self.__test_movie_search(movies, index = 0)
+        return self.__test_movie_search('top_box_office', movies)
     
     """
     # NOTE (travis): TMDB, which is our primary source for movies, does not 

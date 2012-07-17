@@ -48,7 +48,7 @@ class TVSearchTests(SearchTestsRunner):
             makeSimpleTestCase('dark angel'),
             makeSimpleTestCase('misfits'),
             makeSimpleTestCase('arrested development'),
-            makeSimpleTestCase('big bang theory'),
+            makeSimpleTestCase('the big bang theory'),
             makeSimpleTestCase('how i met your mother'),
             makeTestCase('the walking dead',
                 TvResultMatcher(title=Equals('the walking dead')),
@@ -69,8 +69,8 @@ class TVSearchTests(SearchTestsRunner):
 
         # TODO: add more popular foreign shows with exotic names
         test_cases = (
-            makeSimpleTestCase('footballer\'s wives'),
-            makeTestCase('football wives', Matcher(title=Equals('footballer\'s wives'))),
+            makeTestCase('footballer\'s wives', Matcher(title=Equals('footballers\' wives'))),
+            makeTestCase('football wives', Matcher(title=Equals('footballers\' wives'))),
             makeSimpleTestCase('hotel babylon'),
             makeSimpleTestCase('jeeves and wooster'),
             makeSimpleTestCase('coupling')
