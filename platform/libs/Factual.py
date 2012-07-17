@@ -579,7 +579,7 @@ class Factual(object):
         Factual results are difficult to turn into mongo objects for the mongo cache because sometimes they contain
         dicts that use "$distance" as a key which is a problem for mongo. So we cache the result before it's parsed.
         """
-        m = json.loads(self.__rawFactual(service, prefix, priority **args))
+        m = json.loads(self.__rawFactual(service, prefix, priority, **args))
         try:
             return m['response']['data']
         except:
