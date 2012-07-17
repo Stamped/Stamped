@@ -1077,12 +1077,15 @@ class AmazonSource(GenericSource):
         # The max rank across a sample was around 1300000 at the time of writing.
         defaultSalesRank = 2000000
         salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
-                for searchResult in resultList)
+                      for searchResult in resultList)
         logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
         # TODO(geoff): Use numpy for these computations
         rankMean = float(sum(logSalesRanks)) / len(logSalesRanks)
         rankStdDev = math.sqrt(sum((r - rankMean) ** 2 for r in logSalesRanks) / len(logSalesRanks))
-        
+
+        if rankStdDev == 0:
+            return
+
         for logRank, searchResult in zip(logSalesRanks, resultList):
             factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
             searchResult.addRelevanceComponentDebugInfo('Amazon salesRank factor', factor)
