@@ -91,7 +91,7 @@ def handlePOST(path, data, handleExceptions=True):
 ### OAUTH
 
 # /oauth2/token.json
-def _post_oauth2_login.json(screenName, password):
+def _post_oauth2_login(screenName, password):
     params = {
         'login': screenName,
         'password': password,
@@ -100,7 +100,7 @@ def _post_oauth2_login.json(screenName, password):
     return handlePOST('oauth2/login.json', params)
 
 # /oauth2/token.json
-def _post_oauth2_token.json(refreshToken):
+def _post_oauth2_token(refreshToken):
     params = {
         'refresh_token': refreshToken,
         'grant_type': 'refresh_token',
@@ -625,7 +625,11 @@ randomScreenNames = ['robby','bart','kevin','jstaehle']
 
 
 
+###########################
+##### User simulation #####
+###########################
 
+#Base user class - Should not be called directly
 class User(object):
     def __init__(self):
         self.token = None
@@ -658,7 +662,7 @@ class User(object):
                 r = random.random()
                 if r < .5:
                     # Go to user profile!
-                    self.viewProfile(stamp.user.user_id)
+                    self.viewProfile(stamp[user][user_id])
                 elif r < .6:
                     # Click on a preview
                     self.viewProfile(stamp.previews.credits.user.user_id)
@@ -676,8 +680,10 @@ class User(object):
                     return 
                 raise
 
-
-    def viewProfile(self, userId,fromAF):
+    # Function to simulate the viewing of a profile. Takes a user id and fromAddFriends, a boolean 
+    # denoting whether or not the profile was viewed from the Add Friends page
+    def viewProfile(self, userId,fromAddFriends=False):
+        #Initial API Calls
         user = _get_users_show(userId)
         userStamps = _getUserStampCollection(userId, offset=0)
 
@@ -685,7 +691,8 @@ class User(object):
         expectedWaitTime = 10
         time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
         
-        if not fromAF:
+        #Users won't go anywhere but back if viewing from Add Friends
+        if not fromAddFreinds:
             while datetime.datetime.utcnow() < self.expiration:
                 try:
                     # Go somewhere else
@@ -709,70 +716,200 @@ class User(object):
                     if random.random() < .9:
                         return 
                     raise
-
+        return
 
 
     def viewAddFriends(self,tastemakersToFollow=None,screenNamesToFollow=[]):
         #Initial API Call
         suggested = _get_users_suggested(self.token)
-        
+        friends = []
         
         # Wait
         expectedWaitTime = 5
         time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
         
         # Follow some tastemakers
-        for i in range (0,tastemakersToFollow)
+        for i in range (0,tastemakersToFollow):
             r = random.random()
-            if r < .2:
-                try:
-                    self.view
-        _post_friendships_create(self.token, )
+            tastemaker = suggested[int(random.random() * len(suggested))]
+            if r < 0.2:
+                self.viewProfile(tastemaker[user_id],fromAddFriends=True)
+            
+            friends.append(_post_friendships_create(self.token, tastemaker[user_id]))
+
+
+        #Search for some friends and follow them
+        for screenName in screenNamesToFollow:
+            users = _post_users_search(self.token, screenName)
+            if len(users) > 0:
+                r = random.random()
+                if r < 0.2:
+                    self.viewProfile(users[0][user_id],fromAddFriends=True)
+                friends.append(_post_friendships_create(self.token,users[0][user_id]))
+
+        return friends
+
         
+    # Inbox Functions
 
     def viewTastemakerInbox(self, offset=None):
         if offset is not None:
             raise NotImplementedError
         stamps = _get_stamps_collection(scope='popular')
+        print stamps
         return stamps
 
-    def viewInbox(self):
-    	raise NotImplementedError
+    def viewInbox(self,offset=None):
+    	if offset is not None:
+            raise NotImplementedError
+        stamps = _get_stamps_collection(scope='inbox',token=self.token)
+        return stamps
     	
+
+    # Guide functions
+
     def viewGuide(self):
-    	raise NotImplementedError
+    	# No API calls on main guide page
+        
+        # Wait (user is studying the options)
+        expectedWaitTime = 4
+        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
+
+        while datetime.datetime.utcnow() < self.expiration:
+            try: 
+                r = random.random()
+                if r < 0.2:
+                    self.viewPlacesGuide()
+                elif r < 0.35:
+                    self.viewBookGuide()
+                elif r < 0.6:
+                    self.viewMusicGuide()
+                elif r < 0.8:
+                    self.viewMovieGuide()
+                elif r < 0.9:
+                    self.viewSoftwareGuide()
+                else:
+                    raise DoneException
+            except DoneException:
+                if random.random() < 0.5:
+                    continue
+                if random.random() < 0.9:
+                    return
+                raise
+
     	
+    # TODO for all of these: Implement paging
+
+    def viewPlacesGuide(self,scope='inbox'):
+        
+        if self.token == None:
+            scope = 'popular'
+
+        # API Calls
+        guide = _get_guide_collection(scope=scope,section='food',token=self.token)
+        
+        # Wait
+        expectedWaitTime = 4
+        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
+        
+        return guide
+
+    def viewBookGuide(self,scope='inbox'):
+        
+        if self.token == None:
+            scope = 'popular'
+
+        # API Calls
+        guide = _get_guide_collection(scope=scope,section='book',token=self.token)
+        
+        # Wait
+        expectedWaitTime = 4
+        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
+        
+        return guide
+
+    def viewMusicGuide(self,scope='inbox'):
+        
+        if self.token == None:
+            scope = 'popular'
+
+        # API Calls
+        guide = _get_guide_collection(scope=scope,section='music',token=self.token)
+        
+        # Wait
+        expectedWaitTime = 4
+        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
+        
+        return guide
+
+    def viewMovieGuide(self,scope='inbox'):
+        
+        if self.token == None:
+            scope = 'popular'
+
+        # API Calls
+        guide = _get_guide_collection(scope=scope,section='film',token=self.token)
+        
+        # Wait
+        expectedWaitTime = 4
+        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
+        
+        return guide
+
+    def viewSoftwareGuide(self,scope='inbox'):
+        
+        if self.token == None:
+            scope = 'popular'
+
+        # API Calls
+        guide = _get_guide_collection(scope=scope,section='app',token=self.token)
+        
+        # Wait
+        expectedWaitTime = 4
+        time.sleep(random.random() * expectedWaitTime * self._userWaitSpeed)
+        
+        return guide
+
+
+
+    #Other
+
     def viewEdetail(self):
-        raise NotImplementedError
+        print "view eDetail"
+        pass
         
     def viewActivity(self):
-        raise NotImplementedError
+        print "view Activity"
+        pass
         
     def viewTodoList(self):
-        raise NotImplementedError
+        print "view Todos"
+        pass
         
     def viewSettings(self):
-        raise NotImplementedError
+        print "view settings"
+        pass
         
     def viewCreditsStampList(self):
-        raise NotImplementedError
+        print "view credits stamp list"
+        pass
 
 
 #Specific instances of different types of users
 
-#Base class for a user creating a new account
+#Base class for a user creating a new account - should not be called directly
 class NewUser(User):
     def __init__(self):
         User.__init__(self)
-        
-        if screenName is not None:
-            self.createAccountandLogin()
+        self.createAccountAndLogin()
             
     def createAccountAndLogin(self):
         screenName = generateToken(19)
+        
         #Create account
         _post_account_create(screenName)
         
+        #Login to that account
         user, token = _post_oauth2_login(screenName, "12345")
         self.token = token
         self.userId = user[user_id]
@@ -784,7 +921,7 @@ class NewUser(User):
     def root(self):
         raise NotImplementedError
 
-#Base class for a user with an existing account
+#Base class for a user with an existing account - should not be called directly
 class ExistingUser(User):
     def __init__(self,screenName=None):
         User.__init__(self)
@@ -804,12 +941,13 @@ class ExistingUser(User):
     def root(self):
         raise NotImplementedError
 
+
 #Class representing users who do not log in or create an account throughout their session
 class LoggedOutUser(User):
     def __init__(self):
         User.__init__(self)
         self._userWaitSpeed = 1
-        self._userSessionLength = 200 + (random.random() * 200)
+        self._userSessionLength = 10 #200 + (random.random() * 200)
         
     def start(self):
         self.expiration = datetime.datetime.utcnow() + datetime.timedelta(seconds=self._userSessionLength)
@@ -828,14 +966,14 @@ class LoggedOutUser(User):
     def root(self):
     	r = random.random()
     	try:
-        	if r < 0.7:
+        	if r < 0.8:
         		self.viewGuide()
         	else:
 	    		self.viewTastemakerInbox()
         except DoneException:
         	pass
         
-
+#Class representing either a new or existing user who 
 class PowerUser(ExistingUser):
     def __init__(self, bExisting, screenName=None):
         if bExisting:
@@ -855,7 +993,7 @@ class PowerUser(ExistingUser):
             try:
                 friendsToAdd = set()
                 while len(friendsToAdd) < 5:
-                    friendsToAdd.add(randomScreenNames[random.random() * len(randomScreenNames)])
+                    friendsToAdd.add(randomScreenNames[int(random.random() * len(randomScreenNames))])
                 self.viewAddFriends(tastemakersToFollow=5,sreenNamesToFollow=friendsToAdd)
             except DoneException:
                 pass
@@ -890,6 +1028,7 @@ class PowerUser(ExistingUser):
         except DoneException:
         	pass
 
+#Class representing a fan of justin beiber (or other tastemaker)
 class BeiberUser(NewUser):
     def __init__(self):
         NewUser.__init__(self)
@@ -900,7 +1039,7 @@ class BeiberUser(NewUser):
         self.expiration = datetime.datetime.utcnow() + datetime.timedelta(seconds=self._userSessionLength)
         
         try:
-            self.viewAddFriends(tastemakersToFollow = 5)
+            self.viewAddFriends(tastemakersToFollow = 6)
         except DoneException:
             pass
             
@@ -919,18 +1058,18 @@ class BeiberUser(NewUser):
     	try:
             if r < 0.3:
 	            self.viewInbox()
-	        elif r < 0.8:
+            elif r < 0.8:
 	            self.viewGuide()
-	        elif r < 0.85:
+            elif r < 0.85:
 	            self.viewActivity()
-	        elif r < 0.9:
+            elif r < 0.9:
 	            self.viewSettings()
-	        else:
+            else:
 	    		self.viewAddFriends()
         except DoneException:
         	pass
 
-class CasualUser(ExistingUser)
+class CasualUser(ExistingUser):
     def __init__(self,bExisting,screenName=None):
         if bExisting:
             ExistingUser.__init__(self, screenName=screenName)
@@ -944,9 +1083,9 @@ class CasualUser(ExistingUser)
         #New users add friends (3 tastemakers and 2 random friends)
         if self.existing:
             try:
-               friendsToAdd = set()
+                friendsToAdd = set()
                 while len(friendsToAdd) < 2:
-                    friendsToAdd.add(randomScreenNames[random.random() * len(randomScreenNames)])
+                    friendsToAdd.add(randomScreenNames[int(random.random() * len(randomScreenNames))])
                 self.viewAddFriends(tastemakersToFollow=3,sreenNamesToFollow=friendsToAdd)
             except DoneException:
                 pass
@@ -979,6 +1118,6 @@ class CasualUser(ExistingUser)
 
 
 
-user = LoggedOutUser()
-user.start()
-print 'DONE'
+# user = LoggedOutUser()
+# user.start()
+# print 'DONE'
