@@ -10,18 +10,19 @@ from time                       import time, sleep
 from servers.ratelimiter.server import StampedRateLimiterService
 
 
+FAIL_LIMIT = 10
 FAIL_WAIT = 60*5
 RL_HOST = 'localhost'
 RL_PORT = 18861
 
 
 class RateLimiterState(object):
-    def __init__(self, fail_wait, host, port):
+    def __init__(self, fail_limit, fail_wait, host, port):
         self.__local_rlservice = None
         self.__host = host
         self.__port = port
         self.__request_fails = 0
-        self.__fail_threshold = 0
+        self.__fail_limit = fail_limit
         self.__fail_start = None
         self.__fail_wait = fail_wait
         self.__is_ec2 = utils.is_ec2()
@@ -89,7 +90,7 @@ def rl_state():
     global __rl_state
     if __rl_state is not None:
         return __rl_state
-    __rl_state = RateLimiterState(FAIL_WAIT, RL_HOST, RL_PORT)
+    __rl_state = RateLimiterState(FAIL_LIMIT, FAIL_WAIT, RL_HOST, RL_PORT)
     return __rl_state
 
 def service_request(service, method, url, body={}, header={}, query_params = {}, priority='high', timeout=5):
