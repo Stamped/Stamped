@@ -11,7 +11,6 @@ import feedparser, gevent, os, re
 from datetime       import datetime
 from optparse       import OptionParser
 from libs.LibUtils  import parseDateString
-from libs.Request   import service_request
 from api.Schemas    import *
 
 __all__ = [ "Fandango" ]

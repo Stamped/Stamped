@@ -138,7 +138,8 @@ class RateLimiter(object):
 
         self.__semaphore = Semaphore()
 
-        self.__worker = gevent.spawn(workerProcess, self)
+        if self.limit is not None and self.period is not None:
+            self.__worker = gevent.spawn(workerProcess, self)
 
     def update_limits(self, limit, period, cpd, fail_limit, fail_period, blackout_wait):
         if self.limit != limit:
@@ -295,6 +296,8 @@ class RateLimiter(object):
 
     def _getExpectedWaitTime(self, now, priority=0):
         # determine the longest wait time for all of the rate limits, given the number of items in the queue
+        if self.limit is None or self.period is None:
+            return 0
         rate_wait = self._getRateWaitTime(now)
         num_pending_requests = self.__requests.qsize_priority(priority)
         queue_wait = (num_pending_requests / self.limit) * self.period
@@ -326,7 +329,7 @@ class RateLimiter(object):
 
             if self.__curr_timeblock_start is None:
                 self.__curr_timeblock_start = now
-            if self.__calls < self.limit:
+            if self.limit is None or self.period is None or self.__calls < self.limit:
                 self.call()
                 self.doRequest(request, asyncresult)
             else:
