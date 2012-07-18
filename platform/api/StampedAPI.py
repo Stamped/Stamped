@@ -1966,18 +1966,121 @@ class StampedAPI(AStampedAPI):
 
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
-        popularStampIds = map(lambda x: x.stamp_id, popularStamps)
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
+        popularStampStats = self._stampStatsDB.getStatsForStamps(popularStampIds)
 
         if len(popularStampIds) != len(popularUserIds):
             logs.warning("%s: Length of popularStampIds doesn't equal length of popularUserIds" % entityId)
             raise Exception
+
+        numTodos = self._todoDB.countTodosFromEntityId(entityId)
+        
+        aggStampScore = 0
+
+        for stampStat in popularStampStats:
+            if stampStat.score is not None:
+                aggStampScore += stampStat.score
+
+        popularity = (1 * numTodos) + (1 * aggStampScore)
+
+        # Entity Quality is a mixture of having an image and having enrichment
+        if entity.kind == 'other':
+            quality = 0.1
+        else:
+            quality = 0.6
+        
+            # Check if entity has an image (places don't matter)
+            if entity.kind != 'place':
+                if entity.images is None:
+                    quality -= 0.3
+
+            # Places
+            if entity.kind == 'place':
+                if entity.sources.googleplaces_id is None:
+                    quality -= 0.3
+                if entity.formatted_address is None:
+                    quality -= 0.1
+                if entity.sources.singleplatform_id is not None:
+                    quality += 0.2
+                if entity.sources.opentable_id is not None:
+                    quality += 0.1
+
+
+            # Music 
+            if entity.isType('track') or entity.isType('album') or entity.isType('artist'):
+                
+                if entity.sources.itunes_id is None:
+                    quality -= 0.3
+                if entity.sources.spotify_id is not None: 
+                    quality += 0.15
+                if entity.sources.rdio_id is not None:
+                    quality += 0.15
+
+                if entity.isType('track'):
+                    if entity.artists is None:
+                        quality -= 0.1
+                    if entity.albums is None:
+                        quality -= 0.05
+
+                elif entity.isType('artist'):
+                    if entity.tracks is None:
+                        quality -= 0.1
+                    if entity.albums is None:
+                        quality -= 0.05
+
+                elif entity.isType('album'):
+                    if entity.artists is None:
+                        quality -= 0.1
+                    if entity.tracks is None:
+                        quality -= 0.1
+
+            # Movies and TV
+            if entity.isType('movie'):
+
+                if entity.sources.tmdb_id is None:
+                    quality -= 0.3
+                if entity.sources.itunes_id is not None:
+                    quality += 0.2
+                if entity.sources.netflix_id is not None:
+                    quality += 0.1
+
+            if entity.isType('tv'):
+                if entity.sources.thetvdb_id is None:
+                    quality -= 0.15
+                if entity.sources.netflix_id is not None:
+                    quality += 0.2
+
+            # Books
+            if entity.isType('book'):
+
+                if entity.sources.amazon_id is None:
+                    quality -= 0.2
+                if entity.sources.itunes_id is not None:
+                    quality += 0.1
+
+            # Apps
+            if entity.types[0] == 'app':
+
+                if entity.sources.itunes_url is None:
+                    quality -= 0.4
+                else:
+                    quality += 0.1
+
+
+        if quality > 1.0:
+            logs.warning("Quality score greater than 1 for entity %s" % entityId)
+            quality = 1.0
+
+        score = max(quality, quality * popularity)
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
             stats.popular_stamps = popularStampIds
+            stats.popularity = popularity
+            stats.quality = quality
+            stats.score = score
             self._entityStatsDB.updateEntityStats(stats)
         except StampedUnavailableError:
             stats = EntityStats()
@@ -2872,52 +2975,64 @@ class StampedAPI(AStampedAPI):
             # Call async process to update references
             tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
-        # Stamp popularity
-        popularity = stats.num_likes + stats.num_todos + stats.num_comments
+        # Stamp popularity - Unbounded score
+        popularity = (2 * stats.num_likes) + stats.num_todos + (stats.num_comments / 2.0) + (2 * stats.num_credits)
         #TODO: Add in number of activity_items with the given stamp id 
         
-        stats.popularity = int(popularity)
+        stats.popularity = float(popularity)
 
-        # Stamp Quality
-        image_score = 0
-        for content in stamp.contents:
-            if content.images is not None:
-                image_score = 1
-                break
+        # Stamp Quality - Score out of 1... 0.5 by default 
+
+        quality = 0.5 
+
+        # -0.2 for no blurb, +0 for <20 chars, +0.1 for 20-50 chars, + 0.16 for 50-100 chars, +0.19 for 100+ chars
         
         blurb = ""
         for content in stamp.contents:
             blurb = "%s%s" % (blurb,content.blurb)
         
-        length_score = 0
-        if len(blurb) > 20:
-            length_score = 2
-        elif len(blurb) > 0:
-            length_score = 1 
-            
-        # Blurb has at least one mention in it
-        mentions = utils.findMentions(blurb)
-        mention_score = 0
-        for mention in mentions:
-            mention_score = 1
-            break
-            
-        urls = utils.findUrls(blurb)
-        url_score = 0
-        for url in urls:
-            url_score = 1
-            break
-            
-        has_quote = 0
-        if '"' in blurb:
-            has_quote = 1
-        
-        quality = (2 * stats.num_credits) + (2 * image_score) + (1 * length_score) + (1 * mention_score) + (1 * url_score) + (1 * has_quote)
+        if len(blurb) > 100:
+            quality += 0.19
+        elif len(blurb) > 50:
+            quality += 0.13
+        elif len(blurb) > 20:
+            quality += 0.1
+        elif len(blurb) == 0:
+            quality -= 0.2
 
-        stats.quality = int(quality)
+        # +0.2 for image in the stamp
+        for content in stamp.contents:
+            if content.images is not None:
+                quality += 0.2
+                break
         
-        score = (.5 * quality) + popularity
-        stats.score = int(score)
+        # +0.05 if stamp has at least one credit
+        if stats.num_credits > 0:
+            quality += 0.05
+
+
+        # +0.02 if blurb has at least one mention in it
+        mentions = utils.findMentions(blurb)
+        for mention in mentions:
+            quality += 0.02
+            break
+            
+        # +0.02 if blurb has at least one url link in it
+        urls = utils.findUrls(blurb)
+        for url in urls:
+            quality += 0.02
+            break
+        
+        # +0.2 if blurb has at least one quote in it 
+        if '"' in blurb:
+            quality += 0.02
+
+        stats.quality = quality
+        
+        
+
+        score = max(quality, float(quality * popularity))
+        stats.score = score
 
         self._stampStatsDB.updateStampStats(stats)
 
@@ -3923,7 +4038,7 @@ class StampedAPI(AStampedAPI):
                 elif t < 90:
                     stamp_score += 1.03125 - (.65 / 80 * t)
                 elif t < 290:
-                    stamp_score += .435 - (.3 / 200 * t)
+                    stamp_score += .435 - (.3 / 200 * t) 
             
             #Personal stamp score - higher is worse
             if personal_timestamp is not None:
@@ -3965,7 +4080,7 @@ class StampedAPI(AStampedAPI):
                     - (2 * personal_stamp_score) 
                     + (3 * personal_todo_score) 
                     + (1 * avgQuality) 
-                    + (1 * avgPopularity) ) * (image_score)
+                    + (1 * max(5, avgPopularity)) ) * (image_score)
             
             return result
 
