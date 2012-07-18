@@ -2971,7 +2971,10 @@ class StampedAPI(AStampedAPI):
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
-
+        account = self.getAccount(authUserId)
+        if account.linked is not None and account.linked.facebook is not None\
+           and account.linked.facebook.token is not None:
+            token = account.linked.facebook.token
             result = self._facebook.deleteFromOpenGraph(og_action_id, token)
 
 
