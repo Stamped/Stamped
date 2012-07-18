@@ -1087,50 +1087,13 @@ var g_update_stamps = null;
         var $content            = $('#main-page-content');
         var header_height       = $header.height();
         var cur_header_height   = header_height || 0;
-        var min_height_ratio    = 0.5;
+        var min_height_ratio    = 1.0;
         var min_header_height   = header_height * min_height_ratio;
-        
-        /*var $join               = $('.join');
-        var $join_button        = $join.find('a.button');
-        
-        var $login              = $('.login');
-        var $already_stamping   = $login.find('span.desc');
-        var $login_button       = $login.find('a.button');
-        
-        var login_button_width  = $login_button.width();
-        
-        var join_pos            = $join.position();
-        var login_pos           = $login.position();
-        
-        var pad                 = 4;
-        var join_width          = $join.width()  + pad;
-        var join_height         = $join.height() + pad;
-        
-        var login_width         = $login.width()  + pad;
-        var login_height        = $login.height() + pad;*/
         
         // now that we have the static positions and sizes of the dynamic header  
         // elements, initialize their new positioning /sizing to absolute and 
         // non-auto, respectively.
         $header.height(header_height);
-        
-        /*$join.css({
-            'position'  : 'absolute', 
-            'float'     : 'none', 
-            'top'       : join_pos.top, 
-            'left'      : join_pos.left, 
-            'width'     : join_width, 
-            'height'    : join_height
-        });
-        
-        $login.css({
-            'position'  : 'absolute', 
-            'float'     : 'none', 
-            'top'       : login_pos.top, 
-            'left'      : login_pos.left, 
-            'width'     : login_width, 
-            'height'    : login_height
-        });*/
         
         var last_ratio = null;
         
@@ -1172,30 +1135,6 @@ var g_update_stamps = null;
                 $content.css({
                     top : cur_header_height + 15
                 });
-                
-                // layout and style the header's login / join content
-                /*var cur_opacity = cur_ratio * cur_ratio;
-                var already_stamping_style = {
-                    opacity : cur_opacity
-                };
-                
-                if (cur_opacity <= 0.2) {
-                    already_stamping_style['visibility'] = 'hidden';
-                } else {
-                    already_stamping_style['visibility'] = 'visible';
-                }
-                
-                $already_stamping.css(already_stamping_style);
-                
-                var cur_left = join_pos.left - inv_cur_ratio * (login_button_width + 16);
-                $join.css({
-                    left : cur_left
-                });
-                
-                var cur_top  = cur_ratio * login_pos.top + inv_cur_ratio * join_pos.top;
-                $login.css({
-                    top : cur_top
-                });*/
                 
                 // resize user's stamp logo
                 var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width - 166);

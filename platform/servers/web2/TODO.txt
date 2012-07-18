@@ -57,7 +57,8 @@ TODO:
             * replace intro hero font with skyline font
             * subpages
                 * basic 404 page
-                    * cool 404 page w/ animated stamps ala gravity particle simulation
+                    * cool 404 page w/ circle animation
+                    * http://support.google.com/webmasters/bin/answer.py?hl=en&answer=136085&from=93644&rd=1
                 * basic 5XX page
                 * legal page
                 * jobs page
