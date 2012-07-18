@@ -87,6 +87,7 @@ urlpatterns = patterns('',
     url(r'^index$',                             'core.views.index'), 
     url(r'^index\.html?$',                      'core.views.index'), 
     url(r'^/?$',                                'core.views.index'), 
+    url(r'^/?download-app$',                    'core.views.download_app'), 
     
     # ------------------------------ ABOUT -------------------------------------
     # e.g., stamped.com/about, stamped.com/about.html

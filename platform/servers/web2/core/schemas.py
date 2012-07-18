@@ -101,3 +101,9 @@ class HTTPIndexSchema(Schema):
         cls.addProperty('intro',                            bool)
         cls.addProperty('mobile',                           bool)
 
+class HTTPDownloadAppSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('phone_number',                     basestring, required=True)
+

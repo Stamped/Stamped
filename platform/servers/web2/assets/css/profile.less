@@ -1726,21 +1726,150 @@ a.map-profile-link {
    ************************************************************************** */
 
 
+@popup-padding:  24px;
+
 .popup {
     position: relative;
-    max-width: 366px;
-    @padding:  24px;
+    background-color: #fff;
     
     // TODO: add large 50px drop shadow
+    .popup-header {
+        padding: (@popup-padding / 4) @popup-padding;
+        white-space: nowrap;
+    }
     
-    background-color: #fff;
+    .popup-body {
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+.popup-large {
+    text-align: center;
+    width: 100%;
+    
+    .stamped-logo {
+        top:  -160px;
+        left: 50%;
+        
+        margin-left: -92px;
+    }
+    
+    .popup-header {
+        .pronounced-title {
+            line-height: 100%;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+    }
+    
+    .popup-body {
+        padding: 0 @popup-padding;
+        font-size: 90%;
+        
+        p {
+            margin: .5em 0;
+        }
+        
+        .sms {
+            position: relative;
+            border: 2px solid #AAA;
+            margin: 0 auto;
+            width: 60%;
+            line-height: 31px;
+            
+            padding: 6px 12px;
+            .rounded(4px);
+            
+            input {
+                text-align: left;
+                padding: 0;
+                
+                color: #AAA;
+                border: 0 none;
+                outline: none;
+                
+                &:focus {
+                    border: 0 none;
+                    outline: none;
+                    color: #1A60C3;
+                }
+            }
+            
+            .send-button {
+                float: right;
+                opacity: 0;
+                
+                border: 0 none;
+                outline: none;
+                
+                .transition(opacity, .1s, linear);
+            }
+            
+            .active-0  { opacity: 0.0; }
+            .active-1  { opacity: 0.1; }
+            .active-2  { opacity: 0.2; }
+            .active-3  { opacity: 0.3; }
+            .active-4  { opacity: 0.4; }
+            .active-5  { opacity: 0.5; }
+            .active-6  { opacity: 0.6; }
+            .active-7  { opacity: 0.7; }
+            .active-8  { opacity: 0.8; }
+            .active-9  { opacity: 0.9; }
+            .active-10 { opacity: 1.0; }
+        }
+        
+        .active {
+            border-color: #1A60C3;
+        }
+        
+        .error {
+            border-color: red;
+            color: red;
+        }
+        
+        .or {
+            margin-top: .5em;
+            
+            .dotted-left, .dotted-right {
+                display: inline-block;
+                width: 25%;
+                height: .5em;
+                padding-top: .5em;
+                border-bottom: 2px dotted #AAA;
+            }
+        }
+    }
+    
+    .app-store-button {
+        position: absolute;
+        left: 50%;
+        bottom: -60px;
+        margin-left: -60px;
+    }
+}
+
+#retina {
+    .popup-large {
+        .popup-body {
+            .sms {
+                line-height: 62px;
+            }
+        }
+        
+        .app-store-button {
+            margin-left: -120px;
+        }
+    }
+}
+
+.popup-small {
+    max-width: 366px;
     
     .popup-header {
         position: relative;
         z-index: 5000;
-        
-        padding: (@padding / 4) @padding;
-        white-space: nowrap;
         
         .box-shadow(0, 3px, 3px, 0, @shadow);
         .rounded(0px);
@@ -1784,10 +1913,6 @@ a.map-profile-link {
         min-width:  366px;
         overflow: scroll;
         
-        &:focus {
-            outline: none;
-        }
-        
         .jspVerticalBar {
             margin: 0 6px;
             padding-top: 8px;
@@ -1803,7 +1928,7 @@ a.map-profile-link {
                 border-bottom: 1px solid #c2c2c2;
                 white-space: nowrap;
                 
-                padding: (@padding / 2) @padding;
+                padding: (@popup-padding / 2) @popup-padding;
                 
                 .profile-image-wrapper, .stamp, .name {
                     float: left;

@@ -471,3 +471,20 @@ def shuffle_split_users(users):
     
     return a0
 
+def transform_output(value, **kwargs):
+    """
+        Serialize object to json and return it as an HttpResponse object
+    """
+    
+    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
+    kwargs.setdefault('mimetype', 'application/json')
+    
+    if isinstance(value, bool):
+        value = { 'result' : value }
+    
+    output_json = json.dumps(value, sort_keys=not IS_PROD)
+    output      = HttpResponse(output_json, **kwargs)
+    
+    logs.output(output_json)
+    return output
+

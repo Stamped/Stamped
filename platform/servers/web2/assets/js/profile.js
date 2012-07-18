@@ -471,6 +471,24 @@ var g_update_stamps = null;
             return output;
         };
         
+        var get_fancybox_popup_large_options = function(options) {
+            var output = get_fancybox_options({
+                scrolling   : 'no', // we prefer our own, custom jScrollPane scrolling
+                wrapCSS     : '', 
+                padding     : 0
+            });
+            
+            if (!!options) {
+                for (var key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        output[key] = options[key];
+                    }
+                }
+            }
+            
+            return output;
+        };
+        
         var find_valid_image = function($elem, selector, is_sdetail) {
             var $elements = $elem.find(selector);
             $elements     = $elements.filter(function() {
@@ -1072,7 +1090,7 @@ var g_update_stamps = null;
         var min_height_ratio    = 0.5;
         var min_header_height   = header_height * min_height_ratio;
         
-        var $join               = $('.join');
+        /*var $join               = $('.join');
         var $join_button        = $join.find('a.button');
         
         var $login              = $('.login');
@@ -1089,14 +1107,14 @@ var g_update_stamps = null;
         var join_height         = $join.height() + pad;
         
         var login_width         = $login.width()  + pad;
-        var login_height        = $login.height() + pad;
+        var login_height        = $login.height() + pad;*/
         
         // now that we have the static positions and sizes of the dynamic header  
         // elements, initialize their new positioning /sizing to absolute and 
         // non-auto, respectively.
         $header.height(header_height);
         
-        $join.css({
+        /*$join.css({
             'position'  : 'absolute', 
             'float'     : 'none', 
             'top'       : join_pos.top, 
@@ -1112,7 +1130,7 @@ var g_update_stamps = null;
             'left'      : login_pos.left, 
             'width'     : login_width, 
             'height'    : login_height
-        });
+        });*/
         
         var last_ratio = null;
         
@@ -1156,7 +1174,7 @@ var g_update_stamps = null;
                 });
                 
                 // layout and style the header's login / join content
-                var cur_opacity = cur_ratio * cur_ratio;
+                /*var cur_opacity = cur_ratio * cur_ratio;
                 var already_stamping_style = {
                     opacity : cur_opacity
                 };
@@ -1177,7 +1195,7 @@ var g_update_stamps = null;
                 var cur_top  = cur_ratio * login_pos.top + inv_cur_ratio * join_pos.top;
                 $login.css({
                     top : cur_top
-                });
+                });*/
                 
                 // resize user's stamp logo
                 var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width - 166);
@@ -2034,7 +2052,7 @@ var g_update_stamps = null;
                 
                 //var href  = "https://embed.spotify.com/?uri={{source.completion_data.source_id}}";
                 
-                $link.click(function(event) {
+                /*$link.click(function(event) {
                     event.preventDefault();
                     
                     var popup_options = get_fancybox_popup_options({
@@ -2049,7 +2067,7 @@ var g_update_stamps = null;
                     m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
                 }, {
                     cssSelectorAncestor: "#cp_container_1"
-                });
+                });*/
                 
                 // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
             }
@@ -2157,6 +2175,114 @@ var g_update_stamps = null;
                 url   : url
             });
         };
+        
+        
+        // ---------------------------------------------------------------------
+        // initialize signup functionality
+        // ---------------------------------------------------------------------
+        
+        
+        $body.on("click", ".get-the-app-button", function(event) {
+            event.preventDefault();
+            
+            var popup_options = get_fancybox_popup_large_options({
+                content     : $("#popup-signup").html(), 
+                type        : "html", 
+                width       : 480, 
+                minWidth    : 480
+            });
+            
+            console.debug(popup_options);
+            $.fancybox.open(popup_options);
+            return false;
+        });
+        
+        var default_phone_number = "555-555-5555";
+        var sms_message_success  = "SMS Sent!";
+        var sms_message_error    = "SMS Error!";
+        
+        $body.on("focus", ".phone-number", function(event) {
+            var $this = $(this);
+            var $sms  = $this.parent();
+            var value = $this.attr("value");
+            
+            if (value == default_phone_number || value == sms_message_success || value == sms_message_error) {
+                $this.attr("value", "");
+            }
+            
+            $sms.removeClass("error").addClass("active");
+            
+            return true;
+        });
+        
+        $body.on("focusout", ".phone-number", function(event) {
+            var $this = $(this);
+            var $sms  = $this.parent();
+            var value = $this.attr("value").trim();
+            
+            if (value.length <= 0) {
+                $this.attr("value", default_phone_number);
+            }
+            
+            $sms.removeClass("active error");
+            
+            return true;
+        });
+        
+        $(".phone-number").live("keyup change", function(event) {
+            var $this   = $(this);
+            var value   = $this.attr("value").trim();
+            var prefix  = "active-";
+            var classes = "active-0 active-1 active-2 active-3 active-4 active-5 active-6 active-7 active-8 active-9 active-10";
+            
+            if (value.length >= 0) {
+                var length = value.length;
+                
+                if (length > 10) {
+                    length = 10;
+                }
+                
+                var $button = $this.parent().find(".send-button");
+                $button.removeClass(classes).addClass(prefix + length);
+            }
+            
+            return true;
+        });
+        
+        $body.on("submit", ".sms-form", function(event) {
+            event.preventDefault();
+            
+            var $this  = $(this);
+            var $input = $this.find(".phone-number");
+            var value  = $input.attr("value").trim();
+            
+            if (value == default_phone_number || value == sms_message_success || value == sms_message_error || value.length <= 3) {
+                return false;
+            }
+            
+            value = value.replace(/-/g, "");
+            
+            var max_len = 11;
+            if (value[0] == "+") {
+                max_len = 12;
+            }
+            
+            if (value.length > max_len) {
+                return false;
+            }
+            
+            var ajaxP  = $.ajax({
+                type        : "POST", 
+                url         : "/download-app", 
+                data        : { "phone_number" : value }
+            }).done(function () {
+                $input.attr("value", sms_message_success);
+            }).fail(function() {
+                $input.attr("value", sms_message_error).parent().addClass("error");
+            });
+            
+            return false;
+        });
         
         
         // ---------------------------------------------------------------------

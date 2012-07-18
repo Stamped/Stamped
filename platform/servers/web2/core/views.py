@@ -8,10 +8,12 @@ __license__   = "TODO"
 import Globals
 import api.HTTPSchemas
 import os, pprint, utils
+import libs.sms
 
-from django.http                import HttpResponseRedirect
-from servers.web2.core.schemas  import *
-from servers.web2.core.helpers  import *
+from django.views.decorators.http   import require_http_methods
+from django.http                    import HttpResponseRedirect
+from servers.web2.core.schemas      import *
+from servers.web2.core.helpers      import *
 
 # TODO: stricter input schema validation
 
@@ -149,7 +151,7 @@ def about(request, **kwargs):
         {
             'name'              : 'Mike Lowin', 
             'subtitle'          : 'Software Engineer', 
-            'screen_name'       : 'michaellowin', 
+            'screen_name'       : 'ml', 
             'color_primary'     : 'FF7E00', 
             'color_secondary'   : 'FFEA00', 
             'desc'              : 'Mike previously worked with Kevin at a hedge fund building analytics software, and apparently liked him enough to want to join Stamped (we were surprised too). He graduated from Vassar College with a B.A. in Computer Science.', 
@@ -549,4 +551,12 @@ def temp_view(request, **kwargs):
     return stamped_render(request, 'temp.html', {
         'N' : range(10)
     })
+
+@stamped_view(schema=HTTPDownloadAppSchema)
+@require_http_methods(["POST"])
+def download_app(request, schema, **kwargs):
+    sms_client = libs.sms.globalSMSClient()
+    result = sms_client.send_sms(schema.phone_number)
+    
+    return transform_output(True)
 

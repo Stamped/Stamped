@@ -13,18 +13,18 @@ from email.mime.text import MIMEText
 
 class ANotificationHandler(object):
     
-    def __init__(self, recipients):
-        if not isinstance(recipients, list):
-            recipients = [ recipients ]
+    def __init__(self, recipients=None):
+        if recipients is not None and not isinstance(recipients, list):
+            recipients  = [ recipients ]
         
         self.recipients = recipients
     
     @abstract
-    def email(self, subject, message):
+    def email(self, subject, message, recipients=None):
         pass
     
     @abstract
-    def sms(self, subject, message):
+    def sms(self, subject, message, recipients=None):
         pass
     
     def __str__(self):
@@ -55,19 +55,25 @@ class NotificationRecipient(object):
 
 class GoogleSMTPNotificationHandler(ANotificationHandler):
     
-    def __init__(self, username, password, recipients=[]):
+    def __init__(self, username, password, recipients=None):
         ANotificationHandler.__init__(self, recipients)
         
         self.username = username
         self.password = password
     
-    def email(self, subject, message):
-        for recipient in self.recipients:
+    def email(self, subject, message, recipients=None):
+        if recipients is None:
+            recipients = self.recipients
+        
+        for recipient in recipients:
             if recipient.email is not None:
                 self._sendmail(recipient.email, subject, message)
     
-    def sms(self, subject, message):
-        for recipient in self.recipients:
+    def sms(self, subject, message, recipients=None):
+        if recipients is None:
+            recipients = self.recipients
+        
+        for recipient in recipients:
             if recipient.sms is not None:
                 self._sendmail(recipient.sms, subject, message)
     
