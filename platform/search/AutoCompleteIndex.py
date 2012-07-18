@@ -21,21 +21,18 @@ from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
 from search.AutoCompleteTrie import AutoCompleteTrie
 
 EntityTuple = namedtuple('EntityTuple', ['entity_id', 'title', 'last_popular', 'types'])
+
+# The tokenizer breaks input text into tokens by spaces and common punctuations. The CharsetFilter
+# removes any accent marks on letters, and the LowercaseFilter puts all letters to lowercase.
 TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter()
 
 def normalizeTitle(title):
     return ' '.join(tokenizeTitleAndNormalize(title))
 
 def tokenizeTitleAndNormalize(title):
-    tokens = [token.text for token in TOKENIZER(title)]
-    while True:
-        try:
-            index = tokens.index('s', 1)
-        except ValueError:
-            break
-        tokens[index-1] = tokens[index-1] + 's'
-        del tokens[index]
-    return tokens
+    # Remove apostrophes, so contractions don't get broken into two separate words.
+    title = ''.join(c for c in title if c != "'")
+    return [token.text for token in TOKENIZER(title)]
 
 def entityScoringFn(entity, prefix):
     # TODO(geoff): factor in how many stamps are on the entity
