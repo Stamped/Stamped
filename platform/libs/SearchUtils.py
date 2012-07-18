@@ -66,7 +66,8 @@ def formatSearchQuery(queryText):
     components = []
     for token in tokens:
         normalized = set([normalized.text for normalized in NORMALIZER([token])])
-        components.append({'search_tokens' : {'$in' : list(normalized)}})
+        query = next(iter(normalized)) if len(normalized) == 1 else {'$in' : list(normalized)}
+        components.append({'search_tokens' : query})
     return components
 
 
