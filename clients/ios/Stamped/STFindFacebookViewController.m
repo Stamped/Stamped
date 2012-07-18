@@ -101,6 +101,7 @@ static const CGFloat _batchSize = 100;
         self.waitingForFB = YES;
         [[STFacebook sharedInstance] auth];
     }
+    [self reloadDataSource];
 }
 
 - (void)viewDidUnload
@@ -386,7 +387,7 @@ static const CGFloat _batchSize = 100;
 
 - (NSString*)tableView:(UITableView*)tableView titleForHeaderInSection:(NSInteger)section {
     if (section == 0) {
-        return @"Friends from Stamped";
+        return @"Friends on Stamped";
     }
     else {
         return @"Invite Friends to Stamped";

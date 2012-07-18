@@ -28,21 +28,21 @@
 - (void)commonInit {
     
         
-    switch (self.queryType) {
-        case STMusicPickerQueryTypeArtist:
-            self.title = @"Artists";
-            break;
-        case STMusicPickerQueryTypeSong:
-            self.title = @"Songs";
-            break;
-        case STMusicPickerQueryTypeAlbum:
-            self.title = @"Albums";
-            break;
-            
-        default:
-            break;
-    }
-    
+//    switch (self.queryType) {
+//        case STMusicPickerQueryTypeArtist:
+//            self.title = @"Artists";
+//            break;
+//        case STMusicPickerQueryTypeSong:
+//            self.title = @"Songs";
+//            break;
+//        case STMusicPickerQueryTypeAlbum:
+//            self.title = @"Albums";
+//            break;
+//            
+//        default:
+//            break;
+//    }
+//    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
         MPMediaQuery *query;

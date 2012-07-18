@@ -39,6 +39,7 @@
 #import "STActionManager.h"
 #import "STCalloutView.h"
 #import "STConfirmationView.h"
+#import "STUniversalNewsController.h"
 
 #import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
@@ -46,13 +47,13 @@
 #import "STPlayer.h"
 #import "STDebug.h"
 
-static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
-#if defined (DEV_BUILD)
-static NSString* const kDataBaseURL = @"https://dev.stamped.com/v0";
-#else
-static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
-#endif
-static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
+//static NSString* const kLocalDataBaseURL = @"http://localhost:18000/v0";
+//#if defined (DEV_BUILD)
+//static NSString* const kDataBaseURL = @"https://dev.stamped.com/v0";
+//#else
+//static NSString* const kDataBaseURL = @"https://api.stamped.com/v0";
+//#endif
+//static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
 @interface STAppDelegate ()
 
@@ -86,20 +87,20 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     //  [[BWHockeyManager sharedHockeyManager] setAppIdentifier:@"eed3b68dbf577e8e1a9ce46a83577ead"];
     //[[BWHockeyManager sharedHockeyManager] setDelegate:self];
     //#endif
-    
-#if defined (CONFIGURATION_Beta)
-#warning QuincyKit Beta (Ad Hoc) is configured for this build
-    NSString* key;
-    //key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
-    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
-    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
-#endif
-    
-    
-#if defined (CONFIGURATION_Release)
-#warning QuincyKit Distribution is configured for this build
-    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
-#endif
+//    
+//#if defined (CONFIGURATION_Beta)
+//#warning QuincyKit Beta (Ad Hoc) is configured for this build
+//    NSString* key;
+//    //key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
+//    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
+////    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
+//#endif
+//    
+//    
+//#if defined (CONFIGURATION_Release)
+//#warning QuincyKit Distribution is configured for this build
+////    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
+//#endif
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didLogIn:) name:STStampedAPILoginNotification object:nil];
     RKLogConfigureByName("RestKit*", RKLogLevelError);
     RKLogSetAppLoggingLevel(RKLogLevelError);
@@ -112,20 +113,26 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
     if ([STStampedAPI sharedInstance].currentUser) {
         [self didLogIn:nil];
     }
-    STInboxViewController *inboxController = [[STInboxViewController alloc] init];
+    BOOL openedWithAPNS = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey] != nil;
+    UIViewController* firstController;
+    if (openedWithAPNS && LOGGED_IN) {
+        firstController = [[[STUniversalNewsController alloc] init] autorelease];
+    }
+    else {
+        firstController =  [[[STInboxViewController alloc] init] autorelease];
+    }
     STLeftMenuViewController *leftController = [[STLeftMenuViewController alloc] init];
     STRightMenuViewController *rightController = [[STRightMenuViewController alloc] init];
     
-    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:inboxController];
+    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:firstController];
     _navigationController = [navController retain];
     STMenuController *menuController = [[STMenuController alloc] initWithRootViewController:navController];
     menuController.leftViewController = leftController;
     menuController.rightViewController = rightController;
     self.menuController = menuController;
     self.menuController.pan.enabled = NO;
-    [Util addHomeButtonToController:inboxController withBadge:YES];
+    [Util addHomeButtonToController:firstController withBadge:!openedWithAPNS];
     
-    [inboxController release];
     [leftController release];
     [rightController release];
     [menuController release];
@@ -172,6 +179,10 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
 }
 
+- (void)goToNews {
+    
+}
+
 /*
  Apple was actually helpful and clear!!!
  
@@ -184,10 +195,20 @@ static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json
  */
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    if (!LOGGED_IN) return;
     BOOL shouldGoToNews = application.applicationState == UIApplicationStateInactive;
     if (shouldGoToNews) {
+        STMenuController* menuController = self.menuController;
+        while (menuController.presentedViewController) {
+            [menuController dismissModalViewControllerAnimated:NO];
+        }
+        UIViewController* controller = [[[STUniversalNewsController alloc] init] autorelease];
+        [Util addHomeButtonToController:controller withBadge:NO];
+        STRootViewController* rootViewController = [[[STRootViewController alloc] initWithRootViewController:controller] autorelease];
+        [menuController setRootController:rootViewController animated:NO];
+        [(STLeftMenuViewController*)menuController.leftViewController clearSelection];
         //TODO go staight to news
-        [[STUnreadActivity sharedInstance] update];
+//        [[STUnreadActivity sharedInstance] update];
     }
     else {
         [[STUnreadActivity sharedInstance] update];

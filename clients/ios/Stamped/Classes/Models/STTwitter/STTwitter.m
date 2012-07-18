@@ -16,11 +16,26 @@
 #import "STRestKitLoader.h"
 #import "STSimpleBooleanResponse.h"
 
+NSString* const STTwitterErrorDomain = @"STTwitterErrorDomain";
+
 #define kTwitterConsumer @"kn1DLi7xqC6mb5PPwyXw"
 #define kTwitterSecretApersand @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU&"
 #define kTwitterSecret @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU"
 
 static id __instance;
+
+@interface STTwitterHelper : NSObject <UIActionSheetDelegate>
+
+@property (nonatomic, readwrite, copy) void (^callback)(ACAccount* account, NSError* error, STCancellation* cancellation);
+@property (nonatomic, readwrite, retain) STCancellation* cancellation;
+
+- (void)presentTwitterAccounts;
+
+@end
+
+@interface STTwitterAuthHelper : NSObject
+
+@end
 
 @implementation STTwitter
 @synthesize access=_access;
@@ -284,6 +299,25 @@ static id __instance;
 
 #pragma mark - Access
 
+- (STCancellation*)requestAccesWithCallback:(void (^)(BOOL granted, NSError* error, STCancellation* cancellation))block {
+    STCancellation* cancellation = [STCancellation cancellation];
+    if (!self.accountStore) {
+        self.accountStore = [[[ACAccountStore alloc] init] autorelease];
+    }
+    
+    ACAccountType *accountType = [_accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    [_accountStore requestAccessToAccountsWithType:accountType withCompletionHandler:^(BOOL granted, NSError *error) {
+        
+        _access = granted;
+        
+        [Util executeOnMainThread:^{
+            block(_access, error, cancellation);
+        }];
+        
+    }];
+    return cancellation;
+}
+
 - (void)requestAccess:(STTwitterAccessHandler)handler {
     
     if (!self.accountStore) {
@@ -318,8 +352,8 @@ static id __instance;
 
 #pragma mark - Requests
 
-
-- (void)reverseAuthWithAccount:(ACAccount*)account {
+- (STCancellation*)reverseAuthWithAccount:(ACAccount*)account withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    STCancellation* cancellation = [STCancellation cancellation];
     
     __block EGOHTTPRequest *_request = [[EGOHTTPRequest alloc] initWithURL:[NSURL URLWithString:@"https://api.twitter.com/oauth/request_token"] completion:^(id request, NSError *error) {
         
@@ -334,13 +368,15 @@ static id __instance;
             [twRequest setAccount:account];
             [twRequest performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
                 
-                NSString *responseStr = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                NSDictionary *params = [self paramsForString:responseStr];
-                _twitterUserAuth = [params retain];
-                [STEvents postEvent:EventTypeTwitterAuthFinished object:_twitterUserAuth];
-                [responseStr release];
-                
-                NSLog(@"login info %@", _twitterUserAuth);
+                NSString *responseStr = [[[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding] autorelease];
+                NSDictionary *params2 = [self paramsForString:responseStr];
+                [Util executeOnMainThread:^{
+                    _twitterUserAuth = [params2 retain];
+                    if (block && !cancellation.cancelled) {
+                        block(YES, nil, cancellation);
+                    }
+                    [STEvents postEvent:EventTypeTwitterAuthFinished object:_twitterUserAuth];                
+                }];
                 
             }];
             
@@ -348,10 +384,12 @@ static id __instance;
             [twRequest release];
             
         } else {
-            
-            NSLog(@"revers oauth failed");
-            [STEvents postEvent:EventTypeTwitterAuthFailed object:_twitterUserAuth];
-            
+            [Util executeOnMainThread:^{
+                if (block && !cancellation.cancelled) {
+                    block(NO, error, cancellation);
+                }
+                [STEvents postEvent:EventTypeTwitterAuthFailed object:_twitterUserAuth];
+            }];
         }
         
     }];
@@ -365,8 +403,13 @@ static id __instance;
     [_request setRequestBody:[authBody dataUsingEncoding:NSUTF8StringEncoding]]; 
     
     [_request startAsynchronous];
-    [_request release];
+    [_request release]; 
     
+    return cancellation;
+}
+
+- (void)reverseAuthWithAccount:(ACAccount*)account {
+    [self reverseAuthWithAccount:account withCallback:nil];    
 }
 
 - (void)requestToken {
@@ -414,43 +457,84 @@ static id __instance;
 }
 
 - (STCancellation*)sendTweet:(NSString*)tweet withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
-    ACAccount* account = nil;
-    STTwitter* twitter = [STTwitter sharedInstance];
-    for (NSInteger i = 0; i < twitter.accounts.count; i++) {
-        ACAccount* cur = [twitter.accounts objectAtIndex:i];
-        if ([cur.username isEqualToString:twitter.twitterUsername]) {
-            account = cur;
-            break;
+    return [self sendTweets:[NSArray arrayWithObject:tweet] withCallback:block];
+}
+
+- (STCancellation*)sendTweets:(NSArray*)tweets withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    return [self fullTwitterAuthWithAddAccount:NO andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        if (success && self.currentAccount) {
+            for (NSInteger i = 0; i < tweets.count; i++) {
+                NSString* tweet = [tweets objectAtIndex:i];
+                NSDictionary* params = [NSDictionary dictionaryWithObject:tweet forKey:@"status"];
+                NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/statuses/update.json"];
+                TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST] autorelease];    
+                request.account = self.currentAccount;
+                [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
+                    [Util executeOnMainThread:^{
+                        if (i == tweets.count - 1) {
+                            if (!cancellation.cancelled && block) {
+                                if (!error) {
+                                    block(YES, nil, cancellation);
+                                }
+                                else {
+                                    block(NO, error, cancellation);
+                                }
+                            }
+                        }
+                    }];
+                }];
+            }
         }
-    }
-    STCancellation* cancellation = [STCancellation cancellation];
-    if (account) {
-        NSDictionary* params = [NSDictionary dictionaryWithObject:tweet forKey:@"status"];
-        NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/statuses/update.json"];
-        TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST] autorelease];    
-        request.account = account;
-        [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
-            NSLog(@"tweet:%@",error);
-            if (!cancellation.cancelled && block) {
-                if (!error) {
-                    block(YES, nil, cancellation);
+        else {
+            NSLog(@"failed:%d,%@", success, self.currentAccount);
+            [Util executeOnMainThread:^{
+                if (!cancellation.cancelled && block) {
+                    block(NO, 
+                          [NSError errorWithDomain:STTwitterErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:@"There was a problem tweeting." forKey:NSLocalizedDescriptionKey]],
+                          cancellation);
                 }
-                else {
-                    block(NO, error, cancellation);
-                }
-            }
-        }];
-    }
-    else {
-        [Util executeOnMainThread:^{
-            if (!cancellation.cancelled && block) {
-                block(NO, 
-                      [NSError errorWithDomain:@"Twitter" code:0 userInfo:[NSDictionary dictionaryWithObject:@"Couldn't send tweet." forKey:NSLocalizedDescriptionKey]],
-                      cancellation);
-            }
-        }];
-    }
-    return cancellation;
+            }];
+        }
+        
+    }];
+    //    STCancellation* cancellation = [STCancellation cancellation];
+    //    [self requestAccesWithCallback:^(BOOL granted, NSError *error, STCancellation *cancellation) {
+    //        ACAccount* account = nil;
+    //        STTwitter* twitter = [STTwitter sharedInstance];
+    //        for (NSInteger i = 0; i < twitter.accounts.count; i++) {
+    //            ACAccount* cur = [twitter.accounts objectAtIndex:i];
+    //            if ([cur.username isEqualToString:twitter.twitterUsername]) {
+    //                account = cur;
+    //                break;
+    //            }
+    //        }
+    //        if (account) {
+    //            NSDictionary* params = [NSDictionary dictionaryWithObject:tweet forKey:@"status"];
+    //            NSURL* url = [NSURL URLWithString:@"http://api.twitter.com/1/statuses/update.json"];
+    //            TWRequest* request = [[[TWRequest alloc] initWithURL:url parameters:params requestMethod:TWRequestMethodPOST] autorelease];    
+    //            request.account = account;
+    //            [request performRequestWithHandler:^(NSData* responseData, NSHTTPURLResponse* urlResponse, NSError* error) {
+    //                if (!cancellation.cancelled && block) {
+    //                    if (!error) {
+    //                        block(YES, nil, cancellation);
+    //                    }
+    //                    else {
+    //                        block(NO, error, cancellation);
+    //                    }
+    //                }
+    //            }];
+    //        }
+    //        else {
+    //            [Util executeOnMainThread:^{
+    //                if (!cancellation.cancelled && block) {
+    //                    block(NO, 
+    //                          [NSError errorWithDomain:STTwitterErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:@"Couldn't send tweet." forKey:NSLocalizedDescriptionKey]],
+    //                          cancellation);
+    //                }
+    //            }];
+    //        }
+    //    }];
+    //    return cancellation;
 }
 
 
@@ -471,4 +555,149 @@ static id __instance;
                                                  }];
 }
 
+
+- (STCancellation*)fullTwitterAuthWithAddAccount:(BOOL)shouldAddAccount andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    NSAssert1(block != nil, @"Block can't be nil for %@", @selector(fullTwitterAuthWithCallback:));
+    STCancellation* localCancellation = [STCancellation cancellation];
+    [self requestAccesWithCallback:^(BOOL granted, NSError *error, STCancellation *cancellation) {
+        if (granted && self.numberOfAccounts > 0) {
+            STTwitterHelper* helper = [[STTwitterHelper alloc] init];
+            void (^handleAccount)(ACAccount*, NSError*, STCancellation*) = ^(ACAccount* account, NSError* error, STCancellation* cancellation) {
+                [helper release];
+                if (account) {
+                    [self reverseAuthWithAccount:account withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                        if (success) {
+                            success = self.twitterUsername && self.twitterToken && self.twitterTokenSecret;
+                        }
+                        if (success && shouldAddAccount) {
+                            NSMutableDictionary* params = [NSMutableDictionary dictionary];
+                            [params setObject:self.twitterUsername forKey:@"linked_screen_name"];
+                            [params setObject:self.twitterToken forKey:@"token"];
+                            [params setObject:self.twitterTokenSecret forKey:@"secret"];
+                            [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/twitter/add.json"
+                                                                         post:YES
+                                                                authenticated:YES
+                                                                       params:params
+                                                                      mapping:[STSimpleBooleanResponse mapping]
+                                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                                      NSLog(@"called add:%@", error);
+                                                                      if (!localCancellation.cancelled) {
+                                                                          block( result ? YES : NO, error , localCancellation);
+                                                                      }
+                                                                  }];
+                        }
+                        else {
+                            if (!localCancellation.cancelled) {
+                                block(success, error, localCancellation);
+                            }
+                        }
+                    }];
+                }
+                else {
+                    if (!error) {
+                        error = [NSError errorWithDomain:STTwitterErrorDomain
+                                                    code:0 
+                                                userInfo:[NSDictionary dictionaryWithObject:@"Could not connect to Twitter." 
+                                                                                     forKey:NSLocalizedDescriptionKey]];
+                    }
+                    [Util warnWithAPIError:error andBlock:^{
+                        if (!localCancellation.cancelled) {
+                            block(NO, error, localCancellation);
+                        }
+                    }];
+                }
+            };
+            if (self.numberOfAccounts > 1) {
+                helper.cancellation = localCancellation;
+                helper.callback = handleAccount;
+                [helper presentTwitterAccounts];
+            }
+            else {
+                ACAccount* account = [self accountAtIndex:0];
+                [Util executeOnMainThread:^{
+                    handleAccount(account, nil, localCancellation);
+                }];
+            }
+        }
+        else {
+            if (!localCancellation.cancelled) {
+                block(NO, 
+                      [NSError errorWithDomain:STTwitterErrorDomain
+                                          code:0 
+                                      userInfo:[NSDictionary dictionaryWithObject:@"Could not connect to Twitter." 
+                                                                           forKey:NSLocalizedDescriptionKey]],
+                      localCancellation);
+            }
+        }
+    }];
+    return localCancellation;
+}
+
+- (BOOL)canTweet {
+    return NSClassFromString(@"TWTweetComposeViewController") && [TWTweetComposeViewController canSendTweet];
+}
+
+- (ACAccount*)currentAccount {
+    if (self.twitterUsername && [self numberOfAccounts] > 0) {
+        for (NSInteger i = 0; i < [self numberOfAccounts]; i++) {
+            ACAccount* account = [self accountAtIndex:i];
+            if ([account.username.lowercaseString isEqualToString:self.twitterUsername.lowercaseString]) {
+                return account;
+            }
+        }
+    }
+    return nil;
+}
+
 @end
+
+
+@implementation STTwitterHelper
+
+@synthesize callback = _callback;
+@synthesize cancellation = _cancellation;
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    self.callback = nil;
+    [_cancellation release];
+    [super dealloc];
+}
+
+#pragma mark - UIActionSheetDelegate
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    ACAccount *account = nil;
+    if (actionSheet.cancelButtonIndex != buttonIndex) {
+        account = [[STTwitter sharedInstance] accountAtIndex:buttonIndex];
+    }
+    self.callback(account, nil, self.cancellation);
+}
+
+
+- (void)presentTwitterAccounts {
+    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:NSLocalizedString(@"Twitter Accounts", nil) delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:nil destructiveButtonTitle:nil otherButtonTitles:nil];
+    
+    for (ACAccount *account in [[STTwitter sharedInstance] accounts]) {
+        [actionSheet addButtonWithTitle:account.username];
+    }
+    [actionSheet addButtonWithTitle:NSLocalizedString(@"Cancel", nil)];
+    actionSheet.cancelButtonIndex = [actionSheet numberOfButtons] - 1;
+    [actionSheet showInView:[Util topController].view];
+    [actionSheet release];    
+}
+
+@end
+
+
+
+
+

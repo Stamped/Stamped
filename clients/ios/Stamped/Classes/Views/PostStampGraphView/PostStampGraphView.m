@@ -36,7 +36,7 @@
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
         
-        STBlockUIView *iconView = [[STBlockUIView alloc] initWithFrame:CGRectMake(21.0f, 9.0f, 16.0f, 16.0f)];
+        STBlockUIView *iconView = [[STBlockUIView alloc] initWithFrame:CGRectMake(21.0f, 7.5f, 16.0f, 16.0f)];
         iconView.backgroundColor = [UIColor whiteColor];
         iconView.userInteractionEnabled = NO;
         [self addSubview:iconView];
@@ -234,7 +234,7 @@
     STTextCalloutView *callout = [[STTextCalloutView alloc] init];
     [view addSubview:callout];
     NSString* baseTitle = [[Util titleForCategory:cell.category] lowercaseString];
-    [callout setTitle:[NSString stringWithFormat:@"%i stamp%@ in %@", cell.stampCount, (cell.stampCount==1) ? @"" : @"s", baseTitle] boldText:cell.category];
+    [callout setTitle:[NSString stringWithFormat:@"%i stamp%@ in %@", cell.stampCount, (cell.stampCount==1) ? @"" : @"s", baseTitle] boldText:baseTitle];
     CGPoint point = CGPointMake(cell.bounds.size.width/2, (cell.bounds.size.height - cell.barHeight)-14.0f);
     [callout showFromPosition:[view convertPoint:point fromView:cell] animated:YES];
     [callout release];

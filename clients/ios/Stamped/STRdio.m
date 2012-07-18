@@ -65,8 +65,8 @@ static STRdio* _sharedInstance;
 - (id)init {
     self = [super init];
     if (self) {
-        _rdio = [[Rdio alloc] initWithConsumerKey:@"bzj2pmrs283kepwbgu58aw47"
-                                        andSecret:@"xJSZwBZxFp" 
+        _rdio = [[Rdio alloc] initWithConsumerKey:@"vrhd4yxa4eu99jbysjqzebym"
+                                        andSecret:@"paYxS8rPVE" 
                                          delegate:self];
     }
     return self;

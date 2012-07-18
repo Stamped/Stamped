@@ -135,6 +135,8 @@ static STStampedAPI* _sharedInstance;
         _stampPreviewsCache =[[NSCache alloc] init];
         _userCache = [[NSCache alloc] init];
         _entityCache = [[NSCache alloc] init];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDidLogout:) name:STStampedAPILogoutNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userDidLogin:) name:STStampedAPILoginNotification object:nil];
         [STSharedCaches cacheForTodosWithCallback:^(STCache *cache, NSError *error, STCancellation *cancellation) {
             //Nothing 
         }];
@@ -162,7 +164,14 @@ static STStampedAPI* _sharedInstance;
     [super dealloc];
 }
 
-- (void)_didLogout:(id)notImportant {
+- (void)userDidLogout:(id)notImportant {
+    [self.userImageCancellation cancel];
+    self.userImageCancellation = nil;
+    self.currentUserImage = nil;
+}
+
+- (void)userDidLogin:(id)notImportant {
+    
 }
 
 - (id<STUser>)cachedUserForUserID:(NSString*)userID {
@@ -315,6 +324,7 @@ static STStampedAPI* _sharedInstance;
                                                          [self.stampCache setObject:stamp forKey:[stamp stampID]];
                                                          [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification
                                                                                                              object:[stamp stampID]];
+                                                         [self updateUser];
                                                      }
                                                      block(stamp, error, cancellation);
                                                  }];
@@ -332,6 +342,7 @@ static STStampedAPI* _sharedInstance;
                                               if (stamp) {
                                                   [self.stampCache removeObjectForKey:stampID];
                                                   [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILocalStampModificationNotification object:nil];
+                                                  [self updateUser];
                                               }
                                               block(stamp != nil, error);
                                           }];
@@ -1254,6 +1265,22 @@ static STStampedAPI* _sharedInstance;
 }
 
 - (void)setCurrentUserImage:(UIImage *)currentUserImage {
+    if (currentUserImage && currentUserImage.size.width != currentUserImage.size.height) {
+        CGFloat size = MIN(currentUserImage.size.width, currentUserImage.size.height);
+        
+        UIGraphicsBeginImageContextWithOptions(CGSizeMake(size, size), NO, 0.0);
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        
+        CGFloat deltaHeight = (currentUserImage.size.height - size) / 2;
+        CGFloat deltaWidth = (currentUserImage.size.width - size) / 2;
+        
+        CGContextTranslateCTM(context, 0, size);
+        CGContextScaleCTM(context, 1.0, -1.0);
+        
+        CGContextDrawImage(context, CGRectMake(-deltaWidth, -deltaHeight, currentUserImage.size.width, currentUserImage.size.height), currentUserImage.CGImage);
+        currentUserImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+    }
     [_currentUserImage autorelease];
     _currentUserImage = [currentUserImage retain];
     [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:nil];
@@ -1520,6 +1547,17 @@ static STStampedAPI* _sharedInstance;
                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
                                                      block(result, error, cancellation); 
                                                  }];
+}
+
+- (void)updateUser {
+    NSString* userID = self.currentUser.userID;
+    if (userID) {
+        [self userDetailForUserID:userID andCallback:^(id<STUserDetail> userDetail, NSError *error) {
+            if (userDetail) {
+                [[STRestKitLoader sharedInstance] updateCurrentUser:userDetail];
+            }
+        }];
+    }
 }
 
 - (void)fastPurge {

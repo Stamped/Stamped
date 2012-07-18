@@ -256,23 +256,42 @@ NSInteger zoom;
         [_previewContainer addSubview:_previews];
         [self.scrollView addSubview:_previewContainer];
         
+        
         //if (!self.hasShown) {
-            //Request current location
-            CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
-            locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
-            locationManager.distanceFilter = kCLDistanceFilterNone; 
-            [locationManager startUpdatingLocation];
-            [locationManager stopUpdatingLocation];
-            CLLocation *location = [locationManager location];
-            if (location) {
-                [STStampedAPI sharedInstance].currentUserLocation = location; //update global last known location
-                MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
-                MKCoordinateRegion region = MKCoordinateRegionMake(location.coordinate, mapSpan);
-                [mapView_ setRegion:region animated:NO];
-                self.lastRegion = region;
-            }
-            mapView_.showsUserLocation = YES;
+        //Request current location
+        CLLocationManager* locationManager = [[[CLLocationManager alloc] init] autorelease];
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest; 
+        locationManager.distanceFilter = kCLDistanceFilterNone; 
+        [locationManager startUpdatingLocation];
+        [locationManager stopUpdatingLocation];
+        CLLocation *location = [locationManager location];
+        if (location) {
+            [STStampedAPI sharedInstance].currentUserLocation = location; //update global last known location
+            MKCoordinateSpan mapSpan = MKCoordinateSpanMake(_standardLatLongSpan, _standardLatLongSpan);
+            MKCoordinateRegion region = MKCoordinateRegionMake(location.coordinate, mapSpan);
+            [mapView_ setRegion:region animated:NO];
+            self.lastRegion = region;
+        }
+        mapView_.showsUserLocation = YES;
         //}
+        
+        if ([Util oncePerUserWithID:@"akfldskljafdslksjfkjfasld;lkjdfjaslkdfadsljfkasd"]) {
+            UIImageView* popUp = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"tapbelowtoshowslider"]] autorelease];
+            popUp.alpha = 0;
+            [Util reframeView:popUp withDeltas:CGRectMake(333/2., 651/2., 0, 0)];
+            [self.view addSubview:popUp];
+            [UIView animateWithDuration:.4 delay:1 options:UIViewAnimationCurveEaseInOut animations:^{
+                popUp.alpha = 1;
+            } completion:^(BOOL finished) {
+                if (finished) {
+                    [UIView animateWithDuration:.4 delay:4 options:UIViewAnimationCurveEaseInOut animations:^{
+                        popUp.alpha = 0;
+                    } completion:^(BOOL finished) {
+                        [popUp removeFromSuperview]; 
+                    }];
+                }
+            }];
+        }
     }
 }
 
@@ -283,7 +302,7 @@ NSInteger zoom;
 - (void)viewDidAppear:(BOOL)animated {
     //TODO restore user location
     //if (!self.hasShown && self.dirty) {
-        //[mapView_ setRegion:self.lastRegion animated:NO];
+    //[mapView_ setRegion:self.lastRegion animated:NO];
     //}
     //Load initial entities
     self.dirty = NO;
@@ -594,9 +613,9 @@ NSInteger zoom;
 #pragma mark - UITextFieldDelegate Methods.
 
 - (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-//    [Util executeOnMainThread:^{
-//        self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
-//    }];
+    //    [Util executeOnMainThread:^{
+    //        self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
+    //    }];
     return YES;
 }
 

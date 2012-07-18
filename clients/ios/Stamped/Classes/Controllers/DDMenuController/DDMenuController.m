@@ -689,7 +689,6 @@ NSString* const DDMenuControllerWillShowLeftMenuNotification = @"DDMenuControlle
 }
 
 - (void)setRootViewController:(UIViewController *)rootViewController {
-    
     [self showShadow:NO];
     [self addTapView:NO];
     UIViewController *tempRoot = [_root retain];

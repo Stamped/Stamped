@@ -29,6 +29,7 @@
 @property (nonatomic, readonly, assign) CGFloat imageHeight;
 @property (nonatomic, readonly, assign) CGFloat imageYOffset;
 @property (nonatomic, readwrite, retain) UIView* imageView;
+@property (nonatomic, readwrite, retain) id<STAction> primaryAction;
 
 @end
 
@@ -38,6 +39,7 @@
 @synthesize entityDetail = entityDetail_;
 @synthesize entityImageCancellation = entityImageCancellation_;
 @synthesize imageView = imageView_;
+@synthesize primaryAction = _primaryAction;
 
 - (id)initWithEntityDetail:(id<STEntityDetail>)entityDetail {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TODO"];
@@ -150,6 +152,7 @@
 }
 
 - (void)dealloc {
+    [_primaryAction release];
     [activityView_ release];
     [entityDetail_ release];
     [entityImageCancellation_ cancel];
@@ -168,33 +171,40 @@
             context.entity = self.entityDetail;
             context.entityDetail = self.entityDetail;
             if ([[STActionManager sharedActionManager] canHandleAction:action withContext:context]) {
-                UIView* buttonViews[2];
-                CGRect buttonFrame = CGRectMake(0, 0, 60, 60);
-                for (NSInteger i = 0; i < 2; i++) {
-                    UIView* view = [[[UIView alloc] initWithFrame:buttonFrame] autorelease];
-                    view.layer.cornerRadius = view.frame.size.width / 2;
-                    view.layer.borderWidth = 2;
-                    view.layer.borderColor = [UIColor colorWithWhite:.1 alpha:.4].CGColor;
-                    UIColor* backgroundColor;
-                    if (i == 0) {
-                        backgroundColor = [UIColor colorWithWhite:1 alpha:.7];
-                    }
-                    else {
-                        backgroundColor = [UIColor colorWithWhite:.7 alpha:.7];
-                    }
-                    view.backgroundColor = backgroundColor;
-                    buttonViews[i] = view;
-                }
-                STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
-                                                         normalView:buttonViews[0]
-                                                         activeView:buttonViews[1]
-                                                             target:self
-                                                          andAction:@selector(actionButtonClicked:)] autorelease];
-                button.message = action;
-                UIImageView* playView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"TEMP_play_button"]] autorelease];
-                playView.frame = [Util centeredAndBounded:playView.frame.size inFrame:button.frame];
-                [Util reframeView:playView withDeltas:CGRectMake(4, 0, 0, 0)];
-                [button addSubview:playView];
+                
+                UIButton* button = [UIButton buttonWithType:UIButtonTypeCustom];
+                
+                [button addTarget:self action:@selector(actionButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
+                [button setImage:[UIImage imageNamed:@"playbutton"] forState:UIControlStateNormal];
+                button.frame = CGRectMake(0, 0, 60, 60);
+                self.primaryAction = action;
+//                UIView* buttonViews[2];
+//                CGRect buttonFrame = CGRectMake(0, 0, 60, 60);
+//                for (NSInteger i = 0; i < 2; i++) {
+//                    UIView* view = [[[UIView alloc] initWithFrame:buttonFrame] autorelease];
+//                    view.layer.cornerRadius = view.frame.size.width / 2;
+//                    view.layer.borderWidth = 2;
+//                    view.layer.borderColor = [UIColor colorWithWhite:.1 alpha:.4].CGColor;
+//                    UIColor* backgroundColor;
+//                    if (i == 0) {
+//                        backgroundColor = [UIColor colorWithWhite:1 alpha:.7];
+//                    }
+//                    else {
+//                        backgroundColor = [UIColor colorWithWhite:.7 alpha:.7];
+//                    }
+//                    view.backgroundColor = backgroundColor;
+//                    buttonViews[i] = view;
+//                }
+//                STButton* button = [[[STButton alloc] initWithFrame:buttonFrame 
+//                                                         normalView:buttonViews[0]
+//                                                         activeView:buttonViews[1]
+//                                                             target:self
+//                                                          andAction:@selector(actionButtonClicked:)] autorelease];
+//                button.message = action;
+//                UIImageView* playView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"playbutton"]] autorelease];
+//                playView.frame = [Util centeredAndBounded:playView.frame.size inFrame:button.frame];
+//                [Util reframeView:playView withDeltas:CGRectMake(4, 0, 0, 0)];
+//                [button addSubview:playView];
                 button.frame = [Util centeredAndBounded:button.frame.size inFrame:self.imageView.frame];
                 [self addSubview:button];
                 addedAction = YES;
@@ -229,13 +239,8 @@
     if (image) {
         CGRect imageBounds = CGRectMake(70, self.imageYOffset, 180, self.imageHeight);
         UIImageView* imageView = [[[UIImageView alloc] initWithImage:image] autorelease];
-        BOOL shouldShrink;
-        if (image.size.width < 300 && image.size.height < 400) {
-            shouldShrink = NO;
-        }
-        else {
-            shouldShrink = YES;
-        }
+        imageView.frame = CGRectMake(0, 0, image.size.width * 4, image.size.height * 4);
+        BOOL shouldShrink = YES;
         if (shouldShrink) {
             CGSize newSize = [Util size:imageView.frame.size withScale:[Util legacyImageScale]];
             imageView.frame = CGRectMake(0, 0, newSize.width, newSize.height);
@@ -247,7 +252,24 @@
         imageView.layer.shadowColor = [UIColor blackColor].CGColor;
         imageView.layer.shadowRadius = 7;
         imageView.layer.shadowOffset = CGSizeMake(0, imageView.layer.shadowRadius/2);
-        imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
+        if ([self.entityDetail.subcategory isEqualToString:@"app"]) {
+            imageView.layer.cornerRadius = 30;
+            imageView.layer.masksToBounds = YES;
+            UIView* shadowView = [[[UIView alloc] initWithFrame:imageView.frame] autorelease];
+            shadowView.layer.shadowOpacity = .5;
+            shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
+            shadowView.layer.shadowRadius = 7;
+            shadowView.layer.shadowOffset = CGSizeMake(0, shadowView.layer.shadowRadius/2);
+            shadowView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:shadowView.bounds cornerRadius:30].CGPath;
+            [self addSubview:shadowView];
+        }
+        else {
+            imageView.layer.shadowOpacity = .5;
+            imageView.layer.shadowColor = [UIColor blackColor].CGColor;
+            imageView.layer.shadowRadius = 7;
+            imageView.layer.shadowOffset = CGSizeMake(0, imageView.layer.shadowRadius/2);
+            imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
+        }
         [self addSubview:imageView];
         /*
          UIImageView* stampImage = [[[UIImageView alloc] initWithImage:[Util stampImageForUser:self.stamp.user withSize:STStampImageSize46]] autorelease];
@@ -268,12 +290,12 @@
     }
 }
 
-- (void)actionButtonClicked:(id<STAction>)action {
+- (void)actionButtonClicked:(id)notImportant {
     
     STActionContext* context = [STActionContext context];
     context.entity = self.entityDetail;
     context.entityDetail = self.entityDetail;
-    [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+    [[STActionManager sharedActionManager] didChooseAction:self.primaryAction withContext:context];
 }
 
 - (void)handleEntityDetail:(id<STEntityDetail>)entityDetail andError:(NSError*)error {

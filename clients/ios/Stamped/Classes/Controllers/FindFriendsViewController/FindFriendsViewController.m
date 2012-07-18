@@ -30,7 +30,7 @@
 - (id)init {
     if ((self = [super initWithType:FriendsRequestTypeSuggested])) {
         _firstAppearance = YES;
-        self.title = @"Add Friends";
+        //self.title = @"Add Friends";
     }
     return self;
     
@@ -50,8 +50,16 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [Util setTitle:[NSString stringWithFormat:@"Add Friends"]
+     forController:self];
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
+}
 - (void)viewDidAppear:(BOOL)animated {
     
     [super viewDidAppear:animated];

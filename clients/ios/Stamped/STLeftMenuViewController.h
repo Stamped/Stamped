@@ -14,4 +14,6 @@
 
 + (void)setupConfigurations;
 
+- (void)clearSelection;
+
 @end

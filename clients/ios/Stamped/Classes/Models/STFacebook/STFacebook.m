@@ -12,6 +12,7 @@
 #import "STRestKitLoader.h"
 #import "STSimpleBooleanResponse.h"
 #import "STSettingsViewController.h"
+#import "STLinkedAccountsViewController.h"
 #import "Util.h"
 
 static id __instance;
@@ -102,7 +103,13 @@ static id __instance;
                                                    params:params
                                                   mapping:[STSimpleBooleanResponse mapping]
                                               andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                  [STEvents postEvent:EventTypeFacebookAuthFinished];
+                                                  if (error) {
+                                                      [self invalidate];
+                                                      [STEvents postEvent:EventTypeFacebookAuthFailed];
+                                                  }
+                                                  else {
+                                                      [STEvents postEvent:EventTypeFacebookAuthFinished];
+                                                  }
                                               }];
     }
 }
@@ -238,7 +245,7 @@ static id __instance;
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
     if (buttonIndex == 0) {
-        STSettingsViewController* controller = [[[STSettingsViewController alloc] init] autorelease];
+        UIViewController* controller = [[[STLinkedAccountsViewController alloc] init] autorelease];
         [Util pushController:controller modal:NO animated:YES];
     }
 }

@@ -9,6 +9,7 @@
 #import "CountriesViewController.h"
 #import "STTableViewSectionHeader.h"
 #import "STNavigationItem.h"
+#import "Util.h"
 
 #define kCellCheckMarkTag 301
 
@@ -28,7 +29,7 @@
 
 - (void)commonInit {
     
-    self.title = NSLocalizedString(@"Countries", @"Countries");
+//    self.title = NSLocalizedString(@"Countries", @"Countries");
     
     NSMutableArray *countriesArray = [[NSMutableArray alloc] init];
     NSMutableArray *sectionTitlesArray = [[NSMutableArray alloc] init];
@@ -111,6 +112,19 @@
     [button release];
     
 }
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [Util setTitle:[NSString stringWithFormat:@"Countries"]
+     forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

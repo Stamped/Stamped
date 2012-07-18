@@ -156,19 +156,11 @@ static const CGFloat _bodyWidth = 214;
                 NSString* header;
                 if (!first) {
                     [self insertDots];
-                    header = item.blurb ? @" added" : @" restamped";
+                    header = item.blurb ? @" added" : @" stamped again";
                 }
                 else {
                     NSString* subcategory = stamp.entity.subcategory;
-                    NSString* formatString;
-                    NSSet* vowels = [NSSet setWithObjects:@"a", @"e", @"i", @"o", @"u", nil];
-                    if ([vowels containsObject:[subcategory substringToIndex:1]]) {
-                        formatString = @" stamped an %@";
-                    }
-                    else {
-                        formatString = @" stamped a %@";
-                    }
-                    header = [NSString stringWithFormat:formatString, subcategory];
+                    header = [NSString stringWithFormat:@" stamped %@", [Util userStringWithBackendType:subcategory andArticle:YES]];
                     first = NO;
                 }
                 NSArray<STStampPreview>* credits = [NSArray array];

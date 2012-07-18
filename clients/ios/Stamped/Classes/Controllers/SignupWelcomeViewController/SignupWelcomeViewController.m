@@ -31,6 +31,7 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "STRootViewController.h"
+#import "STImageCache.h"
 
 @interface SignupWelcomeViewController ()
 @property(nonatomic,readonly) SignupWelcomeType signupType;
@@ -48,7 +49,7 @@
 
 - (id)initWithType:(SignupWelcomeType)type {
     if ((self = [super initWithStyle:UITableViewStyleGrouped])) {
-        self.title = NSLocalizedString(@"Welcome", @"Welcome");
+        //self.title = NSLocalizedString(@"Welcome", @"Welcome");
         _signupType = type;
         [STEvents addObserver:self selector:@selector(signupFinished:) event:EventTypeSignupFinished];
         [STEvents addObserver:self selector:@selector(signupFailed:) event:EventTypeSignupFailed];
@@ -102,6 +103,7 @@
                 header.titleLabel.text = [userDic objectForKey:@"name"];
                 NSString *avatar = [[userDic objectForKey:@"profile_image_url"] stringByReplacingOccurrencesOfString:@"photo_normal.jpg" withString:@"photo_bigger.jpg"] ;
                 [header.imageView setImageURL:[NSURL URLWithString:avatar]];
+                [self prepareAvatarImageWithPath:avatar];
                 [header setNeedsLayout];
             }
 
@@ -112,6 +114,7 @@
             [header setNeedsLayout];
             
             NSString *avatar = [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture&type=large", [dictionary objectForKey:@"id"]];
+            [self prepareAvatarImageWithPath:avatar];
             [header.imageView setImageURL:[NSURL URLWithString:avatar]];
             [header setNeedsLayout];
 
@@ -167,10 +170,28 @@
     
 }
 
+- (void)prepareAvatarImageWithPath:(NSString*)path {
+    [[STImageCache sharedInstance] imageForImageURL:path andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+        if (image && !self.avatarImage) {
+            self.avatarImage = image;
+        }
+    }];
+}
+
 - (void)viewDidUnload {
     self.tableView.tableHeaderView=nil;
     self.tableView=nil;
     [super viewDidUnload];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [Util setTitle:@"Welcome" forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil forController:self];
 }
 //
 //- (void)viewDidAppear:(BOOL)animated {
@@ -347,7 +368,10 @@
         [[STAuth sharedInstance] updateStampWithPrimaryColor:primaryColor secondary:secondaryColor completion:^(NSError *error) {
             
             if (self.avatarTempPath) {
-                [[STAuth sharedInstance] updateProfileImageWithPath:self.avatarTempPath completion:^(NSError *error) {                    
+                [[STAuth sharedInstance] updateProfileImageWithPath:self.avatarTempPath completion:^(NSError *error) {  
+                    if (self.avatarImage) {
+                        [STStampedAPI sharedInstance].currentUserImage = self.avatarImage;
+                    }
                     FindFriendsViewController *controller = [[FindFriendsViewController alloc] init];
                     controller.navigationItem.hidesBackButton = YES;
                     [self.navigationController pushViewController:controller animated:YES];
@@ -418,10 +442,10 @@
             
         } else if (_signupType == SignupWelcomeTypeFacebook) {
 
-            NSDictionary *dictionary = [[STFacebook sharedInstance] userData];
-            if ([dictionary objectForKey:@"username"]) {
-                cell.textField.text = [dictionary objectForKey:@"username"];
-            }
+//            NSDictionary *dictionary = [[STFacebook sharedInstance] userData];
+//            if ([dictionary objectForKey:@"username"]) {
+//                cell.textField.text = [dictionary objectForKey:@"username"];
+//            }
             
         }
         
@@ -535,7 +559,8 @@
         UIImage *image = [info objectForKey:UIImagePickerControllerEditedImage];
 
         UIGraphicsBeginImageContext(CGSizeMake(500.0f, 500.0f));
-        [image drawInRect:CGRectMake(0.0f, 0.0f, 500.0f, 500.0f)];
+        CGRect rect = [Util centeredAndBounded:image.size inFrame:CGRectMake(0, 0, 500, 500)];
+        [image drawInRect:rect];
         image = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
         
@@ -613,13 +638,17 @@
 }
 
 - (void)stampCustomizeViewController:(StampCustomizeViewController*)controller doneWithColors:(NSArray*)colors {
+    NSMutableArray* fixedColors = [NSMutableArray array];
+    for (UIColor* color in colors) {
+        [fixedColors addObject:[UIColor stampedColorWithHex:[color insaneHexString]]];
+    }
     
     if ([self.tableView.tableHeaderView respondsToSelector:@selector(setStampColors:)]) {
-        [(SocialSignupHeaderView*)self.tableView.tableHeaderView setStampColors:colors];
+        [(SocialSignupHeaderView*)self.tableView.tableHeaderView setStampColors:fixedColors];
     }
     
     if ([self.tableView.tableFooterView respondsToSelector:@selector(setSelectedColors:)]) {
-        [(StampColorPickerView*)self.tableView.tableFooterView setSelectedColors:colors];
+        [(StampColorPickerView*)self.tableView.tableFooterView setSelectedColors:fixedColors];
     }
     
     [self dismissModalViewControllerAnimated:YES];
