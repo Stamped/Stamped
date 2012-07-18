@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import time
+import pymongo, time
 from logs       import report
 
 try:
@@ -393,6 +393,13 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def getEntitiesByQuery(self, queryDict):
         return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
 
+    def getEntitiesByTypes(self, types, limit=None):
+        entityList = self._collection.find({'types': {'$in': types}})
+        if limit is not None:
+            entityList = entityList[:limit]
+        return map(lambda x: self._convertFromMongo(x), entityList)
+
+
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)
         document = self._updateMongoDocument(document)
@@ -427,6 +434,11 @@ class MongoEntityStatsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='entitystats', primary_key='entity_id', obj=EntityStats)
+        self._collection.ensure_index([ ('score', pymongo.DESCENDING) ])
+        self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('lat', pymongo.ASCENDING), \
+                                        ('lng', pymongo.ASCENDING) ])
 
     ### INTEGRITY
 
@@ -547,6 +559,61 @@ class MongoEntityStatsCollection(AMongoCollection):
             { '$set' : { 'popular_users' : userIds, 'popular_stamps' : stampIds } }
         )
         return True
+    
+    def _buildPopularQuery(self, **kwargs):
+        kinds = kwargs.pop('kinds', None)
+        types = kwargs.pop('types', None)
+        viewport = kwargs.pop('viewport', None)
+        minScore = kwargs.pop('minScore', None)
+
+        query = {}
+
+        if kinds is not None:
+            query['kinds'] = {'$in': list(kinds)}
+
+        if types is not None:
+            query['types'] = {'$in': list(types)}
+
+        if viewport is not None:
+            query["lat"] = {
+                "$gte" : viewport.lower_right.lat, 
+                "$lte" : viewport.upper_left.lat, 
+            }
+            
+            if viewport.upper_left.lng <= viewport.lower_right.lng:
+                query["lng"] = { 
+                    "$gte" : viewport.upper_left.lng, 
+                    "$lte" : viewport.lower_right.lng, 
+                }
+            else:
+                # handle special case where the viewport crosses the +180 / -180 mark
+                query["$or"] = [{
+                        "lng" : {
+                            "$gte" : viewport.upper_left.lng, 
+                        }, 
+                    }, 
+                    {
+                        "lng" : {
+                            "$lte" : viewport.lower_right.lng, 
+                        }, 
+                    }, 
+                ]
+
+        if minScore is not None:
+            query['score'] = {'$gte' : minScore}
+
+        return query
+    
+    def getPopularEntityStats(self, **kwargs):
+        limit = kwargs.pop('limit', 1000)
+
+        query = self._buildPopularQuery(**kwargs)
+
+        documents = self._collection.find(query) \
+                        .sort([('score', pymongo.DESCENDING)]) \
+                        .limit(limit)
+
+        return map(self._convertFromMongo, documents)
 
 
 class MongoEntitySeedCollection(AMongoCollection, AEntityDB):

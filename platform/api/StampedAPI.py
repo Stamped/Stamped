@@ -2081,6 +2081,11 @@ class StampedAPI(AStampedAPI):
             stats.popularity = popularity
             stats.quality = quality
             stats.score = score
+            stats.kind = entity.kind
+            stats.types = entity.types
+            if entity.kind == 'place' and entity.coordinates is not None:
+                stats.lat = entity.coordinates.lat
+                stats.lng = entity.coordinates.lng
             self._entityStatsDB.updateEntityStats(stats)
         except StampedUnavailableError:
             stats = EntityStats()
@@ -2088,6 +2093,11 @@ class StampedAPI(AStampedAPI):
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
             stats.popular_stamps = popularStampIds
+            stats.kind = entity.kind
+            stats.types = entity.types
+            if entity.kind == 'place' and entity.coordinates is not None:
+                stats.lat = entity.coordinates.lat
+                stats.lng = entity.coordinates.lng
             self._entityStatsDB.addEntityStats(stats)
         return stats
 
@@ -3789,22 +3799,12 @@ class StampedAPI(AStampedAPI):
     def getTastemakerGuide(self, guideRequest):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
-        since = datetime.utcnow() - timedelta(days=90)
         limit = 1000
         viewport = guideRequest.viewport
         if viewport is not None:
             since = None
             limit = 250
-        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since, limit=limit)
-
-        # Combine stamp scores into grouped entity scores
-        entityScores = {}
-        for stat in stampStats:
-            if stat.entity_id not in entityScores:
-                entityScores[stat.entity_id] = 0
-            entityScores[stat.entity_id] += 2 # Add 2 per stamp
-            if stat.score is not None:
-                entityScores[stat.entity_id] += stat.score # Add individual stamp score
+        entityStats = self._entityStatsDB.getPopularEntityStats(types=types, viewport=viewport, limit=limit)
 
         # Rank entities
         limit = 20
@@ -3813,39 +3813,29 @@ class StampedAPI(AStampedAPI):
         offset = 0
         if guideRequest.offset is not None:
             offset = guideRequest.offset
-        rankedEntityIds = sorted(entityScores.keys(), key=lambda x: entityScores[x], reverse=True)[offset:][:limit]
-
-        entityIds = {}
-        userIds = {}
-
-        # Entities
-        entities = self._entityDB.getEntities(rankedEntityIds)
-        for entity in entities:
-            if entity.sources.tombstone_id is not None:
-                # Convert to newer entity
-                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
-                entityIds[entity.entity_id] = replacement
-                # Call async process to update references
-                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
+        
+        entityIdsWithScore = {}
+        for stat in entityStats[offset:offset+limit]:
+            if stat.score is None:
+                entityIdsWithScore[stat.entity_id] = 0.0
             else:
-                entityIds[entity.entity_id] = entity
+                entityIdsWithScore[stat.entity_id] = stat.score
 
-        # Entity Stats
-        entityStats = self._entityStatsDB.getStatsForEntities(entityIds.keys())
-        ### TEMP CODE: BEGIN
-        # Temporarily force old entity stats to be generated
-        if len(entityStats) < len(entities):
-            statEntityIds = set()
-            for stat in entityStats:
-                statEntityIds.add(stat.entity_id)
-            missingEntityIds = set(entityIds.keys()).difference(statEntityIds)
-            for missingEntityId in missingEntityIds:
-                entityStats.append(self.updateEntityStatsAsync(missingEntityId))
-        ### TEMP CODE: END
-        for stat in entityStats:
             if stat.popular_users is not None:
                 for userId in stat.popular_users[:10]:
                     userIds[userId] = None
+
+        userIds = {}
+        scoredEntities = []
+        entities = self._entityDB.getEntities(entityIdsWithScore.keys())
+        for entity in entities:
+            scoredEntities.append((entityIdsWithScore[entity.entity_id], entity))
+
+        scoredEntities.sort(key=lambda x: x[0], reverse=True)
+
+        # Apply Lottery
+        if offset == 0 and guideRequest.section != "food":
+            scoedEntities = utils.weightedLottery(scoredEntities)
 
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))
@@ -3875,8 +3865,8 @@ class StampedAPI(AStampedAPI):
 
         # Results
         result = []
-        for entityId in rankedEntityIds:
-            entity = entityIds[entityId]
+        for score,entity in scoredEntities:
+            entityId = entity.entity_id
             if entityId in entityStampPreviews:
                 previews = Previews()
                 previews.stamps = entityStampPreviews[entityId]
