@@ -22,7 +22,7 @@ try:
     from api import SchemaValidation
 
     from api.auth                       import convertPasswordForStorage
-    from utils                      import lazyProperty, LoggingThreadPool, sendEmail
+    from utils                      import lazyProperty, LoggingThreadPool
     from functools                  import wraps
     from errors                     import *
     from libs.ec2_utils             import is_prod_stack
