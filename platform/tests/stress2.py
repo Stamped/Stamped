@@ -45,17 +45,14 @@ def handleGET(path, data, handleExceptions=True):
     url    = "%s/%s?%s" % (baseurl, path, params)
     
     try:
-        raw = opener.open(url).read()
-    except urllib.error.HTTPError as e:
+        raw = urllib2.urlopen(url).read()
+    except urllib2.HTTPError as e:
         logs.warning("GET Failed (%s): %s" % (e.code, url))
     except Exception as e:
         logs.warning("GET Failed: %s" % url)
         raise 
     
-    try:
-        result = json.loads(raw)
-    except Exception:
-        raise StampedAPIException(raw)
+    result = json.loads(raw)
 
     if handleExceptions and 'error' in result:
         raise Exception("GET failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
@@ -67,16 +64,15 @@ def handlePOST(path, data, handleExceptions=True):
     url    = "%s/%s" % (baseurl, path)
     
     try:
-        raw = opener.open(url, params).read()
+        raw = urllib2.urlopen(url, params).read()
+    except urllib2.HTTPError as e:
+        logs.warning("POST Failed (%s): %s (%s)" % (e.code, url, params))
     except Exception:
         logs.warning("POST Failed: %s (%s)" % (url, params))
         raise
     # logs.info("POST: %s" % url)
     
-    try:
-        result = json.loads(raw)
-    except:
-        raise StampedAPIException(raw)
+    result = json.loads(raw)
 
     if handleExceptions and 'error' in result:
         raise Exception("POST failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
