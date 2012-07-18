@@ -11,6 +11,9 @@
     {% if entity.desc %}
         <meta property="og:description"     content="{{entity.desc}}"/>
         <meta itemprop="description"        content="{{entity.desc}}"/>
+    {% else %}
+        <meta property="og:description"     content=""/>
+        <meta itemprop="description"        content=""/>
     {% endif %}
     
     {% if entity.subtitle %}
@@ -27,8 +30,38 @@
                     <meta property="og:image"   content="{{img2}}"/>
                     <meta itemprop="image"      content="{{img2}}"/>
                 {% else %}
-                    <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped-logo.png"/>
-                    <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped-logo.png"/>
+                    {% if entity.category == "film" %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_movies.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_movies.jpg"/>
+                    {% else %}{% if entity.category == "place" %}
+                        {% if entity.subcategory == "restaurant" %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_food.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_food.jpg"/>
+                        {% else %}{% if entity.subcategory == "bar" %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_bar.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_bar.jpg"/>
+                        {% else %}{% if entity.subcategory == "cafe" %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_cafe.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_cafe.jpg"/>
+                        {% else %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_place.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_place.jpg"/>
+                        {% endif %}{% endif %}{% endif %}
+                    {% else %}{% if entity.category == "music" %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_music.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_music.jpg"/>
+                    {% else %}{% if entity.category == "book" %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_book.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_book.jpg"/>
+                    {% else %}
+                        {% if entity.subcategory == "app" %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_app.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_app.jpg"/>
+                        {% else %}
+                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped-logo.jpg"/>
+                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped-logo.jpg"/>
+                        {% endif %}
+                    {% endif %}{% endif %}{% endif %}{% endif %}
                 {% endif %}
             {% endwith %}
         {% endif %}

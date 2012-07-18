@@ -178,7 +178,7 @@
             // start the main page content animation
             init_main(autoplay);
             
-            var height = $active.height();
+            var height = $(".active-line").height();
             var offset = get_relative_offset(height);
             
             // hide the intro hero text by translating it off the top of the screen

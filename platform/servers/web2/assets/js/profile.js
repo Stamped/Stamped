@@ -1780,12 +1780,14 @@ var g_update_stamps = null;
                 if (sdetail_ajax_loaded && sdetail_anim_loaded && !sdetail_initialized) {
                     sdetail_initialized = true;
                     
-                    // TODO: which order should these two statements appear in?
-                    $target.replaceWith($target2);
-                    init_sdetail($target2);
-                    
-                    resize_sdetail_wrapper($target2);
-                    $target2.removeClass('sdetail-loading');
+                    setTimeout(function() {
+                        $target.replaceWith($target2);
+                        init_sdetail($target2);
+                        
+                        // TODO: which order should these two statements appear in?
+                        resize_sdetail_wrapper($target2);
+                        $target2.removeClass('sdetail-loading');
+                    }, 150);
                 }
             };
             

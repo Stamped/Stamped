@@ -8,8 +8,7 @@ __license__   = "TODO"
 import Globals
 import sys, datetime, logs, gevent, utils, math
 from api                        import Constants
-from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
-from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+from api.db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
 from resolve.RdioSource         import RdioSource
