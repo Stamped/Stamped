@@ -44,6 +44,14 @@ class CompressedNode(object):
     __slots__ = ['data', 'children']
 
     def __init__(self, data, children):
+        """Builds a CompressedNode.
+        
+        The `children` parameter is a dictionary of string to children
+        nodes. Unlike the usual trie, the keys in the dictionary can be longer than one character,
+        that is, if a normal node chain has keys 'a' -> 'b' -> 'c' -> node, it would be present in
+        the dictionary as {'abc' : node}. Note that no two keys in the dictionary may share a common
+        prefix.
+        """
         self.data = data
         self.children = children.items()
 
@@ -63,13 +71,15 @@ class CompressedNode(object):
     def __len__(self):
         return sum(len(child) for k, child in self.children) + 1
 
-    def add(self, key, data):
-        raise NotImplemented
-
     def get(self, key):
         if not key:
             return self.data
         for k, child in self.children:
+            # Yes, we do need both of these cases. Suppose k = 'lady ', child has data 'lady gaga',
+            # and the child, in turn, has key 'gaga' with data 'lady gaga'. If the input key here
+            # is 'lady gaga', the first clause kicks in and we recurse on the child with 'gaga' as
+            # key, and get 'lady gaga'. If the input key is 'la', the second clause kicks in, and we
+            # recurse to the child with empty string, and it returns 'lady gaga'.
             if key.startswith(k) or k.startswith(key):
                 return child.get(key[len(k):])
         return []
