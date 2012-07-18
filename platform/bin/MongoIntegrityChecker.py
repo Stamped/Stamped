@@ -66,6 +66,9 @@ def parseCommandLine():
     parser.add_option("-n", "--noop", default=False, 
         action="store_true", help="noop mode (don't apply fixes)")
     
+    parser.add_option("-e", "--email", default=False, 
+        action="store_true", help="send result email")
+    
     parser.add_option("-c", "--check", default=None, 
         action="store", help="optionally filter checks based off of their name")
     
@@ -174,7 +177,7 @@ def main():
     # TODO: Repopulate missing documents
 
     # Email dev if any errors come up
-    if libs.ec2_utils.is_ec2():
+    if libs.ec2_utils.is_ec2() and options.email:
         if len(warnings) > 0:
             try:
                 stack = libs.ec2_utils.get_stack().instance.stack
