@@ -1665,7 +1665,12 @@ class Activity(Schema):
         if self.subjects is not None:
             subjects = []
             for userId in self.subjects:
+                if users[str(userId)] is None:
+                    continue
                 subjects.append(users[str(userId)])
+            if len(subjects) == 0:
+                logs.warning('All users missing from activity item subjects')
+                raise StampedActivityMissingUsersError('All users missing from activity item subjects')
             result.subjects = subjects
 
         if self.objects is not None:
