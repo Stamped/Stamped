@@ -254,36 +254,6 @@ body.main {
     position: relative;
 }
 
-#stamped-logo {
-    position: absolute;
-    z-index: 100;
-    
-    background: url(/assets/img/index/stamped-logo.png) no-repeat;
-    width:  184px;
-    height: 184px;
-    
-    top:   -130px;
-    left:  -90px;
-    
-    opacity: 1;
-    .transform(translateZ(0));
-    .transition-transform(.3s, ease);
-}
-
-#retina #stamped-logo {
-    background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
-    width:  368px;
-    height: 368px;
-    
-    // TODO: test retina offsets
-    top:   -130px;
-    left:  -90px;
-}
-
-.stamped-logo-fixed {
-    position: fixed !important;
-}
-
 #main-footer {
     position: relative;
     left: 8px;
@@ -1102,34 +1072,6 @@ footer {
     .social-button-template(2, -22px);
 }
 
-.app-store-button {
-    background: url(/assets/img/index/appstore_sprite.png) no-repeat;
-    display: block;
-    
-    width:  120px;
-    height: 40px;
-    
-    &:hover, &:active {
-        background-position: -122px 0;
-    }
-}
-
-.download-the-app-button {
-    background: url(/assets/img/index/downloadbtn_sprite.png) no-repeat;
-    display: block;
-    
-    width:  200px;
-    height: 32px;
-    
-    &:hover {
-        background-position: -202px 0;
-    }
-    
-    &:active {
-        background-position: -404px 0;
-    }
-}
-
 .launcher-icon-button {
     background: url(/assets/img/index/launchericon_sprite.png) no-repeat;
     display: block;
@@ -1261,30 +1203,6 @@ footer {
     
     .social-button-google {
         .social-button-template(2, -44px);
-    }
-    
-    .app-store-button {
-        background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
-        width:  240px;
-        height: 80px;
-        
-        &:hover, &:active {
-            background-position: -244px 0;
-        }
-    }
-    
-    .download-the-app-button {
-        background: url(/assets/img/index/downloadbtn_sprite@2x.png) no-repeat;
-        width:  400px;
-        height: 64px;
-        
-        &:hover {
-            background-position: -404px 0;
-        }
-        
-        &:active {
-            background-position: -808px 0;
-        }
     }
     
     .launcher-icon-button {

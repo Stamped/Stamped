@@ -72,14 +72,14 @@
             
             {% block header %}
             <div class="header-body fixedwidth clearfix">
-                <p class="join">
+                <p>
                     <span class='desc'>Put your stamp of approval on the world.</span>
-                    <a class='button' href='#'></a>
+                    
+                    <a class='get-the-app-button' href='{{ STAMPED_DOWNLOAD_APP_LINK }}'></a>
                 </p>
                 
-                <p class="login">
-                    <span class='desc'>Already stamping?</span>
-                    <a class='button' href='#'></a>
+                <p>
+                    <div class="fb-login-button">Login with Facebook</div>
                 </p>
                 
                 <a href="/{{user.screen_name}}" class="user-logo-large"></a>
@@ -98,6 +98,12 @@
         <div id="main-page-content" class="main">
             <div id='main-page-content-body' class='main-page-content-body'>
                 {% endblock pre_main %}
+                
+                {% block popup-signup %}
+                <div id="popup-signup">
+                    {% include "popup-signup.html" %}
+                </div>
+                {% endblock popup-signup %}
                 
                 {% block main %}
                 {% endblock main %}
