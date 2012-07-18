@@ -343,9 +343,6 @@ searchQueries = [
 (r'v1/todos/remove.json',                               'v0.functions.todos.remove'),
 (r'v1/todos/collection.json',                           'v0.functions.todos.collection'),
 
-### ACTIVITY
-(r'v1/activity/collection.json',                        'v0.functions.activity.collection'),
-(r'v1/activity/unread.json',                            'v0.functions.activity.unread'),
 """
 
 ### OAUTH
@@ -873,6 +870,28 @@ def _get_guide_search(scope, section, query, subsection=None, viewport=None, off
     return handleGET('guide/search.json', params)
 
 
+### ACTIVITY
+
+# /activity/collection.json
+def _get_activity_collection(token, scope, limit=20, offset=0):
+    params = {
+        'oauth_token': token,
+        'scope': scope,
+        'limit': limit,
+        'offset': offset,
+    }
+
+    return handleGET('activity/collection.json', params)
+
+# /activity/unread.json
+def _get_activity_unread(token):
+    params = {
+        'oauth_token': token,
+    }
+    
+    return handleGET('activity/unread.json', params)
+
+
 
 
 
@@ -1076,6 +1095,9 @@ class StampDetail(View):
         self.setAction('removeLike', self._removeLike)
         self.setWeight('removeLike', 15)
 
+        self.setAction('composeStamp', self._composeStamp)
+        self.setWeight('composeStamp', 5)
+
     def load(self):
         if self.stamp is None:
             self.stamp = _get_stamps_show(self.stampId, token=self.user.token)
@@ -1151,6 +1173,13 @@ class StampDetail(View):
             self.setWeight('addLike', 0)
             self.setWeight('removeLike', 0)
 
+    # Create stamp
+    def _composeStamp(self):
+        if self.user.token is not None:
+            # Create stamp with credit
+            credits = self.stamp['user']['screen_name']
+            self.addToStack(ComposeStamp, kwargs={'entityId': self.entityId, 'credits': credits})
+
 
 class Profile(View):
 
@@ -1164,8 +1193,8 @@ class Profile(View):
         self.setAction('back', self._back)
         self.setWeight('back', 20)
 
-        self.setAction('stamp', self._viewStamp)
-        self.setWeight('stamp', 20)
+        self.setAction('viewStamp', self._viewStamp)
+        self.setWeight('viewStamp', 20)
 
         self.setAction('page', self._page)
         self.setWeight('page', 5)
@@ -1184,7 +1213,7 @@ class Profile(View):
             time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
             self.addToStack(StampDetail, kwargs={'stamp': random.choice(self.stamps)})
         else:
-            self.setWeight('stamp', 0)
+            self.setWeight('viewStamp', 0)
 
     # Load more stamps
     def _page(self):
@@ -1599,6 +1628,95 @@ class ComposeStamp(View):
         raise RootException
 
 
+class Activity(View):
+
+    def __init__(self, user):
+        View.__init__(self, user)
+        
+        self.scope = 'me'
+        self.items = []
+        self.offset = 0
+
+        self.setAction('back', self._back)
+        self.setWeight('back', 2)
+
+        self.setAction('item', self._viewItem)
+        self.setWeight('item', 20)
+
+        self.setAction('page', self._page)
+        self.setWeight('page', 10)
+
+        self.setAction('scope', self._changeScope)
+        self.setWeight('scope', 5)
+
+    def load(self):
+        self.loadActivity()
+
+    def resetActivity(self):
+        self.items = []
+        self.offset = 0
+
+    def loadActivity(self):
+        items = _get_activity_collection(scope=self.scope, offset=self.offset, token=self.user.token, limit=20)
+        self.items += items
+        self.offset += 20
+
+    # Tap on an activity item
+    def _viewItem(self):
+        if len(self.items) > 0:
+            time.sleep(random.randint(2, 6) * self.user._userWaitSpeed)
+            item = random.choice(self.items)
+
+            if 'action' in item:
+                action = item['action']
+                if 'sources' not in action or len(action['sources']) == 0:
+                    return 
+
+                # View entity detail
+                if action['type'] == 'stamped_view_entity':
+                    entityId = action['sources'][0]['source_id']
+                    self.addToStack(EntityDetail, kwargs={'entityId': entityId})
+
+                # View stamp detail
+                elif action['type'] == 'stamped_view_stamp':
+                    stampId = action['sources'][0]['source_id']
+                    self.addToStack(StampDetail, kwargs={'stampId': stampId})
+
+                # View profile
+                elif action['type'] == 'stamped_view_user':
+                    userId = action['sources'][0]['source_id']
+                    self.addToStack(Profile, kwargs={'userId': userId})
+
+    # Load more items
+    def _page(self):
+        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        numItems = len(self.items)
+        self.loadActivity()
+        if numItems == len(self.items):
+            # Nothing loaded!
+            self.setWeight('page', 0)
+
+    # Change scope
+    def _changeScope(self):
+        # Quick and dirty
+        r = random.random()
+        if r < 0.6:
+            scope = 'me'
+        else:
+            scope = 'friends'
+        if self.scope != scope:
+            self.scope = scope 
+            self.resetActivity()
+            self.loadActivity()
+            self.setWeight('scope', int(self.getWeight('scope') * 0.6))
+
+
+
+
+
+
+
+
 # Base user class - Should not be called directly
 class User(object):
     def __init__(self):
@@ -1725,6 +1843,9 @@ class ExistingUser(User):
         
         self.setAction('addStamp', self._entitySearch)
         self.setWeight('addStamp', 30)
+        
+        self.setAction('activity', self._viewActivity)
+        self.setWeight('activity', 20)
 
 
     def load(self):
@@ -1755,6 +1876,11 @@ class ExistingUser(User):
     def _entitySearch(self):
         time.sleep(random.randint(4, 12) * self._userWaitSpeed)
         self.addToStack(EntitySearch)
+
+    # View activity
+    def _viewActivity(self):
+        time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+        self.addToStack(Activity)
 
 
 
