@@ -53,7 +53,7 @@ class Spotify(object):
         response, content = service_request('spotify', 'GET', base_url, query_params=params, priority=priority)
         if response.status >= 200 and response.status < 300:
             return json.loads(content)
-        raise StampedThirdPartyError('Spotify returned error code: ' + str(result.getcode()))
+        raise StampedThirdPartyError('Spotify returned error code: ' + str(response.status))
         
     
     def search(self, method, priority='low', **params):
