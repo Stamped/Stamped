@@ -169,8 +169,6 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
             directors = filter(lambda link : link['title'] ==  u'directors',  self._titleObj['link'])[0]['people']['link']
             # api returns either a dict or a list of dicts depending on len > 1
             if isinstance(directors, list):
-                for dir in directors:
-                    print("\n" + dir['title'])
                 return [
                     {
                     'name':         entry['title'],

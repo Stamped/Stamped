@@ -13,34 +13,29 @@ __all__ = [ 'StampedSource',
             'EntityProxyBook', 'EntityProxyPlace', 'EntityProxyApp', 'EntitySearchAll']
 
 import Globals
-from logs import report
 import re
 
-try:
-    import logs
-    
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.GenericSource              import GenericSource
-    from utils                      import lazyProperty
-    from pprint                     import pformat
-    from libs.LibUtils              import parseDateString
-    from api.Schemas                import BasicEntity
-    from api.Schemas                    import BasicEntityMini as BasicEntityMini1
-    from api.Schemas                import BasicEntityMini as BasicEntityMini2
-    from datetime                   import datetime
-    from bson                       import ObjectId
-    from api.Entity                     import buildEntity
+import logs
 
-    # TODO GET RID OF SEARCH IMPORTS
-    from search.SearchResult import SearchResult
-    from search.ScoringUtils import *
-    from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection
+from resolve.Resolver                   import *
+from resolve.ResolverObject             import *
+from resolve.GenericSource              import GenericSource
+from utils                      import lazyProperty
+from pprint                     import pformat
+from libs.LibUtils              import parseDateString
+from api.Schemas                import BasicEntity
+from api.Schemas                    import BasicEntityMini as BasicEntityMini1
+from api.Schemas                import BasicEntityMini as BasicEntityMini2
+from datetime                   import datetime
+from bson                       import ObjectId
+from api.Entity                     import buildEntity
 
-    from libs.SearchUtils import formatSearchQuery
-except:
-    report()
-    raise
+# TODO GET RID OF SEARCH IMPORTS
+from search.SearchResult import SearchResult
+from search.ScoringUtils import *
+from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+
+from libs.SearchUtils import formatSearchQuery
 
 
 class _EntityProxyObject(object):
@@ -537,8 +532,6 @@ class StampedSource(GenericSource):
         return EntityProxyTV(entity)
 
     def bookFromEntity(self, entity):
-        """
-        """
         return EntityProxyBook(entity)
 
     def placeFromEntity(self, entity):
@@ -582,9 +575,6 @@ class StampedSource(GenericSource):
         raise ValueError('Unrecognized entity %s (%s)' % (entity.title, entity))
     
     def matchSource(self, query):
-        if query.kind == 'search':
-            return self.searchAllSource(query)
-
         if query.kind == 'person':
             return self.artistSource(query)
         if query.kind == 'place':
@@ -608,128 +598,39 @@ class StampedSource(GenericSource):
         return self.emptySource
 
     def trackSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'types'         : 'track',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : 'song',
-            }
-            yield {
-                'albums.title': {'$in': [album['name'] for album in query.albums[:20]]},
-                'types'         : 'track',
-            }
-            yield {
-                'artists.title': {'$in': [artist['name'] for artist in query.artists[:20]]},
-                'types'         : 'track',
-            }
-        return self.__querySource(query_gen(), query)
+        queries = [query.name]
+        queries.extend(album['name'] for album in query.albums[:20])
+        queries.extend(artist['name'] for artist in query.artists[:20])
+        return self.__querySource(queries, query, types='track')
 
     def albumSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'types'         : 'album',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : 'album',
-            }
-            yield {
-                'artists.title': {'$in': [artist['name'] for artist in query.artists[:20]]},
-                'types'         : 'album',
-            }
-            yield {
-                'tracks.title': {'$in': [track['name'] for track in query.tracks[:20]]},
-                'types'         : 'album',
-            }
-        return self.__querySource(query_gen(), query)
+        queries = [query.name]
+        queries.extend(artist['name'] for artist in query.artists[:20])
+        queries.extend(track['name'] for track in query.tracks[:20])
+        return self.__querySource(queries, query, types='album')
 
     def artistSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'types'         : 'artist',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : 'artist',
-            }
-            yield {
-                'albums.title': {'$in': [album['name'] for album in query.albums[:20]]},
-                'types'         : 'artist',
-            }
-            yield {
-                'tracks.title': {'$in': [track['name'] for track in query.tracks[:20]]},
-                'types'         : 'artist',
-            }
-        return self.__querySource(query_gen(), query)
+        queries = [query.name]
+        queries.extend(album['name'] for album in query.albums[:20])
+        queries.extend(track['name'] for track in query.tracks[:20])
+        return self.__querySource(queries, query, types='artist')
 
     def movieSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'types'         : 'movie',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : 'movie',
-            }
-        return self.__querySource(query_gen(), query)
+        return self.__querySource([query.name], query, types='movie')
 
     def tvSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'types'         : 'tv',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : 'tv',
-            }
-        return self.__querySource(query_gen(), query)
+        return self.__querySource([query.name], query, types='tv')
 
     def bookSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'types'         : 'book',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : 'book',
-            }
-            yield {
-                'authors.title': {'$in': [author['name'] for author in query.authors[:20]]},
-                'types'         : 'book',
-            }
-        return self.__querySource(query_gen(), query)
+        queries = [query.name]
+        queries.extend(author['name'] for author in query.authors[:20])
+        return self.__querySource(queries, query, types='book')
 
     def appSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'types'         : 'app',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : 'app',
-            }
-        return self.__querySource(query_gen(), query)
+        return self.__querySource([query.name], query, types='app')
 
     def placeSource(self, query):
-        def query_gen():
-            yield {
-                'titlel'        : query.name.lower(),
-                'kind'          : 'place',
-            }
-            yield {
-                'titlel'        : query.name.lower(),
-                'subcategory'   : {'$in' : ['bar', 'restaurant']},
-            }
-        return self.__querySource(query_gen(), query)
+        return self.__querySource([query.name], query, kind='place')
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
         tokenQueries = formatSearchQuery(queryText)
@@ -784,8 +685,7 @@ class StampedSource(GenericSource):
         and_list = query.setdefault('$and',[])
         and_list.append({'sources.tombstone_id' : { '$exists':False }})
         and_list.append({'sources.user_generated_id' : { '$exists':False }})
-        matches = list(self.__id_query(query))
-        entityIds = [ match['_id'] for match in matches ]
+        entityIds = [match['_id'] for match in self.__id_query(query)]
         # TODO: Should just retrieve all of this from the initial query!
         entityProxies = [ self.entityProxyFromKey(entityId) for entityId in entityIds ]
         if logRawResults:
@@ -810,127 +710,36 @@ class StampedSource(GenericSource):
         return results
 
 
-    def searchAllSource(self, query, timeout=None):
-        def query_gen():
-            try:
-                # Exact match
-                yield {
-                    'titlel' : query.query_string.lower(),
-                }
-
-                words = query.query_string.lower().split()
-                if len(words) == 1:
-                    return
-
-                # Pair prefix
-                yield {
-                    '$or' : [
-                        {
-                            'titlel' : {
-                                '$regex' : r"^%s %s( .*)?$" % (words[i], words[i+1])
-                            }
-                        }
-                            for i in xrange(len(words) - 1)
-                    ]
-                }
-
-                blacklist = set([
-                    'the',
-                    'a',
-                    'an',
-                ])
-
-                yield {
-                    '$or' : [
-                        {
-                            'titlel' : {
-                                '$regex' : r"^%s( .*)?$" % (word)
-                            }
-                        }
-                            for word in words if word not in blacklist
-                    ]
-                }
-
-                # Pair regex
-                yield {
-                    '$or' : [
-                        {
-                            'titlel' : {
-                                '$regex' : r"^(.* )?%s %s( .*)?$" % (words[i], words[i+1])
-                            }
-                        }
-                            for i in xrange(len(words) - 1)
-                    ]
-                }
-                """
-                blacklist = set([
-                    'and',
-                    'or',
-                    'in',
-                    'the',
-                    'a',
-                    'an',
-                    'of',
-                    'on',
-                    'movie',
-                ])
-
-                # Word regex
-                yield {
-                    '$or' : [
-                        {
-                            'titlel' : {
-                                '$regex' : r"^(.* )?%s( .*)?$" % word
-                            }
-                        }
-                            for word in simplify(query.query_string).split()
-                                if word not in blacklist
-                    ]
-                }
-                """
-            except GeneratorExit:
-                pass
-        return self.__querySource(query_gen(), query, constructor_proxy=EntitySearchAll)
-
     def __id_query(self, mongo_query):
         import pymongo
-        #print(pformat(mongo_query))
         logs.debug(str(mongo_query))
-        return list(self.__entityDB._collection.find(mongo_query, fields=['_id'], limit=1000).sort('_id',pymongo.ASCENDING))
+        return self.__entityDB._collection.find(mongo_query, fields=['_id'], limit=1000).sort('_id',pymongo.ASCENDING)
 
-    def __querySource(self, query_gen, query_obj, constructor_proxy=None, **kwargs):
-        def gen():
+    def __querySource(self, token_queries, query_obj, **kwargs):
+        def entityGenerator():
             id_set = set()
-            for query in query_gen:
-                for k,v in kwargs.items():
-                    query[k] = v
-                
-                and_list = query.setdefault('$and',[])
-                and_list.append({'sources.tombstone_id' : { '$exists':False }})
-                and_list.append({'sources.user_generated_id' : { '$exists':False }})
-                if query_obj.source == 'stamped' and query_obj.key != '':
-                    query['_id'] = { '$lt' : ObjectId(query_obj.key) }
-                matches = self.__id_query(query)
-                logs.debug('Found %d matches for query: %20s' % (len(matches), str(matches)))
-                #print(matches)
-                for match in matches:
-                    entity_id = match['_id']
-                    if entity_id not in id_set:
-                        yield entity_id
-                        id_set.add(entity_id)
-        generator = gen()
-        
+            try:
+                for query in token_queries:
+                    mongo_query = {
+                        'sources.tombstone_id' : {'$exists' : False},
+                        'sources.user_generated_id' : {'$exists' : False},
+                        '$and' : formatSearchQuery(query),
+                    }
+                    mongo_query.update(kwargs)
+                    if query_obj.source == 'stamped' and query_obj.key:
+                        mongo_query['_id'] = {'$lt' : ObjectId(query_obj.key)}
+                    matches = self.__id_query(mongo_query)
+                    for match in matches:
+                        entity_id = match['_id']
+                        if entity_id not in id_set:
+                            id_set.add(entity_id)
+                            yield entity_id
+            except GeneratorExit:
+                pass
+            logs.debug('Consumed %d results from query: %s' % (len(id_set), id_set))
         def constructor(entity_id):
-            return self.proxyFromEntity(
-                self.__entityDB.getEntity(
-                    self.__entityDB._getStringFromObjectId(entity_id)
-                )
-            )
-        
-        if constructor_proxy is not None:
-            return self.generatorSource(generator, lambda x: constructor_proxy(constructor(x)), unique=True, tolerant=True)
-        else:
-            return self.generatorSource(generator, constructor=constructor, unique=True, tolerant=True)
+            return self.proxyFromEntity(self.__entityDB.getEntity(str(entity_id)))
+        return self.generatorSource(entityGenerator(), constructor, unique=True, tolerant=True)
 
     def entityProxyFromKey(self, entity_id, **kwargs):
         return self.proxyFromEntity(self.__entityDB.getEntity(entity_id))

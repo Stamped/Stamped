@@ -39,7 +39,7 @@ class SerializationError(Exception):
     def __init__(self, string):
         super(SerializationError, self).__init__(string)
 
-basic_types = [basestring, int, float, bool]
+basic_types = [basestring, int, float, bool, long]
 
 def isBasicType(x):
     return x is None or any(isinstance(x, basic_type) for basic_type in basic_types)
@@ -113,6 +113,7 @@ def serializeValue(arg, schemaClasses):
                                      className)
         return { '__schema_class__': className,
                  '__data__': arg.dataExport() }
+    raise Exception('MongoCache could not serialize item of type: ' + type(arg).__name__)
 
 def deserializeValue(arg, schemaClasses):
     def recurse(arg2):
@@ -135,6 +136,7 @@ def deserializeValue(arg, schemaClasses):
             keys, values = zip(*arg.items())
             # Keys must be strings, so we don't have to bother deserializing.
             return dict(zip(keys, map(recurse, values)))
+    raise Exception('MongoCache could not deserialize item of type: ' + type(arg).__name__)
 
 
 

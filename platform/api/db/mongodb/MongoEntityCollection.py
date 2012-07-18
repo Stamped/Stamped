@@ -523,7 +523,7 @@ class MongoEntityStatsCollection(AMongoCollection):
         documents = self._getMongoDocumentsFromIds(documentIds)
         return map(self._convertFromMongo, documents)
     
-    def updateEntityStats(self, stats):
+    def saveEntityStats(self, stats):
         if stats.timestamp is None:
             stats.timestamp = StatTimestamp()
         stats.timestamp.generated = datetime.utcnow()
