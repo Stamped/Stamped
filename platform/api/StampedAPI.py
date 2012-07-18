@@ -1966,90 +1966,110 @@ class StampedAPI(AStampedAPI):
 
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
-        popularStampIds = map(lambda x: x.stamp_id, popularStamps)
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
+        popularStampStats = self._stampStatsDB.getStatsForStamps(popularStampIds)
 
         if len(popularStampIds) != len(popularUserIds):
             logs.warning("%s: Length of popularStampIds doesn't equal length of popularUserIds" % entityId)
             raise Exception
 
-        popularTodos = self._todoDB.getTodoIdsFromEntityId(entityId)
-        numTodos = len(popularTodos)
-        timestamps = {}
+        numTodos = self._todoDB.countTodosFromEntityId(entityId)
+        
+        aggStampScore = 0
 
-        for stamp in popularStamps:
-            if stamp.timestamp.stamped is not None:
-                t = time.mktime(stamp.timestamp.stamped.timetuple())
-                try:
-                    if t > timestamps[stamp.user.user_id]:
-                        timestamps[stamp.user.user_id] = t
-                except KeyError:
-                    timestamps[stamp.user.user_id] = t
-            elif stamp.timestamp.created is not None:
-                t = time.mktime(stamp.timestamp.created.timetuple())
-                try:
-                    if t > timestamps[stamp.user.user_id]:
-                        timestamps[stamp.user.user_id] = t
-                except KeyError:
-                    timestamps[stamp.user.user_id] = t
+        for stampStat in popularStampStats:
+            if stampStat.score is not None:
+                aggStampScore += stampStat.score
 
-        now = datetime.utcnow()
-        timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
-
-        # Entity popularity is its number of todos plus its time-weighted stamp score
-        stampScore = 0
-        for t in timestamps:
-            if t < 10:
-                stampScore += 1 - (.05 / 10 * t)
-            elif t < 90:
-                stampScore += 1.03125 - (.65 / 80 * t)
-            elif t < 290:
-                stampScore += .435 - (.3 / 200 * t)
-
-        popularity = (1 * numTodos) + (1 * stampScore)
+        popularity = (1 * numTodos) + (1 * aggStampScore)
 
         # Entity Quality is a mixture of having an image and having enrichment
         if entity.kind == 'other':
             quality = 0.1
         else:
-            quality = 0.7
+            quality = 0.6
         
+            # Check if entity has an image (places don't matter)
+            if entity.kind != 'place':
+                if entity.images is None:
+                    quality -= 0.3
 
-        if entity.kind != 'place':
-            if entity.images is None:
-                quality -= 0.5
+            # Places
+            if entity.kind == 'place':
+                if entity.sources.googleplaces_id is None:
+                    quality -= 0.3
+                if entity.formatted_address is None:
+                    quality -= 0.1
+                if entity.sources.singleplatform_id is not None:
+                    quality += 0.2
+                if entity.sources.opentable_id is not None:
+                    quality += 0.1
 
-        if entity.types[0] in ['track','album','artist']:
-            
-            quality -= 0.1
-            if entity.sources.itunes_source is None:
-                quality -= 0.4
-            if entity.sources.spotify_source is not None: 
-                quality += 0.1
-            if entity.sources.rdio_source is not None:
-                quality += 0.1
 
-        elif entity.types[0] in ['movie','tv']:
+            # Music 
+            if entity.isType('track') or entity.isType('album') or entity.isType('artist'):
+                
+                if entity.sources.itunes_id is None:
+                    quality -= 0.3
+                if entity.sources.spotify_id is not None: 
+                    quality += 0.15
+                if entity.sources.rdio_id is not None:
+                    quality += 0.15
 
-            quality -= 0.1
-            if entity.sources.tmdb_source is None:
-                quality -= 0.4
-            if entiyt.sources.itunes_source is not None:
-                quality += 0.2
+                if entity.isType('track'):
+                    if entity.artists is None:
+                        quality -= 0.1
+                    if entity.albums is None:
+                        quality -= 0.05
 
-        elif entity.types[0] == 'book':
+                elif entity.isType('artist'):
+                    if entity.tracks is None:
+                        quality -= 0.1
+                    if entity.albums is None:
+                        quality -= 0.05
 
-            quality -= 0.1
-            if entity.sources.amazon_source is None:
-                quality -= 0.4
-            if entity.sources.itunes_source is not None:
-                quality += 0.2
+                elif entity.isType('album'):
+                    if entity.artists is None:
+                        quality -= 0.1
+                    if entity.tracks is None:
+                        quality -= 0.1
 
-        elif entity.types[0] == 'app':
+            # Movies and TV
+            if entity.isType('movie'):
 
-            if entity.sources.itunes_source is None:
-                quality -= 0.4
+                if entity.sources.tmdb_id is None:
+                    quality -= 0.3
+                if entity.sources.itunes_id is not None:
+                    quality += 0.2
+                if entity.sources.netflix_id is not None:
+                    quality += 0.1
 
+            if entity.isType('tv'):
+                if entity.sources.thetvdb_id is None:
+                    quality -= 0.15
+                if entity.sources.netflix_id is not None:
+                    quality += 0.2
+
+            # Books
+            if entity.isType('book'):
+
+                if entity.sources.amazon_id is None:
+                    quality -= 0.2
+                if entity.sources.itunes_id is not None:
+                    quality += 0.1
+
+            # Apps
+            if entity.types[0] == 'app':
+
+                if entity.sources.itunes_url is None:
+                    quality -= 0.4
+                else:
+                    quality += 0.1
+
+
+        if quality > 1.0:
+            logs.warning("Quality score greater than 1 for entity %s" % entityId)
+            quality = 1.0
 
         score = max(quality, quality * popularity)
 

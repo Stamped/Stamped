@@ -241,6 +241,10 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         documents = self._collection.find({'entity.entity_id': entityId}, fields={'_id': 1}).limit(limit)
         return map(lambda x: self._getStringFromObjectId(x['_id']), documents)
 
+    def countTodosFromEntityId(self, entityId):
+        count = self._collection.find({'entity.entity_id': entityId}).count()
+        return count
+
     def getTodosFromUsersForEntity(self, userIds, entityId, limit=10):
         ### TODO: Convert to index collection
         query = { 'entity.entity_id' : entityId, 'user_id' : { '$in' : userIds } }
