@@ -105,6 +105,13 @@ class _AmazonObject(object):
         except KeyError:
             return None
 
+    @property
+    def hasListPrice(self):
+        try:
+            return 'ListPrice' in xp(self.data, 'ItemAttributes')['c']
+        except KeyError:
+            return False
+
 
 class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
     """
@@ -1167,6 +1174,10 @@ class AmazonSource(GenericSource):
                 penaltyFactor = 0.2
                 searchResult.dataQuality *= penaltyFactor
                 searchResult.addDataQualityComponentDebugInfo('penalty factor for missing author', penaltyFactor)
+            if not searchResult.resolverObject.hasListPrice:
+                penaltyFactor = 0.2
+                searchResult.dataQuality *= penaltyFactor
+                searchResult.addDataQualityComponentDebugInfo('penalty factor for missing list price', penaltyFactor)
 
             miscComponentsToCheck = ['isbn', 'publishers', 'release_date', 'length', 'sku_number', 'images']
             componentsMissing = [c for c in miscComponentsToCheck if not getattr(searchResult.resolverObject, c)]
