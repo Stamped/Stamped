@@ -101,6 +101,11 @@ class StampedRateLimiterService():
                 print ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
                 return
 
+    def saveLimiterStateToDB(self):
+        pass
+#        for l in self.__limiters:
+#            l.day_calls
+
     def handleRequest(self, service, priority, timeout, verb, url, body = {}, headers = {}):
         global count
         count += 1

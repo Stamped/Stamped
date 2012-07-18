@@ -128,7 +128,7 @@ class RateLimiter(object):
         self.__request_dur_cap = REQUEST_DUR_CAP
 
         self.__calls = 0
-        self.__day_calls = 0
+        self.day_calls = 0
         self.__day_start = self._getDay()
 
         self.__low_count = 0
@@ -235,7 +235,7 @@ class RateLimiter(object):
 
     def call(self):
         self.__calls += 1
-        self.__day_calls += 1
+        self.day_calls += 1
 
 
     def _isBlackout(self, now=None):
@@ -259,9 +259,9 @@ class RateLimiter(object):
         #print('Day start: %s   now: %s' % (self.__day_start, now))
         if self.__day_start + 60*60*24 < now:
             self.__day_start = self._getDay()
-            self.__day_calls = 0
+            self.day_calls = 0
 
-        return self.__day_calls >= self.cpd
+        return self.day_calls >= self.cpd
 
 
     def _getDay(self):
