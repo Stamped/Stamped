@@ -82,7 +82,6 @@ window.fbAsyncInit = function() {
         }, true);
         
         FB.Event.subscribe('auth.statusChange', update_fb_auth_status);
-        FB.Event.subscribe('auth.login', update_fb_auth_status);
     }
 };
 
