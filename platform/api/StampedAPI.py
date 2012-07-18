@@ -1733,9 +1733,9 @@ class StampedAPI(AStampedAPI):
             email = {
                 'from' : 'Stamped <noreply@stamped.com>',
                 'to' : 'dev@stamped.com',
-                'subject' : 'Error while reloading autocomplete index',
+                'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
                 'body' : '<pre>%s</pre>' % str(e),
-                }
+            }
             utils.sendEmail(email, format='html')
 
     def updateAutoCompleteIndexAsync(self):
