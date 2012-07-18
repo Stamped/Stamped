@@ -7,9 +7,10 @@ from errors import *
 import oauth as oauth
 
 from libs.Request       import *
+from APIKeys            import get_api_key
 
-TWITTER_CONSUMER_KEY    = 'kn1DLi7xqC6mb5PPwyXw'
-TWITTER_CONSUMER_SECRET = 'AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU'
+TWITTER_CONSUMER_KEY    = get_api_key('twitter', 'consumer_key')
+TWITTER_CONSUMER_SECRET = get_api_key('twitter', 'consumer_secret')
 
 class Twitter(object):
     def __init__(self, consumer_key=TWITTER_CONSUMER_KEY, consumer_secret=TWITTER_CONSUMER_SECRET):

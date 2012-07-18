@@ -15,7 +15,7 @@ from libs.LRUCache          import lru_cache
 from libs.CachedFunction    import cachedFn
 from libs.CountedFunction   import countedFn
 from libs.Request           import *
-
+from APIKeys                import get_api_key
 
 HOST              = 'api-public.netflix.com'
 PORT              = '80'
@@ -23,9 +23,9 @@ REQUEST_TOKEN_URL = 'http://api-public.netflix.com/oauth/request_token'
 ACCESS_TOKEN_URL  = 'http://api-public.netflix.com/oauth/access_token'
 AUTHORIZATION_URL = 'https://api-public-user.netflix.com/oauth/login'
 
-APP_NAME   = 'Stamped'
-API_KEY    = 'nr5nzej56j3smjra6vtybbvw'
-API_SECRET = 'H5A633JsYk'
+APP_NAME                = get_api_key('netflix', 'app_name')
+API_KEY                 = get_api_key('netflix', 'api_key')
+API_SECRET              = get_api_key('netflix', 'api_secret')
 
 """
 HOST              = 'api.netflix.com'
@@ -425,7 +425,7 @@ def demo(method, user_id=USER_ID, user_token=OAUTH_TOKEN, user_secret=OAUTH_TOKE
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'addToQueue'
+    methods = 'autocomplete'
     params['title'] = 'arrested development'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

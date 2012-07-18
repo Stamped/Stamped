@@ -16,6 +16,7 @@ from libs.LRUCache       import lru_cache
 from libs.CachedFunction import *
 from libs.CountedFunction import countedFn
 from libs.Request         import service_request
+from APIKeys              import get_api_key
 
 class GooglePlaces(AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'
@@ -23,15 +24,9 @@ class GooglePlaces(AKeyBasedAPI):
     DEFAULT_RADIUS  = 500 # meters
     NAME            = 'GooglePlaces'
     TYPES           = set([ 'restaurant' ])
-    
-    API_KEYS = [
-        'AIzaSyAxgU3LPU-m5PI7Jh7YTYYKAz6lV6bz2ok',  # Travis
-        #'AIzaSyAEjlMEfxmlCBQeyw_82jjobQAFjYx-Las',  # Kevin
-        #'AIzaSyDTW6GnCmfP_mdxklSaArWrPoQo6cJQhOs',  # Bart
-        #'AIzaSyA90G9YbjX7q3kXOBdmi0JFB3mTCOl45c4',  # Ed
-        #'AIzaSyCZnt6jjlHxzRsyklNoYJKsv6kcPeQs-W8',  # Jake
-    ]
-    
+
+    API_KEYS = get_api_key('googleplaces', 'api_keys')
+
     _googleTypeToSubcategoryMap = {
         "food" : "restaurant", 
         "restaurant" : "restaurant", 

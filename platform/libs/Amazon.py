@@ -9,21 +9,23 @@ import Globals
 from logs import report
 
 try:
-    import keys.aws
     from libs import bottlenose
     import logs
     
-    from libs.LibUtils       import xmlToPython
-    from libs.LRUCache       import lru_cache
-    from libs.CachedFunction import cachedFn
+    from libs.LibUtils        import xmlToPython
+    from libs.LRUCache        import lru_cache
+    from libs.CachedFunction  import cachedFn
     from libs.CountedFunction import countedFn
     from libs.RateLimiter     import RateLimiter, RateException
+
 except:
     report()
     raise
 
-__all__      = [ "Amazon" ]
-ASSOCIATE_ID = 'stamped01-20'
+__all__         = [ "Amazon" ]
+ASSOCIATE_ID        = get_api_key('amazon', 'associate_id')
+AWS_ACCESS_KEY_ID   = get_api_key('amazon', 'aws_access_key_id')
+AWS_SECRET_KEY      = get_api_key('amazon', 'aws_secret_key')
 
 class Amazon(object):
     """
@@ -31,7 +33,7 @@ class Amazon(object):
     """
     
     def __init__(self):
-        self.amazon = bottlenose.Amazon(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY, ASSOCIATE_ID)
+        self.amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, ASSOCIATE_ID)
         self.__limiter = RateLimiter(cps=5)
 
     # note: these decorators add tiered caching to this function, such that

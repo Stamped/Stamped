@@ -20,11 +20,13 @@ from libs.CachedFunction  import cachedFn
 from libs.CountedFunction import countedFn
 from libs.Request        import service_request
 from api.Schemas         import MediaCollectionEntity
+from APIKeys import get_api_key
 
+API_KEY = get_api_key('tvdb', 'api_key')
 
 class TheTVDB(object):
     
-    def __init__(self, api_key='F1D337C9BF2357FB'):
+    def __init__(self, api_key=API_KEY):
         self.api_key = api_key
 
     # note: these decorators add tiered caching to this function, such that

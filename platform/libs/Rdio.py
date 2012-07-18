@@ -42,7 +42,8 @@ try:
     from urllib                 import quote_plus
     from django.utils.encoding  import iri_to_uri
     from libs.Request           import service_request
-    
+    from APIKeys                import get_api_key
+
     try:
         import json
     except ImportError:
@@ -50,6 +51,10 @@ try:
 except:
     report()
     raise
+
+
+API_KEY         = get_api_key('rdio', 'api_key')
+API_SECRET      = get_api_key('rdio', 'api_secret')
 
 
 def urlencode_utf8(params):
@@ -62,7 +67,7 @@ def urlencode_utf8(params):
 
 class Rdio(object):
 
-    def __init__(self, key='bzj2pmrs283kepwbgu58aw47', secret='xJSZwBZxFp'):
+    def __init__(self, key=API_KEY, secret=API_SECRET):
         self.__key      = key
         self.__secret   = secret
         self.__consumer = oauth.Consumer(self.__key, self.__secret)

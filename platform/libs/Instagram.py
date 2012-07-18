@@ -28,14 +28,15 @@ try:
     from libs.LRUCache       import lru_cache
     from libs.Memcache       import memcached_function
     from libs.Request        import service_request
+    from APIKeys import get_api_key
 except:
     report()
     raise
 
 HOST            = 'https://api.instagram.com/v1'
 PORT            = '80'
-CLIENT_ID       = '772a5e1689cf4ae085cb155844dbcd1e'
-CLIENT_SECRET   = 'cdeb59e88a724cdd8ef4792bc7f72bcf'
+CLIENT_ID       = get_api_key('instagram', 'client_id')
+CLIENT_SECRET   = get_api_key('instagram', 'client_secret')
 
 class Instagram(object):
     def __init__(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET):

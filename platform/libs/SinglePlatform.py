@@ -23,6 +23,11 @@ from api.Schemas    import MenuItem
 from api.Schemas    import MenuPrice
 from threading      import Lock
 from libs.Request   import service_request
+from APIKeys        import get_api_key
+
+CLIENT_ID   = get_api_key('singleplatform', 'client_id')
+SIGNING_KEY = get_api_key('singleplatform', 'signing_key')
+API_KEY     = get_api_key('singleplatform', 'api_key')
 
 _spicy_map = {
     'none':0,
@@ -174,9 +179,9 @@ class SinglePlatform(object):
 class StampedSinglePlatform(SinglePlatform):
     def __init__(self):
         SinglePlatform.__init__(self, 
-                                client_id='cyibvntpqlfgmsnynncnkbscg', 
-                                signing_key='1THU8A8TPUYw84LIXQTomgZNNx4yoKnQiDpNv9yDPuQ', 
-                                api_key='kpm48ecj0bb5zai7qc5wvq562')
+                                client_id=CLIENT_ID,
+                                signing_key=SIGNING_KEY,
+                                api_key=API_KEY)
 
 if __name__ == '__main__':
     sp = StampedSinglePlatform()

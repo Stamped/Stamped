@@ -75,15 +75,10 @@ from datetime               import timedelta
 from utils                  import lazyProperty
 from libs.RateLimiter       import RateLimiter
 from libs.Request           import service_request
+from APIKeys                import get_api_key
 
-_API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
-# Random (but seemingly functional API Key)
-#_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
-_API_V3_Key = 'xdNC1Jb03oXouZvIoGNjOFb122lhPax8DN1a1I8P'
-_API_V3_Secret = "pJ4OIbsi8l3V1sXNRngy3uCGe0DzCIpWfzwGtbkM"
-
-_API_V3_Key = 'wgf36HhnpPXQBu6qSkRPiqMK7te3jHpi0EJnYf9D'
-_API_V3_Secret = '9hIItS9RQAlinpyfD6FR9HjmI3tBidMCMxhtAjNd'
+_API_V3_Key             = get_api_key('factual', 'api_key')
+_API_V3_Secret          = get_api_key('factual', 'api_secret')
 _limit = 20
 
 

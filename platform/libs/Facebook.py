@@ -5,11 +5,13 @@ import logs, utils
 import re
 from errors import *
 from libs.Request import *
+from APIKeys import get_api_key
 
 
-APP_ID          = '297022226980395'
-APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
-APP_NAMESPACE   = 'stampedapp'
+
+APP_ID          = get_api_key('facebook', 'app_id')
+APP_SECRET      = get_api_key('facebook', 'app_secret')
+APP_NAMESPACE   = get_api_key('facebook', 'app_namespace')
 
 USER_ID = '100003940534060'
 ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvqLI9LyvDVL5Qg9CmuqJOHSMTT1cgDXk5uj7ODE8CsAZDZD'
@@ -17,7 +19,7 @@ ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvq
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
 
-ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
+#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):

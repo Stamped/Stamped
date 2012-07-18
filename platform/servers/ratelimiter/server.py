@@ -16,11 +16,12 @@ from time               import sleep
 from GreenletServer     import GreenletServer
 import RateLimiter2
 from RateLimiter2       import RateLimiter, Request
+from libs.ec2_utils     import get_stack
 
 from optparse           import OptionParser
 
 
-limits_path = os.path.dirname(RateLimiter2.__file__) + '/limits.conf'
+limits_dir = os.path.dirname(RateLimiter2.__file__)
 config_load_interval = 60*5
 count = 0
 
@@ -39,11 +40,16 @@ class StampedRateLimiterService():
         print('calling ratelimiterService init')
         self.__throttle = throttle
         self.__limiters = {}
+        self.__stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
         self.loadLimiters()
         self.__config_loader = gevent.spawn(configLoaderLoop, self)
 
     def loadLimiters(self):
-        print('checking config file for updates')
+        filename = 'limits-%s.conf' % self.__stack_name
+        limits_path = '%s/%s' % (limits_dir, filename)
+
+        print('checking config file for updates.  path: %s' % limits_path)
+
         try:
             meta = {}
             if os.path.exists(limits_path):
@@ -52,16 +58,16 @@ class StampedRateLimiterService():
 
                 exec compile(source, limits_path, "exec") in meta
             else:
-                print("### Could not find limits.conf: no limits defined")
+                print("### Could not find '%s': no limits defined" % filename)
                 return
         except Exception as e:
-            print('Exception while trying to execute limits.conf file: %s' % e)
+            print("Exception while trying to execute '%s' file: %s" % (filename, e))
             return
 
         try:
             limits = meta['limits']
         except:
-            print('limits var is not being set in limits.conf.  skipping load step')
+            print('limits var is not being set in config file.  skipping load step')
             return
 
         for l in limits:
