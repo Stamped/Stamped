@@ -45,14 +45,14 @@ TODO:
     * HIGH PRIORITY:
         * profile
             * DONE - header get-the-app button & texting functionality
-            * sign-up & login via facebook or stamped
-                * ASK anthony about sign-up, login, vs. get-the-app
+            * PUNT - sign-up & login via facebook or stamped
+                * PUNT - ASK anthony about sign-up, login, vs. get-the-app
             * layout adjustments to gallery view
             * navbar occasional missing graphics
         * misc:
             * replace font usage w/ self-hosting option
             * retina display support & testing
-            * create 3 unique linkes => stamped.com
+            * create 3 unique links => stamped.com
         * stamped.com
             * replace intro hero font with skyline font
             * subpages

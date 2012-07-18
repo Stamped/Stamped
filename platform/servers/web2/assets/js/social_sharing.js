@@ -40,11 +40,11 @@ window.fbAsyncInit = function() {
             channelUrl  : '//www.stamped.com/channel.html', // Channel File (TODO)
             status      : true, // check login status
             cookie      : true, // enable cookies to allow the server to access the session
-            xfbml       : true, // parse XFBML
-            oauth       : true
+            xfbml       : true  // parse XFBML
+            //oauth       : true
         });
         
-        var update_fb_auth_status = function(response) {
+        /*var update_fb_auth_status = function(response) {
             alert(response);
             if (response.authResponse) {
                 console.log("logged in");
@@ -81,7 +81,7 @@ window.fbAsyncInit = function() {
             }
         }, true);
         
-        FB.Event.subscribe('auth.statusChange', update_fb_auth_status);
+        FB.Event.subscribe('auth.statusChange', update_fb_auth_status);*/
     }
 };
 
