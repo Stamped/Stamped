@@ -1973,11 +1973,94 @@ class StampedAPI(AStampedAPI):
             logs.warning("%s: Length of popularStampIds doesn't equal length of popularUserIds" % entityId)
             raise Exception
 
+        popularTodos = self._todoDB.getTodoIdsFromEntityId(entityId)
+        numTodos = len(popularTodos)
+        timestamps = {}
+
+        for stamp in popularStamps:
+            if stamp.timestamp.stamped is not None:
+                t = time.mktime(stamp.timestamp.stamped.timetuple())
+                try:
+                    if t > timestamps[stamp.user.user_id]:
+                        timestamps[stamp.user.user_id] = t
+                except KeyError:
+                    timestamps[stamp.user.user_id] = t
+            elif stamp.timestamp.created is not None:
+                t = time.mktime(stamp.timestamp.created.timetuple())
+                try:
+                    if t > timestamps[stamp.user.user_id]:
+                        timestamps[stamp.user.user_id] = t
+                except KeyError:
+                    timestamps[stamp.user.user_id] = t
+
+        now = datetime.utcnow()
+        timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
+
+        # Entity popularity is its number of todos plus its time-weighted stamp score
+        stampScore = 0
+        for t in timestamps:
+            if t < 10:
+                stampScore += 1 - (.05 / 10 * t)
+            elif t < 90:
+                stampScore += 1.03125 - (.65 / 80 * t)
+            elif t < 290:
+                stampScore += .435 - (.3 / 200 * t)
+
+        popularity = (1 * numTodos) + (1 * stampScore)
+
+        # Entity Quality is a mixture of having an image and having enrichment
+        if entity.kind == 'other':
+            quality = 0.1
+        else:
+            quality = 0.7
+        
+
+        if entity.kind != 'place':
+            if entity.images is None:
+                quality -= 0.5
+
+        if entity.types[0] in ['track','album','artist']:
+            
+            quality -= 0.1
+            if entity.sources.itunes_source is None:
+                quality -= 0.4
+            if entity.sources.spotify_source is not None: 
+                quality += 0.1
+            if entity.sources.rdio_source is not None:
+                quality += 0.1
+
+        elif entity.types[0] in ['movie','tv']:
+
+            quality -= 0.1
+            if entity.sources.tmdb_source is None:
+                quality -= 0.4
+            if entiyt.sources.itunes_source is not None:
+                quality += 0.2
+
+        elif entity.types[0] == 'book':
+
+            quality -= 0.1
+            if entity.sources.amazon_source is None:
+                quality -= 0.4
+            if entity.sources.itunes_source is not None:
+                quality += 0.2
+
+        elif entity.types[0] == 'app':
+
+            if entity.sources.itunes_source is None:
+                quality -= 0.4
+
+
+        score = max(quality, quality * popularity)
+
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
             stats.popular_stamps = popularStampIds
+            stats.popularity = popularity
+            stats.quality = quality
+            stats.score = score
             self._entityStatsDB.updateEntityStats(stats)
         except StampedUnavailableError:
             stats = EntityStats()
@@ -2927,13 +3010,8 @@ class StampedAPI(AStampedAPI):
         stats.quality = quality
         
         
-        #Entity quality for now is just a matter of it having a picture or not
-        image_score = 1
-        if entity.kind in ['media_item','media_collection','person','software']:
-            if entity.images is None:
-                image_score = 0.01
 
-        score = image_score * (max(quality, float(quality * popularity)))
+        score = max(quality, float(quality * popularity))
         stats.score = score
 
         self._stampStatsDB.updateStampStats(stats)
