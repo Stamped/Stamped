@@ -1893,8 +1893,8 @@ class ExistingUser(User):
 
 # greenlets = [ 
 #     gevent.spawn(worker, LoggedOutUser()),
-#     # gevent.spawn(worker, LoggedOutUser()),
-#     # gevent.spawn(worker, LoggedOutUser()),
+#     gevent.spawn(worker, LoggedOutUser()),
+#     gevent.spawn(worker, LoggedOutUser()),
 # ]
 
 # gevent.joinall(greenlets)
