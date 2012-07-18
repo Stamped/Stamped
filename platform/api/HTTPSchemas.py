@@ -1716,20 +1716,20 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            if getattr(entity.sources, 'spotify_id', None) is not None:
-                source              = HTTPActionSource()
-                source.name         = 'Add to playlist on Spotify'
-                source.source       = 'spotify'
-                source.source_id    = entity.sources.spotify_id
-                source.setCompletion(
-                    action      = actionType,
-                    entity_id   = entity.entity_id,
-                    source      = source.source,
-                    source_id   = source.source_id,
-                )
-                sources.append(source)
+            # if getattr(entity.sources, 'spotify_id', None) is not None:
+            #     source              = HTTPActionSource()
+            #     source.name         = 'Add to playlist on Spotify'
+            #     source.source       = 'spotify'
+            #     source.source_id    = entity.sources.spotify_id
+            #     source.setCompletion(
+            #         action      = actionType,
+            #         entity_id   = entity.entity_id,
+            #         source      = source.source,
+            #         source_id   = source.source_id,
+            #     )
+            #     sources.append(source)
 
-            self._addAction(actionType, actionTitle, sources, icon=actionIcon)
+            # self._addAction(actionType, actionTitle, sources, icon=actionIcon)
 
             # Actions: Download
 

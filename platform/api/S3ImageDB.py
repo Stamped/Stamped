@@ -27,6 +27,8 @@ from boto.s3.connection import S3Connection
 from boto.s3.key        import Key
 # from boto.s3.bucket     import Bucket
 
+from libs.ec2_utils     import is_prod_stack
+
 class S3ImageDB(AImageDB):
     
     def __init__(self, bucket_name='stamped.com.static.images'):
@@ -115,17 +117,20 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
     
     def removeProfileImage(self, screen_name):
+        if not is_prod_stack():
+            return
+
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
         suffix = '.jpg'
         
         sizes = self.profileImageSizes
-        
+
         try:
-            self._removeFromS3('%s%s') % (prefix, suffix)
+            self._removeFromS3('%s%s' % (prefix, suffix))
             
             for size in sizes:
-                self._removeFromS3('%s-%s%s') % (prefix, size, suffix)
+                self._removeFromS3('%s-%s%s' % (prefix, size, suffix))
         except Exception:
             logs.warning('Warning: Failed to remove file')
     

@@ -861,6 +861,12 @@ class BasicEntity(BasicEntityMini):
     def subtitle(self):
         return self._genericSubtitle()
 
+    @property
+    def search_subtitle(self):
+        # There are some specific cases -- OK, currently one specific case -- where, for search, we prefer a different
+        # subtitle to the one we would typically show.
+        return self.subtitle
+
     @lazyProperty
     def search_id(self):
         if self.entity_id:
@@ -1079,6 +1085,12 @@ class PlaceEntity(BasicEntity):
 
         # Fallback to generic
         return self._genericSubtitle()
+
+    @property
+    def search_subtitle(self):
+        # TODO: Make sure other places in the code (HTTPSchemas, EntitySearch) stop rolling their own versions of this!
+        formattedAddress = self.formatAddress()
+        return formattedAddress if formattedAddress else self.subtitle
 
     def minimize(self, *args):
         return BasicEntity.minimize(self, 'coordinates')

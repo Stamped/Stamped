@@ -64,6 +64,10 @@ class _EntityProxyObject(object):
         except Exception:
             return ''
 
+    @property
+    def description(self):
+        return self.entity.desc
+
     @lazyProperty
     def key(self):
         try:
@@ -139,6 +143,10 @@ class EntityProxyAlbum(_EntityProxyObject, ResolverMediaCollection):
         except Exception:
             return []
 
+    @property
+    def release_date(self):
+        return self.entity.release_date
+
 
 class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
     """
@@ -172,6 +180,11 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
             return int(self.entity.length)
         except Exception:
             return -1
+
+    @property
+    def release_date(self):
+        return self.entity.release_date
+
 
 def _fixCast(cast):
     newcast = []
@@ -297,6 +310,20 @@ class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
             return self.entity.mpaa_rating
         except Exception:
             return None
+
+    @lazyProperty
+    def studios(self):
+        try:
+            return [ { 'name': item.title } for item in self.entity.studios ]
+        except Exception:
+            return []
+
+    @lazyProperty
+    def networks(self):
+        try:
+            return [ { 'name': item.title } for item in self.entity.networks ]
+        except Exception:
+            return []
 
 
 class EntityProxyBook(_EntityProxyObject, ResolverMediaItem):
