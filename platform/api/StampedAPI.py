@@ -1724,7 +1724,7 @@ class StampedAPI(AStampedAPI):
                 completions.append( { 'completion' : name } )
             return completions
 
-        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(query)]]
+        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
 
     def reloadAutoCompleteIndex(self, greenlet):
         try:
