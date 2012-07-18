@@ -130,7 +130,7 @@ class MongoActivityCollection(AActivityDB):
 
             return activity
 
-        # Insert the activity item individually
+        # Individual activity items
         if not group:
             # Short-circuit if the item exists and it's considered unique
             if unique:
@@ -142,7 +142,7 @@ class MongoActivityCollection(AActivityDB):
             activity    = self.activity_items_collection.addActivityItem(activity)
             activityId  = activity.activity_id
 
-        # Insert the activity item as a group
+        # Grouped activity items
         else:
             params = {
                 'verb'      : verb,
@@ -162,12 +162,14 @@ class MongoActivityCollection(AActivityDB):
                 
                 activityId = activityIds[0]
                 
-                # Check if subject already exists
+                # Short circuit if subject already exists
                 item = self.activity_items_collection.getActivityItem(activityId)
-                if subject not in item.subjects:
-                    self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=created)
-                    if benefit is not None:
-                        self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
+                if subject in item.subjects:
+                    return
+
+                self.activity_items_collection.addSubjectToActivityItem(activityId, subject, modified=created)
+                if benefit is not None:
+                    self.activity_items_collection.setBenefitForActivityItem(activityId, benefit)
 
             # Insert new item
             else:

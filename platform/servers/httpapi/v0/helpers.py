@@ -22,6 +22,8 @@ from django.views.decorators.http   import require_http_methods
 from django.utils.functional        import wraps
 from django.http                    import HttpResponse
 
+from datetime                       import datetime
+
 IS_PROD = libs.ec2_utils.is_prod_stack()
 
 # TODO (travis): VALID_ORIGINS should be dependent on IS_PROD to be 100% as 
@@ -67,6 +69,7 @@ defaultExceptions = [
     (StampedPermissionsError,           403,    'forbidden',            'Insufficient privileges'),
     (StampedDuplicationError,           409,    'already_exists',       'An error occurred. Please try again later'),
     (StampedUnavailableError,           404,    'not_found',            'Not found'),
+    (SchemaException,                   400,    'invalid_request',      'Invalid form'),
     (StampedInternalError,              500,    'internal',             'An error occurred. Please try again later'),
 ]
 
@@ -114,7 +117,7 @@ def handleStampedExceptions(e, handlers=None):
                 email = {}
                 email['from'] = 'Stamped <noreply@stamped.com>'
                 email['to'] = 'dev@stamped.com'
-                email['subject'] = '%s - 500 Error' % stampedAPI.node_name
+                email['subject'] = '%s - 500 Error - %s' % (stampedAPI.node_name, datetime.utcnow().isoformat())
                 email['body'] = logs.getHtmlFormattedLog()
                 utils.sendEmail(email, format='html')
             except Exception as e:
@@ -445,8 +448,7 @@ def parseRequest(schema, request, **kwargs):
         msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
-        
-        raise StampedHTTPError(400, "invalid_form")
+        raise e
 
 def parseFileUpload(schema, request, fileName='image', **kwargs):
     ### Parse Request
@@ -503,8 +505,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         msg = "Unable to parse form (%s)" % e
         logs.warning(msg)
         utils.printException()
-        
-        raise StampedHTTPError(400, "invalid_form")
+        raise e
 
 def transformOutput(value, **kwargs):
     """

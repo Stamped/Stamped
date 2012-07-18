@@ -158,6 +158,24 @@ class StampedNotLoggedInError(StampedPermissionsError):
 # Specific Stamped Exceptions
 
 
+#Validation Errors
+class StampedInvalidColorError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidStringError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedInvalidURLError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+class StampedObjectIdError(StampedInputError):
+    def __init__(self, msg=None):
+        StampedInputError.__init__(self, msg)
+
+
 # Auth
 class StampedInvalidAuthTokenError(StampedAuthError):
     def __init__(self, msg=None):
@@ -367,6 +385,9 @@ class StampedThirdPartyInvalidCredentialsError(StampedInvalidCredentialsError):
 class StampedFacebookTokenError(StampedAuthError):
     def __init__(self, msg=None):
         StampedAuthError.__init__(self,msg)
+
+class StampedThirdPartyRequestFailError(StampedInputError):
+    pass
 
     # Stamps
 class StampedOutOfStampsError(StampedIllegalActionError):

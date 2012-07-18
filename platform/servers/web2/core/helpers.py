@@ -24,7 +24,7 @@ from django.utils.functional    import wraps
 
 # initialize several useful globals
 IS_PROD  = libs.ec2_utils.is_prod_stack()
-_baseurl = "https://dev.stamped.com/v0"
+_baseurl = "https://dev.stamped.com/v1"
 
 # extract all of the settings from django's settings.py which begin with STAMPED_
 # note that these settings will be included in the context of every rendered template.
@@ -470,4 +470,21 @@ def shuffle_split_users(users):
     a0.extend(a1)
     
     return a0
+
+def transform_output(value, **kwargs):
+    """
+        Serialize object to json and return it as an HttpResponse object
+    """
+    
+    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
+    kwargs.setdefault('mimetype', 'application/json')
+    
+    if isinstance(value, bool):
+        value = { 'result' : value }
+    
+    output_json = json.dumps(value, sort_keys=not IS_PROD)
+    output      = HttpResponse(output_json, **kwargs)
+    
+    logs.output(output_json)
+    return output
 

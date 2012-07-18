@@ -69,8 +69,8 @@ class StampedAPITodosPreviews(StampedAPITodoHttpTest):
         # Create User C and User D, who also todo the tntity.  User B should see both users in the preview
         (self.userC, self.tokenC) = self.createAccount('UserC')
         (self.userD, self.tokenD) = self.createAccount('UserD')
-        self.createFriendship(self.tokenC, self.userB)
-        self.createFriendship(self.tokenD, self.userB)
+        self.createFriendship(self.tokenB, self.userC)
+        self.createFriendship(self.tokenB, self.userD)
         self.todo = self.createTodo(self.tokenC, self.entity['entity_id'])
         self.todo = self.createTodo(self.tokenD, self.entity['entity_id'])
 
@@ -81,9 +81,6 @@ class StampedAPITodosPreviews(StampedAPITodoHttpTest):
         result = self.handleGET(path, data)
 
         self.assertEqual(len(result[0]['previews']['todos']), 2)
-        self.assertEqual(len(result[0]['previews']['stamps']), 1)
-        self.assertEqual(result[0]['previews']['stamps'][0]['stamp_id'], self.stamp['stamp_id'])
-        self.assertEqual(result[0]['previews']['stamps'][0]['user']['user_id'], self.userA['user_id'])
 
         self.deleteTodo(self.tokenD, self.entity['entity_id'])
         self.deleteTodo(self.tokenC, self.entity['entity_id'])

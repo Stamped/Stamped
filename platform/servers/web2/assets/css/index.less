@@ -53,19 +53,6 @@ body.main {
    ************************************************************************** */
 
 
-#intro-iphone {
-    background: url(/assets/img/index/iphone_intro_sprite.png) no-repeat;
-    
-    width:  395px;
-    height: 632px;
-    
-    position: fixed;
-    left: 50%;
-    top:  50%;
-    margin: -316px 0 0 -200px;
-    z-index: 1;
-}
-
 #intro-hero {
     position: fixed;
     z-index: 100;
@@ -73,7 +60,7 @@ body.main {
     text-align: center;
     width: 100%;
     top:   50%;
-    margin-top: -200px;
+    margin-top: -140px;
     color: #b7b7b7;
     
     .text {
@@ -106,18 +93,6 @@ body.main {
     .active-text {
         display: block;
     }
-}
-
-.italic {
-    font-style: italic;
-}
-
-.facebook {
-    color: #3B5999;
-}
-
-.twitter {
-    color: #4099FF;
 }
 
 
@@ -168,12 +143,13 @@ body.main {
         
         #pane-wrapper {
             position: relative;
-            margin: 12px 48px;
+            margin: 24px 48px;
             
             .pane {
                 position: absolute;
                 top:  0;
                 left: 0;
+                height: 100%;
                 
                 opacity: 0;
                 .transition(opacity, .3s, ease);
@@ -191,15 +167,10 @@ body.main {
                     color: #888;
                     font-weight: 200;
                     font-size: 80%;
-                    
-                    .continue-button {
-                        color: #438fED;
-                        margin-bottom: 1em;
-                    }
                 }
             }
             
-            #pane-0 {
+            #pane-3 {
                 position: relative !important;
                 
                 .continue-button {
@@ -213,13 +184,22 @@ body.main {
     #pane-nav {
         position: absolute;
         left: -24px;
-        top: 50%;
-        margin-top: -40px;
+        top:   50%;
+        margin-top: -50px;
+        
+        .pane-nav-button {
+            margin-bottom: 4px;
+        }
+        
+        #pane-nav-4 {
+            margin-bottom: 0;
+        }
     }
 }
 
 .hidden-main-animating {
     .transition(opacity, .4s, ease);
+    .transition-delay(.4s);
 }
 
 .active-pane-0 #pane-nav-0, 
@@ -274,42 +254,40 @@ body.main {
     position: relative;
 }
 
-#stamped-logo {
-    position: absolute;
-    z-index: 100;
-    
-    background: url(/assets/img/index/stamped-logo.png) no-repeat;
-    width:  184px;
-    height: 184px;
-    
-    top:   -130px;
-    left:  -90px;
-    
-    opacity: 1;
-    .transition-transform(.3s, ease);
-}
-
-#retina #stamped-logo {
-    background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
-    width:  368px;
-    height: 368px;
-    
-    // TODO: test retina offsets
-    top:   -130px;
-    left:  -90px;
-}
-
 #main-footer {
-    text-align: center;
     position: relative;
     left: 8px;
     
     .watch-video {
+        float: left;
+        margin-left: 8px;
+        
         .bieber-video-preview-icon {
             display: inline-block;
             position: relative;
             top: 12px;
         }
+        
+        .overview-video {
+            display: none;
+        }
+    }
+    
+    .app-store-button {
+        position: relative;
+        
+        float: right;
+        margin: 8px 12px;
+    }
+}
+
+.watch-video-overview {
+    .default-video, .bieber-video-preview-icon {
+        display: none !important;
+    }
+    
+    .overview-video {
+        display: block !important;
     }
 }
 
@@ -364,7 +342,7 @@ body.main {
             left: 50%;
             top:  50%;
             
-            margin: -20px 0 0 -20px;
+            margin: -32px 0 0 -32px;
         }
         
         &:hover, &:active {
@@ -380,11 +358,6 @@ body.main {
         }
     }
     
-    .user-video-desc {
-        .watch-video {
-            color: #438fED;
-        }
-    }
 }
 
 #pane-4 {
@@ -415,10 +388,6 @@ body.main {
 }
 
 #maggie-video-preview {
-    .screen-names {
-        display: block;
-    }
-    
     .user-video-preview-image {
         background: url(/assets/img/index/user_video_preview_maggie.jpg) no-repeat;
         background-size: 100% 100%;
@@ -442,10 +411,6 @@ body.main {
     display: block;
 }
 
-.screen-name {
-    color: #438fed !important;
-}
-
 .intro {
     .hidden-main-animating {
         opacity: 0;
@@ -463,15 +428,30 @@ body.main {
         opacity: 0;
         .transition(opacity, 0s, linear);
     }
+    
+    .post-main {
+        opacity: 0;
+    }
 }
 
 #tastemaker-gallery {
     margin-top: 24px;
+    
     .tastemaker {
         position: relative;
         display:  inline-block;
         
-        margin-right: 8px;
+        margin-right: 18px;
+    }
+    
+    .active {
+        img {
+            border-color: #438fED !important;
+            
+            &:active {
+                border-color: #438fED !important;
+            }
+        }
     }
     
     .tastemaker:last-child {
@@ -521,6 +501,62 @@ body.main {
         font: 10pt helvetica;
         color: #666;
     }
+    
+    .chrome-button {
+        position: absolute;
+        
+        background: url(/assets/img/index/chrome_buttons_sprite.png) no-repeat;
+        width:  27px;
+        height: 28px;
+    }
+    
+    #back-button {
+        top:  56px;
+        left: 37px;
+        
+        background-position: 0 0;
+        background-position: -29px 0;
+        
+        &:hover {
+            background-position: -58px 0;
+        }
+        
+        &:active {
+            background-position: -87px 0;
+        }
+    }
+    
+    #forward-button {
+        top:  56px;
+        left: 64px;
+        
+        background-position: 0 -60px;
+        background-position: -29px -60px;
+        
+        &:hover {
+            background-position: -58px -60px;
+        }
+        
+        &:active {
+            background-position: -87px -60px;
+        }
+    }
+    
+    #refresh-button {
+        top:  56px;
+        left: 91px;
+        
+        background-position: 0 -30px;
+        background-position: -29px -30px;
+        
+        &:hover {
+            background-position: -58px -30px;
+        }
+        
+        &:active {
+            background-position: -87px -30px;
+        }
+    }
 }
 
 #tastemaker-map-window-iframe {
@@ -552,9 +588,79 @@ body.main {
     }
 }
 
+.third-party-logos {
+    margin: 12px auto;
+    
+    .third-party-logo {
+        display: inline-block;
+        margin-right: 20px;
+    }
+    
+    .third-party-logo-opentable {
+        margin-right: 0;
+    }
+}
+
 
 /* **************************************************************************
-                      TILTED IPHONE IN CORE PAGE VIEWS
+                               MISC SPAN STYLES
+   ************************************************************************** */
+
+
+.screen-name {
+    color: #438FED !important;
+}
+
+.watch {
+    color: #438fED;
+}
+
+.bolded {
+    font-weight: 700;
+    color: #888 !important;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.facebook {
+    color: #3B5999;
+}
+
+.twitter {
+    color: #28AAE1;
+}
+
+.twitter-2 {
+    color: #4099FF;
+}
+
+
+/* **************************************************************************
+               NUANCE PANE TITLES TO COERCE DESIRED LINE BREAKS
+   ************************************************************************** */
+
+
+#pane-1 .title {
+    letter-spacing: 0.05em !important;
+}
+
+#pane-2 .title {
+    font-size: 2.9em !important;
+}
+
+#pane-3 .title {
+    letter-spacing: 0.05em !important;
+}
+
+#pane-4 .title {
+    letter-spacing: 0.05em !important;
+}
+
+
+/* **************************************************************************
+                       HERO IPHONE IN CORE PAGE VIEWS
    ************************************************************************** */
 
 
@@ -562,33 +668,109 @@ body.main {
     position: absolute;
     top:  200%;
     left: 50%;
-    margin: -275px 0 0 165px;
+    margin: -275px 0 0 120px;
     z-index: 98;
     
     width:  377px;
     height: 564px;
+    pointer-events: none;
 }
 
 #iphone-hero {
     position: absolute;
-    //background: url(/assets/img/index/iphone_shadow01.png) no-repeat;
-    width:  289px;
-    height: 564px;
+    width:  370px;
+    height: 614px;
+}
+
+.iphone-body-shadow {
+    position: absolute;
+    width:  100%;
+    height: 100%;
+    
+    background: url(/assets/img/index/iphone_main_shadow_sprite.png) no-repeat;
+    //background: red;
+    pointer-events: none;
+}
+
+.iphone-body-shadow-0 {
+    top:   20px;
+    left: -40px;
+}
+
+.iphone-body-shadow-1 {
+    background-position: -372px 0;
+    top:  60px;
+    left: 60px;
+}
+
+#retina {
+    .iphone-body-shadow {
+        background: url(/assets/img/index/iphone_main_shadow_sprite@2x.png) no-repeat;
+    }
 }
 
 .iphone-body {
     background: url(/assets/img/index/iphone_sprite.png) no-repeat;
+    position: relative;
     width:  289px;
     height: 564px;
     margin: 0 auto;
-    //padding: 100px 0 0;
+    pointer-events: auto;
+}
+
+@-webkit-keyframes -webkit-iphone-lighting-animation {
+    0%   { background-position: 75px 0; }
+    100% { background-position: -1245px 0; }
+}
+
+.iphone-body-lighting {
+    position: absolute;
+    top:  0;
+    left: 50%;
+    margin-left: (-144.5px);
+    
+    //background: url(/assets/img/index/iphone_sprite.png) no-repeat;
+    background: url(/assets/img/index/iphone_main_lighting_0.png) no-repeat;
+    //background-position: -466px 0;
+    opacity: .15;
+    
+    width:  289px;
+    height: 564px;
+    
+    //.transition(background-position, 0.3s, ease-out);
+    pointer-events: none;
+    
+    -webkit-animation-name:             -webkit-iphone-lighting-animation;
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function:  linear;
+    //-webkit-animation-direction:        alternate;
+    -webkit-animation-duration:         15s;
+}
+
+.iphone-body-lighting-1 {
+    -webkit-animation-delay:            7.5s;
+}
+
+.iphone-body-overlay {
+    position: absolute;
+    top:  0;
+    left: 50%;
+    margin-left: -134px;
+    
+    background: url(/assets/img/index/iphone_sprite.png) no-repeat;
+    background-position: -300px 0;
+    width:  289px;
+    height: 564px;
+    
+    pointer-events: none;
+
 }
 
 .iphone-screens {
     position: absolute;
     
     top:  100px;
-    left: 22px;
+    left: 63px;
     
     width:  244px;
     height: 366px;
@@ -598,6 +780,7 @@ body.main {
 
 .iphone-screen {
     position: absolute;
+    pointer-events: auto;
     
     top:  0;
     left: 0;
@@ -614,7 +797,7 @@ body.main {
     .iphone-inbox-header {
         background: url(/assets/img/index/iphone_main_inbox_header.png) no-repeat;
         width:  100%;
-        height: 59px;
+        height: 51px;
         
         position: absolute;
         top:  0;
@@ -630,7 +813,17 @@ body.main {
         top:  0;
         left: 0;
     }
-
+    
+    .iphone-inbox-footer {
+        background: url(/assets/img/index/iphone_main_inbox_footer.png) no-repeat;
+        width:  100%;
+        height: 42px;
+        
+        position: absolute;
+        bottom: 0;
+        left:   0;
+    }
+    
     .iphone-inbox-selection {
         position: absolute;
         display:  none;
@@ -659,6 +852,15 @@ body.main {
     }
 }
 
+.iphone-screen-guide {
+    .iphone-screen-guide-0 {
+        background: url(/assets/img/index/iphone_main_guide_0.png) no-repeat;
+        height: 100%;
+        
+        display: none;
+    }
+}
+
 .iphone-screen-back-button {
     position: absolute;
     
@@ -670,12 +872,17 @@ body.main {
     
     &:hover, &:active {
         // TODO: replace with actual active state asset
-        background: red;
+        //background: red;
     }
 }
 
 .iphone-screen-sdetail-active-0 .iphone-screen-sdetail-0, 
 .iphone-screen-sdetail-active-1 .iphone-screen-sdetail-1 {
+    display: block;
+}
+
+.iphone-screen-guide-active-0 .iphone-screen-guide-0, 
+.iphone-screen-guide-active-1 .iphone-screen-guide-1 {
     display: block;
 }
 
@@ -687,17 +894,45 @@ body.main {
     .iphone-screen-sdetail {
         left: 244px !important;
     }
+    
+    .iphone-screen-guide {
+        left: 488px !important;
+    }
 }
 
+//.iphone-screen-active-inbox + .iphone-body-lighting-0 { }
+
 .iphone-screen-active-sdetail {
+    .iphone-screen-inbox {
+        left: -244px !important;
+    }
+    
     .iphone-screen-sdetail {
         left: 0 !important;
     }
     
+    .iphone-screen-guide {
+        left: 244px !important;
+    }
+}
+
+//.iphone-screen-active-sdetail + .iphone-body-lighting-0 { }
+
+.iphone-screen-active-guide {
     .iphone-screen-inbox {
         left: -244px !important;
     }
+    
+    .iphone-screen-sdetail {
+        left: -244px !important;
+    }
+    
+    .iphone-screen-guide {
+        left: 0 !important;
+    }
 }
+
+//.iphone-screen-active-guide + .iphone-body-lighting-0 { }
 
 #retina {
     #main-iphone {
@@ -739,14 +974,6 @@ footer {
     bottom: 0;
     
     padding: 12px 24px;
-    
-    .app-store-button {
-        position: absolute;
-        top: 50%;
-        right: 72px;
-        
-        margin-top: -18px;
-    }
 }
 
 #retina footer .app-store-button {
@@ -754,6 +981,12 @@ footer {
 }
 
 #social {
+    position: absolute;
+    top: 50%;
+    right: 72px;
+    
+    margin-top: -18px;
+    
     .social-button {
         display: inline-block;
     }
@@ -766,16 +999,24 @@ footer {
     .nav {
         display: inline-block;
         margin-right: 1em;
+        font-size: 90%;
+        color: #999;
         
         &:hover {
             color: #000;
         }
     }
+    
+    .active {
+        font-weight: 700;
+        text-shadow: 0px 2px 1.5px fade(#fff, 0.25);
+        color: #333;
+    }
 }
 
 
 /* **************************************************************************
-                                 BUTTONS
+                                   BUTTONS
    ************************************************************************** */
 
 
@@ -831,34 +1072,6 @@ footer {
     .social-button-template(2, -22px);
 }
 
-.app-store-button {
-    background: url(/assets/img/index/appstore_sprite.png) no-repeat;
-    display: block;
-    
-    width:  110px;
-    height: 36px;
-    
-    &:hover, &:active {
-        background-position: -112px 0;
-    }
-}
-
-.download-the-app-button {
-    background: url(/assets/img/index/downloadbtn_sprite.png) no-repeat;
-    display: block;
-    
-    width:  200px;
-    height: 32px;
-    
-    &:hover {
-        background-position: -202px 0;
-    }
-    
-    &:active {
-        background-position: -404px 0;
-    }
-}
-
 .launcher-icon-button {
     background: url(/assets/img/index/launchericon_sprite.png) no-repeat;
     display: block;
@@ -908,6 +1121,49 @@ footer {
     height: 84px;
 }
 
+.third-party-logo {
+    background: url(/assets/img/index/thirdparties_sprite.png) no-repeat;
+    display: block;
+    
+    width:  54px;
+    height: 24px;
+}
+
+.third-party-logo-template(@x, @offset) {
+    @x2: (2 * @x * @offset);
+    background-position: @x2 0;
+    
+    &:hover, &:active {
+        background-position: (@x2 + @offset) 0;
+    }
+}
+
+.third-party-logo-spotify {
+    .third-party-logo-template(0, -56px);
+}
+
+.third-party-logo-rdio {
+    .third-party-logo-template(1, -56px);
+}
+
+.third-party-logo-netflix {
+    .third-party-logo-template(2, -56px);
+}
+
+.third-party-logo-fandango {
+    .third-party-logo-template(3, -56px);
+}
+
+.third-party-logo-opentable {
+    .third-party-logo-template(4, -56px);
+}
+
+
+/* **************************************************************************
+                            RETINA DISPLAY BUTTONS
+   ************************************************************************** */
+
+
 #retina {
     .pane-nav-button {
         background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
@@ -947,30 +1203,6 @@ footer {
     
     .social-button-google {
         .social-button-template(2, -44px);
-    }
-    
-    .app-store-button {
-        background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
-        width:  220px;
-        height: 72px;
-        
-        &:hover, &:active {
-            background-position: -224px 0;
-        }
-    }
-    
-    .download-the-app-button {
-        background: url(/assets/img/index/downloadbtn_sprite@2x.png) no-repeat;
-        width:  400px;
-        height: 64px;
-        
-        &:hover {
-            background-position: -404px 0;
-        }
-        
-        &:active {
-            background-position: -808px 0;
-        }
     }
     
     .launcher-icon-button {
@@ -1017,6 +1249,34 @@ footer {
         background: url(/assets/img/index/illustration@2x.png) no-repeat;
         width:  746px;
         height: 168px;
+    }
+    
+    .third-party-logo {
+        background: url(/assets/img/index/thirdparties_sprite@2x.png) no-repeat;
+        display: block;
+        
+        width:  108px;
+        height: 48px;
+    }
+    
+    .third-party-logo-spotify {
+        .third-party-logo-template(0, -112px);
+    }
+
+    .third-party-logo-rdio {
+        .third-party-logo-template(1, -112px);
+    }
+
+    .third-party-logo-netflix {
+        .third-party-logo-template(2, -112px);
+    }
+
+    .third-party-logo-fandango {
+        .third-party-logo-template(3, -112px);
+    }
+
+    .third-party-logo-opentable {
+        .third-party-logo-template(4, -112px);
     }
 }
 

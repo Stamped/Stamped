@@ -19,6 +19,11 @@ def index(*args, **kwargs):
     
     return views.index(*args, **kwargs)
 
+def about(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.about(*args, **kwargs)
+
 def profile(*args, **kwargs):
     kwargs['mobile'] = True
     

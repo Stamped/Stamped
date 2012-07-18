@@ -10,28 +10,69 @@ import gevent
 from gevent             import monkey
 monkey.patch_all()
 
+import os
 import rpyc
+from time               import sleep
 from GreenletServer     import GreenletServer
+import RateLimiter2
 from RateLimiter2       import RateLimiter, Request
 
 from optparse           import OptionParser
 
-#limiters = {
-#    'facebook'      : RateLimiter(                      fail_limit=10,      limit_dur=60*30,   wait_dur=60),
-#    'twitter'       : RateLimiter(                      fail_limit=10,      limit_dur=60*30,   wait_dur=60),
-#    'netflix'       : RateLimiter(cps=4,    cpd=100000, fail_limit=10000,      limit_dur=60*30,   wait_dur=60),
-#    'rdio'          : RateLimiter(          cpd=15000,  fail_limit=10,      limit_dur=60*30,   wait_dur=60),
-#    'spotify'       : RateLimiter(                      fail_limit=10,      limit_dur=60*30,   wait_dur=60),
-#    }
 
-
-limiters = {
-    'netflix'       : RateLimiter(limit=4, period=1, cpd=10, fail_limit=10, fail_period=30, fail_wait=10),
-    }
-
+limits_path = os.path.dirname(RateLimiter2.__file__) + '/limits.conf'
+config_load_interval = 60*5
 count = 0
 
+
+def configLoaderLoop(service):
+    while True:
+        sleep(config_load_interval)
+        service.loadLimiters()
+
+
 class StampedRateLimiterService(rpyc.Service):
+
+    def __init__(self, port, throttle=False):
+        rpyc.Service.__init__(self, port)
+        self.__throttle = throttle
+        self.__limiters = {}
+        self.loadLimiters()
+        self.__config_loader = gevent.spawn(configLoaderLoop, self)
+
+    def loadLimiters(self):
+        meta = {}
+        if os.path.exists(limits_path):
+            with open(limits_path, "rb") as fp:
+                source = fp.read()
+
+            exec compile(source, limits_path, "exec") in meta
+        else:
+            print("### Could not find limits.conf: no limits defined")
+            return
+
+        limits = meta['limits']
+        limiters = {}
+        if self.__throttle:
+            for l in limits:
+                limit   = max(1, l['limit'] / 10)
+                cpd     = max(1, l['cpd'] / 10)
+                limiter = RateLimiter(limit, l['period'], cpd, l['fail_limit'], l['fail_period'], l['fail_wait'])
+                limiters[l['service_name']] = limiter
+        else:
+            for l in limits:
+                limiter = RateLimiter(l['limit'], l['period'], l['cpd'], l['fail_limit'], l['fail_period'], l['fail_wait'])
+                limiters[l['service_name']] = limiter
+
+        if self.__limiters is None:
+            self.__limiters = limiters
+            return
+
+        for k,v in limiters.iteritems():
+            if self.__limiters.get(k, None) is not None:
+                self.__limiters[k].update_limits(v.limit, v.period, v.cpd, v.fail_limit, v.fail_period, v.fail_wait)
+            else:
+                self.__limiters[k] = v
 
     def on_connect(self):
         # code that runs when a connection is created
@@ -51,9 +92,8 @@ class StampedRateLimiterService(rpyc.Service):
         request = Request(timeout, verb, url, body, headers)
         request.number = count
 
-        limiter = limiters[service]
+        limiter = self.__limiters[service]
 
-        #asyncresult =  AsyncResult()
         priority_int = 0
         if priority != 'high':
             priority_int = 10
@@ -64,7 +104,7 @@ class StampedRateLimiterService(rpyc.Service):
         # the starting time for the timeout, otherwise the starting time is the time of last pop from queue
         gevent.sleep(0)
         response = asyncresult.get(block=True, timeout=timeout)
-        print('### returning from exposed_request')
+        #print('### returning from exposed_request')
         return response
 
 

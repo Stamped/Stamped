@@ -10,14 +10,17 @@ import Globals
 from os import path
 
 import difflib
+import inspect
 import itertools
 import optparse
 import os
 import pickle
 import pprint
 import random
+import shutil
 import sys
 import EntitiesSxSTemplates
+from search.DataQualityUtils import MIN_RESULT_DATA_QUALITY_TO_INCLUDE
 
 # We need the import(s) in the following section because they are referenced by
 # the pickled objects
@@ -52,14 +55,13 @@ def stripEntity(entityDict):
 
 
 def differenceScore(left, right):
-    commonKeys = left.viewkeys() & right.viewkeys()
-    score = len(left) + len(right) - len(commonKeys) * 2
-    for key in commonKeys:
-        if left[key] != right[key]:
-            # TODO(geoff): maybe consider recursing if the field is a nested
-            # message.
-            score += 1
-    return score
+    clusterKeysLeft = set(result.resolverObject.key for result in left.results)
+    clusterKeysRight = set(result.resolverObject.key for result in right.results)
+    commonKeys = clusterKeysLeft & clusterKeysRight
+    if not commonKeys:
+        return 1000
+    diffKeys = clusterKeysLeft ^ clusterKeysRight
+    return float(len(diffKeys)) / len(commonKeys)
 
 
 def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
@@ -89,10 +91,17 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
                 'All queries', ''.join(htmlRowTpl % row for row in allTableRows))
 
 
+def getProxySummary(proxy):
+    return ('%s, %s:%s' % (proxy.name, proxy.source, str(proxy.key)[:15]))
+
+
 def getClusteringDifference(cellId, oldCluster, newCluster):
     def makeProxyDict(cluster):
-        proxies = (result.resolverObject for result in cluster.results)
-        return {(proxy.source, proxy.key) : proxy for proxy in proxies}
+        proxyDict = {}
+        for result in cluster.results:
+            proxy = result.resolverObject
+            proxyDict[proxy.source, proxy.key] = proxy, result.dataQuality
+        return proxyDict
     oldProxies = makeProxyDict(oldCluster)
     newProxies = makeProxyDict(newCluster)
     dropped = oldProxies.viewkeys() - newProxies.viewkeys()
@@ -102,39 +111,44 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
     if same:
         summary += '<h3>Elements stayed the same</h3><ul>'
         for source in same:
-            proxy = oldProxies[source]
-            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+            proxy, _ = oldProxies[source]
+            summary += '<li>%s</li>' % getProxySummary(proxy)
         summary += '</ul>'
+    majorChange = False
     if dropped:
         summary += '<h3>Elements dropped from cluster</h3><ul>'
         for source in dropped:
-            proxy = oldProxies[source]
-            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+            proxy, score = oldProxies[source]
+            summary += '<li>%s</li>' % getProxySummary(proxy)
+            if score > MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
+                majorChange = True
         summary += '</ul>'
     if added:
         summary += '<h3>Elements added to cluster</h3><ul>'
         for source in added:
-            proxy = newProxies[source]
-            summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+            proxy, score = newProxies[source]
+            summary += '<li>%s</li>' % getProxySummary(proxy)
+            if score > MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
+                majorChange = True
         summary += '</ul>'
-    return '<div style="display:none" name="%s">%s</div>' % (cellId + '_summary', summary)
+    return summary, majorChange
 
 
 def getSingleClusterSummary(cellId, cluster):
     summary = '<h3>Cluster component summary</h3><ul>'
     for result in cluster.results:
         proxy = result.resolverObject
-        summary += '<li>%s, %s:%s</li>' % (proxy.name, proxy.source, proxy.key)
+        summary += '<li>%s</li>' % getProxySummary(proxy)
     summary += '</ul>'
-    return '<div style="display:none" name="%s">%s</div>' % (cellId + '_summary', summary)
+    return summary
 
 
 def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold):
     diffScores = []
     for i, left in enumerate(oldResults):
         for j, right in enumerate(newResults):
-            score = differenceScore(left[1], right[1])
-            if score <= diffThreshold:
+            score = differenceScore(left[2], right[2])
+            if score <= diffThreshold or left[0].title == right[0].title and left[0].subtitle == right[0].subtitle:
                 diffScores.append((score, i, j))
     # Find the most similar pair. When there are ties, lower i values (higher
     # ranked items in the original list) come first, since they are probably
@@ -151,7 +165,8 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
 
     linksLeft = []
     linksRightIndexed = {}
-    clusterSummaries = []
+    clusterSummariesLeft = []
+    clusterSummariesRightIndexed = {}
     for i, entity in enumerate(oldResults):
         if i in movements:
             diffFileName = '%s-c%d.html' % (filenameBase, i)
@@ -160,32 +175,42 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             writeCompareEntity(entity, newEntity, outputDir, diffFileName)
 
             cellId = "diff" + str(i)
-            anchorTextTpl = '%s<a href="%s">%%s</a></td>' % (makeHighlightingTableCell(cellId), diffFileName)
+            summary, changeMajor = getClusteringDifference(cellId, entity[2], newEntity[2])
+            majorChangeIcon = '<img src="major_change_icon.jpg" style="max-height:40;max-width:40;float:left" />' if changeMajor else ''
+            anchorTextTpl = '%s<a href="%s">%s%%s</a></td>' % (makeHighlightingTableCell(cellId), diffFileName, majorChangeIcon)
             linksLeft.append(anchorTextTpl % extractLinkText(entity))
             linksRightIndexed[destination] = anchorTextTpl % extractLinkText(newEntity)
-            clusterSummaries.append(getClusteringDifference(cellId, entity[2], newEntity[2]))
+            clusterSummariesLeft.append(summary)
+            clusterSummariesRightIndexed[destination] = summary
         else:
             cellId = 'l%d' % i
             linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i), cellId))
-            clusterSummaries.append(getSingleClusterSummary(cellId, entity[2]))
+            clusterSummariesLeft.append(getSingleClusterSummary(cellId, entity[2]))
 
     linksRight = []
+    clusterSummariesRight = []
     for i, entity in enumerate(newResults):
         if i in linksRightIndexed:
             linksRight.append(linksRightIndexed[i])
+            clusterSummariesRight.append(clusterSummariesRightIndexed[i])
         else:
             cellId = 'r%d' % i
             linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), cellId))
-            clusterSummaries.append(getSingleClusterSummary(cellId, entity[2]))
+            clusterSummariesRight.append(getSingleClusterSummary(cellId, entity[2]))
 
+    summaries = list(itertools.izip_longest(clusterSummariesLeft, clusterSummariesRight, fillvalue=''))
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]
-    for links in itertools.izip_longest(linksLeft, linksRight, fillvalue='<td></td>'):
-        fileContent.append('<tr>%s%s</tr>' % links)
-    fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER % '\n'.join(clusterSummaries))
+    for rowNumber, links in enumerate(itertools.izip_longest(linksLeft, linksRight, fillvalue='<td></td>')):
+        rowId = 'row%d' % rowNumber
+        fileContent.append('<tr onmouseover=showCell("%s") onmouseout=hideCell("%s")>%s%s</tr>' % ((rowId, rowId,) + links))
+        fileContent.append('<tr style="display:none" name="%s"><td>%s</td><td>%s</td></tr>' % ((rowId,) + summaries[rowNumber]))
+    fileContent.append(EntitiesSxSTemplates.COMPARE_FOOTER)
 
     with open(path.join(outputDir, filenameBase) + '.html', 'w') as fout:
         for line in fileContent:
-            print >> fout, line.encode('utf-8')
+            if isinstance(line, unicode):
+                line = line.encode('utf-8')
+            print >> fout, line
 
     # Now compute the stats:
     same = sum(1 for i, j in movements.iteritems() if i == j)
@@ -217,10 +242,16 @@ def writeCompareEntity(left, right, outputDir, filename):
 
 
 def extractLinkText(entity):
-    subtitle = entity[0].subtitle
-    if isinstance(entity[0], PlaceEntity) and entity[0].formatAddress():
-        subtitle = entity[0].formatAddress()
-    return '<p>%s</p><p style="text-indent:4em">%s</p>' % (entity[0].title, subtitle)
+    entity = entity[0]
+    subtitle = entity.subtitle
+    if isinstance(entity, PlaceEntity) and entity.formatAddress():
+        subtitle = entity.formatAddress()
+    if entity.images:
+        imageUrl = entity.images[0].sizes[0].url
+        imageTag = '<img src="%s" style="float:right" />' % imageUrl
+    else:
+        imageTag = ''
+    return '%s<p>%s</p><p style="text-indent:4em">%s</p>' % (imageTag, entity.title, subtitle)
 
 
 def ensureDirectory(pathName):
@@ -232,7 +263,7 @@ def ensureDirectory(pathName):
 
 def main():
     parser = optparse.OptionParser()
-    parser.add_option('-t', dest='diffThreshold', type='int', default=5)
+    parser.add_option('-t', dest='diffThreshold', type='int', default=0.5)
     options, args = parser.parse_args()
 
     if len(args) != 3:
@@ -240,6 +271,11 @@ def main():
         return 1
 
     ensureDirectory(args[2])
+
+    majorChangeIcon = os.path.join(
+            os.path.dirname(inspect.getfile(inspect.currentframe())),
+            'major_change_icon.jpg')
+    shutil.copy(majorChangeIcon, args[2])
 
     oldResults = loadSearchResultsFromFile(args[0])
     newResults = loadSearchResultsFromFile(args[1])

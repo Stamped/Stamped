@@ -179,15 +179,16 @@ class FactualSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'factual',
             groups=[
-                'singleplatform',
                 'address',
-                'price_range',
-                'phone',
-                'site',
-                'cuisine',
                 'alcohol_flag',
-                'opentable',
+                'coordinates',
+                'cuisine',
                 'foursquare',
+                'opentable',
+                'phone',
+                'price_range',
+                'singleplatform',
+                'site',
             ],
             kinds=[
                 'place',
@@ -211,11 +212,6 @@ class FactualSource(GenericSource):
     @lazyProperty
     def __factual(self):
         return globalFactual()
-
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.factual_id = proxy.key
-        return True
 
     def matchSource(self, query):
         if query.kind == 'search':
@@ -333,7 +329,7 @@ class FactualSource(GenericSource):
         return jointResults
 
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
         """
         Attempt to populate data fields based on id data.
 

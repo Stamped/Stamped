@@ -66,6 +66,11 @@ class StampTimestamp(BasicTimestamp):
     def setSchema(cls):
         cls.addProperty('stamped',                          datetime)
 
+class StatTimestamp(Schema):
+    @classmethod 
+    def setSchema(cls):
+        cls.addProperty('generated',                        datetime)
+
 class SettingsEmailAlertToken(Schema):
     @classmethod
     def setSchema(cls):
@@ -158,6 +163,8 @@ class StampStatsSchema(Schema):
         cls.addProperty('like_threshold_hit',               bool)
         cls.addProperty('stamp_num',                        int)
         cls.addProperty('num_blurbs',                       int)
+        cls.addProperty('quality',                          int)
+        cls.addProperty('popularity',                       int)
 
 class StampStats(Schema):
     @classmethod
@@ -170,6 +177,8 @@ class StampStats(Schema):
         cls.addProperty('lng',                              float)
         cls.addProperty('last_stamped',                     datetime)
 
+        cls.addProperty('quality',                          int)
+        cls.addProperty('popularity',                       int)
         cls.addProperty('score',                            int)
         cls.addProperty('num_todos',                        int)
         cls.addProperty('num_likes',                        int)
@@ -179,6 +188,7 @@ class StampStats(Schema):
         cls.addPropertyList('preview_likes',                basestring) # UserIds
         cls.addPropertyList('preview_credits',              basestring) # StampIds
         cls.addPropertyList('preview_comments',             basestring) # CommentIds
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 class EntityStats(Schema):
     @classmethod
@@ -187,6 +197,7 @@ class EntityStats(Schema):
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
         cls.addPropertyList('popular_stamps',               basestring)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 
 # #### #
@@ -850,6 +861,12 @@ class BasicEntity(BasicEntityMini):
     def subtitle(self):
         return self._genericSubtitle()
 
+    @property
+    def search_subtitle(self):
+        # There are some specific cases -- OK, currently one specific case -- where, for search, we prefer a different
+        # subtitle to the one we would typically show.
+        return self.subtitle
+
     @lazyProperty
     def search_id(self):
         if self.entity_id:
@@ -1068,6 +1085,12 @@ class PlaceEntity(BasicEntity):
 
         # Fallback to generic
         return self._genericSubtitle()
+
+    @property
+    def search_subtitle(self):
+        # TODO: Make sure other places in the code (HTTPSchemas, EntitySearch) stop rolling their own versions of this!
+        formattedAddress = self.formatAddress()
+        return formattedAddress if formattedAddress else self.subtitle
 
     def minimize(self, *args):
         return BasicEntity.minimize(self, 'coordinates')
@@ -1488,6 +1511,7 @@ class Stamp(Schema):
         cls.addProperty('via',                              basestring)
         cls.addNestedProperty('previews',                   Previews)
         cls.addNestedProperty('links',                      StampLinks)
+        cls.addProperty('og_action_id',                     basestring)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1794,6 +1818,7 @@ class GuideCacheItem(Schema):
         cls.addPropertyList('todo_user_ids',                basestring)
         cls.addPropertyList('tags',                         basestring)
         cls.addNestedProperty('coordinates',                Coordinates)
+        cls.addProperty('score',                            float)
 
 class GuideCache(Schema):
     @classmethod
@@ -1805,4 +1830,4 @@ class GuideCache(Schema):
         cls.addNestedPropertyList('food',                   GuideCacheItem)
         cls.addNestedPropertyList('app',                    GuideCacheItem)
         cls.addNestedPropertyList('other',                  GuideCacheItem)
-        cls.addProperty('updated',                          datetime)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)

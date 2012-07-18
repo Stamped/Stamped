@@ -471,6 +471,24 @@ var g_update_stamps = null;
             return output;
         };
         
+        var get_fancybox_popup_large_options = function(options) {
+            var output = get_fancybox_options({
+                scrolling   : 'no', // we prefer our own, custom jScrollPane scrolling
+                wrapCSS     : '', 
+                padding     : 0
+            });
+            
+            if (!!options) {
+                for (var key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        output[key] = options[key];
+                    }
+                }
+            }
+            
+            return output;
+        };
+        
         var find_valid_image = function($elem, selector, is_sdetail) {
             var $elements = $elem.find(selector);
             $elements     = $elements.filter(function() {
@@ -658,6 +676,8 @@ var g_update_stamps = null;
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
                 
+                console.log(offset);
+                
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                     
@@ -675,11 +695,8 @@ var g_update_stamps = null;
                                 top : 'easeInOutCubic'
                             }, 
                             complete : function() {
-                                /*$sdetail_wrapper.css({
-                                    'top' : 0, 
-                                });*/
-                                
                                 $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
+                                $sdetail_wrapper.removeClass('animating');
                                 $window.scrollTop(0);
                                 
                                 if (!!anim_callback) {
@@ -688,10 +705,11 @@ var g_update_stamps = null;
                             }
                         });
                 } else if (sdetail_status == 'closing') {
-                    //$body.removeClass('sdetail_popup_animation sdetail_popup');
-                    
                     $sdetail_wrapper
                         .stop(true, false)
+                        .css({
+                            'top' : offset, 
+                        })
                         .addClass('animating')
                         .animate({
                             top : hidden, 
@@ -702,6 +720,7 @@ var g_update_stamps = null;
                             }, 
                             complete : function() {
                                 $body.removeClass('sdetail_popup_animation');
+                                $sdetail_wrapper.removeClass('animating');
                                 
                                 if (!!anim_callback) {
                                     anim_callback();
@@ -1071,7 +1090,7 @@ var g_update_stamps = null;
         var min_height_ratio    = 0.5;
         var min_header_height   = header_height * min_height_ratio;
         
-        var $join               = $('.join');
+        /*var $join               = $('.join');
         var $join_button        = $join.find('a.button');
         
         var $login              = $('.login');
@@ -1088,14 +1107,14 @@ var g_update_stamps = null;
         var join_height         = $join.height() + pad;
         
         var login_width         = $login.width()  + pad;
-        var login_height        = $login.height() + pad;
+        var login_height        = $login.height() + pad;*/
         
         // now that we have the static positions and sizes of the dynamic header  
         // elements, initialize their new positioning /sizing to absolute and 
         // non-auto, respectively.
         $header.height(header_height);
         
-        $join.css({
+        /*$join.css({
             'position'  : 'absolute', 
             'float'     : 'none', 
             'top'       : join_pos.top, 
@@ -1111,7 +1130,7 @@ var g_update_stamps = null;
             'left'      : login_pos.left, 
             'width'     : login_width, 
             'height'    : login_height
-        });
+        });*/
         
         var last_ratio = null;
         
@@ -1155,7 +1174,7 @@ var g_update_stamps = null;
                 });
                 
                 // layout and style the header's login / join content
-                var cur_opacity = cur_ratio * cur_ratio;
+                /*var cur_opacity = cur_ratio * cur_ratio;
                 var already_stamping_style = {
                     opacity : cur_opacity
                 };
@@ -1176,7 +1195,7 @@ var g_update_stamps = null;
                 var cur_top  = cur_ratio * login_pos.top + inv_cur_ratio * join_pos.top;
                 $login.css({
                     top : cur_top
-                });
+                });*/
                 
                 // resize user's stamp logo
                 var cur_logo_width  = user_logo_width  - inv_cur_ratio * (user_logo_width - 166);
@@ -1188,9 +1207,11 @@ var g_update_stamps = null;
                 // TODO: clamp logo size when sdetail is animating
                 // TODO: does logo collapsing only repro on chrome? or is it FF as well?
                 
+                //console.log("width: " + cur_logo_width + "; bg-size: " + cur_logo_size);
+                
                 $user_logo.css({
-                    width               : cur_logo_width, 
-                    height              : cur_logo_width, 
+                    'width'             : cur_logo_width, 
+                    'height'            : cur_logo_width, 
                     'background-size'   : cur_logo_size, 
                     '-webkit-mask-size' : cur_logo_size, 
                     //top                 : cur_logo_top, 
@@ -1725,8 +1746,11 @@ var g_update_stamps = null;
         
         // loads and opens the specified sdetail popup
         var open_sdetail = function(href, html) {
+            var sdetail_initialized = false;
+            var sdetail_anim_loaded = false;
+            var sdetail_ajax_loaded = false;
             var scroll_top = 0;
-            var $target;
+            var $target, $target2;
             
             $(sdetail_wrapper_sel).remove();
             
@@ -1736,22 +1760,43 @@ var g_update_stamps = null;
             
             if (!!href) {
                 $target     = $("<div class='" + sdetail_wrapper + " sdetail-loading'><div class='sdetail-loading-content'></div></div>");
+                $target2    = $("<div class='" + sdetail_wrapper + " sdetail-loading'></div>");
+                
                 scroll_top  = $window.scrollTop();
                 
                 console.debug("AJAX: " + href);
             } else {
                 $target     = $("<div class='" + sdetail_wrapper + "'></div>").html(html);
+                $target2    = $target;
             }
             
             $(sdetail_wrapper_sel).hide().remove();
-            $target.insertAfter($('#main-page-content-body').get(0));
+            $target.insertAfter($('#main-page-content-body'));
             $target = $(sdetail_wrapper_sel);
             
             update_dynamic_header();
             
+            var init_sdetail_async = function() {
+                if (sdetail_ajax_loaded && sdetail_anim_loaded && !sdetail_initialized) {
+                    sdetail_initialized = true;
+                    
+                    setTimeout(function() {
+                        $target.replaceWith($target2);
+                        init_sdetail($target2);
+                        
+                        // TODO: which order should these two statements appear in?
+                        resize_sdetail_wrapper($target2);
+                        $target2.removeClass('sdetail-loading');
+                    }, 150);
+                }
+            };
+            
             if (!!href) {
                 resize_sdetail_wrapper($target, 'opening', function() {
                     $target.removeClass('animating');
+                    
+                    sdetail_anim_loaded = true;
+                    init_sdetail_async();
                 });
             } else {
                 resize_sdetail_wrapper($target, '');
@@ -1759,7 +1804,6 @@ var g_update_stamps = null;
             
             close_sdetail_func = function() {
                 close_sdetail_func = null;
-                
                 $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                 
                 if (!!$gallery) {
@@ -1784,7 +1828,7 @@ var g_update_stamps = null;
                     init_header_subsections();
                 }
                 
-                resize_sdetail_wrapper($target, 'closing', function() {
+                resize_sdetail_wrapper($target2, 'closing', function() {
                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
                     
                     update_gallery_layout(true);
@@ -1797,7 +1841,7 @@ var g_update_stamps = null;
             
             if (!!href) {
                 // initialize sDetail popup after AJAX load
-                $target.load(href, { 'ajax' : true }, function(response, status, xhr) {
+                $target2.load(href, { 'ajax' : true }, function(response, status, xhr) {
                     if (status == "error") {
                         console.debug("AJAX ERROR (sdetail): " + url);
                         console.debug(response);
@@ -1805,11 +1849,12 @@ var g_update_stamps = null;
                         
                         alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
                         
+                        close_sdetail();
                         return;
                     }
                     
-                    $target.removeClass('sdetail-loading');
-                    init_sdetail($target);
+                    sdetail_ajax_loaded = true;
+                    init_sdetail_async();
                 });
             } else {
                 init_sdetail($target);
@@ -1995,6 +2040,40 @@ var g_update_stamps = null;
                 }
             }*/
             
+            // initialize listen action
+            var $action_listen = $sdetail.find('.action-listen');
+            
+            if ($action_listen.length == 1) {
+                var $link = $action_listen.parent('a.action-link');
+                var $source_spotify = $action_listen.find(".source-spotify");
+                var $source_spotify = $action_listen.find(".source-itunes");
+                
+                if ($source_spotify.length === 1) {
+                    // TODO
+                }
+                
+                //var href  = "https://embed.spotify.com/?uri={{source.completion_data.source_id}}";
+                
+                /*$link.click(function(event) {
+                    event.preventDefault();
+                    
+                    var popup_options = get_fancybox_popup_options({
+                        href  : "http://www.stamped.com"
+                    });
+                    
+                    $.fancybox.open(popup_options);
+                    return false;
+                });
+                
+                var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
+                    m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
+                }, {
+                    cssSelectorAncestor: "#cp_container_1"
+                });*/
+                
+                // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
+            }
+            
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
                 var $elem  = $(elem);
@@ -2098,6 +2177,114 @@ var g_update_stamps = null;
                 url   : url
             });
         };
+        
+        
+        // ---------------------------------------------------------------------
+        // initialize signup functionality
+        // ---------------------------------------------------------------------
+        
+        
+        $body.on("click", ".get-the-app-button", function(event) {
+            event.preventDefault();
+            
+            var popup_options = get_fancybox_popup_large_options({
+                content     : $("#popup-signup").html(), 
+                type        : "html", 
+                width       : 480, 
+                minWidth    : 480
+            });
+            
+            console.debug(popup_options);
+            $.fancybox.open(popup_options);
+            return false;
+        });
+        
+        var default_phone_number = "555-555-5555";
+        var sms_message_success  = "SMS Sent!";
+        var sms_message_error    = "SMS Error!";
+        
+        $body.on("focus", ".phone-number", function(event) {
+            var $this = $(this);
+            var $sms  = $this.parent();
+            var value = $this.attr("value");
+            
+            if (value == default_phone_number || value == sms_message_success || value == sms_message_error) {
+                $this.attr("value", "");
+            }
+            
+            $sms.removeClass("error").addClass("active");
+            
+            return true;
+        });
+        
+        $body.on("focusout", ".phone-number", function(event) {
+            var $this = $(this);
+            var $sms  = $this.parent();
+            var value = $this.attr("value").trim();
+            
+            if (value.length <= 0) {
+                $this.attr("value", default_phone_number);
+            }
+            
+            $sms.removeClass("active error");
+            
+            return true;
+        });
+        
+        $(".phone-number").live("keyup change", function(event) {
+            var $this   = $(this);
+            var value   = $this.attr("value").trim();
+            var prefix  = "active-";
+            var classes = "active-0 active-1 active-2 active-3 active-4 active-5 active-6 active-7 active-8 active-9 active-10";
+            
+            if (value.length >= 0) {
+                var length = value.length;
+                
+                if (length > 10) {
+                    length = 10;
+                }
+                
+                var $button = $this.parent().find(".send-button");
+                $button.removeClass(classes).addClass(prefix + length);
+            }
+            
+            return true;
+        });
+        
+        $body.on("submit", ".sms-form", function(event) {
+            event.preventDefault();
+            
+            var $this  = $(this);
+            var $input = $this.find(".phone-number");
+            var value  = $input.attr("value").trim();
+            
+            if (value == default_phone_number || value == sms_message_success || value == sms_message_error || value.length <= 3) {
+                return false;
+            }
+            
+            value = value.replace(/-/g, "");
+            
+            var max_len = 11;
+            if (value[0] == "+") {
+                max_len = 12;
+            }
+            
+            if (value.length > max_len) {
+                return false;
+            }
+            
+            var ajaxP  = $.ajax({
+                type        : "POST", 
+                url         : "/download-app", 
+                data        : { "phone_number" : value }
+            }).done(function () {
+                $input.attr("value", sms_message_success);
+            }).fail(function() {
+                $input.attr("value", sms_message_error).parent().addClass("error");
+            });
+            
+            return false;
+        });
         
         
         // ---------------------------------------------------------------------

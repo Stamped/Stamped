@@ -189,9 +189,9 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
         mask: @mask-image no-repeat;
     }
     
-    .user-logo-large {
+    /*.user-logo-large {
         .user-logo(url(/assets/img/stamped_logo_mask.png));
-    }
+    }*/
     
     .user-logo-small, .user-logo-tiny {
         .user-logo(url(/assets/img/stamped_email_mask.png));

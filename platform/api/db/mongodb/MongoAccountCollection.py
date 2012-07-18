@@ -172,7 +172,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=False, api=None):
         """
         Check the account to verify the following things:
 
@@ -396,15 +396,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         # Construct a new LinkedAccount object which contains only valid fields
         newLinkedAccount = LinkedAccount()
 
+        remove_fields = []
         for k, v in linkedDict.iteritems():
             if k is not None and k not in valid_fields:
-                 delattr(linkedDic, k)
+                remove_fields.append(k)
+        for field in remove_fields:
+            del(linkedDict[field])
 
         newLinkedAccount.dataImport(linkedDict)
-
-#        for k, v in linkedDict.iteritems():
-#            if k in valid_fields and k is not None:
-#                setattr(newLinkedAccount, k, v)
 
         self._collection.update(
             {'_id': self._getObjectIdFromString(userId)},

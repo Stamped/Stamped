@@ -23,36 +23,27 @@ class EntityProxySource(AExternalSource):
     def __init__(self, proxy):
         AExternalSource.__init__(self)
 
-        self.__groups   = set()
         self.__proxy    = proxy
         self.__source   = getSource(proxy.source)
         
-        for group in allGroups:
-            self.__groups.add(group().groupName)
-    
+        
     @property
     def sourceName(self):
         return self.__proxy.source 
 
     @property 
     def kinds(self):
-        return set([
-            'place',
-            'person',
-            'media_collection',
-            'media_item',
-            'software',
-            'search',
-        ])
+        return self.__source.kinds
 
     @property 
     def types(self):
-        return set()
+        return self.__source.types
 
     def getGroups(self, entity=None):
-        return self.__groups
+        return self.__source.getGroups(entity)
 
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        self.__source.enrichEntityWithEntityProxy(self.__proxy, entity, controller, decorations, timestamps)
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
+        for group in groups:
+            group.enrichEntityWithEntityProxy(entity, self.__proxy)
         return True
 

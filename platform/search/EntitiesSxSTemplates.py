@@ -17,30 +17,39 @@ COMPARE_HEADER = """
         }
 
         function setVisibility(cellId, display) {
-            cells = document.getElementsByName(cellId + '_summary');
+            cells = document.getElementsByName(cellId);
             for (var i = 0; i < cells.length; i++)
                 cells[i].style.display = display;
         }
 
         function highlightCell(cellId) {
             setColor(cellId, 'pink');
-            setVisibility(cellId, 'block');
         }
 
         function unhighlightCell(cellId) {
             setColor(cellId, 'white');
+        }
+        function showCell(cellId) {
+            setVisibility(cellId, 'table-row');
+        }
+        function hideCell(cellId) {
             setVisibility(cellId, 'none');
         }
     </script>
+    <style type="text/css">
+      img {
+        max-height: 100;
+        max-width: 100;
+      }
+    </style>
   </head>
   <body>
     <h1>Result comparison for query <code>%s</code></h1>
-    <table cellpadding="5">
+    <table cellpadding="5" style="width: 100%%">
 """
 
 COMPARE_FOOTER = """
     </table>
-    %s
   </body>
 </html>
 """

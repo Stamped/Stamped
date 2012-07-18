@@ -101,7 +101,7 @@ class LoggingContext(object):
             msg = msg.encode('utf-8')
 
         # else:
-        msg = "{0} | {1} | {2:25}:{3:>5} | {4} | {5}".format(os.getpid(), self.__logId[:6], filename, lineno, fnc, msg)
+        msg = "{0} | {1} | {2:25}:{3:>5} | {4:25} | {5}".format(os.getpid(), self.__logId[:6], filename, lineno, fnc, msg)
         if level == 'warning':
             log.warning(msg, *args, **kwargs)
         elif level == 'info':

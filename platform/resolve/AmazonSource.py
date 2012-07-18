@@ -105,6 +105,13 @@ class _AmazonObject(object):
         except KeyError:
             return None
 
+    @property
+    def hasListPrice(self):
+        try:
+            return 'ListPrice' in xp(self.data, 'ItemAttributes')['c']
+        except KeyError:
+            return False
+
 
 class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
     """
@@ -1077,16 +1084,29 @@ class AmazonSource(GenericSource):
         # The max rank across a sample was around 1300000 at the time of writing.
         defaultSalesRank = 2000000
         salesRanks = (searchResult.resolverObject.salesRank or defaultSalesRank
-                for searchResult in resultList)
+                      for searchResult in resultList)
         logSalesRanks = [math.log(rank, 10) for rank in salesRanks]
         # TODO(geoff): Use numpy for these computations
         rankMean = float(sum(logSalesRanks)) / len(logSalesRanks)
         rankStdDev = math.sqrt(sum((r - rankMean) ** 2 for r in logSalesRanks) / len(logSalesRanks))
-        
+
+        if rankStdDev == 0:
+            return
+
         for logRank, searchResult in zip(logSalesRanks, resultList):
             factor = max((rankMean - logRank) / rankStdDev / 3 + 1, 0)
             searchResult.addRelevanceComponentDebugInfo('Amazon salesRank factor', factor)
             searchResult.relevance *= factor
+
+    def __penalizeForMissingListPrice(self, resultList):
+        """Any result without a list price usually has very low quality. These are items third party
+        vendors sell on Amazon."""
+        for searchResult in resultList:
+            if not searchResult.resolverObject.hasListPrice:
+                penaltyFactor = 0.2
+                searchResult.dataQuality *= penaltyFactor
+                searchResult.addDataQualityComponentDebugInfo('penalty factor for missing list price', penaltyFactor)
+
 
     def __scoreFilmResults(self, resolverObjectsLists):
         scoredTvShows = []
@@ -1143,7 +1163,9 @@ class AmazonSource(GenericSource):
             adjustTrackRelevanceByQueryMatch(trackResult, queryText)
 
         self.__adjustScoresBySalesRank(albums)
+        self.__penalizeForMissingListPrice(albums)
         self.__adjustScoresBySalesRank(tracks)
+        self.__penalizeForMissingListPrice(tracks)
 
         self.__augmentAlbumResultsWithSongs(albums, tracks)
 
@@ -1157,6 +1179,7 @@ class AmazonSource(GenericSource):
         # complete shit results that I want to drop off the bottom.
         searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
         self.__adjustScoresBySalesRank(searchResults)
+        self.__penalizeForMissingListPrice(searchResults)
         for searchResult in searchResults:
             adjustBookRelevanceByQueryMatch(searchResult, queryText)
             applyBookTitleDataQualityTests(searchResult, queryText)
@@ -1329,15 +1352,6 @@ class AmazonSource(GenericSource):
             logs.report()
         return None
     
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.amazon_id = proxy.key
-        try:
-            if entity.isType('book'):
-                entity.sources.amazon_underlying = proxy.underlying.key
-        except Exception:
-            pass
-        return True
 
 if __name__ == '__main__':
     demo(AmazonSource(), "Don't Speak")

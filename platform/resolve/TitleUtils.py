@@ -92,7 +92,7 @@ def makeDelimitedSectionRe(pattern):
 
 
 ROMAN_NUMERAL_RE = re.compile(
-    '(?P<numeral>m{0,4}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3}))\s*(:|$)', re.IGNORECASE)
+    r'\b(?P<numeral>(ix|iv|v?i{1,3}))\s*(:|$)', re.IGNORECASE)
 REPLACEMENTS = {
     'm' : 1000,
     'cm' : 900,
@@ -125,10 +125,10 @@ def convertRomanNumerals(title):
         return str(total)
 
     match = ROMAN_NUMERAL_RE.search(title)
-    numeral = match.group('numeral')
-    if numeral:
+    if match:
         matchStart, matchEnd = match.span()
         modifiedTail = convertRomanNumerals(title[matchEnd:])
+        numeral = match.group('numeral')
         numeralInt = romanToInt(numeral)
         title = title[:matchStart] + title[matchStart:matchEnd].replace(numeral, numeralInt, 1) + modifiedTail
     return title
@@ -258,7 +258,7 @@ MOVIE_TITLE_REMOVAL_REGEXPS = (
 def cleanMovieTitle(movieTitle):
     return applyRemovalRegexps(MOVIE_TITLE_REMOVAL_REGEXPS, movieTitle)
 
-def getMovieReleaseYearFromTitle(rawTitle):
+def getFilmReleaseYearFromTitle(rawTitle):
     match = TITLE_YEAR_EXTRACTION_REGEXP.search(rawTitle)
     if match:
         return int(match.group(1))

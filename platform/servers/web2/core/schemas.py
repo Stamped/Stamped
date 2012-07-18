@@ -89,3 +89,21 @@ class HTTPObjectId(Schema):
     def setSchema(cls):
         cls.addProperty('stamp_id',                         basestring)
 
+class HTTPIndexSchema(Schema):
+    
+    def __init__(self, *args, **kwargs):
+        Schema.__init__(self, *args, **kwargs)
+        self.intro  = False
+        self.mobile = False
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('intro',                            bool)
+        cls.addProperty('mobile',                           bool)
+
+class HTTPDownloadAppSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('phone_number',                     basestring, required=True)
+

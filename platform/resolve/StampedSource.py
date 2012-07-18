@@ -35,7 +35,7 @@ try:
     # TODO GET RID OF SEARCH IMPORTS
     from search.SearchResult import SearchResult
     from search.ScoringUtils import *
-    from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+    from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection
 
     from libs.SearchUtils import formatSearchQuery
 except:
@@ -63,6 +63,10 @@ class _EntityProxyObject(object):
             return self.entity.title
         except Exception:
             return ''
+
+    @property
+    def description(self):
+        return self.entity.desc
 
     @lazyProperty
     def key(self):
@@ -139,6 +143,10 @@ class EntityProxyAlbum(_EntityProxyObject, ResolverMediaCollection):
         except Exception:
             return []
 
+    @property
+    def release_date(self):
+        return self.entity.release_date
+
 
 class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
     """
@@ -172,6 +180,11 @@ class EntityProxyTrack(_EntityProxyObject, ResolverMediaItem):
             return int(self.entity.length)
         except Exception:
             return -1
+
+    @property
+    def release_date(self):
+        return self.entity.release_date
+
 
 def _fixCast(cast):
     newcast = []
@@ -297,6 +310,20 @@ class EntityProxyTV(_EntityProxyObject, ResolverMediaCollection):
             return self.entity.mpaa_rating
         except Exception:
             return None
+
+    @lazyProperty
+    def studios(self):
+        try:
+            return [ { 'name': item.title } for item in self.entity.studios ]
+        except Exception:
+            return []
+
+    @lazyProperty
+    def networks(self):
+        try:
+            return [ { 'name': item.title } for item in self.entity.networks ]
+        except Exception:
+            return []
 
 
 class EntityProxyBook(_EntityProxyObject, ResolverMediaItem):
@@ -865,32 +892,6 @@ class StampedSource(GenericSource):
                 pass
         return self.__querySource(query_gen(), query, constructor_proxy=EntitySearchAll)
 
-    """
-    def enrichEntity(self, entity, controller, decorations, timestamps):
-        if controller.shouldEnrich('tombstone', self.sourceName, entity):
-            try:
-                query = self.wrapperFromEntity(entity)
-                timestamps['tombstone'] = controller.now
-                mins = None
-                if query.type == 'artist':
-                    mins = {
-                        'name':.1,
-                        'albums':.1,
-                        'tracks':-1,
-                        'total':-1,
-                    }
-                results = self.resolver.resolve(query, self.matchSource(query), mins=mins)
-                if len(results) != 0:
-                    best = results[0]
-                    if best[0]['resolved']:
-                        entity[self.idField] = best[1].key
-                        if self.urlField is not None and best[1].url is not None:
-                            entity[self.urlField] = best[1].url
-            except ValueError:
-                pass
-        return True
-        """
-    
     def __id_query(self, mongo_query):
         import pymongo
         #print(pformat(mongo_query))
@@ -954,13 +955,13 @@ class StampedSource(GenericSource):
         query = mongoQueries[0] if len(mongoQueries) == 1 else {'$or' : mongoQueries}
         results = self.__entityDB._collection.find(query, fields=['sources'])
 
-        # TODO PRELAUNCH FUCK FUCK FUCK CHECK FOR TOMBSTONE IDS
         sourceIdsToEntityId = {}
         for result in results:
             sourceIds = result['sources']
+            finalId = sourceIds.get('tombstone_id', str(result['_id']))
             for k, v in sourceIds.iteritems():
                 if k.endswith('_id'):
-                    sourceIdsToEntityId[k,v] = str(result['_id'])
+                    sourceIdsToEntityId[k,v] = finalId
 
         return [sourceIdsToEntityId.get(query, None) for query in queryPairs]
 

@@ -182,8 +182,9 @@ class TheTVDB(object):
             return None
     
     def _get_url(self, query):
+        if isinstance(query, unicode):
+            query = query.encode('utf-8')
         params = { 'seriesname' : query }
-        
         return 'http://www.thetvdb.com/api/GetSeries.php?%s' % (urllib.urlencode(params))
 
 __globalTheTVDB = None

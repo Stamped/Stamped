@@ -76,7 +76,7 @@ class ASearchTestSuite(AStampedTestCase):
         pass
     
     def _run_tests(self, tests, base_args, retries=3, delay=1, 
-                   test_coords=True, test_unique=True, async=True):
+                   test_coords=False, test_unique=True, async=True):
         """
             Runs a list of search tests, verifying that each one satisfies its accompanying 
             SearchResultConstraint(s).

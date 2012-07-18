@@ -31,7 +31,7 @@ class Amazon(object):
     """
     
     def __init__(self):
-        self.amazon = bottlenose.Amazon(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY, ASSOCIATE_ID)
+        self.amazon = bottlenose.Amazon(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY, ASSOCIATE_ID, Timeout=5.0)
         self.__limiter = RateLimiter(cps=5)
 
     # note: these decorators add tiered caching to this function, such that
@@ -58,17 +58,7 @@ class Amazon(object):
     
     def _item_helper(self, func, **kwargs):
         with self.__limiter:
-            string = func(**kwargs)
-        
-        """# useful for debugging amazon queries
-        if 'ItemId' in kwargs:
-            f = open('amazon.%s.xml' % kwargs['ItemId'], 'w')
-            f.write(string)n
-            n
-            f.close()
-        """
-        
-        return xmlToPython(string)
+            return xmlToPython(func(**kwargs))
 
 __globalAmazon = None
 

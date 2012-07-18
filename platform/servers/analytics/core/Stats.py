@@ -31,15 +31,15 @@ class Stats():
                  'agg_stamps': (lambda t0,t1: self.mongoQ.newStamps(v1_init(),t1)),
                  'accounts': self.mongoQ.newAccounts,
                  'agg_accts': (lambda t0,t1: self.mongoQ.newAccounts(v1_init(),t1)),
-                 'friendships': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/friendships/create.json')),
+                 'friendships': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/friendships/create.json')),
                  'users': self.logsQ.activeUsers,
-                 'comments': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/comments/create.json')),
-                 'todos': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/todos/create.json')),
-                 'todos_c': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/todos/complete.json')),
-                 'likes': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/stamps/likes/create.json')),
-                 'entities': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v0/entities/create.json')),
-                 'friends': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v0/friendships/create.json')),
-                 'actions': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v0/actions/complete.json')),
+                 'comments': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/comments/create.json')),
+                 'todos': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/todos/create.json')),
+                 'todos_c': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/todos/complete.json')),
+                 'likes': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/stamps/likes/create.json')),
+                 'entities': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/entities/create.json')),
+                 'friends': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v1/friendships/create.json')),
+                 'actions': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v1/actions/complete.json')),
                  }
     
     
