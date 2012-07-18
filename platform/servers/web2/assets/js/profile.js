@@ -1787,7 +1787,7 @@ var g_update_stamps = null;
                         // TODO: which order should these two statements appear in?
                         resize_sdetail_wrapper($target2);
                         $target2.removeClass('sdetail-loading');
-                    }, 250);
+                    }, 150);
                 }
             };
             
