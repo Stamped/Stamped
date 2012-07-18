@@ -32,6 +32,7 @@ HTTP Helper Functions
 
 baseurl = "https://dev.stamped.com/v1"
 baseurl = "http://localhost:18000/v1"
+baseurl = "http://stress-api-1431215555.us-east-1.elb.amazonaws.com/v1"
 
 class StampedAPIURLOpener(urllib.FancyURLopener):
     def prompt_user_passwd(self, host, realm):
@@ -43,8 +44,13 @@ def handleGET(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
     url    = "%s/%s?%s" % (baseurl, path, params)
     
-    raw = opener.open(url).read()
-    # logs.info("GET: %s" % url)
+    try:
+        raw = opener.open(url).read()
+    except urllib.error.HTTPError as e:
+        logs.warning("GET Failed (%s): %s" % (e.code, url))
+    except Exception as e:
+        logs.warning("GET Failed: %s" % url)
+        raise 
     
     try:
         result = json.loads(raw)
@@ -60,7 +66,11 @@ def handlePOST(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
     url    = "%s/%s" % (baseurl, path)
     
-    raw = opener.open(url, params).read()
+    try:
+        raw = opener.open(url, params).read()
+    except Exception:
+        logs.warning("POST Failed: %s (%s)" % (url, params))
+        raise
     # logs.info("POST: %s" % url)
     
     try:
@@ -98,7 +108,7 @@ coordinates = [
     (37.71667, 97.283), (34.233, 77.95), (49.9, 97.11667), 
 ]
 
-searchQueries = [
+entitySearchQueries = [
     'raining', 'redzepi', 'doucett', 'andre', 'woods', 'sleep', 'suzann', 'hanging', 'hate', 'lace', 'feeding', 
     'selen', 'aus', 'edward', 'under', 'ren', 'hedg', 'worth', 'digit', 'rescue', 'oceans', 'misunderstanding', 
     'jacob', 'appar', 'ramis', 'antidot', 'strayed', 'dapkunaite', 'coppola', 'unrelated', 'burke', 'venus', 
@@ -319,7 +329,14 @@ searchQueries = [
     'below', 'hathawai', 'stories', 'mads', 'glori', 'mccallion', 'ansari', 'inx', 'whisper', 'penny', 'beats', 
     'plundered', 'penni', 'pit', 'eric', 'jesse', 'matuli', 'mercenary', 'oak', 'book', 'shortwav', 'futur', 'rememb', 
     'pinkett', 'tilly', 'star', 'juno', 'stay', 'pumps', 'stan', 'friends', 'dinklage', 'stai', 'ghost', 'mercenari', 
-    'apathi', 'baker', 'jewel', 'hedges', 'richardson', '8th'
+    'apathi', 'baker', 'jewel', 'hedges', 'richardson', '8th',
+]
+
+userSearchQueries = [
+    'kevin', 'rob', 'bart', 'jeff', 'geoff', 'landon', 'mike', 'michael', 'jordan', 'travis', 'ed', 'anthony', 'tony',
+    'adam', 'mark', 'paul', 'katie', 'kate', 'julia', 'danielle', 'zoe', 'jenny', 'jennifer', 'george', 'carl', 
+    'sean', 'adam', 'christina', 'sarah', 'vivian', 'andrea', 'tyler', 'andy', 'ashley', 'ethan', 'leslie', 'claire', 
+    'chris', 'caroline', 'angela', 'emily', 'niki', 'steve', 'laura', 'jenna', 'matt', 'jessie', 'becky', 'peter',
 ]
 
 """
@@ -1196,6 +1213,9 @@ class Profile(View):
         self.setAction('viewStamp', self._viewStamp)
         self.setWeight('viewStamp', 20)
 
+        self.setAction('follow', self._follow)
+        self.setWeight('follow', 5)
+
         self.setAction('page', self._page)
         self.setWeight('page', 5)
 
@@ -1223,6 +1243,12 @@ class Profile(View):
         if numStamps == len(self.stamps):
             # Nothing loaded!
             self.setWeight('page', 0)
+
+    # Follow the user
+    def _follow(self):
+        if self.user.token is not None and self.userId != self.user.userId:
+            _post_friendships_create(token=self.user.token, userId=self.userId)
+        self.setWeight('follow', 0)
 
 
 class EntityDetail(View):
@@ -1563,7 +1589,7 @@ class EntitySearch(View):
 
     # Search
     def _search(self):
-        query = random.choice(searchQueries)
+        query = random.choice(entitySearchQueries)
 
         # Run the first few letters through autosuggest
         autosuggest = []
@@ -1618,7 +1644,7 @@ class ComposeStamp(View):
         time.sleep(random.randint(10, 200) * self.user._userWaitSpeed)
 
         # Create stamp
-        blurb = ' '.join(searchQueries[:random.randint(0,20)])
+        blurb = ' '.join(entitySearchQueries[:random.randint(0,20)])
         stamp = _post_stamps_create(self.user.token, self.entityId, blurb, self.credits)
 
         # Pause again for post-stamp
@@ -1711,6 +1737,42 @@ class Activity(View):
             self.setWeight('scope', int(self.getWeight('scope') * 0.6))
 
 
+class FriendFinder(View):
+
+    def __init__(self, user):
+        View.__init__(self, user)
+        
+        self.users = []
+
+        self.setAction('back', self._back)
+        self.setWeight('back', 8)
+
+        self.setAction('follow', self._follow)
+        self.setWeight('follow', 20)
+
+        self.setAction('searchUsers', self._searchUsers)
+        self.setWeight('searchUsers', 20)
+
+    def load(self):
+        self.users = _get_users_suggested(token=self.user.token)
+
+    def _follow(self):
+        if len(self.users) > 0:
+            userId = random.choice(self.users)['user_id']
+            if userId != self.user.userId:
+                _post_friendships_create(token=self.user.token, userId=userId)
+
+    def _searchUsers(self):
+        query = random.choice(userSearchQueries)
+        users = _post_users_search(self.user.token, query)
+        if len(users) > 0:
+            self.users = users
+
+
+
+
+
+
 
 
 
@@ -1800,7 +1862,7 @@ class LoggedOutUser(User):
     def __init__(self):
         User.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 10 #200 + (random.random() * 200)
+        self._userSessionLength = 200 + (random.random() * 200)
         
         self.setAction('inbox', self._viewInbox)
         self.setWeight('inbox', 10)
@@ -1846,6 +1908,9 @@ class ExistingUser(User):
         
         self.setAction('activity', self._viewActivity)
         self.setWeight('activity', 20)
+        
+        self.setAction('friendFinder', self._viewFriendFinder)
+        self.setWeight('friendFinder', 20)
 
 
     def load(self):
@@ -1882,23 +1947,35 @@ class ExistingUser(User):
         time.sleep(random.randint(4, 12) * self._userWaitSpeed)
         self.addToStack(Activity)
 
+    # View friend finder
+    def _viewFriendFinder(self):
+        time.sleep(random.randint(4, 12) * self._userWaitSpeed)
+        self.addToStack(FriendFinder)
 
 
 
-# import gevent
 
-# def worker(user):
-#     user.run()
-#     print 'DONE'
+import gevent
 
-# greenlets = [ 
-#     gevent.spawn(worker, LoggedOutUser()),
-#     gevent.spawn(worker, LoggedOutUser()),
-#     gevent.spawn(worker, LoggedOutUser()),
-# ]
+def worker(user):
+    user.run()
+    print 'DONE'
 
-# gevent.joinall(greenlets)
+greenlets = [ 
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+    gevent.spawn(worker, LoggedOutUser()),
+]
 
-user = ExistingUser('kevin', '12345')
-user.run()
-print 'DONE'
+gevent.joinall(greenlets)
+
+# user = ExistingUser('kevin', '12345')
+# user = LoggedOutUser()
+# user.run()
+# print 'DONE'
