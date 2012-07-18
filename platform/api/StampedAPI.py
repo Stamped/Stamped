@@ -22,7 +22,7 @@ try:
     from api import SchemaValidation
 
     from api.auth                       import convertPasswordForStorage
-    from utils                      import lazyProperty, LoggingThreadPool
+    from utils                      import lazyProperty, LoggingThreadPool, sendEmail
     from functools                  import wraps
     from errors                     import *
     from libs.ec2_utils             import is_prod_stack
@@ -1706,12 +1706,9 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
-        # TODO(geoff): We're loading the index synchronously here, which means once a day we're
-        # going to have a few autocomplete requests that will take a long time (~10 seconds). Find
-        # out if we can do this asynchronously.
         if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
             self.__autocomplete_last_loaded = datetime.now()
-            self.__autocomplete = loadIndexFromS3()
+            gevent.spawn(loadIndexFromS3).link(self.reloadAutoCompleteIndex)
         if category == 'place':
             if coordinates is None:
                 latLng = None
@@ -1728,6 +1725,18 @@ class StampedAPI(AStampedAPI):
             return completions
 
         return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(query)]]
+
+    def reloadAutoCompleteIndex(self, greenlet):
+        try:
+            self.__autocomplete = greenlet.get()
+        except Exception as e:
+            email = {
+                'from' : 'Stamped <noreply@stamped.com>',
+                'to' : 'dev@stamped.com',
+                'subject' : 'Error while reloading autocomplete index',
+                'body' : '<pre>%s</pre>' % str(e),
+                }
+            utils.sendEmail(email, format='html')
 
     def updateAutoCompleteIndexAsync(self):
         pushNewIndexToS3()
