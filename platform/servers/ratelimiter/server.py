@@ -70,16 +70,16 @@ class StampedRateLimiterService():
             print('limits var is not being set in config file.  skipping load step')
             return
 
-        for l in limits:
+        for k,v in limits.iteritems():
             service_name = None
             try:
-                service_name = l['service_name']
-                limit = l.get('limit', None)
-                period = l.get('period', None)
-                cpd = l.get('cpd', None)
-                fail_limit = l.get('fail_limit', None)
-                fail_period = l.get('fail_period', None)
-                fail_wait = l.get('fail_wait', None)
+                service_name    = k
+                limit           = v.get('limit', None)
+                period          = v.get('period', None)
+                cpd             = v.get('cpd', None)
+                fail_limit      = v.get('fail_limit', None)
+                fail_period     = v.get('fail_period', None)
+                blackout_wait   = v.get('blackout_wait', None)
                 if self.__throttle:
                     limit = max(1, limit / 10)
                     cpd = max(1, cpd / 10)
@@ -93,10 +93,10 @@ class StampedRateLimiterService():
             try:
                 limiter = self.__limiters.get(service_name, None)
                 if limiter is not None:
-                    limiter.update_limits(limit, period, cpd, fail_limit, fail_period, fail_wait)
+                    limiter.update_limits(limit, period, cpd, fail_limit, fail_period, blackout_wait)
                 else:
                     print("adding rate limiter for service '%s'" % service_name)
-                    self.__limiters[service_name] = RateLimiter(service_name, limit, period, cpd, fail_limit, fail_period, fail_wait)
+                    self.__limiters[service_name] = RateLimiter(service_name, limit, period, cpd, fail_limit, fail_period, blackout_wait)
             except:
                 print ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
                 return
