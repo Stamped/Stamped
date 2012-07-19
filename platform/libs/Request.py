@@ -20,10 +20,8 @@ RL_PORT = 18861
 
 
 class RateLimiterState(object):
-    def __init__(self, fail_limit, fail_period, blackout_wait, host, port):
+    def __init__(self, fail_limit, fail_period, blackout_wait):
         self.__local_rlservice = None
-        self.__host = host
-        self.__port = port
         self.__request_fails = 0
         self.__fails = deque()
         self.__fail_limit = fail_limit
@@ -33,6 +31,15 @@ class RateLimiterState(object):
         self.__is_ec2 = utils.is_ec2()
         self.__service_init_semaphore = Semaphore()
         self.__fail_semaphore = Semaphore()
+
+        # determine the private ip address of the ratelimiter instance for this stack
+        ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
+        if len(ratelimiter_nodes) != 1:
+            logs.error("Could not find a node with tag 'ratelimiter' on same stack")
+            self.__host = 'localhost'
+        else:
+            self.__host = ratelimiter_nodes[0]['private_ip_address']
+        self.__port = 18861
 
     class FailLog(object):
         def __init__(self, exception):
@@ -172,7 +179,8 @@ def rl_state():
     global __rl_state
     if __rl_state is not None:
         return __rl_state
-    __rl_state = RateLimiterState(FAIL_LIMIT, FAIL_PERIOD, BLACKOUT_WAIT, RL_HOST, RL_PORT)
+
+    __rl_state = RateLimiterState(FAIL_LIMIT, FAIL_PERIOD, BLACKOUT_WAIT)
     return __rl_state
 
 

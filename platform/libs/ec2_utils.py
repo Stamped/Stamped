@@ -179,6 +179,69 @@ def get_db_nodes():
 
     return list(dbNodes)
 
+def get_nodes(tag):
+    if not is_ec2():
+        return None
+
+        # Check for local cache of ratelimiter nodes
+    name = '.__local__.%s.txt' % tag
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
+
+    if os.path.exists(path):
+        modified = utils.get_modified_time(path)
+        current  = datetime.datetime.utcnow() - datetime.timedelta(minutes=15)
+
+        # only try to use the cached config if it's recent enough
+        if modified >= current:
+            try:
+                f = open(path, 'r')
+                nodes = json.loads(f.read())
+                f.close()
+                if len(nodes) > 0:
+                    return map(utils.AttributeDict, nodes)
+            except:
+                utils.log("error getting cached stack info; recomputing")
+                utils.printException()
+
+    # Check current instance tags for specified ratelimiter stack
+    conn = EC2Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+
+    reservations = conn.get_all_instances()
+    instance_id  = get_local_instance_id()
+    cur_instance = None
+
+    for reservation in reservations:
+        for instance in reservation.instances:
+            try:
+                if instance.id == instance_id:
+                    cur_instance = instance
+                    break
+            except Exception:
+                pass
+
+    if cur_instance is None:
+        raise Exception("'%s' nodes not found: %s" % (tag, instance_id))
+
+    dbStackName = cur_instance.tags['stack']
+
+    # Generate db nodes based on specified db stack
+    dbStack = get_stack(dbStackName)
+
+    tagNodes = set()
+    for node in dbStack['nodes']:
+        if tag in node.roles:
+            tagNodes.add(node)
+
+    if len(tagNodes) == 0:
+        raise Exception("nodes not found for stack '%s' and tag '%s'" % (dbStackName, tag))
+
+    f = open(path, 'w')
+    f.write(json.dumps(map(lambda x: dict(x), tagNodes), indent=2))
+    f.close()
+
+    return list(tagNodes)
+
+
 def get_api_elb(stack=None):
     if not is_ec2():
         return None
