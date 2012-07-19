@@ -886,7 +886,10 @@ static STRestKitLoader* _sharedInstance;
                 [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIRefreshedTokenNotification object:nil];
             }
             else {
-                [self clearAuthState];
+                NSString* errorID = [error.userInfo objectForKey:STRestKitErrorIDKey];
+                if ([errorID isEqualToString:@"invalid_credentials"] || [errorID isEqualToString:@"invalid_form"]) {
+                    [self clearAuthState];
+                }
             }
         }];
         if (cancellation) {

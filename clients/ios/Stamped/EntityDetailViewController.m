@@ -31,6 +31,7 @@
 #import "STHoverToolbar.h"
 #import "STNavigationItem.h"
 #import <MessageUI/MFMailComposeViewController.h>
+#import "STSpotify.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
@@ -90,11 +91,12 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 }
 
 - (void)debug:(id)notImportant {
-    MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
-    vc.mailComposeDelegate = self;
-    [vc setMessageBody:[NSString stringWithFormat:@"%@\n%@", self.entityDetail.title, self.entityID] isHTML:NO];
-    [self presentModalViewController:vc animated:YES];
-    [vc release];
+    [[STSpotify sharedInstance] addToPlaylist];
+//    MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+//    vc.mailComposeDelegate = self;
+//    [vc setMessageBody:[NSString stringWithFormat:@"%@\n%@", self.entityDetail.title, self.entityID] isHTML:NO];
+//    [self presentModalViewController:vc animated:YES];
+//    [vc release];
 }
 
 
