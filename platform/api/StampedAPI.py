@@ -3822,6 +3822,8 @@ class StampedAPI(AStampedAPI):
         if guideRequest.offset is not None:
             offset = guideRequest.offset
         
+        userIds = {}
+        
         entityIdsWithScore = {}
         for stat in entityStats[offset:offset+limit]:
             if stat.score is None:
@@ -3833,7 +3835,6 @@ class StampedAPI(AStampedAPI):
                 for userId in stat.popular_users[:10]:
                     userIds[userId] = None
 
-        userIds = {}
         scoredEntities = []
         entities = self._entityDB.getEntities(entityIdsWithScore.keys())
         for entity in entities:
