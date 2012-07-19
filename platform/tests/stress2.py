@@ -1948,7 +1948,7 @@ class LoggedOutUser(User):
     def __init__(self):
         User.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 30# 200 + (random.random() * 200)
+        self._userSessionLength = 60 # 200 + (random.random() * 200)
         
         self.setAction('inbox', self._viewInbox)
         self.setWeight('inbox', 10)
@@ -1978,7 +1978,7 @@ class LoggedInUser(User):
     def __init__(self):
         User.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 10 #200 + (random.random() * 200)
+        self._userSessionLength = 60 #200 + (random.random() * 200)
 
         self.token = None
         self.userId = None 
@@ -2030,7 +2030,7 @@ class ExistingUser(LoggedInUser):
     def __init__(self, login, password):
         LoggedInUser.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 10 #200 + (random.random() * 200)
+        self._userSessionLength = 60 #200 + (random.random() * 200)
 
         self._login = login
         self._password = password
@@ -2060,7 +2060,7 @@ class NewUser(LoggedInUser):
     def __init__(self):
         LoggedInUser.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 10 #200 + (random.random() * 200)
+        self._userSessionLength = 60 #200 + (random.random() * 200)
 
     def load(self):
         # Load tastemakers
@@ -2160,7 +2160,7 @@ def main():
         print 'DONE DONE DONE'
         print
 
-        if time.time() - start > 35:
+        if time.time() - start > 65:
             print "DONE!", datetime.datetime.utcnow()
             break 
 
