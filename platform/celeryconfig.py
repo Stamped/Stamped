@@ -10,6 +10,7 @@ import utils, logs
 import libs.ec2_utils
 
 from datetime import timedelta
+from celery.schedules import crontab
 
 # List of modules to import when celery starts.
 CELERY_IMPORTS = ("tasks", )
@@ -87,6 +88,10 @@ CELERYBEAT_SCHEDULE = {
         'task' : 'tasks.APITasks.crawlExternalSources',
         'schedule' : timedelta(hours=3),
         'relative' : True,
+    },
+    'make-new-autocomplete-index' : {
+        'task' : 'tasks.APITasks.updateAutoCompleteIndex',
+        'schedule' : crontab(hour=4),
     },
 }
 
