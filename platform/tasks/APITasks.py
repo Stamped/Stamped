@@ -188,6 +188,10 @@ def mergeEntityId(*args, **kwargs):
 def crawlExternalSources(*args, **kwargs):
     invoke(crawlExternalSources.request, *args, **kwargs)
 
+@task(queue='enrich', **default_params)
+def updateAutoCompleteIndex(*args, **kwargs):
+    invoke(updateAutoCompleteIndex.request, *args, **kwargs)
+
 # Collage
 
 @task(queue='enrich', **default_params)

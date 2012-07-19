@@ -13,8 +13,7 @@
 
 
 @import "libs/h5bp.min.css";
-@import "http://cloud.webtype.com/css/98498264-8838-4e2c-a0a6-d68fc97fdaf3.css";
-
+@import "fonts.less";
 @import "common.less";
 
 
@@ -87,103 +86,27 @@ header {
      
     .header-body {
         position: relative;
+        height: 48px;
         
         p {
-            position: relative;
-            float: right;
-            clear: both;
+            position: absolute;
+            line-height: 32px;
             
-            margin: 0.5em 0.5em 0.25em 0;
+            margin: 0;
+            top:   0;
+            right: 12px;
             
             .desc {
                 font-size: 90%;
+                margin-right: 12px;
             }
             
             .get-the-app-button {
-                background: url(/assets/img/gettheapp_btn_sprite.png) no-repeat;
-                
-                display: block;
-                width:  120px;
-                height: 32px;
-                
-                &:hover {
-                    background-position: -121px 0;
-                }
-                
-                &:active {
-                    background-position: -242px 0;
-                }
-            }
-            
-            a.button {
-                background: url(/assets/img/join_signup_sprite.png) no-repeat;
-                display: inline-block;
-                
                 position: relative;
-                top: .5em;
-                
-                width:  86px;
-                height: 31px;
-                margin-left: .5em;
+                display:  inline-block;
+                top: 12px;
             }
         }
-        
-/*        
-        .button(@y: 0) {
-            background-position: 0 @y;
-            
-            &:hover {
-                background-position: -88px  @y;
-            }
-            
-            &:active {
-                background-position: -176px @y;
-            }
-        }
-        
-        p.join {
-            z-index: 27;
-            
-            span.desc {
-                color: #438fed;
-            }
-            
-            a.button {
-                .button(0);
-            }
-        }
-        
-        p.login {
-            z-index: 26;
-            margin-bottom: 1em;
-            
-            span.desc {
-                color: #bbb;
-            }
-            
-            a.button {
-                .button(-33px);
-            }
-        }*/
-    }
-}
-
-a.follow-button {
-    display: block;
-    width:  86px;
-    height: 31px;
-    
-    background: url(/assets/img/join_signup_sprite.png) no-repeat;
-    background-position: 0 -66px;
-    
-    &:hover {
-        background-position: -88px  -66px;
-        cursor: pointer;
-    }
-    
-    &:active {
-        background-position: -176px -66px;
-        cursor: pointer;
     }
 }
 
@@ -885,6 +808,21 @@ a.sdetail, .pronounced-title a {
     }
 }
 
+.get-the-app-button {
+    background: url(/assets/img/gettheapp_btn_sprite.png) no-repeat;
+    
+    display: block;
+    width:  120px;
+    height: 32px;
+    
+    &:hover {
+        background-position: -121px 0;
+    }
+    
+    &:active {
+        background-position: -242px 0;
+    }
+}
 
 
 /* **************************************************************************

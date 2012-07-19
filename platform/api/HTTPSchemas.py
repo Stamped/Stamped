@@ -2822,6 +2822,8 @@ class HTTPActivity(Schema):
         cls.addNestedPropertyList('footer_references',      HTTPTextReference)
 
     def importEnrichedActivity(self, activity):
+        logs.debug("IMPORT ACTIVITY: %s" % activity)
+        
         data = activity.dataExport()
         data.pop('subjects', None)
         data.pop('objects', None)

@@ -26,7 +26,7 @@ def applyRemovalRegexps(regexps, title):
             if removalRegexp.search(title):
                 title = removalRegexp.sub('', title)
                 modified = True
-    return title
+    return title.strip()
 
 
 # Tools for demoting based on regepx title matches.

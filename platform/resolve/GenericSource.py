@@ -42,7 +42,7 @@ def generatorSource(generator, constructor=None, unique=False, tolerant=False):
                     except StopIteration:
                         raise
                     except Exception:
-                        pass
+                        logs.report()
                 else:
                     value = constructor(generator.next())
                 if value is not None:

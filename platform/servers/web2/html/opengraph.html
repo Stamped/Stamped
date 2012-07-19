@@ -97,6 +97,11 @@
             <meta itemprop="latitude"                       content='{{entity.coordinates|split0:","}}'/>
             <meta itemprop="longitude"                      content='{{entity.coordinates|split1:","}}'/>
         {% endif %}
+        
+        {% if entity.address|length > 0 %}
+            <meta property="stampedapp:address"             content='{{entity.address}}'/>
+            <meta property="stampedapp:address"             content='{{entity.address}}'/>
+        {% endif %}
     {% else %}{% if entity.category == "music" %}
         {% if entity.subcategory == "artist" %}
             <meta property="og:type"        content="stampedapp:artist"/>

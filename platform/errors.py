@@ -279,6 +279,9 @@ class StampedCollectionCacheError(StampedInternalError):
     def __init__(self, msg=None):
         StampedInternalError.__init__(self, msg)
 
+class StampedActivityMissingUsersError(StampedInternalError):
+    pass
+
 
         # Accounts
 class StampedInvalidPasswordError(StampedInputError):

@@ -71,6 +71,8 @@ try:
     from libs.Twitter                    import *
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
+
+    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -143,6 +145,12 @@ class StampedAPI(AStampedAPI):
         self.__version = 0
         if 'version' in kwargs:
             self.setVersion(kwargs['version'])
+
+        if utils.is_ec2():
+            self.__autocomplete = loadIndexFromS3()
+        else:
+            self.__autocomplete = emptyIndex()
+        self.__autocomplete_last_loaded = datetime.now()
 
     def setVersion(self, version):
         try:
@@ -1697,9 +1705,10 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
-        if category == 'film':
-            return self._netflix.autocomplete(query)
-        elif category == 'place':
+        if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
+            self.__autocomplete_last_loaded = datetime.now()
+            gevent.spawn(loadIndexFromS3).link(self.reloadAutoCompleteIndex)
+        if category == 'place':
             if coordinates is None:
                 latLng = None
             else:
@@ -1713,17 +1722,23 @@ class StampedAPI(AStampedAPI):
             for name in names:
                 completions.append( { 'completion' : name } )
             return completions
-        # elif category == 'music':
-        #     result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
-        #     if 'result' not in result:
-        #         return []
-        #     #names = list(set([i['name'] for i in result['result']]))[:10]
-        #     names = self._orderedUnique([i['name'] for i in result['result']])[:10]
-        #     completions = []
-        #     for name in names:
-        #         completions.append( { 'completion' : name})
-        #     return completions
-        return []
+
+        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
+
+    def reloadAutoCompleteIndex(self, greenlet):
+        try:
+            self.__autocomplete = greenlet.get()
+        except Exception as e:
+            email = {
+                'from' : 'Stamped <noreply@stamped.com>',
+                'to' : 'dev@stamped.com',
+                'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
+                'body' : '<pre>%s</pre>' % str(e),
+            }
+            utils.sendEmail(email, format='html')
+
+    def updateAutoCompleteIndexAsync(self):
+        pushNewIndexToS3()
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):
@@ -1978,14 +1993,14 @@ class StampedAPI(AStampedAPI):
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
             stats.popular_stamps = popularStampIds
-            self._entityStatsDB.updateEntityStats(stats)
+            self._entityStatsDB.saveEntityStats(stats)
         except StampedUnavailableError:
             stats = EntityStats()
             stats.entity_id = entityId
             stats.num_stamps = numStamps
             stats.popular_users = popularUserIds
             stats.popular_stamps = popularStampIds
-            self._entityStatsDB.addEntityStats(stats)
+            self._entityStatsDB.saveEntityStats(stats)
         return stats
 
     def updateTombstonedEntityReferencesAsync(self, oldEntityId):
@@ -2971,7 +2986,10 @@ class StampedAPI(AStampedAPI):
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
-
+        account = self.getAccount(authUserId)
+        if account.linked is not None and account.linked.facebook is not None\
+           and account.linked.facebook.token is not None:
+            token = account.linked.facebook.token
             result = self._facebook.deleteFromOpenGraph(og_action_id, token)
 
 
@@ -4797,6 +4815,7 @@ class StampedAPI(AStampedAPI):
     def getActivity(self, authUserId, scope, limit=20, offset=0):
 
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
+        logs.debug("ACTIVITY DATA: %s" % activityData)
 
         # Append user objects
         userIds     = {}
@@ -4862,6 +4881,10 @@ class StampedAPI(AStampedAPI):
         activity = []
         for item in activityData:
             try:
+                logs.debug("ACTIVITY ITEM: %s" % item)
+                logs.debug("USERS: %s" % userIds)
+                logs.debug("STAMPS: %s" % stampIds)
+                logs.debug("ENTITIES: %s" % entityIds)
                 activity.append(item.enrich(authUserId  = authUserId,
                                             users       = userIds,
                                             stamps      = stampIds,
