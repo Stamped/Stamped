@@ -2075,7 +2075,7 @@ class StampedAPI(AStampedAPI):
                     quality += 0.1
 
             # Apps
-            if entity.types[0] == 'app':
+            if entity.isType('app'):
 
                 if entity.sources.itunes_url is None:
                     quality -= 0.4
