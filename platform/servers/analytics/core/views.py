@@ -80,6 +80,7 @@ def index(request):
     c = Context({
         'hour': est().hour,
         'minute': est().minute,
+        'stack': stack_name,
         'todayStamps': todayStamps,
         'yestStamps': yestStamps,
         'weekStamps': '%.2f' % weekStamps,
@@ -131,6 +132,7 @@ def enrichment(request):
     c = Context({
                  'form': form,
                  'hour': est().hour,
+                 'stack': stack_name,
                  'minute': est().minute,
                  'unattempted': unattempted,
                  'attempted': attempted,
@@ -191,6 +193,7 @@ def latency(request):
     c = Context({
                  'hour': est().hour,
                  'minute': est().minute,
+                 'stack': stack_name,
                  'report': report,
                  'blacklist': blacklist,
                  'whitelist': whitelist,
@@ -213,17 +216,17 @@ def stress(request):
         interval = forms.CharField(max_length=30,
                                    widget=forms.Select(choices=intervals))
 
-    qpsResults = {}
+    count_report = {}
+    mean_report = {}
     if request.method == 'POST': 
         form = qpsForm(request.POST)
         if form.is_valid():
             window = int(form.cleaned_data['window'])
             interval = int(form.cleaned_data['interval'])
             
-            qpsResults = query.qpsReport(now(),interval,window)
+            count_report,mean_report = query.qpsReport(now(),interval,window)
             
             
-        else: form = latencyForm()
     else: form = qpsForm()
     
         
@@ -231,8 +234,12 @@ def stress(request):
     c = Context({
                  'hour': est().hour,
                  'minute': est().minute,
+                 'stack': stack_name,
                  'form': form,
-                 'qpsResults': qpsResults.iteritems()
+                 'count_results': count_report.iteritems(),
+                 'mean_results': mean_report.iteritems(),
+                 'n': range(0,window,interval),
+                 'interval': interval
     })
     return HttpResponse(t.render(c))
 
@@ -265,6 +272,7 @@ def segmentation(request):
     c = Context({
                  'hour': est().hour,
                  'minute': est().minute,
+                 'stack': stack_name,
                  'monthAgo': monthAgo(today()),
                  'weekAgo': weekAgo(today()),
                  'usersM': '%s' % usersM,
@@ -343,6 +351,7 @@ def trending(request):
     c = Context({
                  'hour': now().hour,
                  'minute': now().minute,
+                 'stack': stack_name,
                  'monthAgo': monthAgo,
                  'weekAgo': weekAgo(today()),
                  'results': results,
@@ -400,6 +409,7 @@ def custom(request):
     c = Context({
                  'hour': now().hour,
                  'minute': now().minute,
+                 'stack': stack_name,
                  'form': form,
                  'bgns': bgns,
                  'ends': ends,

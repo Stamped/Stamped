@@ -22,7 +22,7 @@
 		{% block header %}
 		<div class="header_wrapper">	
 			<div class = "header">
-				<h1> Stamped Analytics Dashboard </h1>
+				<h1> Stamped Analytics Dashboard{% if stack != None %} - Stack: {{stack}}{% endif %}</h1>
 				
 				<h2> All stats through {{hour}}:{% if minute < 10 %}0{{minute}}{% else %}{{minute}}{% endif %} EST</h4>
 				

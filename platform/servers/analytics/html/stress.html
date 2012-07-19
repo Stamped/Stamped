@@ -12,7 +12,7 @@
 	{% block content %}
 	
 	    <div class="contentWrapper">
-		    <h1>QPS Report </h1>
+		    <h1>Stress Report </h1>
 		    
 		    <div class="qps">
 		    	<form action='/stress/' method='post'>
@@ -20,16 +20,46 @@
 		    		<input type='submit' />
 		    	</form>
 		    
-			    {% if qpsResults|length > 0 %}
+		    	<h2> QPS Report </h2>
+			    {% if count_results|length > 0 %}
 			    	
 				    <table class="sortable latencyTable">
 				    	
 				    	<tr>
-					        <td>Bgn Time</td><td>QPS</td><td>Mean Latency</td>
+					        <td>Node</td>
+					        {% for i in n %}
+					        	<td>t - {{ i }}</td>
+					        {% endfor %}
 					    </tr>
-					    {% for key,values in qpsResults %}
+					    {% for key,value in count_results %}
 					        <tr>
-					        	<td>{{key}}</td><td>{{values.0}}</td><td>{{values.1}}</td>
+					        	<td>{{key}}</td>
+					        	{% for item in value %}
+					        		<td>{{item}}</td>
+					        	{% endfor %}
+					        </tr>
+					   	{% endfor %}
+				   	</table>
+			    {% endif %}
+			    
+			    <h2> Mean Latency Report </h3>
+			    
+			    {% if count_results|length > 0 %}
+			    	
+				    <table class="sortable latencyTable">
+				    	
+				    	<tr>
+					        <td>Node</td>
+					        {% for i in n %}
+					        	<td>t - {{ i }}</td>
+					        {% endfor %}
+					    </tr>
+					    {% for key,value in mean_results %}
+					        <tr>
+					        	<td>{{key}}</td>
+					        	{% for item in value %}
+					        		<td>{{item}}</td>
+					        	{% endfor %}
 					        </tr>
 					   	{% endfor %}
 				   	</table>
