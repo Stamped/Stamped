@@ -3845,6 +3845,9 @@ class StampedAPI(AStampedAPI):
 
         scoredEntities.sort(key=lambda x: x[0], reverse=True)
 
+        # Remove the buffer we added earlier (in case any entities no longer exist)
+        scoredEntities = scoredEntities[:limit]
+
         # Apply Lottery
         # if offset == 0 and guideRequest.section != "food":
         #     scoredEntities = utils.weightedLottery(scoredEntities)
@@ -3878,11 +3881,6 @@ class StampedAPI(AStampedAPI):
         # Results
         result = []
         for score, entity in scoredEntities:
-            # Verify that entity exists
-            if entity.entity_id not in entityIds:
-                logs.warning("Missing entityId: %s" % entity.entity_id)
-                continue
-
             # Update previews
             if entity.entity_id in entityStampPreviews:
                 previews = Previews()
@@ -3890,7 +3888,7 @@ class StampedAPI(AStampedAPI):
                 entity.previews = previews
             result.append(entity)
 
-        return result[:limit]
+        return result
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
