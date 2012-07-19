@@ -1111,8 +1111,9 @@ def findUrls(text):
     return url_re.finditer(text)
 
 
-#Weighted lottery function for ordering items by their scores. 
-#INPUT: A list of tuples in the form (float_score, item)
+# Weighted lottery function for ordering items by their scores. 
+# INPUT: A list of tuples in the form (float_score, item)
+# OUTPUT: A list of tuples of the same form, ordered probabilistically
 def weightedLottery(items):
     
     aggScore = reduce(lambda x, y: x + y[0], items, 0.0)
@@ -1131,7 +1132,7 @@ def weightedLottery(items):
             for cutoff, item in unselected:
                 if r < cutoff:
                     unselected.pop(index)
-                    selected.append(item[1])
+                    selected.append(item)
                     aggScore -= item[0]
                     unselected = map(lambda (x, y): (((x - item[0]) if x > cutoff else x), y), unselected)    
                     break
@@ -1140,6 +1141,6 @@ def weightedLottery(items):
         
         return selected
 
-    return map(lambda item: item[1], items)
+    return items
 
 
