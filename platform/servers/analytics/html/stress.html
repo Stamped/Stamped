@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+	{% extends 'base.html' %}
+
+	{% block head %}
+	
+	{{ block.super }}
+	
+	<script src="/assets/js/sorttable.js"></script>
+	{% endblock head %}
+	
+	{% block content %}
+	
+	    <div class="contentWrapper">
+		    <h1>QPS Report </h1>
+		    
+		    <div class="qps">
+		    	<form action='/stress/' method='post'>
+		    		{{form}}
+		    		<input type='submit' />
+		    	</form>
+		    
+			    {% if qpsResults|length > 0 %}
+			    	
+				    <table class="sortable latencyTable">
+				    	
+				    	<tr>
+					        <td>Bgn Time</td><td>QPS</td><td>Mean Latency</td>
+					    </tr>
+					    {% for key,values in qpsResults %}
+					        <tr>
+					        	<td>{{key}}</td><td>{{values.0}}</td><td>{{values.1}}</td>
+					        </tr>
+					   	{% endfor %}
+				   	</table>
+			    {% endif %}
+		    </div>
+		    
+		    <div>
+
+   	{% endblock content %}
+   	
+   	

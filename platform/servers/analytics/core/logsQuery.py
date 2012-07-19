@@ -31,7 +31,7 @@ def percentile(numList,p):
 
 class logsQuery(object):
     
-    def __init__(self):
+    def __init__(self,domain_name=None):
         self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domains = {}
         self.statSet  = set()
@@ -39,9 +39,12 @@ class logsQuery(object):
         self.errDict = {}
         self.statCount = 0
 
+        if domain_name is None:
+            domain_name = 'stats_dev'
+            
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
-            self.domains[suffix] = self.conn.get_domain('stats_dev_%s' % (suffix))
+            self.domains[suffix] = self.conn.get_domain('%s_%s' % (domain_name,suffix))
             
             
 
@@ -63,6 +66,7 @@ class logsQuery(object):
             except KeyError:
                 pass
         
+        
     def activeUsers(self,t0, t1):
         self.statSet = set()
         
@@ -79,7 +83,7 @@ class logsQuery(object):
     
     def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist):
         if uri is None:
-            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
+            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
         else:
             query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (domain.name,uri,t0.isoformat(),t1.isoformat())
         stats = domain.select(query)
@@ -153,7 +157,7 @@ class logsQuery(object):
     
     def dailyLatencyReport(self,t0,t1,uri,blacklist,whitelist):
         self.statDict = {}
-        diff = (t1 - t0).days
+        diff = (t1 - t0).days + 1
         output = []
         for i in range (0,diff):
             t2 = t0+datetime.timedelta(days=i)
@@ -191,6 +195,46 @@ class logsQuery(object):
                 output.append((t2.date().isoformat(),'%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5))
                 
         return output
+    
+    def qpsReport(self,time,interval,total_seconds):
+        blacklist=[]
+        whitelist=[]
+        
+        print time,interval,total_seconds
+        qps_report = {}
+        t0 = time - datetime.timedelta(0,total_seconds)
+        for i in range (0,total_seconds/interval):
+            self.statCount = 0
+            self.statDict = {}
+            self.errDict = {}
+            
+            t1 = t0 + datetime.timedelta(0,i*interval)
+            t2 = t0 + datetime.timedelta(0,(i+1)*interval)
+            
+            pool = Pool(32)
+        
+            for i in range (0,16):
+                suffix = '0'+hex(i)[2]
+                
+                pool.spawn(self.performQuery,self.domains[suffix],'count(*)',None,t1,t2)
+                pool.spawn(self.latencyQuery,self.domains[suffix],t1,t2,None,blacklist,whitelist)
+    
+            pool.join()
+            
+            sum = 0
+            total = 0
+            for uri in self.statDict:
+                total += len(self.statDict[uri])
+                for num in self.statDict[uri]:
+                    sum += num
+            try:
+                mean = float(sum)/total
+            except ZeroDivisionError:
+                mean = 0.0
+            
+            qps_report[t1.isoformat()] = (float(self.statCount)/interval,mean)
+            
+        return qps_report
         
     def customQuery(self,t0,t1,fields,uri):
         

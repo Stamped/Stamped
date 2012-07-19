@@ -28,7 +28,7 @@
 
 - (id)init {
     if (self = [super initWithStyle:UITableViewStyleGrouped]) {
-        self.title = NSLocalizedString(@"Sign up", @"Sign up");
+//        self.title = NSLocalizedString(@"Sign up", @"Sign up");
         _dataSource = [[NSArray arrayWithObjects:@"full name", @"email", @"username", @"password", @"phone number", nil] retain];
         self.navigationItem.hidesBackButton = YES;
        
@@ -83,6 +83,18 @@
 
 - (void)viewDidUnload {
     [super viewDidUnload];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [Util setTitle:[NSString stringWithFormat:@"Sign up"]
+     forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
 }
 
 - (void)dealloc {

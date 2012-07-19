@@ -13,6 +13,7 @@
 #import "STStampedBy.h"
 #import "STStampedAPI.h"
 #import "STNavigationItem.h"
+#import "Util.h"
 
 @interface CreditPickerViewController ()
 @property(nonatomic,retain) CreditHeaderView *headerView;
@@ -39,7 +40,7 @@
 - (id)initWithEntityIdentifier:(NSString*)identifier selectedUsers:(NSArray*)users {
     if ((self = [super init])) {
 
-        self.title = @"Credit";
+        //self.title = @"Credit";
         _users = [[NSArray alloc] init];
         _selectedUsers = [[NSMutableArray alloc] init];
         _searchUsers = [[NSArray alloc] init];
@@ -135,6 +136,16 @@
     [super didReceiveMemoryWarning];
 }
 
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];    
+    [Util setTitle:@"Credit" forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil forController:self];
+}
 
 #pragma mark - Actions
 
@@ -478,7 +489,7 @@
     frame.origin.y = height;
     frame.size.height -= height;
     view.frame = frame;
-    [view setupWithTitle:@"No Users" detailTitle:@"No users found."];
+    [view setupWithTitle:@"\nNo Suggested People" detailTitle:@""];
     
 }
 

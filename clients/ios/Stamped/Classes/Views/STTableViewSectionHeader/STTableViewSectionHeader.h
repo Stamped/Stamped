@@ -11,6 +11,8 @@
 @interface STTableViewSectionHeader : UIImageView
 
 @property(nonatomic,readonly,retain) UILabel *titleLabel;
+@property (nonatomic, readwrite, assign) BOOL googleAttribution;
+@property (nonatomic, readwrite, retain) UIImageView* googleImage;
 
 + (CGFloat)height;
 

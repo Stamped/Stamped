@@ -196,7 +196,7 @@
         
         self.backgroundColor = [UIColor whiteColor];
         
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"welcome_popover_title.png"]];
+        UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"welcometostamped"]];
         [self addSubview:imageView];
         [imageView release];
         

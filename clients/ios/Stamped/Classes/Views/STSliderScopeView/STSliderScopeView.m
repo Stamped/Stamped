@@ -100,24 +100,10 @@
     self.layer.shadowOpacity = 1;
     self.layer.shadowOffset = CGSizeMake(0, -1);
 
-    id<STUser> user = STStampedAPI.sharedInstance.currentUser;
-    if (user) {
-        
-        UIImage *image = [[STImageCache sharedInstance] cachedUserImageForUser:user size:STProfileImageSize24];
-        if (image) {
-            
-            [self setUserImageViewImage:image];
-            
-        } else {
-            
-            [[STImageCache sharedInstance] userImageForUser:(id<STUser>)user size:STProfileImageSize24 andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-                [self setUserImageViewImage:image];
-            }];
-            
-        }
-    }
+
     _scope=-1;
-    
+    [self userUpdated:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:STStampedAPIUserUpdatedNotification object:nil];
 }
 
 - (id)initWithStyle:(STSliderScopeStyle)style frame:(CGRect)frame {    
@@ -137,6 +123,7 @@
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     if (_userImage) {
         [_userImage release], _userImage = nil;
     }
@@ -145,6 +132,28 @@
     [_textCallout release];
     _textCallout = nil;
     [super dealloc];
+}
+
+- (void)userUpdated:(id)notImportant {
+    id<STUser> user = STStampedAPI.sharedInstance.currentUser;
+    if (user) {
+        
+        UIImage *image = [STStampedAPI sharedInstance].currentUserImage;
+        if (!image) {
+            [[STImageCache sharedInstance] cachedUserImageForUser:user size:STProfileImageSize24];
+        }
+        if (image) {
+            
+            [self setUserImageViewImage:image];
+            
+        } else {
+            
+            [[STImageCache sharedInstance] userImageForUser:(id<STUser>)user size:STProfileImageSize24 andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+                [self setUserImageViewImage:image];
+            }];
+            
+        }
+    }
 }
 
 
@@ -193,6 +202,7 @@
         if (animated) {
             [[self textCallout] setTitle:[self titleForScope:scope] boldText:[self boldTitleForScope:scope]];   
             _textCallout.hidden = YES;
+            _draggingView.image = [self imageForScope:_scope];
             [self moveToScope:scope animated:YES duration:0.4 completion:^{
                 _textCallout.hidden = NO;
                 if (self.delegate) {
@@ -339,7 +349,7 @@
             image = [UIImage imageNamed:@"scope_drag_inner_fof.png"];
             break;
         case STStampedAPIScopeEveryone:
-            image = [UIImage imageNamed:@"scope_drag_inner_all.png"];
+            image = [UIImage imageNamed:@"tastemakers_star"];
             break;
         default:
             break;

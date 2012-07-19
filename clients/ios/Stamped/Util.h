@@ -21,10 +21,7 @@
 #import "STMenuController.h"
 #import "STStampedAPI.h"
 #import "STActivityReference.h"
-
-@class User;
-@class Entity;
-@class SearchResult;
+#import <CoreText/CoreText.h>
 
 // Constants from Twitter's developer console.
 extern NSString* const kTwitterConsumerKey;
@@ -54,6 +51,8 @@ typedef enum STGradientStyle {
 @interface Util : NSObject
 
 + (NSError*)errorWithDescription:(NSString*)description;
+
++ (void)setTitle:(NSString*)title forController:(UIViewController*)controller;
 
 + (NSString*)floatToHex:(CGFloat)value;
 + (BOOL)splitHexString:(NSString*)hexString toRed:(CGFloat*)red green:(CGFloat*)green blue:(CGFloat*)blue;
@@ -121,8 +120,6 @@ typedef enum STGradientStyle {
 + (CGFloat)imageScale;
 
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message;
-
-+ (Rdio*)sharedRdio;
 
 + (CGRect)getAbsoluteFrame:(UIView*)view;
 
@@ -235,6 +232,15 @@ typedef enum STGradientStyle {
 
 + (CGSize)sizeForString:(NSAttributedString*)inString thatFits:(CGSize)inSize;
 
+
++ (NSAttributedString *)attributedStringForString:(NSString *)aString 
+                                             font:(UIFont *)aFont 
+                                            color:(UIColor *)aColor 
+                                       lineHeight:(CGFloat)lineHeight 
+                                           indent:(CGFloat)indent 
+                                        alignment:(CTTextAlignment)alignment
+                                  extraAttributes:(NSDictionary*)attributes;
+
 + (NSAttributedString *)attributedStringForString:(NSString *)aString 
                                              font:(UIFont *)aFont 
                                             color:(UIColor *)aColor 
@@ -295,5 +301,9 @@ typedef enum STGradientStyle {
 + (void)warnWithAPIError:(NSError*)error andBlock:(void (^)())block;
 
 + (NSString*)versionString;
+
++ (BOOL)showingFullscreenPopUp;
+
++ (BOOL)oncePerUserWithID:(NSString*)unique;
 
 @end

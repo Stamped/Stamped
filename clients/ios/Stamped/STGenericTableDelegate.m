@@ -239,7 +239,7 @@
         self.endReached = YES;
         [self cancelPendingRequests];
         self.tableShouldReloadCallback(self);
-        [Util warnWithMessage:@"Loading failed, see log" andBlock:nil];
+        [Util warnWithAPIError:lazyList.lastError andBlock:nil];
     }
 }
 

@@ -17,6 +17,7 @@
 #import "CreateEntityViewController.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
+#import "STNavigationBar.h"
 
 #define kAddEntityCellTag 101
 
@@ -74,7 +75,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         if (!category) {
             category = @"music";
         }
-        self.title = [Util titleForCategory:category];
+        //self.title = [Util titleForCategory:category];
         _category = [category retain];
         _initialQuery = [query retain];
         _autoCompleteResults = (id)[[NSMutableArray alloc] init];
@@ -136,12 +137,21 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    NSString* title = [Util titleForCategory:self.category];
+    if ([self.category isEqualToString:@"film"]) {
+        title = @"Movies & TV";
+    }
+    [Util setTitle:[NSString stringWithFormat:@"Stamp %@", title]
+     forController:self];
     self.tableView.contentOffset = CGPointZero;
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-    self.tableView.contentOffset = CGPointZero;
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
+    //self.tableView.contentOffset = CGPointZero;
+    //[self.navigationController setNavigationBarHidden:NO animated:animated];
 }
 
 
@@ -167,6 +177,10 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 
 #pragma mark - Actions
+
+- (void)backButton:(id)notImportant {
+    [Util compareAndPopController:self animated:YES];
+}
 
 - (void)cancel:(id)sender {
     
@@ -343,6 +357,9 @@ static const CGFloat _offscreenCancelPadding = 5;
     if (title) {
         STTableViewSectionHeader *view = [[STTableViewSectionHeader alloc] initWithFrame:CGRectMake(0.0f, 0.0f, tableView.bounds.size.width, 0)];
         view.titleLabel.text = title;
+        if ([self.category isEqualToString:@"place"]) {
+            view.googleAttribution = YES;
+        }
         return [view autorelease];
     }
     return nil;

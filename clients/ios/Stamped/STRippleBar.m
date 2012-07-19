@@ -69,4 +69,8 @@
   return self;
 }
 
++ (NSString*)grayColor {
+    return @"dcdcdc";
+}
+
 @end

@@ -55,25 +55,25 @@
         
     }
     
-    switch (type) {
-        case FriendsRequestTypeContacts:
-            self.title = @"Contacts";
-            break;
-        case FriendsRequestTypeTwitter:
-            self.title = @"Twitter";
-            break;
-        case FriendsRequestTypeFacebook:
-            self.title = @"Facebook";
-            break;
-        case FriendsRequestTypeSuggested:
-            self.title = @"Suggestions";
-            break;
-        case FriendsRequestTypeSearch:
-            self.title = @"Results";
-            break;
-        default:
-            break;
-    }
+//    switch (type) {
+//        case FriendsRequestTypeContacts:
+//            self.title = @"Contacts";
+//            break;
+//        case FriendsRequestTypeTwitter:
+//            self.title = @"Twitter";
+//            break;
+//        case FriendsRequestTypeFacebook:
+//            self.title = @"Facebook";
+//            break;
+//        case FriendsRequestTypeSuggested:
+//            self.title = @"Suggestions";
+//            break;
+//        case FriendsRequestTypeSearch:
+//            self.title = @"Results";
+//            break;
+//        default:
+//            break;
+//    }
 
 }
 

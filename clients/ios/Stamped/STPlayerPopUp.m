@@ -79,7 +79,7 @@ static const CGFloat _cellHeight = 52;
         _contentView = [[UIView alloc] initWithFrame:CGRectMake(15, 55, 290, 360)];
         _contentView.backgroundColor = [UIColor whiteColor];
         
-        _fullFooter = LOGGED_IN && !([STRdio sharedRdio].connected && ![STSpotify sharedInstance].connected);// YES;//![STRdio sharedRdio].loggedIn;
+        _fullFooter = LOGGED_IN && ![STRdio sharedRdio].connected && ![STSpotify sharedInstance].connected;// YES;//![STRdio sharedRdio].loggedIn;
         
         CGFloat headerHeight = 66;
         CGFloat footerHeight;
@@ -291,7 +291,9 @@ static const CGFloat _cellHeight = 52;
         [container addSubview:button];
     }
     container.frame = [Util centeredAndBounded:container.frame.size inFrame:CGRectMake(0, 350, self.overlayView.frame.size.width, container.frame.size.height)];
-    //[self.overlayView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(closeOverlay:)] autorelease]];
+    UIView* tapTarget = [Util tapViewWithFrame:self.overlayView.frame target:self selector:@selector(closeOverlay:) andMessage:nil];
+    [self.overlayView addSubview:tapTarget];
+//    [self.overlayView addGestureRecognizer:[[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(closeOverlay:)] autorelease]];
     [self.overlayView addSubview:container];
     
     [self addSubview:self.overlayView];
@@ -317,7 +319,7 @@ static const CGFloat _cellHeight = 52;
 }
 
 + (UIColor*)backgroundColor {
-    return [UIColor colorWithWhite:0 alpha:.5];
+    return [UIColor colorWithWhite:0 alpha:.7];
 }
 
 - (void)changed:(id)notImportant {
