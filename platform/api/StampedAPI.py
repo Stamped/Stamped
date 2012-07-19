@@ -2090,6 +2090,7 @@ class StampedAPI(AStampedAPI):
         score = max(quality, quality * popularity)
 
         stats = EntityStats()
+        stats.entity_id = entity.entity_id
         stats.num_stamps = numStamps
         stats.popular_users = popularUserIds
         stats.popular_stamps = popularStampIds
