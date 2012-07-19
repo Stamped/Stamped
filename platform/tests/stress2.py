@@ -1081,7 +1081,7 @@ class Inbox(View):
         View.__init__(self, user)
         
         # Wait for the page to load
-        time.sleep(random.randrange(0.5, 2.5,0.1))
+        time.sleep(random.uniform(0.5, 2.5))
 
         self.stamps = []
         self.offset = 0
@@ -1164,7 +1164,7 @@ class StampDetail(View):
     
 
         # Wait for the page to load
-        time.sleep(random.randrange(0.5, 2.0,0.1))
+        time.sleep(random.uniform(0.5, 2.0))
 
         self.stamp = stamp
         self.stampId = stampId
@@ -1296,7 +1296,7 @@ class Profile(View):
         View.__init__(self, user)
     
         # Wait for the page to load
-        time.sleep(random.randrange(0.5, 2.0,0.1))
+        time.sleep(random.uniform(0.5, 2.0))
 
         self.userId = userId
         self.stamps = []
@@ -1352,7 +1352,7 @@ class EntityDetail(View):
         View.__init__(self, user)
     
         # Wait for the page to load
-        time.sleep(random.randrange(0.5, 2.0,0.1))
+        time.sleep(random.uniform(0.5, 2.0))
 
         self.entity = entity
         self.entityId = entityId
