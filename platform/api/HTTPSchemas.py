@@ -1422,9 +1422,9 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
-                entity.sources.netflix_instant_available_until is not None and
-                entity.sources.netflix_instant_available_until > datetime.now()):
+                entity.sources.netflix_is_instant_available and
+                (entity.sources.netflix_instant_available_until is None or
+                entity.sources.netflix_instant_available_until > datetime.now())):
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
@@ -1540,9 +1540,9 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
-                entity.sources.netflix_instant_available_until is not None and
-                entity.sources.netflix_instant_available_until > datetime.now()):
+                entity.sources.netflix_is_instant_available and
+                (entity.sources.netflix_instant_available_until is None or
+                entity.sources.netflix_instant_available_until > datetime.now())):
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
