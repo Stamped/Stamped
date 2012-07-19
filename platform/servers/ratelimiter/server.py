@@ -19,20 +19,32 @@ from RateLimiter2       import RateLimiter, Request
 from libs.ec2_utils     import get_stack
 
 from optparse           import OptionParser
+from db.mongodb.MongoRateLimiterLogCollection import MongoRateLimiterLogCollection
 
 
-limits_dir = os.path.dirname(RateLimiter2.__file__)
-config_load_interval = 60*5
-count = 0
+LIMITS_DIR = os.path.dirname(RateLimiter2.__file__)
+CONFIG_LOAD_INTERVAL = 60*3
+UPDATE_LOG_INTERVAL  = 60*3 # seconds to wait between updating the db with log of daily calls to each service
 
 
-def configLoaderLoop(service):
+
+
+def configLoaderLoop(service, interval):
     while True:
-        sleep(config_load_interval)
         try:
             service.loadLimiters()
         except:
             pass
+        sleep(interval)
+
+
+def updateLogLoop(service, interval):
+    while True:
+        try:
+            service.updateDbLog()
+        except:
+            pass
+        sleep(interval)
 
 class StampedRateLimiterService():
 
@@ -41,12 +53,25 @@ class StampedRateLimiterService():
         self.__throttle = throttle
         self.__limiters = {}
         self.__stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
-        self.loadLimiters()
-        self.__config_loader = gevent.spawn(configLoaderLoop, self)
+        self.__rllog = MongoRateLimiterLogCollection()
+        self.__config_loader_thread = gevent.spawn(configLoaderLoop, self, CONFIG_LOAD_INTERVAL)
+        self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
+
+    def updateDbLog(self):
+        callmap = dict()
+        for k,v in self.__limiters:
+            callmap[k] = v.day_calls
+        self.__rllog.updateLog(callmap)
+
+    def getDbLog(self):
+        callmap = self.__rllog.getLog()
+        for k,v in callmap:
+            if k in self.__limiters:
+                self.__limiters[k].day_calls = v
 
     def loadLimiters(self):
         filename = 'limits-%s.conf' % self.__stack_name
-        limits_path = '%s/%s' % (limits_dir, filename)
+        limits_path = '%s/%s' % (LIMITS_DIR, filename)
 
         print('checking config file for updates.  path: %s' % limits_path)
 
@@ -107,13 +132,10 @@ class StampedRateLimiterService():
 #            l.day_calls
 
     def handleRequest(self, service, priority, timeout, verb, url, body = {}, headers = {}):
-        global count
-        count += 1
         print ('calling exposed_request')
         if timeout is None:
             raise StampedInputError("Timeout period must be provided")
         request = Request(timeout, verb, url, body, headers)
-        request.number = count
 
         limiter = self.__limiters[service]
 

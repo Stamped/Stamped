@@ -45,6 +45,7 @@ class RateLimiterState(object):
         self.__request_fails += 1
         if self.__request_fails >= self.__fail_limit:
             self.__blackout_start = time()
+            self.__local_rlservice.getDbLog()    # update the local call log from the db
             logs.error('RPC service FAIL THRESHOLD REACHED')
 
     def _isBlackout(self):

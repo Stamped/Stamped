@@ -25,21 +25,11 @@ REQUEST_DUR_LOG_SIZE    = 10    # the size of the request duration log, which is
 REQUEST_DUR_CAP         = 10.0   # the cap for an individual request duration when determining the avg request duration
 
 
-
-
-#def schedulerLoop(limiter):
-#    limit = limiter.__limit
-#    period = limiter.period
-#    while True:
-#        calls = limiter.__limit_calls_remaining
-#        sleep(period)
-#
-#    sleep()
-
 class RLPriorityQueue(PriorityQueue):
     def qsize_priority(self, priority):
-        """Return the number of entries in the queue of equal or higher priority.  Assumes the entries are a sequence
-    where the first index is the priority as int"""
+        """ Return the number of entries in the queue of equal or higher priority.  Assumes the entries are a sequence
+            where the first index is the priority as int
+        """
         count = 0
         for item in self.queue:
             if item[0] <= priority:
@@ -85,7 +75,6 @@ class RequestLog():
 
 class Request():
     def __init__(self, timeout, verb, url, body, headers):
-        self.number = 0
         self.created = time()
         self.timeout = timeout
         self.verb = verb
@@ -95,7 +84,6 @@ class Request():
         self.log = RequestLog()
 
 def workerProcess(limit):
-
     period = limit.period
 
     while True:
@@ -106,6 +94,7 @@ def workerProcess(limit):
         else:
             gevent.sleep(period)
         sleep(0)
+
 
 class RateLimiter(object):
 
@@ -275,8 +264,7 @@ class RateLimiter(object):
         return calendar.timegm(date.timetuple())
 
     def _addDurationLog(self, elapsed):
-        """
-        Add the duration of the request to the request log for generating an average request time
+        """ Add the duration of the request to the request log for generating an average request time
         """
         self.__request_dur_log.append(elapsed)
         if len(self.__request_dur_log) > self.__request_dur_log_size:
@@ -301,7 +289,8 @@ class RateLimiter(object):
         return dur_sum / len(self.__request_dur_log)
 
     def _getExpectedWaitTime(self, now, priority=0):
-        # determine the longest wait time for all of the rate limits, given the number of items in the queue
+        ### determine the longest wait time for all of the rate limits, given the number of items in the queue
+        ###
         if self.limit is None or self.period is None:
             return 0
         rate_wait = self._getRateWaitTime(now)
