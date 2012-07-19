@@ -26,6 +26,7 @@ from api.db.mongodb.MongoAccountCollection              import MongoAccountColle
 from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection, MongoEntityStatsCollection
 from api.db.mongodb.MongoStampCollection                import MongoStampCollection, MongoStampStatsCollection
 from api.db.mongodb.MongoTodoCollection                 import MongoTodoCollection
+from api.db.mongodb.MongoGuideCollection                import MongoGuideCollection
 
 import gevent
 from gevent.queue import Queue, Empty
@@ -48,6 +49,7 @@ collections = [
     # Stats
     MongoEntityStatsCollection,
     MongoStampStatsCollection, 
+    MongoGuideCollection, 
 ]
 
 WORKER_COUNT = 10

@@ -7,23 +7,23 @@ __license__   = "TODO"
 
 import Globals
 import sys, datetime, logs, gevent, utils, math
-from api                        import Constants
+from api import Constants
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
-from resolve.iTunesSource       import iTunesSource
-from resolve.AmazonSource       import AmazonSource
-from resolve.RdioSource         import RdioSource
-from resolve.SpotifySource      import SpotifySource
-from resolve.TMDBSource         import TMDBSource
-from resolve.TheTVDBSource      import TheTVDBSource
+from resolve.AmazonSource import AmazonSource
+from resolve.EntityProxyContainer import EntityProxyContainer
+from resolve.EntityProxySource import EntityProxySource
+from resolve.FactualSource import FactualSource
 from resolve.GooglePlacesSource import GooglePlacesSource
-from resolve.FactualSource      import FactualSource
-from resolve.StampedSource      import StampedSource
-from resolve.EntityProxyContainer   import EntityProxyContainer
-from resolve.EntityProxySource  import EntityProxySource
-from api.Schemas                import PlaceEntity
-from search.SearchResultDeduper        import SearchResultDeduper
-from search.DataQualityUtils           import *
-from greenlet                   import GreenletExit
+from resolve.RdioSource import RdioSource
+from resolve.SpotifySource import SpotifySource
+from resolve.StampedSource import StampedSource
+from resolve.TMDBSource import TMDBSource
+from resolve.TheTVDBSource import TheTVDBSource
+from resolve.iTunesSource import iTunesSource
+from api.Schemas import PlaceEntity
+from search.SearchResultDeduper import SearchResultDeduper
+from search.DataQualityUtils import *
+from greenlet import GreenletExit
 
 def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
@@ -74,12 +74,12 @@ class EntitySearch(object):
         # iTunes. On the other hand, they're pretty dreadful -- no clear distinction between TV and movies, no
         # clear distinction between individual movies and box sets, etc.
         self.__registerSource(AmazonSource(), music=5, book=10)
-        self.__registerSource(GooglePlacesSource(), place=8)
         self.__registerSource(FactualSource(), place=8)
-        self.__registerSource(TMDBSource(), film=8)
-        self.__registerSource(TheTVDBSource(), film=8)
+        self.__registerSource(GooglePlacesSource(), place=8)
         self.__registerSource(RdioSource(), music=8)
         self.__registerSource(SpotifySource(), music=8)
+        self.__registerSource(TMDBSource(), film=8)
+        self.__registerSource(TheTVDBSource(), film=8)
 
     def __terminateWaiting(self, pool, start_time, category, resultsDict):
         logTimingData('IN TERMINATE WAITING')
