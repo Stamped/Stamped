@@ -3846,8 +3846,8 @@ class StampedAPI(AStampedAPI):
         scoredEntities.sort(key=lambda x: x[0], reverse=True)
 
         # Apply Lottery
-        if offset == 0 and guideRequest.section != "food":
-            scoredEntities = utils.weightedLottery(scoredEntities)
+        # if offset == 0 and guideRequest.section != "food":
+        #     scoredEntities = utils.weightedLottery(scoredEntities)
 
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))
