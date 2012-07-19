@@ -9,7 +9,7 @@ import Globals
 import keys.aws, logs, utils
 import os, time, urllib2
 
-from libs.ec2_utils         import is_ec2, is_prod_stack
+from libs.ec2_utils         import is_ec2, is_prod_stack, get_stack
 from errors                 import *
 from bson.objectid          import ObjectId
 from boto.sdb.connection    import SDBConnection
@@ -24,10 +24,9 @@ class SimpleDB(object):
         self.domains = {}
 
         if domain is None:
-            if is_prod_stack():
-                self.domain_name = 'stats_prod'
-            elif is_ec2():
-                self.domain_name = 'stats_dev'
+            stack = get_stack()
+            stack_name = str(stack['instance']['stack'])
+            self.domain_name = stack_name
         else:
             self.domain_name = domain
 

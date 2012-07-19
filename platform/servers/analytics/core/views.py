@@ -23,6 +23,7 @@ from servers.analytics.core.Enrichment      import getEnrichmentStats
 from servers.analytics.core.logsQuery       import logsQuery
 from servers.analytics.core.weeklyScore     import weeklyScore
 from servers.analytics.core.analytics_utils import *
+from libs.ec2_utils                         import get_stack
 
 from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
@@ -38,6 +39,11 @@ todo_collection = api._todoDB._collection
 
 conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 dash = Dashboard(api)
+
+if get_stack() is not None:
+    stack_name = str(get_stack()['instance']['stack'])
+else:
+    stack_name = None
 
 def index(request):
     
@@ -136,7 +142,7 @@ def enrichment(request):
 
 def latency(request):
     
-    query = logsQuery()
+    query = logsQuery(stack_name)
     
     class latencyForm(forms.Form):
         uri = forms.CharField(max_length=30)
@@ -192,6 +198,41 @@ def latency(request):
                  'is_blacklist': is_blacklist,
                  'form': form,
                  'customResults': customResults
+    })
+    return HttpResponse(t.render(c))
+
+def stress(request):
+    
+    query = logsQuery(stack_name)
+    
+    class qpsForm(forms.Form):
+        intervals =[("5","5 seconds"),("10","10 seconds"),("30","30 Seconds"),("60","60 Seconds"),("300","5 Minutes"),("600","10 Minutes")]
+        windows = [("30","30 seconds"),("60","60 Seconds"),("300","5 Minutes"),("600","10 Minutes"),("1800","30 Minutes"),("3600","1 Hour")]
+        window = forms.CharField(max_length=30,
+                                 widget=forms.Select(choices=windows))
+        interval = forms.CharField(max_length=30,
+                                   widget=forms.Select(choices=intervals))
+
+    qpsResults = {}
+    if request.method == 'POST': 
+        form = qpsForm(request.POST)
+        if form.is_valid():
+            window = int(form.cleaned_data['window'])
+            interval = int(form.cleaned_data['interval'])
+            
+            qpsResults = query.qpsReport(now(),interval,window)
+            
+            
+        else: form = latencyForm()
+    else: form = qpsForm()
+    
+        
+    t = loader.get_template('../html/stress.html')
+    c = Context({
+                 'hour': est().hour,
+                 'minute': est().minute,
+                 'form': form,
+                 'qpsResults': qpsResults.iteritems()
     })
     return HttpResponse(t.render(c))
 
