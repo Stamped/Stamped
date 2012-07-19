@@ -3749,6 +3749,7 @@ class StampedAPI(AStampedAPI):
                 lotterySize = min(limit, len(items))
                 lotteryItems = map(lambda x: (x.score,x), items[0:lotterySize])
                 items = utils.weightedLottery(lotteryItems)
+                items = map(lambda x: x[1], items)
                 
         # Entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3849,8 +3850,8 @@ class StampedAPI(AStampedAPI):
         scoredEntities = scoredEntities[:limit]
 
         # Apply Lottery
-        # if offset == 0 and guideRequest.section != "food":
-        #     scoredEntities = utils.weightedLottery(scoredEntities)
+        if offset == 0 and guideRequest.section != "food":
+            scoredEntities = utils.weightedLottery(scoredEntities)
 
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))

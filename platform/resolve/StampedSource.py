@@ -33,7 +33,7 @@ from api.Entity                     import buildEntity
 # TODO GET RID OF SEARCH IMPORTS
 from search.SearchResult import SearchResult
 from search.ScoringUtils import *
-from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection
 
 from libs.SearchUtils import formatSearchQuery
 
