@@ -1961,7 +1961,7 @@ class LoggedOutUser(User):
 
     def __init__(self):
         User.__init__(self)
-        self._userWaitSpeed = 0.5
+        self._userWaitSpeed = 0 # 0.5
         self._userSessionLength = 60 # 200 + (random.random() * 200)
         
         self.setAction('inbox', self._viewInbox)
@@ -1991,7 +1991,7 @@ class LoggedInUser(User):
 
     def __init__(self):
         User.__init__(self)
-        self._userWaitSpeed = 1.0
+        self._userWaitSpeed = 0 # 1.0
         self._userSessionLength = 60 #200 + (random.random() * 200)
 
         self.token = None
@@ -2043,7 +2043,7 @@ class ExistingUser(LoggedInUser):
 
     def __init__(self, login, password):
         LoggedInUser.__init__(self)
-        self._userWaitSpeed = 1.0
+        self._userWaitSpeed = 0 # 1.0
         self._userSessionLength = 60 #200 + (random.random() * 200)
 
         self._login = login
@@ -2073,7 +2073,7 @@ class NewUser(LoggedInUser):
 
     def __init__(self):
         LoggedInUser.__init__(self)
-        self._userWaitSpeed = 1.3
+        self._userWaitSpeed = 0 # 1.3
         self._userSessionLength = 60 #200 + (random.random() * 200)
 
     def load(self):
