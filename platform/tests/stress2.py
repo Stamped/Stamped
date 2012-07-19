@@ -2091,7 +2091,7 @@ class NewUser(LoggedInUser):
 
         # Customize stamp
         time.sleep(random.randint(3, 20) * self._userWaitSpeed)
-        _post_account_customize_stamp(self.token, '123456', '123456')
+        _post_account_customize_stamp(self.token, '123456', '654321')
 
         # Get suggested
         _get_users_suggested(token=self.token)
