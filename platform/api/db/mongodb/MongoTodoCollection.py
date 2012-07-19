@@ -24,7 +24,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         ATodoDB.__init__(self)
 
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING),\
-            ('user_id', pymongo.ASCENDING)])
+            ('user_id', pymongo.ASCENDING), ('_id', pymongo.DESCENDING)])
 
         self._collection.ensure_index([('user_id', pymongo.ASCENDING),\
             ('timestamp.created', pymongo.DESCENDING)])
@@ -55,7 +55,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=False, api=None):
         """
         Check the raw todo to verify the following things:
 
@@ -210,8 +210,9 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             raise Exception
 
     def getTodo(self, userId, entityId):
-        document = self._collection.find_one(\
-                {'entity.entity_id': entityId, 'user_id': userId})
+        document = self._collection.find_one({'entity.entity_id': entityId, 'user_id': userId})
+        if document is None:
+            raise StampedDocumentNotFoundError("Unable to find document (userId=%s, entityId=%s)" % (userId, entityId))
         todo = self._convertFromMongo(document)
         return todo
 
@@ -243,7 +244,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
     def getTodosFromUsersForEntity(self, userIds, entityId, limit=10):
         ### TODO: Convert to index collection
         query = { 'entity.entity_id' : entityId, 'user_id' : { '$in' : userIds } }
-        documents = self._collection.find(query, fields=['user_id']).sort('$natural', pymongo.DESCENDING).limit(limit)
+        documents = self._collection.find(query, fields=['user_id']).limit(limit)
         return map(lambda x: x['user_id'], documents)
 
     def updateTodoEntity(self, todoId, entity):

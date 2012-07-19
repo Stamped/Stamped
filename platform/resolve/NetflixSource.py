@@ -169,8 +169,6 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
             directors = filter(lambda link : link['title'] ==  u'directors',  self._titleObj['link'])[0]['people']['link']
             # api returns either a dict or a list of dicts depending on len > 1
             if isinstance(directors, list):
-                for dir in directors:
-                    print("\n" + dir['title'])
                 return [
                     {
                     'name':         entry['title'],
@@ -267,13 +265,6 @@ class NetflixSource(GenericSource):
     def __netflix(self):
         return globalNetflix()
 
-
-#    def entityProxyFromKey(self, key, **kwargs):
-#        try:
-#            return
-#        except KeyError:
-#            raise
-
     def getId(self, entity):
         idField = getattr(entity.sources, self.idField)
         try:
@@ -292,13 +283,6 @@ class NetflixSource(GenericSource):
                 return NetflixTVShow(titleObj)
         except KeyError:
             logs.warning('Unable to find Netflix item for key: %s' % netflix_id)
-
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.netflix_is_instant_available = proxy.is_instant_available
-        entity.sources.netflix_instant_available_until = proxy.instant_available_until
-        return True
-
 
     def matchSource(self, query):
         if query.isType('movie'):

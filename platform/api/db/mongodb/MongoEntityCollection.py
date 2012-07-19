@@ -10,23 +10,24 @@ import time
 from logs       import report
 
 try:
-    from datetime                       import datetime
+    import libs.ec2_utils
+
+    from datetime                       import datetime, timedelta
     from utils                          import lazyProperty, getHeadRequest, getWebImageSize
     from bson.objectid                  import ObjectId
 
     from api.Schemas                        import *
     from api.Entity                         import getSimplifiedTitle, buildEntity
 
-    from api.db.mongodb.AMongoCollection               import AMongoCollection
-    from api.db.mongodb.MongoEntitySeedCollection      import MongoEntitySeedCollection
-    from api.db.mongodb.MongoMenuCollection            import MongoMenuCollection
-    from api.AEntityDB                      import AEntityDB
-    from difflib                        import SequenceMatcher
-    from api.ADecorationDB                  import ADecorationDB
-    from errors                         import StampedUnavailableError
-    from logs                           import log
+    from api.db.mongodb.AMongoCollection            import AMongoCollection
+    from api.db.mongodb.MongoMenuCollection         import MongoMenuCollection
+    from api.AEntityDB                              import AEntityDB
+    from difflib                                    import SequenceMatcher
+    from api.ADecorationDB                          import ADecorationDB
+    from errors                                     import StampedUnavailableError
+    from logs                                       import log
 
-    from libs.SearchUtils               import generateSearchTokens
+    from libs.SearchUtils                           import generateSearchTokens
 except:
     report()
     raise
@@ -55,6 +56,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     @lazyProperty
     def seed_collection(self):
         return MongoEntitySeedCollection()
+
+    @lazyProperty
+    def entity_stats(self):
+        return MongoEntityStatsCollection()
 
     def _convertFromMongo(self, document, mini=False):
         if document is None:
@@ -103,7 +108,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=False, api=None):
         """
         Check the entity to verify the following things:
 
@@ -127,8 +132,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         
         assert document is not None
 
+        resolve = False
         modified = False
-        postUpdateErrors = []
 
         # Check if old schema version
         if 'schema_version' not in document or 'search_tokens' not in document:
@@ -183,16 +188,31 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         if entity.sources is None or len(entity.sources.dataExport().keys()) == 0:
             raise StampedInvalidSourcesError("%s: Missing sources" % key)
 
-        # Source-specific checks
+        # iTunes: Verify 'url' exists
         if entity.sources.itunes_id is not None and entity.sources.itunes_url is None:
-            msg = "%s: Missing iTunes URL" % entity.entity_id
-            if repair and entity.sources.itunes_timestamp is not None:
+            msg = "%s: Missing iTunes URL" % key
+            if repair:
                 logs.info(msg)
                 del(entity.sources.itunes_timestamp)
+                resolve = True
                 modified = True
-                postUpdateErrors.append(StampedItunesSourceError(msg))
             else:
-                raise StampedItunesSourceError(msg)
+                raise StampedDataError(msg)
+
+        # iTunes: Verify 'url' points to 'http://itunes.apple.com'
+        elif entity.sources.itunes_id is not None and entity.sources.itunes_url is not None:
+            if not entity.sources.itunes_url.startswith('http://itunes.apple.com'):
+                msg = "%s: Invalid iTunes URL" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.sources.itunes_timestamp)
+                    del(entity.sources.itunes_url)
+                    resolve = True
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+
+        # Google: Verify 'reference' exists
         if entity.sources.googleplaces_id is not None and entity.sources.googleplaces_reference is None:
             raise StampedGooglePlacesSourceError("%s: Missing Google Places reference" % entity.entity_id)
 
@@ -274,11 +294,42 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 else:
                     del(entity.images)
 
+        # Check that any existing links are valid
+        def _checkLink(field):
+            if hasattr(entity, field) and getattr(entity, field) is not None:
+                valid = []
+                for item in getattr(entity, field):
+                    if hasattr(item, 'entity_id') and item.entity_id is not None:
+                        if self._collection.find({'_id': self._getObjectIdFromString(item.entity_id)}).count() == 0:
+                            msg = "%s: Invalid link within %s (%s)" % (key, field, item.entity_id)
+                            if repair:
+                                logs.info(msg)
+                                del(item.entity_id)
+                                modified = True
+                            else:
+                                raise StampedDataError(msg)
+                    valid.append(item)
+                setattr(entity, field, valid)
+
+        linkedFields = ['artists', 'albums', 'tracks', 'directors', 'movies', 'books', 'authors', 'cast']
+        for field in linkedFields:
+            _checkLink(field)
+
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(entity))
 
-        if len(postUpdateErrors) > 0:
-            raise postUpdateErrors[0]
+        if resolve and repair:
+            msg = "%s: Re-resolve entity" % key
+            # Only run this on EC2 (for now)
+            if api is not None:
+                if libs.ec2_utils.is_ec2():
+                    logs.info(msg)
+                    api.mergeEntityId(str(key))
+            else:
+                raise StampedDataError(msg)
+
+        # Check integrity for stats
+        self.entity_stats.checkIntegrity(key, repair=repair, api=api)
 
         return True
 
@@ -369,4 +420,168 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def updateDecoration(self, name, value):
         if name == 'menu':
             self.__menu_db.updateMenu(value)
+
+
+
+class MongoEntityStatsCollection(AMongoCollection):
+    
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='entitystats', primary_key='entity_id', obj=EntityStats)
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=False, api=None):
+        """
+        Check an entity's stats to verify the following things:
+
+        - Entity still exists 
+
+        - Stats are not out of date 
+
+        - Length of popular stamps equals length of popular users
+
+        """
+
+        regenerate = False
+        document = None
+
+        # Remove stat if entity no longer exists
+        if self._collection._database['entities'].find({'_id': key}).count() == 0:
+            msg = "%s: Entity no longer exists"
+            if repair:
+                logs.info(msg)
+                self._removeMongoDocument(key)
+                return True
+            else:
+                raise StampedDataError(msg)
+        
+        # Verify stat exists
+        try:
+            document = self._getMongoDocumentFromId(key)
+        except StampedDocumentNotFoundError:
+            msg = "%s: Stat not found" % key
+            if repair:
+                logs.info(msg)
+                regenerate = True
+            else:
+                raise StampedDataError(msg)
+
+        # Check if old schema version
+        if document is not None and 'timestamp' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                regenerate = True
+            else:
+                raise StampedDataError(msg)
+
+        # Check if stats are stale
+        elif document is not None and 'timestamp' in document:
+            generated = document['timestamp']['generated']
+            if generated < datetime.utcnow() - timedelta(days=2):
+                msg = "%s: Stale stats" % key
+                if repair:
+                    logs.info(msg)
+                    regenerate = True 
+                else:
+                    raise StampedDataError(msg)
+
+        if document is not None and 'popular_users' in document and 'popular_stamps' in document:
+            if len(document['popular_users']) != len(document['popular_stamps']):
+                msg = "%s: Popular users != Popular stamps" % key 
+                if repair:
+                    logs.info(msg)
+                    regenerate = True 
+                else:
+                    raise StampedDataError(msg)
+
+        # Rebuild
+        if regenerate and repair:
+            if api is not None:
+                api.updateEntityStatsAsync(str(key))
+            else:
+                raise Exception("%s: API required to regenerate stats" % key)
+
+        return True
+    
+    ### PUBLIC
+    
+    def addEntityStats(self, stats):
+        if stats.timestamp is None:
+            stats.timestamp = StatTimestamp()
+        stats.timestamp.generated = datetime.utcnow()
+
+        return self._addObject(stats)
+    
+    def getEntityStats(self, entityId):
+        documentId = self._getObjectIdFromString(entityId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
+
+    def getStatsForEntities(self, entityIds):
+        documentIds = map(self._getObjectIdFromString, entityIds)
+        documents = self._getMongoDocumentsFromIds(documentIds)
+        return map(self._convertFromMongo, documents)
+    
+    def saveEntityStats(self, stats):
+        if stats.timestamp is None:
+            stats.timestamp = StatTimestamp()
+        stats.timestamp.generated = datetime.utcnow()
+
+        return self.update(stats)
+    
+    def removeEntityStats(self, entityId):
+        documentId = self._getObjectIdFromString(entityId)
+        return self._removeMongoDocument(documentId)
+
+    def updateNumStamps(self, entityId, numStamps):
+        self._collection.update(
+            { '_id' : self._getObjectIdFromString(entityId) }, 
+            { '$set' : { 'num_stamps' : numStamps } }
+        )
+        return True
+
+    def setPopular(self, entityId, userIds, stampIds):
+        self._collection.update(
+            { '_id' : self._getObjectIdFromString(entityId) }, 
+            { '$set' : { 'popular_users' : userIds, 'popular_stamps' : stampIds } }
+        )
+        return True
+
+
+class MongoEntitySeedCollection(AMongoCollection, AEntityDB):
+    
+    def __init__(self, collection='entities'):
+        AMongoCollection.__init__(self, collection='seedentities', primary_key='entity_id', overflow=True)
+        AEntityDB.__init__(self)
+    
+    def _convertFromMongo(self, document):
+        if document is None:
+            return None
+
+        if '_id' in document and self._primary_key is not None:
+            document[self._primary_key] = self._getStringFromObjectId(document['_id'])
+            del(document['_id'])
+
+        document.pop('titlel')
+
+        entity = buildEntity(document)
+        
+        return entity
+    
+    def _convertToMongo(self, entity):
+        if entity.entity_id is not None and entity.entity_id.startswith('T_'):
+            del entity.entity_id
+        document = AMongoCollection._convertToMongo(self, entity)
+        if document is None:
+            return None
+        if 'title' in document:
+            document['titlel'] = getSimplifiedTitle(document['title'])
+        return document
+    
+    ### PUBLIC
+    
+    def addEntity(self, entity):
+        return self._addObject(entity)
+
 

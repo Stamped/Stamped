@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+    {% block pre_head %}
+    <head>
+        {% endblock pre_head %}
+        
+        {% block head %}
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        
+        <title>Stamped</title>
+        
+        <meta name="description"        content="Stamped is a new way to recommend only 
+                                                 what you like best -- restaurants, books, 
+                                                 movies, music and more.">
+        
+        <meta name="author"             content="Stamped, Inc.">
+        <meta name="copyright"          content="Stamped, Inc.">
+        <meta name="robots"             content="index,follow">
+        <meta name="viewport"           content="width=device-width, initial-scale=0.36">
+        <meta name="application-name"   content="Stamped">
+        
+        <!-- properties -->
+        <meta property="og:image"       content="{{ STATIC_URL }}img/stamped-logo.png"/>
+        <meta property="og:title"       content="Stamped"/>
+        <meta property="og:site_name"   content="Stamped"/>
+        <meta property="og:type"        content="website"/>
+        
+        <!-- icons -->
+        <link rel="shortcut icon"       href="{{ STATIC_URL }}img/favicon.ico"/>
+        <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
+        
+        <!-- styles -->
+        <link rel="stylesheet"          href="{{ STATIC_URL }}css/styles.css">
+         
+        <!-- scripts loaded pre-document-body (most are loaded post-document-body) -->
+        <script src="{{ STATIC_URL }}js/libs/modernizr-2.5.3.min.js"></script>
+        {% endblock head %}
+        
+        {% block post_head %}
+    </head>
+    {% endblock post_head %}
+    
+    {% block pre_body %}
+    <body>
+        {% endblock pre_body %}
+        {% block header %}
+        <div class="wrap flood">
+            <a href="/" class="brand replaced">Stamped</a>
+            <div class="card">
+                <div class="top-wave"></div>
+                {% endblock header %}
+                
+                {% block pre_main %}
+                <div role="main" class="inner">
+                {% endblock pre_main %}
+                
+                {% block main %}{% endblock main %}
+                
+                {% block post_main %}
+                </div> <!-- /main -->
+                <div class="bottom-wave"></div>
+            </div> <!-- /card -->
+            {% endblock post_main %}
+            
+            {% block pre_footer %}
+            <footer>
+                {% endblock pre_footer %}
+                
+                {% block footer %}
+                <a href="/about">About Us</a>
+                <a href="/faq">FAQ</a>
+                <a href="http://help.stamped.com">Help</a>
+                <a href="http://blog.stamped.com">Blog</a>
+                <a href="/terms-of-service">Terms of Service</a>
+                <a href="/privacy">Privacy Policy</a>
+                <span class="copyright">
+                    <a href="http://nytm.org/made/" class="made">Made in NY</a>
+                    &copy;2012 Stamped, Inc.
+                </span>
+                {% endblock footer %}
+                
+                {% block post_footer %}
+            </footer>
+            {% endblock post_footer %}
+        </div> <!-- /home -->
+        
+        <!-- scripts loaded post-document-body -->
+        {% block pre_scripts %}
+        <div id="scripts">
+            {% endblock pre_scripts %}
+            
+            {% block scripts %}
+            <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+            
+            <script src="{{ STATIC_URL }}js/script.js"></script>
+            <script src="{{ STATIC_URL }}js/libs/underscore{% if IS_PROD %}.min{% endif %}.js"></script>
+            <script src="{{ STATIC_URL }}js/libs/backbone{% if IS_PROD %}.min{% endif %}.js"></script>
+            
+            <script>
+                var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];
+                    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+                    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+                    s.parentNode.insertBefore(g,s)}(document,'script'));
+                
+                {{ STAMPED_PRELOAD_JS|safe }}
+            </script>
+            {% endblock scripts %}
+            
+            {% block post_scripts %}
+        </div> <!-- /scripts -->
+        {% endblock post_scripts %}
+        
+        {% block post_body %}
+    </body>
+    {% endblock post_body %}
+</html>
+

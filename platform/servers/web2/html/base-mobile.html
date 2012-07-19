@@ -15,7 +15,11 @@
         <meta name="author"             content="Stamped, Inc.">
         <meta name="copyright"          content="Stamped, Inc.">
         <meta name="robots"             content="index,follow">
-        <meta name="viewport"           content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+        
+        {% block viewport %}
+            <meta name="viewport"       content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+        {% endblock viewport %}
+        
         <meta name="application-name"   content="Stamped">
         
         <!-- icons -->

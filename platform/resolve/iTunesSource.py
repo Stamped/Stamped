@@ -446,7 +446,7 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
     def release_date(self):
         # iTunes movie release dates are LIES. If there's something in a title in parens, we can trust it. Otherwise,
         # throw it out.
-        year = getMovieReleaseYearFromTitle(self.raw_name)
+        year = getFilmReleaseYearFromTitle(self.raw_name)
         if year is not None:
             return datetime.datetime(year, 1, 1)
         else:
@@ -528,7 +528,11 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
 
     @lazyProperty
     def release_date(self):
-        return None
+        year = getFilmReleaseYearFromTitle(self.raw_name)
+        if year is not None:
+            return datetime.datetime(year, 1, 1)
+        else:
+            return None
 
     @lazyProperty
     def seasons(self):
@@ -684,18 +688,19 @@ class iTunesSource(GenericSource):
     def __init__(self):
         GenericSource.__init__(self, 'itunes',
             groups=[
-                'mpaa_rating',
-                'genres',
-                'desc',
-                'artists',
                 'albums',
-                'tracks',
-                'release_date',
-                'publishers',
+                'artists',
                 'authors',
+                'desc',
+                'directors',
+                'genres',
                 'images',
-                'screenshots',
                 'length',
+                'mpaa_rating',
+                'publishers',
+                'release_date',
+                'screenshots',
+                'tracks',
             ],
             kinds=[
                 'person',
@@ -813,15 +818,6 @@ class iTunesSource(GenericSource):
             logs.warning('iTunes lookup failed (%s)' % itunesId)
             raise
         return None
-
-    def enrichEntityWithEntityProxy(self, proxy, entity, controller=None, decorations=None, timestamps=None):
-        GenericSource.enrichEntityWithEntityProxy(self, proxy, entity, controller, decorations, timestamps)
-        entity.sources.itunes_id = proxy.key
-        entity.sources.itunes_url = proxy.url
-
-        if hasattr(proxy, 'preview') and proxy.preview is not None:
-            entity.sources.itunes_preview = proxy.preview
-        return True
 
     def matchSource(self, query):
         if query.kind == 'person':

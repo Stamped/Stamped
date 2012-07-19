@@ -44,9 +44,9 @@ class AmazonError(Exception):
     pass
 
 class AmazonCall(object):
-    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None, \
-            AssociateTag=None, Operation=None, Style=None, Version=None, \
-            Region=None):
+    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
+            AssociateTag=None, Operation=None, Style=None, Version=None,
+            Region=None, Timeout=None):
         self.AWSAccessKeyId = AWSAccessKeyId
         self.AWSSecretAccessKey = AWSSecretAccessKey
         self.Operation = Operation
@@ -54,6 +54,7 @@ class AmazonCall(object):
         self.Version = Version
         self.Style = Style
         self.Region = Region
+        self.Timeout = Timeout
 
     def signed_request(self):
         pass
@@ -62,9 +63,9 @@ class AmazonCall(object):
         try:
             return object.__getattr__(self, k)
         except:
-            return AmazonCall(self.AWSAccessKeyId, self.AWSSecretAccessKey, \
+            return AmazonCall(self.AWSAccessKeyId, self.AWSSecretAccessKey,
                     self.AssociateTag, Operation=k, Version=self.Version,
-                    Style=self.Style, Region=self.Region)
+                    Style=self.Style, Region=self.Region, Timeout=self.Timeout)
 
     def __call__(self, **kwargs):
         kwargs['Timestamp'] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -108,11 +109,11 @@ class AmazonCall(object):
         return response_text
 
 class Amazon(AmazonCall):
-    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None, \
-            AssociateTag=None, Operation=None, Style=None, \
-            Version="2011-08-01", Region="US"):
-        AmazonCall.__init__(self, AWSAccessKeyId, AWSSecretAccessKey, \
-            AssociateTag, Operation, Version=Version, Region=Region, Style=Style)
+    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
+            AssociateTag=None, Operation=None, Style=None,
+            Version="2011-08-01", Region="US", Timeout=None):
+        AmazonCall.__init__(self, AWSAccessKeyId, AWSSecretAccessKey,
+            AssociateTag, Operation, Version=Version, Region=Region, Timeout=Timeout, Style=Style)
 
 __all__ = ["Amazon", "AmazonError"]
 

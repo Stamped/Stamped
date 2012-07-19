@@ -1,0 +1,46 @@
+{% load stamped_tags %}
+
+{% block pre-popup %}
+<div class="popup popup-large popup-signup">
+    <a href="/" class="stamped-logo replaced">Stamped</a>
+    
+    <div class="ribbon-wrapper">
+        <div class="ribbon-bottom"></div>
+    </div>
+    {% endblock pre-popup %}
+    
+    {% block popup-header %}
+    <div class="popup-header clearfix">
+        <div class="pronounced-title">Get the app to get started</div>
+    </div>
+    {% endblock popup-header %}
+    
+    {% block popup-body %}
+    <div class="popup-body">
+        <p class="learn-more">or <a href="/">learn more</a>.</p>
+        <p>Text a download link to your iPhone:</p>
+        
+        <form class="sms-form">
+            <div class="sms clearfix">
+                <input name="phone_number" class="phone-number" value="555-555-5555" maxlength="14"></input> <button type="submit" class="send-button" action="/download-app" method="POST"></button>
+            </div>
+        </form>
+        
+        <div class="or">
+            <span>or</span>
+        </div>
+        
+        <p>using your phone's browser, simply visit</p>
+        <p><a href="/download" class="active-link">stamped.com/download</a></p>
+    </div>
+    {% endblock popup-body %}
+    
+    {% block post-popup %}
+    <div class="ribbon-wrapper">
+        <div class="ribbon-top"></div>
+    </div>
+    
+    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
+</div>
+{% endblock post-popup %}
+

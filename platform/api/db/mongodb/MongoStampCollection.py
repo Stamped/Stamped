@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import bson, logs, pprint, pymongo, re
 
-from datetime                           import datetime
+from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
 from api.Schemas                        import *
 from api.Entity                             import buildEntity
@@ -36,10 +36,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         self._collection.ensure_index([('timestamp.created', pymongo.ASCENDING)])
         self._collection.ensure_index([('timestamp.stamped', pymongo.ASCENDING)])
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING)])
-        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
-                                        ('entity.entity_id', pymongo.ASCENDING)])
-        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), \
-                                        ('stats.stamp_num', pymongo.ASCENDING)])
+        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), ('entity.entity_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), ('stats.stamp_num', pymongo.ASCENDING)])
+        self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), ('credits.user.user_id', pymongo.ASCENDING)])
+
 
     def _upgradeDocument(self, document):
         if document is None:
@@ -128,7 +128,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=False, api=None):
         document = self._getMongoDocumentFromId(key)
         
         assert document is not None
@@ -231,6 +231,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(stamp))
 
+        # Check integrity for stats
+        self.stamp_stats.checkIntegrity(key, repair=repair, api=api)
+
         return True
     
     ### PUBLIC
@@ -266,6 +269,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     @lazyProperty
     def user_likes_history_collection(self):
         return MongoUserLikesHistoryCollection()
+
+    @lazyProperty
+    def stamp_stats(self):
+        return MongoStampStatsCollection()
     
     def addStamp(self, stamp):
         return self._addObject(stamp)
@@ -399,6 +406,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                  '$set': {'timestamp.modified': datetime.utcnow()}},
                 upsert=True)
 
+    def updateStampOGActionId(self, stampId, og_action_id):
+        self._collection.update({'_id': self._getObjectIdFromString(stampId)}, {'$set': {'og_action_id': og_action_id}})
+
     def updateStampEntity(self, stampId, entity):
         self._collection.update({'_id': self._getObjectIdFromString(stampId)}, {'$set': {'entity': entity.dataExport()}})
 
@@ -491,7 +501,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 'entity.entity_id'      : entityId,
                 'credits.user.user_id'  : userId,
             }
-            documents = self._collection.find(query).sort('$natural', pymongo.DESCENDING).limit(limit)
+            documents = self._collection.find(query).limit(limit)
             return map(self._convertFromMongo, documents)
         except Exception:
             return []
@@ -567,4 +577,195 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         result = self._removeMongoDocuments(documentIds)
         
         return result
+
+
+class MongoStampStatsCollection(AMongoCollection):
+    
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='stampstats', primary_key='stamp_id', obj=StampStats)
+    
+        self._collection.ensure_index([ ('score', pymongo.DESCENDING) ])
+        self._collection.ensure_index([ ('last_stamped', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('lat', pymongo.ASCENDING), ('lng', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING) ])
+
+    ### INTEGRITY
+
+    def checkIntegrity(self, key, repair=False, api=None):
+        """
+        Check a stamp's stats to verify the following things:
+
+        - Stamp still exists 
+
+        - Stats are not out of date 
+
+        """
+
+        regenerate = False
+        document = None
+
+        # Remove stat if stamp no longer exists
+        if self._collection._database['stamps'].find({'_id': key}).count() == 0:
+            msg = "%s: Stamp no longer exists"
+            if repair:
+                logs.info(msg)
+                self._removeMongoDocument(key)
+                return True
+            else:
+                raise StampedDataError(msg)
+        
+        # Verify stat exists
+        try:
+            document = self._getMongoDocumentFromId(key)
+        except StampedDocumentNotFoundError:
+            msg = "%s: Stat not found" % key
+            if repair:
+                logs.info(msg)
+                regenerate = True
+            else:
+                raise StampedDataError(msg)
+
+        # Check if old schema version
+        if document is not None and 'timestamp' not in document:
+            msg = "%s: Old schema" % key
+            if repair:
+                logs.info(msg)
+                regenerate = True
+            else:
+                raise StampedDataError(msg)
+
+        # Check if stats are stale
+        elif document is not None and 'timestamp' in document:
+            generated = document['timestamp']['generated']
+            if generated < datetime.utcnow() - timedelta(days=2):
+                msg = "%s: Stale stats" % key
+                if repair:
+                    logs.info(msg)
+                    regenerate = True 
+                else:
+                    raise StampedDataError(msg)
+
+        # Rebuild
+        if regenerate and repair:
+            if api is not None:
+                api.updateStampStatsAsync(str(key))
+            else:
+                raise Exception("%s: API required to regenerate stats" % key)
+
+        return True
+
+    ### PUBLIC
+    
+    def addStampStats(self, stats):
+        if stats.timestamp is None:
+            stats.timestamp = StatTimestamp()
+        stats.timestamp.generated = datetime.utcnow()
+
+        return self._addObject(stats)
+    
+    def getStampStats(self, stampId):
+        documentId = self._getObjectIdFromString(stampId)
+        document = self._getMongoDocumentFromId(documentId)
+        return self._convertFromMongo(document)
+
+    def getStatsForStamps(self, stampIds):
+        documentIds = map(self._getObjectIdFromString, stampIds)
+        documents = self._getMongoDocumentsFromIds(documentIds)
+        return map(self._convertFromMongo, documents)
+    
+    def updateStampStats(self, stats):
+        if stats.timestamp is None:
+            stats.timestamp = StatTimestamp()
+        stats.timestamp.generated = datetime.utcnow()
+
+        return self.update(stats)
+    
+    def removeStampStats(self, stampId):
+        documentId = self._getObjectIdFromString(stampId)
+        return self._removeMongoDocument(stampId)
+    
+    def removeStatsForStamps(self, stampIds):
+        documentIds = map(self._getObjectIdFromString, stampIds)
+        return self._removeMongoDocuments(documentIds)
+
+    def _buildPopularQuery(self, **kwargs):
+        kinds       = kwargs.pop('kinds', None)
+        types       = kwargs.pop('types', None)
+        since       = kwargs.pop('since', None)
+        before      = kwargs.pop('before', None)
+        viewport    = kwargs.pop('viewport', None)
+        entityId    = kwargs.pop('entityId', None)
+        minScore    = kwargs.pop('minScore', None)
+
+        query = {}
+
+        if kinds is not None:
+            query['kinds'] = {'$in': list(kinds)}
+
+        if types is not None:
+            query['types'] = {'$in': list(types)}
+
+        if viewport is not None:
+            query["lat"] = {
+                "$gte" : viewport.lower_right.lat, 
+                "$lte" : viewport.upper_left.lat, 
+            }
+            
+            if viewport.upper_left.lng <= viewport.lower_right.lng:
+                query["lng"] = { 
+                    "$gte" : viewport.upper_left.lng, 
+                    "$lte" : viewport.lower_right.lng, 
+                }
+            else:
+                # handle special case where the viewport crosses the +180 / -180 mark
+                query["$or"] = [{
+                        "lng" : {
+                            "$gte" : viewport.upper_left.lng, 
+                        }, 
+                    }, 
+                    {
+                        "lng" : {
+                            "$lte" : viewport.lower_right.lng, 
+                        }, 
+                    }, 
+                ]
+
+        if entityId is not None:
+            query['entity_id'] = entityId
+
+        if since is not None and before is not None:
+            query['last_stamped'] = {'$gte': since, '$lte': before}
+        elif since is not None:
+            query['last_stamped'] = {'$gte': since}
+        elif before is not None:
+            query['last_stamped'] = {'$lte': before}
+
+        if minScore is not None:
+            query['score'] = {'$gte' : minScore}
+
+        return query
+
+    def getPopularStampIds(self, **kwargs):
+        limit = kwargs.pop('limit', 0)
+        
+        query = self._buildPopularQuery(**kwargs)
+
+        documents = self._collection.find(query, fields=['_id']) \
+                        .sort([('score', pymongo.DESCENDING)]) \
+                        .limit(limit)
+
+        return map(lambda x: self._getStringFromObjectId(x['_id']), documents)
+
+    def getPopularStampStats(self, **kwargs):
+        limit = kwargs.pop('limit', 0)
+
+        query = self._buildPopularQuery(**kwargs)
+
+        documents = self._collection.find(query) \
+                        .sort([('score', pymongo.DESCENDING)]) \
+                        .limit(limit)
+
+        return map(self._convertFromMongo, documents)
 

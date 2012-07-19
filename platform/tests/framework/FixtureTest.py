@@ -30,7 +30,7 @@ def defaultFixtureFilename(testCaseInstance, testFn, fixtureType):
         testClassFilename = sys.argv[0]
     else:
         testClassModule = sys.modules[testClassModuleName]
-        testClassFilename = os.path.abspath(sys.modules[testClassModule].__file__)
+        testClassFilename = os.path.abspath(testClassModule.__file__)
     fixtureFilenameBase = testClassFilename[:testClassFilename.rfind(".")]
     funcName = testFn.func_name
     result = '%s.%s.%s.json' % (fixtureFilenameBase, funcName, fixtureType)

@@ -23,8 +23,8 @@ from api.db.mongodb.MongoUserTodosEntitiesCollection    import MongoUserTodosEnt
 from api.db.mongodb.MongoStampCommentsCollection        import MongoStampCommentsCollection
 
 from api.db.mongodb.MongoAccountCollection              import MongoAccountCollection
-from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection
-from api.db.mongodb.MongoStampCollection                import MongoStampCollection
+from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection, MongoEntityStatsCollection
+from api.db.mongodb.MongoStampCollection                import MongoStampCollection, MongoStampStatsCollection
 from api.db.mongodb.MongoTodoCollection                 import MongoTodoCollection
 
 import gevent
@@ -44,6 +44,10 @@ collections = [
     MongoEntityCollection,
     MongoStampCollection,
     MongoTodoCollection,
+
+    # Stats
+    MongoEntityStatsCollection,
+    MongoStampStatsCollection, 
 ]
 
 WORKER_COUNT = 10
@@ -61,6 +65,9 @@ def parseCommandLine():
     
     parser.add_option("-n", "--noop", default=False, 
         action="store_true", help="noop mode (don't apply fixes)")
+    
+    parser.add_option("-e", "--email", default=False, 
+        action="store_true", help="send result email")
     
     parser.add_option("-c", "--check", default=None, 
         action="store", help="optionally filter checks based off of their name")
@@ -82,28 +89,24 @@ def parseCommandLine():
 
 documentIds = Queue(maxsize=10)
 
-def worker(db, collection, stats, options):
+def worker(db, collection, api, stats, options):
     try:
         while True:
             documentId = documentIds.get(timeout=2) # decrements queue size by 1
             
             try:
-                result = db.checkIntegrity(documentId, repair=(not options.noop))
+                result = db.checkIntegrity(documentId, repair=(not options.noop), api=api)
                 stats['passed'] += 1
+
             except NotImplementedError:
                 logs.warning("WARNING: Collection '%s' not implemented" % collection.__name__)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
-            except StampedItunesSourceError as e:
-                logs.warning("%s: FAIL" % documentId)
-                stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
-                stats['errors'].append(e)
-                if libs.ec2_utils.is_ec2():
-                    api.mergeEntityId(str(documentId))
 
             except StampedDataError as e:
                 logs.warning("%s: FAIL" % documentId)
                 stats[e.__class__.__name__] = stats.setdefault(e.__class__.__name__, 0) + 1
                 stats['errors'].append(e)
+
             except Exception as e:
                 logs.warning("%s: FAIL: %s (%s)" % (documentId, e.__class__, e))
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -118,7 +121,7 @@ def worker(db, collection, stats, options):
 
 def handler(db, options):
     query = {}
-    # query = {'_id': bson.objectid.ObjectId("4f7095cab951fe10e8000a05")}
+    # query = {'_id': bson.objectid.ObjectId("4e4c691ddb6bbe2bcd00034d")}
     for i in db._collection.find(query, fields=['_id']):
         if options.sampleSetRatio < 1 and random.random() > options.sampleSetRatio:
             continue
@@ -146,7 +149,7 @@ def main():
 
         # Build workers
         for i in range(WORKER_COUNT):
-            greenlets.append(gevent.spawn(worker, db, collection, stats, options))
+            greenlets.append(gevent.spawn(worker, db, collection, api, stats, options))
 
         # Run!
         gevent.joinall(greenlets)
@@ -174,7 +177,7 @@ def main():
     # TODO: Repopulate missing documents
 
     # Email dev if any errors come up
-    if libs.ec2_utils.is_ec2():
+    if libs.ec2_utils.is_ec2() and options.email:
         if len(warnings) > 0:
             try:
                 stack = libs.ec2_utils.get_stack().instance.stack

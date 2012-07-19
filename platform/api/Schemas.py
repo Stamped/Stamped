@@ -66,6 +66,11 @@ class StampTimestamp(BasicTimestamp):
     def setSchema(cls):
         cls.addProperty('stamped',                          datetime)
 
+class StatTimestamp(Schema):
+    @classmethod 
+    def setSchema(cls):
+        cls.addProperty('generated',                        datetime)
+
 class SettingsEmailAlertToken(Schema):
     @classmethod
     def setSchema(cls):
@@ -183,6 +188,7 @@ class StampStats(Schema):
         cls.addPropertyList('preview_likes',                basestring) # UserIds
         cls.addPropertyList('preview_credits',              basestring) # StampIds
         cls.addPropertyList('preview_comments',             basestring) # CommentIds
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 class EntityStats(Schema):
     @classmethod
@@ -191,6 +197,7 @@ class EntityStats(Schema):
         cls.addProperty('num_stamps',                       int)
         cls.addPropertyList('popular_users',                basestring)
         cls.addPropertyList('popular_stamps',               basestring)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)
 
 
 # #### #
@@ -854,6 +861,12 @@ class BasicEntity(BasicEntityMini):
     def subtitle(self):
         return self._genericSubtitle()
 
+    @property
+    def search_subtitle(self):
+        # There are some specific cases -- OK, currently one specific case -- where, for search, we prefer a different
+        # subtitle to the one we would typically show.
+        return self.subtitle
+
     @lazyProperty
     def search_id(self):
         if self.entity_id:
@@ -1072,6 +1085,12 @@ class PlaceEntity(BasicEntity):
 
         # Fallback to generic
         return self._genericSubtitle()
+
+    @property
+    def search_subtitle(self):
+        # TODO: Make sure other places in the code (HTTPSchemas, EntitySearch) stop rolling their own versions of this!
+        formattedAddress = self.formatAddress()
+        return formattedAddress if formattedAddress else self.subtitle
 
     def minimize(self, *args):
         return BasicEntity.minimize(self, 'coordinates')
@@ -1492,6 +1511,7 @@ class Stamp(Schema):
         cls.addProperty('via',                              basestring)
         cls.addNestedProperty('previews',                   Previews)
         cls.addNestedProperty('links',                      StampLinks)
+        cls.addProperty('og_action_id',                     basestring)
 
     def __init__(self):
         Schema.__init__(self)
@@ -1645,7 +1665,12 @@ class Activity(Schema):
         if self.subjects is not None:
             subjects = []
             for userId in self.subjects:
+                if users[str(userId)] is None:
+                    continue
                 subjects.append(users[str(userId)])
+            if len(subjects) == 0:
+                logs.warning('All users missing from activity item subjects')
+                raise StampedActivityMissingUsersError('All users missing from activity item subjects')
             result.subjects = subjects
 
         if self.objects is not None:
@@ -1679,6 +1704,7 @@ class Activity(Schema):
                         commentobjects.append(comments[str(commentId)])
                 result.objects.comments = commentobjects
 
+        logs.debug("ENRICHED ENTITY: %s" % result)
         return result
 
 class EnrichedActivity(Schema):
@@ -1810,4 +1836,4 @@ class GuideCache(Schema):
         cls.addNestedPropertyList('food',                   GuideCacheItem)
         cls.addNestedPropertyList('app',                    GuideCacheItem)
         cls.addNestedPropertyList('other',                  GuideCacheItem)
-        cls.addProperty('updated',                          datetime)
+        cls.addNestedProperty('timestamp',                  StatTimestamp)

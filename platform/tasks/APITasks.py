@@ -163,6 +163,10 @@ def postToOpenGraph(*args, **kwargs):
     invoke(postToOpenGraph.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
+def deleteFromOpenGraph(*args, **kwargs):
+    invoke(deleteFromOpenGraph.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
 def buildGuide(*args, **kwargs):
     invoke(buildGuide.request, *args, **kwargs)
 

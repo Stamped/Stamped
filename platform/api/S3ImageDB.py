@@ -27,6 +27,8 @@ from boto.s3.connection import S3Connection
 from boto.s3.key        import Key
 # from boto.s3.bucket     import Bucket
 
+from libs.ec2_utils     import is_prod_stack
+
 class S3ImageDB(AImageDB):
     
     def __init__(self, bucket_name='stamped.com.static.images'):
@@ -84,33 +86,6 @@ class S3ImageDB(AImageDB):
             '31x31': (31, 31),  # 1x
         }
     
-    def addProfileImage(self, screen_name, image):
-        assert isinstance(image, Image.Image)
-        
-        # Filename is lowercase screen name
-        prefix = 'users/%s' % screen_name.lower()
-        width, height = image.size
-        
-        if width != height:
-            # Extract a square aspect ratio image by cropping the longer side
-            diff = abs(height - width) / 2
-            
-            if width > height:
-                box = (diff, 0, width - diff, height)
-            else:
-                box = (0, diff, width, height - diff)
-            
-            square = image.crop(box)
-        else:
-            # image is already square
-            square = image
-        
-        max_size = self.profileImageMaxSize
-        
-        # Add original profile image
-        self._addImageSizes(prefix, square, max_size)
-        return 'http://stamped.com.static.images.s3.amazonaws.com/%s.jpg' % prefix
-    
     def addResizedProfileImages(self, screen_name, image_url):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
@@ -118,21 +93,44 @@ class S3ImageDB(AImageDB):
         image    = utils.getWebImage(image_url, "profile")
         sizes    = self.profileImageSizes
         max_size = self.profileImageMaxSize
-        
+
+        def cropImageToSquare(image):
+            width, height = image.size
+
+            if width != height:
+                # Extract a square aspect ratio image by cropping the longer side
+                diff = abs(height - width) / 2
+
+                if width > height:
+                    box = (diff, 0, width - diff, height)
+                else:
+                    box = (0, diff, width, height - diff)
+
+                square = image.crop(box)
+            else:
+                # image is already square
+                square = image
+            return square
+
+
+        image = cropImageToSquare(image)
         self._addImageSizes(prefix, image, max_size, sizes, original_url=image_url)
     
     def removeProfileImage(self, screen_name):
+        if not is_prod_stack():
+            return
+
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
         suffix = '.jpg'
         
         sizes = self.profileImageSizes
-        
+
         try:
-            self._removeFromS3('%s%s') % (prefix, suffix)
+            self._removeFromS3('%s%s' % (prefix, suffix))
             
             for size in sizes:
-                self._removeFromS3('%s-%s%s') % (prefix, size, suffix)
+                self._removeFromS3('%s-%s%s' % (prefix, size, suffix))
         except Exception:
             logs.warning('Warning: Failed to remove file')
     
@@ -335,10 +333,11 @@ class S3ImageDB(AImageDB):
     def _removeFromS3(self, name):
         num_retries = 0
         max_retries = 5
+        logs.info('### removing from S3 with name: %s' % name)
         
         while True:
             try:
-                if self.bucket.get_key(name):
+                if self.bucket.get_key(name) is not None:
                     self.bucket.delete_key(name)
                 return True
             except Exception as e:

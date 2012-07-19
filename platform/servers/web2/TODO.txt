@@ -42,21 +42,38 @@
 
 
 TODO:
+    * HIGH PRIORITY:
+        * profile
+            * DONE - header get-the-app button & texting functionality
+            * PUNT - sign-up & login via facebook or stamped
+                * PUNT - ASK anthony about sign-up, login, vs. get-the-app
+            * layout adjustments to gallery view
+            * navbar occasional missing graphics
+        * misc:
+            * replace font usage w/ self-hosting option
+            * retina display support & testing
+            * create 3 unique links => stamped.com
+        * stamped.com
+            * replace intro hero font with skyline font
+            * subpages
+                * basic 404 page
+                    * cool 404 page w/ circle animation
+                    * http://support.google.com/webmasters/bin/answer.py?hl=en&answer=136085&from=93644&rd=1
+                * basic 5XX page
+                * legal page
+                * jobs page
+    
     * stamped.com:
         * intro:
-            * ESC skips intro animation
+            * DONE - FIX ESC skips intro animation
         * main:
             * iphone:
-                * ADD SHADOWS
-                * move shadow & phone above other page content
+                * DONE - ADD SHADOWS
+                * DONE - move shadow & phone above other page content
             * pane 3 (tastemakers):
-                * blue border on active tastemaker's image
+                * DONE - blue border on active tastemaker's image
             * pane 4 (videos):
-                * incorporate stamped v1 video
-                    * get v1 video preview asset image
-        * footer:
-            * remove 'available on the app store' button
-            * move social feedback items to lower right
+                * get v1 video preview asset image
     
     * blurred FUCK MEDIOCRITY easter egg w/ f hotkey?
     /* Stop breaking my iphone font size! */
@@ -312,3 +329,4 @@ ChangeList 6/22/2012:
             }
 
 rickroll: http://www.youtube.com/watch?v=ZL_Q4jBTh_8
+

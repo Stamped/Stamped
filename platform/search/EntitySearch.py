@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import sys, datetime, logs, gevent, utils, math
 from api                        import Constants
-from api.db.mongodb.MongoEntityStatsCollection import MongoEntityStatsCollection
+from api.db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
 from resolve.iTunesSource       import iTunesSource
 from resolve.AmazonSource       import AmazonSource
 from resolve.RdioSource         import RdioSource
@@ -60,6 +60,8 @@ class EntitySearch(object):
     def __init__(self):
         allCategories = Constants.categories
         self.__all_sources = []
+        self.__entity_collection = MongoEntityCollection()
+        self.__stats_collection = MongoEntityStatsCollection()
         # Within each category, we have a number of sources and each is assigned a priority. The priority is used to
         # determine how long to wait for results from that source.
         self.__categories_to_sources_and_priorities = {}
@@ -276,10 +278,7 @@ class EntitySearch(object):
 
 
     def __buildEntity(self, entityId):
-        # TODO PRELAUNCH: Should be able to avoid separate lookup here.
-        proxy = self.__stampedSource.entityProxyFromKey(entityId)
-        entity = EntityProxyContainer(proxy).buildEntity()
-        entity.entity_id = entityId
+        entity = self.__entity_collection.getEntity(entityId)
         entity._maybeRegenerateThirdPartyIds()
         return entity
 
@@ -288,7 +287,7 @@ class EntitySearch(object):
         def isTempEntity(entity):
             return entity.entity_id is None
         realEntityIds = [ entity.entity_id for (entity, cluster) in entityAndClusterList if not isTempEntity(entity) ]
-        entityStats = MongoEntityStatsCollection().getStatsForEntities(realEntityIds)
+        entityStats = self.__stats_collection.getStatsForEntities(realEntityIds)
         statsByEntityId = dict([(stats.entity_id, stats) for stats in entityStats])
 
         def scoreEntityAndCluster((entity, cluster)):
@@ -397,7 +396,8 @@ def main():
 
     queryParams = {}
     if options.latlng:
-        queryParams['coords'] = options.latlng.split(',')
+        lat, lng = options.latlng.split(',')
+        queryParams['coords'] = float(lat), float(lng)
     elif options.address:
         queryParams['coords'] = Geocoder().addressToLatLng(options.address)
 

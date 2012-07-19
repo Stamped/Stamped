@@ -1,4 +1,4 @@
-{% extends "base2.html" %}
+{% extends "base.html" %}
 {% load stamped_tags %}
 
 <!-- 
@@ -22,6 +22,12 @@
         script: libs/jquery.fancybox.js
         script: libs/jquery.mousewheel.js
         script: libs/jquery.jscrollpane.js
+        
+        script: libs/jplayer/jquery.transform.js
+        script: libs/jplayer/jquery.grab.js
+        script: libs/jplayer/mod.csstransforms.min.js
+        script: libs/jplayer/circle.player.js
+        script: libs/jplayer/jquery.jplayer.js
     
     Third-party library dependencies:
         script: libs/moment.js
@@ -102,89 +108,91 @@
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix profile-header-subnav subnav-active-0">
-                            <div class="profile-image-column">
-                                {% handlebars_template "profile-image-large" user %}
-                                
-                                <a class="follow-button"></a>
-                            </div>
-                            
-                            <div class="lhs">
-                                <div class="header-subsection header-subsection-0">
-                                    <p class='profile-title'>{{user.name}}</p>
+                            <div class="lhs clearfix">
+                                <div class="profile-image-column">
+                                    {% handlebars_template "profile-image-large" user %}
                                     
-                                    <p>
-                                        <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
-                                    </p>
+                                    <a class="follow-button"></a>
                                 </div>
                                 
-                                <div class="header-subsection header-subsection-1 clearfix">
-                                    <div class="inner-lhs">
+                                <div class="header-subsections">
+                                    <div class="header-subsection header-subsection-0">
                                         <p class='profile-title'>{{user.name}}</p>
                                         
                                         <p>
                                             <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
                                         </p>
-                                        
-                                        {% if user.bio %}
-                                        <p class='bio'>
-                                            {{ user.bio }}
-                                        </p>
-                                        {% endif %}
                                     </div>
                                     
-                                    <div class="inner-rhs">
-                                        <div class='friends-wrapper followers-wrapper'>
-                                            <div class='friends-desc'>Followers</div>
-                                            <div class="clearfix">
-                                                <span class='friend-count'>{{user.num_followers}}</span>
-                                                
-                                                {% with users=followers %}
-                                                {% with title="followers" %}
-                                                    {% include "user-gallery.html" %}
-                                                {% endwith %}
-                                                {% endwith %}
-                                            </div>
+                                    <div class="header-subsection header-subsection-1 clearfix">
+                                        <div class="inner-lhs">
+                                            <p class='profile-title'>{{user.name}}</p>
+                                            
+                                            <p>
+                                                <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
+                                            </p>
+                                            
+                                            {% if user.bio %}
+                                            <p class='bio'>
+                                                {{ user.bio }}
+                                            </p>
+                                            {% endif %}
                                         </div>
                                         
-                                        <div class='friends-wrapper following-wrapper'>
-                                            <div class='friends-desc'>Following</div>
-                                            <div class="clearfix">
-                                                <span class='friend-count'>{{user.num_friends}}</span>
-                                                
-                                                {% with users=friends %}
-                                                {% with title="following" %}
-                                                    {% include "user-gallery.html" %}
-                                                {% endwith %}
-                                                {% endwith %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="header-subsection header-subsection-2">
-                                    <p class='profile-title'>{{user.name}}</p>
-                                    
-                                    <div class="user-stamp-distribution">
-                                        {% for section in user.distribution %}
-                                            <div class="section stamp-category-{{section.category}} stamp-subcategory-{{section.category}} clearfix">
-                                                <div class="category-name">
-                                                    {% if section.category == "place" %}Places{% endif %}
-                                                    {% if section.category == "music" %}Music{% endif %}
-                                                    {% if section.category == "book" %}Books{% endif %}
-                                                    {% if section.category == "film" %}Film &amp; TV{% endif %}
-                                                    {% if section.category == "app" %}Apps{% endif %}
-                                                    {% if section.category == "other" %}Other{% endif %}
+                                        <div class="inner-rhs">
+                                            <div class='friends-wrapper followers-wrapper'>
+                                                <div class='friends-desc'>Followers</div>
+                                                <div class="clearfix">
+                                                    <span class='friend-count'>{{user.num_followers}}</span>
+                                                    
+                                                    {% with users=followers %}
+                                                    {% with title="followers" %}
+                                                        {% include "user-gallery.html" %}
+                                                    {% endwith %}
+                                                    {% endwith %}
                                                 </div>
-                                                
-                                                <div class='icon dark-icon'></div>
-                                                
-                                                <div class="bargraph-row">
-                                                    <div class="bargraph-row-value" data-count="{{section.count}}">
-                                                        <div class="bargraph-row-value-inner"></div>
+                                            </div>
+                                            
+                                            <div class='friends-wrapper following-wrapper'>
+                                                <div class='friends-desc'>Following</div>
+                                                <div class="clearfix">
+                                                    <span class='friend-count'>{{user.num_friends}}</span>
+                                                    
+                                                    {% with users=friends %}
+                                                    {% with title="following" %}
+                                                        {% include "user-gallery.html" %}
+                                                    {% endwith %}
+                                                    {% endwith %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="header-subsection header-subsection-2">
+                                        <p class='profile-title'>{{user.name}}</p>
+                                        
+                                        <div class="user-stamp-distribution">
+                                            {% for section in user.distribution %}
+                                                <div class="section stamp-category-{{section.category}} stamp-subcategory-{{section.category}} clearfix">
+                                                    <div class="category-name">
+                                                        {% if section.category == "place" %}Places{% endif %}
+                                                        {% if section.category == "music" %}Music{% endif %}
+                                                        {% if section.category == "book" %}Books{% endif %}
+                                                        {% if section.category == "film" %}Film &amp; TV{% endif %}
+                                                        {% if section.category == "app" %}Apps{% endif %}
+                                                        {% if section.category == "other" %}Other{% endif %}
+                                                    </div>
+                                                    
+                                                    <div class='icon dark-icon'></div>
+                                                    
+                                                    <div class="bargraph-row">
+                                                        <div class="bargraph-row-value" data-count="{{section.count}}">
+                                                            <div class="bargraph-row-value-inner"></div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        {% endfor %}
+                                            {% endfor %}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -207,17 +215,17 @@
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            
-                            <div class="profile-image-column">
-                                {% handlebars_template "profile-image-large" user %}
+                            <div class="lhs clearfix">
+                                <div class="profile-image-column">
+                                    {% handlebars_template "profile-image-large" user %}
+                                    
+                                    <a class="follow-button"></a>
+                                </div>
                                 
-                                <a class="follow-button"></a>
-                            </div>
-
-                            
-                            <div class="lhs">
-                                <p class='name'>{{user.screen_name}}'s</p>
-                                <p class='title'>Place Stamps</p>
+                                <div class="header-subsections">
+                                    <p class='name'>{{user.screen_name}}'s</p>
+                                    <p class='title'>Place Stamps</p>
+                                </div>
                             </div>
                             
                             <div class="rhs">
@@ -232,16 +240,17 @@
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            
-                            <div class="profile-image-column">
-                                {% handlebars_template "profile-image-large" user %}
+                            <div class="lhs clearfix">
+                                <div class="profile-image-column">
+                                    {% handlebars_template "profile-image-large" user %}
+                                    
+                                    <a class="follow-button"></a>
+                                </div>
                                 
-                                <a class="follow-button"></a>
-                            </div>
-                            
-                            <div class="lhs">
-                                <p class='name'>{{user.screen_name}}'s</p>
-                                <p class='title'>Music Stamps</p>
+                                <div class="header-subsections">
+                                    <p class='name'>{{user.screen_name}}'s</p>
+                                    <p class='title'>Music Stamps</p>
+                                </div>
                             </div>
                             
                             <div class="rhs">
@@ -256,16 +265,17 @@
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            
-                            <div class="profile-image-column">
-                                {% handlebars_template "profile-image-large" user %}
+                            <div class="lhs clearfix">
+                                <div class="profile-image-column">
+                                    {% handlebars_template "profile-image-large" user %}
+                                    
+                                    <a class="follow-button"></a>
+                                </div>
                                 
-                                <a class="follow-button"></a>
-                            </div>
-                            
-                            <div class="lhs">
-                                <p class='name'>{{user.screen_name}}'s</p>
-                                <p class='title'>Book Stamps</p>
+                                <div class="header-subsections">
+                                    <p class='name'>{{user.screen_name}}'s</p>
+                                    <p class='title'>Book Stamps</p>
+                                </div>
                             </div>
                             
                             <div class="rhs">
@@ -280,16 +290,17 @@
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            
-                            <div class="profile-image-column">
-                                {% handlebars_template "profile-image-large" user %}
-                                
-                                <a class="follow-button"></a>
-                            </div>
-                            
                             <div class="lhs">
-                                <p class='name'>{{user.screen_name}}'s</p>
-                                <p class='title'>Film &amp; TV Stamps</p>
+                                <div class="profile-image-column">
+                                    {% handlebars_template "profile-image-large" user %}
+                                    
+                                    <a class="follow-button"></a>
+                                </div>
+                                
+                                <div class="header-subsections">
+                                    <p class='name'>{{user.screen_name}}'s</p>
+                                    <p class='title'>Film &amp; TV Stamps</p>
+                                </div>
                             </div>
                             
                             <div class="rhs">
@@ -304,16 +315,17 @@
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            
-                            <div class="profile-image-column">
-                                {% handlebars_template "profile-image-large" user %}
-                                
-                                <a class="follow-button"></a>
-                            </div>
-                            
                             <div class="lhs">
+                                <div class="profile-image-column">
+                                    {% handlebars_template "profile-image-large" user %}
+                                    
+                                    <a class="follow-button"></a>
+                                </div>
+                                
+                                <div class="header-subsections">
                                 <p class='name'>{{user.screen_name}}'s</p>
-                                <p class='title'>App Stamps</p>
+                                    <p class='title'>App Stamps</p>
+                                </div>
                             </div>
                             
                             <div class="rhs">
@@ -438,6 +450,13 @@
         <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        
+        <!-- jPlayer -->
+        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.transform.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.grab.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jplayer/mod.csstransforms.min.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jplayer/circle.player.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
         
         <script src="{{ STATIC_URL }}js/libs/moment.js"></script>
         

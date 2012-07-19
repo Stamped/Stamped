@@ -36,6 +36,12 @@ COMPARE_HEADER = """
             setVisibility(cellId, 'none');
         }
     </script>
+    <style type="text/css">
+      img {
+        max-height: 100;
+        max-width: 100;
+      }
+    </style>
   </head>
   <body>
     <h1>Result comparison for query <code>%s</code></h1>
