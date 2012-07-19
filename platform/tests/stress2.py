@@ -1222,7 +1222,7 @@ class StampDetail(View):
     def _viewEntity(self):
         time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
         self.setWeight('entity', 0)
-        self.addToStack(EntityDetail, kwargs={'entity': self.entity})
+        self.addToStack(EntityDetail, kwargs={'entity': self.entity, 'alsoStampedBy': self.alsoStampedBy})
 
     def _viewCredit(self):
         if 'previews' in self.stamp and self.stamp['previews'] is not None:
@@ -2176,7 +2176,7 @@ TODO:
 - Automatically reset stress.db?
 - Spawn n instances to run from
 x Connect directly to instances based on stack name (instead of through ELB -- routing SUCKS)
-- Take command-line inputs
+x Take command-line inputs
 - Aggregation of results (via SimpleDB?)
 - Microcaching on nginx
 - Caching of tastemaker endpoints via memcached
