@@ -3821,11 +3821,14 @@ class StampedAPI(AStampedAPI):
         offset = 0
         if guideRequest.offset is not None:
             offset = guideRequest.offset
+
+        # TODO: Do this in db request
+        entityStats = entityStats[offset:offset+limit+5]
         
         userIds = {}
-        
+
         entityIdsWithScore = {}
-        for stat in entityStats[offset:offset+limit]:
+        for stat in entityStats:
             if stat.score is None:
                 entityIdsWithScore[stat.entity_id] = 0.0
             else:
@@ -3887,7 +3890,7 @@ class StampedAPI(AStampedAPI):
                 entity.previews = previews
             result.append(entity)
 
-        return result
+        return result[:limit]
 
     @API_CALL
     def getGuide(self, guideRequest, authUserId):
