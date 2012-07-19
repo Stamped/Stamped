@@ -1,13 +1,14 @@
-import gevent
 from gevent     import monkey
 monkey.patch_all()
+from gevent.coros import Semaphore
 
 import logs
 import utils
 import rpyc
 import urllib
 from time                       import time, sleep
-from servers.ratelimiter.server import StampedRateLimiterService
+from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
+
 
 
 FAIL_LIMIT = 10
@@ -27,14 +28,20 @@ class RateLimiterState(object):
         self.__blackout_start = None
         self.__fail_wait = fail_wait
         self.__is_ec2 = utils.is_ec2()
+        self.__service_init_semaphore = Semaphore()
 
     @property
     def _local_rlservice(self):
         if self.__local_rlservice is None:
-            if self.__is_ec2:
-                self.__local_rlservice = StampedRateLimiterService(throttle=True)
-            else:
-                self.__local_rlservice = StampedRateLimiterService(throttle=False)
+            # use a semaphore here because if two requests come in immediately, we might instantiate two services
+            self.__service_init_semaphore.acquire()
+            if self.__local_rlservice is None:
+                if self.__is_ec2:
+                    self.__local_rlservice = StampedRateLimiterService(throttle=True)
+                else:
+                    print('hit local_rlsservice initiator.   __local_rlservice: %s' % self.__local_rlservice)
+                    self.__local_rlservice = StampedRateLimiterService(throttle=False)
+            self.__service_init_semaphore.release()
 
         return self.__local_rlservice
 
@@ -44,8 +51,11 @@ class RateLimiterState(object):
 
         self.__request_fails += 1
         if self.__request_fails >= self.__fail_limit:
+            # if the fail threshold is hit, then set the blackout start timestamp and load rate limiter call
+            # log data into the local rate limiter service. Also, start the local rate limiter update threads
             self.__blackout_start = time()
-            self.__local_rlservice.getDbLog()    # update the local call log from the db
+            self.__local_rlservice.loadDbLog()    # update the local call log from the db
+            self.__local_rlservice.startThreads()
             logs.error('RPC service FAIL THRESHOLD REACHED')
 
     def _isBlackout(self):
@@ -54,8 +64,11 @@ class RateLimiterState(object):
         if self.__blackout_start + self.__fail_wait > time():
             return True
         else:
+            # if the blackout period has expired, reset the blackout timestamp and fail counter, and stop update
+            # threads on the local rate limiter service
             self.__blackout_start = None
             self.__request_fails = 0
+            self.__local_rlservice.stopThreads()
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):

@@ -25,7 +25,6 @@ from StringIO            import StringIO
 from threading           import Lock
 from gevent.pool         import Pool
 from greenlet            import GreenletExit
-from libs.Request        import service_request
 
 
 
@@ -451,11 +450,6 @@ def getFile(url, request=None, params=None, logging=False):
     response.close()
     # return the successfully downloaded file
     return data
-
-def getSoupService(service, url):
-    """ downloads and returns the BeautifulSoup parsed version of the file at the given url """
-    response, content = service_request(service, 'GET', url)
-    return BeautifulSoup(content)
 
 def getSoup(url, opener=None):
     """ downloads and returns the BeautifulSoup parsed version of the file at the given url """
