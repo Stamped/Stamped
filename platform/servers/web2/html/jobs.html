@@ -1,0 +1,79 @@
+{% extends "about.html" %}
+{% load stamped_tags %}
+
+<!-- CSS Dependencies => jobs.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+    
+    Core stamped dependencies:
+        stylesheet: jobs.less
+-->
+
+<!-- HTML Template Dependencies => jobs.generated.html
+     - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+
+{% block styles %}
+    {{ block.super }}
+    
+    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
+    
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.css">
+{% endblock styles %}
+
+{% block pane-body %}
+    <div class="lhs">
+        <div class="title">
+            JOBS PAGE TODO
+        </div>
+    </div>
+
+    <div class="rhs">
+        <div class="jobs">JOBS</div>
+        
+        <div class="jobs-desc">
+            We're hiring! Check out our <a href="/jobs" class="screen-name">jobs page</a> for more info.
+        </div>
+        
+        <div class="bg-images bg-image-active-0">
+            <div class="bg-image bg-image-0"></div>
+        </div>
+    </div>
+{% endblock pane-body %}
+
+{% block post-main %}
+    <div class="post-main-section">
+        <h1>THE COMPANY</h1>
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus condimentum euismod nunc, eget lacinia libero convallis non. Vivamus a ipsum eros. Nam faucibus luctus sodales. Ut sapien tortor, congue et egestas quis, luctus in urna. Nullam eros neque, sodales vel rhoncus eget, consequat id purus. Morbi dolor dolor, volutpat quis ullamcorper ac, iaculis quis sem. Donec cursus hendrerit dapibus. Ut ornare volutpat fermentum. Aliquam erat volutpat. Sed tincidunt scelerisque augue sed lacinia.
+        </p>
+    </div>
+    
+    <div class="post-main-section">
+        <h1>THE OFFICE</h1>
+        <p>
+            Donec nisi libero, iaculis vitae scelerisque ac, volutpat in massa. Duis consectetur bibendum fermentum. Integer porttitor nibh ut dolor faucibus sit amet pharetra nisl egestas. Integer non purus eu augue consectetur gravida sit amet eget augue. Curabitur lectus ipsum, gravida eu facilisis sed, fermentum vitae mauris. Proin sit amet nibh non erat convallis posuere a nec orci. Mauris sodales, sapien eu fringilla volutpat, urna ligula hendrerit leo, eu interdum orci orci eu leo. Quisque tincidunt est vitae nisl vestibulum et ullamcorper sem dictum. Suspendisse potenti. Pellentesque pharetra nisi eu sapien eleifend eget scelerisque diam tristique. Sed nisl odio, iaculis eu lacinia at, dictum tempus tortor. Cras dignissim viverra lacus, in consequat lorem feugiat vitae. Vestibulum elementum facilisis nisi in malesuada.
+        </p>
+    </div>
+    
+    <div class="post-main-section">
+        <h1>THE PERKS</h1>
+        
+        <p>
+            Integer elit odio, sagittis vitae rhoncus vel, dignissim imperdiet sapien. Proin vehicula tincidunt lorem vitae pretium. Nullam accumsan iaculis nisl et sodales. Donec nec quam est. Maecenas lacinia cursus diam eu ullamcorper. Fusce venenatis, massa vel porta aliquet, ligula justo adipiscing odio, nec hendrerit urna felis ac diam. Ut non neque lectus. Donec hendrerit purus in nibh euismod in vestibulum dolor varius. Quisque nunc diam, tempus a porttitor a, accumsan in enim. Aliquam sed lorem purus, at condimentum enim. Suspendisse potenti. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Pellentesque ut neque in nunc ultrices ultrices. Aliquam diam erat, volutpat id adipiscing a, tincidunt id diam. Cras in orci urna, nec hendrerit nunc. Nam tincidunt aliquam dolor rhoncus condimentum.
+        </p>
+
+    </div>
+    
+    <div class="post-main-section press">
+        <h1>THE JOBS</h1>
+        
+        <p>
+            Suspendisse potenti. Vivamus tincidunt nibh et erat ultrices hendrerit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Aenean adipiscing, mauris nec commodo porttitor, turpis velit malesuada purus, id dictum lorem dolor nec quam. Vestibulum cursus ipsum nec mauris porta in ultrices dolor ultrices. Sed neque quam, fringilla sed suscipit ut, sagittis eget risus. Nam suscipit luctus volutpat. Duis sit amet erat ac massa posuere mollis. Nunc pretium odio ac ligula porttitor feugiat rhoncus nunc imperdiet. Sed sapien elit, facilisis vitae adipiscing ut, blandit sit amet massa. Proin sit amet sapien mauris, et varius libero.
+        </p>
+    </div>
+    
+    <div class="made-in-nyc-logo"></div>
+{% endblock post-main %}
+

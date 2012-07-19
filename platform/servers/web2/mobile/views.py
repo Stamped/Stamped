@@ -24,6 +24,11 @@ def about(*args, **kwargs):
     
     return views.about(*args, **kwargs)
 
+def jobs(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.jobs(*args, **kwargs)
+
 def profile(*args, **kwargs):
     kwargs['mobile'] = True
     
