@@ -23,11 +23,11 @@ class SimpleDB(object):
         self.domain_name = None
         self.domains = {}
 
-        if domain is None:
+        if domain is None and is_ec2():
             stack = get_stack()
             stack_name = str(stack['instance']['stack'])
             self.domain_name = stack_name
-        else:
+        elif domain is not None:
             self.domain_name = domain
 
     def addStat(self, stat):
