@@ -27,8 +27,6 @@ from threading           import Lock
 from gevent.pool         import Pool
 from greenlet            import GreenletExit
 
-
-
 class LoggingThreadPool(object):
     """
     Wrapper around gevent.pool.Pool that (a) logs any exceptions that show up in the spawned tasks and (b) ensures that
