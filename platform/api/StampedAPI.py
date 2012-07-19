@@ -5323,26 +5323,3 @@ class StampedAPI(AStampedAPI):
         entry.created = datetime.utcnow()
 
         return self._clientLogsDB.addEntry(entry)
-
-
-
-    def testFunction(self, authUserId, scope, limit, offset):
-        activity = self.getActivity(authUserId, scope, limit, offset)
-        print ('### activity blah!')
-        from pprint import pprint
-        for act in activity:
-            pprint(act.objects.stamps)
-
-        return
-
-
-        result = []
-        t0 = time.time()
-        for item in activity:
-            try:
-                result.append(HTTPActivity().importEnrichedActivity(item).dataExport())
-            except Exception as e:
-                logs.warning("Failed to enrich activity: %s" % e)
-                logs.debug("Activity: %s" % item)
-        logs.debug("### importEnrichedActivity for all HTTPActivity: %s" % (time.time() - t0))
-        return result
