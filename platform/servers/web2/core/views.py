@@ -17,6 +17,9 @@ from servers.web2.core.helpers      import *
 
 # TODO: stricter input schema validation
 
+TRAVIS = True
+import travis_test
+
 @stamped_view(schema=HTTPIndexSchema)
 def index(request, schema, **kwargs):
     tastemakers = [
@@ -242,7 +245,10 @@ def handle_profile(request, schema, **kwargs):
         user        = None
         user_id     = schema.user_id
     else:
-        user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
+        if TRAVIS:
+            user = travis_test.user
+        else:
+            user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
         user_id     = user['user_id']
     
     # simple sanity check validation of user_id
@@ -254,7 +260,10 @@ def handle_profile(request, schema, **kwargs):
     del schema_data['screen_name']
     schema_data['user_id'] = user_id
     
-    stamps = stampedAPIProxy.getUserStamps(schema_data)
+    if TRAVIS:
+        stamps = travis_test.stamps
+    else:
+        stamps = stampedAPIProxy.getUserStamps(schema_data)
     
     if user is None:
         user = {
@@ -275,12 +284,14 @@ def handle_profile(request, schema, **kwargs):
             if user['user_id'] is None or user['user_id'] != user_id:
                 raise StampedInputError("mismatched user_id")
     
+    """
     if not (ajax | mobile):
         friends     = stampedAPIProxy.getFriends  (user_id, limit=3)
         followers   = stampedAPIProxy.getFollowers(user_id, limit=3)
         
         friends   = shuffle_split_users(friends)
         followers = shuffle_split_users(followers)
+    """
     
     #utils.log("USER:")
     #utils.log(pprint.pformat(user))

@@ -1982,36 +1982,162 @@ var g_update_stamps = null;
             // initialize listen action
             var $action_listen = $sdetail.find('.action-listen');
             
-            if ($action_listen.length == 1) {
-                var $link = $action_listen.parent('a.action-link');
-                var $source_spotify = $action_listen.find(".source-spotify");
-                var $source_spotify = $action_listen.find(".source-itunes");
+            $.each($action_listen, function(i, elem) {
+                var $elem = $(elem);
+                var $source_rdio    = $elem.find(".source-rdio");
+                var $source_itunes  = $elem.find(".source-itunes");
                 
-                if ($source_spotify.length === 1) {
-                    // TODO
-                }
-                
-                //var href  = "https://embed.spotify.com/?uri={{source.completion_data.source_id}}";
-                
-                /*$link.click(function(event) {
-                    event.preventDefault();
+                if ($source_rdio.length === 1) {
+                    var source_id   = $source_rdio.data("source-id");
+                    var $rdio       = $("#rdio-api");
+                    var duration    = 1;
                     
-                    var popup_options = get_fancybox_popup_options({
-                        href  : "http://www.stamped.com"
+                    var rdio_initialized = false;
+                    var rdio_initialized_callback = null;
+                    
+                    // initialize rdio preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $elem.removeClass("stopped playing").addClass("loading");
+                            $rdio.rdio().play(source_id);
+                        };
+                        
+                        var stop_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $rdio.rdio().pause();
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!rdio_initialized) {
+                            $elem.removeClass("stopped playing").addClass("loading");
+                            
+                            rdio_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
                     });
                     
-                    $.fancybox.open(popup_options);
-                    return false;
-                });
-                
-                var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
-                    m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
-                }, {
-                    cssSelectorAncestor: "#cp_container_1"
-                });*/
-                
-                // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
-            }
+                    $rdio.bind('ready.rdio', function() {
+                        rdio_initialized = true;
+                        
+                        if (!!rdio_initialized_callback) {
+                            rdio_initialized_callback();
+                        }
+                    });
+                    
+                    $rdio.bind('playingTrackChanged.rdio', function(e, playingTrack, sourcePosition) {
+                        if (playingTrack) {
+                            duration = playingTrack.duration;
+                            
+                            /*$('#art').attr('src', playingTrack.icon);
+                            $('#track').text(playingTrack.name);
+                            $('#album').text(playingTrack.album);
+                            $('#artist').text(playingTrack.artist);*/
+                        }
+                    });
+                    
+                    $rdio.bind('positionChanged.rdio', function(e, position) {
+                        /*$('#position').css('width', Math.floor(100*position/duration)+'%');*/
+                    });
+                    
+                    $rdio.bind('playStateChanged.rdio', function(e, playState) {
+                        if (playState == 0) { // paused
+                            $elem.removeClass("loading playing").addClass("stopped");
+                        } else {
+                            $elem.removeClass("loading stopped").addClass("playing");
+                        }
+                    });
+                    
+                    // this is a valid playback token for localhost.
+                    // but you should go get your own for your own domain.
+                    $rdio.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
+                } else if ($source_itunes.length === 1) {
+                    var itunes_initialized = false;
+                    var itunes_initialized_callback = null;
+                    var $itunes = $("#itunes-preview");
+                    var itunes_url = $itunes.attr("src");
+                    
+                    // initialize itunes preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("stopped").addClass("playing");
+                            
+                            $itunes.jPlayer("play");
+                        };
+                        
+                        var stop_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("playing").addClass("stopped");
+                            
+                            $itunes.jPlayer("pause");
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!itunes_initialized) {
+                            itunes_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
+                    });
+                    
+                    itunes_initialized = true;
+                    $itunes.jPlayer({
+                        ready: function () {
+                            $itunes.jPlayer("setMedia", {
+                                m4a : itunes_url
+                            });
+                            
+                            itunes_initialized = true;
+                            
+                            if (!!itunes_initialized_callback) {
+                                itunes_initialized_callback();
+                            }
+                        }, 
+                        
+                        supplied: "m4a", 
+                        swfPath: "/assets/js/libs/jplayer", 
+                        solution: "html,flash"
+                    });
+                }
+            });
+            
+            /*
+            var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
+                m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
+            }, {
+                cssSelectorAncestor: "#cp_container_1"
+            });
+            
+            // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
+            */
             
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
