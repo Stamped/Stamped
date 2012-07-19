@@ -84,14 +84,25 @@ class CompressedNode(object):
                 return child.get(key[len(k):])
         return []
 
-    def applyScoringFn(self, scoringFn, nodeLimit):
-        uniqueData = set(self.data)
+    def applyScoringFn(self, scoringFn):
         for k, child in self.children:
-            child.applyScoringFn(scoringFn, nodeLimit)
-            uniqueData.update(child.data)
-        dataList = list(uniqueData)
-        dataList.sort(key=scoringFn, reverse=True)
-        self.data = dataList[:nodeLimit]
+            child.applyScoringFn(scoringFn)
+            self.data.extend(child.data)
+        self.data.sort(key=scoringFn, reverse=True)
+
+    def extractAndDedupe(self, extractionFn, nodeLimit):
+        for k, child in self.children:
+            child.extractAndDedupe(extractionFn, nodeLimit)
+        originalData = self.data
+        self.data = []
+        seenKeys = set()
+        for data in originalData:
+            key = extractionFn(data)
+            if key not in seenKeys:
+                seenKeys.add(key)
+                self.data.append(key)
+                if len(self.data) >= nodeLimit:
+                    break
 
     def modify(self, mutation):
         self.data = map(mutation, self.data)
@@ -137,13 +148,14 @@ class AutoCompleteTrie(object):
     def __getitem__(self, key):
         return self.root.get(key)
 
-    def pruneAndCompress(self, scoringFn, nodeLimit, collapseThreshold):
+    def pruneAndCompress(self, scoringFn, extractionFn, nodeLimit, collapseThreshold):
         prefix, node = self.root.compress()
         if prefix:
             self.root = CompressedNode(None, {prefix : node})
         else:
             self.root = node
-        self.root.applyScoringFn(scoringFn, nodeLimit)
+        self.root.applyScoringFn(scoringFn)
+        self.root.extractAndDedupe(extractionFn, nodeLimit)
         self.root = self.root.prune(collapseThreshold)
 
     def modify(self, mutation):

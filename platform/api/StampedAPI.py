@@ -146,11 +146,10 @@ class StampedAPI(AStampedAPI):
         if 'version' in kwargs:
             self.setVersion(kwargs['version'])
 
-        if utils.is_ec2():
-            self.__autocomplete = loadIndexFromS3()
-        else:
-            self.__autocomplete = emptyIndex()
+        self.__autocomplete = emptyIndex()
         self.__autocomplete_last_loaded = datetime.now()
+        if utils.is_ec2():
+            self.reloadAutoCompleteIndex()
 
     def setVersion(self, version):
         try:
@@ -1707,7 +1706,7 @@ class StampedAPI(AStampedAPI):
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
         if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
             self.__autocomplete_last_loaded = datetime.now()
-            gevent.spawn(loadIndexFromS3).link(self.reloadAutoCompleteIndex)
+            self.reloadAutoCompleteIndex()
         if category == 'place':
             if coordinates is None:
                 latLng = None
@@ -1725,17 +1724,19 @@ class StampedAPI(AStampedAPI):
 
         return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
 
-    def reloadAutoCompleteIndex(self, greenlet):
-        try:
-            self.__autocomplete = greenlet.get()
-        except Exception as e:
-            email = {
-                'from' : 'Stamped <noreply@stamped.com>',
-                'to' : 'dev@stamped.com',
-                'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
-                'body' : '<pre>%s</pre>' % str(e),
-            }
-            utils.sendEmail(email, format='html')
+    def reloadAutoCompleteIndex(self):
+        def setIndex(greenlet):
+            try:
+                self.__autocomplete = greenlet.get()
+            except Exception as e:
+                email = {
+                    'from' : 'Stamped <noreply@stamped.com>',
+                    'to' : 'dev@stamped.com',
+                    'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
+                    'body' : '<pre>%s</pre>' % str(e),
+                }
+                utils.sendEmail(email, format='html')
+        gevent.spawn(loadIndexFromS3).link(setIndex)
 
     def updateAutoCompleteIndexAsync(self):
         pushNewIndexToS3()

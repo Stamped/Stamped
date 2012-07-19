@@ -46,8 +46,7 @@ def buildAutoCompleteIndex():
             else:
                 break
     for trie in categoryMapping.itervalues():
-        trie.pruneAndCompress(entityScoringFn, 5, 50)
-        trie.modify(lambda x: x.title)
+        trie.pruneAndCompress(entityScoringFn, lambda x: x.title.strip(), 5, 50)
     return categoryMapping
 
 
@@ -59,7 +58,7 @@ def convertEntity(entityDict):
     entityDict['types'] = tuple(entityDict['types'])
     try:
         entityDict['num_stamps'] = ENTITY_DB.entity_stats.getEntityStats(entityId).num_stamps
-    except StampedDocumentNotFoundError:
+    except (StampedDocumentNotFoundError, KeyError):
         entityDict['num_stamps'] = 0
     return EntityTuple(**entityDict)
 
@@ -67,14 +66,17 @@ def convertEntity(entityDict):
 def normalizeTitle(title):
     return ' '.join(tokenizeTitleAndNormalize(title))
 
+
 def tokenizeTitleAndNormalize(title):
     # Remove apostrophes, so contractions don't get broken into two separate words.
     title = ''.join(c for c in title if c != "'")
     return [token.text for token in TOKENIZER(title)]
 
+
 def entityScoringFn(entity):
     # TODO(geoff): factor in how many stamps are on the entity
     return entity.last_popular, entity.num_stamps
+
 
 def categorizeEntity(entity):
     if 'album' in entity.types or 'track' in entity.types or 'artist' in entity.types:
