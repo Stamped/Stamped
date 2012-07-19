@@ -152,7 +152,7 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
 - (void)showSmallTooltip {
     if (self.animationState != _animationStateAbort) {
         UIImageView* tooltip = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"taptoaddfriends"]] autorelease];
-        [Util reframeView:tooltip withDeltas:CGRectMake(200 - 2.5, -40, 0, 0)];
+        [Util reframeView:tooltip withDeltas:CGRectMake(170 - 2.5, -40, 0, 0)];
         tooltip.alpha = 0;
         UILabel* label = [Util viewWithText:@""
                                        font:[UIFont stampedFontWithSize:10]
@@ -201,13 +201,13 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
         NoDataView* noDataView = [[[NoDataView alloc] initWithFrame:[Util fullscreenFrame]] autorelease];
         //        [Util reframeView:noDataView withDeltas:CGRectMake(0, -50, 0, 0)];
         noDataView.userInteractionEnabled = YES;
-        NSString* topString = @"Since you're not yet following anyone, we've bumped you over to the Tastemakers view.";
+        NSString* topString = @"Since you're not yet following anyone, we're showing you suggestions from Tastemakers.";
         //        NSString* bottomString = @"Got it.";
         UILabel* top = [Util viewWithText:topString
                                      font:[UIFont stampedBoldFontWithSize:14]
                                     color:[UIColor whiteColor]
                                      mode:UILineBreakModeWordWrap
-                               andMaxSize:CGSizeMake(200, CGFLOAT_MAX)];
+                               andMaxSize:CGSizeMake(240, CGFLOAT_MAX)];
         top.textAlignment = UITextAlignmentCenter;
         CGRect bounds = CGRectMake(0, 0, noDataView.imageView.frame.size.width, noDataView.imageView.frame.size.height);
         top.frame = [Util centeredAndBounded:top.frame.size inFrame:bounds];
@@ -262,6 +262,18 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
         else {
             scope_ = STStampedAPIScopeEveryone;
         }
+//        
+//        NSString* userDefaultsKey = @"38c14bb3f746a468f71cb0323bd9830a"; //psuedo-random
+//        NSString* lastUserID = [[NSUserDefaults standardUserDefaults] objectForKey:userDefaultsKey];
+//        NSString* currentUserID = [STStampedAPI sharedInstance].currentUser.userID;
+//        if (currentUserID != nil && ![currentUserID isEqualToString:lastUserID]) {
+//            _animationState = _animationStateNone;
+//        }
+//        else {
+//            _animationState = _animationStateAbort;
+//        }
+//        [[NSUserDefaults standardUserDefaults] setObject:currentUserID ? currentUserID : @" invalid userID " forKey:userDefaultsKey];
+//        
         tableDelegate_ = [[STGenericTableDelegate alloc] init];
         tableDelegate_.delegate = self;
         tableDelegate_.style = STCellStyleConsumption;
@@ -276,9 +288,9 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
                     if ([Util topController] == self && self.animationState != _animationStateAbort) {
                         [self.consumptionToolbar.slider setScope:STStampedAPIScopeEveryone animated:YES];
                         if (_hasShownPopUp) {
-                            [Util executeWithDelay:.4 onMainThread:^{
-                                [self showSmallTooltip];
-                            }];
+//                            [Util executeWithDelay:.4 onMainThread:^{
+//                                [self showSmallTooltip];
+//                            }];
                         }
                         else {
                             [Util executeWithDelay:.4 onMainThread:^{
@@ -295,7 +307,7 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
             UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"NONE"] autorelease];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             if (self.animationState == _animationStateRunning || self.animationState == _animationStatePopUp) {
-                NSString* title = @"No suggestions";
+                NSString* title = @"No friends suggestions";
                 NSString* body = nil;
                 UIView* noData = [NoDataUtil waterMarkWithImage:[UIImage imageNamed:@"watermark_theguide"] title:title body:body options:nil];
                 noData.frame = [Util centeredAndBounded:noData.frame.size inFrame:bounds];
@@ -303,7 +315,7 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
             }
             else if (weak.scope == STStampedAPIScopeFriends) {
                 NoDataView* view = [[[NoDataView alloc] initWithFrame:bounds] autorelease];
-                [view setupWithButtonTitle:@"Find friends to follow" detailTitle:@"Add friends to improve suggestions." target:weak andAction:@selector(noDataAction:)];
+                [view setupWithButtonTitle:@"Find friends to follow" detailTitle:@"Add friends to see their suggestions." target:weak andAction:@selector(noDataAction:)];
                 view.frame = [Util centeredAndBounded:view.frame.size inFrame:CGRectMake(0, 0, tableView.frame.size.width, tableView.frame.size.height)];
                 [cell.contentView addSubview:view];
             }
@@ -312,7 +324,7 @@ static NSString* _songNameKey = @"Consumption.music.song.name";
                 NSString* body = nil;
                 if (weak.scope == STStampedAPIScopeYou) {
                     title = @"Sorry, no suggestions";
-                    body = @"Try making more stamps.";
+                    body = @"Add to-do's or create stamps!";
                 }
                 UIView* noData = [NoDataUtil waterMarkWithImage:[UIImage imageNamed:@"watermark_theguide"] title:title body:body options:nil];
                 noData.frame = [Util centeredAndBounded:noData.frame.size inFrame:bounds];

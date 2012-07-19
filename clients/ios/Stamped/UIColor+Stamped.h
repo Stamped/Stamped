@@ -22,5 +22,9 @@
 + (NSArray*)stampedButtonGradient;
 
 - (NSString*)hexString;
+- (NSString*)insaneHexString;
+
++ (UIColor*)stampedColorWithHex:(NSString*)hex andAlpha:(CGFloat)alpha;
++ (UIColor*)stampedColorWithHex:(NSString*)hex;
 
 @end

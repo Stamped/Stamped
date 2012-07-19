@@ -11,6 +11,9 @@
 #import <Twitter/Twitter.h>
 #import "STCancellation.h"
 
+
+extern NSString* const STTwitterErrorDomain;
+
 typedef void(^STTwitterAccessHandler)(BOOL granted);
 typedef void(^TwitterRequestHandler)(id, NSError*);
 
@@ -43,14 +46,21 @@ typedef void(^TwitterRequestHandler)(id, NSError*);
 /*
  * Valid for both after auth
  */
+- (ACAccount*)currentAccount;
 - (NSString*)twitterUsername;
 - (NSString*)twitterToken;
 - (NSString*)twitterTokenSecret;
 - (BOOL)isSessionValid;
+- (BOOL)canTweet;
 - (void)getTwitterUser:(TwitterRequestHandler)handler;
 
 - (STCancellation*)sendTweet:(NSString*)tweet withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
+- (STCancellation*)sendTweets:(NSArray*)tweets withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
 - (STCancellation*)addTwitterWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
+- (STCancellation*)fullTwitterAuthWithAddAccount:(BOOL)shouldAddAccount 
+                                     andCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 @end

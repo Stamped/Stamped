@@ -7,13 +7,15 @@
 //
 
 #import "PostStampBadgeTableCell.h"
+#import "STTwitter.h"
 
 @implementation PostStampBadgeTableCell
 @synthesize delegate;
+@synthesize badge = _badge;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
-                
+        
         UIImageView *imageView = [[UIImageView alloc] init];
         [self addSubview:imageView];
         _badgeImageView = imageView;
@@ -42,26 +44,33 @@
         _midTitleLabel = label;
         [label release];
         
-        UIImage *image = [UIImage imageNamed:@"post_stamp_share_btn.png"];
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
-        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
-        [button setTitle:@"Share" forState:UIControlStateNormal];
-        [button setTitleColor:[UIColor colorWithWhite:0.6f alpha:1.0f]forState:UIControlStateNormal];
-        button.titleLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
-        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
-        [button setTitleShadowColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [self addSubview:button];
-        button.frame = CGRectMake(self.bounds.size.width - 65.0f, floorf((self.bounds.size.height-image.size.height)/2), 55.0f, image.size.height);
-        [button addTarget:self action:@selector(share:) forControlEvents:UIControlEventTouchUpInside];
-        
+        if ([STTwitter sharedInstance].canTweet) {
+            UIImage *image = [UIImage imageNamed:@"post_stamp_share_btn.png"];
+            UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+            button.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+            [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+            [button setTitle:@"Share" forState:UIControlStateNormal];
+            [button setTitleColor:[UIColor colorWithWhite:0.6f alpha:1.0f]forState:UIControlStateNormal];
+            button.titleLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
+            button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
+            [button setTitleShadowColor:[UIColor whiteColor] forState:UIControlStateNormal];
+            [self addSubview:button];
+            button.frame = CGRectMake(self.bounds.size.width - 65.0f, floorf((self.bounds.size.height-image.size.height)/2), 55.0f, image.size.height);
+            [button addTarget:self action:@selector(share:) forControlEvents:UIControlEventTouchUpInside];
+        }
         _titleLabel.text = @"You're the";
         _midTitleLabel.text = @"1st of your friends";
         _detailTitleLabel.text = @"to stamp this";
         _badgeImageView.image = [UIImage imageNamed:@"post_stamp_first_friends.png"];
-
+        
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [_badge release];
+    [super dealloc];
 }
 
 - (void)layoutSubviews {
@@ -86,7 +95,7 @@
     frame.origin.x = floorf((self.bounds.size.width-frame.size.width)/2);
     frame.origin.y = CGRectGetMaxY(_midTitleLabel.frame);;
     _detailTitleLabel.frame = frame;
-
+    
     frame = _badgeImageView.frame;
     frame.origin.x = 10.0f;
     frame.origin.y = floorf((self.bounds.size.height-frame.size.height)/2);
@@ -95,7 +104,7 @@
 }
 
 - (void)setupWithBadge:(id<STBadge>)badge {
-    
+    self.badge = badge;
     _titleLabel.text = @"You're the";
     _detailTitleLabel.text = @"to stamp this";
     if ([badge.genre isEqualToString:@"entity_first_stamp"]) {
@@ -107,14 +116,14 @@
         
         _midTitleLabel.text = @"1st of your friends";
         _badgeImageView.image = [UIImage imageNamed:@"post_stamp_first_friends.png"];
-
+        
     } else if ([badge.genre isEqualToString:@"user_first_stamp"]) {
         
         _titleLabel.text = @"This is your";
         _midTitleLabel.text = @"1st Stamp";
         _detailTitleLabel.text = @"Welcome to Stamped!";
         _badgeImageView.image = [UIImage imageNamed:@"post_stamp_first_friends.png"];
-
+        
     }
     
     [self setNeedsLayout];
@@ -158,7 +167,7 @@
         }
         
     }
-
+    
     
 }
 

@@ -37,8 +37,9 @@
 #import "NoDataUtil.h"
 
 #import "STStampsViewController.h"
+#import <MessageUI/MFMailComposeViewController.h>
 
-@interface STUserViewController ()
+@interface STUserViewController () <UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
 
 @property (nonatomic, readonly, assign) BOOL loadingUser;
 @property (nonatomic, readonly, retain) STCache* stampCache;
@@ -436,7 +437,7 @@
                 [Util globalLoadingUnlock];
                 if (followerIDs) {
                     STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:followerIDs] autorelease];
-                    controller.title = @"Followers";
+                    //controller.title = @"Followers";
                     [[Util sharedNavigationController] pushViewController:controller animated:YES];
                 }
             }];
@@ -449,7 +450,7 @@
                 [Util globalLoadingUnlock];
                 if (friendIDs) {
                     STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:friendIDs] autorelease];
-                    controller.title = @"Following";
+                    //controller.title = @"Following";
                     [[Util sharedNavigationController] pushViewController:controller animated:YES];
                 }
             }];
@@ -652,8 +653,9 @@
         NSDictionary *dictionary = [section objectAtIndex:indexPath.row];
         if ([[dictionary objectForKey:@"title"] isEqualToString:@"Web Profile"]) {
             
-            UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:[dictionary objectForKey:@"detail"] delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Copy Link", @"Email Link", nil];
+            UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:[dictionary objectForKey:@"detail"] delegate:(id<UIActionSheetDelegate>)self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Email Link", nil];
             actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+            actionSheet.delegate = self;
             [actionSheet showInView:self.view];
             [actionSheet release];
             
@@ -770,6 +772,29 @@
     
 }
 #pragma mark - Cache Methods
+
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (buttonIndex != actionSheet.cancelButtonIndex) {
+        MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+        vc.mailComposeDelegate = self;
+        [vc setMessageBody:[NSString stringWithFormat:@"stamped.com/%@", self.user.screenName] isHTML:NO];
+        [self presentModalViewController:vc animated:YES];
+        [vc release];
+    }
+}
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+    if (error) {
+        [Util warnWithMessage:@"Couldn't send email" andBlock:^{
+            [self dismissModalViewControllerAnimated:YES];
+        }];
+    }
+    else {
+        [self dismissModalViewControllerAnimated:YES];
+    }
+}
 
 - (void)reloadTableView:(BOOL)preserveOffset {
     

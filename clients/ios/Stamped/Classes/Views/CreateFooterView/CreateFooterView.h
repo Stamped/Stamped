@@ -15,6 +15,7 @@
 @property(nonatomic,assign) id <CreateFooterViewDelegate> delegate;
 
 - (void)setUploading:(BOOL)uploading animated:(BOOL)animated;
+@property (nonatomic, readonly, retain) UIButton* twitterButton;
 
 @end
 @protocol CreateFooterViewDelegate

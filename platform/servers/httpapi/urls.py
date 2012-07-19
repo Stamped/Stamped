@@ -123,6 +123,8 @@ urlpatterns = patterns('',
     (r'v1/entities/suggested.json',                         'v0.functions.entities.suggested'),
     (r'v1/entities/menu.json',                              'v0.functions.entities.menu'),
     (r'v1/entities/stamped_by.json',                        'v0.functions.entities.stampedBy'),
+    (r'v1/entities/edit.html',                              'v0.functions.entities.edit'),
+    (r'v1/entities/update.html',                            'v0.functions.entities.update'),
     
     ### ACTIONS
     (r'v1/actions/complete.json',                           'v0.functions.entities.completeAction'),

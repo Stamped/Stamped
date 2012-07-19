@@ -14,11 +14,11 @@
 #import "STSimpleLoginResponse.h"
 #import "STSimpleOAuthToken.h"
 
-#if defined (DEV_BUILD)
-static NSString* const _baseURL = @"https://dev.stamped.com/v0";
-#else
-static NSString* const _baseURL = @"https://api.stamped.com/v0";
-#endif
+//#if defined (DEV_BUILD)
+static NSString* const _baseURL = @"https://dev.stamped.com/v1";
+//#else
+//static NSString* const _baseURL = @"https://api1.stamped.com/v1";
+//#endif
 
 static NSString* const _clientID = @"iphone8@2x";
 static NSString* const _clientSecret = @"LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu";
@@ -364,7 +364,7 @@ static STRestKitLoader* _sharedInstance;
         }
     }
     if (!errorMessage) {
-        errorMessage = error.localizedDescription;
+        errorMessage = @"We're experiencing some difficulties. Please try again later.";
     }
     if (!errorID) {
         errorID = @"unknown";

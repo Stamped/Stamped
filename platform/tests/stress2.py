@@ -34,15 +34,18 @@ baseurl = "https://dev.stamped.com/v1"
 baseurl = "http://localhost:18000/v1"
 baseurl = "http://stress-api-1431215555.us-east-1.elb.amazonaws.com/v1"
 
-class StampedAPIURLOpener(urllib.FancyURLopener):
-    def prompt_user_passwd(self, host, realm):
-        return ('iphone8@2x', 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu')
-opener = StampedAPIURLOpener()
+hosts = [
+    # "http://ec2-23-22-203-114.compute-1.amazonaws.com:5000/v1",
+    # "http://ec2-174-129-84-64.compute-1.amazonaws.com:5000/v1",
+    "http://ec2-75-101-244-225.compute-1.amazonaws.com:5000/v1",
+]
 
 
 def handleGET(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
-    url    = "%s/%s?%s" % (baseurl, path, params)
+    url    = "%s/%s?%s" % (random.choice(hosts), path, params)
+    
+    print '+|%s|GET|%s' % (datetime.datetime.utcnow(), url)
     
     try:
         raw = urllib2.urlopen(url).read()
@@ -51,7 +54,7 @@ def handleGET(path, data, handleExceptions=True):
     except Exception as e:
         logs.warning("GET Failed: %s" % url)
         raise 
-    
+
     result = json.loads(raw)
 
     if handleExceptions and 'error' in result:
@@ -61,7 +64,9 @@ def handleGET(path, data, handleExceptions=True):
 
 def handlePOST(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
-    url    = "%s/%s" % (baseurl, path)
+    url    = "%s/%s" % (random.choice(hosts), path)
+    
+    print '+|%s|POST|%s' % (datetime.datetime.utcnow(), url)
     
     try:
         raw = urllib2.urlopen(url, params).read()
@@ -70,7 +75,6 @@ def handlePOST(path, data, handleExceptions=True):
     except Exception:
         logs.warning("POST Failed: %s (%s)" % (url, params))
         raise
-    # logs.info("POST: %s" % url)
     
     result = json.loads(raw)
 
@@ -1858,7 +1862,7 @@ class LoggedOutUser(User):
     def __init__(self):
         User.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 200 + (random.random() * 200)
+        self._userSessionLength = 30# 200 + (random.random() * 200)
         
         self.setAction('inbox', self._viewInbox)
         self.setWeight('inbox', 10)
@@ -1957,19 +1961,33 @@ def worker(user):
     user.run()
     print 'DONE'
 
-greenlets = [ 
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-]
+while True:
+    start = time.time()
+    greenlets = [ 
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, LoggedOutUser()),
+    ]
 
-gevent.joinall(greenlets)
+    gevent.joinall(greenlets)
+
+    print 'DONE DONE DONE'
+    print
+
+    if time.time() - start > 35:
+        print "FAIL!", datetime.datetime.utcnow()
+        break 
+
+    time.sleep(3)
 
 # user = ExistingUser('kevin', '12345')
 # user = LoggedOutUser()

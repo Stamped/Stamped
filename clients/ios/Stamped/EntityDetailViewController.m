@@ -29,10 +29,12 @@
 #import "STTodoButton.h"
 #import "STStampButton.h"
 #import "STHoverToolbar.h"
+#import "STNavigationItem.h"
+#import <MessageUI/MFMailComposeViewController.h>
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
-@interface EntityDetailViewController ()
+@interface EntityDetailViewController () <MFMailComposeViewControllerDelegate>
 
 - (void)commonInitWithEntityID:(NSString*)entityID andSearchID:(NSString*)searchID;
 
@@ -83,8 +85,32 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
     //_toolbar = toolbar;
     [super viewDidLoad];
     [self reloadStampedData];
+    self.navigationItem.rightBarButtonItem = [[[STNavigationItem alloc] initWithTitle:@"Debug" style:UIBarButtonItemStyleDone target:self action:@selector(debug:)] autorelease];
     
 }
+
+- (void)debug:(id)notImportant {
+    MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+    vc.mailComposeDelegate = self;
+    [vc setMessageBody:[NSString stringWithFormat:@"%@\n%@", self.entityDetail.title, self.entityID] isHTML:NO];
+    [self presentModalViewController:vc animated:YES];
+    [vc release];
+}
+
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+    if (error) {
+        [Util warnWithMessage:@"Couldn't send email" andBlock:^{
+            [self dismissModalViewControllerAnimated:YES];
+        }];
+    }
+    else {
+        [self dismissModalViewControllerAnimated:YES];
+    }
+}
+
 
 - (void)dealloc {
     [_entityDetailCancellation cancel];

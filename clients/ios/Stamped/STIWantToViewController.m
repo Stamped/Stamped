@@ -18,6 +18,7 @@
 #import "STMenuController.h"
 #import "STAppDelegate.h"
 #import "STNavigationItem.h"
+#import "STGuidePopUp.h"
 
 @interface STIWantToViewController ()
 
@@ -28,19 +29,18 @@
 - (id)init {
     self = [super init];
     if (self) {
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILoginNotification object:nil];
     }
     return self;
 }
 
-- (void)login:(id)sender {
-    
-    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
-    [controller showSignIn];
-    
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [super dealloc];
 }
 
-- (void)viewDidLoad {
-    [super viewDidLoad];
+- (void)loginStatusChanged:(id)notImportant {
     
     if (!LOGGED_IN) {
         
@@ -53,6 +53,19 @@
         [Util addCreateStampButtonToController:self];
         
     }
+}
+
+- (void)login:(id)sender {
+    
+    STMenuController *controller = ((STAppDelegate*)[[UIApplication sharedApplication] delegate]).menuController;
+    [controller showSignIn];
+    
+}
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self loginStatusChanged:nil];
     
     self.view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
     
@@ -92,6 +105,16 @@
     [super viewDidUnload];
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    if([STGuidePopUp shouldShowPopUp]) {
+        [Util executeWithDelay:.4 onMainThread:^{
+            if ([Util topController] == self) {
+                [STGuidePopUp present];
+            }
+        }];
+    }
+}
 
 #pragma mark - Actions
 

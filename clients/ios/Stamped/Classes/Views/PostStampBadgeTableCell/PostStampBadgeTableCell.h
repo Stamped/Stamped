@@ -20,6 +20,7 @@
 }
 
 @property(nonatomic,assign) id <PostStampBadgeTableCell> delegate;
+@property (nonatomic, readwrite, retain) id<STBadge> badge;
 
 - (void)setupWithBadge:(id<STBadge>)badge;
 - (void)showShadow:(BOOL)shadow;

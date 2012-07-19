@@ -2075,6 +2075,40 @@ class HTTPEntityId(Schema):
     def setSchema(cls):
         cls.addProperty('entity_id',                        basestring, required=True)
 
+class HTTPEntityEdit(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',                        basestring, required=True)
+        cls.addProperty('secret',                           basestring, required=True)
+
+class HTTPEntityUpdate(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',                        basestring, required=True)
+        cls.addProperty('secret',                           basestring, required=True)          
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('desc',                             basestring)
+        
+        # sources
+        cls.addProperty('rdio_url',                         basestring)
+        cls.addProperty('itunes_url',                       basestring)
+        cls.addProperty('imdb_url',                         basestring)
+        cls.addProperty('fandango_url',                     basestring)
+        cls.addProperty('amazon_url',                       basestring)
+        cls.addProperty('netflix_url',                      basestring)
+
+        # place
+        cls.addProperty('address_street',                   basestring)
+        cls.addProperty('address_street_ext',               basestring)
+        cls.addProperty('address_locality',                 basestring)
+        cls.addProperty('address_region',                   basestring)
+        cls.addProperty('address_postcode',                 basestring)
+        cls.addProperty('address_country',                  basestring)
+
+        cls.addProperty('phone',                            basestring)
+
+
+
 class HTTPEntityIdSearchId(Schema): ### TODO: Remove?
     @classmethod
     def setSchema(cls):

@@ -79,6 +79,8 @@ static const CGFloat _headerHeight = _cellHeight;
 
 @property (nonatomic, readwrite, assign) BOOL locked;
 
+@property (nonatomic, readwrite, assign) BOOL useOldTwitter;
+
 @end
 
 @implementation STLinkedAccountsViewController
@@ -112,6 +114,7 @@ static const CGFloat _headerHeight = _cellHeight;
 @synthesize meDetailsRequest = _meDetailsRequest;
 
 @synthesize locked = _locked;
+@synthesize useOldTwitter = _useOldTwitter;
 
 - (id)init
 {
@@ -120,6 +123,7 @@ static const CGFloat _headerHeight = _cellHeight;
         _openGraphItems = (id)[[NSArray alloc] init];
         _openGraphValues = [[NSMutableDictionary alloc] init];
         self.disableReload = YES;
+        _useOldTwitter = ![[STTwitter sharedInstance] canTweet];
     }
     return self;
 }
@@ -176,9 +180,10 @@ static const CGFloat _headerHeight = _cellHeight;
         [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookCameBack];
         [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookLoggedOut];
         
-        [STEvents addObserver:self selector:@selector(twitterAuthFinished:) event:EventTypeTwitterAuthFinished];
-        [STEvents addObserver:self selector:@selector(twitterAuthFailed:) event:EventTypeTwitterAuthFailed];
-        
+        if (self.useOldTwitter) {
+            [STEvents addObserver:self selector:@selector(twitterAuthFinished:) event:EventTypeTwitterAuthFinished];
+            [STEvents addObserver:self selector:@selector(twitterAuthFailed:) event:EventTypeTwitterAuthFailed];
+        }
         UIImageView* header = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"linked_accounts_greenbar"]] autorelease];
         CGRect headerFrame = header.frame;
         headerFrame.size.width = self.view.frame.size.width;
@@ -310,7 +315,7 @@ static const CGFloat _headerHeight = _cellHeight;
         
         [self updateSpotify];
         
-        UIView* musicFooter = [self footerWithText:@"Access your listening history, listen to full songs in Stamped, and add songs to your playlist."];
+        UIView* musicFooter = [self footerWithText:@"Listen to full songs in Stamped, and add songs to your playlist."];
         [Util reframeView:musicFooter withDeltas:CGRectMake(0, 0, 0, 19)];
         [self.scrollView appendChildView:musicFooter];
         
@@ -339,8 +344,9 @@ static const CGFloat _headerHeight = _cellHeight;
             _disconnectFromNetflix.hidden = YES;
         }
         
-        UIView* filmFooter = [self footerWithText:@"Access your recommendations and add stamps to your Netflix queue."];
+        UIView* filmFooter = [self footerWithText:@"Add movies and TV shows to you queue."];
         [Util reframeView:filmFooter withDeltas:CGRectMake(0, 0, 0, 32)];
+        [self.scrollView appendChildView:filmFooter];
     }
     else {
         [Util warnWithAPIError:error andBlock:^{
@@ -467,7 +473,7 @@ static const CGFloat _headerHeight = _cellHeight;
     [params setObject:twitter.twitterUsername forKey:@"linked_screen_name"];
     [params setObject:twitter.twitterToken forKey:@"token"];
     [params setObject:twitter.twitterTokenSecret forKey:@"secret"];
-//    [params setObject:@"twitter" forKey:@"service_name"];
+    //    [params setObject:@"twitter" forKey:@"service_name"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/twitter/add.json"
                                                  post:YES
                                         authenticated:YES
@@ -491,10 +497,26 @@ static const CGFloat _headerHeight = _cellHeight;
     [Util warnWithMessage:@"Could not link to Twitter" andBlock:nil];
 }
 
+
 - (void)connectToTwitter:(id)notImportant {
     if (!self.twitterPending) {
         self.twitterPending = YES;
-        [[STTwitter sharedInstance] auth];
+        if (self.useOldTwitter) {
+            [[STTwitter sharedInstance] auth];
+        }
+        else {
+            [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:YES andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                
+                self.twitterPending = NO;
+                if (success) {
+                    self.connectToTwitter.hidden = YES;
+                    self.disconnectFromTwitter.hidden = NO;
+                }
+                else {
+                    [Util warnWithMessage:@"Could not link to Twitter" andBlock:nil];
+                }
+            }];
+        }
     }
 }
 

@@ -28,6 +28,7 @@
 #import "STInboxViewController.h"
 #import "STRootViewController.h"
 #import "STStampedAPI.h"
+#import "STNavigationBar.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -96,11 +97,6 @@ static STPopUpView* volatile _currentPopUp = nil;
 
 @implementation Util
 
-static Rdio* _rdio;
-
-+(void)initialize {
-    _rdio = [[Rdio alloc] initWithConsumerKey:@"bzj2pmrs283kepwbgu58aw47" andSecret:@"xJSZwBZxFp" delegate:nil];
-}
 
 + (NSString*)floatToHex:(CGFloat)value {
     if (value > 1 || value < 0) return nil;
@@ -615,6 +611,16 @@ static Rdio* _rdio;
     return 2.0;
 }
 
+
++ (BOOL)oncePerUserWithID:(NSString*)userDefaultsKey {
+    
+    NSString* lastUserID = [[NSUserDefaults standardUserDefaults] objectForKey:userDefaultsKey];
+    NSString* currentUserID = [STStampedAPI sharedInstance].currentUser.userID;
+    BOOL result = currentUserID != nil && ![currentUserID isEqualToString:lastUserID];
+    [[NSUserDefaults standardUserDefaults] setObject:currentUserID ? currentUserID : @" invalid userID " forKey:userDefaultsKey];
+    return result;
+}
+
 + (void)logOperationException:(NSException*)exception withMessage:(NSString*)message {
     if (message) {
         NSLog(@"%@: %@", message, exception);
@@ -623,10 +629,6 @@ static Rdio* _rdio;
         NSLog(@"exception occurred! %@", exception);
     }
     NSLog(@"%@",[NSThread callStackSymbols]);
-}
-
-+ (Rdio*)sharedRdio {
-    return _rdio;
 }
 
 + (CGRect)getAbsoluteFrame:(UIView*)view {
@@ -1206,6 +1208,11 @@ static Rdio* _rdio;
     
 }
 
++ (void)setTitle:(NSString*)title forController:(UIViewController*)controller {
+    STNavigationBar* bar = (id)[Util sharedNavigationController].navigationBar;
+    bar.title = title;
+}
+
 + (STCancellation*)addUnreadBadgeToView:(UIView*)view origin:(CGPoint)origin {
     return [[STStampedAPI sharedInstance] unreadCountWithCallback:^(id<STActivityCount> count, NSError *error, STCancellation *cancellation) {
         if (count && count.numberUnread.integerValue >0) {
@@ -1458,6 +1465,7 @@ static Rdio* _rdio;
                                             color:(UIColor *)aColor 
                                        lineHeight:(CGFloat)lineHeight 
                                            indent:(CGFloat)indent 
+                                        alignment:(CTTextAlignment)alignment
                                   extraAttributes:(NSDictionary*)attributes {    
     if (!aString)
         return nil;
@@ -1467,6 +1475,7 @@ static Rdio* _rdio;
     id paragraphStyleAttr = ((^ {
         
         CTParagraphStyleSetting paragraphStyles[] = (CTParagraphStyleSetting[]){
+            (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierAlignment, sizeof(alignment), &alignment },
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierLineHeightMultiple, sizeof(float_t), (float_t[]){ 0.01f } },
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMinimumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
             (CTParagraphStyleSetting){ kCTParagraphStyleSpecifierMaximumLineHeight, sizeof(float_t), (float_t[]){ lineHeight } },
@@ -1499,7 +1508,13 @@ static Rdio* _rdio;
                                             color:(UIColor *)aColor 
                                        lineHeight:(CGFloat)lineHeight 
                                            indent:(CGFloat)indent {
-    return [self attributedStringForString:aString font:aFont color:aColor lineHeight:lineHeight indent:indent extraAttributes:[NSDictionary dictionary]];
+    return [self attributedStringForString:aString
+                                      font:aFont 
+                                     color:aColor
+                                lineHeight:lineHeight
+                                    indent:indent 
+                                 alignment:kCTLeftTextAlignment
+                           extraAttributes:[NSDictionary dictionary]];
 }
 
 
@@ -1514,6 +1529,7 @@ static Rdio* _rdio;
                                      color:aColor 
                                 lineHeight:lineHeight
                                     indent:indent
+                                 alignment:kCTLeftTextAlignment
                            extraAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithFloat:kerning] forKey:(id)kCTKernAttributeName]];
 }
 //
@@ -1725,6 +1741,10 @@ static Rdio* _rdio;
 
 + (NSError*)errorWithDescription:(NSString*)description {
     return [NSError errorWithDomain:@"" code:0 userInfo:[NSDictionary dictionaryWithObject:description forKey:NSLocalizedDescriptionKey]];
+}
+
++ (BOOL)showingFullscreenPopUp {
+    return _currentPopUp != nil;
 }
 
 @end

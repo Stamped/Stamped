@@ -15,4 +15,6 @@
 - (STCancellation*)fetchWithRange:(NSRange)range
                       andCallback:(void (^)(NSArray* results, NSError* error, STCancellation* cancellation))block;
 
+@property (nonatomic, readwrite, retain) NSError* lastError;
+
 @end
