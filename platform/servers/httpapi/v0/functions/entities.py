@@ -8,6 +8,11 @@ __license__   = "TODO"
 
 from servers.httpapi.v0.helpers import *
 
+try:
+    from resolve        import ManualEdit
+except:
+    raise
+
 entityExceptions = [
     (StampedEntityUpdatePermissionError,   403, 'invalid_credentials', "Insufficient privileges to update entity"),
     (StampedTombstonedEntityError,         400, 'invalid_credentials', "Sorry, this entity can no longer be updated"),
@@ -161,3 +166,36 @@ def completeAction(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.completeAction(authUserId, **data)
     return transformOutput(result)
 
+_secret = 'supersmash'
+
+@require_http_methods(["GET"])
+@handleHTTPRequest(http_schema=HTTPEntityEdit, requires_auth=False)
+def edit(request, authUserId, http_schema, **kwargs):
+    if _secret != http_schema.secret:
+        raise StampedHTTPError(403, 'Not authorized')
+    form = ManualEdit.formForEntity(http_schema.entity_id, secret=http_schema.secret)
+    kwargs = {}
+    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
+    kwargs.setdefault('mimetype', 'text/html')
+    output      = HttpResponse(form, **kwargs)
+    
+    return output
+
+
+@require_http_methods(["POST"])
+@handleHTTPRequest(http_schema=HTTPEntityUpdate, requires_auth=False)
+def update(request, authUserId, http_schema, **kwargs):
+    if _secret != http_schema.secret:
+        raise StampedHTTPError(403, 'Not authorized')
+    # try:
+    ManualEdit.update(http_schema)
+    # except Exception as e:
+    #     raise StampedHTTPError(400, 'bad form: %s' % e)
+
+    form = ManualEdit.formForEntity(http_schema.entity_id, secret=http_schema.secret)
+    kwargs = {}
+    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
+    kwargs.setdefault('mimetype', 'text/html')
+    output      = HttpResponse(form, **kwargs)
+    
+    return output

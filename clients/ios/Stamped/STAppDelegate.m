@@ -87,20 +87,20 @@
     //  [[BWHockeyManager sharedHockeyManager] setAppIdentifier:@"eed3b68dbf577e8e1a9ce46a83577ead"];
     //[[BWHockeyManager sharedHockeyManager] setDelegate:self];
     //#endif
-//    
-//#if defined (CONFIGURATION_Beta)
-//#warning QuincyKit Beta (Ad Hoc) is configured for this build
-//    NSString* key;
-//    //key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
-//    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
-////    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
-//#endif
-//    
-//    
-//#if defined (CONFIGURATION_Release)
-//#warning QuincyKit Distribution is configured for this build
-////    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
-//#endif
+    
+#if defined (CONFIGURATION_Beta)
+#warning QuincyKit Beta (Ad Hoc) is configured for this build
+    NSString* key;
+    //key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
+    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
+//    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
+#endif
+    
+    
+#if defined (CONFIGURATION_Release)
+#warning QuincyKit Distribution is configured for this build
+//    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
+#endif
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didLogIn:) name:STStampedAPILoginNotification object:nil];
     RKLogConfigureByName("RestKit*", RKLogLevelError);
     RKLogSetAppLoggingLevel(RKLogLevelError);
@@ -126,7 +126,7 @@
     
     STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:firstController];
     _navigationController = [navController retain];
-    STMenuController *menuController = [[STMenuController alloc] initWithRootViewController:navController];
+    STMenuController* menuController = [[STMenuController alloc] initWithRootViewController:navController];
     menuController.leftViewController = leftController;
     menuController.rightViewController = rightController;
     self.menuController = menuController;
@@ -171,7 +171,6 @@
 }
 
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-    NSLog(@"Did fail to register");
     NSString* msg = [NSString stringWithFormat:@"APNS registration failed: %@", error];
     STLog(msg);
 }
