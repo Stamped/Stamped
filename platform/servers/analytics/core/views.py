@@ -218,6 +218,8 @@ def stress(request):
 
     count_report = {}
     mean_report = {}
+    window = 0
+    interval = 0
     if request.method == 'POST': 
         form = qpsForm(request.POST)
         if form.is_valid():
