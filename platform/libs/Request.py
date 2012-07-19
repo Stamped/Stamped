@@ -48,7 +48,6 @@ class RateLimiterState(object):
                 if self.__is_ec2:
                     self.__local_rlservice = StampedRateLimiterService(throttle=True)
                 else:
-                    print('hit local_rlsservice initiator.   __local_rlservice: %s' % self.__local_rlservice)
                     self.__local_rlservice = StampedRateLimiterService(throttle=False)
             self.__service_init_semaphore.release()
 
