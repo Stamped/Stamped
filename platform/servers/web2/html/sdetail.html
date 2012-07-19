@@ -49,7 +49,7 @@
                             
                             {% for content in stamp.contents %}
                                 {% if content.blurb and content.blurb|length > 0 %}
-                                    <p class="normal_blurb">{{content.blurb}}</p>
+                                    <p class="normal_blurb">{{content.blurb|safe}}</p>
                                 {% endif %}
                             {% endfor %}
                             
@@ -228,8 +228,8 @@
                                                             <div class='action-name'>Play preview via Rdio</div>
                                                         </div>
                                                         
-                                                        <div class='loading'>
-                                                            <div class='action-icon action-icon-loading'></div>
+                                                        <div class='media-loading'>
+                                                            <div class='action-icon action-icon-media-loading'></div>
                                                             <div class='action-name'>Loading...</div>
                                                         </div>
                                                         

@@ -943,7 +943,7 @@ body.app {
 @preview-width: 140px;
 @preview-wrapper-width: @preview-width + 8px;
 
-@wide-preview-width: 340px;
+@wide-preview-width: 340px - 48px - 8px - 48px - 24px;
 @wide-preview-wrapper-width: @wide-preview-width + 8px;
 
 .sized(@width) {
@@ -1191,14 +1191,16 @@ quotes: "\201C" "\201D";
             }
             
             .content_2 {
-                margin: 0 auto;
+                position: relative;
+                margin: 0 0 0 36px;
                 left: 0;
                 float: none;
+                width: @wide-preview-width;
                 
                 .timestamp {
                     position: absolute;
                     left: auto;
-                    right: 18px;
+                    right: -6px;
                     top: -1.5em;
                 }
             }

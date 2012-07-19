@@ -676,8 +676,6 @@ var g_update_stamps = null;
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
                 
-                console.log(offset);
-                
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                     
@@ -1276,7 +1274,7 @@ var g_update_stamps = null;
                             var $elem = $(sel);
                             g_category = category;
                             
-                            console.debug("NEW CATEGORY: " + category);
+                            //console.debug("NEW CATEGORY: " + category);
                             //History.log(state.data, state.title, state.url);
                             
                             if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
@@ -1397,7 +1395,7 @@ var g_update_stamps = null;
                     }
                     
                     if (is_match) {
-                        console.debug("History matched view '" + view.title + "'");
+                        //console.debug("History matched view '" + view.title + "'");
                         
                         view.apply_func(state, url, relative_url);
                         break;
@@ -1703,7 +1701,7 @@ var g_update_stamps = null;
                 
                 scroll_top  = $window.scrollTop();
                 
-                console.debug("AJAX: " + href);
+                //console.debug("AJAX: " + href);
             } else {
                 $target     = $("<div class='" + sdetail_wrapper + "'></div>").html(html);
                 $target2    = $target;
@@ -2003,7 +2001,7 @@ var g_update_stamps = null;
                         var play_action = function() {
                             rdio_initialized_callback = null;
                             
-                            $elem.removeClass("stopped playing").addClass("loading");
+                            $elem.removeClass("stopped playing").addClass("media-loading");
                             $rdio.rdio().play(source_id);
                         };
                         
@@ -2020,7 +2018,7 @@ var g_update_stamps = null;
                         }
                         
                         if (!rdio_initialized) {
-                            $elem.removeClass("stopped playing").addClass("loading");
+                            $elem.removeClass("stopped playing").addClass("media-loading");
                             
                             rdio_initialized_callback = function() {
                                 action();
@@ -2057,9 +2055,15 @@ var g_update_stamps = null;
                     
                     $rdio.bind('playStateChanged.rdio', function(e, playState) {
                         if (playState == 0) { // paused
-                            $elem.removeClass("loading playing").addClass("stopped");
+                            $elem.removeClass("media-loading playing").addClass("stopped");
                         } else {
-                            $elem.removeClass("loading stopped").addClass("playing");
+                            // note: empirically, rdio adds an ease-in, so we show the loading 
+                            // indicator for slightly longer than when the audio actually 
+                            // starts "playing" to adjust for the pause until the user actually 
+                            // hears audio
+                            setTimeout(function() {
+                                $elem.removeClass("media-loading stopped").addClass("playing");
+                            }, 2500);
                         }
                     });
                     
@@ -2069,6 +2073,7 @@ var g_update_stamps = null;
                 } else if ($source_itunes.length === 1) {
                     var itunes_initialized = false;
                     var itunes_initialized_callback = null;
+                    
                     var $itunes = $("#itunes-preview");
                     var itunes_url = $itunes.attr("src");
                     
@@ -2204,7 +2209,6 @@ var g_update_stamps = null;
                 var $this = $(this);
                 var href  = $this.attr('href');
                 
-                console.log(href);
                 var popup_options = get_fancybox_popup_options({
                     href  : href
                 });
@@ -2259,7 +2263,6 @@ var g_update_stamps = null;
                 minWidth    : 480
             });
             
-            console.debug(popup_options);
             $.fancybox.open(popup_options);
             return false;
         });

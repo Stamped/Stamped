@@ -282,18 +282,22 @@
                                 setTimeout(function() {
                                     var $s = $('.stamp-map-item');
                                     
-                                    if (!lite) {
-                                        $s.click(function(event) {
-                                            g_open_sdetail_click(event);
-                                        });
-                                    }
-                                    
-                                    $s.find('.stamp-map-item-close-button').click(function(event) {
+                                    $s.find('.close').click(function(event) {
                                         event.preventDefault();
                                         close_popup();
                                         
                                         return false;
                                     });
+                                    
+                                    if (!lite) {
+                                        $s.click(function(event) {
+                                            if ($(event.target).is("a.close")) {
+                                                return true;
+                                            }
+                                            
+                                            return g_open_sdetail_click(event);
+                                        });
+                                    }
                                     
                                     g_update_stamps($s);
                                 }, 150);
