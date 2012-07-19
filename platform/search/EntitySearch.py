@@ -14,7 +14,6 @@ from resolve.EntityProxyContainer import EntityProxyContainer
 from resolve.EntityProxySource import EntityProxySource
 from resolve.FactualSource import FactualSource
 from resolve.GooglePlacesSource import GooglePlacesSource
-from resolve.NetflixSource import NetflixSource
 from resolve.RdioSource import RdioSource
 from resolve.SpotifySource import SpotifySource
 from resolve.StampedSource import StampedSource
@@ -77,7 +76,6 @@ class EntitySearch(object):
         self.__registerSource(AmazonSource(), music=5, book=10)
         self.__registerSource(FactualSource(), place=8)
         self.__registerSource(GooglePlacesSource(), place=8)
-        self.__registerSource(NetflixSource(), film=8)
         self.__registerSource(RdioSource(), music=8)
         self.__registerSource(SpotifySource(), music=8)
         self.__registerSource(TMDBSource(), film=8)
