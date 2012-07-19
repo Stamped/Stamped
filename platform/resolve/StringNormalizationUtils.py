@@ -22,15 +22,16 @@ except:
 
 #generally applicable removal patterns
 _general_regex_removals = [
-    (re.compile(r'.*(\(.*\)).*')    , [1]),     # a name ( with parens ) anywhere
-    (re.compile(r'.*(\[.*]).*')     , [1]),     # a name [ with brackets ] anywhere
-    (re.compile(r'.*(\(.*)')        , [1]),     # a name ( bad parathetical
-    (re.compile(r'.*(\[.*)')        , [1]),     # a name [ bad brackets
-    (re.compile(r'.*(\.\.\.).*')    , [1]),     # ellipsis ... anywhere
-    (re.compile(r".*(').*")         , [1]),
-    (re.compile(r'.*(").*')         , [1]),
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*\w(-)\w.*$')    , [1], ' '),
+    (re.compile(r'.*(\(.*\)).*')    , 1),     # a name ( with parens ) anywhere
+    (re.compile(r'.*(\[.*]).*')     , 1),     # a name [ with brackets ] anywhere
+    (re.compile(r'.*(\(.*)')        , 1),     # a name ( bad parathetical
+    (re.compile(r'.*(\[.*)')        , 1),     # a name [ bad brackets
+    (re.compile(r'.*(\.\.\.).*')    , 1),     # ellipsis ... anywhere
+    (re.compile(r".*(').*")         , 1),
+    (re.compile(r'.*(").*')         , 1),
+    (re.compile(r'^(the ).*$')      , 1),
+    (re.compile(r'.*\w(-)\w.*$')    , 1, ' '),
+    # TODO PRELAUNCH FUCK FUCK FUCK: Clear out -:;/., and all sorts of other gratuitous punctuation. Run SxS!
                                                 ]
 
 #generally applicable replacements
@@ -40,25 +41,25 @@ _general_replacements = [
 
 # track-specific removal patterns
 _track_removals = [
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm|single|\w+ [vV]ersion)$)')  , [1]),
-    (re.compile(r'.*( *[\(\[]\w* *\w* *[vV]ersion[\)\]]$)') , [1]),
+    (re.compile(r'^(the ).*$'), 1),
+    (re.compile(r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm|single|\w+ [vV]ersion)$)'), 1),
+    (re.compile(r'.*( *[\(\[]\w* *\w* *[vV]ersion[\)\]]$)'), 1),
 ]
 
 # album-specific removal patterns
 _album_removals = [
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'.*((-|,)( the)? remixes.*$)')     , [1]),
-    (re.compile(r'.*(- ep$)')                       , [1]),
-    (re.compile(r'.*( the (\w+ )?remixes$)')        , [1]),
-    (re.compile(r'.*(- remix ep)')  , [1]),
-    (re.compile(r'.*(- single$)')   , [1]),
+    (re.compile(r'^(the ).*$'), 1),
+    (re.compile(r'.*((-|,)( the)? remixes.*$)'), 1),
+    (re.compile(r'.*(- ep$)'), 1),
+    (re.compile(r'.*( the (\w+ )?remixes$)'), 1),
+    (re.compile(r'.*(- remix ep)'), 1),
+    (re.compile(r'.*(- single$)'), 1),
 ]
 
 # artist-specific removal patterns
 _artist_removals = [
-    (re.compile(r'^(the ).*$')      , [1]),
-    (re.compile(r'^.*( band)')      , [1]),
+    (re.compile(r'^(the ).*$'), 1),
+    (re.compile(r'^.*( band)'), 1),
 ]
 
 # movie-specific removal patterns
@@ -81,27 +82,26 @@ def regexRemoval(string, patterns):
         modified = False
 
         for case in patterns:
-            replacement = ''
 
             if len(case) == 2:
-                pattern, groups = case
+                pattern, group = case
+                replacement = ''
+            elif len(case) == 3:
+                pattern, group, replacement = case
             else:
-                assert len(case) == 3
-                pattern, groups, replacement = case
+                raise Exception('Invalid case: ' + repr(case))
 
             while True:
                 match = pattern.match(string)
 
-                if match is None:
-                    break
+                if match:
+                    string = string[:match.start(group)] + replacement + string[match.end(group):]
+                    modified = True
                 else:
-                    for group in groups:
-                        string2 = string.replace(match.group(group), replacement)
-
-                        string   = string2
-                        modified = True
+                    break
 
     return string
+
 _whitespace_regexp = re.compile("\s+")
 
 def format(string):
