@@ -1724,19 +1724,22 @@ class StampedAPI(AStampedAPI):
 
         return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
 
-    def reloadAutoCompleteIndex(self):
+    def reloadAutoCompleteIndex(self, retries=5, delay=0):
         def setIndex(greenlet):
             try:
                 self.__autocomplete = greenlet.get()
             except Exception as e:
-                email = {
-                    'from' : 'Stamped <noreply@stamped.com>',
-                    'to' : 'dev@stamped.com',
-                    'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
-                    'body' : '<pre>%s</pre>' % str(e),
-                }
-                utils.sendEmail(email, format='html')
-        gevent.spawn(loadIndexFromS3).link(setIndex)
+                if retries:
+                    self.reloadAutoCompleteIndex(retries-1, delay*2+1)
+                else:
+                    email = {
+                        'from' : 'Stamped <noreply@stamped.com>',
+                        'to' : 'dev@stamped.com',
+                        'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
+                        'body' : '<pre>%s</pre>' % str(e),
+                    }
+                    utils.sendEmail(email, format='html')
+        gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
 
     def updateAutoCompleteIndexAsync(self):
         pushNewIndexToS3()
