@@ -123,11 +123,6 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
             CGFloat imageOffset = (height - imageFrame.size.height) / 2 + padding;
             imageFrame.origin = CGPointMake(320 - (imageFrame.size.width + padding_h), imageOffset);
             imageView.frame = imageFrame;
-            imageView.layer.shadowColor = [UIColor blackColor].CGColor;
-            imageView.layer.shadowOpacity = .2;
-            imageView.layer.shadowRadius = 2.0;
-            imageView.layer.shadowOffset = CGSizeMake(0, 2);
-            imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
         }
         
         CGRect frame = CGRectMake(0, 0, 320, 0);
@@ -147,6 +142,26 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
             [view addSubview:captionView];
         }
         if (imageView) {
+            if ([entity.subcategory isEqualToString:@"app"]) {
+                CGFloat coeff = 60 /360.;
+                CGFloat radius = imageView.frame.size.width * coeff;
+                imageView.layer.cornerRadius = radius;
+                imageView.layer.masksToBounds = YES;
+                UIView* shadowView = [[[UIView alloc] initWithFrame:imageView.frame] autorelease];
+                shadowView.layer.shadowOpacity = .5;
+                shadowView.layer.shadowColor = [UIColor blackColor].CGColor;
+                shadowView.layer.shadowRadius = 7;
+                shadowView.layer.shadowOffset = CGSizeMake(0, shadowView.layer.shadowRadius/2);
+                shadowView.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:shadowView.bounds cornerRadius:radius].CGPath;
+                [view addSubview:shadowView];
+            }
+            else {
+                imageView.layer.shadowColor = [UIColor blackColor].CGColor;
+                imageView.layer.shadowOpacity = .2;
+                imageView.layer.shadowRadius = 2.0;
+                imageView.layer.shadowOffset = CGSizeMake(0, 2);
+                imageView.layer.shadowPath = [UIBezierPath bezierPathWithRect:imageView.bounds].CGPath;
+            }
             [view addSubview:imageView];
             UIView* imageButtom = [Util tapViewWithFrame:imageView.frame andCallback:^{
                 STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:[Util entityImageURLForEntity:entity]]] autorelease];

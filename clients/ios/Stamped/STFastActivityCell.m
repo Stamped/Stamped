@@ -136,17 +136,22 @@ const static NSInteger _bodyOffset = 5;
 }
 
 - (CGRect)iconFrame {
+    CGRect frame;
     if (self.scope == STStampedAPIScopeYou) {
         if (self.iconOnImages) {
-            return CGRectMake(18, 18, 12, 12);
+            frame = CGRectMake(18, 18, 12, 12);
         }
         else {
-            return CGRectMake(42, 40, 17, 17);
+            frame = CGRectMake(42, 40, 17, 17);
         }
     }
     else { 
-        return CGRectMake(self.contentOffset, 9.5, 12, 12);
+        frame = CGRectMake(self.contentOffset, 9.5, 12, 12);
     }
+    if (self.offsetBodyForIcon && !self.iconOnImages) {
+        frame = CGRectOffset(frame, 0, self.contentYOffset);
+    }
+    return frame;
 }
 
 - (BOOL)offsetBodyForIcon {

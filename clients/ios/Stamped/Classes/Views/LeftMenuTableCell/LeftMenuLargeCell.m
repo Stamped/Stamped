@@ -11,6 +11,7 @@
 #import "QuartzUtils.h"
 #import "STUnreadActivity.h"
 #import "UIFont+Stamped.h"
+#import "Util.h"
 
 static const CGFloat _cellHeight = 72;
 
@@ -132,7 +133,7 @@ static const CGFloat _cellHeight = 72;
             [self insertSubview:view belowSubview:self.titleLabel];
             [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
                 
-                drawGradient([UIColor colorWithRed:0.3f green:0.3f blue:0.3f alpha:1.0f].CGColor, [UIColor colorWithRed:0.1f green:0.1f blue:0.1f alpha:1.0f].CGColor, ctx);
+                drawGradient([UIColor colorWithRed:0 green:0 blue:0 alpha:1.0f].CGColor, [UIColor colorWithRed:0 green:0 blue:0 alpha:1.0f].CGColor, ctx);
                 
             }];
             [view release];

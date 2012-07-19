@@ -88,12 +88,12 @@
         self.avatarView.alpha = 0.0f;
         [avatar release];
     
-        UIImage *image = [UIImage imageNamed:@"round_btn_bg.png"];
-        UIImage *imageHi = [UIImage imageNamed:@"round_btn_bg_hi.png"];
+        UIImage *image = [UIImage imageNamed:@"button_addcomment"];
+        UIImage *imageHi = [UIImage imageNamed:@"button_addcomment_down"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
-        [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
-        [button setTitle:@"Add a comment" forState:UIControlStateNormal];
+//        [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
+//        [button setTitle:@"Add a comment" forState:UIControlStateNormal];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
         button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 60.0f, 200.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
@@ -102,12 +102,15 @@
         [button addTarget:self action:@selector(comment:) forControlEvents:UIControlEventTouchUpInside];
         _commentButton = button;
         
+        image = [UIImage imageNamed:@"button_addphoto"];
+        imageHi = [UIImage imageNamed:@"button_addphoto_down"];
         button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
         [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
-        [button setImage:[UIImage imageNamed:@"camera_icon_small.png"] forState:UIControlStateNormal];
+        //[button setImage:[UIImage imageNamed:@"camera_icon_small.png"] forState:UIControlStateNormal];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-        button.frame = CGRectMake((self.bounds.size.width-85.0f)/2, 110.0f, 85.0f, image.size.height);
+        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 11.0f, 200.0f, image.size.height);
+//        button.frame = CGRectMake((self.bounds.size.width-85.0f)/2, 110.0f, 85.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
         [self.scrollView addSubview:button];
@@ -139,6 +142,7 @@
         [self addSubview:creditToolbar];
         [creditToolbar release];
         self.creditToolbar = creditToolbar;
+        [self layoutScrollView];
         
     }
     return self;
@@ -155,7 +159,6 @@
 }
 
 - (void)layoutScrollView {
-    
     CGSize size = self.scrollView.contentSize;
     size.width = self.scrollView.frame.size.width;
     if (self.imageView.image) {
@@ -199,7 +202,6 @@
         _captureButton.frame = frame;
         
     }
-    
     
 }
 
@@ -500,22 +502,26 @@
     
 }
 
+- (void)setupPlaceholder {
+    if (!_textViewPlaceholder) {
+        
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(4.0f, 5.0f, 0.0f, 0.0f)];
+        label.font = [UIFont systemFontOfSize:12];
+        label.text = @"Add a comment";
+        label.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
+        [self.textView addSubview:label];
+        [label sizeToFit];
+        self.textViewPlaceholder = label;
+        [label release];
+        
+    }
+}
+
 - (void)textViewDidEndEditing:(UITextView *)textView {
     
     if (![textView hasText]) {
         
-        if (!_textViewPlaceholder) {
-            
-            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 2.0f, 0.0f, 0.0f)];
-            label.font = [UIFont systemFontOfSize:12];
-            label.text = @"Add a comment";
-            label.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
-            [self.textView addSubview:label];
-            [label sizeToFit];
-            self.textViewPlaceholder = label;
-            [label release];
-            
-        }
+        [self setupPlaceholder];
         
     }
     

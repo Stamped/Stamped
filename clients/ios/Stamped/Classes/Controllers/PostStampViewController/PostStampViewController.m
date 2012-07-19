@@ -50,7 +50,7 @@
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     if ((self = [super initWithStyle:UITableViewStylePlain])) {
-        self.title = NSLocalizedString(@"Your Stamp", @"Your Stamp");
+//        self.title = NSLocalizedString(@"Your Stamp", @"Your Stamp");
         _stamp = [stamp retain];
         
         if (_stamp.badges.count) {
@@ -133,6 +133,18 @@
     self.stampedByView = nil;
     self.graphView = nil;
     [super viewDidUnload];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [Util setTitle:[NSString stringWithFormat:@"Your Stamp"]
+     forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -257,22 +269,31 @@
 #pragma mark - PostStampBadgeTableCell
 
 - (void)postStampBadgeTableCellShare:(PostStampBadgeTableCell*)cell {
-    if ([TWTweetComposeViewController canSendTweet]) {
-        TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
-        
-        [twitter setInitialText:[NSString stringWithFormat:@"I'm the first to stamp %@ on @stampedapp! %@", self.stamp.entity.title, self.stamp.URL]];
-        
-        if ([TWTweetComposeViewController canSendTweet]) {
-            [self presentViewController:twitter animated:YES completion:nil];
+    //Check out my my first stamp with @stampedapp: [entity.title]. [link]
+    [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:NO andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        if (success) {
+            TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
+            NSString* text;
+            if ([cell.badge.genre isEqualToString:@"user_first_stamp"]) {
+                text = [NSString stringWithFormat:@"Check out my first stamp with @stampedapp: %@. %@", self.stamp.entity.title, self.stamp.URL];
+            }
+            else {
+                text = [NSString stringWithFormat:@"I'm the first to stamp %@ on @stampedapp! %@", self.stamp.entity.title, self.stamp.URL];
+            }
+            [twitter setInitialText:text];
+            
+            if ([TWTweetComposeViewController canSendTweet]) {
+                [self presentViewController:twitter animated:YES completion:nil];
+            }
+            
+            twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
+                [self dismissModalViewControllerAnimated:YES];
+            };
         }
-        
-        twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
-            [self dismissModalViewControllerAnimated:YES];
-        };
-    }
-    else {
-        [[STTwitter sharedInstance] auth];
-    }
+        else {
+            [Util warnWithAPIError:error andBlock:nil];
+        }
+    }];
     /*
      PostStampShareView *view = [[PostStampShareView alloc] initWithFrame:self.view.bounds];
      view.layer.zPosition = 100;

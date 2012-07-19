@@ -6,56 +6,55 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, logs
+import Globals, logs, utils, libs.ec2_utils
 import os, json, mimetools, sys, urllib, urllib2
 import datetime, time, random, hashlib, string
 import random
 import copy
+import gevent
 
 from errors import *
-
-class ContinueException(Exception):
-    pass
+from optparse import OptionParser
 
 class DoneException(Exception):
-    pass
-
-class FinishedException(Exception):
     pass
 
 class RootException(Exception):
     pass
 
+DEBUG = False
+
 """
 HTTP Helper Functions
 """
 
-baseurl = "https://dev.stamped.com/v1"
-baseurl = "http://localhost:18000/v1"
-baseurl = "http://stress-api-1431215555.us-east-1.elb.amazonaws.com/v1"
+stack = libs.ec2_utils.get_stack('stress')
 
-class StampedAPIURLOpener(urllib.FancyURLopener):
-    def prompt_user_passwd(self, host, realm):
-        return ('iphone8@2x', 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu')
-opener = StampedAPIURLOpener()
+hosts = []
+for node in stack['nodes']:
+    if 'apiServer' in node['roles']:
+        hosts.append("http://%s:5000/v1" % node['public_dns_name'])
 
+# hosts = [ "http://localhost:18000/v1" ]
+
+assert len(hosts) > 0
 
 def handleGET(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
-    url    = "%s/%s?%s" % (baseurl, path, params)
+    url    = "%s/%s?%s" % (random.choice(hosts), path, params)
+    
+    print '*|%s|GET|%s' % (datetime.datetime.utcnow(), url)
     
     try:
-        raw = opener.open(url).read()
-    except urllib.error.HTTPError as e:
+        raw = urllib2.urlopen(url).read()
+    except urllib2.HTTPError as e:
         logs.warning("GET Failed (%s): %s" % (e.code, url))
+        raise
     except Exception as e:
         logs.warning("GET Failed: %s" % url)
         raise 
-    
-    try:
-        result = json.loads(raw)
-    except Exception:
-        raise StampedAPIException(raw)
+
+    result = json.loads(raw)
 
     if handleExceptions and 'error' in result:
         raise Exception("GET failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
@@ -64,19 +63,20 @@ def handleGET(path, data, handleExceptions=True):
 
 def handlePOST(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
-    url    = "%s/%s" % (baseurl, path)
+    url    = "%s/%s" % (random.choice(hosts), path)
+    
+    print '*|%s|POST|%s' % (datetime.datetime.utcnow(), url)
     
     try:
-        raw = opener.open(url, params).read()
+        raw = urllib2.urlopen(url, params).read()
+    except urllib2.HTTPError as e:
+        logs.warning("POST Failed (%s): %s (%s)" % (e.code, url, params))
+        raise
     except Exception:
         logs.warning("POST Failed: %s (%s)" % (url, params))
         raise
-    # logs.info("POST: %s" % url)
     
-    try:
-        result = json.loads(raw)
-    except:
-        raise StampedAPIException(raw)
+    result = json.loads(raw)
 
     if handleExceptions and 'error' in result:
         raise Exception("POST failed: \n  URI:   %s \n  Form:  %s \n  Error: %s" % (path, data, result))
@@ -339,6 +339,55 @@ userSearchQueries = [
     'chris', 'caroline', 'angela', 'emily', 'niki', 'steve', 'laura', 'jenna', 'matt', 'jessie', 'becky', 'peter',
 ]
 
+randomScreenNames = [
+    'a', 'aaron', 'abdu1ra7man', 'achimh', 'adsfasdfasdf', 'aed', 'agaw', 'agk', 'ajay', 'alanagolob', 'alexcho', 
+    'alexcsmall', 'alexgsrubio', 'alexiskold', 'alexmarkman', 'alexmchale', 'allisonmarie', 'amillionpiecesofhea', 
+    'amitgir', 'andrew_nesbitt', 'andy', 'andybons', 'andyestrella', 'annieteng', 'anthony', 'anthonydelorme', 
+    'anton_in_nyc', 'applewoods', 'artnfear', 'asaf', 'atlasferone', 'b', 'barrettc', 'bart', 'beefy', 'bfolds', 
+    'bill_staehle', 'bjw0715', 'bklynisbetter', 'bluepicasso', 'bobbygrace', 'bowreality', 'brainopera', 
+    'brentbyington', 'brettgarrett', 'briezus', 'bron92', 'brynn', 'buford', 'bunnny', 'byparlak', 'carolynweiss', 
+    'chan', 'charleswilliams', 'cheesemoleo', 'chonko', 'chris', 'chris50001', 'chrisackermann', 'ckarwoski', 
+    'clangballe', 'clofresh', 'cobradave', 'cocoabeanchloe', 'craignm', 'csdd', 'ctide', 'daniel', 'danielle', 
+    'danielloedel', 'danijean', 'dannylm', 'davemorin', 'daveo', 'davidconrad', 'davidfraga', 'davidvb', 'davidzb', 
+    'dbedingfield', 'dbreunig', 'dddesigned', 'ddebonis', 'demoine', 'dhavgarde', 'dlamp417', 'dobata', 'dolly_rose', 
+    'dougvs', 'drb352', 'drbrydges', 'dregar', 'drewcoffman', 'e_blanchardjr', 'earth2travis', 'edchu', 'edmuki', 
+    'edwinp', 'eiph', 'elihorne', 'elimgoodman', 'ellen', 'elliekrieger', 'emchennyc', 'entropy', 'ericbeasley', 
+    'erikep', 'eruji', 'eugeniakoo', 'fabfunk', 'fahad', 'faraz200387', 'fender324', 'franzx007', 'gentlemanly', 
+    'georgearison', 'gillyc', 'girldetective', 'goodmaar', 'grant', 'greg', 'gregor1994', 'gregster007', 'grenicm', 
+    'grex', 'gs32tom', 'gserrao', 'gshans', 'gweiner', 'hannahrae', 'heather', 'henrique_carvalhop', 'herewearenowwhat', 
+    'hernandez', 'herzflimmern', 'hifromjonathan', 'hoogs', 'hrbrt', 'hugoalonzo', 'ibuys', 'idypakb', 'ija', 'ilyse', 
+    'imonmymac', 'intastella', 'isaacjudd', 'islutsky', 'itcanbealover', 'j0seph', 'jacksonli', 'jacob_coy', 
+    'jadyferreira', 'jake', 'jake-m', 'janeg', 'janeway', 'jarvis', 'jason', 'jasongelman', 'jbdeloach', 'jbigger', 
+    'jdrew804', 'jeffhodsdon', 'jeffmc', 'jeffsoo', 'jenny', 'jenyih', 'jephkelley', 'jerrylee', 'jess', 'jgallag6', 
+    'jimboslice', 'jleezy', 'jngsta', 'joehuston', 'jonesir', 'jonmwords', 'jonsjanssens', 'jonslimak', 
+    'josepablocordova', 'joshualane', 'joshumami', 'jreed91', 'jromano', 'jstaehle', 'jtb', 'juanfer1', 'julesc', 
+    'julia', 'julie', 'julius', 'juppschwupp', 'jws', 'jwtalley', 'k', 'kaethend', 'kathy', 'kennberg', 'kevin', 
+    'kevinsystrom', 'kgarriss', 'khe', 'kingdavidofsc', 'krys', 'kssk', 'kumaran', 'kylehorn', 'kylestanding', 
+    'labeeden', 'landon', 'lauren', 'laurenbushey', 'laviniaana', 'lchong', 'lekkerding', 'lethalcupcake', 'lfh', 
+    'lgrun', 'lilyallyn', 'lindsay', 'lipnicks', 'lisa', 'littlefox', 'liz', 'liztan', 'lizwalton', 'lmd', 'lokesh', 
+    'lorn', 'lorri', 'luismtnz', 'lukemc3001', 'lukexi', 'lux', 'lyssagail', 'magdimus', 'maleahjacobs', 'malloryirons', 
+    'malvina', 'mancun_ian', 'maophy', 'marcelapam', 'marcinj', 'margaret', 'maria-trabelsi', 'mark', 'mars', 'matt', 
+    'mattdavey', 'mattgold', 'maurice', 'mauricetrudell', 'mavex', 'maxheller', 'mcbush25', 'mdharris93', 'micah', 
+    'michaelkors', 'michaelramm', 'mike', 'mikegee', 'mikeydigital', 'mileal', 'milkypostman', 'minimini', 'mizlead', 
+    'mj2011', 'mjay', 'mjk396', 'mjparker', 'ml', 'mmcpdx', 'mmmerkl', 'mo', 'mobidever', 'mohabitar', 'moira', 
+    'monicaeunjikim', 'moremagazine', 'mrjamesdi', 'msanchezgrice', 'mulligan', 'mynameisjosh', 'nadiay124', 
+    'nateschulman', 'ndcooper', 'nicgan', 'nicole', 'nicole11606', 'noah', 'noahweiss', 'nobudesign', 'nv', 'nymag', 
+    'nytimes2', 'ogray', 'oliverwaters', 'p', 'pantone356', 'parislemon', 'pascalm', 'patrickmarzullo', 'paulsearle', 
+    'petertravers', 'pharathomas', 'pjedlund', 'ploewen', 'pmray87', 'posativnrg', 'prop79', 'prunthac', 'pyang921', 
+    'rachel', 'rachelray', 'radiothom', 'rajesh', 'ralphbracamonte', 'rebecca', 'rebeccaminkoff', 'restaurantgirl', 
+    'reza', 'rhoganyan', 'richardgroves', 'ridic', 'rishi', 'riva', 'rjlevy', 'rkmnyc', 'rmurdock', 'robbie', 
+    'robsavitsky', 'rooklin', 'rpowell', 'rrludman', 'rugbysforwho', 'ryanpsims', 'ryantevans', 's-karaba', 'sahil', 
+    'sailer', 'salehm8', 'sanjay', 'scottwilliams', 'scrippst', 'serka', 'seyren', 'sfriend37', 'shawnb', 'shenhai1943', 
+    'shindogy', 'shmanimal', 'siddharth1', 'skaw', 'skinthesun', 'slazar', 'smaramba', 'smcgown', 'smehmood', 
+    'snambomb', 'snooper', 'soumar', 'speck', 'spottinger', 'srura', 'starflower', 'startupman', 'stavafilm', 
+    'stephen_tk', 'stoddawg', 'suavebutter', 'sundaysun', 'susan', 'sushme', 'suz_foote', 'sydneyjlindsay', 't', 
+    'tangbj', 'tanmay', 'tchoyj', 'teddy', 'the0utsider', 'theacumenity', 'theguyfrom5r', 'theill', 'thekevin', 
+    'thibaut', 'thisisnotagabe', 'tigg', 'time', 'timsondrup', 'tintinage', 'tinyyuan', 'titusferguson', 'tlalonde', 
+    'tombillionis', 'tommullen', 'tommypjr1', 'tomusher', 'tpoage', 'travis', 'tristan', 'tuesday', 'twinkleboi', 
+    'unsoluble', 'urbandaddy', 'votivored', 'vtti', 'waeiluen', 'walkdesign', 'weston', 'willh103', 'wilsonh', 
+    'withdrake', 'wlivbh', 'xtina', 'yl_ksa', 'yodelmachine', 'yuki', 'zach', 'zannesan', 'zwrodgers',
+]
+
 """
 
 ### ACCOUNT
@@ -348,11 +397,6 @@ userSearchQueries = [
 ### ACTIONS
 (r'v1/actions/complete.json',                           'v0.functions.entities.completeAction'),
 
-
-### COMMENTS
-(r'v1/comments/create.json',                            'v0.functions.comments.create'),
-(r'v1/comments/remove.json',                            'v0.functions.comments.remove'),
-(r'v1/comments/collection.json',                        'v0.functions.comments.collection'),
 
 ### TODOS
 (r'v1/todos/create.json',                               'v0.functions.todos.create'),
@@ -397,6 +441,8 @@ def _post_account_create(screenName, phone=None, bio=None, website=None, locatio
         'screen_name': screenName,
         'email': '%s@stamped.com' % screenName,
         'password': '12345',
+        'client_id': 'iphone8@2x', 
+        'client_secret': 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
     }
     
     if phone is not None:
@@ -909,6 +955,25 @@ def _get_activity_unread(token):
     return handleGET('activity/unread.json', params)
 
 
+### COMMENTS
+
+# /comments/create.json 
+def _post_comments_create(token, stampId, blurb):
+    params = {
+        'oauth_token': token,
+        'stamp_id': stampId,
+        'blurb': blurb,
+    }
+
+    return handlePOST('comments/create.json', params)
+
+# /comments/remove.json
+def _post_comments_remove(token, commentId):
+    raise NotImplementedError
+
+# /comments/collection.json
+def _get_comments_collection(token, stampId, offset=0, limit=20):
+    raise NotImplementedError
 
 
 
@@ -936,7 +1001,8 @@ class View(object):
     def __init__(self, user):
         self.user = user 
         self.indent = ("  " * len(self.user.stack))
-        logs.debug("%sView %s" % (self.indent, self.__class__.__name__))
+        if DEBUG:
+            logs.debug("%sView %s" % (self.indent, self.__class__.__name__))
 
         self.__weights = {}
         self.__actions = {}
@@ -991,14 +1057,17 @@ class View(object):
                     if r < weight:
                         break
                     r -= weight
-                logs.debug("%sCHOSE ACTION: %s" % (self.indent, key))
+                if DEBUG:
+                    logs.debug("%sCHOSE ACTION: %s" % (self.indent, key))
                 self.actions[key]()
 
         except DoneException:
-            logs.debug("%sDONE: %s" % (self.indent, self.__class__.__name__))
+            if DEBUG:
+                logs.debug("%sDONE: %s" % (self.indent, self.__class__.__name__))
 
         except RootException:
-            logs.debug("%sGOING TO ROOT" % self.indent)
+            if DEBUG:
+                logs.debug("%sGOING TO ROOT" % self.indent)
 
     # Go back to root
     def _back(self):
@@ -1026,13 +1095,17 @@ class Inbox(View):
         self.setWeight('stamp', 20)
 
         self.setAction('page', self._page)
-        self.setWeight('page', 10)
+        self.setWeight('page', 15)
 
         self.setAction('scope', self._changeScope)
         self.setWeight('scope', 10)
 
     def load(self):
-        self.loadStamps()
+        # Unread count
+        if self.user.token is not None:
+            _get_activity_unread(token=self.user.token)
+
+        # Load stamps
         self.loadStamps()
 
     def loadStamps(self):
@@ -1115,6 +1188,9 @@ class StampDetail(View):
         self.setAction('composeStamp', self._composeStamp)
         self.setWeight('composeStamp', 5)
 
+        self.setAction('addComment', self._addComment)
+        self.setWeight('addComment', 10)
+
     def load(self):
         if self.stamp is None:
             self.stamp = _get_stamps_show(self.stampId, token=self.user.token)
@@ -1146,7 +1222,7 @@ class StampDetail(View):
     def _viewEntity(self):
         time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
         self.setWeight('entity', 0)
-        self.addToStack(EntityDetail, kwargs={'entity': self.entity})
+        self.addToStack(EntityDetail, kwargs={'entity': self.entity, 'alsoStampedBy': self.alsoStampedBy})
 
     def _viewCredit(self):
         if 'previews' in self.stamp and self.stamp['previews'] is not None:
@@ -1196,6 +1272,14 @@ class StampDetail(View):
             # Create stamp with credit
             credits = self.stamp['user']['screen_name']
             self.addToStack(ComposeStamp, kwargs={'entityId': self.entityId, 'credits': credits})
+        self.setWeight('composeStamp', 0)
+
+    # Add comment
+    def _addComment(self):
+        if self.user.token is not None:
+            blurb = ' '.join(entitySearchQueries[:random.randint(1,20)])
+            _post_comments_create(token=self.user.token, stampId=self.stampId, blurb=blurb)
+        self.setWeight('addComment', 0)
 
 
 class Profile(View):
@@ -1835,7 +1919,8 @@ class User(object):
         self.load()
 
         while datetime.datetime.utcnow() < self.expiration:
-            logs.info("BEGIN: %s" % self.__class__.__name__)
+            if DEBUG:
+                logs.info("BEGIN: %s" % self.__class__.__name__)
             try:
 
                 totalWeight = sum(v for k, v in self.weights.items())
@@ -1846,23 +1931,24 @@ class User(object):
                     if r < weight:
                         break
                     r -= weight
-                logs.debug("CHOSE ACTION: %s" % (key))
+                if DEBUG:
+                    logs.debug("CHOSE ACTION: %s" % (key))
                 self.actions[key]()
 
             except (DoneException, RootException):
                 time.sleep(3)
 
-            logs.info("DONE: %s" % (self.__class__.__name__))
-            print
+            if DEBUG:
+                logs.info("DONE: %s" % (self.__class__.__name__))
+                print
 
 
-# Class representing users who do not log in or create an account throughout their session
 class LoggedOutUser(User):
 
     def __init__(self):
         User.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 200 + (random.random() * 200)
+        self._userSessionLength = 60 # 200 + (random.random() * 200)
         
         self.setAction('inbox', self._viewInbox)
         self.setWeight('inbox', 10)
@@ -1887,15 +1973,16 @@ class LoggedOutUser(User):
         self.addToStack(GuideMenu)
 
 
-class ExistingUser(User):
+class LoggedInUser(User):
 
-    def __init__(self, login, password):
+    def __init__(self):
         User.__init__(self)
         self._userWaitSpeed = 0
-        self._userSessionLength = 10 #200 + (random.random() * 200)
+        self._userSessionLength = 60 #200 + (random.random() * 200)
 
-        self._login = login
-        self._password = password
+        self.token = None
+        self.userId = None 
+        self.screenName = None 
         
         self.setAction('inbox', self._viewInbox)
         self.setWeight('inbox', 10)
@@ -1911,21 +1998,6 @@ class ExistingUser(User):
         
         self.setAction('friendFinder', self._viewFriendFinder)
         self.setWeight('friendFinder', 20)
-
-
-    def load(self):
-        login = _post_oauth2_login(self._login, self._password)
-
-        self.token = login['token']['access_token']
-        self.userId = login['user']['user_id']
-        self.screenName = login['user']['screen_name']
-
-        # try:
-        #     self._viewInbox()
-        # except DoneException:
-        #     pass
-
-        print
 
     # View stamp
     def _viewInbox(self):
@@ -1953,29 +2025,159 @@ class ExistingUser(User):
         self.addToStack(FriendFinder)
 
 
+class ExistingUser(LoggedInUser):
+
+    def __init__(self, login, password):
+        LoggedInUser.__init__(self)
+        self._userWaitSpeed = 0
+        self._userSessionLength = 60 #200 + (random.random() * 200)
+
+        self._login = login
+        self._password = password
+
+    def load(self):
+        # Load tastemakers
+        _get_stamps_collection(scope='popular', offset=0)
+        time.sleep(random.randint(6, 20) * self._userWaitSpeed)
+
+        login = _post_oauth2_login(self._login, self._password)
+
+        self.token = login['token']['access_token']
+        self.userId = login['user']['user_id']
+        self.screenName = login['user']['screen_name']
+
+        # Update APNS
+        _post_account_alerts_ios_update(token=self.token, apns=('0'*64))
+
+        try:
+            self._viewInbox()
+        except DoneException:
+            pass
 
 
-import gevent
+class NewUser(LoggedInUser):
+
+    def __init__(self):
+        LoggedInUser.__init__(self)
+        self._userWaitSpeed = 0
+        self._userSessionLength = 60 #200 + (random.random() * 200)
+
+    def load(self):
+        # Load tastemakers
+        _get_stamps_collection(scope='popular', offset=0)
+        time.sleep(random.randint(15, 45) * self._userWaitSpeed)
+
+        chars = string.ascii_letters + string.digits
+
+        while True:
+            try:
+                screenName =  ''.join(random.choice(chars) for x in xrange(19))
+                login = _post_account_create(screenName)
+                break 
+            except urllib2.HTTPError:
+                print 'UNABLE TO CREATE ACCOUNT: %s' % screenName
+                time.sleep(3)
+                continue
+
+        self.token = login['token']['access_token']
+        self.userId = login['user']['user_id']
+        self.screenName = login['user']['screen_name']
+
+        # Update APNS
+        _post_account_alerts_ios_update(token=self.token, apns=('0'*64))
+
+        # Unread count
+        _get_activity_unread(token=self.token)
+
+        # Customize stamp
+        time.sleep(random.randint(3, 20) * self._userWaitSpeed)
+        _post_account_customize_stamp(self.token, '123456', '654321')
+
+        # Get suggested
+        _get_users_suggested(token=self.token)
+
+        # Go to inbox!
+        try:
+            self._viewInbox()
+        except DoneException:
+            pass
+
+
+
+
+
+
+def parseCommandLine():
+    usage   = "Usage: %prog [options] query"
+    version = "%prog " + __version__
+    parser  = OptionParser(usage=usage, version=version)
+    
+    parser.add_option("-r", "--numLoggedOutUsers", default=0, type="int", 
+        action="store", help="number of logged-out users to run")
+    
+    parser.add_option("-e", "--numExistingUsers", default=0, type="int", 
+        action="store", help="number of existing users to run")
+    
+    parser.add_option("-n", "--numNewUsers", default=0, type="int", 
+        action="store", help="number of new users to run")
+    
+    (options, args) = parser.parse_args()
+    
+    return (options, args)
+
 
 def worker(user):
     user.run()
     print 'DONE'
 
-greenlets = [ 
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-    gevent.spawn(worker, LoggedOutUser()),
-]
 
-gevent.joinall(greenlets)
+def main():
+    options, args = parseCommandLine()
 
-# user = ExistingUser('kevin', '12345')
-# user = LoggedOutUser()
-# user.run()
-# print 'DONE'
+    while True:
+        start = time.time()
+
+        greenlets = []
+
+        # Add logged-out users
+        for i in range(options.numLoggedOutUsers):
+            greenlets.append(gevent.spawn(worker, LoggedOutUser()))
+
+        # Add existing users
+        for i in range(options.numExistingUsers):
+            greenlets.append(gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')))
+
+        # Add new users
+        for i in range(options.numNewUsers):
+            greenlets.append(gevent.spawn(worker, NewUser()))
+
+        if len(greenlets) == 0:
+            print "Nothing to run!"
+            break
+
+        gevent.joinall(greenlets)
+
+        print 'DONE DONE DONE'
+        print
+
+        if time.time() - start > 65:
+            print "DONE!", datetime.datetime.utcnow()
+            break 
+
+        time.sleep(0.5)
+
+
+if __name__ == '__main__':
+    main()
+
+
+"""
+TODO:
+- Automatically reset stress.db?
+- Spawn n instances to run from
+x Connect directly to instances based on stack name (instead of through ELB -- routing SUCKS)
+x Take command-line inputs
+- Aggregation of results (via SimpleDB?)
+- Microcaching on nginx
+- Caching of tastemaker endpoints via memcached
+"""

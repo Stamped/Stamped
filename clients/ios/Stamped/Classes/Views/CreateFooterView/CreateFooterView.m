@@ -29,7 +29,6 @@
 
 @interface CreateFooterView ()
 
-@property (nonatomic, readonly, retain) UIButton* twitterButton;
 @property (nonatomic, readonly, retain) UILabel* twitterText;
 
 @end
@@ -68,35 +67,37 @@
         button.frame = CGRectMake((self.bounds.size.width-106.0f), self.bounds.size.height - (image.size.height+6.0f), 96.0f, image.size.height);
         self.stampButton = button;
         
-        image = [UIImage imageNamed:@"tweetbtn"];
-        button = [UIButton buttonWithType:UIButtonTypeCustom];
-        [button setImage:image forState:UIControlStateNormal];
-        [button setImage:[UIImage imageNamed:@"tweetbtn_down"] forState:UIControlStateSelected];
-        [button setImage:[UIImage imageNamed:@"tweetbtn_active"] forState:UIControlStateHighlighted];
-        [button addTarget:self action:@selector(twitter:) forControlEvents:UIControlEventTouchUpInside];
-        [self addSubview:button];
-        button.frame = CGRectMake(10.0f, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
-        
-        _twitterButton = [button retain];
-        //
-        //        image = [UIImage imageNamed:@"share_fb"];
-        //        button = [UIButton buttonWithType:UIButtonTypeCustom];
-        //        [button setImage:image forState:UIControlStateNormal];
-        //        [button setImage:[UIImage imageNamed:@"share_fb_on"] forState:UIControlStateSelected];
-        //        [button setImage:[UIImage imageNamed:@"share_fb_highlighted"] forState:UIControlStateHighlighted];
-        //        [button addTarget:self action:@selector(facebook:) forControlEvents:UIControlEventTouchUpInside];
-        //        [self addSubview:button];
-        //        button.frame = CGRectMake(12.0f + image.size.width, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
-        //        
-        //        
-        
-        _twitterText = [[Util viewWithText:@"" //Keep in case re-enabled
-                                      font:[UIFont stampedFontWithSize:12]
-                                     color:[UIColor stampedGrayColor]
-                                      mode:UILineBreakModeTailTruncation
-                                andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)] retain];
-        _twitterText.frame = CGRectMake(CGRectGetMaxX(button.frame) + 10, button.frame.origin.y, _twitterText.frame.size.width, button.frame.size.height);
-        [self addSubview:_twitterText];
+        if ([STTwitter sharedInstance].canTweet) {
+            image = [UIImage imageNamed:@"tweetbtn"];
+            button = [UIButton buttonWithType:UIButtonTypeCustom];
+            [button setImage:image forState:UIControlStateNormal];
+            [button setImage:[UIImage imageNamed:@"tweetbtn_active"] forState:UIControlStateSelected];
+            [button setImage:[UIImage imageNamed:@"tweetbtn_down"] forState:UIControlStateHighlighted];
+            [button addTarget:self action:@selector(twitter:) forControlEvents:UIControlEventTouchUpInside];
+            [self addSubview:button];
+            button.frame = CGRectMake(10.0f, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
+            
+            _twitterButton = [button retain];
+            //
+            //        image = [UIImage imageNamed:@"share_fb"];
+            //        button = [UIButton buttonWithType:UIButtonTypeCustom];
+            //        [button setImage:image forState:UIControlStateNormal];
+            //        [button setImage:[UIImage imageNamed:@"share_fb_on"] forState:UIControlStateSelected];
+            //        [button setImage:[UIImage imageNamed:@"share_fb_highlighted"] forState:UIControlStateHighlighted];
+            //        [button addTarget:self action:@selector(facebook:) forControlEvents:UIControlEventTouchUpInside];
+            //        [self addSubview:button];
+            //        button.frame = CGRectMake(12.0f + image.size.width, self.bounds.size.height - (image.size.height+10.0f), image.size.width, image.size.height);
+            //        
+            //        
+            
+            _twitterText = [[Util viewWithText:@"" //Keep in case re-enabled
+                                          font:[UIFont stampedFontWithSize:12]
+                                         color:[UIColor stampedGrayColor]
+                                          mode:UILineBreakModeTailTruncation
+                                    andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)] retain];
+            _twitterText.frame = CGRectMake(CGRectGetMaxX(button.frame) + 10, button.frame.origin.y, _twitterText.frame.size.width, button.frame.size.height);
+            [self addSubview:_twitterText];
+        }
         id <STUser> user = [[STStampedAPI sharedInstance] currentUser];
         if ([user respondsToSelector:@selector(numStampsLeft)]) {
             

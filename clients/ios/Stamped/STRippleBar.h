@@ -8,10 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+#define STRippleBarHeight 3.5
+
 @interface STRippleBar : UIView
 
 - (id)initWithPrimaryColor:(NSString*)primaryColor andSecondaryColor:(NSString*)secondaryColor isTop:(BOOL)isTop;
 
 - (id)initWithFrame:(CGRect)frame andPrimaryColor:(NSString*)primaryColor andSecondaryColor:(NSString*)secondaryColor isTop:(BOOL)isTop;
+
++ (NSString*)grayColor;
 
 @end

@@ -31,6 +31,7 @@
 @property (nonatomic, retain) NSURL *imageURL;
 @property (nonatomic, readwrite, retain) STActionPair* pair;
 
+- (void)setupImageWithUser:(id<STUser>)user;
 - (void)setupWithUser:(id<STUser>)user;
 @end
 
@@ -82,7 +83,6 @@ static const NSInteger _cellsPerRow = 7;
     
     STPreviewView *view = [[STPreviewView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, kPreviewCellWidth, kPreviewCellHeight)];
     [_views addObject:view];
-    
     return [view autorelease];
     
 }
@@ -103,14 +103,14 @@ static const NSInteger _cellsPerRow = 7;
         NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
         BOOL continuedFlag = (limit < total);
         
-        STProfileImageSize size = STProfileImageSize48;
         for (id<STStampPreview> credit in previews.credits) {
             if (index >= limit) break;
             
             STActionContext *context = [STActionContext context];
             id<STAction> action = [STStampedActions actionViewStamp:credit.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:size]];
+            [view setupImageWithUser:credit.user];
+//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:size]];
             [view setupWithUser:credit.user];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
@@ -124,7 +124,8 @@ static const NSInteger _cellsPerRow = 7;
             context.user = user;
             id<STAction> action = [STStampedActions actionViewStamp:preview.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:size]];
+            [view setupImageWithUser:user];
+//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:size]];
             [view setupWithUser:user];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
@@ -139,7 +140,8 @@ static const NSInteger _cellsPerRow = 7;
             context.user = like;
             id<STAction> action = [STStampedActions actionViewUser:like.userID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:size]];
+            [view setupImageWithUser:like];
+//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:size]];
             view.iconImageView.image = likeIcon;
             [view setupWithUser:nil];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
@@ -155,7 +157,8 @@ static const NSInteger _cellsPerRow = 7;
             context.user = todo;
             id<STAction> action = [STStampedActions actionViewUser:todo.userID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
-            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:size]];
+            [view setupImageWithUser:todo];
+//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:size]];
             view.iconImageView.image = todoIcon;
             [view setupWithUser:nil];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
@@ -455,6 +458,22 @@ static const NSInteger _cellsPerRow = 7;
         
     }
     
+}
+
+- (void)setupImageWithUser:(id<STUser>)user {
+    STProfileImageSize size = STProfileImageSize48;
+    BOOL usedCurrentUserImage = NO;
+    self.imageURL = nil;
+    if ([user.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+        UIImage* userImage = [STStampedAPI sharedInstance].currentUserImage;
+        if (userImage) {
+            _imageView.image = userImage;
+            usedCurrentUserImage = YES;
+        }
+    }
+    if (!usedCurrentUserImage) {
+        self.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:size]];
+    }
 }
 
 - (void)setHighlighted:(BOOL)highlighted {

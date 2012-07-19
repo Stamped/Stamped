@@ -31,6 +31,7 @@
 @synthesize string = string_;
 @synthesize black = black_;
 @synthesize playerIcon = _playerIcon;
+@synthesize title = _title;
 
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
@@ -53,6 +54,7 @@
     self.string = nil;
     [_playerIcon release];
     ripplesLayer_ = nil;
+    [_title release];
     [super dealloc];
 }
 
@@ -68,13 +70,13 @@
     CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect byRoundingCorners:(UIRectCornerTopLeft | UIRectCornerTopRight) cornerRadii:CGSizeMake(2.0f, 2.0f)].CGPath);
     CGContextClip(ctx);
     
-    hideLogo_ = self.topItem.title!=nil && ![self.topItem.title isEqualToString:@"Stamps"];
+    hideLogo_ = self.title!=nil && ![self.title isEqualToString:@"Stamps"];
     if (hideLogo_)
         [[UIImage imageNamed:@"nav_bar_no_logo"] drawInRect:rect];
     else
         [[UIImage imageNamed:@"nav_bar"] drawInRect:rect];
     
-    if (hideLogo_ && self.topItem.title) {
+    if (hideLogo_ && self.title) {
         
         for (UIView *view in self.subviews) {
             if ([view isKindOfClass:NSClassFromString(@"UINavigationItemView")]) {
@@ -84,10 +86,21 @@
         
         UIFont *font = [UIFont boldSystemFontOfSize:18];
         [[UIColor colorWithRed:0.0f green:0.333f blue:0.8f alpha:1.0f] setFill];
-        NSString* title = self.topItem.title;
+        NSString* title = self.title;
         CGSize size = [title sizeWithFont:font];
         [title drawInRect:CGRectMake(floorf((self.bounds.size.width-size.width)/2), floorf((self.bounds.size.height-size.height)/2), size.width, size.height) withFont:font lineBreakMode:UILineBreakModeWordWrap];
         
+    }
+}
+
+- (void)setTitle:(NSString *)title {
+    [_title release];
+    _title = [title retain];
+    if (title) {
+        self.playerIcon.hidden = YES;
+    }
+    else {
+        [self playerStateChanged:nil];
     }
 }
 
@@ -119,6 +132,7 @@
 }
 
 - (void)playerStateChanged:(id)notImportant {
+    if (self.title) return;
     self.playerIcon.hidden = [STPlayer sharedInstance].paused;
 }
 
@@ -133,10 +147,10 @@
 }
 
 - (CGPathRef)newPathForTitle {
-    if (!self.topItem.title)
+    if (!self.title)
         return nil;
     
-    NSString* title = self.topItem.title;
+    NSString* title = self.title;
     
     CGContextRef ctx = UIGraphicsGetCurrentContext(); 
     

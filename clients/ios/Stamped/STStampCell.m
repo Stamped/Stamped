@@ -228,7 +228,7 @@
         _statsDots = layer;
         
         // comment count
-        STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200, 60.0f)];
+        STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200, 90.0f)];
         commentView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
         commentView.backgroundColor = [UIColor whiteColor];
         [self addSubview:commentView];
@@ -249,7 +249,7 @@
                     NSString *comments = [NSString stringWithFormat:@"%i", _commentCount];
                     CGFloat width = [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont stampedFontWithSize:12]].width;
                     UIFont *font = [UIFont stampedFontWithSize:12];
-                    [comments drawInRect:CGRectMake(offset, -1.0f, width, font.lineHeight) withFont:font];
+                    [comments drawInRect:CGRectMake(offset, -2.0f, width, font.lineHeight) withFont:font];
                     offset += (width+2.0f);
                 }
             }

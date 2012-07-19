@@ -50,11 +50,12 @@ TODO:
             * layout adjustments to gallery view
             * navbar occasional missing graphics
         * misc:
-            * replace font usage w/ self-hosting option
+            * DONE - replace font usage w/ self-hosting option
+                * TEST
             * retina display support & testing
             * create 3 unique links => stamped.com
         * stamped.com
-            * replace intro hero font with skyline font
+            * DONE - replace intro hero font with skyline font
             * subpages
                 * basic 404 page
                     * cool 404 page w/ circle animation

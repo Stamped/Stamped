@@ -103,7 +103,17 @@
     }
     
     if (user) {
-        _avatarView.imageURL = [NSURL URLWithString:user.imageURL];
+        BOOL usedLocalImage = NO;
+        if ([user.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+            UIImage* localImage = [STStampedAPI sharedInstance].currentUserImage;
+            if (localImage) {
+                _avatarView.imageView.image = localImage;
+                usedLocalImage = YES;
+            }
+        }
+        if (!usedLocalImage) {
+            _avatarView.imageURL = [NSURL URLWithString:user.imageURL];
+        }
     }
     
     _titleLabel.text = [NSString stringWithFormat:@"%i", index];

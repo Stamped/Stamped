@@ -58,7 +58,7 @@
 
 - (id)init {
     if (self = [super initWithStyle:UITableViewStyleGrouped]) {
-        self.title = NSLocalizedString(@"Edit Profile", @"Edit Profile");
+//        self.title = NSLocalizedString(@"Edit Profile", @"Edit Profile");
         _namesForKeyPaths = [[NSDictionary dictionaryWithObjectsAndKeys:
                               @"link", @"website",
                               @"phone number", @"phone",
@@ -103,7 +103,7 @@
     [[STStampedAPI sharedInstance] accountWithCallback:^(id<STAccount> account, NSError *error, STCancellation *cancellation) {
         self.account = account; 
         if (!account) {
-            [Util warnWithMessage:@"There was a problem contacting the server." andBlock:^{
+            [Util warnWithAPIError:error andBlock:^{
                 UINavigationController* nav = [Util sharedNavigationController];
                 if (nav.topViewController == self) {
                     [[Util sharedNavigationController] popViewControllerAnimated:YES];
@@ -146,6 +146,18 @@
         [view release];
     }
     
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [Util setTitle:[NSString stringWithFormat:@"Edit Profile"]
+     forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
 }
 
 #pragma mark - Actions
@@ -240,8 +252,9 @@
     
     UIColor* primaryColor = [colors objectAtIndex:0];
     UIColor* secondaryColor = [colors objectAtIndex:1];
-    self.data.primaryColor = primaryColor.hexString;
-    self.data.secondaryColor = secondaryColor.hexString;
+    //NSLog(@"%@,%@", primaryColor.insaneHexString, self.data.primaryColor);
+    self.data.primaryColor = primaryColor.insaneHexString;
+    self.data.secondaryColor = secondaryColor.insaneHexString;
     [self dismissModalViewControllerAnimated:YES];
     
 }

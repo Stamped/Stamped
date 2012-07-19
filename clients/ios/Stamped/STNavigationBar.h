@@ -17,6 +17,7 @@
 @property (nonatomic, assign) BOOL black;
 @property (nonatomic, assign) BOOL hideLogo;
 @property (nonatomic, copy) NSString* string;
+@property (nonatomic, readwrite, copy) NSString* title;
 
 - (void)showUserStrip:(BOOL)show forUser:(id<STUser>)user;
 

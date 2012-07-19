@@ -24,8 +24,9 @@
 #import "AboutUsViewController.h"
 #import "WebViewController.h"
 #import "TOSViewController.h"
+#import <MessageUI/MFMailComposeViewController.h>
 
-@interface STSettingsViewController ()
+@interface STSettingsViewController () <MFMailComposeViewControllerDelegate>
 
 @end
 
@@ -34,10 +35,10 @@
 - (id)init {
     
     if ((self = [super initWithStyle:UITableViewStyleGrouped])) {
-        self.title = NSLocalizedString(@"Settings", @"Settings");
+//        self.title = NSLocalizedString(@"Settings", @"Settings");
         
         NSArray *you = [NSArray arrayWithObjects:@"Edit profile", @"Connected accounts", @"Notifications", nil];
-        NSArray *stamped = [NSArray arrayWithObjects:@"About us", @"Frequently asked questions", @"Legal", nil];
+        NSArray *stamped = [NSArray arrayWithObjects:@"About us", @"Frequently asked questions", @"Terms of Use", @"Privacy Policy", @"Licenses", nil];
         NSArray *feedback = [NSArray arrayWithObject:@"Send feedback"];
         NSArray *signOut = [NSArray arrayWithObject:@"Sign out"];
 
@@ -81,7 +82,15 @@
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    
+    [super viewWillAppear:animated];
+    [Util setTitle:[NSString stringWithFormat:@"Settings"]
+     forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
 }
 
 
@@ -289,11 +298,29 @@
         }
         else if (indexPath.row == 2) {
             //Legal
-            TOSViewController* vc = [[TOSViewController alloc] init];
+            WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/terms-mobile.html"]];
             [self.navigationController pushViewController:vc animated:YES];
-            vc.doneButton.hidden = YES;
+            [vc hideToolbar:YES];
             [vc release];
+//            TOSViewController* vc = [[TOSViewController alloc] init];
+//            [self.navigationController pushViewController:vc animated:YES];
+//            vc.doneButton.hidden = YES;
+//            [vc release];
 
+        }
+        else if (indexPath.row == 3) {
+            //FAQ
+            WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/privacy-mobile.html"]];
+            [self.navigationController pushViewController:vc animated:YES];
+            [vc hideToolbar:YES];
+            [vc release];
+        }
+        else if (indexPath.row == 4) {
+            //FAQ
+            WebViewController* vc = [[WebViewController alloc] initWithURL:[NSURL URLWithString:@"http://www.stamped.com/licenses-mobile.html"]];
+            [self.navigationController pushViewController:vc animated:YES];
+            [vc hideToolbar:YES];
+            [vc release];
         }
         else {
             [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -302,9 +329,14 @@
     } else if (indexPath.section == 2) {
         
         // feedback
+        MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
+        vc.mailComposeDelegate = self;
+        [vc setToRecipients:[NSArray arrayWithObject:@"feedback@stamped.com"]];
+        [self presentModalViewController:vc animated:YES];
+        [vc release];
         
         //[tableView deselectRowAtIndexPath:indexPath animated:YES];
-        [Util pushController:[[[STDebugViewController alloc] init] autorelease] modal:NO animated:YES];
+//        [Util pushController:[[[STDebugViewController alloc] init] autorelease] modal:NO animated:YES];
 
         
     } else if (indexPath.section == 3) {
@@ -322,6 +354,18 @@
     
 }
 
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+    if (error) {
+        [Util warnWithMessage:@"Couldn't send email" andBlock:^{
+            [self dismissModalViewControllerAnimated:YES];
+        }];
+    }
+    else {
+        [self dismissModalViewControllerAnimated:YES];
+    }
+}
 
 #pragma mark - UIActionSheetDelegate
 

@@ -337,7 +337,7 @@ class OAuthLogin(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('login',                            basestring, required=True)
-        cls.addProperty('password',                         basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True, cast=validateString)
 
 # TODO: Consolidate OAuthFacebookLogin and OAuthTwitterLogin after linked account generification?
 
@@ -445,7 +445,7 @@ class HTTPAccountNew(Schema):
     def setSchema(cls):
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('email',                            basestring, required=True, cast=validateEmail)
-        cls.addProperty('password',                         basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True, cast=validateString)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
@@ -470,7 +470,7 @@ class HTTPAccountUpgradeForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('email',                            basestring, required=True)
-        cls.addProperty('password',                         basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True, cast=validateString)
 
 
 class HTTPFacebookAccountNew(Schema):
@@ -649,8 +649,8 @@ class HTTPAvailableLinkedAccounts(Schema):
 class HTTPAccountChangePassword(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('old_password',                     basestring, required=True)
-        cls.addProperty('new_password',                     basestring, required=True)
+        cls.addProperty('old_password',                     basestring, required=True, cast=validateString)
+        cls.addProperty('new_password',                     basestring, required=True, cast=validateString)
 
 class HTTPAPNSToken(Schema):
     @classmethod
@@ -1422,7 +1422,7 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_is_instant_available and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
                 source                  = HTTPActionSource()
@@ -1540,7 +1540,7 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_is_instant_available and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
                 source                  = HTTPActionSource()
@@ -1696,25 +1696,25 @@ class HTTPEntity(Schema):
 
             # Actions: Add to Playlist
 
-            actionType  = 'playlist'
-            actionTitle = 'Add to playlist'
-            if entity.isType('artist'):
-                actionTitle = 'Add artist to playlist'
-            actionIcon  = _getIconURL('act_playlist_music', client=client)
-            sources     = []
+            # actionType  = 'playlist'
+            # actionTitle = 'Add to playlist'
+            # if entity.isType('artist'):
+            #     actionTitle = 'Add artist to playlist'
+            # actionIcon  = _getIconURL('act_playlist_music', client=client)
+            # sources     = []
 
-            if getattr(entity.sources, 'rdio_id', None) is not None:
-                source              = HTTPActionSource()
-                source.name         = 'Add to playlist on Rdio'
-                source.source       = 'rdio'
-                source.source_id    = entity.sources.rdio_id
-                source.setCompletion(
-                    action      = actionType,
-                    entity_id   = entity.entity_id,
-                    source      = source.source,
-                    source_id   = source.source_id,
-                )
-                sources.append(source)
+            # if getattr(entity.sources, 'rdio_id', None) is not None:
+            #     source              = HTTPActionSource()
+            #     source.name         = 'Add to playlist on Rdio'
+            #     source.source       = 'rdio'
+            #     source.source_id    = entity.sources.rdio_id
+            #     source.setCompletion(
+            #         action      = actionType,
+            #         entity_id   = entity.entity_id,
+            #         source      = source.source,
+            #         source_id   = source.source_id,
+            #     )
+            #     sources.append(source)
 
             # if getattr(entity.sources, 'spotify_id', None) is not None:
             #     source              = HTTPActionSource()
@@ -2074,6 +2074,41 @@ class HTTPEntityId(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('entity_id',                        basestring, required=True)
+
+class HTTPEntityEdit(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',                        basestring, required=True)
+        cls.addProperty('secret',                           basestring, required=True)
+
+class HTTPEntityUpdate(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('entity_id',                        basestring, required=True)
+        cls.addProperty('secret',                           basestring, required=True)          
+        cls.addProperty('title',                            basestring)
+        cls.addProperty('desc',                             basestring)
+        
+        # sources
+        cls.addProperty('rdio_url',                         basestring)
+        cls.addProperty('itunes_url',                       basestring)
+        cls.addProperty('imdb_url',                         basestring)
+        cls.addProperty('fandango_url',                     basestring)
+        cls.addProperty('amazon_url',                       basestring)
+        cls.addProperty('netflix_url',                      basestring)
+        cls.addProperty('singleplatform_url',               basestring)
+
+        # place
+        cls.addProperty('address_street',                   basestring)
+        cls.addProperty('address_street_ext',               basestring)
+        cls.addProperty('address_locality',                 basestring)
+        cls.addProperty('address_region',                   basestring)
+        cls.addProperty('address_postcode',                 basestring)
+        cls.addProperty('address_country',                  basestring)
+
+        cls.addProperty('phone',                            basestring)
+
+
 
 class HTTPEntityIdSearchId(Schema): ### TODO: Remove?
     @classmethod

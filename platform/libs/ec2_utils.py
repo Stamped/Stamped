@@ -43,7 +43,7 @@ def get_local_instance_id():
         return ret[0]
 
 def get_stack(stack=None):
-    if not is_ec2():
+    if stack is None and not is_ec2():
         return None
     
     if stack is not None:

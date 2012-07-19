@@ -80,7 +80,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
 
 - (id)init {
     if ((self = [super init])) {
-        _selectedIndexPath = [[NSIndexPath indexPathForRow:0 inSection:0] retain];
+        //_selectedIndexPath = [[NSIndexPath indexPathForRow:0 inSection:0] retain];
         [self loginStatusChanged:nil];
         
     }
@@ -157,6 +157,7 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(configurationChanged:) name:STConfigurationValueDidChangeNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILoginNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPILogoutNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:STStampedAPIUserUpdatedNotification object:nil];
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerStateChanged:) name:STPlayerStateChangedNotification object:nil];
 //    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playerItemChanged:) name:STPlayerItemChangedNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loginStatusChanged:) name:DDMenuControllerWillShowLeftMenuNotification object:nil];
@@ -334,8 +335,12 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
                 view.userInteractionEnabled = NO;
                 view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
                 [cell addSubview:view];
-                view.imageURL = [NSURL URLWithString:[user imageURL]];
-                
+                if ([STStampedAPI sharedInstance].currentUserImage) {
+                    view.imageView.image = [STStampedAPI sharedInstance].currentUserImage;
+                }
+                else {
+                    view.imageURL = [NSURL URLWithString:[user imageURL]];
+                }
                 view.backgroundView.layer.shadowOffset = CGSizeMake(0.0f, -1.0f);
                 view.backgroundView.layer.shadowRadius = 0.0f;
                 view.backgroundView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.25f];
@@ -460,11 +465,12 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
     [self loginStatusChanged:nil];
 }
 
-- (void)loginStatusChanged:(id)notImportant {
-    
+- (void)loginStatusChanged:(NSNotification*)notification {
     BOOL currentStatus = LOGGED_IN;
-    if (self.loggedIn && self.loggedIn.boolValue == currentStatus) return;
+    if (![notification.name isEqualToString:STStampedAPIUserUpdatedNotification] && self.loggedIn && self.loggedIn.boolValue == currentStatus) return;
     self.loggedIn = [NSNumber numberWithBool:currentStatus];
+    [_selectedIndexPath release];
+    _selectedIndexPath = nil;
     NSIndexPath* selection = self.tableView.indexPathForSelectedRow;
     [_dataSource release];
     [_controllerStore release];
@@ -494,9 +500,9 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
         NSDictionary *navigators = [NSDictionary dictionaryWithObjectsAndKeys:
                                     @"Root.inbox", _inboxNameKey,
                                     @"Root.iWantTo", _iWantToNameKey,
-                                    @"Root.debug", _debugNameKey,
+                                    //@"Root.debug", _debugNameKey,
                                     nil];
-        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, _debugNameKey, nil] retain];
+        _dataSource = [[NSArray arrayWithObjects:_inboxNameKey, _iWantToNameKey, nil] retain];
         _controllerStore = [navigators retain];
     }
     [self.tableView reloadData];
@@ -506,6 +512,11 @@ static NSString* const _settingsNameKey = @"Root.settingsName";
             [self.tableView selectRowAtIndexPath:selection animated:NO scrollPosition:UITableViewScrollPositionNone];
         }
     }
+}
+
+- (void)clearSelection {
+    self.selectedIndexPath = nil;
+    [self.tableView reloadData];
 }
 
 
