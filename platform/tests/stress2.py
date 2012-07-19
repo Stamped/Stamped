@@ -11,20 +11,18 @@ import os, json, mimetools, sys, urllib, urllib2
 import datetime, time, random, hashlib, string
 import random
 import copy
+import gevent
 
 from errors import *
-
-class ContinueException(Exception):
-    pass
+from optparse import OptionParser
 
 class DoneException(Exception):
     pass
 
-class FinishedException(Exception):
-    pass
-
 class RootException(Exception):
     pass
+
+DEBUG = False
 
 """
 HTTP Helper Functions
@@ -2030,56 +2028,81 @@ randomScreenNames = [
 ]
 
 
-import gevent
+
+
+
+def parseCommandLine():
+    usage   = "Usage: %prog [options] query"
+    version = "%prog " + __version__
+    parser  = OptionParser(usage=usage, version=version)
+    
+    # parser.add_option("-d", "--db", default=None, type="string", 
+    #     action="store", dest="db", help="db to connect to")
+    
+    # parser.add_option("-n", "--noop", default=False, 
+    #     action="store_true", help="noop mode (don't apply fixes)")
+    
+    # parser.add_option("-e", "--email", default=False, 
+    #     action="store_true", help="send result email")
+    
+    # parser.add_option("-c", "--check", default=None, 
+    #     action="store", help="optionally filter checks based off of their name")
+    
+    parser.add_option("-r", "--numLoggedOutUsers", default=0, type="int", 
+        action="store", help="number of logged-out users to run")
+    
+    parser.add_option("-e", "--numExistingUsers", default=0, type="int", 
+        action="store", help="number of existing users to run")
+    
+    parser.add_option("-n", "--numNewUsers", default=0, type="int", 
+        action="store", help="number of new users to run")
+    
+    (options, args) = parser.parse_args()
+    
+    return (options, args)
+
 
 def worker(user):
     user.run()
     print 'DONE'
 
-while True:
-    start = time.time()
-    greenlets = [ 
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        # gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
-    ]
+def main():
+    options, args = parseCommandLine()
 
-    gevent.joinall(greenlets)
+    while True:
+        start = time.time()
 
-    print 'DONE DONE DONE'
-    print
+        greenlets = []
 
-    if time.time() - start > 35:
-        print "FAIL!", datetime.datetime.utcnow()
-        break 
+        # Add logged-out users
+        for i in range(options.numLoggedOutUsers):
+            greenlets.append(gevent.spawn(worker, LoggedOutUser()))
 
-    time.sleep(0.5)
+        # Add existing users
+        for i in range(options.numExistingUsers):
+            greenlets.append(gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')))
 
-# user = ExistingUser('kevin', '12345')
-# user = LoggedOutUser()
-# user.run()
-# print 'DONE'
+        # Add new users
+        pass 
+
+        if len(greenlets) == 0:
+            print "Nothing to run!"
+            break
+
+        gevent.joinall(greenlets)
+
+        print 'DONE DONE DONE'
+        print
+
+        if time.time() - start > 35:
+            print "DONE!", datetime.datetime.utcnow()
+            break 
+
+        time.sleep(0.5)
+
+
+if __name__ == '__main__':
+    main()
 
 
 """
@@ -2087,6 +2110,7 @@ TODO:
 - Automatically reset stress.db?
 - Spawn n instances to run from
 x Connect directly to instances based on stack name (instead of through ELB -- routing SUCKS)
+- Take command-line inputs
 - Aggregation of results (via SimpleDB?)
 - Microcaching on nginx
 - Caching of tastemaker endpoints via memcached
