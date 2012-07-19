@@ -1422,7 +1422,7 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_is_instant_available and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
                 source                  = HTTPActionSource()
@@ -1540,7 +1540,7 @@ class HTTPEntity(Schema):
             sources     = []
 
             if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available is not None and
+                entity.sources.netflix_is_instant_available and
                 entity.sources.netflix_instant_available_until is not None and
                 entity.sources.netflix_instant_available_until > datetime.now()):
                 source                  = HTTPActionSource()
@@ -2096,6 +2096,7 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('fandango_url',                     basestring)
         cls.addProperty('amazon_url',                       basestring)
         cls.addProperty('netflix_url',                      basestring)
+        cls.addProperty('singleplatform_url',               basestring)
 
         # place
         cls.addProperty('address_street',                   basestring)

@@ -28,12 +28,6 @@ def _tmdb():
     import libs.TMDB
     return libs.TMDB.globalTMDB()
 
-def _entityDB():
-    from api import MongoStampedAPI
-    stamped_api = MongoStampedAPI.globalMongoStampedAPI()
-    db = stamped_api._entityDB
-    return db
-
 def _itunes():
     import libs.iTunes
     return libs.iTunes.globaliTunes()
@@ -41,6 +35,29 @@ def _itunes():
 def _fullResolveContainer():
     import resolve.FullResolveContainer
     return resolve.FullResolveContainer.FullResolveContainer()
+
+def _stampedAPI():
+    from api import MongoStampedAPI
+    return MongoStampedAPI.globalMongoStampedAPI()
+
+def _entityDB():
+    db = _stampedAPI()._entityDB
+    return db
+
+# Paul, add your extra output here
+def extraInfo(entity):
+    return """
+<pre>
+No extra info
+</pre>
+    """
+
+def _quickLink(key, value):
+    if value is None or value == '' or value == _invalidPlaceholder or value.find('http') == -1:
+        return ""
+    return """
+<a href="%s">%s</a>
+""" % (value, key)
 
 def formForEntity(entity_id, **hidden_params):
     db = _entityDB()
@@ -51,6 +68,11 @@ def formForEntity(entity_id, **hidden_params):
     if entity.kind == 'place':
         for k in _place_fields:
             fields[k] = getattr(entity, k)
+        singleplatform_url = ''
+        singleplatform_id = entity.sources.singleplatform_id
+        if singleplatform_id is not None:
+            singleplatform_url = "http://www.singlepage.com/%s/menu" % singleplatform_id
+        fields['singleplatform_url'] = singleplatform_url
     else:
         itunes_id = entity.sources.itunes_id
         itunes_url = ''
@@ -93,18 +115,21 @@ def formForEntity(entity_id, **hidden_params):
             except KeyError:
                 pass
         fields['imdb_url'] = imdb_url
-        netflix_url = ''
-        netflix_id = entity.sources.netflix_id
-        if netflix_id is not None:
-            netflix_url = _invalidPlaceholder
-            try:
-                netflix_number = netflix_id.split('/')[-1]
-                netflix_url = 'http://movies.netflix.com/WiMovie/%s' % netflix_number
-            except Exception:
-                pass
-        fields['netflix_url'] = netflix_url
+        # netflix_url = ''
+        # netflix_id = entity.sources.netflix_id
+        # if netflix_id is not None:
+        #     netflix_url = _invalidPlaceholder
+        #     try:
+        #         netflix_number = netflix_id.split('/')[-1]
+        #         netflix_url = 'http://movies.netflix.com/WiMovie/%s' % netflix_number
+        #     except Exception:
+        #         pass
+        # fields['netflix_url'] = netflix_url
     hidden_params['entity_id'] = entity_id
     html = []
+    desc = entity.desc
+    if desc is None:
+        desc = ''
     html.append("""
 <html>
 <head>
@@ -114,7 +139,7 @@ def formForEntity(entity_id, **hidden_params):
 <form action="update.html" method="post">
 title:<input type="text" name="title" value="%s"/><br/>
 desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
- """ % (entity.title, entity.title, entity.desc))
+ """ % (entity.title, entity.title, desc))
     for k,v in hidden_params.items():
         html.append("""
 <input type="hidden" name="%s" value="%s"/>
@@ -123,20 +148,23 @@ desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
         if v is None:
             v = ''
         html.append("""
-%s: <input type="text" name="%s" value="%s" size="100"/><br />
-            """ % (k, k, v))
+%s: <input type="text" name="%s" value="%s" size="100"/>%s<br />
+            """ % (k, k, v, _quickLink(k,v)))
 
     html.append("""
 
 <input type="submit" value="Submit" />
 </form>
+<br/>
+%s
 </body>
 </html>
 
-""")
+""" % (extraInfo(entity),))
     return ''.join(html)
 
 def update(updates):
+    bad_versions = set(['', _invalidPlaceholder])
     db = _entityDB()
     now = datetime.utcnow()
     entity = db.getEntity(updates.entity_id)
@@ -149,8 +177,13 @@ def update(updates):
     simple_fields = []
     if entity.kind == 'place':
         simple_fields.extend(_place_fields)
-
-    bad_versions = set(['', _invalidPlaceholder])
+    singleplatform_url = updates.singleplatform_url
+    if singleplatform_url is not None and singleplatform_url not in bad_versions:
+        singleplatform_id = re.match(r'http://www.singlepage.com/(.+)/menu\?.*', singleplatform_url).group(1)
+        entity.sources.singleplatform_url = singleplatform_url
+        entity.sources.singleplatform_id = singleplatform_id
+        entity.sources.singleplatform_source = 'seed'
+        entity.sources.singleplatform_timestamp = now
     rdio_url = updates.rdio_url
     if rdio_url is not None and rdio_url not in bad_versions:
         rdio_data = _rdio().method('getObjectFromUrl', url=rdio_url)
@@ -165,17 +198,17 @@ def update(updates):
         entity.sources.tmdb_id = tmdb_data['id']
         entity.sources.tmdb_source = 'seed'
         entity.sources.tmdb_timestamp = now
-    netflix_url = updates.netflix_url
-    if netflix_url is not None and netflix_url not in bad_versions:
-        match = re.match(r'http://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?trkid=\d+)?',netflix_url)
-        netflix_number = match.group(2)
-        netflix_id = None
-        if entity.isType('movie'):
-            netflix_id = 'http://api.netflix.com/catalog/titles/movies/%s' % netflix_number
-        if netflix_id is not None:
-            entity.sources.netflix_id = netflix_id
-            entity.sources.netflix_source = 'seed'
-            entity.sources.netflix_timestamp = now
+    # netflix_url = updates.netflix_url
+    # if netflix_url is not None and netflix_url not in bad_versions:
+    #     match = re.match(r'http://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?trkid=\d+)?',netflix_url)
+    #     netflix_number = match.group(2)
+    #     netflix_id = None
+    #     if entity.isType('movie'):
+    #         netflix_id = 'http://api.netflix.com/catalog/titles/movies/%s' % netflix_number
+    #     if netflix_id is not None:
+    #         entity.sources.netflix_id = netflix_id
+    #         entity.sources.netflix_source = 'seed'
+    #         entity.sources.netflix_timestamp = now
     itunes_url = updates.itunes_url
     if itunes_url is not None and itunes_url not in bad_versions:
         itunes_id = None
@@ -203,7 +236,7 @@ def update(updates):
             v = None
         if v != _invalidPlaceholder:
             setattr(entity, k, v)
-    db.updateEntity(entity)
+    _stampedAPI().mergeEntity(entity)
 
 
 
