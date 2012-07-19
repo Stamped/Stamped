@@ -14,6 +14,7 @@ import traceback
 
 import utils
 
+import calendar
 from time               import time, gmtime, mktime, strftime, localtime
 from collections        import deque
 
@@ -251,13 +252,15 @@ class RateLimiter(object):
         return False
 
     def _isDayLimit(self):
+        """ Check if we have gone over the daily rate limit. We compare the current utc time against the
+            end of the utc day and reset the counters when the day has elapsed
+        """
         if self.cpd is None:
             return False
 
-        now = mktime(datetime.datetime.utcnow().timetuple())
-        # reset counter if day has elapsed
-        #print('Day start: %s   now: %s' % (self.__day_start, now))
+        now = calendar.timegm(gmtime())
         if self.__day_start + 60*60*24 < now:
+            print('day elapsed')
             self.__day_start = self._getDay()
             self.day_calls = 0
 
@@ -265,8 +268,11 @@ class RateLimiter(object):
 
 
     def _getDay(self):
-        now = gmtime()
-        return mktime(datetime.datetime(now.tm_year, now.tm_mon, now.tm_mday).timetuple())
+        """ Get beginning of current utc day in seconds since the epoch
+        """
+        now = datetime.datetime.utcnow()
+        date = datetime.datetime(now.year, now.month, now.day)
+        return calendar.timegm(date.timetuple())
 
     def _addDurationLog(self, elapsed):
         """
