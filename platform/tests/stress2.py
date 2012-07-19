@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals, logs
+import Globals, logs, utils, libs.ec2_utils
 import os, json, mimetools, sys, urllib, urllib2
 import datetime, time, random, hashlib, string
 import random
@@ -30,16 +30,16 @@ class RootException(Exception):
 HTTP Helper Functions
 """
 
-baseurl = "https://dev.stamped.com/v1"
-baseurl = "http://localhost:18000/v1"
-baseurl = "http://stress-api-1431215555.us-east-1.elb.amazonaws.com/v1"
+stack = libs.ec2_utils.get_stack('stress')
 
-hosts = [
-    # "http://ec2-23-22-203-114.compute-1.amazonaws.com:5000/v1",
-    # "http://ec2-174-129-84-64.compute-1.amazonaws.com:5000/v1",
-    "http://ec2-75-101-244-225.compute-1.amazonaws.com:5000/v1",
-]
+hosts = []
+for node in stack['nodes']:
+    if 'apiServer' in node['roles']:
+        hosts.append("http://%s:5000/v1" % node['public_dns_name'])
 
+# hosts = [ "http://localhost:18000/v1" ]
+
+assert len(hosts) > 0
 
 def handleGET(path, data, handleExceptions=True):
     params = urllib.urlencode(data)
@@ -1920,10 +1920,10 @@ class ExistingUser(User):
         self.userId = login['user']['user_id']
         self.screenName = login['user']['screen_name']
 
-        # try:
-        #     self._viewInbox()
-        # except DoneException:
-        #     pass
+        try:
+            self._viewInbox()
+        except DoneException:
+            pass
 
         print
 
@@ -1953,6 +1953,54 @@ class ExistingUser(User):
         self.addToStack(FriendFinder)
 
 
+randomScreenNames = [
+    'a', 'aaron', 'abdu1ra7man', 'achimh', 'adsfasdfasdf', 'aed', 'agaw', 'agk', 'ajay', 'alanagolob', 'alexcho', 
+    'alexcsmall', 'alexgsrubio', 'alexiskold', 'alexmarkman', 'alexmchale', 'allisonmarie', 'amillionpiecesofhea', 
+    'amitgir', 'andrew_nesbitt', 'andy', 'andybons', 'andyestrella', 'annieteng', 'anthony', 'anthonydelorme', 
+    'anton_in_nyc', 'applewoods', 'artnfear', 'asaf', 'atlasferone', 'b', 'barrettc', 'bart', 'beefy', 'bfolds', 
+    'bill_staehle', 'bjw0715', 'bklynisbetter', 'bluepicasso', 'bobbygrace', 'bowreality', 'brainopera', 
+    'brentbyington', 'brettgarrett', 'briezus', 'bron92', 'brynn', 'buford', 'bunnny', 'byparlak', 'carolynweiss', 
+    'chan', 'charleswilliams', 'cheesemoleo', 'chonko', 'chris', 'chris50001', 'chrisackermann', 'ckarwoski', 
+    'clangballe', 'clofresh', 'cobradave', 'cocoabeanchloe', 'craignm', 'csdd', 'ctide', 'daniel', 'danielle', 
+    'danielloedel', 'danijean', 'dannylm', 'davemorin', 'daveo', 'davidconrad', 'davidfraga', 'davidvb', 'davidzb', 
+    'dbedingfield', 'dbreunig', 'dddesigned', 'ddebonis', 'demoine', 'dhavgarde', 'dlamp417', 'dobata', 'dolly_rose', 
+    'dougvs', 'drb352', 'drbrydges', 'dregar', 'drewcoffman', 'e_blanchardjr', 'earth2travis', 'edchu', 'edmuki', 
+    'edwinp', 'eiph', 'elihorne', 'elimgoodman', 'ellen', 'elliekrieger', 'emchennyc', 'entropy', 'ericbeasley', 
+    'erikep', 'eruji', 'eugeniakoo', 'fabfunk', 'fahad', 'faraz200387', 'fender324', 'franzx007', 'gentlemanly', 
+    'georgearison', 'gillyc', 'girldetective', 'goodmaar', 'grant', 'greg', 'gregor1994', 'gregster007', 'grenicm', 
+    'grex', 'gs32tom', 'gserrao', 'gshans', 'gweiner', 'hannahrae', 'heather', 'henrique_carvalhop', 'herewearenowwhat', 
+    'hernandez', 'herzflimmern', 'hifromjonathan', 'hoogs', 'hrbrt', 'hugoalonzo', 'ibuys', 'idypakb', 'ija', 'ilyse', 
+    'imonmymac', 'intastella', 'isaacjudd', 'islutsky', 'itcanbealover', 'j0seph', 'jacksonli', 'jacob_coy', 
+    'jadyferreira', 'jake', 'jake-m', 'janeg', 'janeway', 'jarvis', 'jason', 'jasongelman', 'jbdeloach', 'jbigger', 
+    'jdrew804', 'jeffhodsdon', 'jeffmc', 'jeffsoo', 'jenny', 'jenyih', 'jephkelley', 'jerrylee', 'jess', 'jgallag6', 
+    'jimboslice', 'jleezy', 'jngsta', 'joehuston', 'jonesir', 'jonmwords', 'jonsjanssens', 'jonslimak', 
+    'josepablocordova', 'joshualane', 'joshumami', 'jreed91', 'jromano', 'jstaehle', 'jtb', 'juanfer1', 'julesc', 
+    'julia', 'julie', 'julius', 'juppschwupp', 'jws', 'jwtalley', 'k', 'kaethend', 'kathy', 'kennberg', 'kevin', 
+    'kevinsystrom', 'kgarriss', 'khe', 'kingdavidofsc', 'krys', 'kssk', 'kumaran', 'kylehorn', 'kylestanding', 
+    'labeeden', 'landon', 'lauren', 'laurenbushey', 'laviniaana', 'lchong', 'lekkerding', 'lethalcupcake', 'lfh', 
+    'lgrun', 'lilyallyn', 'lindsay', 'lipnicks', 'lisa', 'littlefox', 'liz', 'liztan', 'lizwalton', 'lmd', 'lokesh', 
+    'lorn', 'lorri', 'luismtnz', 'lukemc3001', 'lukexi', 'lux', 'lyssagail', 'magdimus', 'maleahjacobs', 'malloryirons', 
+    'malvina', 'mancun_ian', 'maophy', 'marcelapam', 'marcinj', 'margaret', 'maria-trabelsi', 'mark', 'mars', 'matt', 
+    'mattdavey', 'mattgold', 'maurice', 'mauricetrudell', 'mavex', 'maxheller', 'mcbush25', 'mdharris93', 'micah', 
+    'michaelkors', 'michaelramm', 'mike', 'mikegee', 'mikeydigital', 'mileal', 'milkypostman', 'minimini', 'mizlead', 
+    'mj2011', 'mjay', 'mjk396', 'mjparker', 'ml', 'mmcpdx', 'mmmerkl', 'mo', 'mobidever', 'mohabitar', 'moira', 
+    'monicaeunjikim', 'moremagazine', 'mrjamesdi', 'msanchezgrice', 'mulligan', 'mynameisjosh', 'nadiay124', 
+    'nateschulman', 'ndcooper', 'nicgan', 'nicole', 'nicole11606', 'noah', 'noahweiss', 'nobudesign', 'nv', 'nymag', 
+    'nytimes2', 'ogray', 'oliverwaters', 'p', 'pantone356', 'parislemon', 'pascalm', 'patrickmarzullo', 'paulsearle', 
+    'petertravers', 'pharathomas', 'pjedlund', 'ploewen', 'pmray87', 'posativnrg', 'prop79', 'prunthac', 'pyang921', 
+    'rachel', 'rachelray', 'radiothom', 'rajesh', 'ralphbracamonte', 'rebecca', 'rebeccaminkoff', 'restaurantgirl', 
+    'reza', 'rhoganyan', 'richardgroves', 'ridic', 'rishi', 'riva', 'rjlevy', 'rkmnyc', 'rmurdock', 'robbie', 
+    'robsavitsky', 'rooklin', 'rpowell', 'rrludman', 'rugbysforwho', 'ryanpsims', 'ryantevans', 's-karaba', 'sahil', 
+    'sailer', 'salehm8', 'sanjay', 'scottwilliams', 'scrippst', 'serka', 'seyren', 'sfriend37', 'shawnb', 'shenhai1943', 
+    'shindogy', 'shmanimal', 'siddharth1', 'skaw', 'skinthesun', 'slazar', 'smaramba', 'smcgown', 'smehmood', 
+    'snambomb', 'snooper', 'soumar', 'speck', 'spottinger', 'srura', 'starflower', 'startupman', 'stavafilm', 
+    'stephen_tk', 'stoddawg', 'suavebutter', 'sundaysun', 'susan', 'sushme', 'suz_foote', 'sydneyjlindsay', 't', 
+    'tangbj', 'tanmay', 'tchoyj', 'teddy', 'the0utsider', 'theacumenity', 'theguyfrom5r', 'theill', 'thekevin', 
+    'thibaut', 'thisisnotagabe', 'tigg', 'time', 'timsondrup', 'tintinage', 'tinyyuan', 'titusferguson', 'tlalonde', 
+    'tombillionis', 'tommullen', 'tommypjr1', 'tomusher', 'tpoage', 'travis', 'tristan', 'tuesday', 'twinkleboi', 
+    'unsoluble', 'urbandaddy', 'votivored', 'vtti', 'waeiluen', 'walkdesign', 'weston', 'willh103', 'wilsonh', 
+    'withdrake', 'wlivbh', 'xtina', 'yl_ksa', 'yodelmachine', 'yuki', 'zach', 'zannesan', 'zwrodgers',
+]
 
 
 import gevent
@@ -1964,18 +2012,30 @@ def worker(user):
 while True:
     start = time.time()
     greenlets = [ 
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
-        gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        # gevent.spawn(worker, LoggedOutUser()),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
+        gevent.spawn(worker, ExistingUser(random.choice(randomScreenNames), '12345')),
     ]
 
     gevent.joinall(greenlets)
@@ -1993,3 +2053,12 @@ while True:
 # user = LoggedOutUser()
 # user.run()
 # print 'DONE'
+
+
+"""
+TODO:
+- Automatically reset stress.db?
+- Spawn n instances to run from
+x Connect directly to instances based on stack name (instead of through ELB -- routing SUCKS)
+- Aggregation of results
+"""

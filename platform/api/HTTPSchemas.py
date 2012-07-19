@@ -1696,25 +1696,25 @@ class HTTPEntity(Schema):
 
             # Actions: Add to Playlist
 
-            actionType  = 'playlist'
-            actionTitle = 'Add to playlist'
-            if entity.isType('artist'):
-                actionTitle = 'Add artist to playlist'
-            actionIcon  = _getIconURL('act_playlist_music', client=client)
-            sources     = []
+            # actionType  = 'playlist'
+            # actionTitle = 'Add to playlist'
+            # if entity.isType('artist'):
+            #     actionTitle = 'Add artist to playlist'
+            # actionIcon  = _getIconURL('act_playlist_music', client=client)
+            # sources     = []
 
-            if getattr(entity.sources, 'rdio_id', None) is not None:
-                source              = HTTPActionSource()
-                source.name         = 'Add to playlist on Rdio'
-                source.source       = 'rdio'
-                source.source_id    = entity.sources.rdio_id
-                source.setCompletion(
-                    action      = actionType,
-                    entity_id   = entity.entity_id,
-                    source      = source.source,
-                    source_id   = source.source_id,
-                )
-                sources.append(source)
+            # if getattr(entity.sources, 'rdio_id', None) is not None:
+            #     source              = HTTPActionSource()
+            #     source.name         = 'Add to playlist on Rdio'
+            #     source.source       = 'rdio'
+            #     source.source_id    = entity.sources.rdio_id
+            #     source.setCompletion(
+            #         action      = actionType,
+            #         entity_id   = entity.entity_id,
+            #         source      = source.source,
+            #         source_id   = source.source_id,
+            #     )
+            #     sources.append(source)
 
             # if getattr(entity.sources, 'spotify_id', None) is not None:
             #     source              = HTTPActionSource()
