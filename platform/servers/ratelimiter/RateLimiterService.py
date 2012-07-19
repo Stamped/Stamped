@@ -13,6 +13,7 @@ from gevent.hub         import GreenletExit
 
 import os
 from time               import sleep
+from datetime           import datetime
 import RateLimiter2
 from RateLimiter2       import RateLimiter, Request
 from libs.ec2_utils     import get_stack
@@ -51,12 +52,17 @@ class StampedRateLimiterService():
         self.__limiters = {}
         self.__stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
         self.__rllog = MongoRateLimiterLogCollection()
+        self.loadDbLog()
         self.loadLimiterConfig()
         self.__config_loader_thread = None
         self.__update_log_thread = None
-        self.startThreads()
+        self.__config_loader_thread = gevent.spawn(configLoaderLoop, self, CONFIG_LOAD_INTERVAL)
+        if not self.__throttle:
+            self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
+            #self.startThreads()
 
     def updateDbLog(self):
+        print('#### CALLING UPDATEDBLOG')
         callmap = dict()
         for k,v in self.__limiters:
             callmap[k] = v.day_calls
@@ -64,7 +70,9 @@ class StampedRateLimiterService():
 
     def loadDbLog(self):
         callmap = self.__rllog.getLog()
-        for k,v in callmap:
+        if callmap is None:
+            return
+        for k,v in callmap.iteritems():
             if k in self.__limiters:
                 self.__limiters[k].day_calls = v
 
@@ -120,8 +128,12 @@ class StampedRateLimiterService():
                 fail_period     = v.get('fail_period', None)
                 blackout_wait   = v.get('blackout_wait', None)
                 if self.__throttle:
+                    # throttle qps to 1/10 the rate, and cpd to allow 1/10th the remaining calls in quota
                     limit = max(1, limit / 10)
-                    cpd = max(1, cpd / 10)
+                    day_calls = 0
+                    if service_name in self.__limiters:
+                        day_calls = self.__limiters[service_name].day_calls
+                    cpd = min(cpd, day_calls + (cpd-day_calls) / 10)
             except Exception as e:
                 if service_name is not None:
                     print ("Exception while reading limiter for service '%s' in limits.conf, skipping" % service_name)

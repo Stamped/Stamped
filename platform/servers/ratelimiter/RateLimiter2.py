@@ -207,8 +207,8 @@ class RateLimiter(object):
         cutoff = now - self.fail_period
         count = 0
 
-        for timestamp in self.__fails:
-            if timestamp > cutoff:
+        for log in self.__fails:
+            if log.timestamp > cutoff:
                 count += 1
             else:
                 self.__fails.popleft()

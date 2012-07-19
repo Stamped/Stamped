@@ -28,5 +28,5 @@ class MongoRateLimiterLogCollection(AMongoCollection):
         return self._collection.update({'_id': today}, callMap, upsert=True)
 
 
-    def getLog(self, utctime):
+    def getLog(self, utctime=datetime.utcnow()):
         return self._collection.find_one({'_id': self._getUtcDay(utctime)})

@@ -6,29 +6,38 @@ import logs
 import utils
 import rpyc
 import urllib
-from time                       import time, sleep
+from time                       import time, strftime, localtime
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
-
+from collections                import deque
 
 
 FAIL_LIMIT = 10
-FAIL_WAIT = 60*5
+FAIL_PERIOD = 60*3
+BLACKOUT_WAIT = 60*5
 DEFAULT_TIMEOUT = 3
 RL_HOST = 'localhost'
 RL_PORT = 18861
 
 
 class RateLimiterState(object):
-    def __init__(self, fail_limit, fail_wait, host, port):
+    def __init__(self, fail_limit, fail_period, blackout_wait, host, port):
         self.__local_rlservice = None
         self.__host = host
         self.__port = port
         self.__request_fails = 0
+        self.__fails = deque()
         self.__fail_limit = fail_limit
+        self.__fail_period = fail_period
         self.__blackout_start = None
-        self.__fail_wait = fail_wait
+        self.__blackout_wait = blackout_wait
         self.__is_ec2 = utils.is_ec2()
         self.__service_init_semaphore = Semaphore()
+        self.__fail_semaphore = Semaphore()
+
+    class FailLog(object):
+        def __init__(self, exception):
+            self.timestamp = time()
+            self.exception = exception
 
     @property
     def _local_rlservice(self):
@@ -45,30 +54,88 @@ class RateLimiterState(object):
 
         return self.__local_rlservice
 
-    def _fail(self):
+    def sendFailLogEmail(self):
+        if len(self.__fails) == 0:
+            return
+
+        output = '<html>'
+        output += "<h3>RateLimiter RPC Server Failure</h3>"
+        output += "<p><i>There were %s failed requests to the rpc server within the last %s seconds</p></i>" %\
+                  (self.__fail_limit, self.__fail_period)
+        back_online = strftime('%m/%d/%Y %H:%M:%S', localtime(self.__blackout_start + self.__blackout_wait)) # Timestamp
+        output += "<p>Waiting for %s seconds.  Will use local Rate Limiter service in until: %s</p>" % (self.__blackout_wait, back_online)
+
+        output += '<h3>Fail Log</h3>'
+
+        output += '<table border=1 cellpadding=5>'
+        output += '<tr>'
+        labels = ['Timestamp', 'Exception']
+        for label in labels:
+            output += '<td style="font-weight:bold">%s</td>' % label
+        output += '</tr>'
+
+        for fail in self.__fails:
+            output += '<tr>'
+            output += '<td valign=top>%s</td>' % strftime('%m/%d/%Y %H:%M:%S', localtime(fail.timestamp)) # Timestamp
+            output += '<td valign=top>%s</td>' % fail.exception
+            output += '</tr>'
+
+        output += '</table>'
+
+        output += '</html>'
+
+
+        try:
+            email = {}
+            email['from'] = 'Stamped <noreply@stamped.com>'
+            email['to'] = 'dev@stamped.com'
+            email['subject'] = "RateLimiter RPC server failure"
+            email['body'] = output
+            utils.sendEmail(email, format='html')
+        except Exception as e:
+            print('UNABLE TO SEND EMAIL: %s' % e)
+
+        return output
+
+    def _fail(self, exception):
         if self.__blackout_start is not None:
             return
 
-        self.__request_fails += 1
-        if self.__request_fails >= self.__fail_limit:
-            # if the fail threshold is hit, then set the blackout start timestamp and load rate limiter call
-            # log data into the local rate limiter service. Also, start the local rate limiter update threads
+        self.__fail_semaphore.acquire()
+
+        self.__fails.append(self.FailLog(exception))
+
+        now = time()
+
+        cutoff = now - self.__fail_period
+        count = 0
+
+        for log in self.__fails:
+            if log.timestamp > cutoff:
+                count += 1
+            else:
+                print('popping fail')
+                self.__fails.popleft()
+
+        self.__fail_semaphore.release()
+
+        if count >= self.__fail_limit:
             self.__blackout_start = time()
             self.__local_rlservice.loadDbLog()    # update the local call log from the db
-            self.__local_rlservice.startThreads()
-            logs.error('RPC service FAIL THRESHOLD REACHED')
+
+            logs.error('RPC server request FAIL THRESHOLD REACHED')
+            # Email dev if a fail limit was reached
+            if self.__is_ec2:
+                self.sendFailLogEmail()
 
     def _isBlackout(self):
         if self.__blackout_start is None:
             return False
-        if self.__blackout_start + self.__fail_wait > time():
+        if self.__blackout_start + self.__blackout_wait > time():
             return True
         else:
-            # if the blackout period has expired, reset the blackout timestamp and fail counter, and stop update
-            # threads on the local rate limiter service
             self.__blackout_start = None
             self.__request_fails = 0
-            self.__local_rlservice.stopThreads()
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
@@ -96,8 +163,8 @@ class RateLimiterState(object):
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
-        except:
-            self._fail()
+        except Exception as e:
+            self._fail(e)
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 
 
@@ -106,7 +173,7 @@ def rl_state():
     global __rl_state
     if __rl_state is not None:
         return __rl_state
-    __rl_state = RateLimiterState(FAIL_LIMIT, FAIL_WAIT, RL_HOST, RL_PORT)
+    __rl_state = RateLimiterState(FAIL_LIMIT, FAIL_PERIOD, BLACKOUT_WAIT, RL_HOST, RL_PORT)
     return __rl_state
 
 
