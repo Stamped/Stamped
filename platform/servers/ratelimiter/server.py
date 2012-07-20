@@ -39,8 +39,9 @@ class StampedRateLimiterRPCService(rpyc.Service):
         # (to finalize the service, if needed)
         pass
 
-    def exposed_request(self, service, priority, timeout, verb, url, body = {}, headers = {}):
-        response, content = self.__rl_service.handleRequest(service, priority, timeout, verb, url, body, headers)
+    def exposed_request(self, service, priority, timeout, verb, url, body = pickle.dumps({}), headers = pickle.dumps({})):
+        response, content = self.__rl_service.handleRequest(service, priority, timeout, verb, url,
+            pickle.loads(body), pickle.loads(headers))
         return pickle.dumps(response), content
 
 def runServer(port=18861):

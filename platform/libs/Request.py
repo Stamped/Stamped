@@ -160,7 +160,7 @@ class RateLimiterState(object):
 
         async_request = rpyc.async(conn.root.request)
         try:
-            asyncresult = async_request(service, priority, timeout, method, url)
+            asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
             asyncresult.set_expiry(timeout)
             response, content = asyncresult.value
         except RateException as e:
