@@ -103,7 +103,7 @@ class ArtistEntityProxyComparator(AEntityProxyComparator):
             if name1_simple == name2_simple:
                 return CompareResult.match(0.9)
             if stringComparison(name1_simple, name2_simple, strict=True) > 0.9:
-                return CompareResult(stringComparison(name1_simple, name2_simple, strict=True) - 0.1)
+                return CompareResult.match(stringComparison(name1_simple, name2_simple, strict=True) - 0.1)
             return CompareResult.unknown()
 
 
@@ -348,14 +348,12 @@ def titleComparison(title1, title2, simplificationFn):
 
     best_score = 0
     for configuration in configurations:
-        print('TRYING CONFIGURATION [%s]' % ', '.join([fn.func_name for fn in configuration]))
         curr_title1, curr_title2 = title1, title2
         multiplier = 1.0
         for filter_fn in configuration:
             penalty, curr_title1, curr_title2 = filter_fn(curr_title1, curr_title2)
             multiplier *= (1.0 - penalty)
         similarity = stringComparison(curr_title1, curr_title2)
-        print 'sim is', similarity, 'multiplier is', multiplier
         uncommonness = min(complexUncommonness(curr_title1), complexUncommonness(curr_title2))
         score = get_odds_from_sim_unc(similarity * multiplier, uncommonness)
         if score > best_score:
@@ -363,8 +361,6 @@ def titleComparison(title1, title2, simplificationFn):
 
     return best_score
 
-
-print "'abc', 'bcd',", titleComparison('star trek: the next generation', 'star trek', simplify)
 
 
 class OddsBasedMovieEntityProxyComparator(AEntityProxyComparator):
