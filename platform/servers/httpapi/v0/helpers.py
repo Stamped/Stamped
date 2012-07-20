@@ -200,7 +200,7 @@ def handleHTTPRequest(requires_auth=True,
                 if request.method == 'OPTIONS' and valid_origin is not None:
                     return _add_cors_headers(HttpResponse())
                 
-                logs.begin(saveLog=stampedAPI._logsDB.saveLog,
+                logs.begin(saveLog=None, #stampedAPI._logsDB.saveLog,
                            saveStat=stampedAPI._statsDB.addStat,
                            requestData=request,
                            nodeName=stampedAPI.node_name)
