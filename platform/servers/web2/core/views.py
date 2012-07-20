@@ -6,12 +6,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import api.HTTPSchemas
-import os, pprint, utils
+import pprint, utils
 import libs.sms
 
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
+
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
 
@@ -375,7 +375,7 @@ def temp_view(request, **kwargs):
     })
 
 @stamped_view(schema=HTTPDownloadAppSchema)
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def download_app(request, schema, **kwargs):
     sms_client = libs.sms.globalSMSClient()
     result = sms_client.send_sms(schema.phone_number)
@@ -428,7 +428,7 @@ def index(request, schema, **kwargs):
 
 @stamped_view()
 def about(request, **kwargs):
-    body_classes = "about main"
+    body_classes = "about main main-animating"
     
     founders = [
         {
@@ -576,7 +576,7 @@ def about(request, **kwargs):
 
 @stamped_view()
 def jobs(request, **kwargs):
-    body_classes = "jobs main"
+    body_classes = "jobs main main-animating"
     
     return stamped_render(request, 'jobs.html', {
         'body_classes'      : body_classes, 

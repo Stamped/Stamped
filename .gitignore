@@ -23,3 +23,5 @@ Breakpoints.xcbkptlist
 
 platform/libs/.*
 
+
+.project

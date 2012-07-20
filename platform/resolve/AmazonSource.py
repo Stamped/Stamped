@@ -17,6 +17,7 @@ try:
     import logs, re
     from resolve.GenericSource              import GenericSource, multipleSource
     from resolve.TitleUtils                 import *
+    from resolve.StringNormalizationUtils   import *
     from resolve.Resolver                   import *
     from resolve.ResolverObject             import *
     from datetime                   import datetime

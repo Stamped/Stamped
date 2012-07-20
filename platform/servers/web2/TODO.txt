@@ -47,7 +47,7 @@ TODO:
             * DONE - header get-the-app button & texting functionality
             * PUNT - sign-up & login via facebook or stamped
                 * PUNT - ASK anthony about sign-up, login, vs. get-the-app
-            * layout adjustments to gallery view
+            * BETA - layout adjustments to gallery view
             * navbar occasional missing graphics
         * misc:
             * DONE - replace font usage w/ self-hosting option

@@ -98,10 +98,10 @@ var g_update_stamps = null;
                 var width0  = $elem.width();
                 var height0 = $elem.height();
                 
-                $elem.css('display', 'block');
+                $elem.css('display',  'block');
                 $share.show();
                 
-                var width1  = $elem.width();
+                var width1  = $elem.width() + 55;
                 var height1 = $elem.height();
                 
                 $share.hide();
@@ -143,82 +143,7 @@ var g_update_stamps = null;
             });
         };
         
-        $("#subnav").on("click", ".subnav_button", function(event) {
-            event.preventDefault();
-            
-            var $this    = $(this);
-            var $parent  = $this.parents('.profile-header-subnav');
-            var bargraph = false;
-            
-            $parent.removeClass('subnav-active-0 subnav-active-1 subnav-active-2');
-            
-            if ($this.hasClass('subnav_button-0')) {
-                $parent.find('.header-subsection-0').show();
-                $parent.addClass('subnav-active-0');
-            } else if ($this.hasClass('subnav_button-1')) {
-                $parent.find('.header-subsection-1').show();
-                $parent.addClass('subnav-active-1');
-            } else if ($this.hasClass('subnav_button-2')) {
-                bargraph = true;
-                $parent.find('.header-subsection-2').show();
-                $parent.addClass('subnav-active-2');
-            }
-            
-            // TODO: better approach here than setTimeout
-            setTimeout(function() {
-                var $elem   = $parent.find('.header-subsection-1');
-                var opacity = parseFloat($elem.css('opacity'));
-                
-                if (opacity <= 0.05) {
-                    $elem.hide();
-                }
-                
-                $elem   = $parent.find('.header-subsection-2');
-                opacity = parseFloat($elem.css('opacity'));
-                
-                if (opacity <= 0.05) {
-                    $elem.hide();
-                }
-            }, 200);
-            
-            // update the user's stamp category distribution bargraph via a spiffy animation
-            $('.bargraph-row-value').each(function(i, elem) {
-                var percentage  = 0;
-                var opacity     = 1.0;
-                var $this       = $(this);
-                
-                if (bargraph) {
-                    var count   = $this.data('count') || 0;
-                    
-                    if (count > 0) {
-                        percentage = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
-                    } else {
-                        percentage = 0.0;
-                        opacity    = 0.0;
-                    }
-                }
-                
-                $this.stop(true, false).delay(50).animate({
-                    width   : percentage + "%", 
-                    opacity : opacity
-                }, {
-                    duration : 1000, 
-                    specialEasing : { 
-                        width  : 'easeInOutBack'
-                    }, 
-                    complete : function() {
-                        $this.css({
-                            'width'     : percentage + "%", 
-                            'opacity'   : opacity
-                        });
-                    }
-                });
-            });
-            
-            return false;
-        });
-        
-        $(".friends-wrapper").on("click", ".expand-friends", function(event) {
+        $("a.expand-friends").click(function(event) {
             event.preventDefault();
             
             var $this = $(this);
@@ -231,29 +156,6 @@ var g_update_stamps = null;
             $.fancybox.open(popup_options);
             return false;
         });
-        
-        var init_header_subsections = function() {
-            var header_subsection_height = 0;
-            var $header_subsections  = $('.header-subsection');
-            var $header_subsection_0 = null;
-            
-            $header_subsections.each(function(i, elem) {
-                var $elem = $(elem);
-                
-                if ($elem.hasClass('header-subsection-0')) {
-                    $header_subsection_0 = $elem;
-                }
-                
-                header_subsection_height = Math.max($elem.height(), header_subsection_height);
-            });
-            
-            if (!!$header_subsection_0 && header_subsection_height > 0) {
-                $header_subsection_0.css({
-                    'height'     : header_subsection_height, 
-                    'min-height' : header_subsection_height
-                });
-            }
-        };
         
         
         // ---------------------------------------------------------------------
@@ -1761,9 +1663,9 @@ var g_update_stamps = null;
                 enable_gallery_animations(true);
                 update_gallery_layout(true);
                 
-                if (!href) {
+                /*if (!href) {
                     init_header_subsections();
-                }
+                }*/
                 
                 resize_sdetail_wrapper($target2, 'closing', function() {
                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
@@ -2249,113 +2151,6 @@ var g_update_stamps = null;
         
         
         // ---------------------------------------------------------------------
-        // initialize signup functionality
-        // ---------------------------------------------------------------------
-        
-        
-        $body.on("click", ".get-the-app-button", function(event) {
-            event.preventDefault();
-            
-            var popup_options = get_fancybox_popup_large_options({
-                content     : $("#popup-signup").html(), 
-                type        : "html", 
-                width       : 480, 
-                minWidth    : 480
-            });
-            
-            $.fancybox.open(popup_options);
-            return false;
-        });
-        
-        var default_phone_number = "555-555-5555";
-        var sms_message_success  = "SMS Sent!";
-        var sms_message_error    = "SMS Error!";
-        
-        $body.on("focus", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value");
-            
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error) {
-                $this.attr("value", "");
-            }
-            
-            $sms.removeClass("error").addClass("active");
-            
-            return true;
-        });
-        
-        $body.on("focusout", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value").trim();
-            
-            if (value.length <= 0) {
-                $this.attr("value", default_phone_number);
-            }
-            
-            $sms.removeClass("active error");
-            
-            return true;
-        });
-        
-        $(".phone-number").live("keyup change", function(event) {
-            var $this   = $(this);
-            var value   = $this.attr("value").trim();
-            var prefix  = "active-";
-            var classes = "active-0 active-1 active-2 active-3 active-4 active-5 active-6 active-7 active-8 active-9 active-10";
-            
-            if (value.length >= 0) {
-                var length = value.length;
-                
-                if (length > 10) {
-                    length = 10;
-                }
-                
-                var $button = $this.parent().find(".send-button");
-                $button.removeClass(classes).addClass(prefix + length);
-            }
-            
-            return true;
-        });
-        
-        $body.on("submit", ".sms-form", function(event) {
-            event.preventDefault();
-            
-            var $this  = $(this);
-            var $input = $this.find(".phone-number");
-            var value  = $input.attr("value").trim();
-            
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error || value.length <= 3) {
-                return false;
-            }
-            
-            value = value.replace(/-/g, "");
-            
-            var max_len = 11;
-            if (value[0] == "+") {
-                max_len = 12;
-            }
-            
-            if (value.length > max_len) {
-                return false;
-            }
-            
-            var ajaxP  = $.ajax({
-                type        : "POST", 
-                url         : "/download-app", 
-                data        : { "phone_number" : value }
-            }).done(function () {
-                $input.attr("value", sms_message_success);
-            }).fail(function() {
-                $input.attr("value", sms_message_error).parent().addClass("error");
-            });
-            
-            return false;
-        });
-        
-        
-        // ---------------------------------------------------------------------
         // setup misc bindings
         // ---------------------------------------------------------------------
         
@@ -2390,7 +2185,7 @@ var g_update_stamps = null;
         }
         
         update_dynamic_header();
-        init_header_subsections();
+        //init_header_subsections();
         
         init_gallery();
         update_stamps();

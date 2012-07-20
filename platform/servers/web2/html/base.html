@@ -73,7 +73,7 @@
             {% block header %}
             <div class="header-body fixedwidth clearfix">
                 <p>
-                    <span class='desc'>Put your stamp of approval on the world.</span> <a class='get-the-app-button' href='{{ STAMPED_DOWNLOAD_APP_LINK }}'></a>
+                    <span class='desc'>Put your stamp of approval on the world.</span> <a class='download-the-free-app-button download-stamped-popup' href='{{ STAMPED_DOWNLOAD_APP_LINK }}'></a>
                 </p>
                 
                 <a href="/{{user.screen_name}}" class="user-logo-large"></a>
@@ -91,13 +91,13 @@
         {% block pre_main %}
         <div id="main-page-content" class="main">
             <div id='main-page-content-body' class='main-page-content-body'>
-                {% endblock pre_main %}
-                
                 {% block popup-signup %}
                 <div id="popup-signup">
                     {% include "popup-signup.html" %}
                 </div>
                 {% endblock popup-signup %}
+                
+                {% endblock pre_main %}
                 
                 {% block main %}
                 {% endblock main %}

@@ -46,7 +46,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
         return token
 
     def getAccessToken(self, tokenId):
-        document = self._getMongoDocumentFromId(tokenId)
+        document = self._getMongoDocumentFromId(tokenId, forcePrimary=True)
         return self._convertFromMongo(document)
     
     def removeAccessToken(self, tokenId):
