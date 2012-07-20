@@ -42,6 +42,28 @@
 
 
 TODO:
+    * HIGH PRIORITY:
+        * profile
+            * DONE - header get-the-app button & texting functionality
+            * PUNT - sign-up & login via facebook or stamped
+                * PUNT - ASK anthony about sign-up, login, vs. get-the-app
+            * layout adjustments to gallery view
+            * navbar occasional missing graphics
+        * misc:
+            * DONE - replace font usage w/ self-hosting option
+                * TEST
+            * retina display support & testing
+            * create 3 unique links => stamped.com
+        * stamped.com
+            * DONE - replace intro hero font with skyline font
+            * subpages
+                * basic 404 page
+                    * cool 404 page w/ circle animation
+                    * http://support.google.com/webmasters/bin/answer.py?hl=en&answer=136085&from=93644&rd=1
+                * basic 5XX page
+                * legal page
+                * jobs page
+    
     * stamped.com:
         * intro:
             * DONE - FIX ESC skips intro animation

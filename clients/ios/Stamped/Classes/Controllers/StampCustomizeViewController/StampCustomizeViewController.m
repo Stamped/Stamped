@@ -116,6 +116,7 @@
 - (void)done:(id)sender {
     
     if ([(id)delegate respondsToSelector:@selector(stampCustomizeViewController:doneWithColors:)]) {
+        //NSLog(@"colors2:%@\n%@,%@", _colors, [[_colors objectAtIndex:0] hexString], [[_colors objectAtIndex:1] hexString]);
         [self.delegate stampCustomizeViewController:self doneWithColors:_colors];
     }
     
@@ -135,6 +136,7 @@
 - (void)stampColorPickerSliderView:(StampColorPickerSliderView*)view pickedColors:(NSArray*)colors {
     [_colors release], _colors=nil;
     _colors = [colors retain];
+    //NSLog(@"colors2:%@\n%@,%@", _colors, [[_colors objectAtIndex:0] hexString], [[_colors objectAtIndex:1] hexString]);
     [self updateStampView:YES];
 }
 

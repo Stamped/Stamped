@@ -136,7 +136,6 @@ static id __instance;
         } else {
             
             [STEvents postEvent:EventTypeSignupFinished];
-            
         }
                 
     }];
@@ -211,7 +210,6 @@ static id __instance;
      POST /v0/account/customize_stamp.json
      Takes two fields (color_primary and color_secondary) that are the hex values of the two colors. Returns the full user object.
      */
-    NSLog(@"testing");
     NSString *path = @"/account/customize_stamp.json";
     NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:primary, @"color_primary", secondary, @"color_secondary", nil];
     [[STRestKitLoader sharedInstance] loadOneWithPath:path post:YES authenticated:YES params:params mapping:[STSimpleUserDetail mapping] andCallback:^(id result, NSError *error, STCancellation *cancellation) {

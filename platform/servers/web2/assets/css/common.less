@@ -69,19 +69,6 @@
     margin: 0 auto;
 }
 
-@font-face {
-    font-family: StampedFallbackFont;
-    font-style: normal;
-    font-weight: 200;
-    src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
-}
-
-.stamped-font() {
-    font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
-    font-style:  normal;
-    font-weight: 200;
-}
-
 .profile-image-border(@size) {
     border: @size solid #fff;
     .box-shadow(0px, 1px, 3px, 0, rgba(0, 0, 0, 0.15));
@@ -89,5 +76,27 @@
     &:active {
         border-color: #666;
     }
+}
+
+@font-face {
+    font-family: StampedFallbackFont;
+    src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+    font-style: normal;
+}
+
+.stamped-font() {
+    font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+    font-style: normal;
+}
+
+.stamped-thin-font() {
+    font-family: "Titling Gothic FB Thin Skyline", "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+    font-style: normal;
+    letter-spacing: 0.008em;
+}
+
+.stamped-dark-font() {
+    font-family: "TitlingGothicFB RegularComp", "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+    font-style: normal;
 }
 

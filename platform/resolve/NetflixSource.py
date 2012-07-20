@@ -169,8 +169,6 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
             directors = filter(lambda link : link['title'] ==  u'directors',  self._titleObj['link'])[0]['people']['link']
             # api returns either a dict or a list of dicts depending on len > 1
             if isinstance(directors, list):
-                for dir in directors:
-                    print("\n" + dir['title'])
                 return [
                     {
                     'name':         entry['title'],
@@ -204,13 +202,6 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
         except KeyError:
             return None
 
-#    @lazyProperty
-#    def directors(self):
-#        try:
-#            return [ { 'name' : self._titleObj['']}]
-#        except:
-#            return
-
 
 class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
     """
@@ -229,16 +220,7 @@ class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
             return None
 
 
-
-class NetflixSearchAll(ResolverProxy, ResolverSearchAll):
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
 class NetflixSource(GenericSource):
-    """
-
-    """
     def __init__(self):
         GenericSource.__init__(self, 'netflix',
             groups=[
@@ -291,8 +273,6 @@ class NetflixSource(GenericSource):
             return self.movieSource(query)
         if query.isType('tv'):
             return self.tvSource(query)
-        #if query.kind == 'search':
-        #    return self.searchAllSource(query)
 
     def __genericSourceGen(self, query, filter):
         def gen():
@@ -332,13 +312,6 @@ class NetflixSource(GenericSource):
         gen = self.__genericSourceGen(query, filter)
         return self.generatorSource(gen, constructor=NetflixTVShow)
 
-
-#    def searchAllSource(self, query):
-#        def gen():
-#            try:
-#                results = self.__netflix.movie_search
-#            except GeneratorExit:
-#                    pass
 
 if __name__ == '__main__':
     demo(NetflixSource(), 'arrested development')

@@ -1,3 +1,66 @@
+
+        /*var $join               = $('.join');
+        var $join_button        = $join.find('a.button');
+        
+        var $login              = $('.login');
+        var $already_stamping   = $login.find('span.desc');
+        var $login_button       = $login.find('a.button');
+        
+        var login_button_width  = $login_button.width();
+        
+        var join_pos            = $join.position();
+        var login_pos           = $login.position();
+        
+        var pad                 = 4;
+        var join_width          = $join.width()  + pad;
+        var join_height         = $join.height() + pad;
+        
+        var login_width         = $login.width()  + pad;
+        var login_height        = $login.height() + pad;*/
+
+        /*$join.css({
+            'position'  : 'absolute', 
+            'float'     : 'none', 
+            'top'       : join_pos.top, 
+            'left'      : join_pos.left, 
+            'width'     : join_width, 
+            'height'    : join_height
+        });
+        
+        $login.css({
+            'position'  : 'absolute', 
+            'float'     : 'none', 
+            'top'       : login_pos.top, 
+            'left'      : login_pos.left, 
+            'width'     : login_width, 
+            'height'    : login_height
+        });*/
+
+                // layout and style the header's login / join content
+                /*var cur_opacity = cur_ratio * cur_ratio;
+                var already_stamping_style = {
+                    opacity : cur_opacity
+                };
+                
+                if (cur_opacity <= 0.2) {
+                    already_stamping_style['visibility'] = 'hidden';
+                } else {
+                    already_stamping_style['visibility'] = 'visible';
+                }
+                
+                $already_stamping.css(already_stamping_style);
+                
+                var cur_left = join_pos.left - inv_cur_ratio * (login_button_width + 16);
+                $join.css({
+                    left : cur_left
+                });
+                
+                var cur_top  = cur_ratio * login_pos.top + inv_cur_ratio * join_pos.top;
+                $login.css({
+                    top : cur_top
+                });*/
+
+
 var intro_iphone_animation = new Animation({
     start       : 1, 
     end         : 100, 

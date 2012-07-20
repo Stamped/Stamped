@@ -314,7 +314,7 @@ typedef enum {
         }
         
         if (title) {
-            self.title = [Util truncateTitleForBackButton:title];
+            //self.title = [Util truncateTitleForBackButton:title];
             [self updateValue:title atIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
         }
         
@@ -409,12 +409,16 @@ typedef enum {
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];    
+    [Util setTitle:[NSString stringWithFormat:@"Create Other"]
+     forController:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -668,7 +672,7 @@ typedef enum {
     }
     
     
-    self.title = [self valueForIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];    
+    //self.title = [self valueForIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];    
     [self.tableView reloadData];
     [self.navigationController popViewControllerAnimated:YES];
     
@@ -1073,7 +1077,7 @@ typedef enum {
     if (indexPath) {
         
         if (indexPath.row == 0 && indexPath.section == 0) {
-            self.title = textField.text;
+            //self.title = textField.text;
             [self.navigationController.navigationBar setNeedsDisplay];
         }
         [self updateValue:textField.text atIndexPath:indexPath];

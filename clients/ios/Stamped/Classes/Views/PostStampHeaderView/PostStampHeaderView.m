@@ -23,7 +23,13 @@
         
         id <STUser> user = [[STStampedAPI sharedInstance] currentUser];
         STAvatarView *avatar = [[STAvatarView alloc] initWithFrame:CGRectMake(14.0f, 6.0f, 48.0f, 48.0f)];
-        avatar.imageURL = [NSURL URLWithString:user.imageURL];
+        UIImage* localImage = [STStampedAPI sharedInstance].currentUserImage;
+        if (localImage) {
+            avatar.imageView.image = localImage;
+        }
+        else {
+            avatar.imageURL = [NSURL URLWithString:user.imageURL];
+        }
         [self addSubview:avatar];
         [avatar release];
         

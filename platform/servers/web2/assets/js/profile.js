@@ -471,6 +471,24 @@ var g_update_stamps = null;
             return output;
         };
         
+        var get_fancybox_popup_large_options = function(options) {
+            var output = get_fancybox_options({
+                scrolling   : 'no', // we prefer our own, custom jScrollPane scrolling
+                wrapCSS     : '', 
+                padding     : 0
+            });
+            
+            if (!!options) {
+                for (var key in options) {
+                    if (options.hasOwnProperty(key)) {
+                        output[key] = options[key];
+                    }
+                }
+            }
+            
+            return output;
+        };
+        
         var find_valid_image = function($elem, selector, is_sdetail) {
             var $elements = $elem.find(selector);
             $elements     = $elements.filter(function() {
@@ -657,8 +675,6 @@ var g_update_stamps = null;
                 
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
-                
-                console.log(offset);
                 
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
@@ -1069,50 +1085,13 @@ var g_update_stamps = null;
         var $content            = $('#main-page-content');
         var header_height       = $header.height();
         var cur_header_height   = header_height || 0;
-        var min_height_ratio    = 0.5;
+        var min_height_ratio    = 1.0;
         var min_header_height   = header_height * min_height_ratio;
-        
-        var $join               = $('.join');
-        var $join_button        = $join.find('a.button');
-        
-        var $login              = $('.login');
-        var $already_stamping   = $login.find('span.desc');
-        var $login_button       = $login.find('a.button');
-        
-        var login_button_width  = $login_button.width();
-        
-        var join_pos            = $join.position();
-        var login_pos           = $login.position();
-        
-        var pad                 = 4;
-        var join_width          = $join.width()  + pad;
-        var join_height         = $join.height() + pad;
-        
-        var login_width         = $login.width()  + pad;
-        var login_height        = $login.height() + pad;
         
         // now that we have the static positions and sizes of the dynamic header  
         // elements, initialize their new positioning /sizing to absolute and 
         // non-auto, respectively.
         $header.height(header_height);
-        
-        $join.css({
-            'position'  : 'absolute', 
-            'float'     : 'none', 
-            'top'       : join_pos.top, 
-            'left'      : join_pos.left, 
-            'width'     : join_width, 
-            'height'    : join_height
-        });
-        
-        $login.css({
-            'position'  : 'absolute', 
-            'float'     : 'none', 
-            'top'       : login_pos.top, 
-            'left'      : login_pos.left, 
-            'width'     : login_width, 
-            'height'    : login_height
-        });
         
         var last_ratio = null;
         
@@ -1153,30 +1132,6 @@ var g_update_stamps = null;
                 // header's height
                 $content.css({
                     top : cur_header_height + 15
-                });
-                
-                // layout and style the header's login / join content
-                var cur_opacity = cur_ratio * cur_ratio;
-                var already_stamping_style = {
-                    opacity : cur_opacity
-                };
-                
-                if (cur_opacity <= 0.2) {
-                    already_stamping_style['visibility'] = 'hidden';
-                } else {
-                    already_stamping_style['visibility'] = 'visible';
-                }
-                
-                $already_stamping.css(already_stamping_style);
-                
-                var cur_left = join_pos.left - inv_cur_ratio * (login_button_width + 16);
-                $join.css({
-                    left : cur_left
-                });
-                
-                var cur_top  = cur_ratio * login_pos.top + inv_cur_ratio * join_pos.top;
-                $login.css({
-                    top : cur_top
                 });
                 
                 // resize user's stamp logo
@@ -1319,7 +1274,7 @@ var g_update_stamps = null;
                             var $elem = $(sel);
                             g_category = category;
                             
-                            console.debug("NEW CATEGORY: " + category);
+                            //console.debug("NEW CATEGORY: " + category);
                             //History.log(state.data, state.title, state.url);
                             
                             if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
@@ -1440,7 +1395,7 @@ var g_update_stamps = null;
                     }
                     
                     if (is_match) {
-                        console.debug("History matched view '" + view.title + "'");
+                        //console.debug("History matched view '" + view.title + "'");
                         
                         view.apply_func(state, url, relative_url);
                         break;
@@ -1746,7 +1701,7 @@ var g_update_stamps = null;
                 
                 scroll_top  = $window.scrollTop();
                 
-                console.debug("AJAX: " + href);
+                //console.debug("AJAX: " + href);
             } else {
                 $target     = $("<div class='" + sdetail_wrapper + "'></div>").html(html);
                 $target2    = $target;
@@ -1762,12 +1717,14 @@ var g_update_stamps = null;
                 if (sdetail_ajax_loaded && sdetail_anim_loaded && !sdetail_initialized) {
                     sdetail_initialized = true;
                     
-                    // TODO: which order should these two statements appear in?
-                    $target.replaceWith($target2);
-                    init_sdetail($target2);
-                    
-                    resize_sdetail_wrapper($target2);
-                    $target2.removeClass('sdetail-loading');
+                    setTimeout(function() {
+                        $target.replaceWith($target2);
+                        init_sdetail($target2);
+                        
+                        // TODO: which order should these two statements appear in?
+                        resize_sdetail_wrapper($target2);
+                        $target2.removeClass('sdetail-loading');
+                    }, 150);
                 }
             };
             
@@ -2023,36 +1980,169 @@ var g_update_stamps = null;
             // initialize listen action
             var $action_listen = $sdetail.find('.action-listen');
             
-            if ($action_listen.length == 1) {
-                var $link = $action_listen.parent('a.action-link');
-                var $source_spotify = $action_listen.find(".source-spotify");
-                var $source_spotify = $action_listen.find(".source-itunes");
+            $.each($action_listen, function(i, elem) {
+                var $elem = $(elem);
+                var $source_rdio    = $elem.find(".source-rdio");
+                var $source_itunes  = $elem.find(".source-itunes");
                 
-                if ($source_spotify.length === 1) {
-                    // TODO
-                }
-                
-                //var href  = "https://embed.spotify.com/?uri={{source.completion_data.source_id}}";
-                
-                $link.click(function(event) {
-                    event.preventDefault();
+                if ($source_rdio.length === 1) {
+                    var source_id   = $source_rdio.data("source-id");
+                    var $rdio       = $("#rdio-api");
+                    var duration    = 1;
                     
-                    var popup_options = get_fancybox_popup_options({
-                        href  : "http://www.stamped.com"
+                    var rdio_initialized = false;
+                    var rdio_initialized_callback = null;
+                    
+                    // initialize rdio preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $elem.removeClass("stopped playing").addClass("media-loading");
+                            $rdio.rdio().play(source_id);
+                        };
+                        
+                        var stop_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $rdio.rdio().pause();
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!rdio_initialized) {
+                            $elem.removeClass("stopped playing").addClass("media-loading");
+                            
+                            rdio_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
                     });
                     
-                    $.fancybox.open(popup_options);
-                    return false;
-                });
-                
-                var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
-                    m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
-                }, {
-                    cssSelectorAncestor: "#cp_container_1"
-                });
-                
-                // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
-            }
+                    $rdio.bind('ready.rdio', function() {
+                        rdio_initialized = true;
+                        
+                        if (!!rdio_initialized_callback) {
+                            rdio_initialized_callback();
+                        }
+                    });
+                    
+                    $rdio.bind('playingTrackChanged.rdio', function(e, playingTrack, sourcePosition) {
+                        if (playingTrack) {
+                            duration = playingTrack.duration;
+                            
+                            /*$('#art').attr('src', playingTrack.icon);
+                            $('#track').text(playingTrack.name);
+                            $('#album').text(playingTrack.album);
+                            $('#artist').text(playingTrack.artist);*/
+                        }
+                    });
+                    
+                    $rdio.bind('positionChanged.rdio', function(e, position) {
+                        /*$('#position').css('width', Math.floor(100*position/duration)+'%');*/
+                    });
+                    
+                    $rdio.bind('playStateChanged.rdio', function(e, playState) {
+                        if (playState == 0) { // paused
+                            $elem.removeClass("media-loading playing").addClass("stopped");
+                        } else {
+                            // note: empirically, rdio adds an ease-in, so we show the loading 
+                            // indicator for slightly longer than when the audio actually 
+                            // starts "playing" to adjust for the pause until the user actually 
+                            // hears audio
+                            setTimeout(function() {
+                                $elem.removeClass("media-loading stopped").addClass("playing");
+                            }, 2500);
+                        }
+                    });
+                    
+                    // this is a valid playback token for localhost.
+                    // but you should go get your own for your own domain.
+                    $rdio.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
+                } else if ($source_itunes.length === 1) {
+                    var itunes_initialized = false;
+                    var itunes_initialized_callback = null;
+                    
+                    var $itunes = $("#itunes-preview");
+                    var itunes_url = $itunes.attr("src");
+                    
+                    // initialize itunes preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("stopped").addClass("playing");
+                            
+                            $itunes.jPlayer("play");
+                        };
+                        
+                        var stop_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("playing").addClass("stopped");
+                            
+                            $itunes.jPlayer("pause");
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!itunes_initialized) {
+                            itunes_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
+                    });
+                    
+                    itunes_initialized = true;
+                    $itunes.jPlayer({
+                        ready: function () {
+                            $itunes.jPlayer("setMedia", {
+                                m4a : itunes_url
+                            });
+                            
+                            itunes_initialized = true;
+                            
+                            if (!!itunes_initialized_callback) {
+                                itunes_initialized_callback();
+                            }
+                        }, 
+                        
+                        supplied: "m4a", 
+                        swfPath: "/assets/js/libs/jplayer", 
+                        solution: "html,flash"
+                    });
+                }
+            });
+            
+            /*
+            var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
+                m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
+            }, {
+                cssSelectorAncestor: "#cp_container_1"
+            });
+            
+            // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
+            */
             
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
@@ -2119,7 +2209,6 @@ var g_update_stamps = null;
                 var $this = $(this);
                 var href  = $this.attr('href');
                 
-                console.log(href);
                 var popup_options = get_fancybox_popup_options({
                     href  : href
                 });
@@ -2157,6 +2246,113 @@ var g_update_stamps = null;
                 url   : url
             });
         };
+        
+        
+        // ---------------------------------------------------------------------
+        // initialize signup functionality
+        // ---------------------------------------------------------------------
+        
+        
+        $body.on("click", ".get-the-app-button", function(event) {
+            event.preventDefault();
+            
+            var popup_options = get_fancybox_popup_large_options({
+                content     : $("#popup-signup").html(), 
+                type        : "html", 
+                width       : 480, 
+                minWidth    : 480
+            });
+            
+            $.fancybox.open(popup_options);
+            return false;
+        });
+        
+        var default_phone_number = "555-555-5555";
+        var sms_message_success  = "SMS Sent!";
+        var sms_message_error    = "SMS Error!";
+        
+        $body.on("focus", ".phone-number", function(event) {
+            var $this = $(this);
+            var $sms  = $this.parent();
+            var value = $this.attr("value");
+            
+            if (value == default_phone_number || value == sms_message_success || value == sms_message_error) {
+                $this.attr("value", "");
+            }
+            
+            $sms.removeClass("error").addClass("active");
+            
+            return true;
+        });
+        
+        $body.on("focusout", ".phone-number", function(event) {
+            var $this = $(this);
+            var $sms  = $this.parent();
+            var value = $this.attr("value").trim();
+            
+            if (value.length <= 0) {
+                $this.attr("value", default_phone_number);
+            }
+            
+            $sms.removeClass("active error");
+            
+            return true;
+        });
+        
+        $(".phone-number").live("keyup change", function(event) {
+            var $this   = $(this);
+            var value   = $this.attr("value").trim();
+            var prefix  = "active-";
+            var classes = "active-0 active-1 active-2 active-3 active-4 active-5 active-6 active-7 active-8 active-9 active-10";
+            
+            if (value.length >= 0) {
+                var length = value.length;
+                
+                if (length > 10) {
+                    length = 10;
+                }
+                
+                var $button = $this.parent().find(".send-button");
+                $button.removeClass(classes).addClass(prefix + length);
+            }
+            
+            return true;
+        });
+        
+        $body.on("submit", ".sms-form", function(event) {
+            event.preventDefault();
+            
+            var $this  = $(this);
+            var $input = $this.find(".phone-number");
+            var value  = $input.attr("value").trim();
+            
+            if (value == default_phone_number || value == sms_message_success || value == sms_message_error || value.length <= 3) {
+                return false;
+            }
+            
+            value = value.replace(/-/g, "");
+            
+            var max_len = 11;
+            if (value[0] == "+") {
+                max_len = 12;
+            }
+            
+            if (value.length > max_len) {
+                return false;
+            }
+            
+            var ajaxP  = $.ajax({
+                type        : "POST", 
+                url         : "/download-app", 
+                data        : { "phone_number" : value }
+            }).done(function () {
+                $input.attr("value", sms_message_success);
+            }).fail(function() {
+                $input.attr("value", sms_message_error).parent().addClass("error");
+            });
+            
+            return false;
+        });
         
         
         // ---------------------------------------------------------------------

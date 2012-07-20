@@ -21,6 +21,8 @@ extern NSString* const STSpotifyTrackEndedNotification;
 
 - (STCancellation*)logoutWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
+- (void)addToPlaylist;
+
 @property (nonatomic, readonly, assign) BOOL loggedIn;
 
 @end

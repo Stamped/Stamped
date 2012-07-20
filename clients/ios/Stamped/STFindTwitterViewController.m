@@ -47,6 +47,8 @@ static const CGFloat _batchSize = 100;
 
 @property (nonatomic, readwrite, assign) _authState authState;
 
+@property (nonatomic, readwrite, assign) BOOL useOldTwitter;
+
 @end
 
 @implementation STFindTwitterViewController
@@ -66,6 +68,8 @@ static const CGFloat _batchSize = 100;
 
 @synthesize authState = _authState;
 
+@synthesize useOldTwitter = _useOldTwitter;
+
 - (id)init
 {
     self = [super init];
@@ -73,6 +77,7 @@ static const CGFloat _batchSize = 100;
         _unresolvedContacts = [[NSMutableArray alloc] init];
         _resolvedIDs = [[NSMutableSet alloc] init];
         _inviteIndices = [[NSMutableSet alloc] init];
+        _useOldTwitter = ![[STTwitter sharedInstance] canTweet];
     }
     return self;
 }
@@ -80,6 +85,9 @@ static const CGFloat _batchSize = 100;
 - (void)dealloc
 {
     [self clearAll];
+    if (_useOldTwitter) {
+        [STEvents removeObserver:self];
+    }
     [_unresolvedContacts release];
     [_resolvedIDs release];
     [_inviteIndices release];
@@ -89,21 +97,37 @@ static const CGFloat _batchSize = 100;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    [STEvents addObserver:self selector:@selector(twitterAuthChanged:) event:EventTypeTwitterAuthFailed];
-    [STEvents addObserver:self selector:@selector(twitterAuthChanged:) event:EventTypeTwitterAuthFinished];
+    if (self.useOldTwitter) {
+        [STEvents addObserver:self selector:@selector(twitterAuthChanged:) event:EventTypeTwitterAuthFailed];
+        [STEvents addObserver:self selector:@selector(twitterAuthChanged:) event:EventTypeTwitterAuthFinished];
+    }
     if ([[STTwitter sharedInstance] isSessionValid]) {        
         [self loadMore];
     }
     else {
-        self.waitingForTwitter = YES;
-        [[STTwitter sharedInstance] auth];
+        self.waitingForTwitter = YES;        if (self.useOldTwitter) {
+            [[STTwitter sharedInstance] auth];
+        }
+        else {
+            [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:YES andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                self.waitingForTwitter = NO;
+                if (success) {
+                    [self loadMore];
+                }
+                else {
+                    [Util warnWithAPIError:error andBlock:^{
+                        [Util compareAndPopController:self animated:YES];
+                    }];
+                }
+            }];
+        }
     }
+    [self reloadDataSource];
 }
 
 - (void)viewDidUnload
 {
     [super viewDidUnload];
-    [STEvents removeObserver:self];
     [self clearAll];
     [self updateSendButton];
 }
@@ -142,7 +166,10 @@ static const CGFloat _batchSize = 100;
 
 - (void)sendTweet:(NSString*)tweet {
     [[STTwitter sharedInstance] sendTweet:tweet withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-        
+        if (!success) {
+            [Util warnWithAPIError:error andBlock:nil];
+            [self updateSendButton];
+        }
     }];
 }
 
@@ -169,6 +196,16 @@ static const CGFloat _batchSize = 100;
     }
     [Util confirmWithMessage:message action:@"Send" destructive:NO withBlock:^(BOOL success) {
         if (success) {
+            NSMutableArray* tweets = [NSMutableArray array];
+            for (STContact* contact in contacts) {
+                [tweets addObject:[NSString stringWithFormat:@"@%@ I’m using @stampedapp to record and share my favorite things. Join me! www.stamped.com", contact.twitterUsername]];
+            }
+            [[STTwitter sharedInstance] sendTweets:tweets withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                if (!success) {
+                    [Util warnWithAPIError:error andBlock:nil];
+                    [self updateSendButton];
+                }
+            }];
             for (STContact* contact in contacts) {
                 [self sendTweet:[NSString stringWithFormat:@"@%@ I’m using @stampedapp to record and share my favorite things. Join me! www.stamped.com", contact.twitterUsername]];
             }
@@ -191,27 +228,24 @@ static const CGFloat _batchSize = 100;
 
 - (void)loadMore {
     if (![self dataSourceReloading] && !self.consumedAllContacts) {
-        if (self.consumedAllContacts) {
-            if (![self dataSourceReloading]) {
-                [Util executeOnMainThread:^{
-                    [self dataSourceDidFinishLoading];
-                }];
-            }
-            return;
-        }
-        
         if (!self.matchUsers) {
             self.matchCancellation = [[STStampedAPI sharedInstance] usersFromTwitterWithCallback:^(NSArray<STUserDetail> *users, NSError *error, STCancellation *cancellation) {
                 [self handleMatchResponseWithUsers:users andError:error]; 
             }];
         }
         else {
-            self.friendsCancellation = [STContact contactsFromTwitterWithOffset:self.offset
-                                                                          limit:_batchSize
-                                                                    andCallback:^(NSArray* contacts, NSError* error, STCancellation* cancellation) {
-                                                                        [self handleTwitterContacts:contacts andError:error];
-                                                                    }];
-            self.offset += _batchSize;
+            if (!self.useOldTwitter) {
+                self.friendsCancellation = [STContact contactsFromTwitterWithOffset:self.offset
+                                                                              limit:_batchSize
+                                                                        andCallback:^(NSArray* contacts, NSError* error, STCancellation* cancellation) {
+                                                                            [self handleTwitterContacts:contacts andError:error];
+                                                                        }];
+                self.offset += _batchSize;
+            }
+            else {
+                self.consumedAllContacts = YES;
+                [self dataSourceDidFinishLoading];
+            }
         }
     }
 }
@@ -245,8 +279,24 @@ static const CGFloat _batchSize = 100;
         NSString* errorID = [error.userInfo objectForKey:STRestKitErrorIDKey];
         if (self.authState == _authStateNone && ([errorID isEqualToString:@"bad_request"] || [errorID isEqualToString:@"invalid_request"])) {
             self.waitingForTwitter = YES;
+            self.matchCancellation = nil;
             self.authState = _authStateReauth;
-            [self twitterAuthChanged:nil];
+            if (self.useOldTwitter) {
+                [self twitterAuthChanged:nil];
+            }
+            else {
+                [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:YES andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                    self.waitingForTwitter = NO;
+                    if (success) {
+                        [self loadMore];
+                    }
+                    else {
+                        [Util warnWithAPIError:error andBlock:^{
+                            [Util compareAndPopController:self animated:YES];
+                        }];
+                    }
+                }];
+            }
             [self dataSourceDidFinishLoading];
         }
         else {
@@ -296,7 +346,7 @@ static const CGFloat _batchSize = 100;
 #pragma mark - STRestViewController Methods
 
 - (BOOL)dataSourceReloading {
-    return self.matchCancellation != nil || self.friendsCancellation || self.waitingForTwitter;
+    return self.matchCancellation || self.friendsCancellation || self.waitingForTwitter;
 } 
 
 - (void)loadNextPage {
@@ -381,7 +431,7 @@ static const CGFloat _batchSize = 100;
 
 - (NSString*)tableView:(UITableView*)tableView titleForHeaderInSection:(NSInteger)section {
     if (section == 0) {
-        return @"Friends from Stamped";
+        return @"Friends on Stamped";
     }
     else {
         return @"Invite Friends to Stamped";

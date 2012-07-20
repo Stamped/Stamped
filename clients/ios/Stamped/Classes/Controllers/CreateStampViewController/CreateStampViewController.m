@@ -29,8 +29,8 @@
 #define kRemovePhotoActionSheetTag 201
 
 @interface CreateStampViewController ()
-@property(nonatomic,readonly, retain) CreateHeaderView* headerView; // weak
-@property(nonatomic,readonly, retain) CreateFooterView* footerView; // weak
+@property(nonatomic,readonly, retain) CreateHeaderView* headerView;
+@property(nonatomic,readonly, retain) CreateFooterView* footerView;
 @property(nonatomic,retain) CreateEditView *editView;
 @property(nonatomic,retain) STS3Uploader *imageUploader;
 @property(nonatomic,copy) NSString *tempImagePath;
@@ -62,7 +62,7 @@
 - (void)commonInit {
     
     self.imageUploader = [[[STS3Uploader alloc] init] autorelease];
-    self.title = NSLocalizedString(@"New Stamp", @"New Stamp");
+    //self.title = NSLocalizedString(@"New Stamp", @"New Stamp");
     
 }
 
@@ -142,11 +142,31 @@
     if (!_footerView) {
         CreateFooterView *view = [[CreateFooterView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.bounds.size.width, 84.0f)];
         view.delegate = (id<CreateFooterViewDelegate>)self;
+        view.twitterButton.selected = self.shareToTwitter;
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tableView.tableFooterView = view;
         _footerView = view;
     }
-    
+}
+
+- (void)viewWillUnload {
+    [super viewWillUnload];
+    [_headerView release];
+    _headerView = nil;
+    [_footerView release];
+    _footerView = nil;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [Util setTitle:[NSString stringWithFormat:@"New Stamp"]
+     forController:self];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [Util setTitle:nil
+     forController:self];
 }
 
 #pragma mark - Stamp Posting
@@ -167,20 +187,20 @@
         
         if (stamp) {
             if (self.shareToTwitter) {
-                NSString* suffix = @"";
+                NSString* suffix = @".\" ";
                 BOOL hasBlurb = stampNew.blurb.length > 0;
                 BOOL hasPhoto = stampNew.tempImageURL.length > 0;
                 if (hasBlurb && hasPhoto) {
-                    suffix = @"w/ comment & pic";
+                    suffix = @"\" w/ comment & pic. ";
                 }
                 else if (hasBlurb) {
-                    suffix = @"w/ comment";
+                    suffix = @"\" w/ comment. ";
                 }
                 else if (hasPhoto) {
-                    suffix = @"w/ pic";
+                    suffix = @"\" w/ pic. ";
                 }
                 if([[STTwitter sharedInstance] isSessionValid]) {
-                    [[STTwitter sharedInstance] sendTweet:[NSString stringWithFormat:@"I just stamped \"%@\"", stamp.entity.title, suffix]
+                    [[STTwitter sharedInstance] sendTweet:[NSString stringWithFormat:@"I just stamped \"%@%@%@", stamp.entity.title, suffix, stamp.URL]
                                              withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
                                                  if (error) {
                                                      [STDebug log:[NSString stringWithFormat:@"Share tweet failed:%@", error]];
@@ -201,7 +221,7 @@
                 }
             }
             button.titleLabel.alpha = 1.0f;
-            [Util warnWithMessage:@"There was a problem creating your stamp" andBlock:nil];
+            [Util warnWithAPIError:error andBlock:nil];
         }
         
         self.view.userInteractionEnabled = YES;
@@ -215,7 +235,7 @@
 
 - (void)switchToggled:(STStampSwitch*)sender {
     
-    self.title = [sender isOn] ? @"New To-do" : @"New Stamp";
+    //self.title = [sender isOn] ? @"New To-do" : @"New Stamp";
     [self.navigationController.navigationBar setNeedsDisplay];
     
     sender.userInteractionEnabled = NO;
@@ -370,10 +390,20 @@
 #pragma mark - CreateFooterViewDelegate
 
 - (void)createFooterView:(CreateFooterView*)view twitterSelected:(UIButton*)button {
-    button.selected = !button.selected;
-    self.shareToTwitter = button.selected;
     if (![[STTwitter sharedInstance] isSessionValid]) {
-        [[STTwitter sharedInstance] auth];
+        [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:NO andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+            if (success) {
+                button.selected = !button.selected;
+                self.shareToTwitter = button.selected;
+            }
+            else {
+                [Util warnWithAPIError:error andBlock:nil];
+            }
+        }];
+    }
+    else {
+        button.selected = !button.selected;
+        self.shareToTwitter = button.selected;
     }
 }
 

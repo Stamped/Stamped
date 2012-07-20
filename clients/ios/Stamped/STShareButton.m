@@ -13,11 +13,11 @@
 @synthesize block = block_;
 
 - (id)initWithCallback:(void (^)(void))block {
-  self = [super initWithNormalOffImage:[UIImage imageNamed:@"sDetailBar_btn_share"] offText:@"Share" andOnText:@"Shared"];
+  self = [super initWithNormalOffImage:[UIImage imageNamed:@"NEW_share"] offText:@"Share" andOnText:@"Shared"];
   if (self) {
-    self.touchedOffImage = [UIImage imageNamed:@"sDetailBar_btn_share_active"];
-    self.touchedOnImage= [UIImage imageNamed:@"sDetailBar_btn_share_active"];
-    self.normalOffImage = [UIImage imageNamed:@"sDetailBar_btn_share"];
+    self.touchedOffImage = [UIImage imageNamed:@"NEW_share-white"];
+    self.touchedOnImage= [UIImage imageNamed:@"NEW_share-white"];
+    self.normalOffImage = [UIImage imageNamed:@"NEW_share"];
     self.block = block;
   }
   return self;

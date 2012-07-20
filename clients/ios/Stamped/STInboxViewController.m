@@ -99,8 +99,12 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(prepareForAnimationRequest:) name:STInboxViewControllerPrepareForAnimationNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(popupDismissed:) name:STUtilPopupDismissedNotification object:nil];
         
-        _showIntro = YES;
-        if ([STStampedAPI sharedInstance].currentUser == nil) {
+        NSString* userDefaultsKey = @"otenupvpinouuipovfsdfpdfaipofdais"; //psuedo-random
+        NSString* lastUserID = [[NSUserDefaults standardUserDefaults] objectForKey:userDefaultsKey];
+        NSString* currentUserID = [STStampedAPI sharedInstance].currentUser.userID;
+        _showIntro = currentUserID != nil && ![currentUserID isEqualToString:lastUserID];
+        [[NSUserDefaults standardUserDefaults] setObject:currentUserID ? currentUserID : @" invalid userID " forKey:userDefaultsKey];
+        if (currentUserID == nil) {
             _scope = STStampedAPIScopeEveryone;
             _lastScope = STStampedAPIScopeEveryone;
         } else {
@@ -287,7 +291,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
             return @"you";
             break;
         case STStampedAPIScopeFriends:
-            return @"friends";
+            return @"you + friends";
             break;
         case STStampedAPIScopeEveryone:
             return @"tastemakers";
@@ -459,7 +463,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
         NoDataView* noDataView = [[[NoDataView alloc] initWithFrame:[Util fullscreenFrame]] autorelease];
         //        [Util reframeView:noDataView withDeltas:CGRectMake(0, -50, 0, 0)];
         noDataView.userInteractionEnabled = YES;
-        NSString* topString = @"Since you're not yet following anyone, we've bumped you over to the Tastemakers view.";
+        NSString* topString = @"Since you're not yet following anyone, we're showing you stamps from Tastemakers.";
         //        NSString* bottomString = @"Got it.";
         UILabel* top = [Util viewWithText:topString
                                      font:[UIFont stampedBoldFontWithSize:14]
@@ -594,52 +598,24 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
         }
     }
     else if (LOGGED_IN && self.scope == STStampedAPIScopeYou) {
-        
+        //DUCKTAPE
         view.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
         view.imageView.backgroundColor = view.backgroundColor;
         
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.lineBreakMode = UILineBreakModeWordWrap;
-        label.numberOfLines = 3;
-        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
-        label.font = [UIFont boldSystemFontOfSize:13];
-        label.backgroundColor = [UIColor clearColor];
-        label.textColor = [UIColor colorWithRed:0.749f green:0.749f blue:0.749f alpha:1.0f];
+        UILabel* label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 240, 90)];
+        label.frame = [Util centeredAndBounded:label.frame.size inFrame:CGRectMake(-10, 16, 320, label.frame.size.height)];
+        label.lineBreakMode	= UILineBreakModeWordWrap;
+        label.font = [UIFont stampedBoldFontWithSize:13];
         label.textAlignment = UITextAlignmentCenter;
-        label.shadowOffset = CGSizeMake(0.0f, -1.0f);
-        label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
-        [view.imageView addSubview:label];
-        [label release];
-        
-        label.text = @"That amazing burrito place.\nThe last great book you read.\nA movie your friends have to see.";
-        
-        CGSize size = [label.text sizeWithFont:label.font constrainedToSize:CGSizeMake(240.0f, CGFLOAT_MAX) lineBreakMode:UILineBreakModeWordWrap];
-        CGRect frame = label.frame;
-        frame.size = size;
-        frame.origin.x = floorf((view.imageView.bounds.size.width-size.width)/2);
-        frame.origin.y = 24.0f;
-        label.frame = frame;
-        
-        CGFloat maxY = CGRectGetMaxY(label.frame);
-        
-        label = [[UILabel alloc] initWithFrame:CGRectZero];
-        label.lineBreakMode	= UILineBreakModeTailTruncation;
-        label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleTopMargin;
-        label.font = [UIFont boldSystemFontOfSize:17];
         label.backgroundColor = [UIColor clearColor];
         label.textColor = [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f];
         label.shadowOffset = CGSizeMake(0.0f, -1.0f);
         label.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
         [view.imageView addSubview:label];
         [label release];
+        label.numberOfLines = 3;
+        label.text = @"Tap the \"+\" button to create\nyour first stamp. It's easy, just\nthink of something you love!";
         
-        label.text = @"Stamp it.";
-        [label sizeToFit];
-        
-        frame = label.frame;
-        frame.origin.x = floorf((view.imageView.bounds.size.width-frame.size.width)/2);
-        frame.origin.y = floorf(maxY + 4.0f);
-        label.frame = frame;
         [Util executeOnMainThread:^{
             if ([Util topController] == self && self.scope == STStampedAPIScopeYou) {
                 [self noDataTapped:nil];
@@ -716,7 +692,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
         [view addGestureRecognizer:gesture];
         [gesture release];
         self.createStampOverlay = view;
-        double delayInSeconds = 1.2;
+        double delayInSeconds = 2.5;
         dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
         dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
             [view removeFromSuperview];
@@ -759,15 +735,13 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
                 self.tooltip.alpha = 1;
             } completion:^(BOOL finished) {
                 if (finished) {
-                    [Util executeWithDelay:2 onMainThread:^{
-                        if ([Util topController] == self) {
-                            [UIView animateWithDuration:.4 animations:^{
-                                self.tooltip.alpha = 0;
-                            } completion:^(BOOL finished) {
-                                [self.tooltip removeFromSuperview];
-                                self.tooltip = nil;
-                            }];
-                        }
+                    [Util executeWithDelay:2 onMainThread:^{ 
+                        [UIView animateWithDuration:.4 animations:^{
+                            self.tooltip.alpha = 0;
+                        } completion:^(BOOL finished) {
+                            [self.tooltip removeFromSuperview];
+                            self.tooltip = nil;
+                        }];
                     }];
                 }
             }];

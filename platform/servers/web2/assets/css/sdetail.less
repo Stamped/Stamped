@@ -99,7 +99,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
                 @c0: #f2f2f2;
                 @c1: #fff;
                 
-                .linear-gradient2(@angle, @c0, @c1);
+                //.linear-gradient2(@angle, @c0, @c1);
                 
                 .action {
                     .entity-padding();
@@ -141,6 +141,12 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         background-position: -@x -20px;
                     }
                     
+                    .action-icon-media-loading {
+                        background: url(/assets/img/loading.gif) no-repeat;
+                        background-size: 100% 100%;
+                        display: inline-block;
+                    }
+                    
                     .action-icon-reserve {
                         .action-icon-image(0);
                     }
@@ -164,7 +170,9 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         .action-icon-image(100px);
                     }
                     
-                    /* TODO: what is the other 'play' icon at 120px? */
+                    .action-icon-watch {
+                        .action-icon-image(120px);
+                    }
                     
                     .action-icon-download {
                         .action-icon-image(140px);
@@ -172,6 +180,10 @@ body.sdetail_popup_animation, body.sdetail_popup {
                     
                     .action-icon-playlist {
                         .action-icon-image(160px);
+                    }
+                    
+                    .action-icon-playing {
+                        .action-icon-image(180px);
                     }
                     
                     &:hover {
@@ -195,12 +207,20 @@ body.sdetail_popup_animation, body.sdetail_popup {
                             .action-icon-image-hover(100px);
                         }
                         
+                        .action-icon-watch {
+                            .action-icon-image-hover(120px);
+                        }
+                        
                         .action-icon-download {
                             .action-icon-image-hover(140px);
                         }
                         
                         .action-icon-playlist {
                             .action-icon-image-hover(160px);
+                        }
+                        
+                        .action-icon-playing {
+                            .action-icon-image-hover(180px);
                         }
                     }
                     
@@ -261,6 +281,22 @@ body.sdetail_popup_animation, body.sdetail_popup {
                             .source-image(100px);
                         }
                     }
+                    
+                    .stopped, .playing, .media-loading {
+                        display: none;
+                    }
+                }
+                
+                .stopped .stopped, 
+                .media-loading .media-loading, 
+                .playing .playing {
+                    display: block;
+                }
+                
+                #rdio-api, #itunes-preview {
+                    opacity: 0;
+                    width:   0;
+                    height:  0;
                 }
                 
                 /* TODO: MOBILE enable phone action */

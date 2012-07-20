@@ -17,6 +17,18 @@ urlpatterns = patterns('',
     # ------------------------------ MOBILE ------------------------------------
     # --------------------------------------------------------------------------
     
+    # ------------------------------ ERRORS ------------------------------------
+    # e.g., stamped.com/mobile/404, stamped.com/mobile/404.html
+    url(r'^mobile/404/?$',                              'error.views.error_404'), 
+    url(r'^mobile/404.html?$',                          'error.views.error_404'), 
+    
+    # e.g., stamped.com/mobile/503, stamped.com/mobile/503.html
+    url(r'^mobile/503/?$',                              'error.views.error_503'), 
+    url(r'^mobile/503.html?$',                          'error.views.error_503'), 
+    
+    # e.g., stamped.com/mobile/500, stamped.com/mobile/500.html
+    url(r'^mobile/500/?$',                              'error.views.error_500'), 
+    url(r'^mobile/500.html?$',                          'error.views.error_500'), 
     
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com/mobile, stamped.com/mobile/index, stamped.com/mobile/index.html
@@ -28,6 +40,11 @@ urlpatterns = patterns('',
     # e.g., stamped.com/mobile/about, stamped.com/mobile/about.html
     url(r'^mobile/about$',                              'mobile.views.about'), 
     url(r'^mobile/about\.html?$',                       'mobile.views.about'), 
+    
+    # ------------------------------ JOBS --------------------------------------
+    # e.g., stamped.com/mobile/jobs, stamped.com/mobile/jobs.html
+    url(r'^mobile/jobs$',                               'mobile.views.jobs'), 
+    url(r'^mobile/jobs\.html?$',                        'mobile.views.jobs'), 
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
@@ -51,17 +68,22 @@ urlpatterns = patterns('',
     # --------------------------------------------------------------------------
     
     
+    # ------------------------------ ERRORS ------------------------------------
+    # e.g., stamped.com/404, stamped.com/404.html
+    url(r'^404/?$',                             'error.views.error_404'), 
+    url(r'^404.html?$',                         'error.views.error_404'), 
+    
+    # e.g., stamped.com/503, stamped.com/503.html
+    url(r'^503/?$',                             'error.views.error_503'), 
+    url(r'^503.html?$',                         'error.views.error_503'), 
+    
+    # e.g., stamped.com/500, stamped.com/500.html
+    url(r'^500/?$',                             'error.views.error_500'), 
+    url(r'^500.html?$',                         'error.views.error_500'), 
+    
     # ------------------------------- BLOG -------------------------------------
     # e.g., stamped.com/blog
     url(r'^blog$',                              'core.views.blog'), 
-    
-    
-    # ------------------------------- TEST -------------------------------------
-    # e.g., stamped.com/test
-    url(r'^test$',                              'core.views.test_view'), 
-    # e.g., stamped.com/temp
-    url(r'^temp$',                              'core.views.temp_view'), 
-    
     
     
     # ------------------------------ POPUPS ------------------------------------
@@ -87,12 +109,18 @@ urlpatterns = patterns('',
     url(r'^index$',                             'core.views.index'), 
     url(r'^index\.html?$',                      'core.views.index'), 
     url(r'^/?$',                                'core.views.index'), 
+    url(r'^/?download-app$',                    'core.views.download_app'), 
     
     # ------------------------------ ABOUT -------------------------------------
     # e.g., stamped.com/about, stamped.com/about.html
     url(r'^about$',                             'core.views.about'), 
     url(r'^about\.html?$',                      'core.views.about'), 
     
+    # ------------------------------ JOBS --------------------------------------
+    # e.g., stamped.com/jobs, stamped.com/jobs.html
+    url(r'^jobs$',                              'core.views.jobs'), 
+    url(r'^jobs\.html?$',                       'core.views.jobs'), 
+
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/travis
     url(r'^(?P<screen_name>[\w-]{1,20})\/?$',   'core.views.profile'), 

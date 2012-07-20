@@ -27,8 +27,6 @@ from threading           import Lock
 from gevent.pool         import Pool
 from greenlet            import GreenletExit
 
-
-
 class LoggingThreadPool(object):
     """
     Wrapper around gevent.pool.Pool that (a) logs any exceptions that show up in the spawned tasks and (b) ensures that
@@ -1075,9 +1073,19 @@ def getImage(data):
     
     return im
 
+def tryGetWebImage(url):
+    
+    return data
+
 def getWebImage(url, desc=None):
     try:
-        data = getFile(url)
+        data = getCachedWebImage(url)
+        memcached = libs.Memcache.globalMemcache()
+        
+        data = memcached.get(url)
+        if data is None:
+            data = getFile(url)
+            memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
     except urllib2.HTTPError:
         desc = ("%s " % desc if desc is not None else "")
         logs.warning("unable to download %simage from '%s'" % (url, desc))
@@ -1111,8 +1119,9 @@ def findUrls(text):
     return url_re.finditer(text)
 
 
-#Weighted lottery function for ordering items by their scores. 
-#INPUT: A list of tuples in the form (float_score, item)
+# Weighted lottery function for ordering items by their scores. 
+# INPUT: A list of tuples in the form (float_score, item)
+# OUTPUT: A list of tuples of the same form, ordered probabilistically
 def weightedLottery(items):
     
     aggScore = reduce(lambda x, y: x + y[0], items, 0.0)
@@ -1131,7 +1140,7 @@ def weightedLottery(items):
             for cutoff, item in unselected:
                 if r < cutoff:
                     unselected.pop(index)
-                    selected.append(item[1])
+                    selected.append(item)
                     aggScore -= item[0]
                     unselected = map(lambda (x, y): (((x - item[0]) if x > cutoff else x), y), unselected)    
                     break
@@ -1140,6 +1149,6 @@ def weightedLottery(items):
         
         return selected
 
-    return map(lambda item: item[1], items)
+    return items
 
 

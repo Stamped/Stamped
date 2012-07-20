@@ -35,4 +35,6 @@
 
 @property (nonatomic, readonly, assign) NSInteger count;
 
+@property (nonatomic, readonly, retain) NSError* lastError;
+
 @end

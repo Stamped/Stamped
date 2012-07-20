@@ -442,7 +442,6 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
         # digital re-masterings and re-releases, so dates are not decisive. Cast data is spotty.
         # We get reliable release dates from TMDB and TheTVDB, but not from iTunes, so those are generally unhelpful.
 
-
         raw_name_similarity = stringComparison(movie1.name, movie2.name, strict=True)
         simple_name_similarity = stringComparison(movieSimplify(movie1.name),
             movieSimplify(movie2.name), strict=True)

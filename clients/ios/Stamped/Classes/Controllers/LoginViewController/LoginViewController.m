@@ -242,7 +242,6 @@
 #pragma mark - Keyboard Notifications
 
 - (void)keyboardWillShow:(NSNotification*)notification {
-    
     if (!_didAnimateIn) {
         return;
     }

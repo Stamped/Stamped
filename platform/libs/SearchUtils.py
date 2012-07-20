@@ -42,7 +42,7 @@ def generateSearchTokens(entity):
             for subdoc in subfield:
                 if getattr(subdoc, 'title', None) is not None:
                     components.append(subdoc.title)
-    subfields = ('authors', 'albums', 'artists', 'tracks', 'directors', 'cast', 'publishers')
+    subfields = ('authors', 'albums', 'artists', 'tracks', 'directors', 'cast')
     for field in subfields:
         addSubfieldTitles(field)
         
@@ -66,7 +66,8 @@ def formatSearchQuery(queryText):
     components = []
     for token in tokens:
         normalized = set([normalized.text for normalized in NORMALIZER([token])])
-        components.append({'search_tokens' : {'$in' : list(normalized)}})
+        query = next(iter(normalized)) if len(normalized) == 1 else {'$in' : list(normalized)}
+        components.append({'search_tokens' : query})
     return components
 
 

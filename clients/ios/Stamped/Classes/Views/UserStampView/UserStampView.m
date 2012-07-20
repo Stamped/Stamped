@@ -8,6 +8,7 @@
 
 #import "UserStampView.h"
 #import "Util.h"
+#import "UIColor+Stamped.h"
 
 @implementation UserStampView
 @synthesize size;
@@ -77,8 +78,12 @@
 - (void)setupWithColors:(NSArray*)colors {
     if (!colors || [colors count] < 2) return; // invalid colors
 
-    const CGFloat *top = CGColorGetComponents([[colors objectAtIndex:0] CGColor]);
-    const CGFloat *bottom = CGColorGetComponents([[colors objectAtIndex:1] CGColor]);
+    //Pure insanity
+    UIColor* primary = [UIColor stampedColorWithHex:[[colors objectAtIndex:0] insaneHexString]];
+    UIColor* secondary = [UIColor stampedColorWithHex:[[colors objectAtIndex:1] insaneHexString]];
+    
+    const CGFloat *top = CGColorGetComponents([primary CGColor]);
+    const CGFloat *bottom = CGColorGetComponents([secondary CGColor]);
     
     r = top[0];
     g = top[1];
@@ -108,5 +113,17 @@
     return [NSArray arrayWithObjects:[UIColor colorWithRed:r green:g blue:b alpha:1.0f], [UIColor colorWithRed:r1 green:g1 blue:b1 alpha:1.0f], nil];
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 @end

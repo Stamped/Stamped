@@ -74,6 +74,7 @@ typedef enum {
 @property (nonatomic, assign) CGRect beginFrame;
 @property (nonatomic, assign) CGRect commentBeginFrame;
 @property (nonatomic, readwrite, retain) UIView* entityDetailView;
+@property (nonatomic, readwrite, assign) BOOL showCommentClicked;
 
 @end
 
@@ -215,6 +216,7 @@ typedef enum {
 @synthesize beginFrame;
 @synthesize commentBeginFrame;
 @synthesize entityDetailView = _entityDetailView;
+@synthesize showCommentClicked = _showCommentClicked;
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     id<STStamp> cachedStamp = [[STStampedAPI sharedInstance] cachedStampForStampID:stamp.stampID];
@@ -352,6 +354,7 @@ typedef enum {
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
+    _showCommentClicked = NO;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [[STActionManager sharedActionManager] setStampContext:nil];
     [super viewWillDisappear:animated];
@@ -375,7 +378,7 @@ typedef enum {
 
 - (void)stCreateCommentViewWillBeginEditing:(STCreateCommentView*)view {
     
-    self.title = @"Comment";
+//    self.title = @"Comment";
     [self.navigationController.navigationBar setNeedsDisplay];
     
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancelComment:)];
@@ -454,7 +457,7 @@ typedef enum {
 }
 
 - (void)commentButtonPressed {
-    
+    _showCommentClicked = YES;
     [self showCommentView:YES];
     
 }
@@ -581,7 +584,6 @@ typedef enum {
 #pragma mark - Comment View
 
 - (void)showCommentView:(BOOL)animated {
-    
     self.commentView.identifier = self.stamp.stampID;
     //_animateKeyboard = animated;
     [self.commentView showAnimated:YES];
@@ -591,8 +593,8 @@ typedef enum {
 
 #pragma mark - UIKeyboard Notfications
 
-- (void)keyboardWillShow:(NSNotification*)notification {    
-    
+- (void)keyboardWillShow:(NSNotification*)notification {
+    if (!_showCommentClicked) return;
     if (self.commentView) {
         [self.commentView keyboardWillShow:[notification userInfo]];
     }

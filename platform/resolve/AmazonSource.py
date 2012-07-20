@@ -105,6 +105,13 @@ class _AmazonObject(object):
         except KeyError:
             return None
 
+    @property
+    def hasListPrice(self):
+        try:
+            return 'ListPrice' in xp(self.data, 'ItemAttributes')['c']
+        except KeyError:
+            return False
+
 
 class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
     """
@@ -1091,6 +1098,16 @@ class AmazonSource(GenericSource):
             searchResult.addRelevanceComponentDebugInfo('Amazon salesRank factor', factor)
             searchResult.relevance *= factor
 
+    def __penalizeForMissingListPrice(self, resultList):
+        """Any result without a list price usually has very low quality. These are items third party
+        vendors sell on Amazon."""
+        for searchResult in resultList:
+            if not searchResult.resolverObject.hasListPrice:
+                penaltyFactor = 0.2
+                searchResult.dataQuality *= penaltyFactor
+                searchResult.addDataQualityComponentDebugInfo('penalty factor for missing list price', penaltyFactor)
+
+
     def __scoreFilmResults(self, resolverObjectsLists):
         scoredTvShows = []
         scoredMovies = []
@@ -1146,7 +1163,9 @@ class AmazonSource(GenericSource):
             adjustTrackRelevanceByQueryMatch(trackResult, queryText)
 
         self.__adjustScoresBySalesRank(albums)
+        self.__penalizeForMissingListPrice(albums)
         self.__adjustScoresBySalesRank(tracks)
+        self.__penalizeForMissingListPrice(tracks)
 
         self.__augmentAlbumResultsWithSongs(albums, tracks)
 
@@ -1160,6 +1179,7 @@ class AmazonSource(GenericSource):
         # complete shit results that I want to drop off the bottom.
         searchResults = scoreResultsWithBasicDropoffScoring(resolverObjectsLists['Books'], dropoffFactor=0.9)
         self.__adjustScoresBySalesRank(searchResults)
+        self.__penalizeForMissingListPrice(searchResults)
         for searchResult in searchResults:
             adjustBookRelevanceByQueryMatch(searchResult, queryText)
             applyBookTitleDataQualityTests(searchResult, queryText)
@@ -1248,73 +1268,6 @@ class AmazonSource(GenericSource):
         #    return self.__scoreFilmResults(resultSets.values())
         else:
             raise NotImplementedError('AmazonSource.searchLite() does not handle category (%s)' % queryCategory)
-
-    
-    # def __enrichSong(self, entity, asin):
-    #     track = AmazonTrack(asin)
-    #     if track.artist['name'] != '':
-    #         entity['artist_display_name'] = track.artist['name']
-    #     if track.album['name'] != '':
-    #         entity['album_name'] = track.album['name']
-    #     if len(track.genres) > 0:
-    #         entity['genre'] = track.genres[0]
-    #     if track.date != None:
-    #         entity['release_date'] = track.date
-    #     if track.length > 0:
-    #         entity['track_length'] = track.length
-    
-    # def __enrichBook(self, entity, asin):
-    #     book = AmazonBook(asin)
-    #     if book.author['name'] != '':
-    #         entity['author'] = book.author['name']
-    #     if book.publisher['name'] != '':
-    #         entity['publisher'] = book.publisher['name']
-    #     if book.date != None:
-    #         entity['release_date'] = book.date
-    #     if book.description != '':
-    #         entity['desc'] = book.description
-    #     if book.length > 0:
-    #         entity['num_pages'] = int(book.length)
-    #     if book.isbn != None:
-    #         entity['isbn'] = book.isbn
-    #     if book.sku != None:
-    #         entity['sku_number'] = book.sku
-    #     if book.ebookVersion is not None and book.ebookVersion.link is not None:
-    #         entity['amazon_link'] = book.ebookVersion.link
-    #     elif book.link != None:
-    #         entity['amazon_link'] = book.link
-    #     entity['amazon_underlying'] = book.underlying.key
-    #     try:
-    #         image_set = xp(book.underlying.data, 'ImageSets','ImageSet')
-    #         entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
-    #         entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
-    #         entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
-    #     except Exception:
-    #         logs.warning("no image set for %s" % book.underlying.key)
-    
-    # def __enrichVideoGame(self, entity, asin):
-    #     game = AmazonVideoGame(asin)
-        
-    #     if game.artist['name'] != '':
-    #         entity['artist_display_name'] = game.artist['name']
-    #     if len(game.genres) > 0:
-    #         entity['genre'] = game.genres[0]
-    #     if game.date != None:
-    #         entity['release_date'] = game.date
-    #     if game.description != '':
-    #         entity['desc'] = game.description
-    #     if game.sku != None:
-    #         entity['sku_number'] = game.sku
-    #     if game.platform != '':
-    #         entity['platform'] = game.platform
-        
-    #     try:
-    #         image_set = xp('.//ImageSets','ImageSet')
-    #         entity['images']['large'] = xp(image_set,'LargeImage','URL')['v']
-    #         entity['images']['small'] = xp(image_set,'MediumImage','URL')['v']
-    #         entity['images']['tiny']  = xp(image_set,'SmallImage','URL')['v']
-    #     except Exception:
-    #         logs.warning("no image set for %s" % asin)
     
     def entityProxyFromKey(self, key, **kwargs):
         try:

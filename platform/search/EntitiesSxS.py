@@ -148,7 +148,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
     for i, left in enumerate(oldResults):
         for j, right in enumerate(newResults):
             score = differenceScore(left[2], right[2])
-            if score <= diffThreshold:
+            if score <= diffThreshold or left[0].title == right[0].title and left[0].subtitle == right[0].subtitle:
                 diffScores.append((score, i, j))
     # Find the most similar pair. When there are ties, lower i values (higher
     # ranked items in the original list) come first, since they are probably

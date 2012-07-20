@@ -71,6 +71,8 @@ try:
     from libs.Twitter                    import *
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
+
+    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -80,8 +82,14 @@ except Exception:
 CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per like
 
-# TODO (travis): refactor API function calling conventions to place optional last
-# instead of first.
+stamp_num_collage_regeneration = frozenset([
+    1, 2, 3, 4, 5, 10, 15, 20, 25, 35, 50, 60, 70, 80, 90, 100, 
+    125, 150, 175, 200, 250, 300, 375, 450, 500, 600, 700, 800, 900, 
+    1000
+])
+
+# TODO (travis): refactor API function calling conventions to place optional authUserId last
+# instead of first, especially for function which don't require auth.
 
 class StampedAPI(AStampedAPI):
     """
@@ -143,6 +151,11 @@ class StampedAPI(AStampedAPI):
         self.__version = 0
         if 'version' in kwargs:
             self.setVersion(kwargs['version'])
+
+        self.__autocomplete = emptyIndex()
+        self.__autocomplete_last_loaded = datetime.now()
+        if utils.is_ec2():
+            self.reloadAutoCompleteIndex()
 
     def setVersion(self, version):
         try:
@@ -1697,9 +1710,10 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
-        if category == 'film':
-            return self._netflix.autocomplete(query)
-        elif category == 'place':
+        if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
+            self.__autocomplete_last_loaded = datetime.now()
+            self.reloadAutoCompleteIndex()
+        if category == 'place':
             if coordinates is None:
                 latLng = None
             else:
@@ -1713,17 +1727,28 @@ class StampedAPI(AStampedAPI):
             for name in names:
                 completions.append( { 'completion' : name } )
             return completions
-        # elif category == 'music':
-        #     result = self._rdio.searchSuggestions(query, types="Artist,Album,Track")
-        #     if 'result' not in result:
-        #         return []
-        #     #names = list(set([i['name'] for i in result['result']]))[:10]
-        #     names = self._orderedUnique([i['name'] for i in result['result']])[:10]
-        #     completions = []
-        #     for name in names:
-        #         completions.append( { 'completion' : name})
-        #     return completions
-        return []
+
+        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
+
+    def reloadAutoCompleteIndex(self, retries=5, delay=0):
+        def setIndex(greenlet):
+            try:
+                self.__autocomplete = greenlet.get()
+            except Exception as e:
+                if retries:
+                    self.reloadAutoCompleteIndex(retries-1, delay*2+1)
+                else:
+                    email = {
+                        'from' : 'Stamped <noreply@stamped.com>',
+                        'to' : 'dev@stamped.com',
+                        'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
+                        'body' : '<pre>%s</pre>' % str(e),
+                    }
+                    utils.sendEmail(email, format='html')
+        gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
+
+    def updateAutoCompleteIndexAsync(self):
+        pushNewIndexToS3()
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):
@@ -1968,24 +1993,127 @@ class StampedAPI(AStampedAPI):
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularStampIds = map(lambda x: x.stamp_id, popularStamps)
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
+        popularStampStats = self._stampStatsDB.getStatsForStamps(popularStampIds)
 
         if len(popularStampIds) != len(popularUserIds):
             logs.warning("%s: Length of popularStampIds doesn't equal length of popularUserIds" % entityId)
             raise Exception
 
-        try:
-            stats = self._entityStatsDB.getEntityStats(entityId)
-            stats.num_stamps = numStamps
-            stats.popular_users = popularUserIds
-            stats.popular_stamps = popularStampIds
-            self._entityStatsDB.updateEntityStats(stats)
-        except StampedUnavailableError:
-            stats = EntityStats()
-            stats.entity_id = entityId
-            stats.num_stamps = numStamps
-            stats.popular_users = popularUserIds
-            stats.popular_stamps = popularStampIds
-            self._entityStatsDB.addEntityStats(stats)
+        numTodos = self._todoDB.countTodosFromEntityId(entityId)
+        
+        aggStampScore = 0
+
+        for stampStat in popularStampStats:
+            if stampStat.score is not None:
+                aggStampScore += stampStat.score
+
+        popularity = (1 * numTodos) + (1 * aggStampScore)
+
+        # Entity Quality is a mixture of having an image and having enrichment
+        if entity.kind == 'other':
+            quality = 0.1
+        else:
+            quality = 0.6
+        
+            # Check if entity has an image (places don't matter)
+            if entity.kind != 'place':
+                if entity.images is None:
+                    quality -= 0.3
+
+            # Places
+            if entity.kind == 'place':
+                if entity.sources.googleplaces_id is None:
+                    quality -= 0.3
+                if entity.formatted_address is None:
+                    quality -= 0.1
+                if entity.sources.singleplatform_id is not None:
+                    quality += 0.2
+                if entity.sources.opentable_id is not None:
+                    quality += 0.1
+
+
+            # Music 
+            if entity.isType('track') or entity.isType('album') or entity.isType('artist'):
+                
+                if entity.sources.itunes_id is None:
+                    quality -= 0.3
+                if entity.sources.spotify_id is not None: 
+                    quality += 0.15
+                if entity.sources.rdio_id is not None:
+                    quality += 0.15
+
+                if entity.isType('track'):
+                    if entity.artists is None:
+                        quality -= 0.1
+                    if entity.albums is None:
+                        quality -= 0.05
+
+                elif entity.isType('artist'):
+                    if entity.tracks is None:
+                        quality -= 0.1
+                    if entity.albums is None:
+                        quality -= 0.05
+
+                elif entity.isType('album'):
+                    if entity.artists is None:
+                        quality -= 0.1
+                    if entity.tracks is None:
+                        quality -= 0.1
+
+            # Movies and TV
+            if entity.isType('movie'):
+
+                if entity.sources.tmdb_id is None:
+                    quality -= 0.3
+                if entity.sources.itunes_id is not None:
+                    quality += 0.2
+                if entity.sources.netflix_id is not None:
+                    quality += 0.1
+
+            if entity.isType('tv'):
+                if entity.sources.thetvdb_id is None:
+                    quality -= 0.15
+                if entity.sources.netflix_id is not None:
+                    quality += 0.2
+
+            # Books
+            if entity.isType('book'):
+
+                if entity.sources.amazon_id is None:
+                    quality -= 0.2
+                if entity.sources.itunes_id is not None:
+                    quality += 0.1
+
+            # Apps
+            if entity.isType('app'):
+
+                if entity.sources.itunes_url is None:
+                    quality -= 0.4
+                else:
+                    quality += 0.1
+
+
+        if quality > 1.0:
+            logs.warning("Quality score greater than 1 for entity %s" % entityId)
+            quality = 1.0
+
+        score = max(quality, quality * popularity)
+
+        stats = EntityStats()
+        stats.entity_id = entity.entity_id
+        stats.num_stamps = numStamps
+        stats.popular_users = popularUserIds
+        stats.popular_stamps = popularStampIds
+        stats.popularity = popularity
+        stats.quality = quality
+        stats.score = score
+        stats.kind = entity.kind
+        stats.types = entity.types
+        if entity.kind == 'place' and entity.coordinates is not None:
+            stats.lat = entity.coordinates.lat
+            stats.lng = entity.coordinates.lng
+        self._entityStatsDB.saveEntityStats(stats)
+
         return stats
 
     def updateTombstonedEntityReferencesAsync(self, oldEntityId):
@@ -2529,7 +2657,7 @@ class StampedAPI(AStampedAPI):
             distribution = self._getUserStampDistribution(authUserId)
             self._userDB.updateDistribution(authUserId, distribution)
             
-            if utils.is_ec2():
+            if utils.is_ec2() and self._should_regenerate_collage(stamp.stats.stamp_num):
                 tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
 
         # Generate activity and stamp pointers
@@ -2705,10 +2833,13 @@ class StampedAPI(AStampedAPI):
         
         tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits, og_action_id])
         
-        if utils.is_ec2():
+        if utils.is_ec2() and self._should_regenerate_collage(stamp.stats.stamp_num):
             tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
         
         return True
+    
+    def _should_regenerate_collage(self, stamp_num):
+        return (stamp_num in stamp_num_collage_regeneration)
     
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None, og_action_id=None):
         # Remove from user collection
@@ -2872,52 +3003,64 @@ class StampedAPI(AStampedAPI):
             # Call async process to update references
             tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
 
-        # Stamp popularity
-        popularity = stats.num_likes + stats.num_todos + stats.num_comments
+        # Stamp popularity - Unbounded score
+        popularity = (2 * stats.num_likes) + stats.num_todos + (stats.num_comments / 2.0) + (2 * stats.num_credits)
         #TODO: Add in number of activity_items with the given stamp id 
         
-        stats.popularity = int(popularity)
+        stats.popularity = float(popularity)
 
-        # Stamp Quality
-        image_score = 0
-        for content in stamp.contents:
-            if content.images is not None:
-                image_score = 1
-                break
+        # Stamp Quality - Score out of 1... 0.5 by default 
+
+        quality = 0.5 
+
+        # -0.2 for no blurb, +0 for <20 chars, +0.1 for 20-50 chars, + 0.16 for 50-100 chars, +0.19 for 100+ chars
         
         blurb = ""
         for content in stamp.contents:
             blurb = "%s%s" % (blurb,content.blurb)
         
-        length_score = 0
-        if len(blurb) > 20:
-            length_score = 2
-        elif len(blurb) > 0:
-            length_score = 1 
-            
-        # Blurb has at least one mention in it
-        mentions = utils.findMentions(blurb)
-        mention_score = 0
-        for mention in mentions:
-            mention_score = 1
-            break
-            
-        urls = utils.findUrls(blurb)
-        url_score = 0
-        for url in urls:
-            url_score = 1
-            break
-            
-        has_quote = 0
-        if '"' in blurb:
-            has_quote = 1
-        
-        quality = (2 * stats.num_credits) + (2 * image_score) + (1 * length_score) + (1 * mention_score) + (1 * url_score) + (1 * has_quote)
+        if len(blurb) > 100:
+            quality += 0.19
+        elif len(blurb) > 50:
+            quality += 0.13
+        elif len(blurb) > 20:
+            quality += 0.1
+        elif len(blurb) == 0:
+            quality -= 0.2
 
-        stats.quality = int(quality)
+        # +0.2 for image in the stamp
+        for content in stamp.contents:
+            if content.images is not None:
+                quality += 0.2
+                break
         
-        score = (.5 * quality) + popularity
-        stats.score = int(score)
+        # +0.05 if stamp has at least one credit
+        if stats.num_credits > 0:
+            quality += 0.05
+
+
+        # +0.02 if blurb has at least one mention in it
+        mentions = utils.findMentions(blurb)
+        for mention in mentions:
+            quality += 0.02
+            break
+            
+        # +0.02 if blurb has at least one url link in it
+        urls = utils.findUrls(blurb)
+        for url in urls:
+            quality += 0.02
+            break
+        
+        # +0.2 if blurb has at least one quote in it 
+        if '"' in blurb:
+            quality += 0.02
+
+        stats.quality = quality
+        
+        
+
+        score = max(quality, float(quality * popularity))
+        stats.score = score
 
         self._stampStatsDB.updateStampStats(stats)
 
@@ -2971,7 +3114,10 @@ class StampedAPI(AStampedAPI):
             return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
 
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
-
+        account = self.getAccount(authUserId)
+        if account.linked is not None and account.linked.facebook is not None\
+           and account.linked.facebook.token is not None:
+            token = account.linked.facebook.token
             result = self._facebook.deleteFromOpenGraph(og_action_id, token)
 
 
@@ -3616,6 +3762,7 @@ class StampedAPI(AStampedAPI):
                 lotterySize = min(limit, len(items))
                 lotteryItems = map(lambda x: (x.score,x), items[0:lotterySize])
                 items = utils.weightedLottery(lotteryItems)
+                items = map(lambda x: x[1], items)
                 
         # Entities
         entities = self._entityDB.getEntities(entityIds.keys())
@@ -3674,22 +3821,12 @@ class StampedAPI(AStampedAPI):
     def getTastemakerGuide(self, guideRequest):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
-        since = datetime.utcnow() - timedelta(days=90)
         limit = 1000
         viewport = guideRequest.viewport
         if viewport is not None:
             since = None
             limit = 250
-        stampStats = self._stampStatsDB.getPopularStampStats(types=types, viewport=viewport, since=since, limit=limit)
-
-        # Combine stamp scores into grouped entity scores
-        entityScores = {}
-        for stat in stampStats:
-            if stat.entity_id not in entityScores:
-                entityScores[stat.entity_id] = 0
-            entityScores[stat.entity_id] += 2 # Add 2 per stamp
-            if stat.score is not None:
-                entityScores[stat.entity_id] += stat.score # Add individual stamp score
+        entityStats = self._entityStatsDB.getPopularEntityStats(types=types, viewport=viewport, limit=limit)
 
         # Rank entities
         limit = 20
@@ -3698,39 +3835,36 @@ class StampedAPI(AStampedAPI):
         offset = 0
         if guideRequest.offset is not None:
             offset = guideRequest.offset
-        rankedEntityIds = sorted(entityScores.keys(), key=lambda x: entityScores[x], reverse=True)[offset:][:limit]
 
-        entityIds = {}
+        # TODO: Do this in db request
+        entityStats = entityStats[offset:offset+limit+5]
+        
         userIds = {}
 
-        # Entities
-        entities = self._entityDB.getEntities(rankedEntityIds)
-        for entity in entities:
-            if entity.sources.tombstone_id is not None:
-                # Convert to newer entity
-                replacement = self._entityDB.getEntity(entity.sources.tombstone_id)
-                entityIds[entity.entity_id] = replacement
-                # Call async process to update references
-                tasks.invoke(tasks.APITasks.updateTombstonedEntityReferences, args=[entity.entity_id])
-            else:
-                entityIds[entity.entity_id] = entity
-
-        # Entity Stats
-        entityStats = self._entityStatsDB.getStatsForEntities(entityIds.keys())
-        ### TEMP CODE: BEGIN
-        # Temporarily force old entity stats to be generated
-        if len(entityStats) < len(entities):
-            statEntityIds = set()
-            for stat in entityStats:
-                statEntityIds.add(stat.entity_id)
-            missingEntityIds = set(entityIds.keys()).difference(statEntityIds)
-            for missingEntityId in missingEntityIds:
-                entityStats.append(self.updateEntityStatsAsync(missingEntityId))
-        ### TEMP CODE: END
+        entityIdsWithScore = {}
         for stat in entityStats:
+            if stat.score is None:
+                entityIdsWithScore[stat.entity_id] = 0.0
+            else:
+                entityIdsWithScore[stat.entity_id] = stat.score
+
             if stat.popular_users is not None:
                 for userId in stat.popular_users[:10]:
                     userIds[userId] = None
+
+        scoredEntities = []
+        entities = self._entityDB.getEntities(entityIdsWithScore.keys())
+        for entity in entities:
+            scoredEntities.append((entityIdsWithScore[entity.entity_id], entity))
+
+        scoredEntities.sort(key=lambda x: x[0], reverse=True)
+
+        # Remove the buffer we added earlier (in case any entities no longer exist)
+        scoredEntities = scoredEntities[:limit]
+
+        # Apply Lottery
+        if offset == 0 and guideRequest.section != "food":
+            scoredEntities = utils.weightedLottery(scoredEntities)
 
         # Users
         users = self._userDB.lookupUsers(list(userIds.keys()))
@@ -3760,11 +3894,11 @@ class StampedAPI(AStampedAPI):
 
         # Results
         result = []
-        for entityId in rankedEntityIds:
-            entity = entityIds[entityId]
-            if entityId in entityStampPreviews:
+        for score, entity in scoredEntities:
+            # Update previews
+            if entity.entity_id in entityStampPreviews:
                 previews = Previews()
-                previews.stamps = entityStampPreviews[entityId]
+                previews.stamps = entityStampPreviews[entity.entity_id]
                 entity.previews = previews
             result.append(entity)
 
@@ -3920,7 +4054,7 @@ class StampedAPI(AStampedAPI):
                 elif t < 90:
                     stamp_score += 1.03125 - (.65 / 80 * t)
                 elif t < 290:
-                    stamp_score += .435 - (.3 / 200 * t)
+                    stamp_score += .435 - (.3 / 200 * t) 
             
             #Personal stamp score - higher is worse
             if personal_timestamp is not None:
@@ -3962,7 +4096,7 @@ class StampedAPI(AStampedAPI):
                     - (2 * personal_stamp_score) 
                     + (3 * personal_todo_score) 
                     + (1 * avgQuality) 
-                    + (1 * avgPopularity) ) * (image_score)
+                    + (1 * max(5, avgPopularity)) ) * (image_score)
             
             return result
 
@@ -4794,6 +4928,7 @@ class StampedAPI(AStampedAPI):
     def getActivity(self, authUserId, scope, limit=20, offset=0):
 
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
+        logs.debug("ACTIVITY DATA: %s" % activityData)
 
         # Append user objects
         userIds     = {}
@@ -4859,6 +4994,10 @@ class StampedAPI(AStampedAPI):
         activity = []
         for item in activityData:
             try:
+                logs.debug("ACTIVITY ITEM: %s" % item)
+                logs.debug("USERS: %s" % userIds)
+                logs.debug("STAMPS: %s" % stampIds)
+                logs.debug("ENTITIES: %s" % entityIds)
                 activity.append(item.enrich(authUserId  = authUserId,
                                             users       = userIds,
                                             stamps      = stampIds,

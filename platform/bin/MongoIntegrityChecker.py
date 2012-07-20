@@ -26,6 +26,7 @@ from api.db.mongodb.MongoAccountCollection              import MongoAccountColle
 from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection, MongoEntityStatsCollection
 from api.db.mongodb.MongoStampCollection                import MongoStampCollection, MongoStampStatsCollection
 from api.db.mongodb.MongoTodoCollection                 import MongoTodoCollection
+from api.db.mongodb.MongoGuideCollection                import MongoGuideCollection
 
 import gevent
 from gevent.queue import Queue, Empty
@@ -48,6 +49,7 @@ collections = [
     # Stats
     MongoEntityStatsCollection,
     MongoStampStatsCollection, 
+    MongoGuideCollection, 
 ]
 
 WORKER_COUNT = 10
@@ -65,6 +67,9 @@ def parseCommandLine():
     
     parser.add_option("-n", "--noop", default=False, 
         action="store_true", help="noop mode (don't apply fixes)")
+    
+    parser.add_option("-e", "--email", default=False, 
+        action="store_true", help="send result email")
     
     parser.add_option("-c", "--check", default=None, 
         action="store", help="optionally filter checks based off of their name")
@@ -174,7 +179,7 @@ def main():
     # TODO: Repopulate missing documents
 
     # Email dev if any errors come up
-    if libs.ec2_utils.is_ec2():
+    if libs.ec2_utils.is_ec2() and options.email:
         if len(warnings) > 0:
             try:
                 stack = libs.ec2_utils.get_stack().instance.stack
