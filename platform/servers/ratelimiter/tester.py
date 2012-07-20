@@ -14,7 +14,7 @@ import rpyc
 from rpyc       import AsyncResult
 import rpyc.core.async
 from optparse   import OptionParser
-from time       import time, sleep
+import time
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
@@ -52,7 +52,7 @@ def parseCommandLine():
 import random
 
 def makeRequest(host, port, service, priority, timeout, method, url):
-    sleep(random.random()*3)
+    time.sleep(random.random()*3)
     if timeout == 0:
         timeout = None
     print('requesting... service: %s  priority: %s  timeout: %s  method: %s  url: %s' % (service, priority, timeout, method, url))
@@ -94,13 +94,13 @@ def main():
     #    pool.spawn(makeRequest, None, service, priority, timeout, method, url)
     #pool.join()
 
-    begin = time()
+    begin = time.time()
 
     threads = [gevent.spawn(makeRequest, host, port, service, priority, timeout, method, url) for i in xrange(num_requests)]
     print ('finished thread creation')
     gevent.joinall(threads)
 
-    elapsed = time() - begin
+    elapsed = time.time() - begin
     print('Total elapsed time: %s seconds' % elapsed)
 
 if __name__ == '__main__':

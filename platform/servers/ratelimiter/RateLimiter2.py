@@ -14,8 +14,7 @@ import traceback
 
 import utils
 
-import calendar
-from time               import time, gmtime, mktime, strftime, localtime
+import calendar, time
 from collections        import deque
 
 from django.utils.html  import escape
@@ -75,7 +74,7 @@ class RequestLog():
 
 class Request():
     def __init__(self, timeout, verb, url, body, headers):
-        self.created = time()
+        self.created = time.time()
         self.timeout = timeout
         self.verb = verb
         self.url = url
@@ -89,8 +88,8 @@ def workerProcess(limit):
     while True:
         limit.handleTimestep()
         if limit._isBlackout():
-            print('Fail limit reached.  Sleeping for %s' % (limit.blackout_wait - (time() - limit.blackout_start)))
-            gevent.sleep(limit.blackout_wait - (time() - limit.blackout_start))
+            print('Fail limit reached.  Sleeping for %s' % (limit.blackout_wait - (time.time() - limit.blackout_start)))
+            gevent.sleep(limit.blackout_wait - (time.time() - limit.blackout_start))
         else:
             gevent.sleep(period)
         sleep(0)
@@ -105,7 +104,7 @@ class RateLimiter(object):
         self.limit = limit
         self.period = period
         self.cpd = cpd
-        self.__curr_timeblock_start =  time()
+        self.__curr_timeblock_start =  time.time()
 
         self.__fails = deque()
         self.fail_limit = fail_limit
@@ -147,7 +146,7 @@ class RateLimiter(object):
 
     class FailLog(object):
         def __init__(self, status_code, content):
-            self.timestamp = time()
+            self.timestamp = time.time()
             self.status_code = status_code
             self.content = content
 
@@ -159,7 +158,7 @@ class RateLimiter(object):
         output += "<h3>RateLimiter Fail Limit reached</h3>"
         output += "<p><i>There were %s failed requests to service '%s' within the last %s seconds</p></i>" %  \
                   (self.fail_limit, self.__service_name, self.fail_period)
-        back_online = strftime('%m/%d/%Y %H:%M:%S', localtime(self.blackout_start + self.blackout_wait)) # Timestamp
+        back_online = time.strftime('%m/%d/%Y %H:%M:%S', time.localtime(self.blackout_start + self.blackout_wait)) # Timestamp
         output += "<p>Waiting for %s seconds.  Service will be active again at: %s</p>" % (self.blackout_wait, back_online)
 
         output += '<h3>Fail Log</h3>'
@@ -173,7 +172,7 @@ class RateLimiter(object):
 
         for fail in self.__fails:
             output += '<tr>'
-            output += '<td valign=top>%s</td>' % strftime('%m/%d/%Y %H:%M:%S', localtime(fail.timestamp)) # Timestamp
+            output += '<td valign=top>%s</td>' % time.strftime('%m/%d/%Y %H:%M:%S', time.localtime(fail.timestamp)) # Timestamp
             output += '<td valign=top>%s</td>' % fail.status_code
             output += '<td valign=top>%s</td>' % escape(fail.content)
             output += '</tr>'
@@ -197,7 +196,7 @@ class RateLimiter(object):
         if self.fail_limit is None or self.fail_period is None or self.blackout_wait is None:
             return
 
-        now = time()
+        now = time.time()
 
         ### Was getting deque() corruption error when the server was uploaded with requests.  This is to help prevent that.
         self.__semaphore.acquire()
@@ -217,7 +216,7 @@ class RateLimiter(object):
 
         if count > self.fail_limit:
             print('### hit fail limit')
-            self.blackout_start = time()
+            self.blackout_start = time.time()
 
             # Email dev if a fail limit was reached
             if is_ec2():
@@ -230,7 +229,7 @@ class RateLimiter(object):
 
     def _isBlackout(self, now=None):
         if now is None:
-            now = time()
+            now = time.time()
 
         if self.blackout_start is None:
             return False
@@ -247,7 +246,7 @@ class RateLimiter(object):
         if self.cpd is None:
             return False
 
-        now = calendar.timegm(gmtime())
+        now = calendar.timegm(time.gmtime())
         if self.__day_start + 60*60*24 < now:
             print('day elapsed')
             self.__day_start = self._getDay()
@@ -301,7 +300,7 @@ class RateLimiter(object):
 
     def addRequest(self, request, priority):
         try:
-            now = time()
+            now = time.time()
 
             expected_request_time = self._getExpectedRequestTime()
             expected_wait_time = self._getExpectedWaitTime(now, priority)
@@ -339,7 +338,7 @@ class RateLimiter(object):
 
     def handleTimestep(self):
         self.__calls = 0
-        now = time()
+        now = time.time()
         while (self.__curr_timeblock_start + self.period < now):
             self.__curr_timeblock_start += self.period  # TODO convert seconds to timedelta
         while self.__calls < self.limit:
@@ -352,7 +351,7 @@ class RateLimiter(object):
 
     def doRequest(self, request, asyncresult):
         try:
-            begin = time()
+            begin = time.time()
             http = httplib2.Http()
 
             if (begin - request.created) > request.timeout:
@@ -368,7 +367,7 @@ class RateLimiter(object):
 
             asyncresult.set((response, content))
 
-            end = time()
+            end = time.time()
             elapsed = end - begin
             realized_dur = end - request.created
             print('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))

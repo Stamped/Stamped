@@ -9,6 +9,7 @@ import Globals, logs, time
 from utils import abstract
 from datetime import timedelta
 from libs.Memcache import globalMemcache
+from errors import *
 
 class ACollectionCache(object):
 
