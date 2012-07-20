@@ -42,7 +42,6 @@ class StampedRateLimiterRPCService(rpyc.Service):
         pass
 
     def exposed_request(self, service, priority, timeout, verb, url, body = None, headers = None):
-        print('body: %s  headers: %s' % (pickle.loads(body), pickle.loads(headers)))
         if body is not None:
             body = pickle.loads(body)
         if headers is not None:

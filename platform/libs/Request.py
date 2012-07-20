@@ -16,6 +16,7 @@ import urllib
 import pickle
 import time
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
+from servers.ratelimiter.RateLimiter2 import RateException
 import libs.ec2_utils
 from collections                import deque
 
@@ -183,7 +184,6 @@ class RateLimiterState(object):
         return response, content
 
     def request(self, service, method, url, body, header, priority, timeout):
-        print('### is_ec2: %s' % self.__is_ec2)
         if not self.__is_ec2 or self._isBlackout():
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
