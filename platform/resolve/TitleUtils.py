@@ -9,6 +9,7 @@ __license__   = "TODO"
 
 import Globals
 import re
+from resolve.StringNormalizationUtils import format
 
 # TODO: Merge with search/DataQualityUtils.py somewhere common (to avoid dependency loop)
 
@@ -26,7 +27,7 @@ def applyRemovalRegexps(regexps, title):
             if removalRegexp.search(title):
                 title = removalRegexp.sub('', title)
                 modified = True
-    return title.strip()
+    return format(title)
 
 
 # Tools for demoting based on regepx title matches.
@@ -84,11 +85,12 @@ def makeTokensRegexp(*tokens):
     """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
     return re.compile("(^|[ ,-:\[(])(%s)($|[ ,-:\])])" % '|'.join(tokens), re.IGNORECASE)
 
+
 def makeDelimitedSectionRe(pattern):
     """Returns a regex that matches an entire delimited section (by () or []) if the
     section contains the given pattern.
     """
-    return re.compile("[(\[](.+ )?%s( .+)?[)\]]" % pattern, re.IGNORECASE)
+    return re.compile("[(\[].*?\\b%s\\b.*?[)\]]" % pattern, re.IGNORECASE)
 
 
 ROMAN_NUMERAL_RE = re.compile(
