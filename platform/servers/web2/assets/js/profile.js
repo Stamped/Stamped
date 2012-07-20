@@ -2155,7 +2155,7 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        $body.on("click", ".get-the-app-button", function(event) {
+        $body.on("click", ".download-the-free-app-button", function(event) {
             event.preventDefault();
             
             var popup_options = get_fancybox_popup_large_options({
