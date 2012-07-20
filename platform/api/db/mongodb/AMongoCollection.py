@@ -247,7 +247,7 @@ class AMongoCollection(object):
         forcePrimary = kwargs.pop('forcePrimary', False)
         params = {}
         if forcePrimary:
-            params['read_preference'] = pymongo.PRIMARY
+            params['read_preference'] = pymongo.ReadPreference.PRIMARY
         document = self._collection.find_one(documentId, **params)
         if document is None:
             raise StampedDocumentNotFoundError("Unable to find document (id = %s)" % documentId)
