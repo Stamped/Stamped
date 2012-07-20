@@ -92,7 +92,7 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
 
 
 def getProxySummary(proxy):
-    return ('%s, %s:%s' % (proxy.name, proxy.source, str(proxy.key)[:15]))
+    return ('%s, %s:%s' % (proxy.raw_name, proxy.source, str(proxy.key)[:15]))
 
 
 def getClusteringDifference(cellId, oldCluster, newCluster):
