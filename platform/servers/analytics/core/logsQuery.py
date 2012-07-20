@@ -11,10 +11,11 @@ import Globals
 import calendar, pprint, datetime, sys, math
 import keys.aws, logs, utils
 
-from api.MongoStampedAPI                            import MongoStampedAPI
+from api.MongoStampedAPI                        import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool
+from analytics_utils                            import today
 
 
 def percentile(numList,p):
@@ -103,7 +104,7 @@ class logsQuery(object):
     
     def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist):
         if uri is None:
-            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
+            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1/%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
         else:
             query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (domain.name,uri,t0.isoformat(),t1.isoformat())
         stats = domain.select(query)
@@ -180,8 +181,8 @@ class logsQuery(object):
         diff = (t1 - t0).days + 1
         output = []
         for i in range (0,diff):
-            t2 = t0+datetime.timedelta(days=i)
-            t3 = t0+datetime.timedelta(days=i+1)
+            t2 = today(t0+datetime.timedelta(days=i+1))
+            t3 = today(t0+datetime.timedelta(days=i+2))
             self.statDict = {}
             self.errDict = {}
             
