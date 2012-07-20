@@ -72,6 +72,9 @@ endef
 
 define ADD_CSS_TARGET
 $(CSS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
+	
+# TODO: call lessc preprocessor on each file before compression
+	
 	cat $$(call REST,$$^) | java -jar bin/compressor.jar --type css --line-break 120 > $$@
 	@echo
 endef
