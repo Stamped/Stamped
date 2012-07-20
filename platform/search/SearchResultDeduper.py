@@ -53,6 +53,7 @@ class SearchResultDeduper(object):
             elif len(match_scores_and_clusters) > 1:
                 match_scores_and_clusters.sort(reverse=True)
                 cluster = match_scores_and_clusters[0][1]
+                cluster.add_result(result)
                 unmerged_matches = 0
                 for (match_score, secondary_match_cluster) in match_scores_and_clusters[1:]:
                     if (cluster, secondary_match_cluster) in known_non_matches:
