@@ -30,40 +30,62 @@ _general_regex_removals = [
     (re.compile(r".*(').*")         , 1),
     (re.compile(r'.*(").*')         , 1),
     (re.compile(r'^(the ).*$')      , 1),
+    # TODO: This one is curious. As far as I can tell, the reason this is in here is to prevent removal rules like the
+    # first track removal from hitting when there's just a hyphenated word.
     (re.compile(r'.*\w(-)\w.*$')    , 1, ' '),
     # TODO PRELAUNCH FUCK FUCK FUCK: Clear out -:;/., and all sorts of other gratuitous punctuation. Run SxS!
-                                                ]
+]
 
 #generally applicable replacements
 _general_replacements = [
     ('&', ' and '),                             # canonicalize synonyms
 ]
 
+STRONGLY_SEPARATED_STUFF_REMOVAL_PATTERN = (
+    r'.*?'              # Non-greedy; looks for the earliest matching point of separation.
+    r'(\s*[(\[;:,-]'    # Open the group that we're going to be removing. Consume any leading whitespace and the separator.
+    r'[(\[:, -]*'       # Consume any following separator/space characters.
+    r'%s'               # This is where you put the stuff you're looking for past the separator.
+    r'[)\]:, -]*)$'     # Consume any trailing separators or spaces and check that the string is at an end.
+)
+
+# The difference between this one and strongly is that this one will remove separators but doesn't require any more
+# separation than whitespace.
+WEAKLY_SEPARATED_STUFF_REMOVAL_PATTERN = (
+    r'.*?'              # Non-greedy; looks for the earliest matching point of separation.
+    r'([(\[;:, -]+'     # Open the group that we're going to be removing. Consume any leading whitespace and the separator.
+    r'%s'               # This is where you put the stuff you're looking for past the separator.
+    r'[)\]:, -]*)$'     # Consume any trailing separators or spaces and check that the string is at an end.
+)
+
 # track-specific removal patterns
+# TODO: There is tremendous overlap between the track-specific removal patterns in simplify and the TitleUtils title
+# cleaning functions. In theory we can afford to be a little more aggressive in simplify than we can there, but in
+# practice the two functions don't coordinate well; I think there is duplicate code with slight differences which is
+# a confusing and unwanted outcome. This code should be collocated and any duplication should be removed.
 _track_removals = [
-    (re.compile(r'.*[^-](-+.* (remix|mix|version|edit|dub|tribute|cover|bpm|single|\w+ [vV]ersion)$)'), 1),
-    (re.compile(r'.*( *[\(\[]\w* *\w* *[vV]ersion[\)\]]$)'), 1),
+    (re.compile(STRONGLY_SEPARATED_STUFF_REMOVAL_PATTERN %
+                r'(remix|mix|version|edit|dub|tribute|cover|bpm|single|(\w+ +){1,3}version)'), 1),
 ]
 
 # album-specific removal patterns
 _album_removals = [
-    (re.compile(r'^(the ).*$'), 1),
-    (re.compile(r'.*((-|,)( the)? remixes.*$)'), 1),
-    (re.compile(r'.*(- ep$)'), 1),
-    (re.compile(r'.*( the (\w+ )?remixes$)'), 1),
-    (re.compile(r'.*(- remix ep)'), 1),
-    (re.compile(r'.*(- single$)'), 1),
+    (re.compile(STRONGLY_SEPARATED_STUFF_REMOVAL_PATTERN % r'(the +)?(\w+ +)?remixes'), 1),
+    (re.compile(WEAKLY_SEPARATED_STUFF_REMOVAL_PATTERN % r'ep'), 1),
+    (re.compile(STRONGLY_SEPARATED_STUFF_REMOVAL_PATTERN % r'remix(ed)? +ep'), 1),
+    (re.compile(STRONGLY_SEPARATED_STUFF_REMOVAL_PATTERN % r'single'), 1),
 ]
 
 # artist-specific removal patterns
 _artist_removals = [
-    (re.compile(r'^(the ).*$'), 1),
     (re.compile(r'^.*( band)'), 1),
 ]
 
 # movie-specific removal patterns
 _movie_removals = [
-    # TODO - unimplemented and unused
+    (re.compile(r'.*(\bthe\b).*'), 1),
+    (re.compile(r'.*\s(-+).*'), 1),
+    (re.compile(r'.*(-+)\s.*'), 1),
 ]
 
 def regexRemoval(string, patterns):
@@ -162,8 +184,6 @@ def trackSimplify(name, artist=None):
     return format(string)
 
 def albumSimplify(string):
-    # TODO: Work this into the regexRemoval call!
-    string = re.compile('[ (\[:,-]+EP[)\]:, -]*$').sub(' ', string)
     string = simplify(string)
     string = regexRemoval(string, _album_removals)
     return format(string)
@@ -173,13 +193,10 @@ def artistSimplify(string):
     string = regexRemoval(string, _artist_removals)
     return format(string)
 
-def movieSimplify(movie_name):
-    # TODO: Do this in a more organized way!
-    movie_name = re.compile('(^|\s)the(\s|$)', re.IGNORECASE).sub(' ', movie_name)
-    movie_name = re.compile('(-\s|\s-)').sub(' ', movie_name)
-    movie_name = re.compile('\s+').sub(' ', movie_name)
-    movie_name = movie_name.strip()
-    return format(simplify(movie_name))
+def movieSimplify(string):
+    string = simplify(string)
+    string = regexRemoval(string, _movie_removals)
+    return format(string)
 
 def bookSimplify(string):
     return format(simplify(string))
@@ -206,6 +223,7 @@ def stringComparison(a, b, strict=False):
     if a == b:
         return 1.0
     else:
+        # TODO BEFORE SUBMITTING FIX THIS FIX THIS FIX THIS
         junk_to_ignore = "\t-.;&".__contains__ # characters for SequenceMatcher to disregard
         v = SequenceMatcher(junk_to_ignore, a, b).ratio()
 

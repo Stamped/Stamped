@@ -38,8 +38,25 @@ class StringNormalizationUtilsTest(AStampedTestCase):
         self.assertEquals(trackSimplify('my song - unrated version'), 'my song'),
         self.assertEquals(trackSimplify('my song--radio version'), 'my song'),
         # TODO FIX: self.assertEquals(trackSimplify('my song featuring Guest Singer'), 'my song'),
+        # TODO: Right now all shit we want to get rid of must be separated by a dash. Is this always what we see in
+        # practice?
+        self.assertEquals(trackSimplify('abc-def remix'), 'abc def remix')  # TODO IS THIS RIGHT?
+        self.assertEquals(trackSimplify('stay single'), 'stay single')
 
+    def test_album_simplify(self):
+        self.assertEquals(albumSimplify('Abc EP'), 'abc')
+        self.assertEquals(albumSimplify('Abc ---EP'), 'abc')
+        self.assertEquals(albumSimplify('abc -- single'), 'abc')
+        self.assertEquals(albumSimplify('stay single'), 'stay single')
 
+    def test_artist_simplify(self):
+        self.assertEquals(artistSimplify('John\'s Totally Awesome Band'), 'johns totally awesome')
+        self.assertEquals(artistSimplify('my single -- remix'), 'my single -- remix')
+
+    def test_movie_simplify(self):
+        self.assertEquals(movieSimplify('geoff the effeminate coworker'), 'geoff effeminate coworker')
+        self.assertEquals(movieSimplify('-- IF y\'all INTRISTID in the LADIES'), 'if yall intristid in ladies')
+        self.assertEquals(movieSimplify('i- -hate wri-ting test-- -  cases'), 'i hate wri ting test cases')
 
 if __name__ == '__main__':
     _verbose = True
