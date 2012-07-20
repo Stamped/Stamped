@@ -161,7 +161,6 @@ class RateLimiterState(object):
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-        sleep(0)
         conn = rpyc.connect(host, port)
 
         async_request = rpyc.async(conn.root.request)
@@ -184,6 +183,7 @@ class RateLimiterState(object):
 
     def request(self, service, method, url, body, header, priority, timeout):
         print('### is_ec2: %s' % self.__is_ec2)
+        sleep(0)
         if not self.__is_ec2 or self._isBlackout():
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
