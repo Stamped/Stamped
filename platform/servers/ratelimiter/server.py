@@ -40,6 +40,7 @@ class StampedRateLimiterRPCService(rpyc.Service):
         pass
 
     def exposed_request(self, service, priority, timeout, verb, url, body = pickle.dumps({}), headers = pickle.dumps({})):
+        print('body: %s  headers: %s' % (pickle.loads(body), pickle.loads(headers)))
         response, content = self.__rl_service.handleRequest(service, priority, timeout, verb, url,
             pickle.loads(body), pickle.loads(headers))
         return pickle.dumps(response), content
