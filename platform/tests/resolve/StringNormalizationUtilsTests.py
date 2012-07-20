@@ -52,6 +52,7 @@ class StringNormalizationUtilsTest(AStampedTestCase):
     def test_artist_simplify(self):
         self.assertEquals(artistSimplify('John\'s Totally Awesome Band'), 'johns totally awesome')
         self.assertEquals(artistSimplify('my single -- remix'), 'my single -- remix')
+        self.assertEquals(artistSimplify('Jay-Z'), 'jay z')
 
     def test_movie_simplify(self):
         self.assertEquals(movieSimplify('geoff the effeminate coworker'), 'geoff effeminate coworker')
