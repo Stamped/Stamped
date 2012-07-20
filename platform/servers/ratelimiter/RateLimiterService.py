@@ -62,7 +62,6 @@ class StampedRateLimiterService():
             #self.startThreads()
 
     def updateDbLog(self):
-        print('#### CALLING UPDATEDBLOG')
         callmap = dict()
         for k,v in self.__limiters:
             callmap[k] = v.day_calls

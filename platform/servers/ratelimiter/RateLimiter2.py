@@ -371,7 +371,7 @@ class RateLimiter(object):
             end = time.time()
             elapsed = end - begin
             realized_dur = end - request.created
-            print('realized dur: %s  expected dur: %s' % (realized_dur, request.log.expected_dur))
+            print("service: %s  realized dur: %s  expected dur: %s" % (self.__service_name, realized_dur, request.log.expected_dur))
 
             self._addDurationLog(elapsed)
 
