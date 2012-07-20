@@ -173,7 +173,7 @@
                 {% for a in entity.actions %}
                     {% with action=a.action %}
                         {% if action.type != "playlist" %}
-                            {% if action.type == "add_to_instant_queue" %}
+                            {% if action.type == "queue" %}
                                 <!-- TODO: support Netflix add to instant queue -->
                             {% else %}{% if action.type == "listen" %}
                                 {% for source in action.sources %}
