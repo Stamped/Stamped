@@ -2520,14 +2520,15 @@ class StampedAPI(AStampedAPI):
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
-        except StampedUnavailableError:
-            stats = self.updateEntityStatsAsync(entityId)
+            if stats.num_stamps == 0:
+                badge           = Badge()
+                badge.user_id   = userId
+                badge.genre     = "entity_first_stamp"
+                badges.append(badge)
 
-        if stats.num_stamps == 0:
-            badge           = Badge()
-            badge.user_id   = userId
-            badge.genre     = "entity_first_stamp"
-            badges.append(badge)
+        except StampedUnavailableError:
+            # This can happen if the stamp has just been created and it's a new entity
+            pass
 
         return badges
 
