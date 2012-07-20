@@ -175,6 +175,256 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
         return CompareResult.match(score)
 
 
+WHITESPACE_RE = re.compile('\s+')
+SEPARATOR_RE = re.compile('[:-_;]+')
+def simplifyLite(title):
+    title = WHITESPACE_RE.sub(' ', title)
+    title = title.strip()
+    title = SEPARATOR_RE.sub('-', title)
+    return title.lower()
+
+BEGINNING_SUBTITLE_RE = re.compile('\s*[-:,.(\[]')
+def titleSamenessOdds(title1, title2, simplifyFn):
+    def oddsFromSimilarityAndLength(similarity, length):
+        return similarity * (length ** 0.5)
+
+    title1, title2 = simplifyLite(title1), simplifyLite(title2)
+    raw_similarity = stringComparison(title1, title2, strict=True) ** 3
+    shorter_title, longer_title = (title1, title2) if len(title1) < len(title2) else (title2, title1)
+    if (longer_title.lower().starts_with(longer_title.lower()) and
+        BEGINNING_SUBTITLE_RE.match(longer_title[len(shorter_title):])):
+        # It looks like the longer title just adds a subtitle to the shorter title.
+        pass
+
+
+def loadWordFrequencyTable():
+    f = open('/Users/paul/Downloads/anc-lexicon.txt')
+    lines = f.readlines()
+    f.close()
+    line_pairs = [tuple(line.strip().split(' ')) for line in lines]
+    return dict(line_pairs[1:])
+
+word_frequencies = loadWordFrequencyTable()
+
+def simpleUncommonness(string):
+    return len(string)
+
+WORD_RE = re.compile('([a-zA-Z0-9]+(-[a-zA-Z0-9]+)?)(\'s)?')
+def complexUncommonness(string):
+    uncommonness = 0.0
+    words = [word for (word, _, _) in WORD_RE.findall(string)]
+    exponent = len(words) ** -0.3
+    for word in words:
+        if word.isdigit():
+            uncommonness += len(word) ** 1.5
+            continue
+
+        if word in word_frequencies:
+            word_frequency = 2000000.0 / int(word_frequencies[word])
+        elif word.endswith("'s") and word[:len(word)-2] in word_frequencies:
+            word_frequency = 4000000.0 / int(word_frequencies[word[:len(word)-2]])
+        elif word.isalpha():
+            word_frequency = 2000000.0
+        else:
+            word_frequency = 4000000.0
+
+        word_frequency = 2000000.0 / int(word_frequencies.get(word.lower(), 1))
+        word_uncommonness = 0.5*math.log(word_frequency) + 0.5*len(word)
+        uncommonness += word_uncommonness
+    return uncommonness
+
+MIN_TARGET_SIM = 0.875
+def target_sim(unc):
+    return MIN_TARGET_SIM + 2 * ((1 - MIN_TARGET_SIM) / (1 + math.exp(unc / 10.0)))
+
+def get_odds_from_sim_unc(sim, unc):
+    return 20 * ((sim / target_sim(unc)) ** (2 * math.log(unc+1, 2)))
+
+SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
+COMMA_SUBTITLE_RE = re.compile('(\w)\s*,\s*\w+.*$')
+PARENTHETICAL_RE = re.compile('[.,;: -]+[(\[][^\])]+[)\]]\s*$')
+TOKENS_RE = re.compile('[a-zA-Z0-9]+')
+# TODO get this unified with token lists used in TitleUtils!
+WORTHLESS_SUBTITLE_TOKENS = set([
+    # film/tv
+    'uncut', 'unrated', 'nr', 'pg', 'r', 'edition', 'collection', 'volume', 'vol', 'cut', 'version', 'starring',
+    'episodes', 'eps', 'vols', 'volumes', 'film', 'movie',
+    # books
+    'paperback', 'hardcover', 'print', 'illustrated', 'novel', 'story', 'stories', 'tale', 'tales', 'biography',
+    'autobiography', 'history', 'abridged', 'complete', 'book', 'books',
+    # music
+    'remix', 'mix', 'remixed', 're-mix', 're-mixed', 'featuring', 'feat', 'inst', 'instrumental', 'karaoke'
+])
+def strip_subtitle(title):
+    match = SUBTITLE_RE.search(title)
+    if match:
+        subtitle_tokens = [token.lower() for token in TOKENS_RE.findall(match.group(0)[1:])]
+        print 'TOKENS:', subtitle_tokens
+        subtitle_is_worthless = bool(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
+        return SUBTITLE_RE.sub('\\1', title), subtitle_is_worthless
+
+    match = COMMA_SUBTITLE_RE.search(title)
+    # Sometimes a comma is used for subtitles, but we want to be a lot more conservative with
+    # them. So we will only split it if there is only one comma.
+    if match and title.count(',') == 1 and title.find(',') >= 3:
+        subtitle_tokens = [token.lower() for token in TOKENS_RE.findall(match.group(0)[1:])]
+        subtitle_is_worthless = bool(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
+        return SUBTITLE_RE.sub('\\1', title), subtitle_is_worthless
+
+    match = PARENTHETICAL_RE.search(title)
+    if match:
+        subtitle_tokens = [token.lower() for token in TOKENS_RE.findall(match.group(0))]
+        subtitle_is_worthless = bool(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
+        return PARENTHETICAL_RE.sub('', title), subtitle_is_worthless
+
+
+def titleComparison(title1, title2, simplificationFn):
+    def noChange(title1, title2):
+        penalty = 0.0
+        return penalty, title1, title2
+
+    def liteSimplification(title1, title2):
+        penalty = 0.005
+        return penalty, simplifyLite(title1), simplifyLite(title2)
+
+    def fullSimplification(title1, title2):
+        simple_title1 = simplificationFn(title1)
+        simple_title2 = simplificationFn(title2)
+        penalty1 = 1 - ((float(len(simple_title1)) / len(title1)) ** 0.1)
+        penalty2 = 1 - ((float(len(simple_title2)) / len(title2)) ** 0.1)
+        penalty = max(penalty1, penalty2)
+        return penalty, simple_title1, simple_title2
+
+    def fixFirstSubtitle(title1, title2):
+        result = strip_subtitle(title1)
+        if not result:
+            return 0.0, title1, title2
+        fixed_title1, subtitle_definitely_crap = result
+        penalty_exponent = 0.01 if subtitle_definitely_crap else 0.05
+        penalty = 1 - ((float(len(fixed_title1)) / len(title1)) ** penalty_exponent)
+        return penalty, fixed_title1, title2
+
+    def fixSecondSubtitle(title1, title2):
+        result = strip_subtitle(title2)
+        if not result:
+            return 0.0, title1, title2
+        fixed_title2, subtitle_definitely_crap = result
+        penalty_exponent = 0.01 if subtitle_definitely_crap else 0.05
+        penalty = 1 - ((float(len(fixed_title2)) / len(title2)) ** penalty_exponent)
+        print 'penalty', penalty, len(fixed_title2), len(title2), penalty_exponent
+        return penalty, title1, fixed_title2
+
+    def fixBothSubtitles(title1, title2):
+        penalty1, fixed_title1, _ = fixFirstSubtitle(title1, title2)
+        penalty2, _, fixed_title2 = fixSecondSubtitle(title1, title2)
+        return penalty1+penalty2, fixed_title1, fixed_title2
+
+    def removeLeadingStopWords(title1, title2):
+        stop_words = set(['the', 'a', 'an'])
+        title1_tokens = TOKENS_RE.findall(title1)
+        title2_tokens = TOKENS_RE.findall(title2)
+        if len(title1_tokens) > 1 and title1_tokens[0].lower() in stop_words:
+            start = title1.find(title1_tokens[0])
+            title1 = title1[start+len(title1_tokens[0]):].strip()
+        if len(title2_tokens) > 1 and title2_tokens[0].lower() in stop_words:
+            start = title2.find(title2_tokens[0])
+            title2 = title2[start+len(title2_tokens[0]):].strip()
+        penalty = 0.0075
+        return penalty, title1, title2
+
+    title_comparison_options = (
+        (noChange, liteSimplification, fullSimplification),
+        (noChange, fixFirstSubtitle, fixSecondSubtitle, fixBothSubtitles),
+        (noChange, removeLeadingStopWords)
+        # TODO: Plurals and possessives?
+    )
+
+    configurations = [[]]
+    for decision in title_comparison_options:
+        new_configurations = []
+        for option in decision:
+            new_configurations.extend(configuration + [option] for configuration in configurations)
+        configurations = new_configurations
+
+    best_score = 0
+    for configuration in configurations:
+        print('TRYING CONFIGURATION [%s]' % ', '.join([fn.func_name for fn in configuration]))
+        curr_title1, curr_title2 = title1, title2
+        multiplier = 1.0
+        for filter_fn in configuration:
+            penalty, curr_title1, curr_title2 = filter_fn(curr_title1, curr_title2)
+            multiplier *= (1.0 - penalty)
+        similarity = stringComparison(curr_title1, curr_title2)
+        print 'sim is', similarity, 'multiplier is', multiplier
+        uncommonness = min(complexUncommonness(curr_title1), complexUncommonness(curr_title2))
+        score = get_odds_from_sim_unc(similarity * multiplier, uncommonness)
+        if score > best_score:
+            best_score = score
+
+    return best_score
+
+
+print "'abc', 'bcd',", titleComparison('star trek: the next generation', 'star trek', simplify)
+
+
+class OddsBasedMovieEntityProxyComparator(AEntityProxyComparator):
+    @property
+    def prior_odds(self):
+        return 0.3
+
+    @property
+    def sameness_odds_threshold(self):
+        # A 20x boost is what we get for short titles being exactly the same. For movies/TV, we want that to be just
+        # enough if there's nothing else different about the two.
+        return 5.9
+
+    @property
+    def definitely_different_odds_threshold(self):
+        return 0.5
+
+    @property
+    def _compute_sameness_odds(self, proxy1, proxy2):
+        raw_name_similarity = stringComparison(movie1.name, movie2.name, strict=True)
+        simple_name_similarity = stringComparison(movieSimplify(movie1.name),
+                movieSimplify(movie2.name), strict=True)
+        sim_score = max(raw_name_similarity, simple_name_similarity - 0.10)
+        # You're 25x more likely to have the exact same raw name if you're the same than if you aren't.
+        # You're 10x more likely to have the exact same simplified name if you're the same than if you aren't.
+        # You're 5x more likely to have the exact same raw name if you're the same than if you aren't.
+        # The odds of having names that are 80% the same are the same whether you're the same or you aren't.
+        # Beyond there, steep penalties begin.
+        title_comparison_odds = (5 ** 10) ** (sim_score - 0.8)
+        self._adjust_odds_for_comparison(title_comparison_odds, 'title comparison')
+
+        if self._endsInDifferentNumbers(movie1.name, movie2.name):
+            self._adjust_odds_for_comparison(0.1, 'movie title number mismatch')
+
+        if movie1.release_date and movie2.release_date:
+            time_difference = abs(movie1.release_date - movie2.release_date)
+            # TODO: Smooth this.
+            if time_difference < timedelta(30):
+                release_date_odds = 25.0
+            elif time_difference < timedelta(365):
+                release_date_odds = 8.0
+            elif time_difference < timedelta(750):
+                release_date_odds = 2.0
+            else:
+                release_date_odds = 0.5
+            self._adjust_odds_for_comparison(release_date_odds, 'release dates')
+
+        if movie1.length and movie2.length:
+            movie_length_odds = None
+            if movie1.length == movie2.length and movie1.length % 60 != 0:
+                movie_length_odds = 40.0
+            elif movie1.length == movie2.length:
+                movie_length_odds = 20.0
+            if abs(movie1.length - movie2.length) <= 120:
+                movie_length_odds = 10.0
+
+
+
+
+
 
 class MovieEntityProxyComparator(AEntityProxyComparator):
     ENDING_NUMBER_RE = re.compile(r'(\d+)\s*(:|$)')

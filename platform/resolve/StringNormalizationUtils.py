@@ -41,8 +41,7 @@ _general_replacements = [
 
 # track-specific removal patterns
 _track_removals = [
-    (re.compile(r'^(the ).*$'), 1),
-    (re.compile(r'.*(-.* (remix|mix|version|edit|dub|tribute|cover|bpm|single|\w+ [vV]ersion)$)'), 1),
+    (re.compile(r'.*[^-](-+.* (remix|mix|version|edit|dub|tribute|cover|bpm|single|\w+ [vV]ersion)$)'), 1),
     (re.compile(r'.*( *[\(\[]\w* *\w* *[vV]ersion[\)\]]$)'), 1),
 ]
 
@@ -139,6 +138,7 @@ def trackSimplify(name, artist=None):
     # occasionally track names have their artist's name embedded within them,
     # so attempt to canonicalize track names by removing their artist's name
     # if present.
+    # TODO: Do this in TrackEntityProxyComparator!
     if artist:
         artist = artist.lower().strip()
 

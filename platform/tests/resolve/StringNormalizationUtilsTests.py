@@ -21,6 +21,8 @@ class StringNormalizationUtilsTest(AStampedTestCase):
         self.assertEquals(simplify('abc-def "hello"   (goodbye)'), 'abc def hello')
         self.assertEquals(simplify('this -- should : all; be, cleaned ... out'),
                           'this -- should : all; be, cleaned out')  # ...but only the ellipsis is.
+        self.assertEquals(simplify('rum & coke'), 'rum and coke')
+        self.assertEquals(simplify('rum&coke'), 'rum and coke')
 
     def test_regex_removal(self):
         patterns = (
@@ -29,6 +31,15 @@ class StringNormalizationUtilsTest(AStampedTestCase):
             (re.compile('(x)(bx)'), 2, 'yz')
         )
         self.assertEquals('xyz', regexRemoval('xaaaaaaaabccccccccx', patterns))
+
+    def test_track_simplify(self):
+        self.assertEquals(trackSimplify('my song (mix version)'), 'my song'),
+        self.assertEquals(trackSimplify('my song -- remix'), 'my song'),
+        self.assertEquals(trackSimplify('my song - unrated version'), 'my song'),
+        self.assertEquals(trackSimplify('my song--radio version'), 'my song'),
+        # TODO FIX: self.assertEquals(trackSimplify('my song featuring Guest Singer'), 'my song'),
+
+
 
 if __name__ == '__main__':
     _verbose = True
