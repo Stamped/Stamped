@@ -8,6 +8,7 @@ __license__   = "TODO"
 from gevent             import monkey
 monkey.patch_all()
 
+import pickle
 import rpyc
 from GreenletServer     import GreenletServer
 from RateLimiterService import StampedRateLimiterService
@@ -39,8 +40,8 @@ class StampedRateLimiterRPCService(rpyc.Service):
         pass
 
     def exposed_request(self, service, priority, timeout, verb, url, body = {}, headers = {}):
-        return self.__rl_service.handleRequest(service, priority, timeout, verb, url, body, headers)
-
+        response, content = self.__rl_service.handleRequest(service, priority, timeout, verb, url, body, headers)
+        return pickle.dumps(response), content
 
 def runServer(port=18861):
     t = GreenletServer(StampedRateLimiterRPCService, port =port)

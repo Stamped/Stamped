@@ -13,6 +13,7 @@ import logs
 import utils
 import rpyc
 import urllib
+import pickle
 from time                       import time, strftime, localtime
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
 import libs.ec2_utils
@@ -213,6 +214,7 @@ def service_request(service, method, url, body={}, header={}, query_params = {},
             url += "&%s" % encoded_params
 
     response, content = rl_state().request(service, method, url, body, header, priority, timeout)
+    response = pickle.loads(response)
 
     if response.status > 400:
         logs.warning('service request returned an error response.  status code: %s  content: %s' % (response.status, content))
