@@ -90,7 +90,7 @@ class MongoDBConfig(Singleton):
                 
                 if replicaset:
                     self._connection = pymongo.ReplicaSetConnection(hosts,
-                                                                    read_preference=pymongo.ReadPreference.PRIMARY, 
+                                                                    read_preference=pymongo.ReadPreference.SECONDARY, 
                                                                     replicaset=replicaset)
                 else:
                     self._connection = pymongo.Connection(hosts,
