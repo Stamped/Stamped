@@ -213,140 +213,20 @@
                         }
                         
                         .header-subsection {
-                            display: block;
-                            display: none;
-                            width: 100%;
-                            
-                            opacity: 0;
-                            .transition(opacity, .3s, ease-out);
-                        }
-                        
-                        .header-subsection-0 {
                             position: relative;
-                            top:  0;
-                            left: 0;
-                            height: auto;
-                            display: block;
-                            
-                            /* NOTE: height and min-height dynamically set to MAX(s0/s1/s2-heights);*/
+                            display:  block;
+                            width: 100%;
                             
                             p.profile-title {
                                 font-size: 7em;
                             }
-                        }
-                        
-                        .header-subsection-1 {
-                            position: absolute;
-                            top:  0;
-                            left: 0;
                             
-                            p.profile-title {
-                                font-size: 2.5em;
-                                font-weight: 500;
+                            p.subline-0 {
+                                font-size: 1.5em;
                             }
                             
-                            .bio {
-                                font-size:  80%;
-                                margin-top: 1em;
-                            }
-                            
-                            .friends-wrapper {
-                                .friends-desc {
-                                    text-align: left;
-                                }
-                                
-                                .friend-count {
-                                    .stamped-font();
-                                    
-                                    display: block;
-                                    float: left;
-                                    margin-right: 12px;
-                                    
-                                    line-height: 100%;
-                                    letter-spacing: .02em;
-                                    
-                                    font-size: 2.5em;
-                                    font-weight: 500;
-                                    color: #000;
-                                }
-                                
-                                .user-gallery {
-                                    float: right;
-                                    width: 96px;
-                                    
-                                    // NOTE (travis): in order to vertically center the user-gallery 
-                                    // w.r.t. the larger friend-count, the line-height here should 
-                                    // match the previous friend-count font-size.
-                                    
-                                    line-height: 2.5em;
-                                }
-                            }
-                        }
-                        
-                        .header-subsection-2 {
-                            position: absolute;
-                            top:  0;
-                            left: 0;
-                            
-                            p.profile-title {
-                                font-size: 2.5em;
-                            }
-                            
-                            .user-stamp-distribution {
-                                margin-top: 1em;
-                                font-weight: 700;
-                                font-size: 70%;
-                                color: #262626;
-                                
-                                .section {
-                                    position: relative;
-                                    
-                                    @b0: #3b84eb;
-                                    @b1: #438fed;
-                                    
-                                    .category-name {
-                                        display: inline-block;
-                                        min-width: 6em;
-                                    }
-                                    
-                                    .icon {
-                                        margin: 0;
-                                    }
-                                    
-                                    .bargraph-row {
-                                        display: inline-block;
-                                        background: #FEFEFE;
-                                        .rounded(1em);
-                                        
-                                        width:  70%;
-                                        height: 1em;
-                                        
-                                        .bargraph-row-value {
-                                            .rounded(1em);
-                                            
-                                            @c0: lighten(@b0, 10%);
-                                            @c1: lighten(@b1, 15%);
-                                            
-                                            .linear-gradient2(left, @c0, @c1);
-                                            
-                                            width:  0%;
-                                            height: 100%;
-                                        }
-                                        
-                                        .bargraph-row-value-inner {
-                                            .rounded(1em);
-                                            
-                                            width:  100%;
-                                            height: 100%;
-                                            
-                                            background: url(/assets/img/progress.png) repeat-x;
-                                        }
-                                    }
-                                    
-                                    &:hover .bargraph-row .bargraph-row-value {
-                                        .linear-gradient2(left, @b0, @b1);
-                                    }
-                                }
+                            p.subline-1 {
+                                font-size: 1em;
                             }
                         }
                     }
@@ -354,57 +234,7 @@
                     .rhs {
                         float: right;
                         width: 25%;
-                        
-                        #subnav {
-                            width: 256px;
-                            
-                            .subnav_button {
-                                background: url(/assets/img/profile_header_subnav_sprite.png) no-repeat;
-                                display: inline-block;
-                                width:  38px;
-                                height: 38px;
-                                
-                                .transition-transform2(0.1s, ease-out, opacity, 0.1s, ease-out);
-                                opacity: .5;
-                                cursor: pointer;
-                                
-                                &:hover {
-                                    .subnav-activated(1.0);
-                                }
-                                
-                                &:active {
-                                    .subnav-activated(1.0);
-                                }
-                            }
-                            
-                            .subnav_button-1 {
-                                background-position: -40px 0;
-                            }
-                            
-                            .subnav_button-2 {
-                                background-position: -80px 0;
-                            }
-                        }
                     }
-                }
-                
-                /* profile header subsection navigation */
-                .subnav-active-0 .rhs .subnav .subnav_button-0, 
-                .subnav-active-1 .rhs .subnav .subnav_button-1, 
-                .subnav-active-2 .rhs .subnav .subnav_button-2 {
-                    cursor: default !important;
-                    .subnav-activated(1.0);
-                    
-                    &:hover {
-                        .subnav-activated(1.0);
-                    }
-                }
-                
-                .subnav-active-0 .lhs .header-subsection-0, 
-                .subnav-active-1 .lhs .header-subsection-1, 
-                .subnav-active-2 .lhs .header-subsection-2 {
-                    //display: block !important;
-                    opacity: 1 !important;
                 }
             }
             
@@ -1901,25 +1731,15 @@ a.map-profile-link {
             
             .send-button {
                 float: right;
-                opacity: 0;
+                opacity: .3;
                 
                 border: 0 none;
                 outline: none;
                 
-                .transition(opacity, .1s, linear);
+                .transition(opacity, .3s, linear);
             }
             
-            .active-0  { opacity: 0.0; }
-            .active-1  { opacity: 0.1; }
-            .active-2  { opacity: 0.2; }
-            .active-3  { opacity: 0.3; }
-            .active-4  { opacity: 0.4; }
-            .active-5  { opacity: 0.5; }
-            .active-6  { opacity: 0.6; }
-            .active-7  { opacity: 0.7; }
-            .active-8  { opacity: 0.8; }
-            .active-9  { opacity: 0.9; }
-            .active-10 { opacity: 1.0; }
+            .active { opacity: 1.0; }
         }
         
         .active {
@@ -1967,7 +1787,7 @@ a.map-profile-link {
 }
 
 .popup-small {
-    max-width: 366px;
+    max-width:  366px;
     
     .popup-header {
         position: relative;
@@ -2010,9 +1830,9 @@ a.map-profile-link {
     }
     
     .popup-body {
-        max-height: 300px;
         width:      366px;
         min-width:  366px;
+        max-height: 300px !important;
         overflow: scroll;
         
         .jspVerticalBar {

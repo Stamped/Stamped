@@ -30,6 +30,25 @@ urlpatterns = patterns('',
     url(r'^mobile/500/?$',                              'error.views.error_500'), 
     url(r'^mobile/500.html?$',                          'error.views.error_500'), 
     
+    # ----------------------------- SETTINGS -----------------------------------
+    # e.g., stamped.com/mobile/pw/screen_name
+    url(R'^mobile/pw/(?P<token>[\w-]{36})$',            'mobile.views.password_reset'),
+    
+    # e.g., stamped.com/mobile/settings/password/forgot
+    url(R'^mobile/settings/password/forgot/?$',         'mobile.views.password_forgot'),
+    
+    # e.g., stamped.com/mobile/settings/password/sent
+    url(R'^mobile/settings/password/sent/?$',           'mobile.views.password_sent'),
+    
+    # e.g., stamped.com/mobile/settings/password/success
+    url(R'^mobile/settings/password/success/?$',        'mobile.views.password_success'),
+    
+    # e.g., stamped.com/mobile/settings/alerts
+    url(R'^mobile/settings/alerts/?$',                  'mobile.views.alert_settings'),
+    
+    # e.g., stamped.com/mobile/settings/alerts/update.json
+    url(R'^mobile/settings/alerts/update.json$',        'mobile.views.alert_settings_update'),
+    
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com/mobile, stamped.com/mobile/index, stamped.com/mobile/index.html
     url(r'^mobile/index$',                              'mobile.views.index'), 
@@ -80,6 +99,13 @@ urlpatterns = patterns('',
     # e.g., stamped.com/500, stamped.com/500.html
     url(r'^500/?$',                             'error.views.error_500'), 
     url(r'^500.html?$',                         'error.views.error_500'), 
+    
+    url(R'^pw/(?P<token>[\w-]{36})$',           'core.views.password_reset'),
+    url(R'^settings/password/forgot/?$',        'core.views.password_forgot'),
+    url(R'^settings/password/sent/?$',          'core.views.password_sent'),
+    url(R'^settings/password/success/?$',       'core.views.password_success'),
+    url(R'^settings/alerts/?$',                 'core.views.alert_settings'),
+    url(R'^settings/alerts/update.json$',       'core.views.alert_settings_update'),
     
     # ------------------------------- BLOG -------------------------------------
     # e.g., stamped.com/blog

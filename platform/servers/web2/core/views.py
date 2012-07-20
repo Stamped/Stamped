@@ -584,3 +584,33 @@ def jobs(request, **kwargs):
         'title'             : 'Stamped - Jobs', 
     })
 
+@stamped_view()
+def password_reset(request, **kwargs):
+    body_classes = "password_reset main"
+    
+    return stamped_render(request, 'password_reset.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'password_reset', 
+        'title'             : 'Stamped - Reset Password', 
+    })
+
+@stamped_view()
+def password_forgot(request, **kwargs):
+    body_classes = "password_forgot main"
+    
+    return stamped_render(request, 'password_forgot.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'password_forgot', 
+        'title'             : 'Stamped - Forgot Password', 
+    })
+
+@stamped_view()
+def alert_settings(request, **kwargs):
+    body_classes = "alert_settings main"
+    
+    return stamped_render(request, 'alert_settings.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'alert_settings', 
+        'title'             : 'Stamped - Alert Settings', 
+    })
+

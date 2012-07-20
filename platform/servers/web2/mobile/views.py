@@ -14,21 +14,6 @@ import servers.web2.core.views as views
 from servers.web2.core.schemas  import *
 from servers.web2.core.helpers  import *
 
-def index(*args, **kwargs):
-    kwargs['mobile'] = True
-    
-    return views.index(*args, **kwargs)
-
-def about(*args, **kwargs):
-    kwargs['mobile'] = True
-    
-    return views.about(*args, **kwargs)
-
-def jobs(*args, **kwargs):
-    kwargs['mobile'] = True
-    
-    return views.jobs(*args, **kwargs)
-
 def profile(*args, **kwargs):
     kwargs['mobile'] = True
     
@@ -84,4 +69,19 @@ def sdetail(request, schema, **kwargs):
         'stamp'              : stamp, 
         'entity'             : entity, 
     }, preload=[ 'user', 'stamp', 'entity' ])
+
+def password_reset(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.password_reset(*args, **kwargs)
+
+def password_forgot(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.password_forgot(*args, **kwargs)
+
+def alert_settings(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.alert_settings(*args, **kwargs)
 
