@@ -161,6 +161,7 @@ class RateLimiterState(object):
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
+        sleep(0)
         conn = rpyc.connect(host, port)
 
         async_request = rpyc.async(conn.root.request)
