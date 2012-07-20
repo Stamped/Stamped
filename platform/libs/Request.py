@@ -40,6 +40,11 @@ class RateLimiterState(object):
         self.__is_ec2 = utils.is_ec2()
         self.__service_init_semaphore = Semaphore()
         self.__fail_semaphore = Semaphore()
+        stack_info = libs.ec2_utils.get_stack()
+        self.__stack_name = stack_info.instance.stack
+        self.__node_name = stack_info.instance.name
+        self.__last_email_time = None
+        self.__emails = deque()
 
         # determine the private ip address of the ratelimiter instance for this stack
         ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
@@ -77,7 +82,8 @@ class RateLimiterState(object):
 
         output = '<html>'
         output += "<h3>RateLimiter RPC Server Failure</h3>"
-        output += "<p><i>There were %s failed requests to the rpc server within the last %s seconds</p></i>" %\
+        output += "<p>On stack '%s' instance '%s'.</p>" % (self.__stack_name, self.__node_name)
+        output += "<p><i>There were %s failed requests to the rpc server within the last %s seconds</i></p>" %\
                   (self.__fail_limit, self.__fail_period)
         back_online = strftime('%m/%d/%Y %H:%M:%S', localtime(self.__blackout_start + self.__blackout_wait)) # Timestamp
         output += "<p>Waiting for %s seconds.  Will use local Rate Limiter service in until: %s</p>" % (self.__blackout_wait, back_online)
@@ -143,7 +149,9 @@ class RateLimiterState(object):
             logs.error('RPC server request FAIL THRESHOLD REACHED')
             # Email dev if a fail limit was reached
             if self.__is_ec2:
-                self.sendFailLogEmail()
+                if self.__last_email_time is not None and (time() - self.__last_email_time) > 60*5:
+                    self.sendFailLogEmail()
+                    self.__last_email_time = time()
 
     def _isBlackout(self):
         if self.__blackout_start is None:
