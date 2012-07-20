@@ -1564,10 +1564,10 @@ class StampedAPI(AStampedAPI):
     def _getEntity(self, entityId):
         if entityId is not None and entityId.startswith('T_'):
             entityId = self._convertSearchId(entityId)
+            return self._entityDB.getEntity(entityId, forcePrimary=True)
         else:
             self.mergeEntityId(entityId)
-
-        return self._entityDB.getEntity(entityId)
+            return self._entityDB.getEntity(entityId)
 
     @API_CALL
     def addEntity(self, entity):
@@ -2520,14 +2520,15 @@ class StampedAPI(AStampedAPI):
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
-        except StampedUnavailableError:
-            stats = self.updateEntityStatsAsync(entityId)
+            if stats.num_stamps == 0:
+                badge           = Badge()
+                badge.user_id   = userId
+                badge.genre     = "entity_first_stamp"
+                badges.append(badge)
 
-        if stats.num_stamps == 0:
-            badge           = Badge()
-            badge.user_id   = userId
-            badge.genre     = "entity_first_stamp"
-            badges.append(badge)
+        except StampedUnavailableError:
+            # This can happen if the stamp has just been created and it's a new entity
+            pass
 
         return badges
 
@@ -2926,7 +2927,7 @@ class StampedAPI(AStampedAPI):
             try:
                 stat = self._stampStatsDB.getStampStats(stampIds)
             except (StampedUnavailableError, KeyError):
-                stat = self.updateStampStatsAsync(stampIds)
+                stat = None
             return stat
 
         else:
@@ -2935,12 +2936,6 @@ class StampedAPI(AStampedAPI):
             statsDict = {}
             for stat in statsList:
                 statsDict[stat.stamp_id] = stat
-            for stampId in stampIds:
-                if stampId not in statsDict:
-                    try:
-                        statsDict[stampId] = self.updateStampStatsAsync(stampId)
-                    except Exception as e:
-                        logs.warning("Failed to generate stamp stats for %s: %s" % (stampId, e))
             return statsDict
 
     def updateStampStatsAsync(self, stampId):

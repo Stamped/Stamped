@@ -86,25 +86,25 @@ header {
      
     .header-body {
         position: relative;
-        height: 48px;
+        height: 64px;
         
         p {
             position: absolute;
-            line-height: 32px;
+            line-height: 42px;
             
             margin: 0;
-            top:   0;
-            right: 12px;
+            top:    0;
+            right:  12px;
             
             .desc {
                 font-size: 90%;
                 margin-right: 12px;
             }
             
-            .get-the-app-button {
+            .download-the-free-app-button {
                 position: relative;
                 display:  inline-block;
-                top: 12px;
+                top: 15px;
             }
         }
     }
@@ -179,7 +179,7 @@ header {
 
 #main-page-content {
     position: relative;
-    top:  63px;
+    top:  70px;
     left: 0;
 }
 
@@ -809,6 +809,22 @@ a.sdetail, .pronounced-title a {
     }
 }
 
+.download-the-free-app-button {
+    background: url(/assets/img/downloadthefreeapp_btn_sprite.png) no-repeat;
+    
+    display: block;
+    width:  198px;
+    height: 42px;
+    
+    &:hover {
+        background-position: -200px 0;
+    }
+    
+    &:active {
+        background-position: -400px 0;
+    }
+}
+
 
 /* **************************************************************************
                             RETINA DISPLAY BUTTONS
@@ -848,6 +864,19 @@ a.sdetail, .pronounced-title a {
         
         &:hover, &:active {
             background-position: -141px 0;
+        }
+    }
+    
+    .download-the-free-app-button {
+        width:  396px;
+        height: 84px;
+        
+        &:hover {
+            background-position: -400px 0;
+        }
+        
+        &:active {
+            background-position: -800px 0;
         }
     }
 }

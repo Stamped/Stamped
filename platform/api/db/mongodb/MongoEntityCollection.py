@@ -353,9 +353,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         return entity
 
-    def getEntity(self, entityId):
+    def getEntity(self, entityId, forcePrimary=False):
         documentId  = self._getObjectIdFromString(entityId)
-        document    = self._getMongoDocumentFromId(documentId)
+        document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
         entity      = self._convertFromMongo(document)
 
         return entity

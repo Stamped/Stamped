@@ -90,7 +90,7 @@ class MongoDBConfig(Singleton):
                 
                 if replicaset:
                     self._connection = pymongo.ReplicaSetConnection(hosts,
-                                                                    read_preference=pymongo.ReadPreference.PRIMARY, 
+                                                                    read_preference=pymongo.ReadPreference.SECONDARY, 
                                                                     replicaset=replicaset)
                 else:
                     self._connection = pymongo.Connection(hosts,
@@ -243,8 +243,12 @@ class AMongoCollection(object):
             logs.warning("Unable to add document: %s" % e)
             raise
     
-    def _getMongoDocumentFromId(self, documentId):
-        document = self._collection.find_one(documentId)
+    def _getMongoDocumentFromId(self, documentId, **kwargs):
+        forcePrimary = kwargs.pop('forcePrimary', False)
+        params = {}
+        if forcePrimary:
+            params['read_preference'] = pymongo.ReadPreference.PRIMARY
+        document = self._collection.find_one(documentId, **params)
         if document is None:
             raise StampedDocumentNotFoundError("Unable to find document (id = %s)" % documentId)
         return document
