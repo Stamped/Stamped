@@ -6,12 +6,12 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import api.HTTPSchemas
-import os, pprint, utils
+import pprint, utils
 import libs.sms
 
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
+
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
 
@@ -375,7 +375,7 @@ def temp_view(request, **kwargs):
     })
 
 @stamped_view(schema=HTTPDownloadAppSchema)
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def download_app(request, schema, **kwargs):
     sms_client = libs.sms.globalSMSClient()
     result = sms_client.send_sms(schema.phone_number)
@@ -582,35 +582,5 @@ def jobs(request, **kwargs):
         'body_classes'      : body_classes, 
         'page'              : 'jobs', 
         'title'             : 'Stamped - Jobs', 
-    })
-
-@stamped_view()
-def password_reset(request, **kwargs):
-    body_classes = "password_reset main"
-    
-    return stamped_render(request, 'password_reset.html', {
-        'body_classes'      : body_classes, 
-        'page'              : 'password_reset', 
-        'title'             : 'Stamped - Reset Password', 
-    })
-
-@stamped_view()
-def password_forgot(request, **kwargs):
-    body_classes = "password_forgot main"
-    
-    return stamped_render(request, 'password_forgot.html', {
-        'body_classes'      : body_classes, 
-        'page'              : 'password_forgot', 
-        'title'             : 'Stamped - Forgot Password', 
-    })
-
-@stamped_view()
-def alert_settings(request, **kwargs):
-    body_classes = "alert_settings main"
-    
-    return stamped_render(request, 'alert_settings.html', {
-        'body_classes'      : body_classes, 
-        'page'              : 'alert_settings', 
-        'title'             : 'Stamped - Alert Settings', 
     })
 

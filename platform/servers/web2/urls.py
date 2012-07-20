@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -100,12 +99,12 @@ urlpatterns = patterns('',
     url(r'^500/?$',                             'error.views.error_500'), 
     url(r'^500.html?$',                         'error.views.error_500'), 
     
-    url(R'^pw/(?P<token>[\w-]{36})$',           'core.views.password_reset'),
-    url(R'^settings/password/forgot/?$',        'core.views.password_forgot'),
-    url(R'^settings/password/sent/?$',          'core.views.password_sent'),
-    url(R'^settings/password/success/?$',       'core.views.password_success'),
-    url(R'^settings/alerts/?$',                 'core.views.alert_settings'),
-    url(R'^settings/alerts/update.json$',       'core.views.alert_settings_update'),
+    url(R'^pw/(?P<token>[\w-]{36})$',           'core.appsettings.password_reset'),
+    url(R'^settings/password/forgot/?$',        'core.appsettings.password_forgot'),
+    url(R'^settings/password/sent/?$',          'core.appsettings.password_sent'),
+    url(R'^settings/password/success/?$',       'core.appsettings.password_success'),
+    url(R'^settings/alerts/?$',                 'core.appsettings.alert_settings'),
+    url(R'^settings/alerts/update.json$',       'core.appsettings.alert_settings_update'),
     
     # ------------------------------- BLOG -------------------------------------
     # e.g., stamped.com/blog

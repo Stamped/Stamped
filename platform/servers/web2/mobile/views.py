@@ -9,7 +9,8 @@ import Globals
 import api.HTTPSchemas
 import utils
 
-import servers.web2.core.views as views
+import servers.web2.core.views       as views
+import servers.web2.core.appsettings as appsettings
 
 from servers.web2.core.schemas  import *
 from servers.web2.core.helpers  import *
@@ -73,15 +74,15 @@ def sdetail(request, schema, **kwargs):
 def password_reset(*args, **kwargs):
     kwargs['mobile'] = True
     
-    return views.password_reset(*args, **kwargs)
+    return appsettings.password_reset(*args, **kwargs)
 
 def password_forgot(*args, **kwargs):
     kwargs['mobile'] = True
     
-    return views.password_forgot(*args, **kwargs)
+    return appsettings.password_forgot(*args, **kwargs)
 
 def alert_settings(*args, **kwargs):
     kwargs['mobile'] = True
     
-    return views.alert_settings(*args, **kwargs)
+    return appsettings.alert_settings(*args, **kwargs)
 
