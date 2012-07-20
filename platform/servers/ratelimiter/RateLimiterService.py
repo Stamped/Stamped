@@ -129,11 +129,13 @@ class StampedRateLimiterService():
                 blackout_wait   = v.get('blackout_wait', None)
                 if self.__throttle:
                     # throttle qps to 1/10 the rate, and cpd to allow 1/10th the remaining calls in quota
-                    limit = max(1, limit / 10)
-                    day_calls = 0
-                    if service_name in self.__limiters:
-                        day_calls = self.__limiters[service_name].day_calls
-                    cpd = min(cpd, day_calls + (cpd-day_calls) / 10)
+                    if limit is not None:
+                        limit = max(1, limit / 10)
+                    if cps is not None:
+                        day_calls = 0
+                        if service_name in self.__limiters:
+                            day_calls = self.__limiters[service_name].day_calls
+                        cpd = min(cpd, day_calls + (cpd-day_calls) / 10)
             except Exception as e:
                 if service_name is not None:
                     print ("Exception while reading limiter for service '%s' in limits config, skipping: %s" % (service_name, e))
