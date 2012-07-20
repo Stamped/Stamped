@@ -2926,7 +2926,7 @@ class StampedAPI(AStampedAPI):
             try:
                 stat = self._stampStatsDB.getStampStats(stampIds)
             except (StampedUnavailableError, KeyError):
-                stat = self.updateStampStatsAsync(stampIds)
+                stat = None
             return stat
 
         else:
@@ -2935,12 +2935,6 @@ class StampedAPI(AStampedAPI):
             statsDict = {}
             for stat in statsList:
                 statsDict[stat.stamp_id] = stat
-            for stampId in stampIds:
-                if stampId not in statsDict:
-                    try:
-                        statsDict[stampId] = self.updateStampStatsAsync(stampId)
-                    except Exception as e:
-                        logs.warning("Failed to generate stamp stats for %s: %s" % (stampId, e))
             return statsDict
 
     def updateStampStatsAsync(self, stampId):
