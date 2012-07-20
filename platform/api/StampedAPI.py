@@ -4082,11 +4082,11 @@ class StampedAPI(AStampedAPI):
             if entity.quality is not None:
                 entityQuality = entity.quality
             
-            result = ( (2 * stamp_score) )
-                    # - (2 * personal_stamp_score) 
-                    # + (3 * personal_todo_score) 
-                    # + (1 * avgQuality) 
-                    # + (1 * avgPopularity) ) * (entityQuality)
+            result = ( (2 * stamp_score) 
+                    - (2 * personal_stamp_score) 
+                    + (3 * personal_todo_score) 
+                    + (1 * avgQuality) 
+                    + (1 * avgPopularity) ) * (entityQuality)
             
             return result
 
