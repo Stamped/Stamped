@@ -2174,7 +2174,7 @@ def main():
         print 'DONE DONE DONE'
         print
 
-        if time.time() - start > 65:
+        if time.time() - start > 70:
             print "DONE!", datetime.datetime.utcnow()
             break 
 
