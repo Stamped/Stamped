@@ -428,7 +428,7 @@ def index(request, schema, **kwargs):
 
 @stamped_view()
 def about(request, **kwargs):
-    body_classes = "about main"
+    body_classes = "about main main-animating"
     
     founders = [
         {
@@ -576,7 +576,7 @@ def about(request, **kwargs):
 
 @stamped_view()
 def jobs(request, **kwargs):
-    body_classes = "jobs main"
+    body_classes = "jobs main main-animating"
     
     return stamped_render(request, 'jobs.html', {
         'body_classes'      : body_classes, 

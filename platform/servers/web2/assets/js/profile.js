@@ -98,10 +98,10 @@ var g_update_stamps = null;
                 var width0  = $elem.width();
                 var height0 = $elem.height();
                 
-                $elem.css('display', 'block');
+                $elem.css('display',  'block');
                 $share.show();
                 
-                var width1  = $elem.width();
+                var width1  = $elem.width() + 55;
                 var height1 = $elem.height();
                 
                 $share.hide();
@@ -2148,118 +2148,6 @@ var g_update_stamps = null;
                 url   : url
             });
         };
-        
-        
-        // ---------------------------------------------------------------------
-        // initialize signup functionality
-        // ---------------------------------------------------------------------
-        
-        
-        $body.on("click", ".download-the-free-app-button", function(event) {
-            event.preventDefault();
-            
-            var popup_options = get_fancybox_popup_large_options({
-                content     : $("#popup-signup").html(), 
-                type        : "html", 
-                width       : 480, 
-                minWidth    : 480
-            });
-            
-            $.fancybox.open(popup_options);
-            return false;
-        });
-        
-        var default_phone_number = "555-555-5555";
-        var sms_message_success  = "SMS Sent!";
-        var sms_message_error    = "SMS Error!";
-        
-        $body.on("focus", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value");
-            
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error) {
-                $this.attr("value", "");
-            }
-            
-            $sms.removeClass("error").addClass("active");
-            
-            return true;
-        });
-        
-        $body.on("focusout", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value").trim();
-            
-            if (value.length <= 0) {
-                $this.attr("value", default_phone_number);
-            }
-            
-            $sms.removeClass("active error");
-            
-            return true;
-        });
-        
-        var is_valid_number = function(value) {
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error || value.length <= 3) {
-                return null;
-            }
-            
-            value = value.replace(/-/g, "");
-            value = value.replace(/ /g, "");
-            
-            var len = 10;
-            if (value[0] == "+") {
-                len = 12;
-            }
-            
-            if (value.length !== len) {
-                return null;
-            }
-            
-            return value;
-        };
-        
-        $(".phone-number").live("keyup change", function(event) {
-            var $this   = $(this);
-            var value   = $this.attr("value").trim();
-            var active  = "active";
-            var $button = $this.parent().find(".send-button");
-            
-            if (is_valid_number(value) !== null) {
-                $button.addClass(active);
-            } else {
-                $button.removeClass(active);
-            }
-            
-            return true;
-        });
-        
-        $body.on("submit", ".sms-form", function(event) {
-            event.preventDefault();
-            
-            var $this   = $(this);
-            var $input  = $this.find(".phone-number");
-            var value   = $input.attr("value").trim();
-            value       = is_valid_number(value);
-            
-            if (!value) {
-                return false;
-            }
-            
-            var ajaxP  = $.ajax({
-                type        : "POST", 
-                url         : "/download-app", 
-                data        : { "phone_number" : value }
-            }).done(function () {
-                $input.attr("value", sms_message_success);
-            }).fail(function() {
-                $input.attr("value", sms_message_error).parent().addClass("error");
-            });
-            
-            return false;
-        });
         
         
         // ---------------------------------------------------------------------

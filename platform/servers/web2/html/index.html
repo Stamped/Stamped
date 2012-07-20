@@ -7,7 +7,6 @@
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
         script: libs/jquery.fancybox.js
-        script: libs/helpers/jquery.fancybox-thumbs.js
         script: libs/jquery.fittext.js
         script: libs/jquery.event.drag.js
     
@@ -15,6 +14,7 @@
     
     Core stamped dependencies:
         script: utils.js
+        script: signup.js
         script: index.js
 -->
 
@@ -42,7 +42,6 @@
     <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
     
     <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/helpers/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
     
     <style>
@@ -152,12 +151,12 @@
         <div class="vertically-centered">
             <div id="main-header" class="hidden-main-animating clearfix">
                 <div class="floatright">
-                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button"></a>
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button download-stamped-popup"></a>
                 </div>
                 
                 <div id="available" class="floatright">
-                    <div class="desc">Available on the App Store</div>
-                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button"></a>
+                    <div class="desc">Available on the App Store&#8480;</div>
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button download-stamped-popup"></a>
                 </div>
             </div>
             
@@ -362,9 +361,8 @@
                 </div>
             </div>
             
-            <!--<div class="iphone-body-lighting iphone-body-lighting-0"></div>
-            <div class="iphone-body-lighting iphone-body-lighting-1"></div>
-            <div class="iphone-body-overlay"></div>-->
+            <div class="iphone-body-lighting iphone-body-lighting-0"></div>
+            <div class="iphone-body-overlay"></div>
         </div>
     </div>
     
@@ -379,31 +377,6 @@
             <div id="tastemaker-map-window-loading"></div>
         </div>
     </div>
-    
-    <!--
-    <form id="main-iphone-dev" class="main-content">
-        <ol>
-            <br />
-            
-            <li><span class="desc">Perspective: </span><input title="perspective" type="text" maxlength=10 value="600"></li>
-            
-            <br />
-            
-            <li><span class="desc">x-axis: </span><input title="x-axis" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">y-axis: </span><input title="y-axis" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">z-axis: </span><input title="z-axis" type="text" maxlength=10 value="1.0"></li>
-            
-            <br />
-            
-            <li><span class="desc">angle:  </span><input title="angle" type="range" value=0 min=0 max=360></li>
-            
-            <br />
-            
-            <li><span class="desc">scale-x: </span><input title="scale-x" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">scale-y: </span><input title="scale-y" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">scale-z: </span><input title="scale-z" type="text" maxlength=10 value="1.0"></li>
-        </ol>
-    </form>-->
 {% endblock main %}
 
 {% block pre_footer %}
@@ -423,6 +396,10 @@
             </div>
         </div>
         
+        <div id="apple-legal">
+            iPhone is a trademark of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.
+        </div>
+        
         <div id="social">
             <a href="https://twitter.com/stampedapp" title="Follow @stampedapp on Twitter" class="social-button social-button-twitter"></a>
             <a href="http://www.facebook.com/stampedapp" title="Like @stampedapp on Facebook!" class="social-button social-button-facebook"></a>
@@ -437,11 +414,11 @@
     {% if STAMPED_DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
         <script src="{{ STATIC_URL }}js/libs/jquery.event.drag.js"></script>
         
         <script src="{{ STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STATIC_URL }}js/signup.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
     {% else %}
         <script src="{{ STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>

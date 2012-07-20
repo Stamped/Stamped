@@ -322,8 +322,8 @@ TRACK_TITLE_BAD_TOKENS = (
     Token('mix', rawName=True), Token('remix', rawName=True),
     Token('re-mix', rawName=True), Token('remixed', rawName=True), Token('re-mixed', rawName=True),
     Token('cut', rawName=True), Token('edit', rawName=True), Token('instrumental', rawName=True),
-    Token('cover', rawName=True), Token('version', rawName=True), Token('tribute', rawName=True),
-    Token('karaoke', rawName=True, penalty=0.4)
+    Token('inst', rawName=True), Token('cover', rawName=True), Token('version', rawName=True),
+    Token('tribute', rawName=True), Token('karaoke', rawName=True, penalty=0.4)
 )
 def applyTrackTitleDataQualityTests(searchResult, searchQuery):
     # Even though we cut this mix/edit/etc. bullshit out of the title we want to demote results that had these terms
