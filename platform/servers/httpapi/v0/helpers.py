@@ -116,7 +116,7 @@ def handleStampedExceptions(e, handlers=None):
             try:
                 email = {}
                 email['from'] = 'Stamped <noreply@stamped.com>'
-                email['to'] = 'dev@stamped.com'
+                email['to'] = 'kevin@stamped.com'
                 email['subject'] = '%s - 500 Error - %s' % (stampedAPI.node_name, datetime.utcnow().isoformat())
                 email['body'] = logs.getHtmlFormattedLog()
                 utils.sendEmail(email, format='html')
