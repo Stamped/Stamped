@@ -35,16 +35,25 @@ class TitleUtilsTest(AStampedTestCase):
         self.assertEqual(cleanMovieTitle("2012: BluRay Version HD BluRay"), "2012")
         self.assertEqual(cleanMovieTitle("The Godfather: the something restoration"), "The Godfather")
         self.assertEqual(cleanMovieTitle("Spirited Away, Digitally Remastered"), "Spirited Away")
+        self.assertEqual(cleanMovieTitle("The Godfather (uncut)"), "The Godfather")
+        self.assertEqual(cleanMovieTitle("The Godfather (uncut edition)"), "The Godfather")
+        self.assertEqual(cleanMovieTitle("The Godfather - uncut"), "The Godfather")
 
     def test_clean_tv_title(self):
-        # self.assertEqual(cleanTvTitle("Lost : Season 2"), "Lost")
-        # self.assertEqual(cleanTvTitle("The Complete Lost"), "Lost")
-        self.assertEqual(cleanTvTitle("Completely Lost"), "Completely Lost")
-        # self.assertEqual(cleanTvTitle("Lost, Volumn 2"), "Lost")
+        self.assertEqual(cleanTvTitle("Lost : Season 2"), "Lost")
+        self.assertEqual(cleanTvTitle("Lost, Volume 2"), "Lost")
+        self.assertEqual(cleanTvTitle("Lost: box set"), "Lost")
+        self.assertEqual(cleanTvTitle("The Best of Lost"), "Lost")
+        self.assertEqual(cleanTvTitle("Best of Lost"), "Lost")
+
+    def test_clean_track_title(self):
+        self.assertEqual(cleanTrackTitle("Call Me Maybe - single"), "Call Me Maybe")
+        self.assertEqual(cleanTrackTitle("Call Me Maybe: digital remastered"), "Call Me Maybe")
 
     def __check_quality_tests_applied(self, title, query, testFn, score):
         mockResolver = Mock()
         mockResolver.name = title
+        mockResolver.raw_name = title
         mockResult = Mock()
         mockResult.resolverObject = mockResolver
         mockResult.dataQuality = 1.0
@@ -88,12 +97,40 @@ class TitleUtilsTest(AStampedTestCase):
                 'The complete stamped story season 3',
                 'stamped',
                 applyMovieTitleDataQualityTests,
-                0.65 * 0.5)
+                0.65)
         self.__check_quality_tests_applied(
-                'The complete stamped story season 3',
+                'Stamped story season 3 collector\'s edition',
+                'stamped',
+                applyMovieTitleDataQualityTests,
+                0.8 * 0.85)
+        self.__check_quality_tests_applied(
+                'Stamped story season 3 collector\'s edition',
                 'season',
                 applyMovieTitleDataQualityTests,
-                0.65)
+                0.85)
+ 
+    def test_track_title_quality(self):
+        self.__check_quality_tests_applied(
+                'Call Me Maybe (Instumental Version)',
+                'stamped',
+                applyTrackTitleDataQualityTests,
+                0.5)
+        self.__check_quality_tests_applied(
+                'Call Me Maybe Instrumental;',
+                'stamped',
+                applyTrackTitleDataQualityTests,
+                0.75)
+        self.__check_quality_tests_applied(
+                'Call Me Maybe Instrumental Remix',
+                'stamped',
+                applyTrackTitleDataQualityTests,
+                0.75 * 0.75)
+        self.__check_quality_tests_applied(
+                'Call Me Maybe Karaoke Version',
+                'stamped',
+                applyTrackTitleDataQualityTests,
+                0.6 * 0.75)
+ 
  
 if __name__ == '__main__':
     StampedTestRunner().run()
