@@ -136,9 +136,9 @@ class StampedRateLimiterService():
                     cpd = min(cpd, day_calls + (cpd-day_calls) / 10)
             except Exception as e:
                 if service_name is not None:
-                    print ("Exception while reading limiter for service '%s' in limits.conf, skipping" % service_name)
+                    print ("Exception while reading limiter for service '%s' in limits config, skipping" % service_name)
                 else:
-                    print ('Exception while reading limiter in limits.conf, skipping')
+                    print ('Exception while reading limiter in limits config, skipping')
                 continue
 
             try:

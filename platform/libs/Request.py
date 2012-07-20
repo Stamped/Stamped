@@ -175,9 +175,11 @@ class RateLimiterState(object):
         return response, content
 
     def request(self, service, method, url, body, header, priority, timeout):
+        print('### is_ec2: %s' % self.__is_ec2)
         if not self.__is_ec2 or self._isBlackout():
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
+            print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
         except Exception as e:
             self._fail(e)
