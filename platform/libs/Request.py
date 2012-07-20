@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
+
 from gevent     import monkey
 monkey.patch_all()
 from gevent.coros import Semaphore
@@ -8,6 +15,7 @@ import rpyc
 import urllib
 from time                       import time, strftime, localtime
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
+import libs.ec2_utils
 from collections                import deque
 
 
@@ -34,7 +42,7 @@ class RateLimiterState(object):
 
         # determine the private ip address of the ratelimiter instance for this stack
         ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
-        if len(ratelimiter_nodes) != 1:
+        if ratelimiter_nodes is None or len(ratelimiter_nodes) != 1:
             logs.error("Could not find a node with tag 'ratelimiter' on same stack")
             self.__host = 'localhost'
         else:
