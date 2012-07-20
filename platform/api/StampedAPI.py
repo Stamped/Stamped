@@ -1564,10 +1564,10 @@ class StampedAPI(AStampedAPI):
     def _getEntity(self, entityId):
         if entityId is not None and entityId.startswith('T_'):
             entityId = self._convertSearchId(entityId)
+            return self._entityDB.getEntity(entityId, forcePrimary=True)
         else:
             self.mergeEntityId(entityId)
-
-        return self._entityDB.getEntity(entityId)
+            return self._entityDB.getEntity(entityId)
 
     @API_CALL
     def addEntity(self, entity):

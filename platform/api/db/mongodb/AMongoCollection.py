@@ -243,8 +243,12 @@ class AMongoCollection(object):
             logs.warning("Unable to add document: %s" % e)
             raise
     
-    def _getMongoDocumentFromId(self, documentId):
-        document = self._collection.find_one(documentId)
+    def _getMongoDocumentFromId(self, documentId, **kwargs):
+        forcePrimary = kwargs.pop('forcePrimary', False)
+        params = {}
+        if forcePrimary:
+            params['read_preference'] = pymongo.PRIMARY
+        document = self._collection.find_one(documentId, **params)
         if document is None:
             raise StampedDocumentNotFoundError("Unable to find document (id = %s)" % documentId)
         return document
