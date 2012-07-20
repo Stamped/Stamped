@@ -358,7 +358,8 @@ class RateLimiter(object):
             if (begin - request.created) > request.timeout:
                 raise TimeoutException('The request timed out while waiting in the rate limiter queue')
 
-            if body is not None:
+            body = None
+            if request.body is not None:
                 body = urllib.urlencode(request.body, True)
             response, content = http.request(request.url, request.verb, headers=request.headers, body=body)
             if response.status >= 400:
