@@ -23,8 +23,11 @@ def est():
     return datetime.utcnow() - timedelta(hours=4)
 
 #Returns the beginning of a day (midnight) according to EST
-def today():
-    now = datetime.utcnow()
+def today(date=None):
+    if date is None:
+        now = datetime.utcnow()
+    else:
+        now = date
     if now.hour > 3:
         diff = timedelta(days=0,hours=now.hour-4,minutes=now.minute,seconds=now.second,microseconds=now.microsecond)
     else:
