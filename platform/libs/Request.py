@@ -40,7 +40,6 @@ class RateLimiterState(object):
         self.__blackout_wait = blackout_wait
         self.__is_ec2 = utils.is_ec2()
         self.__service_init_semaphore = Semaphore()
-        self.__fail_semaphore = Semaphore()
         stack_info = libs.ec2_utils.get_stack()
         self.__stack_name = stack_info.instance.stack
         self.__node_name = stack_info.instance.name
@@ -125,8 +124,6 @@ class RateLimiterState(object):
         if self.__blackout_start is not None:
             return
 
-        self.__fail_semaphore.acquire()
-
         self.__fails.append(self.FailLog(exception))
 
         now = time.time()
@@ -141,8 +138,6 @@ class RateLimiterState(object):
                break
 
         count = len(self.__fails)
-
-        self.__fail_semaphore.release()
 
         if count >= self.__fail_limit:
             self.__blackout_start = time.time()
