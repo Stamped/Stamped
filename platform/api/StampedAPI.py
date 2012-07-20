@@ -2941,6 +2941,7 @@ class StampedAPI(AStampedAPI):
 
         stats                   = StampStats()
         stats.stamp_id          = stampId
+        stats.user_id           = stamp.user.user_id
 
         MAX_PREVIEW             = 10
         stats.last_stamped      = stamp.timestamp.stamped
@@ -3992,27 +3993,28 @@ class StampedAPI(AStampedAPI):
         t0 = time.time()
 
         stampIds = self._collectionDB.getInboxStampIds(user.user_id)
-        stamps = self._stampDB.getStamps(stampIds)
         stampStats = self._stampStatsDB.getStatsForStamps(stampIds)
-        entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
-        entities = self._entityDB.getEntities(entityIds)
+        entityIds = list(set(map(lambda x: x.entity_id, stampStats)))
+        entityStats = self._entityStatsDB.getStatsForEntities(entityIds)
         todos = set(self._todoDB.getTodoEntityIds(user.user_id))
         friendIds = self._friendshipDB.getFriends(user.user_id)
-
-        stampMap = {} # Map entityId to stamps
-        statsMap = {} # Map stampId to stats
-        todosMap = {} # Map entityId to userIds
 
         t1 = time.time()
 
         sections = {}
-        for entity in entities:
-            section = entity.category
-            if section == 'place':
-                if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
-                    section = 'food'
-                else:
-                    section = 'other'
+        for entity in entityStats:
+            if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
+                section = 'food'
+            elif entity.isType('track') or entity.isType('artist') or entity.isType('album'):
+                section = 'music'
+            elif entity.isType('movie') or entity.isType('tv'):
+                section = 'film'
+            elif entity.isType('book'):
+                section = 'book'
+            elif entity.isType('app'):
+                section = 'app'
+            else:
+                section = 'other'
             if section not in sections:
                 sections[section] = set()
             sections[section].add(entity)
@@ -4026,7 +4028,7 @@ class StampedAPI(AStampedAPI):
             
             # Remove personal stamp from timestamps if it exists
             try:
-                personal_timestamp = (time.mktime(now.timetuple()) - timestamps.pop(authUserId)) / 60 / 60 / 24
+                personal_timestamp = (time.mktime(now.timetuple()) - timestamps.pop(user.user_id)) / 60 / 60 / 24
             except KeyError:
                 personal_timestamp = None
                 
@@ -4076,80 +4078,67 @@ class StampedAPI(AStampedAPI):
                 avgQuality = avgQuality / len(timestamps)
                 avgPopularity = avgPopularity / len(timestamps)
             
-            image_score = 1
-            if entity.images is None:
-                image_score = 0.01
+            entityQuality = 0.5
+            if entity.quality is not None:
+                entityQuality = entity.quality
             
-            result = ( (2 * stamp_score) 
-                    - (2 * personal_stamp_score) 
-                    + (3 * personal_todo_score) 
-                    + (1 * avgQuality) 
-                    + (1 * max(5, avgPopularity)) ) * (image_score)
+            result = ( (2 * stamp_score) )
+                    # - (2 * personal_stamp_score) 
+                    # + (3 * personal_todo_score) 
+                    # + (1 * avgQuality) 
+                    # + (1 * avgPopularity) ) * (entityQuality)
             
             return result
 
-        # Build stampMap
-        for stamp in stamps:
-            if stamp.entity.entity_id not in stampMap:
-                stampMap[stamp.entity.entity_id] = set()
-            stampMap[stamp.entity.entity_id].add(stamp)
-                    
-        # Build statsMap and todoMap
+        # Build statsMap and todosMap
+        statsMap = {}
+        todosMap = {}
         for stat in stampStats:
-            statsMap[stat.stamp_id] = stat
+            if stat.entity_id not in statsMap:
+                statsMap[stat.entity_id] = set()
+            statsMap[stat.entity_id].add(stat)
             if stat.preview_todos is not None:
                 if stat.entity_id not in todosMap:
                     todosMap[stat.entity_id] = set()
                 for userId in stat.preview_todos:
                     if userId in friendIds:
                         todosMap[stat.entity_id].add(userId)
+                    
 
         guide = GuideCache()
         guide.user_id = user.user_id
         guide.timestamp = StatTimestamp()
         guide.timestamp.generated = now
         
-        for section, entities in sections.items():
+        for section, entity_ids in sections.items():
             r = []
-            for entity in entities:
+            for entity in sections[section]:
                 aggQuality = 0
                 aggPopularity = 0
                 timestamps = {}
-                for stamp in stampMap[entity.entity_id]:
-                    if stamp.stamp_id in statsMap:
-                        stat = statsMap[stamp.stamp_id]
-                        if stat.quality is not None:
-                            aggQuality += stat.quality
-                        if stat.popularity is not None:
-                            aggPopularity += min(10,stat.popularity)
-                    else:
-                        # TEMP: Use embedded stats for backwards compatibility
-                        if stamp.stats.quality is not None:
-                            aggQuality += stamp.stats.quality
-                        if stamp.stats.popularity is not None:
-                            aggPopularity += min(10,stamp.stats.popularity)
-                    if stamp.timestamp.stamped is not None:
-                        t = time.mktime(stamp.timestamp.stamped.timetuple())
+                for stat in statsMap[entity.entity_id]:
+                    if stat.quality is not None:
+                        aggQuality += stat.quality
+                    #Cap the popularity to prevent over-impact from tastemakers
+                    if stat.popularity is not None:
+                        aggPopularity += min(5,stat.popularity)
+                    if stat.last_stamped is not None:
+                        t = time.mktime(stat.last_stamped.timetuple())
                         try:
-                            if t > timestamps[stamp.user.user_id]:
-                                timestamps[stamp.user.user_id] = t
+                            if t > timestamps[stat.user_id]:
+                                timestamps[stat.user_id] = t
                         except KeyError:
-                            timestamps[stamp.user.user_id] = t
-                    elif stamp.timestamp.created is not None:
-                        t = time.mktime(stamp.timestamp.created.timetuple())
-                        try:
-                            if t > timestamps[stamp.user.user_id]:
-                                timestamps[stamp.user.user_id] = t
-                        except KeyError:
-                            timestamps[stamp.user.user_id] = t
+                            timestamps[stat.user_id] = t
                 
                 score = entityScore(section=section,aggQuality=aggQuality,aggPopularity=aggPopularity, timestamps=timestamps)
                 coordinates = None
-                if hasattr(entity, 'coordinates'):
-                    coordinates = entity.coordinates
+                if entity.lat is not None:
+                    coordinates = Coordinates()
+                    coordinates.lat = entity.lat
+                    coordinates.lng = entity.lng
                 r.append((entity.entity_id, score, entity.types, coordinates))
                 if entity.entity_id in todos:
-                    if entity.entity_id not in todosMap:
+                    if entity_id not in todosMap:
                         todosMap[entity.entity_id] = set()
                     todosMap[entity.entity_id].add(user.user_id)
 
@@ -4160,16 +4149,19 @@ class StampedAPI(AStampedAPI):
                 item = GuideCacheItem()
                 item.entity_id = result[0]
                 item.score = result[1]
-                item.tags = result[2]
+                if result[2] is None:
+                    item.tags = ['other']
+                else:
+                    item.tags = result[2]
                 if result[3] is not None:
                     item.coordinates = result[3]
-                if len(stampMap[result[0]]) > 0:
+                if len(statsMap[result[0]]) > 0:
                     preview = []
-                    for stamp in stampMap[result[0]]:
+                    for stat in statsMap[result[0]]:
                         stampPreview = StampPreview()
-                        stampPreview.stamp_id = stamp.stamp_id
+                        stampPreview.stamp_id = stat.stamp_id
                         userPreview = UserMini()
-                        userPreview.user_id = stamp.user.user_id
+                        userPreview.user_id = stat.user_id
                         stampPreview.user = userPreview
                         preview.append(stampPreview)
                     if len(preview) > 0:

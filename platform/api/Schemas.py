@@ -166,12 +166,14 @@ class StampStatsSchema(Schema):
         cls.addProperty('quality',                          float)
         cls.addProperty('popularity',                       float)
         cls.addProperty('score',                            float)
+        cls.addProperty('user_id',                          basestring)
 
 class StampStats(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('user_id',                          basestring)
         cls.addProperty('kind',                             basestring)
         cls.addPropertyList('types',                        basestring)
         cls.addProperty('lat',                              float)
@@ -206,6 +208,13 @@ class EntityStats(Schema):
         cls.addPropertyList('popular_users',                basestring)
         cls.addPropertyList('popular_stamps',               basestring)
         cls.addNestedProperty('timestamp',                  StatTimestamp)
+
+    def isType(self, t):
+        try:
+            if t in self.types:
+                return True
+        except Exception as e:
+            return False
 
 
 # #### #
