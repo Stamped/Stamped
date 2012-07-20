@@ -1,8 +1,7 @@
 
-import time
-import urllib, urllib2, json, httplib2
+import Globals
+import json, httplib2
 import logs
-import re
 from errors import *
 import oauth as oauth
 

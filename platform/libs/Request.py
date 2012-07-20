@@ -169,7 +169,8 @@ class RateLimiterState(object):
         except Exception as e:
             logs.error('RPC service request fail: %s' % e)
             raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request")
-        return response, content
+
+        return pickle.loads(response), content
 
     def _local_service_request(self, service, method, url, body, header, priority, timeout):
         response, content = self._local_rlservice.handleRequest(service, priority, timeout, method, url, body, header)
@@ -214,7 +215,6 @@ def service_request(service, method, url, body={}, header={}, query_params = {},
             url += "&%s" % encoded_params
 
     response, content = rl_state().request(service, method, url, body, header, priority, timeout)
-    response = pickle.loads(response)
 
     if response.status > 400:
         logs.warning('service request returned an error response.  status code: %s  content: %s' % (response.status, content))
