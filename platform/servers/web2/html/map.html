@@ -74,8 +74,12 @@
                 <div class="inner"></div>
             </a>
             
+            {% with share_widget_url="/{{user.screen_name}}/map" %}
+            {% with share_widget_text="Check out {{user.screen_name}}'s map on Stamped" %}
             {% with share_widget_desc="Share this map" %}
                 {% handlebars_template "share-widget" %}
+            {% endwith %}
+            {% endwith %}
             {% endwith %}
         {% endif %}
         
