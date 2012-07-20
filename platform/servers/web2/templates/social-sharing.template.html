@@ -6,15 +6,15 @@
     
     <div class='share-buttons clearfix'>
         <div class='share-button facebook'>
-            <div class="fb-like" data-layout="button_count"></div>
+            <div class="fb-like" data-layout="button_count" data-href="{{share_widget_url}}"></div>
         </div>
         
         <div class='share-button twitter'>
-            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp">Tweet</a>
+            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="{{share_widget_url}}" data-text="{{share_widget_text}}">Tweet</a>
         </div>
         
         <div class='share-button google'>
-            <g:plusone size="medium"></g:plusone>
+            <g:plusone size="medium" href="{{share_widget_url}}"></g:plusone>
         </div>
     </div>
 </div>

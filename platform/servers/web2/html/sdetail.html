@@ -347,7 +347,13 @@
     </div>
     
     <div class="section section-social">
-        {% handlebars_template "social-sharing" %}
+        {% with share_widget_url="/{{user.screen_name}}" %}
+        {% with share_widget_text="Check out this stamp of {{entity.title}}" %}
+        {% with share_widget_desc="Share this stamp" %}
+            {% handlebars_template "social-sharing" %}
+        {% endwith %}
+        {% endwith %}
+        {% endwith %}
     </div>
 </div>
 
