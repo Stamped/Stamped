@@ -91,8 +91,8 @@ class EntitySearch(object):
             try:
                 elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
 
-                if elapsed_seconds >= 20:
-                    logs.warning('Search completely timed out at 20s!')
+                if elapsed_seconds >= 7:
+                    logs.warning('Search completely timed out at 7s!')
                     pool.kill()
                     return
 
