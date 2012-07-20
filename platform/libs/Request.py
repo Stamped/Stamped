@@ -134,12 +134,13 @@ class RateLimiterState(object):
         cutoff = now - self.__fail_period
         count = 0
 
-        for log in self.__fails:
-            if log.timestamp > cutoff:
-                count += 1
-            else:
-                print('popping fail')
+        while len(self.__fails) > 0:
+            if self.__fails[0].timestamp > cutoff:
                 self.__fails.popleft()
+            else:
+               break
+
+        count = len(self.__fails)
 
         self.__fail_semaphore.release()
 
