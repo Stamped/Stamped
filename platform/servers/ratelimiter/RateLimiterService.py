@@ -154,7 +154,7 @@ class StampedRateLimiterService():
                 print ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
                 return
 
-    def handleRequest(self, service, priority, timeout, verb, url, body = {}, headers = {}):
+    def handleRequest(self, service, priority, timeout, verb, url, body = None, headers = None):
         print ('calling exposed_request')
         if timeout is None:
             raise StampedInputError("Timeout period must be provided")
