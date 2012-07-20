@@ -46,7 +46,7 @@ class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
         return token
 
     def getRefreshToken(self, tokenId):
-        document = self._getMongoDocumentFromId(tokenId)
+        document = self._getMongoDocumentFromId(tokenId, forcePrimary=True)
         return self._convertFromMongo(document)
     
     def removeRefreshToken(self, tokenId):
