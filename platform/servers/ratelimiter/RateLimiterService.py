@@ -131,7 +131,7 @@ class StampedRateLimiterService():
                     # throttle qps to 1/10 the rate, and cpd to allow 1/10th the remaining calls in quota
                     if limit is not None:
                         limit = max(1, limit / 10)
-                    if cps is not None:
+                    if cpd is not None:
                         day_calls = 0
                         if service_name in self.__limiters:
                             day_calls = self.__limiters[service_name].day_calls
