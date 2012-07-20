@@ -23,6 +23,7 @@ from collections                import deque
 FAIL_LIMIT = 10
 FAIL_PERIOD = 60*3
 BLACKOUT_WAIT = 60*5
+EMAIL_WAIT = 60*5
 DEFAULT_TIMEOUT = 3
 RL_HOST = 'localhost'
 RL_PORT = 18861
@@ -149,9 +150,9 @@ class RateLimiterState(object):
             logs.error('RPC server request FAIL THRESHOLD REACHED')
             # Email dev if a fail limit was reached
             if self.__is_ec2:
-                if self.__last_email_time is not None and (time() - self.__last_email_time) > 60*5:
+                if self.__last_email_time is not None and (time.time() - self.__last_email_time) > EMAIL_WAIT:
                     self.sendFailLogEmail()
-                    self.__last_email_time = time()
+                    self.__last_email_time = time.time()
 
     def _isBlackout(self):
         if self.__blackout_start is None:
