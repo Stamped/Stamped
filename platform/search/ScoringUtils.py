@@ -73,7 +73,12 @@ def smoothRelevanceScores(searchResultList, minGrowthFactor=1.05):
 
 
 def sortByRelevance(results):
-    results.sort(key=lambda result: result.relevance, reverse=True)
+    def sortFn(result):
+        relevance = result.relevance
+        if hasattr(result, 'primary_result'):
+            result = result.primary_result
+        return relevance, result.resolverObject.source, result.resolverObject.key
+    results.sort(key=sortFn, reverse=True)
 
 
 def stringRelevance(queryText, resultText):

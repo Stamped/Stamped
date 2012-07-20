@@ -19,17 +19,17 @@ Matcher = AlbumResultMatcher
 def makeTestCase(query, *expected_results):
     return SearchTestCase('music', query, *expected_results)
 
-def makeSimpleTestCase(query, artist=None):
+def makeSimpleTestCase(query, artist=None, unique=True):
     if artist is None:
-        return makeTestCase(query, Matcher(title=Equals(query)))
+        return makeTestCase(query, Matcher(title=Equals(query), unique=unique))
     else:
-        return makeTestCase(query, Matcher(title=Equals(query), artist=Equals(query)))
+        return makeTestCase(query, Matcher(title=Equals(query), artist=Equals(query), unique=unique))
 
 class AlbumSearchTests(SearchTestsRunner):
     
     def test_basic(self):
         test_cases = (
-            makeSimpleTestCase('deep cuts'),
+            makeSimpleTestCase('deep cuts', unique=False),
             makeSimpleTestCase('s.c.i.e.n.c.e.'),
             makeTestCase('science', Matcher(title=Equals('s.c.i.e.n.c.e.'))),
             makeSimpleTestCase('hail to the thief'),

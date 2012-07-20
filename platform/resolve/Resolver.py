@@ -12,17 +12,6 @@ __all__ = [
     'Resolver',
     'ResolverProxy',
     'demo',
-    'regexRemoval',
-    'simplify',
-    'format',
-    'trackSimplify',
-    'albumSimplify',
-    'artistSimplify',
-    'movieSimplify',
-    'bookSimplify',
-    'nameSimplify',
-    'videoGameSimplify', 
-    'stringComparison',
 ]
 
 import Globals
