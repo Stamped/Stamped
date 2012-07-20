@@ -197,14 +197,15 @@ def titleSamenessOdds(title1, title2, simplifyFn):
         pass
 
 
-def loadWordFrequencyTable():
-    f = open('/Users/paul/Downloads/anc-lexicon.txt')
+def loadWordFrequencyTable(fname):
+    f = open(fname)
     lines = f.readlines()
     f.close()
     line_pairs = [tuple(line.strip().split(' ')) for line in lines]
     return dict(line_pairs[1:])
 
-word_frequencies = loadWordFrequencyTable()
+#word_frequencies = loadWordFrequencyTable('/Users/paul/Downloads/anc-lexicon.txt')
+word_frequencies = None
 
 def simpleUncommonness(string):
     return len(string)
