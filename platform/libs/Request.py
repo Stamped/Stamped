@@ -49,6 +49,8 @@ class RateLimiterState(object):
             self.__host = ratelimiter_nodes[0]['private_ip_address']
         self.__port = 18861
 
+        print('### host: %s' % self.__host)
+
     class FailLog(object):
         def __init__(self, exception):
             self.timestamp = time()
