@@ -82,8 +82,14 @@ except Exception:
 CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per like
 
-# TODO (travis): refactor API function calling conventions to place optional last
-# instead of first.
+stamp_num_collage_regeneration = frozenset([
+    1, 2, 3, 4, 5, 8, 12, 15, 20, 25, 35, 50, 60, 70, 80, 90, 100, 
+    125, 150, 175, 200, 250, 300, 375, 450, 500, 600, 700, 800, 900, 
+    1000
+])
+
+# TODO (travis): refactor API function calling conventions to place optional authUserId last
+# instead of first, especially for function which don't require auth.
 
 class StampedAPI(AStampedAPI):
     """
@@ -2651,7 +2657,7 @@ class StampedAPI(AStampedAPI):
             distribution = self._getUserStampDistribution(authUserId)
             self._userDB.updateDistribution(authUserId, distribution)
             
-            if utils.is_ec2():
+            if utils.is_ec2() and self._should_regenerate_collage(stamp.stats.stamp_num):
                 tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
 
         # Generate activity and stamp pointers
@@ -2827,10 +2833,13 @@ class StampedAPI(AStampedAPI):
         
         tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits, og_action_id])
         
-        if utils.is_ec2():
+        if utils.is_ec2() and self._should_regenerate_collage(stamp.stats.stamp_num):
             tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
         
         return True
+    
+    def _should_regenerate_collage(self, stamp_num):
+        return (stamp_num in stamp_num_collage_regeneration)
     
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None, og_action_id=None):
         # Remove from user collection
