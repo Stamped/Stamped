@@ -28,6 +28,7 @@ class StampedRateLimiterRPCService(rpyc.Service):
     def __init__(self, port):
         rpyc.Service.__init__(self, port)
         self.__rl_service = globalRateLimiterService()
+        self.__pickle_empty_dict = pickle.dumps({})
 
     def on_connect(self):
         # code that runs when a connection is created
@@ -39,7 +40,7 @@ class StampedRateLimiterRPCService(rpyc.Service):
         # (to finalize the service, if needed)
         pass
 
-    def exposed_request(self, service, priority, timeout, verb, url, body = pickle.dumps({}), headers = pickle.dumps({})):
+    def exposed_request(self, service, priority, timeout, verb, url, body = self.__pickle_empty_dict, headers = self.__pickle_empty_dict):
         print('body: %s  headers: %s' % (pickle.loads(body), pickle.loads(headers)))
         response, content = self.__rl_service.handleRequest(service, priority, timeout, verb, url,
             pickle.loads(body), pickle.loads(headers))
