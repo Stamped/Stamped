@@ -218,6 +218,8 @@ def stress(request):
 
     count_report = {}
     mean_report = {}
+    window = 0
+    interval = 1
     if request.method == 'POST': 
         form = qpsForm(request.POST)
         if form.is_valid():
@@ -238,7 +240,7 @@ def stress(request):
                  'form': form,
                  'count_results': count_report.iteritems(),
                  'mean_results': mean_report.iteritems(),
-                 'n': range(0,window,interval),
+                 'n': range(0, window, interval),
                  'interval': interval
     })
     return HttpResponse(t.render(c))

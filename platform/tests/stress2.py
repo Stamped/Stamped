@@ -1080,6 +1080,9 @@ class Inbox(View):
     def __init__(self, user):
         View.__init__(self, user)
         
+        # Wait for the page to load
+        time.sleep(random.uniform(0.5, 2.5))
+
         self.stamps = []
         self.offset = 0
 
@@ -1095,7 +1098,7 @@ class Inbox(View):
         self.setWeight('stamp', 20)
 
         self.setAction('page', self._page)
-        self.setWeight('page', 15)
+        self.setWeight('page', 10)
 
         self.setAction('scope', self._changeScope)
         self.setWeight('scope', 10)
@@ -1115,14 +1118,14 @@ class Inbox(View):
     # View the stamp detail
     def _viewStamp(self):
         if len(self.stamps) > 0:
-            time.sleep(random.randint(2, 6) * self.user._userWaitSpeed)
+            time.sleep(random.randint(1, 5) * self.user._userWaitSpeed)
             self.addToStack(StampDetail, kwargs={'stamp': random.choice(self.stamps)})
         else:
             self.setWeight('stamp', 0)
 
     # Load more stamps
     def _page(self):
-        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        time.sleep(random.randint(1, 3) * self.user._userWaitSpeed)
         numStamps = len(self.stamps)
         self.loadStamps()
         if numStamps == len(self.stamps):
@@ -1131,6 +1134,7 @@ class Inbox(View):
 
     # Change scope
     def _changeScope(self):
+        time.sleep(random.randint(1, 4) * self.user._userWaitSpeed)
         if self.user.token is not None:
             # Quick and dirty
             r = random.random()
@@ -1158,6 +1162,10 @@ class StampDetail(View):
     def __init__(self, user, stamp=None, stampId=None):
         View.__init__(self, user)
     
+
+        # Wait for the page to load
+        time.sleep(random.uniform(0.5, 2.0))
+
         self.stamp = stamp
         self.stampId = stampId
         
@@ -1214,13 +1222,13 @@ class StampDetail(View):
 
     # View the user's profile
     def _viewProfile(self):
-        time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+        time.sleep(random.randint(3, 12) * self.user._userWaitSpeed)
         self.setWeight('profile', 0)
         self.addToStack(Profile, kwargs={'userId': self.stamp['user']['user_id']})
 
     # View entity details
     def _viewEntity(self):
-        time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+        time.sleep(random.randint(1, 10) * self.user._userWaitSpeed)
         self.setWeight('entity', 0)
         self.addToStack(EntityDetail, kwargs={'entity': self.entity, 'alsoStampedBy': self.alsoStampedBy})
 
@@ -1257,7 +1265,7 @@ class StampDetail(View):
     # Remove like
     def _removeLike(self):
         if self.user.token is not None:
-            time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+            time.sleep(random.randint(2, 10) * self.user._userWaitSpeed)
             if self.isLiked:
                 _post_stamps_likes_remove(self.user.token, self.stampId)
                 self.isLiked = False
@@ -1287,6 +1295,9 @@ class Profile(View):
     def __init__(self, user, userId=None):
         View.__init__(self, user)
     
+        # Wait for the page to load
+        time.sleep(random.uniform(0.5, 2.0))
+
         self.userId = userId
         self.stamps = []
         self.offset = 0
@@ -1321,7 +1332,7 @@ class Profile(View):
 
     # Load more stamps
     def _page(self):
-        time.sleep(random.randint(1, 2) * self.user._userWaitSpeed)
+        time.sleep(random.randint(2, 5) * self.user._userWaitSpeed)
         numStamps = len(self.stamps)
         self.loadStamps()
         if numStamps == len(self.stamps):
@@ -1340,6 +1351,9 @@ class EntityDetail(View):
     def __init__(self, user, entity=None, entityId=None, alsoStampedBy=None):
         View.__init__(self, user)
     
+        # Wait for the page to load
+        time.sleep(random.uniform(0.5, 2.0))
+
         self.entity = entity
         self.entityId = entityId
         self.alsoStampedBy = alsoStampedBy
@@ -1368,7 +1382,7 @@ class EntityDetail(View):
         if 'friends' in self.alsoStampedBy and 'stamps' in self.alsoStampedBy['friends']:
             stamps = self.alsoStampedBy['friends']['stamps']
             if len(stamps) > 0:
-                time.sleep(random.randint(4, 12) * self.user._userWaitSpeed)
+                time.sleep(random.randint(3, 10) * self.user._userWaitSpeed)
                 self.addToStack(StampDetail, kwargs={'stampId': random.choice(stamps)['stamp_id']})
                 return
 
@@ -1947,7 +1961,7 @@ class LoggedOutUser(User):
 
     def __init__(self):
         User.__init__(self)
-        self._userWaitSpeed = 0
+        self._userWaitSpeed = 0 # 0.5
         self._userSessionLength = 60 # 200 + (random.random() * 200)
         
         self.setAction('inbox', self._viewInbox)
@@ -1977,7 +1991,7 @@ class LoggedInUser(User):
 
     def __init__(self):
         User.__init__(self)
-        self._userWaitSpeed = 0
+        self._userWaitSpeed = 0 # 1.0
         self._userSessionLength = 60 #200 + (random.random() * 200)
 
         self.token = None
@@ -2029,7 +2043,7 @@ class ExistingUser(LoggedInUser):
 
     def __init__(self, login, password):
         LoggedInUser.__init__(self)
-        self._userWaitSpeed = 0
+        self._userWaitSpeed = 0 # 1.0
         self._userSessionLength = 60 #200 + (random.random() * 200)
 
         self._login = login
@@ -2059,7 +2073,7 @@ class NewUser(LoggedInUser):
 
     def __init__(self):
         LoggedInUser.__init__(self)
-        self._userWaitSpeed = 0
+        self._userWaitSpeed = 0 # 1.3
         self._userSessionLength = 60 #200 + (random.random() * 200)
 
     def load(self):

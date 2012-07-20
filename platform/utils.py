@@ -27,8 +27,6 @@ from threading           import Lock
 from gevent.pool         import Pool
 from greenlet            import GreenletExit
 
-
-
 class LoggingThreadPool(object):
     """
     Wrapper around gevent.pool.Pool that (a) logs any exceptions that show up in the spawned tasks and (b) ensures that
@@ -1075,9 +1073,19 @@ def getImage(data):
 
     return im
 
+def tryGetWebImage(url):
+    
+    return data
+
 def getWebImage(url, desc=None):
     try:
-        data = getFile(url)
+        data = getCachedWebImage(url)
+        memcached = libs.Memcache.globalMemcache()
+        
+        data = memcached.get(url)
+        if data is None:
+            data = getFile(url)
+            memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
     except urllib2.HTTPError:
         desc = ("%s " % desc if desc is not None else "")
         logs.warning("unable to download %simage from '%s'" % (url, desc))
