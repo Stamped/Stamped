@@ -13,7 +13,7 @@ __all__ = ['RateLimiter','RateException']
 import Globals
 from logs   import report
 try:
-    from time           import time
+    import time
     from threading      import Lock
     from gevent         import sleep
     from gevent.pool    import Pool
@@ -35,11 +35,11 @@ class RateLimit(object):
         self.__limit    = limit
         self.__duration = duration
         self.__calls    = 0
-        self.__start    = time()
+        self.__start    = time.time()
 
     def __update(self, now=None):
         if now is None:
-            now = time()
+            now = time.time()
 
         diff = now - self.__start
 
@@ -53,7 +53,7 @@ class RateLimit(object):
 
     def wait(self, now=None):
         if now is None:
-            now = time()
+            now = time.time()
 
         self.__update(now)
 
@@ -87,14 +87,14 @@ class RateLimiter(object):
         self.__semaphore = Semaphore()
 
     def __enter__(self):
-        begin  = time()
+        begin  = time.time()
         locked = self.__semaphore.acquire(timeout=self.__max_wait)
 
         if locked:
             try:
                 max_wait = 0
                 max_name = None
-                now      = time()
+                now      = time.time()
 
                 for name, limit in self.__limits.items():
                     wait = limit.wait(now)
@@ -110,7 +110,7 @@ class RateLimiter(object):
                     end = now + max_wait
 
                     while True:
-                        cur = time()
+                        cur = time.time()
                         if cur >= end:
                             break
                         else:
