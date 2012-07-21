@@ -132,10 +132,12 @@ def collection(request, authUserId, schema, uri, **kwargs):
 
     stamps = stampedAPI.getStampCollection(schema, authUserId)
 
-    if authUserId is None:
-        setCache(uri, schema, stamps, ttl=600)
+    result = transformStamps(stamps)
 
-    return transformStamps(stamps)
+    if authUserId is None:
+        setCache(uri, schema, result, ttl=600)
+
+    return result
 
 
 # Search
