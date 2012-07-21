@@ -20,6 +20,7 @@ from api.db.mongodb.AMongoCollection           import AMongoCollection
 from api.db.mongodb.MongoFollowersCollection   import MongoFollowersCollection
 from api.db.mongodb.MongoFriendsCollection     import MongoFriendsCollection
 from api.AUserDB                import AUserDB
+from libs.Memcache                              import globalMemcache
 
 try:
     from pyes.filters           import *
@@ -37,6 +38,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         self._collection.ensure_index('phone')
         self._collection.ensure_index('linked.twitter.linked_user_id')
         self._collection.ensure_index('linked.facebook.linked_user_id')
+
+        self._cache = globalMemcache()
 
     ### Note that overflow=True
     def _convertFromMongo(self, document):
