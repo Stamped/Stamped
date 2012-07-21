@@ -148,6 +148,7 @@ class RateLimiterState(object):
             self.__local_rlservice.loadDbLog()    # update the local call log from the db
 
 
+            print ('almost sending email')
             logs.error('RPC server request FAIL THRESHOLD REACHED')
             # Email dev if a fail limit was reached
             if self.__is_ec2:
