@@ -434,9 +434,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         documents = self._collection.find(params, fields)
 
-        result = []
-        for doc in documents:
-            entity = self._convertFromMongo(doc, mini=False)
+        for document in documents:
+            entity = self._convertFromMongo(document, mini=False)
             entity = entity.minimize()
             self._setCachedEntityMini(entity)
             result.append(entity)
@@ -452,10 +451,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 result.append(self._getCachedEntity(entityId))
             except KeyError:
                 documentIds.append(self._getObjectIdFromString(entityId))
-        data = self._getMongoDocumentsFromIds(documentIds)
+        documents = self._getMongoDocumentsFromIds(documentIds)
 
-        for item in data:
-            entity = self._convertFromMongo(item)
+        for document in documents:
+            entity = self._convertFromMongo(document)
             self._setCachedEntity(entity)
             result.append(entity)
 
