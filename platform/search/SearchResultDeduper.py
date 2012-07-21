@@ -29,6 +29,7 @@ class SearchResultDeduper(object):
         return dedupeFnMap[category](resultLists)
 
     def __formClusters(self, search_results, cluster_class):
+        search_results.sort(key=lambda r: r.dataQuality, reverse=True)
         clusters = []
         # For the most part we just treat clustering as transitive, but every once in a while we find two clusters that
         # we have some overriding reason to believe are not the same. Because these clusters are not the same, but are
@@ -122,7 +123,6 @@ class SearchResultDeduper(object):
         for resultList in resultLists:
             places.extend(resultList)
 
-        places.sort(key=lambda place: place.dataQuality, reverse=True)
         placeClusters = self.__formClusters(places, PlaceSearchResultCluster)
         # TODO: I need a pruning phase here. Where I have a good cluster in a city that has street-specific data, and
         # another cluster in the same city that doesn't, just get rid of the second one.

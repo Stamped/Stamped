@@ -255,7 +255,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def getAccount(self, userId):
         try:
             documentId = self._getObjectIdFromString(userId)
-            document = self._getMongoDocumentFromId(documentId)
+            document = self._getMongoDocumentFromId(documentId, forcePrimary=True)
         except Exception:
             raise StampedAccountNotFoundError("Account not found in database")
         return self._convertFromMongo(document)

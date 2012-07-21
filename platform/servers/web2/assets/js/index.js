@@ -315,8 +315,8 @@
             
             // load the main content with a spiffy animation, translating in from beneath 
             // the bottom of the page
+            $body.addClass("main-animating");
             $main
-                .addClass("main-animating")
                 .css('top', start + "px")
                 .animate({
                     'top'       : result.offset + "px"
@@ -327,7 +327,7 @@
                         var percent = (value - result.offset) / (start - result.offset);
                         
                         if (percent < 0.1) {
-                            $main.removeClass("main-animating");
+                            $body.removeClass("main-animating");
                         }
                     }, 
                     complete    : function() {
@@ -335,7 +335,7 @@
                             update_main_layout();
                         }
                         
-                        $main.removeClass("main-animating");
+                        $body.removeClass("main-animating");
                         
                         if (!!autoplay) {
                             main_pane_cycle_animation.start();

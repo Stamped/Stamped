@@ -95,6 +95,8 @@
         <div class="profile-header">
             <div class="profile-content-page">
                 
+                {% with share_widget_url="/{{user.screen_name}}" %}
+                {% with share_widget_text="Check out {{user.screen_name}}'s stamp collection on www.stamped.com/{{user.screen_name}}" %}
                 {% with share_widget_desc="Share this collection" %}
                 {% with collage_root="http://s3.amazonaws.com/stamped.com.static.images" %}
                 {# {% with collage_root="http://static.stamped.com" %} #}
@@ -128,7 +130,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -283,6 +301,8 @@
                             {% endfor %}
                         </div>
                     </div>
+                {% endwith %}
+                {% endwith %}
                 {% endwith %}
                 {% endwith %}
             </div>

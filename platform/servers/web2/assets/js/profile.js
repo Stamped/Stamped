@@ -98,10 +98,10 @@ var g_update_stamps = null;
                 var width0  = $elem.width();
                 var height0 = $elem.height();
                 
-                $elem.css('display', 'block');
+                $elem.css('display',  'block');
                 $share.show();
                 
-                var width1  = $elem.width();
+                var width1  = $elem.width() + 55;
                 var height1 = $elem.height();
                 
                 $share.hide();
