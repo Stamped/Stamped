@@ -59,6 +59,26 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             if 'screen_name_lower' in document:
                 screenNames.append(document['screen_name_lower'])
         return screenNames
+
+
+    def _getCachedUserMini(self, userId):
+        key = str("obj::usermini::%s" % userId)
+        return self._cache[key]
+
+    def _setCachedUserMini(self, user):
+        key = str("obj::usermini::%s" % user.user_id)
+        ttl = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, user, time=ttl)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (user.user_id, e))
+
+    def _delCachedUserMini(self, userId):
+        key = str("obj::usermini::%s" % userId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
     
     ### PUBLIC
     
@@ -108,6 +128,24 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         
         return map(self._convertFromMongo, results)
     
+    def getUserMinis(self, userIds):
+        result = []
+
+        documentIds = []
+        for userId in userIds:
+            try:
+                result.append(self._getCachedUserMini(userId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
+        documents = self._MongoDocumentsFromIds(documentIds)
+
+        for document in documents:
+            user = self._convertFromMongo(document).minimize()
+            self._setCachedUserMini(user)
+            result.append(user)
+
+        return result
+
     @lazyProperty
     def _valid_re(self):
         return re.compile("[^\s\w-]+", re.IGNORECASE)

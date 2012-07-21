@@ -2223,7 +2223,7 @@ class StampedAPI(AStampedAPI):
         t1 = t0
 
         previewLength = kwargs.pop('previews', 10)
-        mini        = kwargs.pop('mini', False)
+        mini        = kwargs.pop('mini', True)
 
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
@@ -2360,12 +2360,12 @@ class StampedAPI(AStampedAPI):
 
         # Enrich missing user ids
         missingUserIds = allUserIds.difference(set(userIds.keys()))
-        users = self._userDB.lookupUsers(list(missingUserIds))
+        users = self._userDB.getUserMinis(list(missingUserIds))
 
         for user in users:
-            userIds[user.user_id] = user.minimize()
+            userIds[user.user_id] = user
 
-        logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
+        logs.debug('Time for getUserMinis: %s' % (time.time() - t1))
         t1 = time.time()
 
 
