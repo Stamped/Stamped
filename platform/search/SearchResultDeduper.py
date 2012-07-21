@@ -29,6 +29,8 @@ class SearchResultDeduper(object):
         return dedupeFnMap[category](resultLists)
 
     def __formClusters(self, search_results, cluster_class):
+        # TODO: Make this nondeterministic!
+        # TODO PRELAUNCH FUCK: Investigate with throwing a bit of relevance/prominence in here too!
         search_results.sort(key=lambda r: r.dataQuality, reverse=True)
         clusters = []
         # For the most part we just treat clustering as transitive, but every once in a while we find two clusters that

@@ -10,7 +10,7 @@
 -->
 {% load ssi from future %}
 
-<!-- Javascript Dependencies => profile.generated.js
+<!-- Javascript Dependencies => assets/generated/js/profile.generated.js
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
@@ -35,16 +35,15 @@
         script: profile.js
 -->
 
-<!-- CSS Dependencies => profile.generated.css
+<!-- CSS Dependencies => assets/generated/css/profile.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
-        stylesheet: libs/jquery.fancybox.css?v=2.0.6
-        stylesheet: libs/jquery.jscrollpane.less
+        stylesheet: libs/jquery.jscrollpane.css
     
     Core stamped dependencies:
-        stylesheet: profile.less
-        stylesheet: sdetail.less
+        stylesheet: profile.css
+        stylesheet: sdetail.css
 -->
 
 <!-- HTML Template Dependencies => profile.generated.html
@@ -56,12 +55,13 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
+    {% if True %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
+    {% endif %}
     
     <style>
         {% custom_css "profile" %}
@@ -95,9 +95,6 @@
         <div class="profile-header">
             <div class="profile-content-page">
                 
-                {% with share_widget_url="/{{user.screen_name}}" %}
-                {% with share_widget_text="Check out {{user.screen_name}}'s stamp collection on www.stamped.com/{{user.screen_name}}" %}
-                {% with share_widget_desc="Share this collection" %}
                 {% with collage_root="http://s3.amazonaws.com/stamped.com.static.images" %}
                 {# {% with collage_root="http://static.stamped.com" %} #}
                     
@@ -130,7 +127,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -155,7 +168,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,7 +209,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -205,7 +250,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -230,7 +291,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -255,7 +332,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -285,9 +378,6 @@
                             {% endfor %}
                         </div>
                     </div>
-                {% endwith %}
-                {% endwith %}
-                {% endwith %}
                 {% endwith %}
             </div>
         </div>
@@ -388,7 +478,7 @@
         <script src="{{ STATIC_URL }}js/signup.js"></script>
         <script src="{{ STATIC_URL }}js/profile.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STATIC_URL }}generated/js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     {% if not lite %}

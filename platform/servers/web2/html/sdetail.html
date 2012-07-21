@@ -347,13 +347,25 @@
     </div>
     
     <div class="section section-social">
-        {% with share_widget_url="/{{user.screen_name}}" %}
-        {% with share_widget_text="Check out this stamp of {{entity.title}}" %}
-        {% with share_widget_desc="Share this stamp" %}
-            {% handlebars_template "social-sharing" %}
-        {% endwith %}
-        {% endwith %}
-        {% endwith %}
+        <div class='social-sharing'>
+            <p class='share'>
+                Share this stamp:
+            </p>
+            
+            <div class='share-buttons clearfix'>
+                <div class='share-button facebook'>
+                    <div class="fb-like" data-layout="button_count" data-href="/{{stamp.url}}"></div>
+                </div>
+                
+                <div class='share-button twitter'>
+                    <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="{{stamp.url}}" data-text="Check out this stamp of {{entity.title}}">Tweet</a>
+                </div>
+                
+                <div class='share-button google'>
+                    <g:plusone size="medium" href="{{stamp.url}}"></g:plusone>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

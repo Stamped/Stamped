@@ -10,7 +10,7 @@
 -->
 {% load ssi from future %}
 
-<!-- Javascript Dependencies => sdetail-mobile.generated.js
+<!-- Javascript Dependencies => assets/generated/js/sdetail-mobile.generated.js
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
@@ -27,15 +27,15 @@
         script: mobile/sdetail.js
 -->
 
-<!-- CSS Dependencies => sdetail-mobile.generated.css
+<!-- CSS Dependencies => assets/generated/css/sdetail-mobile.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
         stylesheet: libs/jquery.fancybox.css?v=2.0.6
-        stylesheet: libs/jquery.jscrollpane.less
+        stylesheet: libs/jquery.jscrollpane.css
     
     Core stamped dependencies:
-        stylesheet: mobile/sdetail.less
+        stylesheet: mobile/sdetail.css
 -->
 
 <!-- HTML Template Dependencies => sdetail-mobile.generated.html
@@ -45,9 +45,13 @@
 {% block styles %}
     {{ block.super }}
     
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/mobile/sdetail.css">
+    {% if True %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/mobile/sdetail.css">
+    {% endif %}
     
     <style>
         {% custom_css "profile" %}
@@ -330,7 +334,7 @@
         <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/mobile/sdetail.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/sdetail-mobile.generated.js"></script>
+        <script src="{{ STATIC_URL }}generated/js/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 

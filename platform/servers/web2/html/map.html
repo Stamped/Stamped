@@ -2,7 +2,7 @@
 {% load stamped_tags %}
 {% load ssi from future %}
 
-<!-- Javascript dependencies => map.generated.js
+<!-- Javascript dependencies => assets/generated/js/map.generated.js
      - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
@@ -17,11 +17,11 @@
         script: map.js
 -->
 
-<!-- CSS Dependencies => map.generated.css
+<!-- CSS Dependencies => assets/generated/css/map.generated.css
      - - - - - - - - - - - - - - - - - - -
     
     Core stamped dependencies:
-        stylesheet: map.less
+        stylesheet: map.css
 -->
 
 <!-- HTML Template Dependencies => map.generated.html
@@ -34,9 +34,11 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/map.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
+    {% if True %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/map.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
+    {% endif %}
     
     <!--[if lte IE 9]>
     <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/map.lte.ie.9.css">
@@ -74,13 +76,23 @@
                 <div class="inner"></div>
             </a>
             
-            {% with share_widget_url="/{{user.screen_name}}/map" %}
-            {% with share_widget_text="Check out {{user.screen_name}}'s map on Stamped" %}
-            {% with share_widget_desc="Share this map" %}
-                {% handlebars_template "share-widget" %}
-            {% endwith %}
-            {% endwith %}
-            {% endwith %}
+            <div class="share-widget">
+                <div class="desc">Share this map</div>
+                
+                <div class='share-buttons clearfix'>
+                    <div class='share-button facebook'>
+                        <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}/map"></div>
+                    </div>
+                    
+                    <div class='share-button twitter'>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}/map" data-text="Check out {{user.screen_name}}'s map on Stamped">Tweet</a>
+                    </div>
+                    
+                    <div class='share-button google'>
+                        <g:plusone size="medium" href="/{{user.screen_name}}/map"></g:plusone>
+                    </div>
+                </div>
+            </div>
         {% endif %}
         
         <div class="fixedwidth">
@@ -161,6 +173,7 @@
     {{ block.super }}
      
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD4uiuKac5adB9_bwQK9fgJx3SyZVzQsSc&sensor=true"></script>
+    
     {% if STAMPED_DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
         <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
@@ -168,7 +181,7 @@
         <script src="{{ STATIC_URL }}js/libs/markerclusterer.js"></script>
         <script src="{{ STATIC_URL }}js/map.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/map.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STATIC_URL }}generated/js/map.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     {% ssi STAMPED_MAP_TEMPLATE_FILE %}

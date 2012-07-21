@@ -704,6 +704,7 @@ class StampedSource(GenericSource):
             result.relevance = 0.3 + 0.2 * (num_stamps ** 0.5)
             result.addRelevanceComponentDebugInfo('Initial score based on Entity with %d stamps' % num_stamps,
                                                   result.relevance)
+            result.relevance *= stringRelevance(queryText, entityProxy.name)[0]
             results.append(result)
         sortByRelevance(results)
         return results
