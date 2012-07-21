@@ -44,7 +44,7 @@ class RateLimiterState(object):
         stack_info = libs.ec2_utils.get_stack()
         self.__stack_name = stack_info.instance.stack
         self.__node_name = stack_info.instance.name
-        self.__last_email_time = None
+        self.__last_email_time = 0
         self.__emails = deque()
 
         # determine the private ip address of the ratelimiter instance for this stack
