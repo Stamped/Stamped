@@ -52,10 +52,10 @@
         {% block styles %}
         
         {% if True %}
+            <link rel="stylesheet"      href="{{ STATIC_URL }}generated/css/base.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        {% else %}
             <link rel="stylesheet"      href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
             <link rel="stylesheet"      href="{{ STATIC_URL }}css/styles.css">
-        {% else %}
-            <link rel="stylesheet"      href="{{ STATIC_URL }}generated/css/base.generated.{{ STAMPED_ASSET_VERSION }}.css">
         {% endif %}
         
         <!--[if lte IE 9]>

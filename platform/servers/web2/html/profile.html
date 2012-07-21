@@ -56,11 +56,11 @@
     {{ block.super }}
     
     {% if True %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
         <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
         <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
-    {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>

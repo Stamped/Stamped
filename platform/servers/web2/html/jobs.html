@@ -18,9 +18,9 @@
     {{ block.super }}
     
     {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.css">
-    {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/jobs.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.css">
     {% endif %}
 {% endblock styles %}
 

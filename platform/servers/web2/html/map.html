@@ -35,9 +35,9 @@
     {{ block.super }}
     
     {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
-    {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/map.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
     {% endif %}
     
     <!--[if lte IE 9]>

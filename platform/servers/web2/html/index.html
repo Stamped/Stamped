@@ -37,9 +37,9 @@
     {{ block.super }}
     
     {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
-    {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
     {% endif %}
     
     <style>
