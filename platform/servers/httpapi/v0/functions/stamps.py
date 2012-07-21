@@ -106,11 +106,13 @@ def show(request, authUserId, http_schema, uri, **kwargs):
                                             stampNumber=http_schema.stamp_num)
     
     stamp = HTTPStamp().importStamp(stamp)
+    
+    result = transformOutput(stamp.dataExport())
 
     if authUserId is None:
-        setCache(uri, http_schema, stamp, ttl=600)
-    
-    return transformOutput(stamp.dataExport())
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 # Collection
