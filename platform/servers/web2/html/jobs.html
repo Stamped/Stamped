@@ -1,13 +1,13 @@
 {% extends "about.html" %}
 {% load stamped_tags %}
 
-<!-- CSS Dependencies => jobs.generated.css
+<!-- CSS Dependencies => assets/generated/css/jobs.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
     
     Core stamped dependencies:
-        stylesheet: jobs.less
+        stylesheet: jobs.css
 -->
 
 <!-- HTML Template Dependencies => jobs.generated.html
@@ -17,9 +17,11 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}assets/generated/css/jobs.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
 {% endblock styles %}
 
 {% block pane-body %}

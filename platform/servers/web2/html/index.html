@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load stamped_tags %}
 
-<!-- Javascript Dependencies => index.generated.js
+<!-- Javascript Dependencies => assets/generated/js/index.generated.js
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
@@ -18,14 +18,14 @@
         script: index.js
 -->
 
-<!-- CSS Dependencies => index.generated.css
+<!-- CSS Dependencies => assets/generated/css/index.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
-        stylesheet: libs/jquery.fancybox.css?v=2.0.6
+        stylesheet: libs/jquery.fancybox.css
     
     Core stamped dependencies:
-        stylesheet: index.less
+        stylesheet: index.css
 -->
 
 <!-- HTML Template Dependencies => profile.generated.html
@@ -39,10 +39,12 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
     
     <style>
         {% for user in tastemakers %}
@@ -421,7 +423,7 @@
         <script src="{{ STATIC_URL }}js/signup.js"></script>
         <script src="{{ STATIC_URL }}js/index.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STATIC_URL }}generated/js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 
