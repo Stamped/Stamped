@@ -42,8 +42,11 @@ class RateLimiterState(object):
         self.__is_ec2 = utils.is_ec2()
         self.__service_init_semaphore = Semaphore()
         stack_info = libs.ec2_utils.get_stack()
-        self.__stack_name = stack_info.instance.stack
-        self.__node_name = stack_info.instance.name
+        self.__stack_name = 'localhost'
+        self.__node_name = 'localhost'
+        if stack_info is not None:
+            self.__stack_name = stack_info.instance.stack
+            self.__node_name = stack_info.instance.name
         self.__last_email_time = 0
         self.__emails = deque()
 
