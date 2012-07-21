@@ -15,6 +15,7 @@ import functools, operator
 from itertools import ifilterfalse
 from heapq import nsmallest
 from operator import itemgetter
+from schema import Schema
 
 class Counter(dict):
     'Mapping where default values are zero'
@@ -49,26 +50,20 @@ def lru_cache(maxsize=100):
         @functools.wraps(user_function)
         def wrapper(*args, **kwds):
             # cache key records both positional and keyword args
-            key = '%s' % user_function.__name__
+            key = user_function.__name__
+
             for arg in args:
-                try:
+                if isinstance(arg, Schema):
                     arg = arg.dataExport()
-                except Exception:
-                    pass
                 # TODO: Should really complain if this isn't a type that's going to serialize meaningfully
                 # to string.
                 key = "%s - %s" % (key, arg)
             for k, v in sorted(kwds.iteritems()):
-                try:
+                if isinstance(v, Schema):
                     v = v.dataExport()
-                except Exception:
-                    pass
                 # TODO: Should really complain if this isn't a type that's going to serialize meaningfully
                 # to string.
                 key = "%s - %s (%s)" % (key, k, v)
-
-            if key == '':
-                raise Exception("Key not set! (%s)" % user_function)
 
             # get cache entry or compute if not found
             try:
