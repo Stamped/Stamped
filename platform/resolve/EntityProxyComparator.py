@@ -20,6 +20,7 @@ try:
     from search.DataQualityUtils import *
     from resolve.StringNormalizationUtils import *
     from search import ScoringUtils
+    from resolve.StringComparator   import StringComparator
 except:
     report()
     raise
@@ -280,88 +281,10 @@ def strip_subtitle(title):
 
 
 def titleComparison(title1, title2, simplificationFn):
-    def noChange(title1, title2):
-        penalty = 0.0
-        return penalty, title1, title2
-
-    def liteSimplification(title1, title2):
-        penalty = 0.005
-        return penalty, simplifyLite(title1), simplifyLite(title2)
-
-    def fullSimplification(title1, title2):
-        simple_title1 = simplificationFn(title1)
-        simple_title2 = simplificationFn(title2)
-        penalty1 = 1 - ((float(len(simple_title1)) / len(title1)) ** 0.1)
-        penalty2 = 1 - ((float(len(simple_title2)) / len(title2)) ** 0.1)
-        penalty = max(penalty1, penalty2)
-        return penalty, simple_title1, simple_title2
-
-    def fixFirstSubtitle(title1, title2):
-        result = strip_subtitle(title1)
-        if not result:
-            return 0.0, title1, title2
-        fixed_title1, subtitle_definitely_crap = result
-        penalty_exponent = 0.01 if subtitle_definitely_crap else 0.05
-        penalty = 1 - ((float(len(fixed_title1)) / len(title1)) ** penalty_exponent)
-        return penalty, fixed_title1, title2
-
-    def fixSecondSubtitle(title1, title2):
-        result = strip_subtitle(title2)
-        if not result:
-            return 0.0, title1, title2
-        fixed_title2, subtitle_definitely_crap = result
-        penalty_exponent = 0.01 if subtitle_definitely_crap else 0.05
-        penalty = 1 - ((float(len(fixed_title2)) / len(title2)) ** penalty_exponent)
-        print 'penalty', penalty, len(fixed_title2), len(title2), penalty_exponent
-        return penalty, title1, fixed_title2
-
-    def fixBothSubtitles(title1, title2):
-        penalty1, fixed_title1, _ = fixFirstSubtitle(title1, title2)
-        penalty2, _, fixed_title2 = fixSecondSubtitle(title1, title2)
-        return penalty1+penalty2, fixed_title1, fixed_title2
-
-    def removeLeadingStopWords(title1, title2):
-        stop_words = set(['the', 'a', 'an'])
-        title1_tokens = TOKENS_RE.findall(title1)
-        title2_tokens = TOKENS_RE.findall(title2)
-        if len(title1_tokens) > 1 and title1_tokens[0].lower() in stop_words:
-            start = title1.find(title1_tokens[0])
-            title1 = title1[start+len(title1_tokens[0]):].strip()
-        if len(title2_tokens) > 1 and title2_tokens[0].lower() in stop_words:
-            start = title2.find(title2_tokens[0])
-            title2 = title2[start+len(title2_tokens[0]):].strip()
-        penalty = 0.0075
-        return penalty, title1, title2
-
-    title_comparison_options = (
-        (noChange, liteSimplification, fullSimplification),
-        (noChange, fixFirstSubtitle, fixSecondSubtitle, fixBothSubtitles),
-        (noChange, removeLeadingStopWords)
-        # TODO: Plurals and possessives?
-    )
-
-    configurations = [[]]
-    for decision in title_comparison_options:
-        new_configurations = []
-        for option in decision:
-            new_configurations.extend(configuration + [option] for configuration in configurations)
-        configurations = new_configurations
-
-    best_score = 0
-    for configuration in configurations:
-        curr_title1, curr_title2 = title1, title2
-        multiplier = 1.0
-        for filter_fn in configuration:
-            penalty, curr_title1, curr_title2 = filter_fn(curr_title1, curr_title2)
-            multiplier *= (1.0 - penalty)
-        similarity = stringComparison(curr_title1, curr_title2)
-        uncommonness = min(complexUncommonness(curr_title1), complexUncommonness(curr_title2))
-        score = get_odds_from_sim_unc(similarity * multiplier, uncommonness)
-        if score > best_score:
-            best_score = score
-
-    return best_score
-
+    score1 = StringComparator.get_ratio(title1, title2)
+    score2 = 0.985 * StringComparator.get_ratio(simplifyLite(title1), simplifyLite(title2))
+    score3 = 0.96 * StringComparator.get_ratio(simplificationFn(title1), simplificationFn(title2))
+    return max(score1, score2, score3)
 
 
 class OddsBasedMovieEntityProxyComparator(AEntityProxyComparator):
@@ -439,9 +362,9 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
         # digital re-masterings and re-releases, so dates are not decisive. Cast data is spotty.
         # We get reliable release dates from TMDB and TheTVDB, but not from iTunes, so those are generally unhelpful.
 
-        raw_name_similarity = stringComparison(movie1.name, movie2.name, strict=True)
-        simple_name_similarity = stringComparison(movieSimplify(movie1.name),
-            movieSimplify(movie2.name), strict=True)
+        raw_name_similarity = StringComparator.get_ratio(movie1.name, movie2.name)
+        simple_name_similarity = StringComparator.get_ratio(movieSimplify(movie1.name),
+            movieSimplify(movie2.name))
         sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
 
         if cls._endsInDifferentNumbers(movie1.name, movie2.name):
