@@ -193,7 +193,7 @@ class RateLimiterState(object):
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
             print('### attempting rpc service request')
-            return self._rpc_service_request('192.10.10.10', self.__port, service, method.upper(), url, body, header, priority, timeout)
+            return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
         except Exception as e:
             print('### failed while attempting rpc service request: %s' % e)
             self._fail(e)
