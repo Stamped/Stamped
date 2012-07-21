@@ -523,7 +523,7 @@ def _getCacheKey(uri, schema=None):
 def getCache(uri, schema=None):
     key = _getCacheKey(uri, schema)
     result = cache[key]
-    print 'CACHE HIT: %s' % key
+    logs.info("Cache hit: %s" % key)
     return result
 
 def setCache(uri, schema, result, ttl):
