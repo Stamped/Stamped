@@ -145,7 +145,7 @@ def collection(request, authUserId, http_schema, schema, uri, **kwargs):
 @handleHTTPRequest(http_schema=HTTPSearchSlice,
                   conversion=HTTPSearchSlice.exportSearchSlice,
                   exceptions=stampExceptions)
-def search(request, authUserId, schema, uri, **kwargs):
+def search(request, authUserId, http_schema, schema, uri, **kwargs):
     if authUserId is None or http_schema.scope == 'popular':
         try:
             return getCache(uri, http_schema)
@@ -170,7 +170,7 @@ def search(request, authUserId, schema, uri, **kwargs):
                    http_schema=HTTPGuideRequest,
                    conversion=HTTPGuideRequest.exportGuideRequest,
                    exceptions=stampExceptions)
-def guide(request, authUserId, schema, uri, **kwargs):
+def guide(request, authUserId, http_schema, schema, uri, **kwargs):
     if http_schema.scope == 'popular':
         try:
             return getCache(uri, http_schema)
@@ -203,7 +203,7 @@ def guide(request, authUserId, schema, uri, **kwargs):
                    http_schema=HTTPGuideSearchRequest,
                    conversion=HTTPGuideSearchRequest.exportGuideSearchRequest,
                    exceptions=stampExceptions)
-def searchGuide(request, authUserId, schema, uri, **kwargs):
+def searchGuide(request, authUserId, http_schema, schema, uri, **kwargs):
     if http_schema.scope == 'popular':
         try:
             return getCache(uri, http_schema)
