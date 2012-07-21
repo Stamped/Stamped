@@ -52,6 +52,10 @@ class StringComparator(object):
 
     @classmethod
     def get_difference(cls, s1, s2, max_difference=None):
+        if isinstance(s1, unicode):
+            s1 = s1.encode('utf-8')
+        if isinstance(s2, unicode):
+            s2 = s2.encode('utf-8')
         starts1, ends1 = cls.get_token_starts_and_ends(s1)
         starts2, ends2 = cls.get_token_starts_and_ends(s2)
 
