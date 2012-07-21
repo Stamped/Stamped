@@ -267,7 +267,7 @@ class TvEntityProxyComparator(AEntityProxyComparator):
         and we want to cluster those together, so things like runtime and release date don't work. Title is really
         the meat of the comparison.
         """
-        sim_score = titleComparison(tv_show1.name, tv_show2.name, tvSimplify)
+        sim_score = titleComparison(tv_show1.name, tv_show2.name, movieSimplify)
         if logComparisonLogic:
             print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
                 repr(tv_show1.raw_name), tv_show1.source, tv_show1.key,
