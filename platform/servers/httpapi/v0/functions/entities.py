@@ -47,11 +47,22 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPEntityIdSearchId,
                    exceptions=entityExceptions)
-def show(request, authUserId, authClientId, http_schema, **kwargs):
+def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
+    try:
+        return getCache(uri, http_schema)
+    except KeyError:
+        pass
+    except Exception as e:
+        logs.warning("Failed to get cache: %s" % e)
+            
     entity      = stampedAPI.getEntity(http_schema, authUserId)
     entity      = _convertHTTPEntity(entity, authClientId)
+
+    result = transformOutput(entity.dataExport())
+
+    setCache(uri, http_schema, result, ttl=1800)
     
-    return transformOutput(entity.dataExport())
+    return result
 
 
 @require_http_methods(["POST"])
