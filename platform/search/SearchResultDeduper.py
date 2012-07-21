@@ -18,7 +18,7 @@ class SearchResultDeduper(object):
         Takes the search category and one list of results per source.
         """
         # We have to cap results here because the deduping process is O(n^2).
-        maxResultsPerSource = 15
+        maxResultsPerSource = 30
         for resultList in resultLists:
             resultList[maxResultsPerSource:] = []
         dedupeFnMap = {'music': self.__dedupeMusicResults,
