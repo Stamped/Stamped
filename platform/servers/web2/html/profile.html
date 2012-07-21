@@ -55,12 +55,12 @@
 {% block styles %}
     {{ block.super }}
     
-    {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.jscrollpane.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/sdetail.css">
     {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>
@@ -68,18 +68,18 @@
     </style>
     
     <!--[if lte IE 9]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.9.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
     <![endif]-->
     
     <!--[if lte IE 8]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.8.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
     <![endif]-->
     
     <!--[if lte IE 7]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.7.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
     <![endif]-->
 {% endblock styles %}
 
@@ -460,25 +460,25 @@
     {{ block.super }}
      
     {% if STAMPED_DEBUG %}
-        <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.isotope.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.rdio.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.isotope.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.emoji.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/history/jquery.history.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.rdio.js"></script>
         
-        <script src="{{ STATIC_URL }}js/libs/moment.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/moment.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
         
-        <script src="{{ STATIC_URL }}js/utils.js"></script>
-        <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
-        <script src="{{ STATIC_URL }}js/signup.js"></script>
-        <script src="{{ STATIC_URL }}js/profile.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/social_sharing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/signup.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/profile.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}generated/js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     {% if not lite %}

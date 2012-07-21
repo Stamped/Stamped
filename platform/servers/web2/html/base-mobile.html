@@ -23,8 +23,8 @@
         <meta name="application-name"   content="Stamped">
         
         <!-- icons -->
-        <link rel="shortcut icon"       href="{{ STATIC_URL }}img/favicon.ico"/>
-        <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
+        <link rel="shortcut icon"       href="{{ STAMPED_STATIC_URL }}img/favicon.ico"/>
+        <link rel="apple-touch-icon"    href="{{ STAMPED_STATIC_URL }}img/apple-touch-icon.png"/>
         {% endblock head %}
         
         {% block opengraph %}
@@ -36,7 +36,7 @@
         
         {% block styles %}
         <!-- styles -->
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/mobile/styles.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/mobile/styles.css">
         {% endblock styles %}
         
         {% block post_head %}
@@ -105,7 +105,7 @@
             {% block scripts %}
             <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
             <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
-            <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
+            <script>window.jQuery || document.write('<script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
             
             <script>
                 var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];

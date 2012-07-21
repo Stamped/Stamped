@@ -4,6 +4,7 @@
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
+        stylesheet: libs/h5bp.css
         stylesheet: libs/jquery.fancybox.css
     
     Core stamped dependencies:
@@ -38,8 +39,8 @@
         <meta name="application-name"   content="Stamped">
         
         <!-- icons -->
-        <link rel="shortcut icon"       href="{{ STATIC_URL }}img/favicon.ico"/>
-        <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
+        <link rel="shortcut icon"       href="{{ STAMPED_STATIC_URL }}img/favicon.ico"/>
+        <link rel="apple-touch-icon"    href="{{ STAMPED_STATIC_URL }}img/apple-touch-icon.png"/>
         {% endblock head %}
         
         {% block opengraph %}
@@ -51,23 +52,26 @@
         
         {% block styles %}
         
-        {% if True %}
-            <link rel="stylesheet"      href="{{ STATIC_URL }}generated/css/base.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        {% if STAMPED_DEBUG %}
+            <link rel="stylesheet"      href="/assets/css/fonts.css">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/libs/h5bp.min.css">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/styles.css">
         {% else %}
-            <link rel="stylesheet"      href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-            <link rel="stylesheet"      href="{{ STATIC_URL }}css/styles.css">
+            <link rel="stylesheet"      href="/assets/css/fonts.css">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/base.generated.{{ STAMPED_ASSET_VERSION }}.css">
         {% endif %}
         
         <!--[if lte IE 9]>
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.9.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/styles.lte.ie.9.css">
         <![endif]-->
         
         <!--[if lte IE 8]>
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.8.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/styles.lte.ie.8.css">
         <![endif]-->
         
         <!--[if lte IE 7]>
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.7.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/styles.lte.ie.7.css">
         <![endif]-->
         
         {% endblock styles %}
@@ -140,8 +144,8 @@
             
             {% block scripts %}
             <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
-            <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
-            <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="/assets/js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
             
             <script>
                 var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];

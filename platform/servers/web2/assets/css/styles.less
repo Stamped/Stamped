@@ -12,8 +12,6 @@
    ************************************************************************** */
 
 
-@import "libs/h5bp.min.css";
-@import "fonts.less";
 @import "common.less";
 
 
@@ -69,6 +67,42 @@ ol, ul {
 
 .active-link {
     color: #438FED !important;
+}
+
+.replaced {
+    display: block;
+    text-indent: -9999em;
+    overflow: hidden;
+}
+
+.fullwidth {
+    position: relative;
+    width: 100%;
+}
+
+.fullsize {
+    position: relative;
+    width:  100%;
+    height: 100%;
+}
+
+.floatleft {
+    float: left;
+}
+
+.floatright {
+    float: right;
+}
+
+.fixedwidth {
+    position: relative;
+    display: block;
+    
+    max-width: @fixed-width;
+    min-width: 360px;
+    width: @fixed-width;
+    
+    margin: 0 auto;
 }
 
 
@@ -185,7 +219,7 @@ header {
 
 #stamped-logo, .stamped-logo {
     position: absolute;
-    z-index: 10000;
+    z-index: 1000;
     
     background: url(/assets/img/index/stamped-logo.png) no-repeat;
     
@@ -197,7 +231,7 @@ header {
     left:  -90px;
     
     opacity: 1;
-    .transform(translateZ(0));
+    .transform(scale(1, 1));
     .transition-transform(.3s, ease);
 }
 

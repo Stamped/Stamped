@@ -1099,9 +1099,9 @@ def getWebImageSize(url):
     except urllib2.HTTPError:
         logs.warning("Unable to download image: %s" % url)
         raise
-
+    
     img = getImage(data)
-
+    
     return img.size[0], img.size[1]
 
 
