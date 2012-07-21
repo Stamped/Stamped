@@ -112,10 +112,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
     def _getCachedEntity(self, entityId):
         key = str("obj::entity::%s" % entityId)
-        try:
-            return self._cache[key]
-        except KeyError:
-            return None
+        return self._cache[key]
 
     def _setCachedEntity(self, entity):
         key = str("obj::entity::%s" % entity.entity_id)
@@ -382,9 +379,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
 
     def getEntity(self, entityId, forcePrimary=False):
-        cached      = self._getCachedEntity(entityId)
-        if cached is not None:
-            return cached 
+        try:
+            return self._getCachedEntity(entityId)
+        except KeyError:
+            pass 
 
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
@@ -416,11 +414,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
         documentIds = []
         for entityId in entityIds:
-            cached = self._getCachedEntity(entityId)
-            if cached is None:
+            try:
+                result.append(self._getCachedEntity(entityId))
+            except KeyError:
                 documentIds.append(self._getObjectIdFromString(entityId))
-            else:
-                result.append(cached)
         data = self._getMongoDocumentsFromIds(documentIds)
 
         for item in data:

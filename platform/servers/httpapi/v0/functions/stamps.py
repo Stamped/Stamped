@@ -90,7 +90,15 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False,
                   http_schema=HTTPStampRef,
                   exceptions=stampExceptions)
-def show(request, authUserId, http_schema, **kwargs):
+def show(request, authUserId, http_schema, uri, **kwargs):
+    if authUserId is None:
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     if http_schema.stamp_id is not None:
         stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
     else:
@@ -98,6 +106,9 @@ def show(request, authUserId, http_schema, **kwargs):
                                             stampNumber=http_schema.stamp_num)
     
     stamp = HTTPStamp().importStamp(stamp)
+
+    if authUserId is None:
+        setCache(uri, http_schema, stamp, ttl=600)
     
     return transformOutput(stamp.dataExport())
 
@@ -108,8 +119,20 @@ def show(request, authUserId, http_schema, **kwargs):
                    http_schema=HTTPTimeSlice,
                    conversion=HTTPTimeSlice.exportTimeSlice,
                    exceptions=stampExceptions)
-def collection(request, authUserId, schema, **kwargs):
+def collection(request, authUserId, schema, uri, **kwargs):
+    if authUserId is None:
+        try:
+            return getCache(uri, schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     stamps = stampedAPI.getStampCollection(schema, authUserId)
+
+    if authUserId is None:
+        setCache(uri, schema, stamps, ttl=600)
+
     return transformStamps(stamps)
 
 

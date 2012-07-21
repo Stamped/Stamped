@@ -18,6 +18,8 @@ from api.HTTPSchemas                    import *
 from api.MongoStampedAPI            import globalMongoStampedAPI
 from api.MongoStampedAuth           import MongoStampedAuth
 
+from libs.Memcache                  import globalMemcache
+
 from django.views.decorators.http   import require_http_methods
 from django.utils.functional        import wraps
 from django.http                    import HttpResponse
@@ -52,6 +54,7 @@ t1 = time.time()
 # e.g., there are MongoStampedAPIs instantiated throughout the codebase => refactor
 stampedAPI  = globalMongoStampedAPI()
 stampedAuth = MongoStampedAuth()
+cache       = globalMemcache()
 
 t2 = time.time()
 duration = (t2 - t1) * 1.0
@@ -233,6 +236,9 @@ def handleHTTPRequest(requires_auth=True,
                         params['schema']        = conversion(params['http_schema'])
                     elif http_schema is not None:
                         params['data']          = params['http_schema'].dataExport()
+
+                if 'PATH_INFO' in request.META:
+                    params['uri'] = request.META['PATH_INFO'].lower()
                 
                 kwargs.update(params)
                 ret = fn(request, *args, **kwargs)
@@ -506,6 +512,26 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         logs.warning(msg)
         utils.printException()
         raise e
+
+def _getCacheKey(uri, schema=None):
+    key = str("http::%s" % uri)
+    if schema is not None:
+        dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else obj
+        key += json.dumps(schema.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
+    return key
+
+def getCache(uri, schema=None):
+    key = _getCacheKey(uri, schema)
+    result = cache[key]
+    print 'CACHE HIT: %s' % key
+    return result
+
+def setCache(uri, schema, result, ttl):
+    key = _getCacheKey(uri, schema)
+    try:
+        cache.set(key, result, time=ttl)
+    except Exception as e:
+        logs.warning("Unable to set cache for %s: %s" % (key, e))
 
 def transformOutput(value, **kwargs):
     """
