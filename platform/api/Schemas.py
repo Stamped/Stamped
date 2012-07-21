@@ -213,8 +213,9 @@ class EntityStats(Schema):
         try:
             if t in self.types:
                 return True
-        except Exception as e:
-            return False
+        except TypeError:
+            logs.warning("Type field in stamp stat set to None")
+        return False
 
 
 # #### #
