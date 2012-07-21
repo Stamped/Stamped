@@ -193,6 +193,8 @@ WORD_RE = re.compile('([a-zA-Z0-9]+(-[a-zA-Z0-9]+)?)(\'s)?')
 def complexUncommonness(string):
     uncommonness = 0.0
     words = [word for (word, _, _) in WORD_RE.findall(string)]
+    if not words:
+        return 0.5 * len(string)
     exponent = len(words) ** -0.3
     for word in words:
         if word.isdigit():
