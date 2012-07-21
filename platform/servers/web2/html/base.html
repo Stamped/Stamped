@@ -1,5 +1,15 @@
 <!doctype html>
 
+<!-- CSS Dependencies => assets/generated/css/base.generated.X.Y.Z.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        stylesheet: libs/jquery.fancybox.css
+    
+    Core stamped dependencies:
+        stylesheet: styles.css
+-->
+
 <!--[if lte IE 9]>
 <html class="ie" lang="en">
 <![endif]-->
@@ -40,8 +50,13 @@
         {% endblock opengraph %}
         
         {% block styles %}
-        <!-- styles -->
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/styles.css">
+        
+        {% if True %}
+            <link rel="stylesheet"      href="{{ STATIC_URL }}generated/css/base.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        {% else %}
+            <link rel="stylesheet"      href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+            <link rel="stylesheet"      href="{{ STATIC_URL }}css/styles.css">
+        {% endif %}
         
         <!--[if lte IE 9]>
         <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.9.css">

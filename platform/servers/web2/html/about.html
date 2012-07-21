@@ -1,13 +1,13 @@
 {% extends "index.html" %}
 {% load stamped_tags %}
 
-<!-- CSS Dependencies => about.generated.css
-     - - - - - - - - - - - - - - - - - - - - -
+<!-- CSS Dependencies => generated/css/about.generated.css
+     - - - - - - - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
     
     Core stamped dependencies:
-        stylesheet: about.less
+        stylesheet: about.css
 -->
 
 <!-- HTML Template Dependencies => about.generated.html
@@ -17,9 +17,11 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/about.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/about.css">
+    {% if True %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/about.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/about.css">
+    {% endif %}
     
     <style>
         {% for user in founders %}
