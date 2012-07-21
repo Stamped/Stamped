@@ -87,6 +87,12 @@ class StringComparator(object):
 
         starts1, ends1 = cls.get_token_starts_and_ends(s1)
         starts2, ends2 = cls.get_token_starts_and_ends(s2)
+
+        get_skip_prefix_cost = cls.get_skip_prefix_cost
+        get_skip_word_cost = cls.get_skip_word_cost
+        get_skip_cost = cls.get_skip_cost
+        get_cmp_cost = cls.get_cmp_cost
+
         for curr_row in range(nrows):
 
             for curr_col in range(ncols):
@@ -100,37 +106,37 @@ class StringComparator(object):
                     curr_start_idx = starts1.index(curr_col)
                     skip_begin = starts1[curr_start_idx-1]
                     skip_end = curr_col
-                    cost = cls.get_skip_word_cost(s1, skip_begin, skip_end)
+                    cost = get_skip_word_cost(s1, skip_begin, skip_end)
                     least_penalty = min(least_penalty, cost + differences_array[curr_row, skip_begin])
                 if curr_row in starts2 and curr_row != starts2[0] and curr_col in starts1:
                     curr_start_idx = starts2.index(curr_row)
                     skip_begin = starts2[curr_start_idx-1]
                     skip_end = curr_row
-                    cost = cls.get_skip_word_cost(s2, skip_begin, skip_end)
+                    cost = get_skip_word_cost(s2, skip_begin, skip_end)
                     least_penalty = min(least_penalty, cost + differences_array[skip_begin, curr_col])
 
                 # TODO: I think I should do something similar with ends.
 
                 # Handle cutting off the entire string1 or string2 to date as an unwanted prefix.
                 if curr_row == 0 and curr_col in starts1 and curr_col != 0:
-                    cost = cls.get_skip_prefix_cost(s1, curr_col)
+                    cost = get_skip_prefix_cost(s1, curr_col)
                     least_penalty = min(least_penalty, cost + differences_array[curr_row, 0])
                 if curr_col == 0 and curr_row in starts2 and curr_row != 0:
-                    cost = cls.get_skip_prefix_cost(s2, curr_row)
+                    cost = get_skip_prefix_cost(s2, curr_row)
                     least_penalty = min(least_penalty, cost + differences_array[0, curr_col])
 
                 # Handle the case where we want to just skip a character in one string or the other. Expensive.
                 if curr_col > 0:
-                    cost = cls.get_skip_cost(s1, curr_col-1, s2, curr_row)
+                    cost = get_skip_cost(s1, curr_col-1, s2, curr_row)
                     least_penalty = min(least_penalty, cost + differences_array[curr_row, curr_col-1])
                 if curr_row > 0:
-                    cost = cls.get_skip_cost(s2, curr_row-1, s1, curr_col)
+                    cost = get_skip_cost(s2, curr_row-1, s1, curr_col)
                     least_penalty = min(least_penalty, cost + differences_array[curr_row-1, curr_col])
 
                 # Handle the case where we want to just progress a character in each string.
                 if curr_col > 0 and curr_row > 0:
                     char1, char2 = s1[curr_col-1], s2[curr_row-1]
-                    cost = cls.get_cmp_cost(s1, curr_col-1, s2, curr_row-1)
+                    cost = get_cmp_cost(s1, curr_col-1, s2, curr_row-1)
                     least_penalty = min(least_penalty, cost + differences_array[curr_row-1, curr_col-1])
 
                 differences_array[curr_row, curr_col] = least_penalty
