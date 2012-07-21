@@ -27,6 +27,7 @@ try:
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
     from search.ScoringUtils        import *
+    from search.DataQualityUtils    import *
 except:
     report()
     raise
@@ -312,6 +313,7 @@ class TMDBSource(GenericSource):
         for search_result in search_results:
             applyMovieTitleDataQualityTests(search_result, queryText)
             adjustMovieRelevanceByQueryMatch(search_result, queryText)
+            augmentMovieDataQualityOnBasicAttributePresence(search_result)
         # TODO: We could incorporate release date recency or popularity into our ranking, but for now will assume that
         # TMDB is clever enough to handle that for us.
         return search_results

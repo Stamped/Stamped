@@ -28,6 +28,7 @@ try:
     from api.Entity                     import mapCategoryToTypes
     from search.ScoringUtils        import *
     from resolve.Resolver                   import trackSimplify
+    from search.DataQualityUtils            import *
 except Exception:
     report()
     raise
@@ -994,7 +995,8 @@ class iTunesSource(GenericSource):
 
         # TODO: Refactoring is needed here.
         iTunesTypesToScoreAdjustments = {
-            'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch),
+            'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch,
+                       lambda result, _ : augmentMovieDataQualityOnBasicAttributePresence(result)),
             'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch),
             'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
             'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
