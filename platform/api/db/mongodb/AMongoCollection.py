@@ -237,6 +237,11 @@ class AMongoCollection(object):
         self._collection = MongoCollectionProxy(self, cfg.connection, db, collection, cap_size)
         
         logs.debug("Connected to MongoDB collection: %s" % collection)
+
+    @property
+    def isCapped(self):
+        options = self._collection.options()
+        return 'capped' in options and options['capped'] == True
     
     def _validateUpdate(self, result):
         try:
@@ -409,8 +414,14 @@ class AMongoCollection(object):
             documents = documents.sort(sort, order)
         
         return documents.limit(limit)
-    
-    
+
+
+    ### COLLECTION OPTIONS
+
+    def convertToCapped(self, size):
+        if not self.isCapped:
+            self._collection.command("convertToCapped", value=self._collection_name, size=size)
+
     ### RELATIONSHIP MANAGEMENT
     
     def _getOverflowBucket(self, objId):

@@ -21,7 +21,7 @@ class MongoLogsCollection(AMongoCollection):
             collection = "logs_%s" % stack_info.instance.stack
 
         AMongoCollection.__init__(self, collection=collection, logger=True)
-    
+
     ### PUBLIC
     
     def addLog(self, logData):

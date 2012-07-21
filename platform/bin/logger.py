@@ -15,6 +15,8 @@ from errors     import Fail
 
 from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
 
+LOG_COLLECTION_SIZE = 1024*1024*1024    # 1 gb
+
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
     version = "%prog " + __version__
@@ -89,8 +91,11 @@ def main():
         levels = ['debug', 'info', 'warning', 'error', 'critical']
     else:
         levels = ['info', 'warning', 'error', 'critical']
-    
-    logs = MongoLogsCollection().getLogs(userId=user_id, requestId=request_id, limit=limit, errors=errors,
+
+    logsCollection = MongoLogsCollection()
+    if not logsCollection.isCapped:
+        logsCollection.convertToCapped(LOG_COLLECTION_SIZE)
+    logs = logsCollection.getLogs(userId=user_id, requestId=request_id, limit=limit, errors=errors,
                                             path=path, severity=severity, method=method, code=code)
     for i in xrange(len(logs)):
         print 

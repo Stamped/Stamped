@@ -31,6 +31,9 @@ class MongoCollectionProxy(object):
         except:
             logs.warning("Error: unable to set collection")
             raise
+
+    def options(self):
+        return self._collection.options()
     
     def find(self, spec=None, output=None, limit=None, **kwargs):
         if self._debug:
@@ -61,7 +64,7 @@ class MongoCollectionProxy(object):
                 logs.info("Retrying find (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
     
-    def command(self, cmd):
+    def command(self, cmd, **kwargs):
         if self._debug:
             print("Mongo 'command' - cmd %s" % cmd)
 
@@ -70,7 +73,7 @@ class MongoCollectionProxy(object):
         
         while True:
             try:
-                ret = self._database.command(cmd)
+                ret = self._database.command(cmd, **kwargs)
                 return ret
             except AutoReconnect as e:
                 num_retries += 1
