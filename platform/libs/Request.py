@@ -140,6 +140,7 @@ class RateLimiterState(object):
 
         count = len(self.__fails)
 
+        print('### len fails: %s' % len(self.__fails))
         if count >= self.__fail_limit:
             print('### RPC server fail threshold reached')
             logs.error('### testing error')
