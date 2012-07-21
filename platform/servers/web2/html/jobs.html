@@ -17,7 +17,7 @@
 {% block styles %}
     {{ block.super }}
     
-    {% if STAMPED_DEBUG %}
+    {% if True %}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/jobs.css">
     {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}assets/generated/css/jobs.generated.{{ STAMPED_ASSET_VERSION }}.css">

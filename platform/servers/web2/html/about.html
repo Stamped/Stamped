@@ -17,7 +17,7 @@
 {% block styles %}
     {{ block.super }}
     
-    {% if STAMPED_DEBUG %}
+    {% if True %}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/about.css">
     {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/about.generated.{{ STAMPED_ASSET_VERSION }}.css">

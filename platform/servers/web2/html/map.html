@@ -34,7 +34,7 @@
 {% block styles %}
     {{ block.super }}
     
-    {% if STAMPED_DEBUG %}
+    {% if True %}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
     {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}assets/generated/css/map.generated.{{ STAMPED_ASSET_VERSION }}.css">
@@ -173,6 +173,7 @@
     {{ block.super }}
      
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD4uiuKac5adB9_bwQK9fgJx3SyZVzQsSc&sensor=true"></script>
+    
     {% if STAMPED_DEBUG %}
         <script src="{{ STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
         <script src="{{ STATIC_URL }}js/libs/handlebars.js"></script>
