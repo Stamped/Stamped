@@ -140,7 +140,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
                 result.append(self._getCachedUserMini(userId))
             except KeyError:
                 documentIds.append(self._getObjectIdFromString(userId))
-        documents = self._MongoDocumentsFromIds(documentIds)
+        documents = self._getMongoDocumentsFromIds(documentIds)
 
         for document in documents:
             user = self._convertFromMongo(document).minimize()
