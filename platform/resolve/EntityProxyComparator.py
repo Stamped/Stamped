@@ -25,6 +25,7 @@ except:
     report()
     raise
 
+logComparisonLogic = False
 
 class CompareResult(object):
     """
@@ -61,6 +62,14 @@ class CompareResult(object):
     @classmethod
     def definitely_not_match(cls):
         return cls(cls.DEFINITELY_NOT_MATCH)
+
+    def __repr__(self):
+        if self.is_match():
+            return 'CompareResult.match(%f)' % self.score
+        elif self.is_definitely_not_match():
+            return 'CompareResult.not_a_fucking_match()'
+        else:
+            return 'CompareResult.unknown()'
 
 
 class AEntityProxyComparator(object):
@@ -205,8 +214,7 @@ def loadWordFrequencyTable(fname):
     line_pairs = [tuple(line.strip().split(' ')) for line in lines]
     return dict(line_pairs[1:])
 
-#word_frequencies = loadWordFrequencyTable('/Users/paul/Downloads/anc-lexicon.txt')
-word_frequencies = None
+word_frequencies = loadWordFrequencyTable('/Users/paul/Downloads/anc-lexicon.txt')
 
 def simpleUncommonness(string):
     return len(string)
@@ -240,7 +248,9 @@ def target_sim(unc):
     return MIN_TARGET_SIM + 2 * ((1 - MIN_TARGET_SIM) / (1 + math.exp(unc / 10.0)))
 
 def get_odds_from_sim_unc(sim, unc):
-    return 20 * ((sim / target_sim(unc)) ** (2 * math.log(unc+1, 2)))
+    if sim <= 0:
+        return 0
+    return (sim ** 1.2) * ((sim / target_sim(unc)) ** 1.2) * ((unc / 8) ** 0.2)
 
 SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
 COMMA_SUBTITLE_RE = re.compile('(\w)\s*,\s*\w+.*$')
@@ -281,69 +291,13 @@ def strip_subtitle(title):
 
 
 def titleComparison(title1, title2, simplificationFn):
-    score1 = StringComparator.get_ratio(title1, title2)
-    score2 = 0.985 * StringComparator.get_ratio(simplifyLite(title1), simplifyLite(title2))
-    score3 = 0.96 * StringComparator.get_ratio(simplificationFn(title1), simplificationFn(title2))
-    return max(score1, score2, score3)
-
-
-class OddsBasedMovieEntityProxyComparator(AEntityProxyComparator):
-    @property
-    def prior_odds(self):
-        return 0.3
-
-    @property
-    def sameness_odds_threshold(self):
-        # A 20x boost is what we get for short titles being exactly the same. For movies/TV, we want that to be just
-        # enough if there's nothing else different about the two.
-        return 5.9
-
-    @property
-    def definitely_different_odds_threshold(self):
-        return 0.5
-
-    @property
-    def _compute_sameness_odds(self, proxy1, proxy2):
-        raw_name_similarity = StringComparator.get_ratio(movie1.name, movie2.name)
-        simple_name_similarity = StringComparator.get_ratio(movieSimplify(movie1.name),
-                movieSimplify(movie2.name))
-        sim_score = max(raw_name_similarity, simple_name_similarity - 0.10)
-        # You're 25x more likely to have the exact same raw name if you're the same than if you aren't.
-        # You're 10x more likely to have the exact same simplified name if you're the same than if you aren't.
-        # You're 5x more likely to have the exact same raw name if you're the same than if you aren't.
-        # The odds of having names that are 80% the same are the same whether you're the same or you aren't.
-        # Beyond there, steep penalties begin.
-        title_comparison_odds = (5 ** 10) ** (sim_score - 0.8)
-        self._adjust_odds_for_comparison(title_comparison_odds, 'title comparison')
-
-        if self._endsInDifferentNumbers(movie1.name, movie2.name):
-            self._adjust_odds_for_comparison(0.1, 'movie title number mismatch')
-
-        if movie1.release_date and movie2.release_date:
-            time_difference = abs(movie1.release_date - movie2.release_date)
-            # TODO: Smooth this.
-            if time_difference < timedelta(30):
-                release_date_odds = 25.0
-            elif time_difference < timedelta(365):
-                release_date_odds = 8.0
-            elif time_difference < timedelta(750):
-                release_date_odds = 2.0
-            else:
-                release_date_odds = 0.5
-            self._adjust_odds_for_comparison(release_date_odds, 'release dates')
-
-        if movie1.length and movie2.length:
-            movie_length_odds = None
-            if movie1.length == movie2.length and movie1.length % 60 != 0:
-                movie_length_odds = 40.0
-            elif movie1.length == movie2.length:
-                movie_length_odds = 20.0
-            if abs(movie1.length - movie2.length) <= 120:
-                movie_length_odds = 10.0
-
-
-
-
+    score1 = get_odds_from_sim_unc(StringComparator.get_ratio(title1, title2),
+        min(complexUncommonness(title1), complexUncommonness(title2)))
+    simple_title1 = simplificationFn(title1)
+    simple_title2 = simplificationFn(title2)
+    score2 = get_odds_from_sim_unc(StringComparator.get_ratio(simple_title1, simple_title2) * 0.98,
+        min(complexUncommonness(simple_title1), complexUncommonness(simple_title2)))
+    return max(score1, score2)
 
 
 class MovieEntityProxyComparator(AEntityProxyComparator):
@@ -354,94 +308,78 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
         title2 = convertRomanNumerals(title2)
         match1 = cls.ENDING_NUMBER_RE.search(title1)
         match2 = cls.ENDING_NUMBER_RE.search(title2)
-        return match1 and match2 and match1.group(1) != match2.group(1)
+        if match1 and match2 and match1.group(1) != match2.group(1):
+            return True
+        if match1 and not match2 and int(match1.group(1)) != 1:
+            return True
+        if match2 and not match1 and int(match2.group(1)) != 1:
+            return True
+        return False
 
     @classmethod
-    def compare_proxies(cls, movie1, movie2):
-        # Our task here is a bit harder than normal. There are often remakes, so name is not decisive. There are often
-        # digital re-masterings and re-releases, so dates are not decisive. Cast data is spotty.
-        # We get reliable release dates from TMDB and TheTVDB, but not from iTunes, so those are generally unhelpful.
+    def compare_proxies(self, movie1, movie2):
+        sim_score = titleComparison(movie1.name, movie2.name, movieSimplify)        
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(movie1.raw_name), movie1.source, movie1.key,
+                repr(movie2.raw_name), movie2.source, movie2.key,
+            )
+            print 'sim score after title', sim_score
+        # You're 25x more likely to have the exact same raw name if you're the same than if you aren't.
+        # You're 10x more likely to have the exact same simplified name if you're the same than if you aren't.
+        # You're 5x more likely to have the exact same raw name if you're the same than if you aren't.
+        # The odds of having names that are 80% the same are the same whether you're the same or you aren't.
+        # Beyond there, steep penalties begin.
 
-        raw_name_similarity = StringComparator.get_ratio(movie1.name, movie2.name)
-        simple_name_similarity = StringComparator.get_ratio(movieSimplify(movie1.name),
-            movieSimplify(movie2.name))
-        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
+        if movie1.source == 'tmdb' and movie2.source == 'tmdb' and movie1.key != movie2.key:
+            sim_score *= 0.7
+            if logComparisonLogic:
+                print 'demoting to', sim_score, 'for double tmdb IDs'
 
-        if cls._endsInDifferentNumbers(movie1.name, movie2.name):
-            sim_score -= 0.3
+        if self._endsInDifferentNumbers(movie1.name, movie2.name):
+            sim_score *= 0.4
+            if logComparisonLogic:
+                print 'demoting to', sim_score, 'for ending numbers'
 
         if movie1.release_date and movie2.release_date:
             time_difference = abs(movie1.release_date - movie2.release_date)
-            if time_difference > timedelta(750):
-                sim_score -= 0.2
+            # TODO: Smooth this.
+            if time_difference < timedelta(30):
+                release_date_odds = 2.5
             elif time_difference < timedelta(365):
-                sim_score += 0.05
-            elif time_difference < timedelta(30):
-                sim_score += 0.1
+                release_date_odds = 1.8
+            elif time_difference < timedelta(750):
+                release_date_odds = 1.4
+            else:
+                release_date_odds = 0.7
+
+            sim_score *= release_date_odds
+            if logComparisonLogic:
+                print 'changing to', sim_score, 'for release dates'
+
 
         if movie1.length and movie2.length:
-            if movie1.length == movie2.length:
-                sim_score += 0.1
-            if abs(movie1.length - movie2.length) < 60:
-                # Here, it might be really nice to actually check if one of them has been rounded to minutes and
-                # then converted back.
-                sim_score += 0.05
-
-        try:
-            movie1_director = simplify(movie1.directors[0]['name'])
-            movie2_director = simplify(movie2.directors[0]['name'])
-            if movie1_director == movie2_director:
-                sim_score += 0.2
+            movie_length_odds = None
+            if movie1.length == movie2.length and movie1.length % 60 != 0:
+                movie_length_odds = 2.0
+            elif movie1.length == movie2.length:
+                movie_length_odds = 1.5
+            elif abs(movie1.length - movie2.length) <= 120:
+                movie_length_odds = 1.25
             else:
-                sim_score -= 0.2
-        except IndexError:
-            pass
+                movie_length_odds = 0.9
+            sim_score *= movie_length_odds
+            if logComparisonLogic:
+                print 'changing to', sim_score, 'for movie lengths'
 
-        if simple_name_similarity > 0.9 and sim_score > 0.95:
+        if logComparisonLogic:
+            print 'final score:', sim_score, '\n'
+        if sim_score > 0.99:
             return CompareResult.match(sim_score)
-        elif simple_name_similarity < 0.8 or sim_score < 0.6:
+        elif sim_score < 0.5:
             return CompareResult.definitely_not_match()
-        return CompareResult.unknown()
-
-        """
-        cast1_names = set([simplify(actor['name']) for actor in movie1.cast])
-        cast2_names = set([simplify(actor['name']) for actor in movie2.cast])
-        if cast1_names and cast2_names:
-            overlap_fraction = float(len(cast1_names.intersection(cast2_names))) / min(len(cast1_names), len(cast2_names))
-            # So the midpoint here is at 20% matching. If less than that matches, it's a bad sign. If more than that
-            # matches, it's a good sign.
-            # TODO: This is totally not the best way to do this.
-            score += (overlap_fraction / 2) - 0.1
-
-        try:
-            movie1_director = simplify(movie1.directors[0]['name'])
-            movie2_director = simplify(movie2.directors[0]['name'])
-            if movie1_director == movie2_director:
-                score += 0.2
-            else:
-                score -= 0.2
-        except IndexError:
-            pass
-
-        # TODO: Pull out helper function here!
-        # TODO: Publisher?
-        # TODO: Genre, only as a potential gain?
-        try:
-            movie1_studio = simplify(movie1.studios[0]['name'])
-            movie2_studio = simplify(movie2.studios[0]['name'])
-            if movie1_studio == movie2_studio:
-                score += 0.2
-            # Don't subtract otherwise because sometimes it gets billed differently.
-        except IndexError:
-            pass
-
-        # TODO: MPAA rating (can we get this from TMDB?)
-        # TODO: Genres
-        if score >= 0.3:
-            return CompareResult.match(score)
         else:
             return CompareResult.unknown()
-        """
 
 
 class TvEntityProxyComparator(AEntityProxyComparator):

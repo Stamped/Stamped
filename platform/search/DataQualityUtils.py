@@ -32,8 +32,13 @@ def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
         movieSearchResult.dataQuality *= 1 - penalty
         movieSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
-    if movieSearchResult.resolverObject.directors:
+    if movieSearchResult.resolverObject.source == 'tmdb':
         boost = 0.1
+        movieSearchResult.dataQuality *= 1 + boost
+        movieSearchResult.addDataQualityComponentDebugInfo('boost for IMDB', boost)
+
+    if movieSearchResult.resolverObject.directors:
+        boost = 0.05
         movieSearchResult.dataQuality *= 1 + boost
         movieSearchResult.addDataQualityComponentDebugInfo("boost for director", boost)
 
