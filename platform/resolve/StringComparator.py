@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import re
-from numpy import array
+import collections
 
 # TODO: Handle pluralization and possessives properly.
 
@@ -79,8 +79,7 @@ class StringComparator(object):
     def get_difference(cls, s1, s2, max_difference=None):
         ncols = len(s1) + 1
         nrows = len(s2) + 1
-        row = tuple([-1] * ncols)
-        differences_array = array([row] * nrows, dtype=float)
+        differences_array = collections.defaultdict(lambda:-1)
         differences_array[0,0] = 0
         curr_col = 1
         curr_row = 0
@@ -97,13 +96,13 @@ class StringComparator(object):
                 least_penalty = 10000000
 
                 # If we're at the start of a new word, consider cutting it out.
-                if curr_col in starts1[1:] and curr_row in starts2:
+                if curr_col in starts1 and curr_col != starts1[0] and curr_row in starts2:
                     curr_start_idx = starts1.index(curr_col)
                     skip_begin = starts1[curr_start_idx-1]
                     skip_end = curr_col
                     cost = cls.get_skip_word_cost(s1, skip_begin, skip_end)
                     least_penalty = min(least_penalty, cost + differences_array[curr_row, skip_begin])
-                if curr_row in starts2[1:] and curr_col in starts1:
+                if curr_row in starts2 and curr_row != starts2[0] and curr_col in starts1:
                     curr_start_idx = starts2.index(curr_row)
                     skip_begin = starts2[curr_start_idx-1]
                     skip_end = curr_row
@@ -113,10 +112,10 @@ class StringComparator(object):
                 # TODO: I think I should do something similar with ends.
 
                 # Handle cutting off the entire string1 or string2 to date as an unwanted prefix.
-                if curr_col in starts1 and curr_col != 0 and curr_row == 0:
+                if curr_row == 0 and curr_col in starts1 and curr_col != 0:
                     cost = cls.get_skip_prefix_cost(s1, curr_col)
                     least_penalty = min(least_penalty, cost + differences_array[curr_row, 0])
-                if curr_row in starts2 and curr_row != 0 and curr_col == 0:
+                if curr_col == 0 and curr_row in starts2 and curr_row != 0:
                     cost = cls.get_skip_prefix_cost(s2, curr_row)
                     least_penalty = min(least_penalty, cost + differences_array[0, curr_col])
 
@@ -149,8 +148,10 @@ class StringComparator(object):
         return least_penalty
 
     @classmethod
-    def get_ratio(cls, s1, s2):
-        return cls.get_difference(s1, s2) / ((len(s1) + len(s2)) * 0.5)
+    def get_ratio(cls, s1, s2, min_ratio=0.8):
+        rough_max_distance = 0.5 * (len(s1) + len(s2))
+        max_difference = rough_max_distance * (1.0 - min_ratio)
+        return 1.0 - (float(cls.get_difference(s1, s2, max_difference=max_difference)) / ((len(s1) + len(s2)) * 0.5))
 
 if __name__ == '__main__':
     import sys
