@@ -21,9 +21,6 @@
 <!-- CSS Dependencies => assets/generated/css/index.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
-    Third-party library dependencies:
-        stylesheet: libs/jquery.fancybox.css
-    
     Core stamped dependencies:
         stylesheet: index.css
 -->
@@ -40,7 +37,6 @@
     {{ block.super }}
     
     {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
         <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
     {% else %}
         <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">

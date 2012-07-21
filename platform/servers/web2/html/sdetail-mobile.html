@@ -50,7 +50,7 @@
         <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
         <link rel="stylesheet" href="{{ STATIC_URL }}css/mobile/sdetail.css">
     {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}assets/generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>
@@ -334,7 +334,7 @@
         <script src="{{ STATIC_URL }}js/utils.js"></script>
         <script src="{{ STATIC_URL }}js/mobile/sdetail.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}assets/generated/js/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STATIC_URL }}generated/js/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 

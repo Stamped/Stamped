@@ -37,7 +37,7 @@
     {% if True %}
         <link rel="stylesheet" href="{{ STATIC_URL }}css/map.css">
     {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}assets/generated/css/map.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/map.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <!--[if lte IE 9]>
@@ -181,7 +181,7 @@
         <script src="{{ STATIC_URL }}js/libs/markerclusterer.js"></script>
         <script src="{{ STATIC_URL }}js/map.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}assets/generated/js/map.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STATIC_URL }}generated/js/map.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     {% ssi STAMPED_MAP_TEMPLATE_FILE %}
