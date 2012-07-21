@@ -72,7 +72,7 @@ def parseCommandLine():
             print("Warning: No instances exist on stack 'logger'")
             return options
         instance_name = '%s.%s' % (logger_nodes[0]['stack'], logger_nodes[0]['name'])
-        utils.init_db_config(instance_name)
+        utils.init_log_db_config(instance_name)
         if options.stack is None:
             options.stack = get_stack().instance.stack
 

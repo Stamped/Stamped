@@ -645,6 +645,28 @@ def init_db_config(config_desc):
     cfg2 = MongoDBConfig2.getInstance()
     cfg2.config = AttributeDict(config)
 
+def init_log_db_config(config_desc):
+    """ initializes MongoDB with proper host configuration """
+
+    host, port = get_db_config(config_desc)
+    config = {
+        'mongodb' : {
+            'hosts' : [(host, port)],
+            }
+    }
+
+    # TODO: there is a Python oddity that needs some investigation, where, depending on
+    # where and when the MongoDBConfig Singleton is imported, it'll register as the same
+    # instance that AMongoCollection knows about or not. For now, as a workaround, just
+    # import it multiple ways and initialize the config with both possible import paths.
+    from api.db.mongodb.AMongoCollection import MongoLogDBConfig
+    cfg = MongoLogDBConfig.getInstance()
+    cfg.config = AttributeDict(config)
+
+    from api.db.mongodb.AMongoCollection import MongoLogDBConfig as MongoLogDBConfig2
+    cfg2 = MongoLogDBConfig2.getInstance()
+    cfg2.config = AttributeDict(config)
+
     return config
 
 def is_func(obj):
