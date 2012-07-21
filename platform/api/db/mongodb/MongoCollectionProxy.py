@@ -15,7 +15,7 @@ from datetime       import datetime
 DEBUG = False
 
 class MongoCollectionProxy(object):
-    def __init__(self, parent, connection, database, collection):
+    def __init__(self, parent, connection, database, collection, cap_size=None):
         global DEBUG
         try:
             self._parent     = parent
@@ -23,6 +23,11 @@ class MongoCollectionProxy(object):
             self._database   = self._connection[database]
             self._collection = self._database[collection]
             self._debug      = DEBUG
+            # if cap_size is specified and the collection does not exist, create it and set a cap
+            collection_names = self._database.collection_names()
+            if cap_size is not None and collection not in collection_names:
+                self._database.create_collection(collection, size=cap_size, capped=True)
+
         except:
             logs.warning("Error: unable to set collection")
             raise

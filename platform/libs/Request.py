@@ -15,6 +15,7 @@ import rpyc
 import urllib
 import pickle
 import time
+from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
 from servers.ratelimiter.RateLimiter2 import RateException
 import libs.ec2_utils

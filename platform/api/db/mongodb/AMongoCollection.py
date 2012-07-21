@@ -16,6 +16,7 @@ from datetime               import datetime
 from pymongo.errors         import AutoReconnect, DuplicateKeyError
 from api.db.mongodb.MongoCollectionProxy   import MongoCollectionProxy
 
+LOGGER_CAP_SIZE = 1024*1024*1024    # allocate 1gb for logger collections
 
 class MongoDBConfig(Singleton):
     def __init__(self):
@@ -220,18 +221,20 @@ class AMongoCollection(object):
 
         if logger:
             self._dbConfig = MongoLogDBConfig.getInstance()
+            self._init_collection(self._dbConfig.database_name, collection, LOGGER_CAP_SIZE)
         else:
             self._dbConfig = MongoDBConfig.getInstance()
+            self._init_collection(self._dbConfig.database_name, collection)
         
-        self._init_collection(self._dbConfig.database_name, collection)
+
         self._primary_key = primary_key
         self._obj = obj
         self._overflow = overflow
         self._collection_name = collection
     
-    def _init_collection(self, db, collection):
+    def _init_collection(self, db, collection, cap_size=None):
         cfg = self._dbConfig
-        self._collection = MongoCollectionProxy(self, cfg.connection, db, collection)
+        self._collection = MongoCollectionProxy(self, cfg.connection, db, collection, cap_size)
         
         logs.debug("Connected to MongoDB collection: %s" % collection)
     
