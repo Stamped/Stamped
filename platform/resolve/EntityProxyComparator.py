@@ -95,16 +95,16 @@ class ArtistEntityProxyComparator(AEntityProxyComparator):
             name2 = artist2.name
             if name1 == name2:
                 return CompareResult.match(1.0)
-            if stringComparison(name1, name2, strict=True) > 0.9:
-                return CompareResult.match(stringComparison(name1, name2, strict=True))
+            if StringComparator.get_ratio(name1, name2) > 0.9:
+                return CompareResult.match(StringComparator.get_ratio(name1, name2))
 
             name1_simple = artistSimplify(name1)
             name2_simple = artistSimplify(name2)
 
             if name1_simple == name2_simple:
                 return CompareResult.match(0.9)
-            if stringComparison(name1_simple, name2_simple, strict=True) > 0.9:
-                return CompareResult.match(stringComparison(name1_simple, name2_simple, strict=True) - 0.1)
+            if StringComparator.get_ratio(name1_simple, name2_simple) > 0.9:
+                return CompareResult.match(StringComparator.get_ratio(name1_simple, name2_simple) - 0.1)
             return CompareResult.unknown()
 
 
@@ -114,9 +114,9 @@ class AlbumEntityProxyComparator(AEntityProxyComparator):
         """
         Album comparison is easy -- just album name and artist name.
         """
-        raw_name_similarity = stringComparison(album1.name, album2.name, strict=True)
-        simple_name_similarity = stringComparison(albumSimplify(album1.name),
-            albumSimplify(album2.name), strict=True)
+        raw_name_similarity = StringComparator.get_ratio(album1.name, album2.name)
+        simple_name_similarity = StringComparator.get_ratio(albumSimplify(album1.name),
+            albumSimplify(album2.name))
         album_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
         if album_name_sim <= 0.8:
             return CompareResult.unknown()
@@ -125,9 +125,9 @@ class AlbumEntityProxyComparator(AEntityProxyComparator):
         try:
             artist1_name = album1.artists[0]['name']
             artist2_name = album2.artists[0]['name']
-            raw_artist_similarity = stringComparison(artist1_name, artist2_name, strict=True)
-            simple_artist_similarity = stringComparison(artistSimplify(artist1_name),
-                artistSimplify(artist2_name), strict=True)
+            raw_artist_similarity = StringComparator.get_ratio(artist1_name, artist2_name)
+            simple_artist_similarity = StringComparator.get_ratio(artistSimplify(artist1_name),
+                artistSimplify(artist2_name))
             artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
             if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
                 artist_name_sim = max(artist_name_sim, 0.9)
@@ -148,9 +148,9 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
         """
         Track comparison is easy -- just track name and artist name.
         """
-        raw_name_similarity = stringComparison(track1.name, track2.name, strict=True)
-        simple_name_similarity = stringComparison(trackSimplify(track1.name),
-            trackSimplify(track2.name), strict=True)
+        raw_name_similarity = StringComparator.get_ratio(track1.name, track2.name)
+        simple_name_similarity = StringComparator.get_ratio(trackSimplify(track1.name),
+            trackSimplify(track2.name))
         track_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
         if track_name_sim <= 0.8:
             return CompareResult.unknown()
@@ -159,9 +159,9 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
         try:
             artist1_name = track1.artists[0]['name']
             artist2_name = track2.artists[0]['name']
-            raw_artist_similarity = stringComparison(artist1_name, artist2_name, strict=True)
-            simple_artist_similarity = stringComparison(artistSimplify(artist1_name),
-                artistSimplify(artist2_name), strict=True)
+            raw_artist_similarity = StringComparator.get_ratio(artist1_name, artist2_name)
+            simple_artist_similarity = StringComparator.get_ratio(artistSimplify(artist1_name),
+                artistSimplify(artist2_name))
             artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
             if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
                 artist_name_sim = max(artist_name_sim, 0.9)
@@ -190,7 +190,7 @@ def titleSamenessOdds(title1, title2, simplifyFn):
         return similarity * (length ** 0.5)
 
     title1, title2 = simplifyLite(title1), simplifyLite(title2)
-    raw_similarity = stringComparison(title1, title2, strict=True) ** 3
+    raw_similarity = StringComparator.get_ratio(title1, title2) ** 3
     shorter_title, longer_title = (title1, title2) if len(title1) < len(title2) else (title2, title1)
     if (longer_title.lower().starts_with(longer_title.lower()) and
         BEGINNING_SUBTITLE_RE.match(longer_title[len(shorter_title):])):
@@ -304,9 +304,9 @@ class OddsBasedMovieEntityProxyComparator(AEntityProxyComparator):
 
     @property
     def _compute_sameness_odds(self, proxy1, proxy2):
-        raw_name_similarity = stringComparison(movie1.name, movie2.name, strict=True)
-        simple_name_similarity = stringComparison(movieSimplify(movie1.name),
-                movieSimplify(movie2.name), strict=True)
+        raw_name_similarity = StringComparator.get_ratio(movie1.name, movie2.name)
+        simple_name_similarity = StringComparator.get_ratio(movieSimplify(movie1.name),
+                movieSimplify(movie2.name))
         sim_score = max(raw_name_similarity, simple_name_similarity - 0.10)
         # You're 25x more likely to have the exact same raw name if you're the same than if you aren't.
         # You're 10x more likely to have the exact same simplified name if you're the same than if you aren't.
@@ -452,9 +452,9 @@ class TvEntityProxyComparator(AEntityProxyComparator):
         and we want to cluster those together, so things like runtime and release date don't work. Title is really
         the meat of the comparison.
         """
-        raw_name_similarity = stringComparison(tv_show1.name, tv_show2.name, strict=True)
-        simple_name_similarity = stringComparison(movieSimplify(tv_show1.name),
-            movieSimplify(tv_show2.name), strict=True)
+        raw_name_similarity = StringComparator.get_ratio(tv_show1.name, tv_show2.name)
+        simple_name_similarity = StringComparator.get_ratio(movieSimplify(tv_show1.name),
+            movieSimplify(tv_show2.name))
         sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
 
         if tv_show1.release_date and tv_show2.release_date:
@@ -508,7 +508,7 @@ class BookEntityProxyComparator(AEntityProxyComparator):
         if book1_name_simple == book2_name_simple:
             return 1
 
-        similarity = stringComparison(book1_name_simple, book2_name_simple, strict=True)
+        similarity = StringComparator.get_ratio(book1_name_simple, book2_name_simple)
         title1_without_subtitle = cls._strip_subtitle(book1_name_simple)
         title2_without_subtitle = cls._strip_subtitle(book2_name_simple)
         if book1_name_simple == title2_without_subtitle or book2_name_simple == title1_without_subtitle:
@@ -518,7 +518,7 @@ class BookEntityProxyComparator(AEntityProxyComparator):
         elif isSuspiciousPrefixBookTitle(book1_name_simple, book2_name_simple):
             similarity = max(similarity, 0.9)
         else:
-            subtitle_similarity = stringComparison(title1_without_subtitle, title2_without_subtitle, strict=True)
+            subtitle_similarity = StringComparator.get_ratio(title1_without_subtitle, title2_without_subtitle)
             similarity = max(similarity, subtitle_similarity - 0.1)
         return similarity
 
@@ -533,7 +533,7 @@ class BookEntityProxyComparator(AEntityProxyComparator):
             # This makes "Todd Gardner" and "Todd Manci Gardner" match.
         if author1_tokens > author2_tokens or author2_tokens > author1_tokens:
             return 0.9
-        return stringComparison(author1_name_simple, author2_name_simple, strict=True)
+        return StringComparator.get_ratio(author1_name_simple, author2_name_simple)
 
     @classmethod
     def compare_proxies(cls, book1, book2):
@@ -589,9 +589,9 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
         #print "COMPARING PLACES:", place1.name, "--", tryToGetStreetAddressFromPlace(place1), "--", place1.key, \
         #      "       AND    ", place2.name, "--", tryToGetStreetAddressFromPlace(place2), "--", place2.key
 
-        raw_name_similarity = stringComparison(place1.name, place2.name, strict=True)
-        simple_name_similarity = stringComparison(simplify(place1.name),
-            simplify(place2.name), strict=True)
+        raw_name_similarity = StringComparator.get_ratio(place1.name, place2.name)
+        simple_name_similarity = StringComparator.get_ratio(simplify(place1.name),
+            simplify(place2.name))
         name_similarity = max(raw_name_similarity, simple_name_similarity - 0.15)
         if place1.name.startswith(place2.name) or place2.name.startswith(place1.name):
             name_similarity = max(name_similarity, 0.9)
@@ -650,7 +650,7 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
         locality2 = tryToGetLocalityFromPlace(place2)
         if locality1 and locality2:
             compared_locations = True
-            if stringComparison(simplify(locality1), simplify(locality2), strict=True) != 1:
+            if StringComparator.get_ratio(simplify(locality1), simplify(locality2)) != 1:
                 #print "DROPPING 0.3 for LOCALITY"
                 location_similarity -= 0.3
 
@@ -686,7 +686,7 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
                     # case, though.
 
             #print "COMPARING", street_address1, "TO", street_address2
-            street_address_similarity = stringComparison(street_address1, street_address2, strict=True)
+            street_address_similarity = StringComparator.get_ratio(street_address1, street_address2)
             if ((street_address1 in street_address2 and set(street_address1.split()) < set(street_address2.split())) or
                 (street_address2 in street_address1 and set(street_address2.split()) < set(street_address1.split()))):
                 street_address_similarity = max(street_address_similarity, 0.9)
@@ -703,7 +703,7 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
             address_string1 = cls._simplify_address(place1.address_string)
             address_string2 = cls._simplify_address(place2.address_string)
 
-            address_string_similarity = stringComparison(address_string1, address_string2, strict=True)
+            address_string_similarity = StringComparator.get_ratio(address_string1, address_string2)
 
             # Completely tanks similarity for different address strings, max boost of 0.6 for identical. TODO: I might
             # want to be even stricter here.
