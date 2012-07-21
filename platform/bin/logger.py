@@ -12,7 +12,7 @@ from optparse   import OptionParser
 from utils      import lazyProperty
 from datetime   import *
 from errors     import Fail
-from libs.ec2_utils import is_ec2, get_db_nodes
+from libs.ec2_utils import is_ec2, get_db_nodes, get_stack
 
 from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
 
@@ -74,8 +74,7 @@ def parseCommandLine():
         instance_name = '%s.%s' % (logger_nodes[0]['stack'], logger_nodes[0]['name'])
         utils.init_db_config(instance_name)
         if options.stack is None:
-            stack_info = libs.ec2_utils.get_stack()
-            options['stack'] = stack_info.instance.stack
+            options['stack'] = get_stack().instance.stack
 
     return options
 
