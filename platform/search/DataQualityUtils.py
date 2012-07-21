@@ -60,19 +60,19 @@ def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
 
 def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
     if tvSearchResult.resolverObject.release_date is None:
-        penalty = 0.1
+        penalty = 0.15
         tvSearchResult.dataQuality *= 1 - penalty
         tvSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
     if tvSearchResult.resolverObject.source == 'thetvdb':
-        boost = 0.05
+        boost = 0.1
         tvSearchResult.dataQuality *= 1 + boost
         tvSearchResult.addDataQualityComponentDebugInfo('boost for thetvdb', boost)
 
     if not tvSearchResult.resolverObject.description:
         penalty = 0.1
         tvSearchResult.dataQuality *= 1 - penalty
-        tvSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
+        tvSearchResult.addDataQualityComponentDebugInfo("penalty for missing description", penalty)
 
     titleUncommonness = complexUncommonness(tvSearchResult.resolverObject.name)
     if titleUncommonness < 6:

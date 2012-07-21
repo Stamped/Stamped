@@ -997,9 +997,9 @@ class iTunesSource(GenericSource):
         iTunesTypesToScoreAdjustments = {
             'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch,
                        lambda result, _ : augmentMovieDataQualityOnBasicAttributePresence(result)),
-            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch),
-            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch,
-                             lambda result, _ : augmentTvDataQualityOnBasicAttributePresence(result)),
+            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch,
+                        lambda result, _ : augmentTvDataQualityOnBasicAttributePresence(result)),
+            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
             'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
             'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch),
         }

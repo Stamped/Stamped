@@ -230,6 +230,8 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
                 release_date_odds = 1.8
             elif time_difference < timedelta(750):
                 release_date_odds = 1.4
+            elif movie1.source != 'stamped' and movie2.source != 'stamped' and time_difference > timedelta(365*5):
+                release_date_odds = 0.3
             else:
                 release_date_odds = 0.7
 
@@ -280,12 +282,10 @@ class TvEntityProxyComparator(AEntityProxyComparator):
 
         if tv_show1.release_date and tv_show2.release_date:
             time_difference = abs(tv_show1.release_date - tv_show2.release_date)
-            if time_difference > timedelta(365 * 10):
+            if time_difference > timedelta(365 * 5):
                 sim_score *= 0.5
-            elif time_difference < timedelta(365 * 5):
-                sim_score *= 1.1
             elif time_difference < timedelta(365 * 2):
-                sim_score *= 1.2
+                sim_score *= 1.1
             elif time_difference < timedelta(365 * 1):
                 sim_score *= 1.3
             if logComparisonLogic:
@@ -300,6 +300,8 @@ class TvEntityProxyComparator(AEntityProxyComparator):
             print 'Final sim score is:', sim_score
         if sim_score > 1:
             return CompareResult.match(sim_score)
+        elif sim_score < 0.5:
+            return CompareResult.definitely_not_match()
         else:
             return CompareResult.unknown()
 
