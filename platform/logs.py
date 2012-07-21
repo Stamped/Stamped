@@ -49,14 +49,14 @@ class LoggingContext(object):
             return
 
         # Don't log pings
-        if self.__logs['path'] == '/v1/ping.json':
+        if self.__log['path'] == '/v1/ping.json':
             return
 
         self.__log['finish'] = datetime.datetime.utcnow()
         try:
-            self.__log['duration'] = (self.__log['finish'] - self.__log['begin']).microseconds()
-        except Exception:
-            warning("FAILED TO CALCULATE DURATION")
+            self.__log['duration'] = (self.__log['finish'] - self.__log['begin']).microseconds
+        except Exception as e:
+            warning("FAILED TO CALCULATE DURATION: %s" % e)
             pass
 
         try:
