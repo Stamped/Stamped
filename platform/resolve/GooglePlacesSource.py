@@ -403,11 +403,11 @@ class GooglePlacesSource(GenericSource):
         localResults = []
         nationalResults = []
         def searchLocally():
-            results = self.__places.getSearchResultsByLatLng(coords, params={'name': queryText, 'radius': 20000})
+            results = self.__places.getSearchResultsByLatLng(coords, params={'name': queryText, 'radius': 20000}, priority='high')
             if results:
                 localResults.extend(results)
         def searchNationally():
-            results = self.__places.getAutocompleteResults(coords, queryText)
+            results = self.__places.getAutocompleteResults(coords, queryText, priority='high')
             if results:
                 nationalResults.extend(results)
         if coords:

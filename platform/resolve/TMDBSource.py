@@ -298,7 +298,7 @@ class TMDBSource(GenericSource):
         return [resolverObject for resolverObject in resolverObjects if not isFarInFuture(resolverObject)]
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
-        raw_results = self.__tmdb.movie_search(queryText)['results']
+        raw_results = self.__tmdb.movie_search(queryText, priority='high')['results']
         if logRawResults:
             logComponents = ['\n\n\nTMDB RAW RESULTS\nTMDB RAW RESULTS\nTMDB RAW RESULTS\n\n\n']
             for result in raw_results:

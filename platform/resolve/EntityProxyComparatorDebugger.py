@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import re, sys
-from resolve.EntityProxyComparator import *
+from resolve import EntityProxyComparator
 from resolve.AmazonSource import AmazonSource
 from resolve.FactualSource import FactualSource
 from resolve.GooglePlacesSource import GooglePlacesSource
@@ -33,6 +33,8 @@ SOURCES = {
 
 SOURCE_AND_KEY_RE = re.compile('([a-z_]+):(.*)')
 def main():
+    EntityProxyComparator.logComparisonLogic = True
+
     proxies = []
     for arg in sys.argv[1:]:
         source_and_key_match = SOURCE_AND_KEY_RE.match(arg)
@@ -44,21 +46,21 @@ def main():
         raise Exception('You are shit at this.')
 
     if isinstance(proxies[0], ResolverMediaCollection) and 'album' in proxies[0].types:
-        comparator = AlbumEntityProxyComparator
+        comparator = EntityProxyComparator.AlbumEntityProxyComparator
     elif isinstance(proxies[0], ResolverPerson) and 'artist' in proxies[0].types:
-        comparator = ArtistEntityProxyComparator
+        comparator = EntityProxyComparator.ArtistEntityProxyComparator
     elif isinstance(proxies[0], ResolverMediaItem) and 'track' in proxies[0].types:
-        comparator = TrackEntityProxyComparator
+        comparator = EntityProxyComparator.TrackEntityProxyComparator
     elif isinstance(proxies[0], ResolverMediaCollection) and 'tv' in proxies[0].types:
-        comparator = TvEntityProxyComparator
+        comparator = EntityProxyComparator.TvEntityProxyComparator
     elif isinstance(proxies[0], ResolverMediaItem) and 'movie' in proxies[0].types:
-        comparator = MovieEntityProxyComparator
+        comparator = EntityProxyComparator.MovieEntityProxyComparator
     elif isinstance(proxies[0], ResolverMediaItem) and 'book' in proxies[0].types:
-        comparator = BookEntityProxyComparator
+        comparator = EntityProxyComparator.BookEntityProxyComparator
     elif isinstance(proxies[0], ResolverPlace):
-        comparator = PlaceEntityProxyComparator
+        comparator = EntityProxyComparator.PlaceEntityProxyComparator
     elif isinstance(proxies[0], ResolverSoftware):
-        comparator = AppEntityProxyComparator
+        comparator = EntityProxyComparator.AppEntityProxyComparator
 
     for i in range(len(proxies)):
         for j in range(i):

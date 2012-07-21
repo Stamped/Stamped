@@ -76,6 +76,9 @@ class SimpleDB(object):
             if 'client_id' in stat:
                 data['cid'] = stat['client_id']
 
+            if 'duration' in stat:
+                data['dur'] = "{0:08d}".format(stat['duration'])
+
             if len(data) > 0:
                 statId = str(ObjectId())
                 if data['uri'] != '/v1/ping.json' and data['uri'] != '/v1/temp/ping.json':

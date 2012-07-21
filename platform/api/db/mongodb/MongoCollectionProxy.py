@@ -15,7 +15,7 @@ from datetime       import datetime
 DEBUG = False
 
 class MongoCollectionProxy(object):
-    def __init__(self, parent, connection, database, collection):
+    def __init__(self, parent, connection, database, collection, cap_size=None):
         global DEBUG
         try:
             self._parent     = parent
@@ -23,9 +23,17 @@ class MongoCollectionProxy(object):
             self._database   = self._connection[database]
             self._collection = self._database[collection]
             self._debug      = DEBUG
+            # if cap_size is specified and the collection does not exist, create it and set a cap
+            collection_names = self._database.collection_names()
+            if cap_size is not None and collection not in collection_names:
+                self._database.create_collection(collection, size=cap_size, capped=True)
+
         except:
             logs.warning("Error: unable to set collection")
             raise
+
+    def options(self):
+        return self._collection.options()
     
     def find(self, spec=None, output=None, limit=None, **kwargs):
         if self._debug:
@@ -56,7 +64,7 @@ class MongoCollectionProxy(object):
                 logs.info("Retrying find (%s)" % (self._parent.__class__.__name__))
                 time.sleep(0.25)
     
-    def command(self, cmd):
+    def command(self, cmd, **kwargs):
         if self._debug:
             print("Mongo 'command' - cmd %s" % cmd)
 
@@ -65,7 +73,7 @@ class MongoCollectionProxy(object):
         
         while True:
             try:
-                ret = self._database.command(cmd)
+                ret = self._database.command(cmd, **kwargs)
                 return ret
             except AutoReconnect as e:
                 num_retries += 1

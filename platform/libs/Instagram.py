@@ -27,14 +27,16 @@ try:
     from libs.RateLimiter    import RateLimiter, RateException
     from libs.LRUCache       import lru_cache
     from libs.Memcache       import memcached_function
+    from libs.Request        import service_request
+    from APIKeys import get_api_key
 except:
     report()
     raise
 
 HOST            = 'https://api.instagram.com/v1'
 PORT            = '80'
-CLIENT_ID       = '772a5e1689cf4ae085cb155844dbcd1e'
-CLIENT_SECRET   = 'cdeb59e88a724cdd8ef4792bc7f72bcf'
+CLIENT_ID       = get_api_key('instagram', 'client_id')
+CLIENT_SECRET   = get_api_key('instagram', 'client_secret')
 
 class Instagram(object):
     def __init__(self, client_id=CLIENT_ID, client_secret=CLIENT_SECRET):
@@ -42,19 +44,18 @@ class Instagram(object):
         self.__client_secret=client_secret
         self.__consumer = oauth.OAuthConsumer(self.__client_id, self.__client_secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
-        self.__limiter = RateLimiter(cps=10)
 
     #def place_search(self, **kwargs):
     #    return self.__instagram('locations/search', **kwargs)
 
-    def place_search(self, foursquare_id):
-        return self.__instagram('locations/search', foursquare_v2_id=foursquare_id)
+    def place_search(self, foursquare_id, priority='low'):
+        return self.__instagram('locations/search', priority, foursquare_v2_id=foursquare_id)
 
-    def place_lookup(self, instagram_id):
-        return self.__instagram('locations/' + instagram_id)
+    def place_lookup(self, instagram_id, priority='low'):
+        return self.__instagram('locations/' + instagram_id, priority)
 
-    def place_recent_media(self, instagram_id):
-        return self.__instagram('locations/%s/media/recent' % instagram_id)
+    def place_recent_media(self, instagram_id, priority='low'):
+        return self.__instagram('locations/%s/media/recent' % instagram_id, priority)
 
 #    def place_recent_media(self, **kwargs):
 #        return self.
@@ -64,7 +65,7 @@ class Instagram(object):
     # and also cached remotely via memcached with a TTL of 7 days
 #    @lru_cache(maxsize=64)
 #    @memcached_function(time=7*24*60*60)
-    def __instagram(self, service, max_retries=3, verb='GET', **params):
+    def __instagram(self, service, priority='low', max_retries=3, verb='GET', **params):
         if 'client_id' not in params:
             params['client_id'] = self.__client_id
 
@@ -73,16 +74,15 @@ class Instagram(object):
         else:
             url = "%s/%s" % (HOST, service)
 
-        pairs = [ '%s=%s' % (k,urllib2.quote(str(v))) for k,v in params.items() ]
-        url += '?%s' % '&'.join(pairs)
-        logs.info(url)
+        response, content = service_request('instagram',
+                                            'GET',
+                                            url,
+                                            query_params=params,
+                                            header={ 'Accept' : 'application/json' },
+                                            priority=priority)
 
-        with self.__limiter:
-            req = urllib2.Request(url, headers={ 'Accept' : 'application/json' })
-            response = urllib2.urlopen(req).read()
-        data = json.loads(response)
+        data = json.loads(content)
         return data
-
 
 __globalInstagram = None
 

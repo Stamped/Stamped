@@ -45,6 +45,9 @@ class MongoStatsCollection(AMongoCollection):
             if 'node' in statData:
                 stat['nde'] = statData['node']
 
+            if 'duration' in statData:
+                stat['dur'] = statData['duration']
+
 
             self._collection.insert_one(stat, log=False, safe=False)
 

@@ -1,19 +1,32 @@
+#!/usr/bin/env python
 
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
+
+import Globals
 import time
-import urllib, urllib2, json, urlparse
+import urllib, json, urlparse
 import logs, utils
 import re
 from errors import *
+from libs.Request import *
+from APIKeys import get_api_key
 
-APP_ID          = '297022226980395'
-APP_SECRET      = '17eb87d731f38bf68c7b40c45c35e52e'
-APP_NAMESPACE   = 'stampedapp'
+
+
+APP_ID          = get_api_key('facebook', 'app_id')
+APP_SECRET      = get_api_key('facebook', 'app_secret')
+APP_NAMESPACE   = get_api_key('facebook', 'app_namespace')
 
 USER_ID = '100003940534060'
 ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvqLI9LyvDVL5Qg9CmuqJOHSMTT1cgDXk5uj7ODE8CsAZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
+
+#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -22,7 +35,7 @@ class Facebook(object):
         self.app_namespace  = app_namespace
         pass
 
-    def _http(self, method, accessToken, path, parse_json=True, **params):
+    def _http(self, method, accessToken, path, priority='high', parse_json=True, **params):
         if params is None:
             params = {}
 
@@ -34,59 +47,52 @@ class Facebook(object):
             params['method'] = method
 
         data = None
-        while True:
-            try:
-                baseurl = ''
-                if path[:8] != 'https://':
-                    baseurl = 'https://graph.facebook.com/'
-                url     = "%s%s" % (baseurl, path)
-                if params != {}:
-                    encoded_params  = urllib.urlencode(params)
-                    if method == 'get':
-                        url += "?%s" % encoded_params
-                    else:
-                        data = encoded_params
-                logs.info("'%s'  url: %s" % (method,url))
-                logs.info('encoded_params: %s' % encoded_params)
-                if parse_json:
-                    result  = json.load(urllib2.urlopen(url, data))
-                else:
-                    result = urllib2.urlopen(url).read()
-                return result
-            except urllib2.HTTPError as e:
-                logs.info('e: %s' % e)
-                result = json.load(e)
-                logs.info('result: %s' % result)
-                if 'error' in result:
-                    if 'code' in result['error']:
-                        code = result['error']['code']
-                        if code == 190:
-                            raise StampedFacebookTokenError('Invalid Facebook token')
-#                    if 'code' in result['error']:
-#                        # if a code is provided, then we can reauth the user
-#                        logs.info('### hit error in FB with code')
-#                        self.getUserAccessToken(result['error']['code'])
-                    if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
-                        # OAuth exception
-                        msg = result['error']['message']
 
-                logs.info('Facebook API Error: code: %s  message: %s' % (e.code, e))
+        baseurl = ''
+        if path[:8] != 'https://':
+            baseurl = 'https://graph.facebook.com/'
+        url     = "%s%s" % (baseurl, path)
 
-                num_retries += 1
-                if num_retries > max_retries:
-                    raise StampedThirdPartyError('Facebook API Error')
+        if method == 'get':
+            response, content = service_request('facebook', method, url, query_params=params, priority=priority)
+        else:
+            response, content = service_request('facebook', method, url, body=params, priority=priority)
+        if parse_json:
+            result = json.loads(content)
+        else:
+            result = content
 
-                logs.info("Retrying (%s)" % (num_retries))
-                time.sleep(0.5)
+        if int(response.status) >= 400:
+            result = json.loads(content)
+            logs.info('result: %s' % result)
 
-    def _get(self, accessToken, path, parse_json=True, **params):
-        return self._http('get', accessToken, path, parse_json, **params)
+            msg = None
+            if 'error' in result:
+                if 'code' in result['error']:
+                    code = result['error']['code']
+                    if code == 190:
+                        raise StampedFacebookTokenError('Invalid Facebook token')
+                if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
+                    # OAuth exception
+                    pass
+                msg = result['error']['message']
 
-    def _post(self, accessToken, path, parse_json=True, **params):
-        return self._http('post', accessToken, path, parse_json, **params)
+            logs.info('Facebook API Error: code: %s  message: %s' % (response.status, msg))
 
-    def _delete(self, accessToken, path, parse_json=True, **params):
-        return self._http('delete', accessToken, path, parse_json, **params)
+            raise StampedThirdPartyError('Facebook API Error')
+
+            #logs.info("Retrying (%s)" % (num_retries))
+            #time.sleep(0.5)
+        return result
+
+    def _get(self, accessToken, path, priority='high', **params):
+        return self._http('get', accessToken, path, priority, **params)
+
+    def _post(self, accessToken, path, priority='high', **params):
+        return self._http('post', accessToken, path, priority, **params)
+
+    def _delete(self, accessToken, path, priority='high', **params):
+        return self._http('delete', accessToken, path, priority, **params)
 
     def authorize(self, code, state):
         path = 'oauth/access_token'
@@ -156,7 +162,7 @@ class Facebook(object):
         result = self._get(
             None,
             path,
-            False,
+            parse_json      = False,
             client_id       = client_id,
             client_secret   = client_secret,
             grant_type      = 'client_credentials',
@@ -171,7 +177,6 @@ class Facebook(object):
         result = self._get(
             None,
             path,
-            False,
             client_id       = client_id,
             client_secret   = client_secret,
             code            = code,
@@ -252,6 +257,7 @@ class Facebook(object):
         return self._post(
             access_token,
             path,
+            priority='low',
             **args
         )
 
@@ -259,7 +265,8 @@ class Facebook(object):
         path = str(action_instance_id)
         return self._delete(
             access_token,
-            path
+            path,
+            priority='low',
         )
 
     def getNewsFeed(self, user_id, access_token):
@@ -279,6 +286,7 @@ class Facebook(object):
         self._post(
             access_token,
             path,
+            priority='low',
             **params
         )
 
@@ -315,7 +323,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToNewsFeed'
+    methods = 'getUserInfo'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

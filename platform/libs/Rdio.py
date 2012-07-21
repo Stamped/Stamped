@@ -41,7 +41,9 @@ try:
     from urllib2                import HTTPError
     from urllib                 import quote_plus
     from django.utils.encoding  import iri_to_uri
-    
+    from libs.Request           import service_request
+    from APIKeys                import get_api_key
+
     try:
         import json
     except ImportError:
@@ -49,6 +51,10 @@ try:
 except:
     report()
     raise
+
+
+API_KEY         = get_api_key('rdio', 'api_key')
+API_SECRET      = get_api_key('rdio', 'api_secret')
 
 
 def urlencode_utf8(params):
@@ -61,61 +67,58 @@ def urlencode_utf8(params):
 
 class Rdio(object):
 
-    def __init__(self, key='bzj2pmrs283kepwbgu58aw47', secret='xJSZwBZxFp', cps=5, cpd=15000):
+    def __init__(self, key=API_KEY, secret=API_SECRET):
         self.__key      = key
         self.__secret   = secret
         self.__consumer = oauth.Consumer(self.__key, self.__secret)
-        self.__limiter  = RateLimiter(cps=cps, cpd=cpd)
+        self.__signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1()
 
-    # note: these decorators add tiered caching to this function, such that 
-    # results will be cached locally with a very small LRU cache of 64 items 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @countedFn('Rdio (before caching)')
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Rdio (after caching)')
-    def method(self, method, **kwargs):
-        # create the OAuth consumer credentials
-        client = oauth.Client(self.__consumer)
-        kwargs['method'] = method 
-        
+    def method(self, method, priority='low', **kwargs):
         for k,v in kwargs.items():
             if isinstance(v,int) or isinstance(v,float):
                 kwargs[k] = str(v)
             elif isinstance(v,unicode):
                 kwargs[k] = v.encode('utf-8')
-        
-        urlish = 'http://api.rdio.com/1/ POST %s' % urlencode_utf8(kwargs)
-        try:
-            with self.__limiter:
-                logs.info(urlish)
-                response = client.request('http://api.rdio.com/1/', 
-                                          'POST', 
-                                          urlencode_utf8(kwargs),
-                                          headers={'Accept-encoding':'gzip'})
-        except HTTPError as e:
-            logs.warning("Rdio threw an exception (%s): %s" % (e.code, e.message))
-            raise
-        
-        status = int(response[0]['status'])
-        if status == 200:
-            return json.loads(response[1])
-        else:
-            logs.warning("Rdio returned a failure response (%s): %s" % (status, response[1]))
-            raise Exception('rdio returned a failure response %d' % status) 
-    
-    def userMethod(self, token, token_secret, method, **kwargs): 
-        kwargs['method'] = method 
-        access_token = oauth.Token(token, token_secret)   
+
+        kwargs['method'] = method
+
+        oauthRequest = oauth.Request.from_consumer_and_token(self.__consumer,
+                            http_url='http://api.rdio.com/1/',
+                            http_method='POST',
+                            token = None,
+                            parameters=kwargs)
+        oauthRequest.sign_request(self.__signature_method_hmac_sha1, self.__consumer, None)
+
+        body = oauthRequest
+        body.update(kwargs)
+        headers = {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept-encoding':'gzip'
+        }
+        response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/',
+                                            header=headers, body=body, priority=priority)
+        return json.loads(content)
+
+    def userMethod(self, token, token_secret, method, **kwargs):
+        kwargs['method'] = method
+        access_token = oauth.Token(token, token_secret)
         client = oauth.Client(self.__consumer, access_token)
-        
-        with self.__limiter:
-            logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
-            response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
-        
+
+        #TODO: add service_request call here.  This method isn't being called right now, s
+
+        logs.info('http://api.rdio.com/1/ POST %s' % urllib.urlencode(kwargs))
+        response = client.request('http://api.rdio.com/1/', 'POST', urllib.urlencode(kwargs))
+
         return json.loads(response[1])
 
-    def searchSuggestions(self, query, types="Artist,Album,Track", extras=None):
+    def searchSuggestions(self, query, types="Artist,Album,Track", extras=None, priority='low'):
         """
         query:  required - the search prefix
         types:  optional - object types to include in results - a comma separated list of: "Artist", "Album", "Track", "Playlist" or "User"

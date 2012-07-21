@@ -191,12 +191,15 @@ def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
 
 # These are things we're so confident don't belong in TV titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
-TV_SEASON1_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Seasons?\s*\d+', re.IGNORECASE)
-TV_SEASON2_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
-TV_BOXED_SET_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Box(ed)? Set([:,\]\) -]|$)', re.IGNORECASE)
-TV_VOLUMES_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}([\])]|\\b)$', re.IGNORECASE)
-TV_BEST_OF_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*(The )?Best of ', re.IGNORECASE)
-TV_UNCENSORED_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*uncensored\\b', re.IGNORECASE)
+TV_SEASON1_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*Seasons?\s*\d+', re.IGNORECASE)
+TV_SEASON2_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
+TV_BOXED_SET_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*Box(ed)? Set([:,\]\) -]|$)', re.IGNORECASE)
+TV_VOLUMES_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}([\])]|\\b)$', re.IGNORECASE)
+TV_BEST_OF_REGEX_CONFIDENT = re.compile(r'\s*(^|[:,\[\(-])\s*(The )?Best of ', re.IGNORECASE)
+TV_UNCENSORED_REGEX_CONFIDENT = re.compile(r'\s*(^|[:,\[\(-])\s*uncensored\\b', re.IGNORECASE)
+# TODO: Occasionally it is best to keep this in the title, but it's hard to know when. Maybe when the search hits the
+# text in it or something?
+TV_PRESENTS_REGEX_CONFIDENT = re.compile(r'^(["\'a-zA-Z0-9]+\s+){1,3}Presents\s*:\s*', re.IGNORECASE)
 
 TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\)\s*$")
 
@@ -208,6 +211,7 @@ TV_TITLE_REMOVAL_REGEXPS = (
     TV_VOLUMES_REGEX_CONFIDENT,
     TV_BEST_OF_REGEX_CONFIDENT,
     TV_UNCENSORED_REGEX_CONFIDENT,
+    TV_PRESENTS_REGEX_CONFIDENT,
 )
 
 def cleanTvTitle(tvTitle):
@@ -241,6 +245,7 @@ def applyTvTitleDataQualityTests(searchResult, searchQuery):
 # These aren't things that reflect badly on a movie for being in its title.
 MOVIE_TITLE_REMOVAL_REGEXPS = (
     TITLE_YEAR_EXTRACTION_REGEXP,
+    TV_PRESENTS_REGEX_CONFIDENT,
     re.compile("[ ,:\[(-]+\s*Director'?s Cut[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+\s*Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
     re.compile("[ ,:\[(-]+\s*Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
