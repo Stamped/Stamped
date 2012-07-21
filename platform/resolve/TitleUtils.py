@@ -196,6 +196,7 @@ TV_SEASON2_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons
 TV_BOXED_SET_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Box(ed)? Set([:,\]\) -]|$)', re.IGNORECASE)
 TV_VOLUMES_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}([\])]|\\b)$', re.IGNORECASE)
 TV_BEST_OF_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*(The )?Best of ', re.IGNORECASE)
+TV_UNCENSORED_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*uncensored\\b', re.IGNORECASE)
 
 TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\)\s*$")
 
@@ -205,7 +206,8 @@ TV_TITLE_REMOVAL_REGEXPS = (
     TV_SEASON2_REGEX_CONFIDENT,
     TV_BOXED_SET_REGEX_CONFIDENT,
     TV_VOLUMES_REGEX_CONFIDENT,
-    TV_BEST_OF_REGEX_CONFIDENT
+    TV_BEST_OF_REGEX_CONFIDENT,
+    TV_UNCENSORED_REGEX_CONFIDENT,
 )
 
 def cleanTvTitle(tvTitle):
@@ -239,14 +241,15 @@ def applyTvTitleDataQualityTests(searchResult, searchQuery):
 # These aren't things that reflect badly on a movie for being in its title.
 MOVIE_TITLE_REMOVAL_REGEXPS = (
     TITLE_YEAR_EXTRACTION_REGEXP,
-    re.compile("[ ,:\[(-]+Director'?s Cut[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("[ ,:\[(-]+Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("[ ,:\[(-]+Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("[ ,:\[(-]+HD[ ,:\])-]*$"),
-    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Edition|Restoration|Version)[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[\[\(].*subtitle.*[\)\]]\s*$", re.IGNORECASE),
-    re.compile("\s*\((Unrated|NR|Not Rated|Uncut)( Edition)?\)\s*$", re.IGNORECASE)
+    re.compile("[ ,:\[(-]+\s*Director'?s Cut[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[ ,:\[(-]+\s*Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[ ,:\[(-]+\s*Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[ ,:\[(-]+\s*HD[ ,:\])-]*$"),
+    re.compile("[,:\[(-]+\s*uncensored[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Edition|Restoration|Version)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[\[\(].*subtitle.*[\)\]]\s*$", re.IGNORECASE),
+    re.compile("\((Unrated|NR|Not Rated|Uncut)( Edition)?\)\s*$", re.IGNORECASE)
 )
 
 def cleanMovieTitle(movieTitle):
