@@ -122,7 +122,7 @@ def show(request, authUserId, http_schema, uri, **kwargs):
                    conversion=HTTPTimeSlice.exportTimeSlice,
                    exceptions=stampExceptions)
 def collection(request, authUserId, schema, uri, **kwargs):
-    if authUserId is None:
+    if authUserId is None or schema.scope == 'popular':
         try:
             return getCache(uri, schema)
         except KeyError:
@@ -134,7 +134,7 @@ def collection(request, authUserId, schema, uri, **kwargs):
 
     result = transformStamps(stamps)
 
-    if authUserId is None:
+    if authUserId is None or schema.scope == 'popular':
         setCache(uri, schema, result, ttl=600)
 
     return result
