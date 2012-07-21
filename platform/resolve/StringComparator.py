@@ -158,8 +158,10 @@ class StringComparator(object):
     @lru_cache()
     def get_ratio(cls, s1, s2, min_ratio=0.8):
         rough_max_distance = 0.5 * (len(s1) + len(s2))
+        if rough_max_distance == 0:
+            return 0
         max_difference = rough_max_distance * (1.0 - min_ratio)
-        return 1.0 - (float(cls.get_difference(s1, s2, max_difference=max_difference)) / ((len(s1) + len(s2)) * 0.5))
+        return 1.0 - (float(cls.get_difference(s1, s2, max_difference=max_difference)) / rough_max_distance)
 
 if __name__ == '__main__':
     import sys
