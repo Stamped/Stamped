@@ -130,6 +130,26 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             pass
 
 
+    def _getCachedEntityMini(self, entityId):
+        key = str("obj::entitymini::%s" % entityId)
+        return self._cache[key]
+
+    def _setCachedEntityMini(self, entity):
+        key = str("obj::entitymini::%s" % entity.entity_id)
+        cacheLength = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, entity, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (entity.entity_id, e))
+
+    def _delCachedEntityMini(self, entityId):
+        key = str("obj::entitymini::%s" % entityId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
+
     ### INTEGRITY
 
     def checkIntegrity(self, key, repair=False, api=None):
@@ -366,6 +386,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
 
     def getEntityMini(self, entityId):
+        try:
+            return self._getCachedEntityMini(entityId)
+        except KeyError:
+            pass 
+
         documentId  = self._getObjectIdFromString(entityId)
         params = {'_id' : documentId}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
@@ -376,13 +401,16 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         entity = self._convertFromMongo(documents[0])
         entity = entity.minimize()
 
+        self._setCachedEntityMini(entity)
+
         return entity
 
     def getEntity(self, entityId, forcePrimary=False):
-        try:
-            return self._getCachedEntity(entityId)
-        except KeyError:
-            pass 
+        if not forcePrimary:
+            try:
+                return self._getCachedEntity(entityId)
+            except KeyError:
+                pass 
 
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
@@ -393,9 +421,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
 
     def getEntityMinis(self, entityIds):
+        result = []
+
         documentIds = []
         for entityId in entityIds:
-            documentIds.append(self._getObjectIdFromString(entityId))
+            try:
+                result.append(self._getCachedEntityMini(entityId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
         params = {'_id': {'$in': documentIds}}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
 
@@ -405,6 +438,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         for doc in documents:
             entity = self._convertFromMongo(doc, mini=False)
             entity = entity.minimize()
+            self._setCachedEntityMini(entity)
             result.append(entity)
 
         return result
