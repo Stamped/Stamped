@@ -517,7 +517,8 @@ def _getCacheKey(uri, schema=None):
     key = str("http::%s" % uri)
     if schema is not None:
         dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else obj
-        key += json.dumps(schema.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
+        data = json.dumps(schema.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
+        key = "%s::%s" % (key, data)
     return key
 
 def getCache(uri, schema=None):
