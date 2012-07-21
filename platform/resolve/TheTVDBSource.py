@@ -111,7 +111,7 @@ class TheTVDBShow(_TheTVDBObject, ResolverMediaCollection):
         return []
     
     @lazyProperty
-    def date(self):
+    def release_date(self):
         return self.data.release_date
     
     @lazyProperty
@@ -201,6 +201,7 @@ class TheTVDBSource(GenericSource):
         for searchResult in searchResults:
             applyTvTitleDataQualityTests(searchResult, queryText)
             adjustTvRelevanceByQueryMatch(searchResult, queryText)
+            augmentTvDataQualityOnBasicAttributePresence(searchResult)
         return searchResults
 
 if __name__ == '__main__':

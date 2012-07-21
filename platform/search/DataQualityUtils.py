@@ -11,6 +11,8 @@ import Globals
 import math
 import re
 
+from resolve.StringComparator import *
+
 # Results with lower data quality than this are summarily dropped pre-clustering.
 MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.3
 # Results with lower data quality than this are allowed to cluster for the purposes of boosting the cluster's final
@@ -48,9 +50,37 @@ def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
         movieSearchResult.addDataQualityComponentDebugInfo(
                 "boost for cast of size %d" % len(movieSearchResult.resolverObject.cast), boost)
 
+    titleUncommonness = complexUncommonness(movieSearchResult.resolverObject.name)
+    if titleUncommonness < 6:
+        penalty = ((6 - titleUncommonness) / 6.0) ** 0.4
+        movieSearchResult.dataQuality *= 1 - penalty
+        movieSearchResult.addDataQualityComponentDebugInfo(
+            'penalty for common shitty title of uncommonness %f' % titleUncommonness, penalty)
+
 
 def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
-    pass
+    if tvSearchResult.resolverObject.release_date is None:
+        penalty = 0.1
+        tvSearchResult.dataQuality *= 1 - penalty
+        tvSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
+
+    if tvSearchResult.resolverObject.source == 'thetvdb':
+        boost = 0.05
+        tvSearchResult.dataQuality *= 1 + boost
+        tvSearchResult.addDataQualityComponentDebugInfo('boost for thetvdb', boost)
+
+    if not tvSearchResult.resolverObject.description:
+        penalty = 0.1
+        tvSearchResult.dataQuality *= 1 - penalty
+        tvSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
+
+    titleUncommonness = complexUncommonness(tvSearchResult.resolverObject.name)
+    if titleUncommonness < 6:
+        penalty = ((6 - titleUncommonness) / 6.0) ** 0.4
+        tvSearchResult.dataQuality *= 1 - penalty
+        tvSearchResult.addDataQualityComponentDebugInfo(
+            'penalty for common shitty title of uncommonness %f' % titleUncommonness, penalty)
+
 
 ############################################################################################################
 ################################################   MUSIC    ################################################

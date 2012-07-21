@@ -998,7 +998,8 @@ class iTunesSource(GenericSource):
             'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch,
                        lambda result, _ : augmentMovieDataQualityOnBasicAttributePresence(result)),
             'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch),
-            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
+            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch,
+                             lambda result, _ : augmentTvDataQualityOnBasicAttributePresence(result)),
             'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
             'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch),
         }

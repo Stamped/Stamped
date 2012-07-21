@@ -11,7 +11,7 @@ import Globals
 from logs import report
 
 try:
-    import utils, os, re, string, sys, traceback
+    import utils, re, string, sys, traceback
     import logs
     from pprint                     import pprint, pformat
     from libs.LibUtils              import parseDateString
@@ -20,7 +20,7 @@ try:
     from search.DataQualityUtils import *
     from resolve.StringNormalizationUtils import *
     from search import ScoringUtils
-    from resolve.StringComparator   import StringComparator
+    from resolve.StringComparator   import *
 except:
     report()
     raise
@@ -185,123 +185,6 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
         return CompareResult.match(score)
 
 
-WHITESPACE_RE = re.compile('\s+')
-SEPARATOR_RE = re.compile('[:-_;]+')
-def simplifyLite(title):
-    title = WHITESPACE_RE.sub(' ', title)
-    title = title.strip()
-    title = SEPARATOR_RE.sub('-', title)
-    return title.lower()
-
-BEGINNING_SUBTITLE_RE = re.compile('\s*[-:,.(\[]')
-def titleSamenessOdds(title1, title2, simplifyFn):
-    def oddsFromSimilarityAndLength(similarity, length):
-        return similarity * (length ** 0.5)
-
-    title1, title2 = simplifyLite(title1), simplifyLite(title2)
-    raw_similarity = StringComparator.get_ratio(title1, title2) ** 3
-    shorter_title, longer_title = (title1, title2) if len(title1) < len(title2) else (title2, title1)
-    if (longer_title.lower().starts_with(longer_title.lower()) and
-        BEGINNING_SUBTITLE_RE.match(longer_title[len(shorter_title):])):
-        # It looks like the longer title just adds a subtitle to the shorter title.
-        pass
-
-
-def loadWordFrequencyTable():
-    resolve_dir = os.path.dirname(os.path.abspath(__file__))
-    fname = os.path.join(resolve_dir, 'lexicon.txt')
-    f = open(fname)
-    lines = f.readlines()
-    f.close()
-    line_pairs = [tuple(line.strip().split(' ')) for line in lines]
-    return dict(line_pairs[1:])
-
-word_frequencies = loadWordFrequencyTable()
-
-def simpleUncommonness(string):
-    return len(string)
-
-WORD_RE = re.compile('([a-zA-Z0-9]+(-[a-zA-Z0-9]+)?)(\'s)?')
-def complexUncommonness(string):
-    uncommonness = 0.0
-    words = [word for (word, _, _) in WORD_RE.findall(string)]
-    exponent = len(words) ** -0.3
-    for word in words:
-        if word.isdigit():
-            uncommonness += len(word) ** 1.5
-            continue
-
-        if word in word_frequencies:
-            word_frequency = 2000000.0 / int(word_frequencies[word])
-        elif word.endswith("'s") and word[:len(word)-2] in word_frequencies:
-            word_frequency = 4000000.0 / int(word_frequencies[word[:len(word)-2]])
-        elif word.isalpha():
-            word_frequency = 2000000.0
-        else:
-            word_frequency = 4000000.0
-
-        word_frequency = 2000000.0 / int(word_frequencies.get(word.lower(), 1))
-        word_uncommonness = 0.5*math.log(word_frequency) + 0.5*len(word)
-        uncommonness += word_uncommonness
-    return uncommonness
-
-MIN_TARGET_SIM = 0.875
-def target_sim(unc):
-    return MIN_TARGET_SIM + 2 * ((1 - MIN_TARGET_SIM) / (1 + math.exp(unc / 10.0)))
-
-def get_odds_from_sim_unc(sim, unc):
-    if sim <= 0:
-        return 0
-    return (sim ** 1.2) * ((sim / target_sim(unc)) ** 1.2) * ((unc / 8) ** 0.2)
-
-SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
-COMMA_SUBTITLE_RE = re.compile('(\w)\s*,\s*\w+.*$')
-PARENTHETICAL_RE = re.compile('[.,;: -]+[(\[][^\])]+[)\]]\s*$')
-TOKENS_RE = re.compile('[a-zA-Z0-9]+')
-# TODO get this unified with token lists used in TitleUtils!
-WORTHLESS_SUBTITLE_TOKENS = set([
-    # film/tv
-    'uncut', 'unrated', 'nr', 'pg', 'r', 'edition', 'collection', 'volume', 'vol', 'cut', 'version', 'starring',
-    'episodes', 'eps', 'vols', 'volumes', 'film', 'movie',
-    # books
-    'paperback', 'hardcover', 'print', 'illustrated', 'novel', 'story', 'stories', 'tale', 'tales', 'biography',
-    'autobiography', 'history', 'abridged', 'complete', 'book', 'books',
-    # music
-    'remix', 'mix', 'remixed', 're-mix', 're-mixed', 'featuring', 'feat', 'inst', 'instrumental', 'karaoke'
-])
-def strip_subtitle(title):
-    match = SUBTITLE_RE.search(title)
-    if match:
-        subtitle_tokens = [token.lower() for token in TOKENS_RE.findall(match.group(0)[1:])]
-        print 'TOKENS:', subtitle_tokens
-        subtitle_is_worthless = bool(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
-        return SUBTITLE_RE.sub('\\1', title), subtitle_is_worthless
-
-    match = COMMA_SUBTITLE_RE.search(title)
-    # Sometimes a comma is used for subtitles, but we want to be a lot more conservative with
-    # them. So we will only split it if there is only one comma.
-    if match and title.count(',') == 1 and title.find(',') >= 3:
-        subtitle_tokens = [token.lower() for token in TOKENS_RE.findall(match.group(0)[1:])]
-        subtitle_is_worthless = bool(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
-        return SUBTITLE_RE.sub('\\1', title), subtitle_is_worthless
-
-    match = PARENTHETICAL_RE.search(title)
-    if match:
-        subtitle_tokens = [token.lower() for token in TOKENS_RE.findall(match.group(0))]
-        subtitle_is_worthless = bool(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
-        return PARENTHETICAL_RE.sub('', title), subtitle_is_worthless
-
-
-def titleComparison(title1, title2, simplificationFn):
-    score1 = get_odds_from_sim_unc(StringComparator.get_ratio(title1, title2),
-        min(complexUncommonness(title1), complexUncommonness(title2)))
-    simple_title1 = simplificationFn(title1)
-    simple_title2 = simplificationFn(title2)
-    score2 = get_odds_from_sim_unc(StringComparator.get_ratio(simple_title1, simple_title2) * 0.98,
-        min(complexUncommonness(simple_title1), complexUncommonness(simple_title2)))
-    return max(score1, score2)
-
-
 class MovieEntityProxyComparator(AEntityProxyComparator):
     ENDING_NUMBER_RE = re.compile(r'(\d+)\s*(:|$)')
     @classmethod
@@ -327,11 +210,6 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
                 repr(movie2.raw_name), movie2.source, movie2.key,
             )
             print 'sim score after title', sim_score
-        # You're 25x more likely to have the exact same raw name if you're the same than if you aren't.
-        # You're 10x more likely to have the exact same simplified name if you're the same than if you aren't.
-        # You're 5x more likely to have the exact same raw name if you're the same than if you aren't.
-        # The odds of having names that are 80% the same are the same whether you're the same or you aren't.
-        # Beyond there, steep penalties begin.
 
         if movie1.source == 'tmdb' and movie2.source == 'tmdb' and movie1.key != movie2.key:
             sim_score *= 0.7
@@ -392,27 +270,38 @@ class TvEntityProxyComparator(AEntityProxyComparator):
         and we want to cluster those together, so things like runtime and release date don't work. Title is really
         the meat of the comparison.
         """
-        raw_name_similarity = StringComparator.get_ratio(tv_show1.name, tv_show2.name)
-        simple_name_similarity = StringComparator.get_ratio(movieSimplify(tv_show1.name),
-            movieSimplify(tv_show2.name))
-        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
+        sim_score = titleComparison(tv_show1.name, tv_show2.name, movieSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(tv_show1.raw_name), tv_show1.source, tv_show1.key,
+                repr(tv_show2.raw_name), tv_show2.source, tv_show2.key,
+                )
+            print 'sim score after title', sim_score
 
         if tv_show1.release_date and tv_show2.release_date:
             time_difference = abs(tv_show1.release_date - tv_show2.release_date)
             if time_difference > timedelta(365 * 10):
-                sim_score -= 0.2
+                sim_score *= 0.5
             elif time_difference < timedelta(365 * 5):
-                sim_score += 0.075
+                sim_score *= 1.1
             elif time_difference < timedelta(365 * 2):
-                sim_score += 0.1
+                sim_score *= 1.2
             elif time_difference < timedelta(365 * 1):
-                sim_score += 0.15
+                sim_score *= 1.3
+            if logComparisonLogic:
+                print 'After release date, sim score is:', sim_score
 
-        if simple_name_similarity > 0.85 and sim_score >= 0.9:
+        if tv_show1.source == 'thetvdb' and tv_show2.source == 'thetvdb' and tv_show1.key != tv_show2.key:
+            sim_score *= 0.7
+            if logComparisonLogic:
+                print 'After penalty for different thetvdb IDs, sim score is:', sim_score
+
+        if logComparisonLogic:
+            print 'Final sim score is:', sim_score
+        if sim_score > 1:
             return CompareResult.match(sim_score)
-        elif simple_name_similarity < 0.8 or sim_score < 0.6:
-            return CompareResult.definitely_not_match()
-        return CompareResult.unknown()
+        else:
+            return CompareResult.unknown()
 
 
 class AppEntityProxyComparator(AEntityProxyComparator):
