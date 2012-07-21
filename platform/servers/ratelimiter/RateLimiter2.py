@@ -207,7 +207,7 @@ class RateLimiter(object):
         count = 0
 
         while len(self.__fails) > 0:
-            if self.__fails[0].timestamp > cutoff:
+            if self.__fails[0].timestamp < cutoff:
                 self.__fails.popleft()
             else:
                 break
