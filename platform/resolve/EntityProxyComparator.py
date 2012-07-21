@@ -11,7 +11,7 @@ import Globals
 from logs import report
 
 try:
-    import utils, re, string, sys, traceback
+    import utils, os, re, string, sys, traceback
     import logs
     from pprint                     import pprint, pformat
     from libs.LibUtils              import parseDateString
@@ -207,14 +207,16 @@ def titleSamenessOdds(title1, title2, simplifyFn):
         pass
 
 
-def loadWordFrequencyTable(fname):
+def loadWordFrequencyTable():
+    resolve_dir = os.path.dirname(os.path.abspath(__file__))
+    fname = os.path.join(resolve_dir, 'lexicon.txt')
     f = open(fname)
     lines = f.readlines()
     f.close()
     line_pairs = [tuple(line.strip().split(' ')) for line in lines]
     return dict(line_pairs[1:])
 
-word_frequencies = loadWordFrequencyTable('/Users/paul/Downloads/anc-lexicon.txt')
+word_frequencies = loadWordFrequencyTable()
 
 def simpleUncommonness(string):
     return len(string)
