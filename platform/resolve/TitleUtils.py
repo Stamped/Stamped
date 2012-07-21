@@ -285,6 +285,8 @@ MOVIE_TITLE_BAD_TOKENS = (
     # indicate we weren't able to fix the title completely.
     Token('edition', rawName=False, penalty=0.15),
     Token('remastered', rawName=False, penalty=0.15),
+    Token('re-mastered', rawName=False, penalty=0.15),
+    Token('version', rawName=False, penalty=0.15),
     Token('HD', rawName=False, penalty=0.15),
 )
 
@@ -322,8 +324,12 @@ TRACK_TITLE_BAD_TOKENS = (
     Token('mix', rawName=True), Token('remix', rawName=True),
     Token('re-mix', rawName=True), Token('remixed', rawName=True), Token('re-mixed', rawName=True),
     Token('cut', rawName=True), Token('edit', rawName=True), Token('instrumental', rawName=True),
-    Token('inst', rawName=True), Token('cover', rawName=True), Token('version', rawName=True),
-    Token('tribute', rawName=True), Token('karaoke', rawName=True, penalty=0.4)
+    Token('inst', rawName=True), Token('cover', rawName=True),
+    Token('tribute', rawName=True), Token('karaoke', rawName=True, penalty=0.4),
+    Token('remastered', rawName=False, penalty=0.15),
+    Token('re-mastered', rawName=False, penalty=0.15),
+    Token('version', rawName=False),
+    Token('LP', rawName=False),
 )
 def applyTrackTitleDataQualityTests(searchResult, searchQuery):
     # Even though we cut this mix/edit/etc. bullshit out of the title we want to demote results that had these terms
