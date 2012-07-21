@@ -81,40 +81,35 @@ class AEntityProxyComparator(object):
 class ArtistEntityProxyComparator(AEntityProxyComparator):
     @classmethod
     def compare_proxies(cls, artist1, artist2):
+        sim_score = titleComparison(artist1.name, artist2.name, artistSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(artist1.raw_name), artist1.source, artist1.key,
+                repr(artist2.raw_name), artist2.source, artist2.key,
+                )
+            print 'sim score after title', sim_score
+
         # TODO: It might be worth it here to get the songs that have been linked to these sources at the
         # ____Source.searchLite() level and compare names.
         if (hasattr(artist1, 'amgId') and
             hasattr(artist2, 'amgId') and
             artist1.amgId != artist2.amgId):
-            return CompareResult.definitely_not_match()
+            sim_score *= 0.3
+            if logComparisonLogic:
+                print 'sim score after penalty for different AMG IDs', sim_score
+
         if type(artist1) == type(artist2) and artist1.source != 'stamped':
-            # If they're from the same source, we are extremely conservative about assuming that they might be the
-            # same artist. If iTunes tells us that Foxes is not the same band as Foxes!, we believe them. On the other
-            # hand, dupes in our database can definitely happen.
-            # TODO: This all-or-nothing logic is probably not the way to go in the long run. We'd like to have a
-            # weight-of-the-evidence approach, but that takes a lot of tweaking. For instance, in this case, if we
-            # happened to see that artists with both of these names are cited on other sources as having albums with
-            # the same names, we would want to override this and merge.
-            if artist1.name != artist2.name:
-                return CompareResult.definitely_not_match()
-            else:
-                return CompareResult.unknown()
-        else:
-            name1 = artist1.name
-            name2 = artist2.name
-            if name1 == name2:
-                return CompareResult.match(1.0)
-            if StringComparator.get_ratio(name1, name2) > 0.9:
-                return CompareResult.match(StringComparator.get_ratio(name1, name2))
+            sim_score *= 0.85
+            if logComparisonLogic:
+                print 'sim score after penalty for being from same source', sim_score
 
-            name1_simple = artistSimplify(name1)
-            name2_simple = artistSimplify(name2)
 
-            if name1_simple == name2_simple:
-                return CompareResult.match(0.9)
-            if StringComparator.get_ratio(name1_simple, name2_simple) > 0.9:
-                return CompareResult.match(StringComparator.get_ratio(name1_simple, name2_simple) - 0.1)
-            return CompareResult.unknown()
+        if sim_score > 0.95:
+            return CompareResult.match(sim_score)
+        if sim_score < 0.5:
+            return CompareResult.definitely_not_match()
+        return CompareResult.unknown()
+
 
 
 class AlbumEntityProxyComparator(AEntityProxyComparator):
@@ -272,7 +267,7 @@ class TvEntityProxyComparator(AEntityProxyComparator):
         and we want to cluster those together, so things like runtime and release date don't work. Title is really
         the meat of the comparison.
         """
-        sim_score = titleComparison(tv_show1.name, tv_show2.name, movieSimplify)
+        sim_score = titleComparison(tv_show1.name, tv_show2.name, tvSimplify)
         if logComparisonLogic:
             print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
                 repr(tv_show1.raw_name), tv_show1.source, tv_show1.key,
