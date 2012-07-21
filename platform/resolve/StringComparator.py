@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import re
 import collections
+from libs.LRUCache import lru_cache
 
 # TODO: Handle pluralization and possessives properly.
 
@@ -154,6 +155,7 @@ class StringComparator(object):
         return least_penalty
 
     @classmethod
+    @lru_cache()
     def get_ratio(cls, s1, s2, min_ratio=0.8):
         rough_max_distance = 0.5 * (len(s1) + len(s2))
         max_difference = rough_max_distance * (1.0 - min_ratio)
