@@ -145,9 +145,23 @@ def collection(request, authUserId, http_schema, schema, uri, **kwargs):
 @handleHTTPRequest(http_schema=HTTPSearchSlice,
                   conversion=HTTPSearchSlice.exportSearchSlice,
                   exceptions=stampExceptions)
-def search(request, authUserId, schema, **kwargs):
+def search(request, authUserId, schema, uri, **kwargs):
+    if authUserId is None or http_schema.scope == 'popular':
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     stamps = stampedAPI.searchStampCollection(schema, authUserId)
-    return transformStamps(stamps)
+
+    result = transformStamps(stamps)
+
+    if authUserId is None or http_schema.scope == 'popular':
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 # Guide
@@ -156,7 +170,15 @@ def search(request, authUserId, schema, **kwargs):
                    http_schema=HTTPGuideRequest,
                    conversion=HTTPGuideRequest.exportGuideRequest,
                    exceptions=stampExceptions)
-def guide(request, authUserId, schema, **kwargs):
+def guide(request, authUserId, schema, uri, **kwargs):
+    if http_schema.scope == 'popular':
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     entities = stampedAPI.getGuide(schema, authUserId)
     result = []
 
@@ -167,7 +189,12 @@ def guide(request, authUserId, schema, **kwargs):
             logs.warning(utils.getFormattedException())
             raise
 
-    return transformOutput(result)
+    result = transformOutput(result)
+
+    if http_schema.scope == 'popular':
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 # Search Guide
@@ -176,7 +203,15 @@ def guide(request, authUserId, schema, **kwargs):
                    http_schema=HTTPGuideSearchRequest,
                    conversion=HTTPGuideSearchRequest.exportGuideSearchRequest,
                    exceptions=stampExceptions)
-def searchGuide(request, authUserId, schema, **kwargs):
+def searchGuide(request, authUserId, schema, uri, **kwargs):
+    if http_schema.scope == 'popular':
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+            
     entities = stampedAPI.searchGuide(schema, authUserId)
     result = []
 
@@ -187,7 +222,12 @@ def searchGuide(request, authUserId, schema, **kwargs):
             logs.warning(utils.getFormattedException())
             raise
 
-    return transformOutput(result)
+    result = transformOutput(result)
+
+    if http_schema.scope == 'popular':
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 @require_http_methods(["POST"])
