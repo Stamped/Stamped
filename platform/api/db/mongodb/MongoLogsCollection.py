@@ -13,10 +13,12 @@ from api.db.mongodb.AMongoCollection import AMongoCollection
 
 class MongoLogsCollection(AMongoCollection):
     
-    def __init__(self):
+    def __init__(self, stack_name=None):
         # Change collection name to stack if on EC2
         collection = 'logs'
-        if libs.ec2_utils.is_ec2():
+        if stack_name is not None:
+            collection = "logs_%s" % stack_name
+        elif libs.ec2_utils.is_ec2():
             stack_info = libs.ec2_utils.get_stack()
             collection = "logs_%s" % stack_info.instance.stack
 

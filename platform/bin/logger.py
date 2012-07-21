@@ -12,7 +12,7 @@ from optparse   import OptionParser
 from utils      import lazyProperty
 from datetime   import *
 from errors     import Fail
-from libs.ec2_utils import is_ec2
+from libs.ec2_utils import is_ec2, get_db_nodes
 
 from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
 
@@ -24,8 +24,8 @@ def parseCommandLine():
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
-    parser.add_option("-D", "--db", default=None, type="string", 
-        action="store", dest="db", help="db to connect to")
+    parser.add_option("-s", "--stack", default=None, type="string",
+        action="store", dest="stack", help="stack to pull logs from")
     
     parser.add_option("-d", "--headers", action="store_true", dest="show_headers", 
         default=False, help="Include HTTP headers in results")
@@ -66,9 +66,17 @@ def parseCommandLine():
 
     (options, args) = parser.parse_args()
     
-    if options.db:
-        utils.init_db_config(options.db)
-    
+    if is_ec2() or options.stack:
+        logger_nodes = get_db_nodes('logger')
+        if len(logger_nodes) == 0:
+            print("Warning: No instances exist on stack 'logger'")
+            return options
+        instance_name = '%s.%s' % (logger_nodes[0]['stack'], logger_nodes[0]['name'])
+        utils.init_db_config(instance_name)
+        if options.stack is None:
+            stack_info = libs.ec2_utils.get_stack()
+            options['stack'] = stack_info.instance.stack
+
     return options
 
 def main():
@@ -85,6 +93,7 @@ def main():
     verbose     = options.pop('verbose', False)
     method      = options.pop('method', None)
     code        = options.pop('code', None)
+    stack       = options.pop('stack', None)
     
     if severity not in ['debug', 'info', 'warning', 'error', 'critical']:
         severity = None
@@ -94,11 +103,10 @@ def main():
     else:
         levels = ['info', 'warning', 'error', 'critical']
 
-    logsCollection = MongoLogsCollection()
+    logsCollection = MongoLogsCollection(stack)
     if not logsCollection.isCapped:
         size = LOG_COLLECTION_SIZE if is_ec2() else LOG_LOCAL_COLLECTION_SIZE
         logsCollection.convertToCapped(size)
-
     logs = logsCollection.getLogs(userId=user_id, requestId=request_id, limit=limit, errors=errors,
                                             path=path, severity=severity, method=method, code=code)
     for i in xrange(len(logs)):
