@@ -16,7 +16,9 @@ from datetime               import datetime
 from pymongo.errors         import AutoReconnect, DuplicateKeyError
 from api.db.mongodb.MongoCollectionProxy   import MongoCollectionProxy
 
-LOGGER_CAP_SIZE = 1024*1024*1024    # allocate 1gb for logger collections
+
+LOG_COLLECTION_SIZE         = 1024*1024*1024    # 1 gb
+LOG_LOCAL_COLLECTION_SIZE   = 1024*1024*100     # 100 mb
 
 class MongoDBConfig(Singleton):
     def __init__(self):
@@ -221,7 +223,8 @@ class AMongoCollection(object):
 
         if logger:
             self._dbConfig = MongoLogDBConfig.getInstance()
-            self._init_collection(self._dbConfig.database_name, collection, LOGGER_CAP_SIZE)
+            size = LOG_COLLECTION_SIZE if libs.ec2_utils.is_ec2() else LOG_LOCAL_COLLECTION_SIZE
+            self._init_collection(self._dbConfig.database_name, collection, size)
         else:
             self._dbConfig = MongoDBConfig.getInstance()
             self._init_collection(self._dbConfig.database_name, collection)

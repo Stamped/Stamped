@@ -12,10 +12,12 @@ from optparse   import OptionParser
 from utils      import lazyProperty
 from datetime   import *
 from errors     import Fail
+from libs.ec2_utils import is_ec2
 
 from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
 
-LOG_COLLECTION_SIZE = 1024*1024*1024    # 1 gb
+LOG_COLLECTION_SIZE         = 1024*1024*1024   # 1 gb
+LOG_LOCAL_COLLECTION_SIZE   = 1024*1024*100    # 100 mb
 
 def parseCommandLine():
     usage   = "Usage: %prog [options] command [args]"
@@ -94,7 +96,9 @@ def main():
 
     logsCollection = MongoLogsCollection()
     if not logsCollection.isCapped:
-        logsCollection.convertToCapped(LOG_COLLECTION_SIZE)
+        size = LOG_COLLECTION_SIZE if is_ec2() else LOG_LOCAL_COLLECTION_SIZE
+        logsCollection.convertToCapped(size)
+
     logs = logsCollection.getLogs(userId=user_id, requestId=request_id, limit=limit, errors=errors,
                                             path=path, severity=severity, method=method, code=code)
     for i in xrange(len(logs)):
