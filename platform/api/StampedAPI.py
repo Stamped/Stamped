@@ -152,10 +152,10 @@ class StampedAPI(AStampedAPI):
         if 'version' in kwargs:
             self.setVersion(kwargs['version'])
 
-        # self.__autocomplete = emptyIndex()
-        # self.__autocomplete_last_loaded = datetime.now()
-        # if utils.is_ec2():
-        #     self.reloadAutoCompleteIndex()
+        self.__autocomplete = emptyIndex()
+        self.__autocomplete_last_loaded = datetime.now()
+        if utils.is_ec2():
+            self.reloadAutoCompleteIndex()
 
     def setVersion(self, version):
         try:
