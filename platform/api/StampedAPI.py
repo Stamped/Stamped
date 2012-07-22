@@ -72,7 +72,7 @@ try:
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
 
-    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
+    # from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -82,8 +82,14 @@ except Exception:
 CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per like
 
-# TODO (travis): refactor API function calling conventions to place optional last
-# instead of first.
+stamp_num_collage_regeneration = frozenset([
+    1, 2, 3, 4, 5, 10, 15, 20, 25, 35, 50, 60, 70, 80, 90, 100, 
+    125, 150, 175, 200, 250, 300, 375, 450, 500, 600, 700, 800, 900, 
+    1000
+])
+
+# TODO (travis): refactor API function calling conventions to place optional authUserId last
+# instead of first, especially for function which don't require auth.
 
 class StampedAPI(AStampedAPI):
     """
@@ -146,10 +152,10 @@ class StampedAPI(AStampedAPI):
         if 'version' in kwargs:
             self.setVersion(kwargs['version'])
 
-        self.__autocomplete = emptyIndex()
-        self.__autocomplete_last_loaded = datetime.now()
-        if utils.is_ec2():
-            self.reloadAutoCompleteIndex()
+        # self.__autocomplete = emptyIndex()
+        # self.__autocomplete_last_loaded = datetime.now()
+        # if utils.is_ec2():
+        #     self.reloadAutoCompleteIndex()
 
     def setVersion(self, version):
         try:
@@ -1558,10 +1564,10 @@ class StampedAPI(AStampedAPI):
     def _getEntity(self, entityId):
         if entityId is not None and entityId.startswith('T_'):
             entityId = self._convertSearchId(entityId)
+            return self._entityDB.getEntity(entityId, forcePrimary=True)
         else:
             self.mergeEntityId(entityId)
-
-        return self._entityDB.getEntity(entityId)
+            return self._entityDB.getEntity(entityId)
 
     @API_CALL
     def addEntity(self, entity):
@@ -1704,42 +1710,49 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
-        if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
-            self.__autocomplete_last_loaded = datetime.now()
-            self.reloadAutoCompleteIndex()
-        if category == 'place':
-            if coordinates is None:
-                latLng = None
-            else:
-                latLng = [ coordinates.lat, coordinates.lng ]
-            results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'})
-            #make list of names from results, remove duplicate entries, limit to 10
-            if results is None:
-                return []
-            names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
-            completions = []
-            for name in names:
-                completions.append( { 'completion' : name } )
-            return completions
+        return []
+        # if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
+        #     self.__autocomplete_last_loaded = datetime.now()
+        #     self.reloadAutoCompleteIndex()
+        # if category == 'place':
+        #     if coordinates is None:
+        #         latLng = None
+        #     else:
+        #         latLng = [ coordinates.lat, coordinates.lng ]
+        #     results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'},
+        #         priority='high')
+        #     #make list of names from results, remove duplicate entries, limit to 10
+        #     if results is None:
+        #         return []
+        #     names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
+        #     completions = []
+        #     for name in names:
+        #         completions.append( { 'completion' : name } )
+        #     return completions
 
-        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
+        # return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
 
-    def reloadAutoCompleteIndex(self):
-        def setIndex(greenlet):
-            try:
-                self.__autocomplete = greenlet.get()
-            except Exception as e:
-                email = {
-                    'from' : 'Stamped <noreply@stamped.com>',
-                    'to' : 'dev@stamped.com',
-                    'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
-                    'body' : '<pre>%s</pre>' % str(e),
-                }
-                utils.sendEmail(email, format='html')
-        gevent.spawn(loadIndexFromS3).link(setIndex)
+    def reloadAutoCompleteIndex(self, retries=5, delay=0):
+        return
+        # def setIndex(greenlet):
+        #     try:
+        #         self.__autocomplete = greenlet.get()
+        #     except Exception as e:
+        #         if retries:
+        #             self.reloadAutoCompleteIndex(retries-1, delay*2+1)
+        #         else:
+        #             email = {
+        #                 'from' : 'Stamped <noreply@stamped.com>',
+        #                 'to' : 'dev@stamped.com',
+        #                 'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
+        #                 'body' : '<pre>%s</pre>' % str(e),
+        #             }
+        #             utils.sendEmail(email, format='html')
+        # gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
 
     def updateAutoCompleteIndexAsync(self):
-        pushNewIndexToS3()
+        return ## TEMP
+        # pushNewIndexToS3()
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):
@@ -2213,7 +2226,7 @@ class StampedAPI(AStampedAPI):
         t1 = t0
 
         previewLength = kwargs.pop('previews', 10)
-        mini        = kwargs.pop('mini', False)
+        mini        = kwargs.pop('mini', True)
 
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
@@ -2350,12 +2363,12 @@ class StampedAPI(AStampedAPI):
 
         # Enrich missing user ids
         missingUserIds = allUserIds.difference(set(userIds.keys()))
-        users = self._userDB.lookupUsers(list(missingUserIds))
+        users = self._userDB.getUserMinis(list(missingUserIds))
 
         for user in users:
-            userIds[user.user_id] = user.minimize()
+            userIds[user.user_id] = user
 
-        logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
+        logs.debug('Time for getUserMinis: %s' % (time.time() - t1))
         t1 = time.time()
 
 
@@ -2511,14 +2524,15 @@ class StampedAPI(AStampedAPI):
 
         try:
             stats = self._entityStatsDB.getEntityStats(entityId)
-        except StampedUnavailableError:
-            stats = self.updateEntityStatsAsync(entityId)
+            if stats.num_stamps == 0:
+                badge           = Badge()
+                badge.user_id   = userId
+                badge.genre     = "entity_first_stamp"
+                badges.append(badge)
 
-        if stats.num_stamps == 0:
-            badge           = Badge()
-            badge.user_id   = userId
-            badge.genre     = "entity_first_stamp"
-            badges.append(badge)
+        except StampedUnavailableError:
+            # This can happen if the stamp has just been created and it's a new entity
+            pass
 
         return badges
 
@@ -2648,7 +2662,7 @@ class StampedAPI(AStampedAPI):
             distribution = self._getUserStampDistribution(authUserId)
             self._userDB.updateDistribution(authUserId, distribution)
             
-            if utils.is_ec2():
+            if utils.is_ec2() and self._should_regenerate_collage(stamp.stats.stamp_num):
                 tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[user.user_id, stamp.entity.category])
 
         # Generate activity and stamp pointers
@@ -2824,10 +2838,13 @@ class StampedAPI(AStampedAPI):
         
         tasks.invoke(tasks.APITasks.removeStamp, args=[authUserId, stampId, stamp.entity.entity_id, stamp.credits, og_action_id])
         
-        if utils.is_ec2():
+        if utils.is_ec2() and self._should_regenerate_collage(stamp.stats.stamp_num):
             tasks.invoke(tasks.APITasks.updateUserImageCollage, args=[stamp.user.user_id, stamp.entity.category])
         
         return True
+    
+    def _should_regenerate_collage(self, stamp_num):
+        return (stamp_num in stamp_num_collage_regeneration)
     
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None, og_action_id=None):
         # Remove from user collection
@@ -2914,7 +2931,7 @@ class StampedAPI(AStampedAPI):
             try:
                 stat = self._stampStatsDB.getStampStats(stampIds)
             except (StampedUnavailableError, KeyError):
-                stat = self.updateStampStatsAsync(stampIds)
+                stat = None
             return stat
 
         else:
@@ -2923,12 +2940,6 @@ class StampedAPI(AStampedAPI):
             statsDict = {}
             for stat in statsList:
                 statsDict[stat.stamp_id] = stat
-            for stampId in stampIds:
-                if stampId not in statsDict:
-                    try:
-                        statsDict[stampId] = self.updateStampStatsAsync(stampId)
-                    except Exception as e:
-                        logs.warning("Failed to generate stamp stats for %s: %s" % (stampId, e))
             return statsDict
 
     def updateStampStatsAsync(self, stampId):
@@ -3785,8 +3796,8 @@ class StampedAPI(AStampedAPI):
                 for stampPreview in item.stamps:
                     stampPreviewUser = userIds[stampPreview.user.user_id]
                     if stampPreviewUser is None:
-                        logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
-                            (stampPreview.user.user_id, item.entity_id))
+                        logs.warning("Stamp Preview: User (%s) not found in entity (%s)" %\
+                                     (stampPreview.user.user_id, item.entity_id))
                         # Trigger update to entity stats
                         tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
                         continue
@@ -4023,16 +4034,16 @@ class StampedAPI(AStampedAPI):
             avgPopularity = kwargs.pop('aggPopularity', [])
             timestamps = kwargs.pop('timestamps', [])
             result = 0
-            
+
             # Remove personal stamp from timestamps if it exists
             try:
                 personal_timestamp = (time.mktime(now.timetuple()) - timestamps.pop(authUserId)) / 60 / 60 / 24
             except KeyError:
                 personal_timestamp = None
-                
+
             # timestamps is now a list of each friends' most recent stamp time in terms of days since stamped 
             timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
-            
+
             #stamp_score
             stamp_score = 0
             personal_stamp_score = 0
@@ -4052,7 +4063,7 @@ class StampedAPI(AStampedAPI):
                     personal_stamp_score = 1.03125 - (.65 / 80 * personal_timestamp)
                 elif personal_timestamp < 290:
                     personal_stamp_score = .435 - (.3 / 200 * personal_timestamp)
-            
+
             section_coefs = {
                             'food': 0,
                             'music': 1.0,
@@ -4066,16 +4077,16 @@ class StampedAPI(AStampedAPI):
                 personal_stamp_score = section_coefs[section] * personal_stamp_score * len(timestamps)
             except KeyError:
                 personal_stamp_score = personal_stamp_score * len(timestamps)
-                
+
             ### PERSONAL TODO LIST
             personal_todo_score = 0
             if entity.entity_id in todos:
                 personal_todo_score = 1
-            
+
             if len(timestamps) > 0:
                 avgQuality = avgQuality / len(timestamps)
                 avgPopularity = avgPopularity / len(timestamps)
-            
+
             image_score = 1
             if entity.images is None:
                 image_score = 0.01
@@ -4180,12 +4191,12 @@ class StampedAPI(AStampedAPI):
                         item.todo_user_ids = userIds
                 cache.append(item)
             setattr(guide, section, cache)
-            
-        
+
+
         logs.info("Time to build guide: %s seconds" % (time.time() - t0))
 
         self._guideDB.updateGuide(guide)
-            
+
         return guide
 
 

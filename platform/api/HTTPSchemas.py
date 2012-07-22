@@ -337,7 +337,7 @@ class OAuthLogin(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('login',                            basestring, required=True)
-        cls.addProperty('password',                         basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True, cast=validateString)
 
 # TODO: Consolidate OAuthFacebookLogin and OAuthTwitterLogin after linked account generification?
 
@@ -445,7 +445,7 @@ class HTTPAccountNew(Schema):
     def setSchema(cls):
         cls.addProperty('name',                             basestring, required=True)
         cls.addProperty('email',                            basestring, required=True, cast=validateEmail)
-        cls.addProperty('password',                         basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True, cast=validateString)
         cls.addProperty('screen_name',                      basestring, required=True, cast=validateScreenName)
         cls.addProperty('phone',                            basestring, cast=parsePhoneNumber)
 
@@ -470,7 +470,7 @@ class HTTPAccountUpgradeForm(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('email',                            basestring, required=True)
-        cls.addProperty('password',                         basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True, cast=validateString)
 
 
 class HTTPFacebookAccountNew(Schema):
@@ -649,8 +649,8 @@ class HTTPAvailableLinkedAccounts(Schema):
 class HTTPAccountChangePassword(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('old_password',                     basestring, required=True)
-        cls.addProperty('new_password',                     basestring, required=True)
+        cls.addProperty('old_password',                     basestring, required=True, cast=validateString)
+        cls.addProperty('new_password',                     basestring, required=True, cast=validateString)
 
 class HTTPAPNSToken(Schema):
     @classmethod

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -30,6 +29,25 @@ urlpatterns = patterns('',
     url(r'^mobile/500/?$',                              'error.views.error_500'), 
     url(r'^mobile/500.html?$',                          'error.views.error_500'), 
     
+    # ----------------------------- SETTINGS -----------------------------------
+    # e.g., stamped.com/mobile/pw/screen_name
+    url(R'^mobile/pw/(?P<token>[\w-]{36})$',            'mobile.views.password_reset'),
+    
+    # e.g., stamped.com/mobile/settings/password/forgot
+    url(R'^mobile/settings/password/forgot/?$',         'mobile.views.password_forgot'),
+    
+    # e.g., stamped.com/mobile/settings/password/sent
+    url(R'^mobile/settings/password/sent/?$',           'mobile.views.password_sent'),
+    
+    # e.g., stamped.com/mobile/settings/password/success
+    url(R'^mobile/settings/password/success/?$',        'mobile.views.password_success'),
+    
+    # e.g., stamped.com/mobile/settings/alerts
+    url(R'^mobile/settings/alerts/?$',                  'mobile.views.alert_settings'),
+    
+    # e.g., stamped.com/mobile/settings/alerts/update.json
+    url(R'^mobile/settings/alerts/update.json$',        'mobile.views.alert_settings_update'),
+    
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com/mobile, stamped.com/mobile/index, stamped.com/mobile/index.html
     url(r'^mobile/index$',                              'mobile.views.index'), 
@@ -40,6 +58,11 @@ urlpatterns = patterns('',
     # e.g., stamped.com/mobile/about, stamped.com/mobile/about.html
     url(r'^mobile/about$',                              'mobile.views.about'), 
     url(r'^mobile/about\.html?$',                       'mobile.views.about'), 
+    
+    # ------------------------------ JOBS --------------------------------------
+    # e.g., stamped.com/mobile/jobs, stamped.com/mobile/jobs.html
+    url(r'^mobile/jobs$',                               'mobile.views.jobs'), 
+    url(r'^mobile/jobs\.html?$',                        'mobile.views.jobs'), 
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
@@ -76,6 +99,13 @@ urlpatterns = patterns('',
     url(r'^500/?$',                             'error.views.error_500'), 
     url(r'^500.html?$',                         'error.views.error_500'), 
     
+    url(R'^pw/(?P<token>[\w-]{36})$',           'core.appsettings.password_reset'),
+    url(R'^settings/password/forgot/?$',        'core.appsettings.password_forgot'),
+    url(R'^settings/password/sent/?$',          'core.appsettings.password_sent'),
+    url(R'^settings/password/success/?$',       'core.appsettings.password_success'),
+    url(R'^settings/alerts/?$',                 'core.appsettings.alert_settings'),
+    url(R'^settings/alerts/update.json$',       'core.appsettings.alert_settings_update'),
+    
     # ------------------------------- BLOG -------------------------------------
     # e.g., stamped.com/blog
     url(r'^blog$',                              'core.views.blog'), 
@@ -111,6 +141,11 @@ urlpatterns = patterns('',
     url(r'^about$',                             'core.views.about'), 
     url(r'^about\.html?$',                      'core.views.about'), 
     
+    # ------------------------------ JOBS --------------------------------------
+    # e.g., stamped.com/jobs, stamped.com/jobs.html
+    url(r'^jobs$',                              'core.views.jobs'), 
+    url(r'^jobs\.html?$',                       'core.views.jobs'), 
+
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/travis
     url(r'^(?P<screen_name>[\w-]{1,20})\/?$',   'core.views.profile'), 

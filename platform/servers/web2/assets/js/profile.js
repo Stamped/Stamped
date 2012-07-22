@@ -98,10 +98,10 @@ var g_update_stamps = null;
                 var width0  = $elem.width();
                 var height0 = $elem.height();
                 
-                $elem.css('display', 'block');
+                $elem.css('display',  'block');
                 $share.show();
                 
-                var width1  = $elem.width();
+                var width1  = $elem.width() + 55;
                 var height1 = $elem.height();
                 
                 $share.hide();
@@ -143,82 +143,7 @@ var g_update_stamps = null;
             });
         };
         
-        $("#subnav").on("click", ".subnav_button", function(event) {
-            event.preventDefault();
-            
-            var $this    = $(this);
-            var $parent  = $this.parents('.profile-header-subnav');
-            var bargraph = false;
-            
-            $parent.removeClass('subnav-active-0 subnav-active-1 subnav-active-2');
-            
-            if ($this.hasClass('subnav_button-0')) {
-                $parent.find('.header-subsection-0').show();
-                $parent.addClass('subnav-active-0');
-            } else if ($this.hasClass('subnav_button-1')) {
-                $parent.find('.header-subsection-1').show();
-                $parent.addClass('subnav-active-1');
-            } else if ($this.hasClass('subnav_button-2')) {
-                bargraph = true;
-                $parent.find('.header-subsection-2').show();
-                $parent.addClass('subnav-active-2');
-            }
-            
-            // TODO: better approach here than setTimeout
-            setTimeout(function() {
-                var $elem   = $parent.find('.header-subsection-1');
-                var opacity = parseFloat($elem.css('opacity'));
-                
-                if (opacity <= 0.05) {
-                    $elem.hide();
-                }
-                
-                $elem   = $parent.find('.header-subsection-2');
-                opacity = parseFloat($elem.css('opacity'));
-                
-                if (opacity <= 0.05) {
-                    $elem.hide();
-                }
-            }, 200);
-            
-            // update the user's stamp category distribution bargraph via a spiffy animation
-            $('.bargraph-row-value').each(function(i, elem) {
-                var percentage  = 0;
-                var opacity     = 1.0;
-                var $this       = $(this);
-                
-                if (bargraph) {
-                    var count   = $this.data('count') || 0;
-                    
-                    if (count > 0) {
-                        percentage = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
-                    } else {
-                        percentage = 0.0;
-                        opacity    = 0.0;
-                    }
-                }
-                
-                $this.stop(true, false).delay(50).animate({
-                    width   : percentage + "%", 
-                    opacity : opacity
-                }, {
-                    duration : 1000, 
-                    specialEasing : { 
-                        width  : 'easeInOutBack'
-                    }, 
-                    complete : function() {
-                        $this.css({
-                            'width'     : percentage + "%", 
-                            'opacity'   : opacity
-                        });
-                    }
-                });
-            });
-            
-            return false;
-        });
-        
-        $(".friends-wrapper").on("click", ".expand-friends", function(event) {
+        $("a.expand-friends").click(function(event) {
             event.preventDefault();
             
             var $this = $(this);
@@ -231,29 +156,6 @@ var g_update_stamps = null;
             $.fancybox.open(popup_options);
             return false;
         });
-        
-        var init_header_subsections = function() {
-            var header_subsection_height = 0;
-            var $header_subsections  = $('.header-subsection');
-            var $header_subsection_0 = null;
-            
-            $header_subsections.each(function(i, elem) {
-                var $elem = $(elem);
-                
-                if ($elem.hasClass('header-subsection-0')) {
-                    $header_subsection_0 = $elem;
-                }
-                
-                header_subsection_height = Math.max($elem.height(), header_subsection_height);
-            });
-            
-            if (!!$header_subsection_0 && header_subsection_height > 0) {
-                $header_subsection_0.css({
-                    'height'     : header_subsection_height, 
-                    'min-height' : header_subsection_height
-                });
-            }
-        };
         
         
         // ---------------------------------------------------------------------
@@ -298,9 +200,18 @@ var g_update_stamps = null;
             }
         };
         
+        var update_empty_stamps = function() {
+            if ($(".stamp-gallery-item").length === 0) {
+                $(".empty-stamps").show();
+            } else {
+                $(".empty-stamps").hide();
+            }
+        };
+        
         var update_gallery = function(callback) {
             if ($gallery !== null) {
                 $gallery = $(".stamp-gallery").find(".stamps");
+                update_empty_stamps();
                 
                 $gallery.isotope('reLayout', callback);
             }
@@ -676,8 +587,6 @@ var g_update_stamps = null;
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
                 
-                console.log(offset);
-                
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                     
@@ -826,6 +735,9 @@ var g_update_stamps = null;
             }
         };
         
+        var layout_mode_index  = 0;
+        var layout_modes = [ "masonry", "fitRows", "cellsByRow" ];
+        
         // initialize the stamp gallery's layout with isotope and infinite scroll
         var init_gallery = function() {
             $gallery = $(".stamp-gallery .stamps");
@@ -833,10 +745,14 @@ var g_update_stamps = null;
             if ($gallery.length <= 0) {
                 $gallery = null;
             } else {
+                update_empty_stamps();
+                
                 $gallery.isotope({
                     itemSelector        : '.stamp-gallery-item', 
-                    layoutMode          : "masonry"/*, 
-                    animationOptions    : {
+                    layoutMode          : layout_modes[layout_mode_index]
+                    //layoutMode          : "fitRows"
+                    //layoutMode          : "masonry"
+                    /*, animationOptions    : {
                         duration        : 800,
                         easing          : 'easeOut',
                         queue           : true
@@ -845,6 +761,17 @@ var g_update_stamps = null;
                 
                 $gallery.on("click", ".stamp-gallery-item", open_sdetail_click);
                 init_infinite_scroll();
+            }
+        };
+        
+        var toggle_gallery_layout_mode = function() {
+            if (!!$gallery) {
+                layout_mode_index = (layout_mode_index + 1) % layout_modes.length;
+                
+                $gallery.isotope({
+                    layoutMode          : layout_modes[layout_mode_index]
+                    //layoutMode          : "fitRows"
+                });
             }
         };
         
@@ -1276,7 +1203,7 @@ var g_update_stamps = null;
                             var $elem = $(sel);
                             g_category = category;
                             
-                            console.debug("NEW CATEGORY: " + category);
+                            //console.debug("NEW CATEGORY: " + category);
                             //History.log(state.data, state.title, state.url);
                             
                             if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
@@ -1397,7 +1324,7 @@ var g_update_stamps = null;
                     }
                     
                     if (is_match) {
-                        console.debug("History matched view '" + view.title + "'");
+                        //console.debug("History matched view '" + view.title + "'");
                         
                         view.apply_func(state, url, relative_url);
                         break;
@@ -1486,6 +1413,7 @@ var g_update_stamps = null;
             
             var gallery_x       = $stamp_gallery.offset().left;
             var gallery_width   = $stamp_gallery.width();
+            var wide_body       = 'wide-body';
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
             var max_blurb_width = 125;
@@ -1507,7 +1435,8 @@ var g_update_stamps = null;
                     var desired_width_header_px;
                     
                     if (gallery) {
-                        desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        //desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        desired_width_header_px = "232px";
                         desired_width_px = "auto";
                     } else {
                         //desired_width_header_px = (desired_width + 148) + "px";
@@ -1515,7 +1444,6 @@ var g_update_stamps = null;
                     }
                     
                     $elem.find('.content_1').css({
-                        'width'     : desired_width_px, 
                         'max-width' : desired_width_px
                     });
                     
@@ -1526,21 +1454,22 @@ var g_update_stamps = null;
                 });
             };
             
-            /*if (gallery_width <= min_col_width + 144) {
+            if (window.innerWidth <= 780) {
                 if (!$stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery).addClass(narrow_gallery);
+                    $body.addClass(wide_body);
                     update = true;
                     
                     reset_stamp_gallery_items(max_blurb_width);
                 } else {
                     force_no_update = true;
                 }
-            } else */
-            if (right < fixed_padding / 2) {
+            } else if (right < fixed_padding / 2) {
                 //console.debug("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
                 
                 if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery + " " + narrow_gallery);
+                    $body.removeClass(wide_body);
                     update = true;
                 }
                 
@@ -1551,6 +1480,7 @@ var g_update_stamps = null;
                 
                 if (!$stamp_gallery.hasClass(wide_gallery)) {
                     $stamp_gallery.removeClass(narrow_gallery).addClass(wide_gallery);
+                    $body.addClass(wide_body);
                     update = true;
                     
                     reset_stamp_gallery_items(max_blurb_width);
@@ -1567,7 +1497,8 @@ var g_update_stamps = null;
                         update = true;
                     } else {
                         //var cur_fixed_width_px = Math.Max(1000, 1 * width) + "px";
-                        var cur_fixed_width_px = fixed_width + "px";
+                        //var cur_fixed_width_px = fixed_width + "px";
+                        var cur_fixed_width_px = "75%";
                         
                         $('.fixedwidth').width(cur_fixed_width_px);
                     }
@@ -1703,7 +1634,7 @@ var g_update_stamps = null;
                 
                 scroll_top  = $window.scrollTop();
                 
-                console.debug("AJAX: " + href);
+                //console.debug("AJAX: " + href);
             } else {
                 $target     = $("<div class='" + sdetail_wrapper + "'></div>").html(html);
                 $target2    = $target;
@@ -1763,9 +1694,9 @@ var g_update_stamps = null;
                 enable_gallery_animations(true);
                 update_gallery_layout(true);
                 
-                if (!href) {
+                /*if (!href) {
                     init_header_subsections();
-                }
+                }*/
                 
                 resize_sdetail_wrapper($target2, 'closing', function() {
                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
@@ -1982,36 +1913,169 @@ var g_update_stamps = null;
             // initialize listen action
             var $action_listen = $sdetail.find('.action-listen');
             
-            if ($action_listen.length == 1) {
-                var $link = $action_listen.parent('a.action-link');
-                var $source_spotify = $action_listen.find(".source-spotify");
-                var $source_spotify = $action_listen.find(".source-itunes");
+            $.each($action_listen, function(i, elem) {
+                var $elem = $(elem);
+                var $source_rdio    = $elem.find(".source-rdio");
+                var $source_itunes  = $elem.find(".source-itunes");
                 
-                if ($source_spotify.length === 1) {
-                    // TODO
-                }
-                
-                //var href  = "https://embed.spotify.com/?uri={{source.completion_data.source_id}}";
-                
-                /*$link.click(function(event) {
-                    event.preventDefault();
+                if ($source_rdio.length === 1) {
+                    var source_id   = $source_rdio.data("source-id");
+                    var $rdio       = $("#rdio-api");
+                    var duration    = 1;
                     
-                    var popup_options = get_fancybox_popup_options({
-                        href  : "http://www.stamped.com"
+                    var rdio_initialized = false;
+                    var rdio_initialized_callback = null;
+                    
+                    // initialize rdio preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $elem.removeClass("stopped playing").addClass("media-loading");
+                            $rdio.rdio().play(source_id);
+                        };
+                        
+                        var stop_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $rdio.rdio().pause();
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!rdio_initialized) {
+                            $elem.removeClass("stopped playing").addClass("media-loading");
+                            
+                            rdio_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
                     });
                     
-                    $.fancybox.open(popup_options);
-                    return false;
-                });
-                
-                var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
-                    m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
-                }, {
-                    cssSelectorAncestor: "#cp_container_1"
-                });*/
-                
-                // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
-            }
+                    $rdio.bind('ready.rdio', function() {
+                        rdio_initialized = true;
+                        
+                        if (!!rdio_initialized_callback) {
+                            rdio_initialized_callback();
+                        }
+                    });
+                    
+                    $rdio.bind('playingTrackChanged.rdio', function(e, playingTrack, sourcePosition) {
+                        if (playingTrack) {
+                            duration = playingTrack.duration;
+                            
+                            /*$('#art').attr('src', playingTrack.icon);
+                            $('#track').text(playingTrack.name);
+                            $('#album').text(playingTrack.album);
+                            $('#artist').text(playingTrack.artist);*/
+                        }
+                    });
+                    
+                    $rdio.bind('positionChanged.rdio', function(e, position) {
+                        /*$('#position').css('width', Math.floor(100*position/duration)+'%');*/
+                    });
+                    
+                    $rdio.bind('playStateChanged.rdio', function(e, playState) {
+                        if (playState == 0) { // paused
+                            $elem.removeClass("media-loading playing").addClass("stopped");
+                        } else {
+                            // note: empirically, rdio adds an ease-in, so we show the loading 
+                            // indicator for slightly longer than when the audio actually 
+                            // starts "playing" to adjust for the pause until the user actually 
+                            // hears audio
+                            setTimeout(function() {
+                                $elem.removeClass("media-loading stopped").addClass("playing");
+                            }, 2500);
+                        }
+                    });
+                    
+                    // this is a valid playback token for localhost.
+                    // but you should go get your own for your own domain.
+                    $rdio.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
+                } else if ($source_itunes.length === 1) {
+                    var itunes_initialized = false;
+                    var itunes_initialized_callback = null;
+                    
+                    var $itunes = $("#itunes-preview");
+                    var itunes_url = $itunes.attr("src");
+                    
+                    // initialize itunes preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("stopped").addClass("playing");
+                            
+                            $itunes.jPlayer("play");
+                        };
+                        
+                        var stop_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("playing").addClass("stopped");
+                            
+                            $itunes.jPlayer("pause");
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!itunes_initialized) {
+                            itunes_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
+                    });
+                    
+                    itunes_initialized = true;
+                    $itunes.jPlayer({
+                        ready: function () {
+                            $itunes.jPlayer("setMedia", {
+                                m4a : itunes_url
+                            });
+                            
+                            itunes_initialized = true;
+                            
+                            if (!!itunes_initialized_callback) {
+                                itunes_initialized_callback();
+                            }
+                        }, 
+                        
+                        supplied: "m4a", 
+                        swfPath: "/assets/js/libs/jplayer", 
+                        solution: "html,flash"
+                    });
+                }
+            });
+            
+            /*
+            var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
+                m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
+            }, {
+                cssSelectorAncestor: "#cp_container_1"
+            });
+            
+            // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
+            */
             
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
@@ -2078,7 +2142,6 @@ var g_update_stamps = null;
                 var $this = $(this);
                 var href  = $this.attr('href');
                 
-                console.log(href);
                 var popup_options = get_fancybox_popup_options({
                     href  : href
                 });
@@ -2119,117 +2182,13 @@ var g_update_stamps = null;
         
         
         // ---------------------------------------------------------------------
-        // initialize signup functionality
-        // ---------------------------------------------------------------------
-        
-        
-        $body.on("click", ".get-the-app-button", function(event) {
-            event.preventDefault();
-            
-            var popup_options = get_fancybox_popup_large_options({
-                content     : $("#popup-signup").html(), 
-                type        : "html", 
-                width       : 480, 
-                minWidth    : 480
-            });
-            
-            console.debug(popup_options);
-            $.fancybox.open(popup_options);
-            return false;
-        });
-        
-        var default_phone_number = "555-555-5555";
-        var sms_message_success  = "SMS Sent!";
-        var sms_message_error    = "SMS Error!";
-        
-        $body.on("focus", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value");
-            
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error) {
-                $this.attr("value", "");
-            }
-            
-            $sms.removeClass("error").addClass("active");
-            
-            return true;
-        });
-        
-        $body.on("focusout", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value").trim();
-            
-            if (value.length <= 0) {
-                $this.attr("value", default_phone_number);
-            }
-            
-            $sms.removeClass("active error");
-            
-            return true;
-        });
-        
-        $(".phone-number").live("keyup change", function(event) {
-            var $this   = $(this);
-            var value   = $this.attr("value").trim();
-            var prefix  = "active-";
-            var classes = "active-0 active-1 active-2 active-3 active-4 active-5 active-6 active-7 active-8 active-9 active-10";
-            
-            if (value.length >= 0) {
-                var length = value.length;
-                
-                if (length > 10) {
-                    length = 10;
-                }
-                
-                var $button = $this.parent().find(".send-button");
-                $button.removeClass(classes).addClass(prefix + length);
-            }
-            
-            return true;
-        });
-        
-        $body.on("submit", ".sms-form", function(event) {
-            event.preventDefault();
-            
-            var $this  = $(this);
-            var $input = $this.find(".phone-number");
-            var value  = $input.attr("value").trim();
-            
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error || value.length <= 3) {
-                return false;
-            }
-            
-            value = value.replace(/-/g, "");
-            
-            var max_len = 11;
-            if (value[0] == "+") {
-                max_len = 12;
-            }
-            
-            if (value.length > max_len) {
-                return false;
-            }
-            
-            var ajaxP  = $.ajax({
-                type        : "POST", 
-                url         : "/download-app", 
-                data        : { "phone_number" : value }
-            }).done(function () {
-                $input.attr("value", sms_message_success);
-            }).fail(function() {
-                $input.attr("value", sms_message_error).parent().addClass("error");
-            });
-            
-            return false;
-        });
-        
-        
-        // ---------------------------------------------------------------------
         // setup misc bindings
         // ---------------------------------------------------------------------
         
+        
+        $(document).bind('keydown', 'ctrl+t', function() {
+            toggle_gallery_layout_mode();
+        });
         
         // whenever the window scrolls, check if the header's layout needs to be updated
         $window.bind("scroll", update_dynamic_header);
@@ -2261,7 +2220,7 @@ var g_update_stamps = null;
         }
         
         update_dynamic_header();
-        init_header_subsections();
+        //init_header_subsections();
         
         init_gallery();
         update_stamps();

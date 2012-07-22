@@ -18,9 +18,10 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER		= 1.0.0
+ASSET_VERSION_NUMBER        = 1.1.7
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
+GENERATED_LINE_LENGTH		= 512
 
 LESS_CSS_DIRS               = assets/css assets/css/libs assets/css/ie assets/css/mobile
 LESS_CSS_SOURCE_SUFFIX      = less
@@ -31,20 +32,23 @@ LESS_CSS_SOURCES            = $(strip \
     $(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
 LESS_CSS_TARGETS            = $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$(LESS_CSS_TARGET_SUFFIX))
 
+GENERATED_BASE_DIR			= assets/generated
+GENERATED_JS_BASE_DIR		= $(GENERATED_BASE_DIR)/js
+GENERATED_CSS_BASE_DIR		= $(GENERATED_BASE_DIR)/css
 JS_BASE_DIR					= assets/js
 CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 TEMPLATE_BASE_DIR		    = templates
-HTML_PAGES					= profile map index
+HTML_PAGES					= base profile index map about jobs retina
 TEMPLATE_PROG				= bin/process_templates.py
 
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
 GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^[ \t]*stylesheet:[ \t]*' $1 | sed 's/[ \t]*stylesheet:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
 GET_TEMPLATE_DEPENDENCIES	= $(foreach FILE,$(shell grep '^[ \t]*template:[ \t]*' $1 | sed 's/[ \t]*template:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(TEMPLATE_BASE_DIR)/$(FILE))
 
-JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)
-CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(CSS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).css)
+JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(GENERATED_JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)
+CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(GENERATED_CSS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).css)
 TEMPLATE_TARGETS			= $(foreach PAGE,$(HTML_PAGES),$(TEMPLATE_BASE_DIR)/$(PAGE).generated.html)
 
 #TEMPLATE_DIRS				= templates
@@ -54,7 +58,7 @@ TEMPLATES 					= $(strip \
 	$(foreach DIR,$(TEMPLATE_DIRS),$(wildcard $(DIR)/*.$(TEMPLATE_SUFFIX))))
 
 DEPENDENCIES				= $(TEMPLATES) $(TEMPLATE_PROG) $(wildcard core/templatetags/*.py)
-ALL_TARGETS					= $(LESS_CSS_TARGETS) $(JS_TARGETS) $(TEMPLATE_TARGETS)
+ALL_TARGETS					= $(LESS_CSS_TARGETS) $(JS_TARGETS) $(TEMPLATE_TARGETS) css_targets $(CSS_TARGETS)
 
 define ADD_LESS_CSS_TARGET
 $1/%.$(LESS_CSS_TARGET_SUFFIX): $1/%.$(LESS_CSS_SOURCE_SUFFIX)
@@ -64,15 +68,17 @@ $1/%.$(LESS_CSS_TARGET_SUFFIX): $1/%.$(LESS_CSS_SOURCE_SUFFIX)
 endef
 
 define ADD_JS_TARGET
-$(JS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
-	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(call REST,$$^)$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break 120 > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
-	@cat $$(call REST,$$^) | java -jar bin/compressor.jar --type js --nomunge --line-break 120 > $$@
+$(GENERATED_JS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
+	@mkdir -p $(GENERATED_JS_BASE_DIR)
+	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^))$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break $(GENERATED_LINE_LENGTH) > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
+	@cat $$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^)) | java -jar bin/compressor.jar --type js --nomunge --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef
 
 define ADD_CSS_TARGET
-$(CSS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
-	cat $$(call REST,$$^) | java -jar bin/compressor.jar --type css --line-break 120 > $$@
+$(GENERATED_CSS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) css_targets $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
+	@mkdir -p $(GENERATED_CSS_BASE_DIR)
+	cat $$(call REST,$$(call REST,$$^)) | java -jar bin/compressor.jar --type css --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef
 
@@ -85,30 +91,28 @@ endef
 
 all: $(ALL_TARGETS)
 
-.PHONY: all clean help version deploy
-
-#$(TEMPLATE_DEST): $(DEPENDENCIES)
-#	$(TEMPLATE_PROG) -o $(TEMPLATE_DEST)
-#	@$(CECHO) "Created '$(BOLD_COLOR)$(FR_COLOR_RED)$(TEMPLATE_DEST)$(END_COLOR)'."
-#	@echo
+.PHONY: all clean help update_version deploy css_targets
 
 $(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_LESS_CSS_TARGET,$(DIR))))
 $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_JS_TARGET,$(PAGE))))
 $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_TEMPLATE_TARGET,$(PAGE))))
+$(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_CSS_TARGET,$(PAGE))))
 
-#$(foreach PAGE,$(HTML_PAGES),$(eval $(call ADD_CSS_TARGET,$(PAGE))))
+css_targets: $(LESS_CSS_TARGETS);
 
 deploy: $(ALL_TARGETS)
-	@echo "TODO: upload all JS assets to S3"
-	@echo "$(foreach PAGE,$(HTML_PAGES),$(JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)"
-	@echo "TODO: upload all CSS assets to S3"
-	@echo "$(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.LESS_CSS_TARGET_SUFFIX))"
+	cd bin && python deploy_assets.py
+
+update_version:
+	@echo $(ASSET_VERSION_NUMBER)
+	cd bin && python deploy_version.py
 
 version:
 	@echo $(ASSET_VERSION_NUMBER)
 
 clean:
-	$(RM) -f $(ALL_TARGETS)
+	$(RM) -rf $(GENERATED_BASE_DIR)
+	$(RM) -f  $(ALL_TARGETS)
 	@echo
 
 help::

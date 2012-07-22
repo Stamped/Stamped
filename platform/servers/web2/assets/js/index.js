@@ -315,8 +315,8 @@
             
             // load the main content with a spiffy animation, translating in from beneath 
             // the bottom of the page
+            $body.addClass("main-animating");
             $main
-                .addClass("main-animating")
                 .css('top', start + "px")
                 .animate({
                     'top'       : result.offset + "px"
@@ -327,7 +327,7 @@
                         var percent = (value - result.offset) / (start - result.offset);
                         
                         if (percent < 0.1) {
-                            $main.removeClass("main-animating");
+                            $body.removeClass("main-animating");
                         }
                     }, 
                     complete    : function() {
@@ -335,7 +335,7 @@
                             update_main_layout();
                         }
                         
-                        $main.removeClass("main-animating");
+                        $body.removeClass("main-animating");
                         
                         if (!!autoplay) {
                             main_pane_cycle_animation.start();
@@ -580,7 +580,7 @@
         // ---------------------------------------------------------------------
         
         
-        iphone_inbox_stamps = [
+        /*iphone_inbox_stamps = [
             {
                 id : "Son of a Gun Restaurant", 
                 y0 : 49, 
@@ -708,7 +708,7 @@
             return false;
         });
         
-        $body.on("mouseup", iphone_inbox_selection_hide);
+        $body.on("mouseup", iphone_inbox_selection_hide);*/
         
         $iphone_back_button.click(function(event) {
             event.preventDefault();
@@ -719,11 +719,26 @@
             return false;
         });
         
+        var disable_main_pane_cycle_animation = function(event) {
+            main_pane_cycle_animation.stop();
+            
+            return true;
+        };
+        
+        // stop main cycling animation whenever the user hovers over the main 
+        // stamp card, iphone, or navigation-pane
+        $main_body.hover(disable_main_pane_cycle_animation);
+        $main_iphone.hover(disable_main_pane_cycle_animation);
+        $("#pane-nav").hover(disable_main_pane_cycle_animation);
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
         // ---------------------------------------------------------------------
         
+        $(document).bind('keydown', 'ctrl+t', function() {
+            $(".download-the-app-button").toggleClass("download-the-app-button-ugly-green");
+        });
         
         $(document).bind('keydown', function(e) {
             if (e.which == 27) { // ESC
@@ -732,6 +747,8 @@
                     intro_animation.stop(true, true);
                     
                     hide_intro(false);
+                } else {
+                    main_pane_cycle_animation.stop();
                 }
             }
         });

@@ -21,3 +21,7 @@ xcuserdata/
 
 Breakpoints.xcbkptlist
 
+platform/libs/.*
+
+
+.project

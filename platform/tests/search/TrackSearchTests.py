@@ -33,7 +33,6 @@ class TrackSearchTests(SearchTestsRunner):
         test_cases = (
             makeSimpleTestCase('simple as...'),
             makeSimpleTestCase('what\'s wrong is everywhere'),
-            makeSimpleTestCase('whats wrong is everywhere', 'what\'s wrong is everywhere'),
             makeSimpleTestCase('midnight city'),
             makeSimpleTestCase('lux aeterna'),
             makeSimpleTestCase('mouthful of diamonds'),

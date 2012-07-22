@@ -12,7 +12,7 @@ import calendar, datetime, sys, math
 import keys.aws, logs, utils
 
 
-from analytics.core.Convert                 import Converter
+from servers.analytics.core.Convert             import Converter
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool

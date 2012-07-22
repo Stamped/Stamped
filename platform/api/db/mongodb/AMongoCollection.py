@@ -16,6 +16,10 @@ from datetime               import datetime
 from pymongo.errors         import AutoReconnect, DuplicateKeyError
 from api.db.mongodb.MongoCollectionProxy   import MongoCollectionProxy
 
+
+LOG_COLLECTION_SIZE         = 1024*1024*1024    # 1 gb
+LOG_LOCAL_COLLECTION_SIZE   = 1024*1024*100     # 100 mb
+
 class MongoDBConfig(Singleton):
     def __init__(self):
         self.config = AttributeDict()
@@ -90,7 +94,7 @@ class MongoDBConfig(Singleton):
                 
                 if replicaset:
                     self._connection = pymongo.ReplicaSetConnection(hosts,
-                                                                    read_preference=pymongo.ReadPreference.PRIMARY, 
+                                                                    read_preference=pymongo.ReadPreference.SECONDARY, 
                                                                     replicaset=replicaset)
                 else:
                     self._connection = pymongo.Connection(hosts,
@@ -114,22 +118,133 @@ class MongoDBConfig(Singleton):
     def __str__(self):
         return self.__class__.__name__
 
+
+class MongoLogDBConfig(Singleton):
+
+    def __init__(self):
+        self.config = AttributeDict()
+        self.database_name = 'stamped'
+        self._connection = None
+        self._init()
+        
+        def disconnect():
+            ### TODO: Add disconnect from MongoDB
+            if self._connection is not None:
+                self._connection.disconnect()
+                self._connection = None
+        
+        atexit.register(disconnect)
+    
+    @property
+    def isValid(self):
+        return 'mongodb' in self.config and 'hosts' in self.config.mongodb 
+    
+    def _init(self):
+        if utils.is_ec2():
+            dbNodes = libs.ec2_utils.get_db_nodes('logger')
+
+            hosts = []
+            for dbNode in dbNodes:
+                hosts.append((dbNode['private_ip_address'], 27017))
+
+            if len(hosts) > 0:
+                self.config['mongodb'] = {
+                    "hosts" : hosts
+                }
+        
+        if not 'mongodb' in self.config:
+            self.config = AttributeDict({
+                "mongodb" : {
+                    "hosts" : [("localhost", 27017)]
+               }
+            })
+            
+            logs.info("MongoDB connection defaulting to %s" % 
+                      (self.config.mongodb.hosts))
+    
+    @property
+    def hosts(self):
+        return self.config.mongodb.hosts
+    
+    @property
+    def user(self):
+        if 'user' in self.config.mongodb:
+            return str(self.config.mongodb.user)
+        else:
+            return 'root'
+    
+    @property
+    def connection(self):
+        if self._connection:
+            return self._connection
+        
+        reinitialized = False
+        max_delay = 16
+        delay = 1
+        
+        if utils.is_ec2():
+            replicaset = 'stamped-dev-01'
+        else:
+            replicaset = None
+        
+        while True:            
+            try:
+                hosts = ','.join(map(lambda x: "%s:%s" % (x[0], x[1]), self.hosts))
+                logs.info("Connecting to MongoDB: %s" % hosts)
+                
+                if replicaset:
+                    self._connection = pymongo.ReplicaSetConnection(hosts,
+                                                                    read_preference=pymongo.ReadPreference.SECONDARY, 
+                                                                    replicaset=replicaset)
+                else:
+                    self._connection = pymongo.Connection(hosts,
+                                                          read_preference=pymongo.ReadPreference.SECONDARY)
+                
+                return self._connection
+            except AutoReconnect as e:
+                if delay > max_delay:
+                    if reinitialized:
+                        raise
+                    
+                    # attempt to reinitialize our MongoDB configuration and retry
+                    self._init()
+                    delay = 1
+                    reinitialized = True
+                
+                logs.warning("Retrying to connect to host: %s (delay %d)" % (str(e), delay))
+                time.sleep(delay)
+                delay *= 2
+
+
 class AMongoCollection(object):
     
-    def __init__(self, collection, primary_key=None, obj=None, overflow=False):
+    def __init__(self, collection, primary_key=None, obj=None, overflow=False, logger=False):
         self._desc = self.__class__.__name__
+
+        if logger:
+            self._dbConfig = MongoLogDBConfig.getInstance()
+            size = LOG_COLLECTION_SIZE if libs.ec2_utils.is_ec2() else LOG_LOCAL_COLLECTION_SIZE
+            self._init_collection(self._dbConfig.database_name, collection, size)
+        else:
+            self._dbConfig = MongoDBConfig.getInstance()
+            self._init_collection(self._dbConfig.database_name, collection)
         
-        self._init_collection(MongoDBConfig.getInstance().database_name, collection)
+
         self._primary_key = primary_key
         self._obj = obj
         self._overflow = overflow
         self._collection_name = collection
     
-    def _init_collection(self, db, collection):
-        cfg = MongoDBConfig.getInstance()
-        self._collection = MongoCollectionProxy(self, cfg.connection, db, collection)
+    def _init_collection(self, db, collection, cap_size=None):
+        cfg = self._dbConfig
+        self._collection = MongoCollectionProxy(self, cfg.connection, db, collection, cap_size)
         
         logs.debug("Connected to MongoDB collection: %s" % collection)
+
+    @property
+    def isCapped(self):
+        options = self._collection.options()
+        return 'capped' in options and options['capped'] == True
     
     def _validateUpdate(self, result):
         try:
@@ -243,8 +358,12 @@ class AMongoCollection(object):
             logs.warning("Unable to add document: %s" % e)
             raise
     
-    def _getMongoDocumentFromId(self, documentId):
-        document = self._collection.find_one(documentId)
+    def _getMongoDocumentFromId(self, documentId, **kwargs):
+        forcePrimary = kwargs.pop('forcePrimary', False)
+        params = {}
+        if forcePrimary:
+            params['read_preference'] = pymongo.ReadPreference.PRIMARY
+        document = self._collection.find_one(documentId, **params)
         if document is None:
             raise StampedDocumentNotFoundError("Unable to find document (id = %s)" % documentId)
         return document
@@ -298,8 +417,14 @@ class AMongoCollection(object):
             documents = documents.sort(sort, order)
         
         return documents.limit(limit)
-    
-    
+
+
+    ### COLLECTION OPTIONS
+
+    def convertToCapped(self, size):
+        if not self.isCapped:
+            self._collection.command("convertToCapped", value=self._collection_name, size=size)
+
     ### RELATIONSHIP MANAGEMENT
     
     def _getOverflowBucket(self, objId):

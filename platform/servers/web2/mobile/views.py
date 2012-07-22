@@ -9,20 +9,11 @@ import Globals
 import api.HTTPSchemas
 import utils
 
-import servers.web2.core.views as views
+import servers.web2.core.views       as views
+import servers.web2.core.appsettings as appsettings
 
 from servers.web2.core.schemas  import *
 from servers.web2.core.helpers  import *
-
-def index(*args, **kwargs):
-    kwargs['mobile'] = True
-    
-    return views.index(*args, **kwargs)
-
-def about(*args, **kwargs):
-    kwargs['mobile'] = True
-    
-    return views.about(*args, **kwargs)
 
 def profile(*args, **kwargs):
     kwargs['mobile'] = True
@@ -79,4 +70,34 @@ def sdetail(request, schema, **kwargs):
         'stamp'              : stamp, 
         'entity'             : entity, 
     }, preload=[ 'user', 'stamp', 'entity' ])
+
+def index(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.index(*args, **kwargs)
+
+def about(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.about(*args, **kwargs)
+
+def jobs(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.jobs(*args, **kwargs)
+
+def password_reset(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return appsettings.password_reset(*args, **kwargs)
+
+def password_forgot(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return appsettings.password_forgot(*args, **kwargs)
+
+def alert_settings(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return appsettings.alert_settings(*args, **kwargs)
 

@@ -53,45 +53,32 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import utils
 import json
 import urllib
 from libs import oauth
-import urllib2
 import sys
-import time
 import random
-import logs
 
 from urlparse               import urlparse, parse_qsl
-from libs.LRUCache               import lru_cache
-from libs.CachedFunction         import cachedFn
+from libs.LRUCache          import lru_cache
+from libs.CachedFunction    import cachedFn
 from libs.CountedFunction   import countedFn
 from api.Schemas            import BasicEntity
-from libs.SinglePlatform         import StampedSinglePlatform
+from libs.SinglePlatform    import StampedSinglePlatform
 from pprint                 import pprint
-from pymongo                import Connection
-from gevent.queue           import Queue
-from gevent.pool            import Pool
 from functools              import partial
 from urllib2                import HTTPError
 from gevent                 import sleep
-from itertools              import combinations
 from re                     import match
-from threading              import Lock
 from datetime               import datetime
 from datetime               import timedelta
 from utils                  import lazyProperty
-from libs.RateLimiter            import RateLimiter
+from libs.RateLimiter       import RateLimiter
+from libs.Request           import service_request
+from APIKeys                import get_api_key
 
-_API_Key = "SlSXpgbiMJEUqzYYQAYttqNqqb30254tAUQIOyjs0w9C2RKh7yPzOETd4uziASDv"
-# Random (but seemingly functional API Key)
-#_API_V3_Key = "p7kwKMFUSyVi64FxnqWmeSDEI41kzE3vNWmwY9Zi"
-_API_V3_Key = 'xdNC1Jb03oXouZvIoGNjOFb122lhPax8DN1a1I8P'
-_API_V3_Secret = "pJ4OIbsi8l3V1sXNRngy3uCGe0DzCIpWfzwGtbkM"
-
-_API_V3_Key = 'wgf36HhnpPXQBu6qSkRPiqMK7te3jHpi0EJnYf9D'
-_API_V3_Secret = '9hIItS9RQAlinpyfD6FR9HjmI3tBidMCMxhtAjNd'
+_API_V3_Key             = get_api_key('factual', 'api_key')
+_API_V3_Secret          = get_api_key('factual', 'api_secret')
 _limit = 20
 
 
@@ -118,7 +105,7 @@ def _path(path_string, entity, subfunc=None):
         else:
             return None
     if subfunc:
-        cur = subfunc(cur) 
+        cur = subfunc(cur)
     return cur
 
 def _street(val):
@@ -258,11 +245,11 @@ class Factual(object):
         self.__v3_secret = secret
         self.__singleplatform = StampedSinglePlatform()
         self.__log_file = log
-        self.__limiter = RateLimiter(cpm=400,cpd=180000)  
+        self.__limiter = RateLimiter(cpm=400,cpd=180000)
         self.__max_crosswalk_age = timedelta(30)
         self.__max_resolve_age = timedelta(30)
-    
-    def search(self, query, limit=_limit, coordinates=None, radius=5000):
+
+    def search(self, query, limit=_limit, coordinates=None, radius=5000, priority="low"):
         params = {}
         params['prefix']    = 't'
         params['limit']     = limit
@@ -275,18 +262,18 @@ class Factual(object):
                     {"category":{"$bw":"Arts, Entertainment & Nightlife"}},
                 ]
             }))
-        
+
         if coordinates is not None:
             params['geo'] = urllib.quote(json.dumps({
-                '$circle':{'$center':[coordinates[0], coordinates[1]],'$meters':radius}
+                '$circle':{'$center':[coordinates[0], coordinates[1]], '$meters':radius}
             }))
-        
-        return self.__factual('global', **params)
-    
-    def resolve(self, data, limit=_limit):
+
+        return self.__factual('global', priority=priority, **params)
+
+    def resolve(self, data, limit=_limit, priority="low"):
         """
         Use Resolve service to match entities to limited attributes, including partial names.
-        
+
         Accepts a JSON compatible object such as: {'name':'ino','locality':'New York'}
 
         returns a JSON like object which includes the usual attributes and 'similarity'
@@ -295,35 +282,35 @@ class Factual(object):
         and will operate on partial names.
         """
         string = json.dumps(data)
-        r = self.__factual('resolve',limit=limit,values=urllib.quote(string))
+        r = self.__factual('resolve', limit=limit, values=urllib.quote(string), priority=priority)
         if r != None and len(r) > limit:
             r = r[:limit]
         return r
-    
-    def places(self, data, limit=_limit):
+
+    def places(self, data, limit=_limit, priority="low"):
         """
         A stricter search than resolve. Seems to only produce entities which exactly match the given fields (at least for name).
         """
         string = urllib.quote(json.dumps(data))
-        return self.__factual('global', prefix='t', limit=limit, filters=string)
-    
-    def place(self, factual_id):
-        result = self.places({'factual_id':factual_id},1)
+        return self.__factual('global', prefix='t', limit=limit, filters=string, priority=priority)
+
+    def place(self, factual_id, priority="low"):
+        result = self.places({'factual_id':factual_id}, 1, priority)
         if result:
             return result[0]
         else:
             return None
-    
-    def crosswalk_id(self, factual_id, namespace=None, limit=_limit, namespaces=None):
+
+    def crosswalk_id(self, factual_id, namespace=None, limit=_limit, namespaces=None, priority="low"):
         """
         Use Crosswalk service to find urls and ids that match the given entity.
-        
+
         If namespace is provided, it limits the scope of the search to that service.
 
         It appears that there are not necessarilly crosswalk results for every factual_id.
 
         Regardless of the options, every entry in the result will contain the following fields:
-        
+
         factual_id - the given id
         namespace - the namespace of entry (i.e. 'singleplatform')
         namespace_id - the string id within the namespace (i.e. 'ino') or '' if unknown/non-existant
@@ -336,15 +323,15 @@ class Factual(object):
         elif namespaces != None:
             args['only'] = ','.join(namespaces)
             del args['limit']
-        return self.__factual('crosswalk',**args)
-    
-    def crosswalk_external(self, space, space_id, namespace=None, limit=_limit):
+        return self.__factual('crosswalk', priority=priority, **args)
+
+    def crosswalk_external(self, space, space_id, namespace=None, limit=_limit, priority="low"):
         """
         Use Crosswalk service to find urls and ids that match the given external entity.
-        
+
         If namespace is provided, it limits the scope of the search to that service.
         Regardless of the options, every entry in the result will contain the following fields:
-        
+
         factual_id - the given id
         namespace - the namespace of entry (i.e. 'singleplatform')
         namespace_id - the string id within the namespace (i.e. 'ino') or '' if unknown/non-existant
@@ -353,31 +340,31 @@ class Factual(object):
         args = {'limit':limit,'namespace':space,'namespace_id':space_id}
         if namespace != None:
             args['only'] = namespace
-        return self.__factual('crosswalk',**args)
-    
-    def crossref_id(self, factual_id, limit=_limit):
+        return self.__factual('crosswalk', priority=priority, **args)
+
+    def crossref_id(self, factual_id, limit=_limit, priority="low"):
         """
         Use Crossref service to find urls that pertain to the given entity.
         """
-        return self.__factual('crossref',factual_id=factual_id,limit=limit)
-    
-    def crossref_url(self, url, limit=_limit):
+        return self.__factual('crossref', factual_id=factual_id, limit=limit, priority=priority)
+
+    def crossref_url(self, url, limit=_limit, priority="low"):
         """
         User Crossref service to find the entities related/mentioned at the given url.
         """
-        return self.__factual('crossref',url=urllib.quote(url),limit=limit)
-    
-    def restaurant(self, factual_id):
+        return self.__factual('crossref', url=urllib.quote(url), limit=limit, priority=priority)
+
+    def restaurant(self, factual_id, priority="low"):
         """
         Get Factual restaurant data for a given factual_id.
         """
         string = json.dumps({'factual_id':factual_id})
-        result = self.__factual('restaurants-us','t',filters=urllib.quote(string))
+        result = self.__factual('restaurants-us', 't', filters=urllib.quote(string), priority=priority)
         if result:
             return result[0]
         else:
             return None
-            
+
     def entity(self, factual_id):
         """
         STUB Create a Stamped entity from a factual_id.
@@ -385,7 +372,7 @@ class Factual(object):
         entity = BasicEntity()
         self.enrich(entity,factual_id)
         return entity
-    
+
     def resolveEntity(self, entity):
         factual_id = None
         result = False
@@ -423,7 +410,7 @@ class Factual(object):
                 entity.factual_crosswalk = datetime.utcnow()
                 result = True
         return result
-    
+
     def enrichEntity(self, entity):
         return self.enrich(entity)
 
@@ -484,7 +471,7 @@ class Factual(object):
             return crosswalk_result['factual_id']
         else:
             return None
-    
+
     def singleplatform(self, factual_id):
         """
         Get singleplatform id from factual_id
@@ -528,15 +515,15 @@ class Factual(object):
             return None
 
 
-    def data(self, factual_id, entity=None):
+    def data(self, factual_id, entity=None, priority="low"):
         """
         Generate Factual data for given factual_id.
 
         The entity argument is optional but may allow the method to run more efficiently.
         """
-        data = self.restaurant(factual_id)
+        data = self.restaurant(factual_id, priority)
         if data is None:
-            data = self.place(factual_id)
+            data = self.place(factual_id, priority=priority)
         return data
 
     def menu(self, factual_id):
@@ -559,7 +546,7 @@ class Factual(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='Factual (after caching)')
-    def __rawFactual(self, service, prefix='places', **args):
+    def __rawFactual(self, service, prefix='places', priority='low', **args):
         """
         Helper method for making OAuth Factual API calls.
 
@@ -579,18 +566,17 @@ class Factual(object):
 
         request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), consumer, None)
 
-        with self.__limiter:
-            req = urllib2.Request(url, None, request.to_header())
-            logs.info(req.get_full_url())
-            res = urllib2.urlopen(req)
-        return res.read()
 
-    def __factual(self, service, prefix='places', **args):
+        response, content = service_request('factual', 'GET', url, header=request.to_header(), priority=priority)
+
+        return content
+
+    def __factual(self, service, prefix='places', priority="low", **args):
         """
         Factual results are difficult to turn into mongo objects for the mongo cache because sometimes they contain
         dicts that use "$distance" as a key which is a problem for mongo. So we cache the result before it's parsed.
         """
-        m = json.loads(self.__rawFactual(service, prefix, **args))
+        m = json.loads(self.__rawFactual(service, prefix, priority, **args))
         try:
             return m['response']['data']
         except:

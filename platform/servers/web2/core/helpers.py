@@ -488,3 +488,40 @@ def transform_output(value, **kwargs):
     logs.output(output_json)
     return output
 
+def convert_stamp(stamp):
+    for i in xrange(len(stamp['contents'])):
+        content = stamp['contents'][i]
+        if 'blurb_references' in content and 'blurb' in content:
+            content['blurb'] = convert_blurb(content['blurb'], content['blurb_references'])
+    
+    return stamp
+
+def convert_blurb(blurb, references=None):
+    prevIndex = 0
+    result = []
+    
+    if references is not None:
+        for reference in references:
+            bgn = reference['indices'][0]
+            end = reference['indices'][1]
+            
+            # Append previous section
+            result.append(blurb[prevIndex:bgn]) 
+            
+            # Build this section
+            if reference['action']['type'] == 'link':
+                result.append("<a href='%s'>%s</a>" % (reference['action']['sources'][0]['link'], blurb[bgn:end]))
+            elif reference['action']['type'] == 'stamped_view_screen_name':
+                result.append("<class='mention'>%s</class>" % (blurb[bgn:end]))
+            
+            prevIndex = end
+    
+    if len(blurb) > prevIndex:
+        result.append(blurb[prevIndex:])
+    
+    result = ''.join(result)
+    result = result.replace('\n', '<br>')
+    result = result.replace('  ', '&nbsp;&nbsp;')
+    
+    return result
+

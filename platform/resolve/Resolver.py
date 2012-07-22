@@ -12,17 +12,6 @@ __all__ = [
     'Resolver',
     'ResolverProxy',
     'demo',
-    'regexRemoval',
-    'simplify',
-    'format',
-    'trackSimplify',
-    'albumSimplify',
-    'artistSimplify',
-    'movieSimplify',
-    'bookSimplify',
-    'nameSimplify',
-    'videoGameSimplify', 
-    'stringComparison',
 ]
 
 import Globals
@@ -42,7 +31,6 @@ try:
     from libs.LibUtils              import parseDateString
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
-    from time                       import time
     from resolve.ResolverObject             import *
     from resolve.EntityProxyComparator      import *
 

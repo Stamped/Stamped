@@ -10,10 +10,11 @@
 -->
 {% load ssi from future %}
 
-<!-- Javascript Dependencies => profile.generated.js
+<!-- Javascript Dependencies => assets/generated/js/profile.generated.js
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
+        script: libs/jquery.hotkeys.js
         script: libs/jquery.infinitescroll.js
         script: libs/jquery.isotope.js
         script: libs/jquery.emoji.js
@@ -22,32 +23,28 @@
         script: libs/jquery.fancybox.js
         script: libs/jquery.mousewheel.js
         script: libs/jquery.jscrollpane.js
-        
-        script: libs/jplayer/jquery.transform.js
-        script: libs/jplayer/jquery.grab.js
-        script: libs/jplayer/mod.csstransforms.min.js
-        script: libs/jplayer/circle.player.js
-        script: libs/jplayer/jquery.jplayer.js
+        script: libs/jquery.rdio.js
     
     Third-party library dependencies:
         script: libs/moment.js
+        script: libs/jplayer/jquery.jplayer.js
     
     Core stamped dependencies:
         script: utils.js
         script: social_sharing.js
+        script: signup.js
         script: profile.js
 -->
 
-<!-- CSS Dependencies => profile.generated.css
+<!-- CSS Dependencies => assets/generated/css/profile.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
-        stylesheet: libs/jquery.fancybox.css?v=2.0.6
-        stylesheet: libs/jquery.jscrollpane.less
+        stylesheet: libs/jquery.jscrollpane.css
     
     Core stamped dependencies:
-        stylesheet: profile.less
-        stylesheet: sdetail.less
+        stylesheet: profile.css
+        stylesheet: sdetail.css
 -->
 
 <!-- HTML Template Dependencies => profile.generated.html
@@ -59,30 +56,31 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.jscrollpane.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/sdetail.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
     
     <style>
         {% custom_css "profile" %}
     </style>
     
     <!--[if lte IE 9]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.9.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
     <![endif]-->
     
     <!--[if lte IE 8]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.8.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
     <![endif]-->
     
     <!--[if lte IE 7]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.7.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
     <![endif]-->
 {% endblock styles %}
 
@@ -98,7 +96,6 @@
         <div class="profile-header">
             <div class="profile-content-page">
                 
-                {% with share_widget_desc="Share this collection" %}
                 {% with collage_root="http://s3.amazonaws.com/stamped.com.static.images" %}
                 {# {% with collage_root="http://static.stamped.com" %} #}
                     
@@ -107,7 +104,7 @@
                         <!--<div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
                         <div class="header-overlay"></div>
                         
-                        <div class="profile-header-body-fixedwidth fixedwidth clearfix profile-header-subnav subnav-active-0">
+                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
                             <div class="lhs clearfix">
                                 <div class="profile-image-column">
                                     {% handlebars_template "profile-image-large" user %}
@@ -116,94 +113,37 @@
                                 </div>
                                 
                                 <div class="header-subsections">
-                                    <div class="header-subsection header-subsection-0">
+                                    <div class="header-subsection">
                                         <p class='profile-title'>{{user.name}}</p>
                                         
-                                        <p>
+                                        <p class='subline-0'>
                                             <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
                                         </p>
-                                    </div>
-                                    
-                                    <div class="header-subsection header-subsection-1 clearfix">
-                                        <div class="inner-lhs">
-                                            <p class='profile-title'>{{user.name}}</p>
-                                            
-                                            <p>
-                                                <a class='screen-name' href="/{{user.screen_name}}">@{{user.screen_name}}</a>{% if user.location %} / <span class="user-location">{{user.location}}</span>{% endif %}
-                                            </p>
-                                            
-                                            {% if user.bio %}
-                                            <p class='bio'>
-                                                {{ user.bio }}
-                                            </p>
-                                            {% endif %}
-                                        </div>
                                         
-                                        <div class="inner-rhs">
-                                            <div class='friends-wrapper followers-wrapper'>
-                                                <div class='friends-desc'>Followers</div>
-                                                <div class="clearfix">
-                                                    <span class='friend-count'>{{user.num_followers}}</span>
-                                                    
-                                                    {% with users=followers %}
-                                                    {% with title="followers" %}
-                                                        {% include "user-gallery.html" %}
-                                                    {% endwith %}
-                                                    {% endwith %}
-                                                </div>
-                                            </div>
-                                            
-                                            <div class='friends-wrapper following-wrapper'>
-                                                <div class='friends-desc'>Following</div>
-                                                <div class="clearfix">
-                                                    <span class='friend-count'>{{user.num_friends}}</span>
-                                                    
-                                                    {% with users=friends %}
-                                                    {% with title="following" %}
-                                                        {% include "user-gallery.html" %}
-                                                    {% endwith %}
-                                                    {% endwith %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="header-subsection header-subsection-2">
-                                        <p class='profile-title'>{{user.name}}</p>
-                                        
-                                        <div class="user-stamp-distribution">
-                                            {% for section in user.distribution %}
-                                                <div class="section stamp-category-{{section.category}} stamp-subcategory-{{section.category}} clearfix">
-                                                    <div class="category-name">
-                                                        {% if section.category == "place" %}Places{% endif %}
-                                                        {% if section.category == "music" %}Music{% endif %}
-                                                        {% if section.category == "book" %}Books{% endif %}
-                                                        {% if section.category == "film" %}Film &amp; TV{% endif %}
-                                                        {% if section.category == "app" %}Apps{% endif %}
-                                                        {% if section.category == "other" %}Other{% endif %}
-                                                    </div>
-                                                    
-                                                    <div class='icon dark-icon'></div>
-                                                    
-                                                    <div class="bargraph-row">
-                                                        <div class="bargraph-row-value" data-count="{{section.count}}">
-                                                            <div class="bargraph-row-value-inner"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
+                                        <p class='subline-1'>
+                                            <a class='screen-name expand-friends expand-followers' href="/popups/followers?user_id={{user.user_id}}"> {{user.num_followers}} Followers</a> / <a class='screen-name expand-friends expand-following' href="/popups/following?user_id={{user.user_id}}">{{user.num_friends}} Following</a>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
-                                
-                                <div id="subnav">
-                                    <a class="subnav_button subnav_button-0" title="Profile default"></a>
-                                    <a class="subnav_button subnav_button-1" title="Profile details"></a>
-                                    <a class="subnav_button subnav_button-2" title="Stamp distribution"></a>
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -229,7 +169,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -254,7 +210,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -279,7 +251,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -304,7 +292,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -329,7 +333,23 @@
                             </div>
                             
                             <div class="rhs">
-                                {% handlebars_template "share-widget" %}
+                                <div class="share-widget">
+                                    <div class="desc">Share this collection</div>
+                                    
+                                    <div class='share-buttons clearfix'>
+                                        <div class='share-button facebook'>
+                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
+                                        </div>
+                                        
+                                        <div class='share-button twitter'>
+                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
+                                        </div>
+                                        
+                                        <div class='share-button google'>
+                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -339,27 +359,30 @@
                             <div class="ribbon-bottom"></div>
                         </div>
                         
-                        <div class="inset-stamp">
-                            <div class="stamp-count-dependent stamp-count-default">
-                                <div class="stamp-count user-primary">
-                                    {{user.num_stamps}}
-                                </div>
-                                
-                                <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
-                            </div>
-                            
-                            {% for distro in user.distribution %}
-                                <div class="stamp-count-dependent stamp-count-{{distro.category}}">
-                                    <div class="stamp-count user-primary">
-                                        {{distro.count}}
+                        <div class="inset-stamp-wrapper">
+                            <div class="inset-stamp-body">
+                                <div class="inset-stamp">
+                                    <div class="stamp-count-dependent stamp-count-default">
+                                        <div class="stamp-count user-primary">
+                                            {{user.num_stamps}}
+                                        </div>
+                                        
+                                        <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
                                     </div>
                                     
-                                    <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                    {% for distro in user.distribution %}
+                                        <div class="stamp-count-dependent stamp-count-{{distro.category}}">
+                                            <div class="stamp-count user-primary">
+                                                {{distro.count}}
+                                            </div>
+                                            
+                                            <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
-                            {% endfor %}
+                            </div>
                         </div>
                     </div>
-                {% endwith %}
                 {% endwith %}
             </div>
         </div>
@@ -442,29 +465,26 @@
     {{ block.super }}
      
     {% if STAMPED_DEBUG %}
-        <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.isotope.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.isotope.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.emoji.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/history/jquery.history.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.rdio.js"></script>
         
-        <!-- jPlayer -->
-        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.transform.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.grab.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jplayer/mod.csstransforms.min.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jplayer/circle.player.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/moment.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
         
-        <script src="{{ STATIC_URL }}js/libs/moment.js"></script>
-        
-        <script src="{{ STATIC_URL }}js/utils.js"></script>
-        <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
-        <script src="{{ STATIC_URL }}js/profile.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/social_sharing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/signup.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/profile.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     {% if not lite %}

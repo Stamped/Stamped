@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load stamped_tags %}
 
-<!-- Javascript Dependencies => index.generated.js
+<!-- Javascript Dependencies => assets/generated/js/index.generated.js
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
+        script: libs/jquery.hotkeys.js
         script: libs/jquery.fancybox.js
-        script: libs/helpers/jquery.fancybox-thumbs.js
         script: libs/jquery.fittext.js
         script: libs/jquery.event.drag.js
     
@@ -15,17 +15,15 @@
     
     Core stamped dependencies:
         script: utils.js
+        script: signup.js
         script: index.js
 -->
 
-<!-- CSS Dependencies => index.generated.css
+<!-- CSS Dependencies => assets/generated/css/index.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
-    Third-party library dependencies:
-        stylesheet: libs/jquery.fancybox.css?v=2.0.6
-    
     Core stamped dependencies:
-        stylesheet: index.less
+        stylesheet: index.css
 -->
 
 <!-- HTML Template Dependencies => profile.generated.html
@@ -39,11 +37,11 @@
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/helpers/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/index.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
     
     <style>
         {% for user in tastemakers %}
@@ -52,15 +50,15 @@
     </style>
     
     <!--[if lte IE 9]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.9.css">
     <![endif]-->
     
     <!--[if lte IE 8]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.8.css">
     <![endif]-->
     
     <!--[if lte IE 7]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.7.css">
     <![endif]-->
 {% endblock styles %}
 
@@ -77,24 +75,24 @@
     <div id="intro">
         <div id="intro-hero">
             <div class="text">
-                <div class="line active-line"><span class="blurred">FUCK</span><span class="unblurred">SCREW</span> MEDIOCRITY</div>
-                <div class="line">DOWNLOAD STAMPED</div>
-            </div>
-            
-            <div class="text">
                 <div class="line active-line">WHY SO SERIOUS?</div>
                 <div class="line">START STAMPING</div>
             </div>
             
             <div class="text">
-                <div class="line active-line">LIKES  ARE CHEAP</div>
-                <div class="line">STARS  ARE PASSÉ</div>
+                <div class="line active-line">LIKES ARE CHEAP</div>
+                <div class="line">STARS ARE PASSÉ</div>
                 <div class="line">STAMPS ARE <span class="italic">YOU</span></div>
             </div>
             
             <div class="text">
                 <div class="line active-line">SHARE YOUR PERSONALITY</div>
                 <div class="line">FIND COOL STUFF</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">SCREW MEDIOCRITY</div>
                 <div class="line">DOWNLOAD STAMPED</div>
             </div>
             
@@ -152,12 +150,12 @@
         <div class="vertically-centered">
             <div id="main-header" class="hidden-main-animating clearfix">
                 <div class="floatright">
-                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button"></a>
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button download-stamped-popup"></a>
                 </div>
                 
                 <div id="available" class="floatright">
-                    <div class="desc">Available on the App Store</div>
-                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button"></a>
+                    <div class="desc">Available on the App Store&#8480;</div>
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button download-stamped-popup"></a>
                 </div>
             </div>
             
@@ -341,7 +339,9 @@
         <div id="iphone-hero">
             <div class="iphone-body-shadow iphone-body-shadow-0"></div>
             <div class="iphone-body-shadow iphone-body-shadow-1"></div>
-            <div class="iphone-body"></div>
+            <div class="iphone-body">
+                <div class="iphone-body-lighting iphone-body-lighting-0"></div>
+            </div>
             
             <div class="iphone-screens iphone-screen-active-inbox">
                 <div class="iphone-screen iphone-screen-inbox">
@@ -354,17 +354,12 @@
                 <div class="iphone-screen iphone-screen-sdetail iphone-screen-sdetail-active-0">
                     <div class="iphone-screen-back-button"></div>
                     <div class="iphone-screen-sdetail-0"></div>
-                    <div class="iphone-screen-sdetail-1"></div>
                 </div>
                 
                 <div class="iphone-screen iphone-screen-guide iphone-screen-guide-active-0">
                     <div class="iphone-screen-guide-0"></div>
                 </div>
             </div>
-            
-            <!--<div class="iphone-body-lighting iphone-body-lighting-0"></div>
-            <div class="iphone-body-lighting iphone-body-lighting-1"></div>
-            <div class="iphone-body-overlay"></div>-->
         </div>
     </div>
     
@@ -379,31 +374,6 @@
             <div id="tastemaker-map-window-loading"></div>
         </div>
     </div>
-    
-    <!--
-    <form id="main-iphone-dev" class="main-content">
-        <ol>
-            <br />
-            
-            <li><span class="desc">Perspective: </span><input title="perspective" type="text" maxlength=10 value="600"></li>
-            
-            <br />
-            
-            <li><span class="desc">x-axis: </span><input title="x-axis" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">y-axis: </span><input title="y-axis" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">z-axis: </span><input title="z-axis" type="text" maxlength=10 value="1.0"></li>
-            
-            <br />
-            
-            <li><span class="desc">angle:  </span><input title="angle" type="range" value=0 min=0 max=360></li>
-            
-            <br />
-            
-            <li><span class="desc">scale-x: </span><input title="scale-x" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">scale-y: </span><input title="scale-y" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">scale-z: </span><input title="scale-z" type="text" maxlength=10 value="1.0"></li>
-        </ol>
-    </form>-->
 {% endblock main %}
 
 {% block pre_footer %}
@@ -418,8 +388,13 @@
                 <a href="/about" class="nav {% if page == 'about' %}active{% endif %}">About Us</a></li>
                 <a href="http://help.stamped.com" class="nav {% if page == 'help' %}active{% endif %}">Help</a></li>
                 <a href="http://blog.stamped.com" class="nav {% if page == 'blog' %}active{% endif %}">Blog</a>
+                <a href="/jobs" class="nav {% if page == 'jobs' %}active{% endif %}">Jobs</a></li>
                 <a href="/legal" class="nav {% if page == 'legal' %}active{% endif %}">Legal</a>
             </div>
+        </div>
+        
+        <div id="apple-legal">
+            iPhone is a trademark of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.
         </div>
         
         <div id="social">
@@ -434,16 +409,17 @@
     {{ block.super }}
     
     {% if STAMPED_DEBUG %}
-        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.event.drag.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fittext.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.event.drag.js"></script>
         
-        <script src="{{ STATIC_URL }}js/utils.js"></script>
-        <script src="{{ STATIC_URL }}js/index.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/signup.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/index.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 

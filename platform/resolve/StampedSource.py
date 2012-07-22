@@ -33,7 +33,7 @@ from api.Entity                     import buildEntity
 # TODO GET RID OF SEARCH IMPORTS
 from search.SearchResult import SearchResult
 from search.ScoringUtils import *
-from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection
+from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection, MongoEntityCollection
 
 from libs.SearchUtils import formatSearchQuery
 
@@ -465,11 +465,10 @@ class StampedSource(GenericSource):
 
     @lazyProperty
     def __entityDB(self):
-        if not self._stamped_api:
-            from api import MongoStampedAPI
-            self._stamped_api = MongoStampedAPI.globalMongoStampedAPI()
+        if self._stamped_api:
+            return self._stamped_api._entityDB
+        return MongoEntityCollection()
         
-        return self._stamped_api._entityDB
     
     def artistFromEntity(self, entity):
         """
@@ -705,6 +704,7 @@ class StampedSource(GenericSource):
             result.relevance = 0.3 + 0.2 * (num_stamps ** 0.5)
             result.addRelevanceComponentDebugInfo('Initial score based on Entity with %d stamps' % num_stamps,
                                                   result.relevance)
+            result.relevance *= stringRelevance(queryText, entityProxy.name)[0]
             results.append(result)
         sortByRelevance(results)
         return results

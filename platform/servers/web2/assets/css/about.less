@@ -1,4 +1,4 @@
-/* about.less
+/*! about.less
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
  * less version if you don't want your changes to be overwritten.
@@ -23,7 +23,7 @@
 
 html {
     overflow: scroll !important;
-    overflow-x: hidden !important;
+    overflow-x: auto !important;
 }
 
 p {
@@ -56,7 +56,7 @@ footer {
     top: -100%;
     
     width:     50%;
-    min-width: 640px;
+    min-width: 700px;
     
     margin: -10% 0 24px -25%;
     z-index: 10;
@@ -140,11 +140,6 @@ footer {
                     
                     .bg-image-active-0 .bg-image-0 {
                         opacity: 1;
-                    }
-                    
-                    .bg-image-0 {
-                        background: url(/assets/img/about/teamphotobooth.jpg) no-repeat;
-                        background-size: 100% 100%;
                     }
                 }
             }
@@ -242,7 +237,7 @@ footer {
             
             .content {
                 float: left;
-                width: 70%;
+                width: 65%;
                 margin-top: -10px;
                 
                 .subtitle {
@@ -348,6 +343,11 @@ footer {
     }
 }
 
+.bg-image-0 {
+    background: url(/assets/img/about/teamphotobooth.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
 .post-main-overlay {
     position: fixed;
     left:   50%;
@@ -396,12 +396,6 @@ footer {
     
 }
 
-#retina {
-    #main .pane-body #pane-wrapper .pane .lhs .social-button-twitter {
-        background-position: 0 -44px;
-    }
-}
-
 .social-button-stamped {
     display: block;
     background: url(/assets/img/about/stampbadge.png) no-repeat;
@@ -409,6 +403,10 @@ footer {
     margin: 1px 0;
     width:  20px;
     height: 20px;
+}
+
+#apple-legal {
+    display: none;
 }
 
 .robby .headshot {
@@ -549,13 +547,5 @@ footer {
     display: block;
     width:  204px;
     height: 205px;
-}
-
-#retina {
-    .made-in-nyc-logo {
-        background: url(/assets/img/about/nyctoken@2x.png) no-repeat;
-        width:  408px;
-        height: 410px;
-    }
 }
 

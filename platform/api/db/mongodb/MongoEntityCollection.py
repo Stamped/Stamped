@@ -22,6 +22,7 @@ try:
     from api.db.mongodb.AMongoCollection            import AMongoCollection
     from api.db.mongodb.MongoMenuCollection         import MongoMenuCollection
     from api.AEntityDB                              import AEntityDB
+    from libs.Memcache                              import globalMemcache
     from difflib                                    import SequenceMatcher
     from api.ADecorationDB                          import ADecorationDB
     from errors                                     import StampedUnavailableError
@@ -52,6 +53,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self._collection.ensure_index('artists.title')
         self._collection.ensure_index('authors.title')
         self._collection.ensure_index('tracks.title')
+
+        self._cache = globalMemcache()
 
     @lazyProperty
     def seed_collection(self):
@@ -105,6 +108,47 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document['titlel'] = getSimplifiedTitle(document['title'])
 
         return document
+
+
+    def _getCachedEntity(self, entityId):
+        key = str("obj::entity::%s" % entityId)
+        return self._cache[key]
+
+    def _setCachedEntity(self, entity):
+        key = str("obj::entity::%s" % entity.entity_id)
+        cacheLength = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, entity, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (entity.entity_id, e))
+
+    def _delCachedEntity(self, entityId):
+        key = str("obj::entity::%s" % entityId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
+
+    def _getCachedEntityMini(self, entityId):
+        key = str("obj::entitymini::%s" % entityId)
+        return self._cache[key]
+
+    def _setCachedEntityMini(self, entity):
+        key = str("obj::entitymini::%s" % entity.entity_id)
+        cacheLength = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, entity, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (entity.entity_id, e))
+
+    def _delCachedEntityMini(self, entityId):
+        key = str("obj::entitymini::%s" % entityId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
 
     ### INTEGRITY
 
@@ -338,9 +382,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def addEntity(self, entity):
         entity = self._addObject(entity)
         self.seed_collection.addEntity(entity)
+        self._setCachedEntity(entity)
         return entity
 
     def getEntityMini(self, entityId):
+        try:
+            return self._getCachedEntityMini(entityId)
+        except KeyError:
+            pass 
+
         documentId  = self._getObjectIdFromString(entityId)
         params = {'_id' : documentId}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
@@ -351,41 +401,61 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         entity = self._convertFromMongo(documents[0])
         entity = entity.minimize()
 
+        self._setCachedEntityMini(entity)
+
         return entity
 
-    def getEntity(self, entityId):
+    def getEntity(self, entityId, forcePrimary=False):
+        if not forcePrimary:
+            try:
+                return self._getCachedEntity(entityId)
+            except KeyError:
+                pass 
+
         documentId  = self._getObjectIdFromString(entityId)
-        document    = self._getMongoDocumentFromId(documentId)
+        document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
         entity      = self._convertFromMongo(document)
+
+        self._setCachedEntity(entity)
 
         return entity
 
     def getEntityMinis(self, entityIds):
+        result = []
+
         documentIds = []
         for entityId in entityIds:
-            documentIds.append(self._getObjectIdFromString(entityId))
+            try:
+                result.append(self._getCachedEntityMini(entityId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
         params = {'_id': {'$in': documentIds}}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
 
         documents = self._collection.find(params, fields)
 
-        result = []
-        for doc in documents:
-            entity = self._convertFromMongo(doc, mini=False)
+        for document in documents:
+            entity = self._convertFromMongo(document, mini=False)
             entity = entity.minimize()
+            self._setCachedEntityMini(entity)
             result.append(entity)
 
         return result
 
     def getEntities(self, entityIds):
+        result = []
+
         documentIds = []
         for entityId in entityIds:
-            documentIds.append(self._getObjectIdFromString(entityId))
-        data = self._getMongoDocumentsFromIds(documentIds)
+            try:
+                result.append(self._getCachedEntity(entityId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
+        documents = self._getMongoDocumentsFromIds(documentIds)
 
-        result = []
-        for item in data:
-            entity = self._convertFromMongo(item)
+        for document in documents:
+            entity = self._convertFromMongo(document)
+            self._setCachedEntity(entity)
             result.append(entity)
 
         return result
@@ -403,10 +473,12 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)
         document = self._updateMongoDocument(document)
-
-        return self._convertFromMongo(document)
+        entity = self._convertFromMongo(document)
+        self._setCachedEntity(entity)
+        return entity
 
     def removeEntity(self, entityId):
+        self._delCachedEntity(entityId)
         documentId = self._getObjectIdFromString(entityId)
         return self._removeMongoDocument(documentId)
 
@@ -416,13 +488,17 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             self._collection.remove(query)
             query = {'_id': self._getObjectIdFromString(entityId), 'sources.userGenerated.user_id': userId} # Deprecated version
             self._collection.remove(query)
+            self._delCachedEntity(entityId)
             return True
         except Exception:
             logs.warning("Cannot remove custom entity")
             raise
 
     def addEntities(self, entities):
-        return self._addObjects(entities)
+        entities = self._addObjects(entities)
+        for entity in entities:
+            self._setCachedEntity(entity)
+        return entities
 
     def updateDecoration(self, name, value):
         if name == 'menu':

@@ -115,12 +115,15 @@ def get_stack(stack=None):
     
     return info
 
-def get_db_nodes():
-    if not is_ec2():
+def get_db_nodes(stack=None):
+    if stack is None and not is_ec2():
         return None 
     
+    if stack is not None:
+        stack = stack.lower()
+    
     # Check for local cache of db nodes
-    name = '.__local__.db_nodes.txt'
+    name = '.%s.db_nodes.txt' % ('__local__' if stack is None else stack)
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
     
     if os.path.exists(path):
@@ -139,31 +142,33 @@ def get_db_nodes():
                 utils.log("error getting cached stack info; recomputing")
                 utils.printException()
 
-    # Check current instance tags for specified db stack
-    conn = EC2Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-    
-    reservations = conn.get_all_instances()
-    instance_id  = get_local_instance_id()
-    cur_instance = None
-    
-    for reservation in reservations:
-        for instance in reservation.instances:
-            try:
-                if instance.id == instance_id:
-                    cur_instance = instance 
-                    break
-            except Exception:
-                pass
+    # Use existing params if stack not specified
+    if stack is None:
+        # Check current instance tags for specified db stack
+        conn = EC2Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+        
+        reservations = conn.get_all_instances()
+        instance_id  = get_local_instance_id()
+        cur_instance = None
+        
+        for reservation in reservations:
+            for instance in reservation.instances:
+                try:
+                    if instance.id == instance_id:
+                        cur_instance = instance 
+                        break
+                except Exception:
+                    pass
 
-    if cur_instance is None:
-        raise Exception("DB nodes not found: %s" % instance_id)
+        if cur_instance is None:
+            raise Exception("DB nodes not found: %s" % instance_id)
 
-    dbStackName = cur_instance.tags['stack']
-    if 'db_stack' in cur_instance.tags:
-        dbStackName = cur_instance.tags['db_stack']
+        stack = cur_instance.tags['stack']
+        if 'db_stack' in cur_instance.tags:
+            stack = cur_instance.tags['db_stack']
 
     # Generate db nodes based on specified db stack
-    dbStack = get_stack(dbStackName)
+    dbStack = get_stack(stack)
 
     dbNodes = set()
     for node in dbStack['nodes']:
@@ -171,13 +176,76 @@ def get_db_nodes():
             dbNodes.add(node)
 
     if len(dbNodes) == 0:
-        raise Exception("DB nodes not found for stack '%s'" % dbStackName)
+        raise Exception("DB nodes not found for stack '%s'" % stack)
 
     f = open(path, 'w')
     f.write(json.dumps(map(lambda x: dict(x), dbNodes), indent=2))
     f.close()
 
     return list(dbNodes)
+
+def get_nodes(tag):
+    if not is_ec2():
+        return None
+
+        # Check for local cache of ratelimiter nodes
+    name = '.__local__.%s.txt' % tag
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
+
+    if os.path.exists(path):
+        modified = utils.get_modified_time(path)
+        current  = datetime.datetime.utcnow() - datetime.timedelta(minutes=15)
+
+        # only try to use the cached config if it's recent enough
+        if modified >= current:
+            try:
+                f = open(path, 'r')
+                nodes = json.loads(f.read())
+                f.close()
+                if len(nodes) > 0:
+                    return map(utils.AttributeDict, nodes)
+            except:
+                utils.log("error getting cached stack info; recomputing")
+                utils.printException()
+
+    # Check current instance tags for specified ratelimiter stack
+    conn = EC2Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+
+    reservations = conn.get_all_instances()
+    instance_id  = get_local_instance_id()
+    cur_instance = None
+
+    for reservation in reservations:
+        for instance in reservation.instances:
+            try:
+                if instance.id == instance_id:
+                    cur_instance = instance
+                    break
+            except Exception:
+                pass
+
+    if cur_instance is None:
+        raise Exception("'%s' nodes not found: %s" % (tag, instance_id))
+
+    dbStackName = cur_instance.tags['stack']
+
+    # Generate db nodes based on specified db stack
+    dbStack = get_stack(dbStackName)
+
+    tagNodes = set()
+    for node in dbStack['nodes']:
+        if tag in node.roles:
+            tagNodes.add(node)
+
+    if len(tagNodes) == 0:
+        raise Exception("nodes not found for stack '%s' and tag '%s'" % (dbStackName, tag))
+
+    f = open(path, 'w')
+    f.write(json.dumps(map(lambda x: dict(x), tagNodes), indent=2))
+    f.close()
+
+    return list(tagNodes)
+
 
 def get_api_elb(stack=None):
     if not is_ec2():

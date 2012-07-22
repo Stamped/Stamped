@@ -1,4 +1,105 @@
 
+$("#subnav").on("click", ".subnav_button", function(event) {
+    event.preventDefault();
+    
+    var $this    = $(this);
+    var $parent  = $this.parents('.profile-header-subnav');
+    var bargraph = false;
+    
+    $parent.removeClass('subnav-active-0 subnav-active-1 subnav-active-2');
+    
+    if ($this.hasClass('subnav_button-0')) {
+        $parent.find('.header-subsection-0').show();
+        $parent.addClass('subnav-active-0');
+    } else if ($this.hasClass('subnav_button-1')) {
+        $parent.find('.header-subsection-1').show();
+        $parent.addClass('subnav-active-1');
+    } else if ($this.hasClass('subnav_button-2')) {
+        bargraph = true;
+        $parent.find('.header-subsection-2').show();
+        $parent.addClass('subnav-active-2');
+    }
+    
+    // TODO: better approach here than setTimeout
+    setTimeout(function() {
+        var $elem   = $parent.find('.header-subsection-1');
+        var opacity = parseFloat($elem.css('opacity'));
+        
+        if (opacity <= 0.05) {
+            $elem.hide();
+        }
+        
+        $elem   = $parent.find('.header-subsection-2');
+        opacity = parseFloat($elem.css('opacity'));
+        
+        if (opacity <= 0.05) {
+            $elem.hide();
+        }
+    }, 200);
+    
+    // update the user's stamp category distribution bargraph via a spiffy animation
+    $('.bargraph-row-value').each(function(i, elem) {
+        var percentage  = 0;
+        var opacity     = 1.0;
+        var $this       = $(this);
+        
+        if (bargraph) {
+            var count   = $this.data('count') || 0;
+            
+            if (count > 0) {
+                percentage = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
+            } else {
+                percentage = 0.0;
+                opacity    = 0.0;
+            }
+        }
+        
+        $this.stop(true, false).delay(50).animate({
+            width   : percentage + "%", 
+            opacity : opacity
+        }, {
+            duration : 1000, 
+            specialEasing : { 
+                width  : 'easeInOutBack'
+            }, 
+            complete : function() {
+                $this.css({
+                    'width'     : percentage + "%", 
+                    'opacity'   : opacity
+                });
+            }
+        });
+    });
+    
+    return false;
+});
+
+var init_header_subsections = function() {
+    var header_subsection_height = 0;
+    var $header_subsections  = $('.header-subsection');
+    var $header_subsection_0 = null;
+    
+    $header_subsections.each(function(i, elem) {
+        var $elem = $(elem);
+        
+        if ($elem.hasClass('header-subsection-0')) {
+            $header_subsection_0 = $elem;
+        }
+        
+        header_subsection_height = Math.max($elem.height(), header_subsection_height);
+    });
+    
+    if (!!$header_subsection_0 && header_subsection_height > 0) {
+        $header_subsection_0.css({
+            'height'     : header_subsection_height, 
+            'min-height' : header_subsection_height
+        });
+    }
+};
+
+
+
+
         /*var $join               = $('.join');
         var $join_button        = $join.find('a.button');
         

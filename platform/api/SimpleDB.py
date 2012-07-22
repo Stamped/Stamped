@@ -9,7 +9,7 @@ import Globals
 import keys.aws, logs, utils
 import os, time, urllib2
 
-from libs.ec2_utils         import is_ec2, is_prod_stack
+from libs.ec2_utils         import is_ec2, is_prod_stack, get_stack
 from errors                 import *
 from bson.objectid          import ObjectId
 from boto.sdb.connection    import SDBConnection
@@ -23,12 +23,11 @@ class SimpleDB(object):
         self.domain_name = None
         self.domains = {}
 
-        if domain is None:
-            if is_prod_stack():
-                self.domain_name = 'stats_prod'
-            elif is_ec2():
-                self.domain_name = 'stats_dev'
-        else:
+        if domain is None and is_ec2():
+            stack = get_stack()
+            stack_name = str(stack['instance']['stack'])
+            self.domain_name = stack_name
+        elif domain is not None:
             self.domain_name = domain
 
     def addStat(self, stat):
@@ -76,6 +75,9 @@ class SimpleDB(object):
                 
             if 'client_id' in stat:
                 data['cid'] = stat['client_id']
+
+            if 'duration' in stat:
+                data['dur'] = "{0:08d}".format(stat['duration'])
 
             if len(data) > 0:
                 statId = str(ObjectId())

@@ -9,6 +9,7 @@ __license__   = "TODO"
 
 import Globals
 import re
+from resolve.StringNormalizationUtils import format
 
 # TODO: Merge with search/DataQualityUtils.py somewhere common (to avoid dependency loop)
 
@@ -26,7 +27,7 @@ def applyRemovalRegexps(regexps, title):
             if removalRegexp.search(title):
                 title = removalRegexp.sub('', title)
                 modified = True
-    return title.strip()
+    return format(title)
 
 
 # Tools for demoting based on regepx title matches.
@@ -84,24 +85,17 @@ def makeTokensRegexp(*tokens):
     """Returns a simple regular expression testing whether or not the word appears as a single token in the text."""
     return re.compile("(^|[ ,-:\[(])(%s)($|[ ,-:\])])" % '|'.join(tokens), re.IGNORECASE)
 
+
 def makeDelimitedSectionRe(pattern):
     """Returns a regex that matches an entire delimited section (by () or []) if the
     section contains the given pattern.
     """
-    return re.compile("[(\[](.+ )?%s( .+)?[)\]]" % pattern, re.IGNORECASE)
+    return re.compile("[(\[].*?\\b%s\\b.*?[)\]]" % pattern, re.IGNORECASE)
 
 
 ROMAN_NUMERAL_RE = re.compile(
     r'\b(?P<numeral>(ix|iv|v?i{1,3}))\s*(:|$)', re.IGNORECASE)
 REPLACEMENTS = {
-    'm' : 1000,
-    'cm' : 900,
-    'd' : 500,
-    'cd' : 400,
-    'c' : 100,
-    'xc' : 90,
-    'l' : 50,
-    'xl' : 40,
     'x' : 10,
     'ix' : 9,
     'v' : 5,
@@ -184,7 +178,7 @@ def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
     for token in tokens:
         currTitleTokens = rawTitleTokens if token.useRawName else titleTokens
         if token.isIn(currTitleTokens) and not token.isIn(queryTokens):
-            penalty = token.penalty if token.penalty else defaultPenalty
+            penalty = token.penalty or defaultPenalty
             searchResult.dataQuality *= 1 - penalty
             searchResult.addDataQualityComponentDebugInfo("token '%s' in title but not query" % token.text, penalty)
             anyMatches = True
@@ -197,12 +191,15 @@ def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
 
 # These are things we're so confident don't belong in TV titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
-TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*The Complete ', re.IGNORECASE)
-TV_SEASON1_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Seasons? ', re.IGNORECASE)
-TV_SEASON2_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
-TV_BOXED_SET_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Box(ed)? Set([:,\]\) -]|$)', re.IGNORECASE)
-TV_VOLUMES_REGEX_CONFIDENT = re.compile('\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}[\]) ]+$', re.IGNORECASE)
-TV_BEST_OF_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*The Best of ', re.IGNORECASE)
+TV_SEASON1_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*Seasons?\s*\d+', re.IGNORECASE)
+TV_SEASON2_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*The [0-9a-zA-Z-] Seasons?', re.IGNORECASE)
+TV_BOXED_SET_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*Box(ed)? Set([:,\]\) -]|$)', re.IGNORECASE)
+TV_VOLUMES_REGEX_CONFIDENT = re.compile(r'\s*[:,\[\(-]\s*Volumes? [0-9a-zA-Z-]{1,10}([\])]|\\b)$', re.IGNORECASE)
+TV_BEST_OF_REGEX_CONFIDENT = re.compile(r'\s*(^|[:,\[\(-])\s*(The )?Best of ', re.IGNORECASE)
+TV_UNCENSORED_REGEX_CONFIDENT = re.compile(r'\s*(^|[:,\[\(-])\s*uncensored\\b', re.IGNORECASE)
+# TODO: Occasionally it is best to keep this in the title, but it's hard to know when. Maybe when the search hits the
+# text in it or something?
+TV_PRESENTS_REGEX_CONFIDENT = re.compile(r'^(["\'a-zA-Z0-9]+\s+){1,3}Presents\s*:\s*', re.IGNORECASE)
 
 TITLE_YEAR_EXTRACTION_REGEXP = re.compile("\s*\((\d{4})\)\s*$")
 
@@ -212,12 +209,15 @@ TV_TITLE_REMOVAL_REGEXPS = (
     TV_SEASON2_REGEX_CONFIDENT,
     TV_BOXED_SET_REGEX_CONFIDENT,
     TV_VOLUMES_REGEX_CONFIDENT,
-    TV_BEST_OF_REGEX_CONFIDENT
+    TV_BEST_OF_REGEX_CONFIDENT,
+    TV_UNCENSORED_REGEX_CONFIDENT,
+    TV_PRESENTS_REGEX_CONFIDENT,
 )
 
 def cleanTvTitle(tvTitle):
     return applyRemovalRegexps(TV_TITLE_REMOVAL_REGEXPS, tvTitle)
 
+TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*The Complete ', re.IGNORECASE)
 TV_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
     # I didn't quite feel confident enough to strip this one out.
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' prefix in title", 0.35,
@@ -245,14 +245,16 @@ def applyTvTitleDataQualityTests(searchResult, searchQuery):
 # These aren't things that reflect badly on a movie for being in its title.
 MOVIE_TITLE_REMOVAL_REGEXPS = (
     TITLE_YEAR_EXTRACTION_REGEXP,
-    re.compile("[ ,:\[(-]+Director'?s Cut[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("[ ,:\[(-]+Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("[ ,:\[(-]+Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("[ ,:\[(-]+HD[ ,:\])-]*$"),
-    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Edition|Restoration|Version)[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[\[\(].*subtitle.*[\)\]]\s*$", re.IGNORECASE),
-    re.compile("\s*\((Unrated|NR|Not Rated|Uncut)( Edition)?\)\s*$", re.IGNORECASE)
+    TV_PRESENTS_REGEX_CONFIDENT,
+    re.compile("[ ,:\[(-]+\s*Director'?s Cut[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[ ,:\[(-]+\s*Blu-?Ray[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[ ,:\[(-]+\s*Box\s+Set[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[ ,:\[(-]+\s*HD[ ,:\])-]*$"),
+    re.compile("[,:\[(-]+\s*uncensored[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){1,2}(Cut|Edition|Restoration|Version)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("[\[\(].*subtitle.*[\)\]]\s*$", re.IGNORECASE),
+    re.compile("\((Unrated|NR|Not Rated|Uncut)( Edition)?\)\s*$", re.IGNORECASE)
 )
 
 def cleanMovieTitle(movieTitle):
@@ -291,6 +293,8 @@ MOVIE_TITLE_BAD_TOKENS = (
     # indicate we weren't able to fix the title completely.
     Token('edition', rawName=False, penalty=0.15),
     Token('remastered', rawName=False, penalty=0.15),
+    Token('re-mastered', rawName=False, penalty=0.15),
+    Token('version', rawName=False, penalty=0.15),
     Token('HD', rawName=False, penalty=0.15),
 )
 
@@ -328,8 +332,12 @@ TRACK_TITLE_BAD_TOKENS = (
     Token('mix', rawName=True), Token('remix', rawName=True),
     Token('re-mix', rawName=True), Token('remixed', rawName=True), Token('re-mixed', rawName=True),
     Token('cut', rawName=True), Token('edit', rawName=True), Token('instrumental', rawName=True),
-    Token('cover', rawName=True), Token('version', rawName=True), Token('tribute', rawName=True),
-    Token('karaoke', rawName=True, penalty=0.4)
+    Token('inst', rawName=True), Token('cover', rawName=True),
+    Token('tribute', rawName=True), Token('karaoke', rawName=True, penalty=0.4),
+    Token('remastered', rawName=False, penalty=0.15),
+    Token('re-mastered', rawName=False, penalty=0.15),
+    Token('version', rawName=False),
+    Token('LP', rawName=False),
 )
 def applyTrackTitleDataQualityTests(searchResult, searchQuery):
     # Even though we cut this mix/edit/etc. bullshit out of the title we want to demote results that had these terms

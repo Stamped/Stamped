@@ -91,8 +91,8 @@ class EntitySearch(object):
             try:
                 elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
 
-                if elapsed_seconds >= 20:
-                    logs.warning('Search completely timed out at 20s!')
+                if elapsed_seconds >= 7:
+                    logs.warning('Search completely timed out at 7s!')
                     pool.kill()
                     return
 
@@ -262,7 +262,7 @@ class EntitySearch(object):
         filteredResults = [r for r in cluster.results if r.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
         # So this is ugly, but it's pretty common for two listings to have the same or virtually the same data quality
         # and using relevance as a tie-breaker is really helpful.
-        filteredResults.sort(key=lambda r: r.dataQuality + (r.relevance / 10.0), reverse=True)
+        filteredResults.sort(key=lambda r: (r.dataQuality + (r.relevance / 10.0), r.resolverObject.source, r.resolverObject.key), reverse=True)
         entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
         for result in filteredResults[1:]:
             # TODO PRELAUNCH: Only use the best result from each source.

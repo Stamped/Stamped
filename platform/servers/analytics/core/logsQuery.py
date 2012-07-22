@@ -11,10 +11,11 @@ import Globals
 import calendar, pprint, datetime, sys, math
 import keys.aws, logs, utils
 
-from api.MongoStampedAPI                            import MongoStampedAPI
+from api.MongoStampedAPI                        import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool
+from analytics_utils                            import today
 
 
 def percentile(numList,p):
@@ -31,21 +32,26 @@ def percentile(numList,p):
 
 class logsQuery(object):
     
-    def __init__(self):
+    def __init__(self,domain_name=None):
         self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domains = {}
         self.statSet  = set()
         self.statDict = {}
         self.errDict = {}
         self.statCount = 0
+        self.statCountByNode = {}
+        self.statTimeByNode = {}
 
+        if domain_name is None:
+            domain_name = 'stats_dev'
+            
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
-            self.domains[suffix] = self.conn.get_domain('stats_dev_%s' % (suffix))
+            self.domains[suffix] = self.conn.get_domain('%s_%s' % (domain_name,suffix))
             
             
 
-    def performQuery(self,domain,fields,uri,t0,t1):
+    def performQuery(self,domain,fields,uri,t0,t1,byNode=False):
         
         if uri is not None:
             query = 'select %s from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, uri, t0.isoformat(), t1.isoformat())
@@ -55,13 +61,32 @@ class logsQuery(object):
         stats = domain.select(query)
         
         for stat in stats:
+            
             try:
                 if fields == 'count(*)':
                     self.statCount += int(stat['Count'])
+                elif byNode:
+                    bgn = stat['bgn'].split('T')
+                    end = stat['end'].split('T')
+                    if end[0] == bgn[0]:
+                        bgn = bgn[1].split(':')
+                        end = end[1].split(':')
+                        hours = float(end[0]) - float(bgn[0])
+                        minutes = float(end[1]) - float(bgn[1])
+                        seconds = float(end[2]) - float(bgn[2])
+                        diff = seconds + 60*(minutes + 60*hours)
+                    
+                    try:
+                        self.statCountByNode[stat['nde']] += 1
+                        self.statTimeByNode[stat['nde']] += diff
+                    except KeyError:
+                        self.statCountByNode[stat['nde']] = 1
+                        self.statTimeByNode[stat['nde']] = diff
                 else:
                     self.statSet.add(stat[fields])
             except KeyError:
                 pass
+        
         
     def activeUsers(self,t0, t1):
         self.statSet = set()
@@ -79,7 +104,7 @@ class logsQuery(object):
     
     def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist):
         if uri is None:
-            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
+            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1/%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
         else:
             query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (domain.name,uri,t0.isoformat(),t1.isoformat())
         stats = domain.select(query)
@@ -153,11 +178,11 @@ class logsQuery(object):
     
     def dailyLatencyReport(self,t0,t1,uri,blacklist,whitelist):
         self.statDict = {}
-        diff = (t1 - t0).days
+        diff = (t1 - t0).days + 1
         output = []
         for i in range (0,diff):
-            t2 = t0+datetime.timedelta(days=i)
-            t3 = t0+datetime.timedelta(days=i+1)
+            t2 = today(t0+datetime.timedelta(days=i+1))
+            t3 = today(t0+datetime.timedelta(days=i+2))
             self.statDict = {}
             self.errDict = {}
             
@@ -191,6 +216,53 @@ class logsQuery(object):
                 output.append((t2.date().isoformat(),'%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5))
                 
         return output
+    
+    def qpsReport(self,time,interval,total_seconds):
+        blacklist=[]
+        whitelist=[]
+        
+
+        count_report = {}
+        mean_report = {}
+        t0 = time - datetime.timedelta(0,total_seconds)
+        for i in range (0,total_seconds/interval):
+            self.statCountByNode = {}
+            self.statTimeByNode = {}
+            
+            t1 = t0 + datetime.timedelta(0,i*interval)
+            t2 = t0 + datetime.timedelta(0,(i+1)*interval)
+            
+            pool = Pool(32)
+        
+            for j in range (0,16):
+                suffix = '0'+hex(j)[2]
+                
+                pool.spawn(self.performQuery,self.domains[suffix],'nde,bgn,end',None,t1,t2,byNode=True)
+    
+            pool.join()
+            
+
+            for node in self.statCountByNode:
+                count = self.statCountByNode[node]
+                mean = float(self.statTimeByNode[node])/count
+                try:
+                    while len(count_report[node]) < i:
+                        count_report[node].insert(0,0)
+                        mean_report[node].insert(0,0)
+                    count_report[node].insert(0,"%.3f" % (float(count)/interval))
+                    mean_report[node].insert(0,"%.3f" % (mean))
+                except KeyError:
+                    count_report[node] = [0]*i
+                    mean_report[node] = [0]*i
+                    count_report[node].insert(0,"%.3f" % (float(count)/interval))
+                    mean_report[node].insert(0,"%.3f" % (mean))
+                    
+        for node in count_report:
+            while len(count_report[node]) < total_seconds/interval:
+                count_report[node].insert(0,0)
+                mean_report[node].insert(0,0)
+        
+        return count_report,mean_report
         
     def customQuery(self,t0,t1,fields,uri):
         

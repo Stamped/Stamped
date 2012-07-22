@@ -28,6 +28,7 @@ try:
     from api.Entity                     import mapCategoryToTypes
     from search.ScoringUtils        import *
     from resolve.Resolver                   import trackSimplify
+    from search.DataQualityUtils            import *
 except Exception:
     report()
     raise
@@ -906,7 +907,7 @@ class iTunesSource(GenericSource):
         try:
             if isinstance(queryText, unicode):
                 queryText = queryText.encode('utf-8')
-            resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText)['results']
+            resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText, priority='high')['results']
         except Exception:
             logs.report()
 
@@ -994,8 +995,10 @@ class iTunesSource(GenericSource):
 
         # TODO: Refactoring is needed here.
         iTunesTypesToScoreAdjustments = {
-            'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch),
-            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch),
+            'movie' : (applyMovieTitleDataQualityTests, adjustMovieRelevanceByQueryMatch,
+                       lambda result, _ : augmentMovieDataQualityOnBasicAttributePresence(result)),
+            'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch,
+                        lambda result, _ : augmentTvDataQualityOnBasicAttributePresence(result)),
             'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
             'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
             'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch),
