@@ -21,8 +21,6 @@
 
 
 html, body {
-    overflow-y: hidden;
-    
     /* TODO: the following only exists here as an attempt to remove the occasional 
        white lines that appear inbetween google map tiles */
     height:  100%;
@@ -244,7 +242,7 @@ footer {
     @map_nav_width: 280px;
     @map_nav_space: 24px;
     
-    .fixedwidth {
+    .stamp-map-nav-layout {
         position: absolute;
         top:  0;
         left: 50%;
@@ -434,6 +432,11 @@ footer {
                 }
             }
         }
+    }
+    
+    .layout-clamped {
+        left: 0;
+        margin-left: 0;
     }
     
     

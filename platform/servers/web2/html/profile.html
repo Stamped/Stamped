@@ -99,9 +99,7 @@
                 {% with collage_root="http://s3.amazonaws.com/stamped.com.static.images" %}
                 {# {% with collage_root="http://static.stamped.com" %} #}
                     
-                    <!-- DEFAULT HEADER -->
-                    <div class="profile-header-body header-category-default">
-                        <!--<div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-default-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>-->
+                    <div class="profile-header-body">
                         <div class="header-overlay"></div>
                         
                         <div class="profile-header-body-fixedwidth fixedwidth clearfix">
@@ -113,7 +111,7 @@
                                 </div>
                                 
                                 <div class="header-subsections">
-                                    <div class="header-subsection">
+                                    <div class="header-subsection header-category-default">
                                         <p class='profile-title'>{{user.name}}</p>
                                         
                                         <p class='subline-0'>
@@ -124,211 +122,31 @@
                                             <a class='screen-name expand-friends expand-followers' href="/popups/followers?user_id={{user.user_id}}"> {{user.num_followers}} Followers</a> / <a class='screen-name expand-friends expand-following' href="/popups/following?user_id={{user.user_id}}">{{user.num_friends}} Following</a>
                                         </p>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div class="rhs">
-                                <div class="share-widget">
-                                    <div class="desc">Share this collection</div>
                                     
-                                    <div class='share-buttons clearfix'>
-                                        <div class='share-button facebook'>
-                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
-                                        </div>
-                                        
-                                        <div class='share-button twitter'>
-                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
-                                        </div>
-                                        
-                                        <div class='share-button google'>
-                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
-                                        </div>
+                                    <div class="header-subsection header-category-place">
+                                        <p class='name'>{{user.screen_name}}'s</p>
+                                        <p class='title'>Place Stamps</p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- PLACE HEADER -->
-                    <div class="profile-header-body header-category-place">
-                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-place-640x256.jpg) no-repeat; background-size: 100% 100%;"></div>
-                        <div class="header-overlay"></div>
-                        
-                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            <div class="lhs clearfix">
-                                <div class="profile-image-column">
-                                    {% handlebars_template "profile-image-large" user %}
                                     
-                                    <a class="follow-button"></a>
-                                </div>
-                                
-                                <div class="header-subsections">
-                                    <p class='name'>{{user.screen_name}}'s</p>
-                                    <p class='title'>Place Stamps</p>
-                                </div>
-                            </div>
-                            
-                            <div class="rhs">
-                                <div class="share-widget">
-                                    <div class="desc">Share this collection</div>
-                                    
-                                    <div class='share-buttons clearfix'>
-                                        <div class='share-button facebook'>
-                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
-                                        </div>
-                                        
-                                        <div class='share-button twitter'>
-                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
-                                        </div>
-                                        
-                                        <div class='share-button google'>
-                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
-                                        </div>
+                                    <div class="header-subsection header-category-book">
+                                        <p class='name'>{{user.screen_name}}'s</p>
+                                        <p class='title'>Book Stamps</p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- MUSIC HEADER -->
-                    <div class="profile-header-body header-category-music">
-                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-music-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
-                        <div class="header-overlay"></div>
-                        
-                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            <div class="lhs clearfix">
-                                <div class="profile-image-column">
-                                    {% handlebars_template "profile-image-large" user %}
                                     
-                                    <a class="follow-button"></a>
-                                </div>
-                                
-                                <div class="header-subsections">
-                                    <p class='name'>{{user.screen_name}}'s</p>
-                                    <p class='title'>Music Stamps</p>
-                                </div>
-                            </div>
-                            
-                            <div class="rhs">
-                                <div class="share-widget">
-                                    <div class="desc">Share this collection</div>
-                                    
-                                    <div class='share-buttons clearfix'>
-                                        <div class='share-button facebook'>
-                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
-                                        </div>
-                                        
-                                        <div class='share-button twitter'>
-                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
-                                        </div>
-                                        
-                                        <div class='share-button google'>
-                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
-                                        </div>
+                                    <div class="header-subsection header-category-film">
+                                        <p class='name'>{{user.screen_name}}'s</p>
+                                        <p class='title'>Film Stamps</p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- BOOK HEADER -->
-                    <div class="profile-header-body header-category-book">
-                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-book-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
-                        <div class="header-overlay"></div>
-                        
-                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            <div class="lhs clearfix">
-                                <div class="profile-image-column">
-                                    {% handlebars_template "profile-image-large" user %}
                                     
-                                    <a class="follow-button"></a>
-                                </div>
-                                
-                                <div class="header-subsections">
-                                    <p class='name'>{{user.screen_name}}'s</p>
-                                    <p class='title'>Book Stamps</p>
-                                </div>
-                            </div>
-                            
-                            <div class="rhs">
-                                <div class="share-widget">
-                                    <div class="desc">Share this collection</div>
-                                    
-                                    <div class='share-buttons clearfix'>
-                                        <div class='share-button facebook'>
-                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
-                                        </div>
-                                        
-                                        <div class='share-button twitter'>
-                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
-                                        </div>
-                                        
-                                        <div class='share-button google'>
-                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
-                                        </div>
+                                    <div class="header-subsection header-category-music">
+                                        <p class='name'>{{user.screen_name}}'s</p>
+                                        <p class='title'>Music Stamps</p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- FILM & TV HEADER -->
-                    <div class="profile-header-body header-category-film">
-                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-film-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
-                        <div class="header-overlay"></div>
-                        
-                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            <div class="lhs">
-                                <div class="profile-image-column">
-                                    {% handlebars_template "profile-image-large" user %}
                                     
-                                    <a class="follow-button"></a>
-                                </div>
-                                
-                                <div class="header-subsections">
-                                    <p class='name'>{{user.screen_name}}'s</p>
-                                    <p class='title'>Film &amp; TV Stamps</p>
-                                </div>
-                            </div>
-                            
-                            <div class="rhs">
-                                <div class="share-widget">
-                                    <div class="desc">Share this collection</div>
-                                    
-                                    <div class='share-buttons clearfix'>
-                                        <div class='share-button facebook'>
-                                            <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}"></div>
-                                        </div>
-                                        
-                                        <div class='share-button twitter'>
-                                            <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}" data-text="Check out {{user.screen_name}}'s stamp collection!">Tweet</a>
-                                        </div>
-                                        
-                                        <div class='share-button google'>
-                                            <g:plusone size="medium" href="/{{user.screen_name}}"></g:plusone>
-                                        </div>
+                                    <div class="header-subsection header-category-app">
+                                        <p class='name'>{{user.screen_name}}'s</p>
+                                        <p class='title'>App Stamps</p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- OTHER HEADER -->
-                    <div class="profile-header-body header-category-app">
-                        <div class="blur_3 header-blur" style="background: url({{collage_root}}/collages/collage-{{user.screen_name}}-app-1024x256.jpg) no-repeat; background-size: 100% 100%;"></div>
-                        <div class="header-overlay"></div>
-                        
-                        <div class="profile-header-body-fixedwidth fixedwidth clearfix">
-                            <div class="lhs">
-                                <div class="profile-image-column">
-                                    {% handlebars_template "profile-image-large" user %}
-                                    
-                                    <a class="follow-button"></a>
-                                </div>
-                                
-                                <div class="header-subsections">
-                                <p class='name'>{{user.screen_name}}'s</p>
-                                    <p class='title'>App Stamps</p>
                                 </div>
                             </div>
                             

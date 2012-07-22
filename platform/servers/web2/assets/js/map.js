@@ -336,6 +336,7 @@
         // ---------------------------------------------------------------------
         
         
+        var $stamp_map_nav_layout   = $('.stamp-map-nav-layout');
         var $stamp_map_nav_wrapper  = $('.stamp-map-nav-wrapper');
         var $list                   = $stamp_map_nav_wrapper.find('.stamp-list-view');
         
@@ -509,6 +510,13 @@
                 });
                 
                 update_stamp_list_scrollbars();
+            }
+            
+            var layout_clamped = "layout-clamped";
+            
+            $stamp_map_nav_layout.removeClass(layout_clamped);
+            if ($stamp_map_nav_layout.offset().left < 0) {
+                $stamp_map_nav_layout.addClass(layout_clamped);
             }
         };
         

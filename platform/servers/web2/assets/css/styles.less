@@ -101,7 +101,8 @@ ol, ul {
     min-width: @min-fixed-width;
     width: @fixed-width;
     
-    margin: 0 auto;
+    margin:  0 auto;
+    padding: 0 82px;
 }
 
 
@@ -128,6 +129,7 @@ header {
             margin: 0;
             top:    0;
             right:  12px;
+            white-space: nowrap;
             
             .desc {
                 font-size: 90%;
@@ -167,7 +169,7 @@ header {
 .user-logo-large {
     position: absolute;
     top:  -60px;
-    left: -110px;
+    left: 0;
     
     display: block;
     width:  210px;
@@ -911,10 +913,6 @@ a.sdetail, .pronounced-title a {
     &:active {
         background-position: -404px 0;
     }
-}
-
-.download-the-app-button-ugly-green {
-    background: url(/assets/img/index/downloadbtn_green_sprite.png) no-repeat;
 }
 
 .app-store-button {

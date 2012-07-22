@@ -24,14 +24,12 @@
 .header-selection() {
     position: relative !important;
     display: block !important;
-    top: 0 !important;
     z-index: 51 !important;
 }
 
 .header-hidden() {
     position: absolute !important;
     display: none !important;
-    top: -100% !important;
     z-index: 50 !important;
 }
 
@@ -60,12 +58,8 @@
             left: 0;
             
             .profile-header-body {
-                position: absolute;
-                top:  -100%;
-                left: 0;
-                
-                display: none;
-                overflow: hidden;
+                position: relative;
+                overflow: visible;
                 
                 width:   100%;
                 height:  100%;
@@ -90,13 +84,10 @@
                     -ms-transition:     -ms-transform     @duration-ease0, filter         @duration-ease1;
                     -o-transition:      -o-transform      @duration-ease0, filter         @duration-ease1;
                     transition:         transform         @duration-ease0, filter         @duration-ease1;
-                    
-                    /*
-                    -webkit-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                       -moz-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                        -ms-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                         -o-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                            transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);*/
+                }
+                
+                .header-collage {
+                    display: none;
                 }
                 
                 .header-overlay {
@@ -208,14 +199,18 @@
                         
                         .header-subsections {
                             position: relative;
-                            width: 70%;
                             float: left;
+                            width: 50%;
                             margin-left: 24px;
+                            
+                            .header-subsection {
+                                width: 150%;
+                            }
                         }
                         
                         .header-subsection {
-                            position: relative;
-                            display:  block;
+                            position: absolute;
+                            display:  none;
                             width: 100%;
                             
                             p.profile-title {
@@ -239,62 +234,13 @@
                 }
             }
             
-            .header-category-default {
-            }
-            
-            .header-category-place {
-                .header-blur {
-                    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-music {
-                .header-blur {
-                    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-book {
-                .header-blur {
-                    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-film {
-                .header-blur {
-                    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-app {
-                .header-blur {
-                    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-animating {
-                position: absolute;
-                display: block;
-                top: -100%;
-                
-                z-index: 52;
-            }
-            
-            .header-selected {
-                .header-selection();
-            }
-            
             .profile-header-post {
                 position: relative;
                 z-index: 54;
-                width:  100%;
+                width:   100%;
                 height:  15px;
                 background: #fff;
+                pointer-events: none;
                 
                 .box-shadow(0, -4px, 5px, -2px, rgba(0,0,0,0.10));
                 
@@ -356,13 +302,13 @@
     display: none;
 }
 
-.profile-header-body:hover .header-overlay {
+/*.profile-header-body:hover .header-overlay {
     opacity: 0 !important;
 }
 
 .header-category-default:hover .header-overlay {
     opacity: 1 !important;
-}
+}*/
 
 body.default {
     .header-category-default {
@@ -557,7 +503,7 @@ body.app {
    ************************************************************************** */
 
 
-@stamp-gallery-item-min-width: 305px - 24px - 24px;
+@stamp-gallery-item-min-width: 305px;
 
 .stamp-gallery {
     position: relative;
@@ -895,9 +841,16 @@ body.app {
         height: 140px;
     }
     
-    .stamp-category-app img {
-        /*.rounded(28px);*/
-        .rounded(20%);
+    .stamp-category-app {
+        img {
+            /*.rounded(28px);*/
+            .rounded(20%);
+        }
+        
+        .zoom {
+            top:   16px;
+            right: 16px;
+        }
     }
 }
 
@@ -1018,7 +971,8 @@ quotes: "\201C" "\201D";
     }
     
     .stamp-gallery-item {
-        width:   280px;
+        width:     280px;
+        min-width: 280px;
         margin:  0;
         
         .content {

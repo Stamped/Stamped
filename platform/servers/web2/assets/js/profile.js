@@ -736,7 +736,7 @@ var g_update_stamps = null;
         };
         
         var layout_mode_index  = 0;
-        var layout_modes = [ "masonry", "fitRows", "cellsByRow" ];
+        var layout_modes = [ "masonry", "fitRows" ]; // "cellsByRow"
         
         // initialize the stamp gallery's layout with isotope and infinite scroll
         var init_gallery = function() {
@@ -1200,13 +1200,15 @@ var g_update_stamps = null;
                             
                             // animated transition between category-specific headers
                             var sel = '.header-category-' + orig_category;
-                            var $elem = $(sel);
                             g_category = category;
+                            
+                            set_body_class(orig_category);
+                            g_init_social_sharing();
                             
                             //console.debug("NEW CATEGORY: " + category);
                             //History.log(state.data, state.title, state.url);
                             
-                            if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
+                            /*if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
                                 var completion_func = function() {
                                     $('.header-selected').removeClass('header-animating header-selected');
                                     $elem.removeClass('header-animating').addClass('header-selected');
@@ -1230,7 +1232,7 @@ var g_update_stamps = null;
                                         complete : completion_func
                                     });
                                 }
-                            }
+                            }*/
                             
                             // scroll page back to top
                             $('body,html').stop(true, false).animate({
@@ -1394,7 +1396,9 @@ var g_update_stamps = null;
         var fixed_padding   = 80;
         var min_col_width   = 305;
         var last_nav_pos_x  = null;
-        var update_navbar_count = 0;
+        
+        var update_navbar_count  = 0;
+        var wide_gallery_enabled = false;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
@@ -1416,13 +1420,13 @@ var g_update_stamps = null;
             var wide_body       = 'wide-body';
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
-            var max_blurb_width = 125;
+            var max_blurb_width = 280 - 48;
             var min_blurb_width = (gallery_width - (24 + 58 + 48 + 148));
             
             var width           = window.innerWidth;
-            var left            = gallery_x + gallery_width + fixed_padding;
+            var left            = gallery_x + gallery_width;
             var right           = (width - (gallery_x + fixed_width + nav_bar_width + 1.5 * fixed_padding));
-            var pos             = left;
+            var pos             = Math.min(width - nav_bar_width - 24, Math.max(left, (left + width) / 2.0 - nav_bar_width / 2.0));
             
             var force_no_update = false;
             var update          = false;
@@ -1440,7 +1444,7 @@ var g_update_stamps = null;
                         desired_width_px = "auto";
                     } else {
                         //desired_width_header_px = (desired_width + 148) + "px";
-                        desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
+                        desired_width_header_px = Math.max(desired_width - 68, 200) + "px";
                     }
                     
                     $elem.find('.content_1').css({
@@ -1454,7 +1458,7 @@ var g_update_stamps = null;
                 });
             };
             
-            if (window.innerWidth <= 780) {
+            if (wide_gallery_enabled && width <= 780) {
                 if (!$stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery).addClass(narrow_gallery);
                     $body.addClass(wide_body);
@@ -1464,7 +1468,7 @@ var g_update_stamps = null;
                 } else {
                     force_no_update = true;
                 }
-            } else if (right < fixed_padding / 2) {
+            } else if (!wide_gallery_enabled || right < fixed_padding / 2) {
                 //console.debug("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
                 
                 if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
@@ -1490,22 +1494,22 @@ var g_update_stamps = null;
             if (!force_no_update) {
                 if (update || last_nav_pos_x !== pos) {
                     if (!gallery) {
-                        var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
-                        var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
+                        var min_fixed_width = 640; //min_col_width + nav_bar_width + fixed_padding / 2;
+                        var new_fixed_width = Math.min(fixed_width, Math.max((width - (fixed_padding * 2 + nav_bar_width)), min_fixed_width));
                         
                         $('.fixedwidth').width(new_fixed_width);
                         update = true;
                     } else {
                         //var cur_fixed_width_px = Math.Max(1000, 1 * width) + "px";
-                        //var cur_fixed_width_px = fixed_width + "px";
-                        var cur_fixed_width_px = "75%";
+                        var cur_fixed_width_px = fixed_width + "px";
+                        //var cur_fixed_width_px = "80%";
                         
                         $('.fixedwidth').width(cur_fixed_width_px);
                     }
                 }
                 
                 if (should_update_gallery) {
-                    update_gallery_layout(update);
+                    update_gallery_layout(true, null, true);
                 }
             }
             
@@ -1532,7 +1536,7 @@ var g_update_stamps = null;
                 
                 ++update_navbar_count;
                 
-                if (gallery || update_navbar_count >= 2) {
+                if (gallery || update_navbar_count >= 1) {
                     style['visibility'] = 'visible';
                 }
                 
@@ -2186,8 +2190,15 @@ var g_update_stamps = null;
         // ---------------------------------------------------------------------
         
         
-        $(document).bind('keydown', 'ctrl+t', function() {
+        $(document).bind('keydown', 'ctrl+l', function() {
             toggle_gallery_layout_mode();
+        });
+        
+        $(document).bind('keydown', 'ctrl+g', function() {
+            wide_gallery_enabled = !wide_gallery_enabled;
+            
+            update_navbar_layout(true);
+            //update_gallery_layout(true, null, true);
         });
         
         // whenever the window scrolls, check if the header's layout needs to be updated

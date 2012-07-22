@@ -736,10 +736,6 @@
         // setup misc bindings and start initial animations
         // ---------------------------------------------------------------------
         
-        $(document).bind('keydown', 'ctrl+t', function() {
-            $(".download-the-app-button").toggleClass("download-the-app-button-ugly-green");
-        });
-        
         $(document).bind('keydown', function(e) {
             if (e.which == 27) { // ESC
                 // skip the intro animation if the user presses escape
