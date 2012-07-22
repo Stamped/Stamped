@@ -1095,13 +1095,8 @@ def getImage(data):
 
     return im
 
-def tryGetWebImage(url):
-    
-    return data
-
 def getWebImage(url, desc=None):
     try:
-        data = getCachedWebImage(url)
         memcached = libs.Memcache.globalMemcache()
         
         data = memcached.get(url)
