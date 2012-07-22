@@ -876,7 +876,7 @@ static STStampedAPI* _sharedInstance;
 
 - (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context execute:(BOOL)flag {
     BOOL handled = NO;
-    if (source.endpoint) {
+    if (source.endpoint && ![STRestKitLoader sharedInstance].isOffline) {
         handled = YES;
         if (flag) {
             NSMutableDictionary* params = [NSMutableDictionary dictionary];

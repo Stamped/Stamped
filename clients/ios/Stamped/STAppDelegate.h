@@ -13,7 +13,6 @@
 
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) STMenuController *menuController;
-@property (nonatomic, retain) UINavigationController* navigationController;
 @property (nonatomic, readonly, retain) UIImageView* grid;
 
 @end

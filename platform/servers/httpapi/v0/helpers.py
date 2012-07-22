@@ -119,7 +119,7 @@ def handleStampedExceptions(e, handlers=None):
             try:
                 email = {}
                 email['from'] = 'Stamped <noreply@stamped.com>'
-                email['to'] = 'kevin@stamped.com'
+                email['to'] = 'dev@stamped.com'
                 email['subject'] = '%s - 500 Error - %s' % (stampedAPI.node_name, datetime.utcnow().isoformat())
                 email['body'] = logs.getHtmlFormattedLog()
                 utils.sendEmail(email, format='html')
@@ -450,6 +450,12 @@ def parseRequest(schema, request, **kwargs):
         logs.debug("Parsed request data")
         return schema
     
+    except (KeyError, AttributeError) as e:
+        msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
+        logs.warning(msg)
+        logs.warning(utils.getFormattedException())
+        raise StampedHTTPError(400, "invalid_request")
+        
     except Exception as e:
         msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
         logs.warning(msg)

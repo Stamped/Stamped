@@ -87,14 +87,14 @@
 }
 
 - (void)setUploading:(BOOL)uploading {
-    _uploading = uploading;
-    
-    if (_uploading) {
-        [self.activiyView startAnimating];
-    } else {
-        [self.activiyView stopAnimating];
-    }
-    
+//    _uploading = uploading;
+//    
+//    if (_uploading) {
+//        [self.activiyView startAnimating];
+//    } else {
+//        [self.activiyView stopAnimating];
+//    }
+//    
 }
 
 - (void)setFrame:(CGRect)frame {

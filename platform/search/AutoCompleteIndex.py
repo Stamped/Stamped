@@ -27,11 +27,14 @@ EntityTuple = namedtuple('EntityTuple', ['entity_id', 'title', 'last_popular', '
 # removes any accent marks on letters, and the LowercaseFilter puts all letters to lowercase.
 TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter()
 
-ENTITY_DB = MongoEntityCollection()
-
 def buildAutoCompleteIndex():
-    allEntities = (convertEntity(entity) for entity in ENTITY_DB._collection.find(
-        fields=['title', 'last_popular', 'types']))
+    entityDb = MongoEntityCollection()
+    query = {
+        'sources.tombstone_id' : { '$exists':False },
+        'sources.user_generated_id' : { '$exists':False }
+    }
+    allEntities = (convertEntity(entity, entityDb) for entity in entityDb._collection.find(
+        query, fields=['title', 'last_popular', 'types']))
     categoryMapping = emptyIndex()
     for entity in allEntities:
         category = categorizeEntity(entity)
@@ -50,14 +53,14 @@ def buildAutoCompleteIndex():
     return categoryMapping
 
 
-def convertEntity(entityDict):
+def convertEntity(entityDict, entityDb):
     entityId = str(entityDict.pop('_id'))
     if 'last_popular' not in entityDict:
         entityDict['last_popular'] = datetime(1, 1, 1)
     entityDict['entity_id'] = entityId
     entityDict['types'] = tuple(entityDict['types'])
     try:
-        entityDict['num_stamps'] = ENTITY_DB.entity_stats.getEntityStats(entityId).num_stamps
+        entityDict['num_stamps'] = entityDb.entity_stats.getEntityStats(entityId).num_stamps
     except (StampedDocumentNotFoundError, KeyError):
         entityDict['num_stamps'] = 0
     return EntityTuple(**entityDict)
