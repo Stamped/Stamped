@@ -138,9 +138,11 @@ class AWSDeploymentStack(ADeploymentStack):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/ebs_backup.py', pty=False)
     
-    def update(self, branch=None, *args):
+    def update(self, *args, **kwargs):
         force = (len(args) >= 1 and args[0] == 'force')
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
+
+        branch = kwargs.get('branch', None)
 
         cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s'" %\
               (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
