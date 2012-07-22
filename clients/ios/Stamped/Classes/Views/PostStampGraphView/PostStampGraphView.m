@@ -403,7 +403,7 @@
     
     _iconView.alpha = 0.0f;
     
-    [UIView animateWithDuration:0.3f delay:0.3f options:UIViewAnimationOptionCurveEaseInOut animations:^{
+    [UIView animateWithDuration:.025 * barHeight delay:.8f options:UIViewAnimationOptionCurveEaseInOut animations:^{
         
         _iconView.alpha = 1.0f;
         _columnView.frame = CGRectMake(0.0f, self.bounds.size.height - (_barHeight+18.0f), self.bounds.size.width, _barHeight);

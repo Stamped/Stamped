@@ -142,6 +142,9 @@ def handle_profile(request, schema, **kwargs):
     if sdetail is not None:
         body_classes += " sdetail_popup";
     
+    if not mobile:
+        body_classes += " wide-body";
+    
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
     

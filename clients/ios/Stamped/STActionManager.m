@@ -18,6 +18,7 @@
 #import "STRestKitLoader.h"
 #import "STConfiguration.h"
 #import "STActionUtil.h"
+#import "STSpotify.h"
 #import <MediaPlayer/MediaPlayer.h>
 
 NSString* STActionManagerShowAllActionsKey = @"Actions.showAllActions";
@@ -60,6 +61,7 @@ static STActionManager* _singleton;
         _sources = [[NSMutableDictionary alloc] init];
         [_sources setObject:[STRdio sharedRdio] forKey:@"rdio"];
         [_sources setObject:[STStampedActions sharedInstance] forKey:@"stamped"];
+        [_sources setObject:[STSpotify sharedInstance] forKey:@"spotify"];
     }
     return self;
 }
@@ -122,7 +124,10 @@ static STActionManager* _singleton;
 
 - (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
     [Util setFullScreenPopUp:nil dismissible:NO withBackground:nil];
-    [self handleSource:source withAction:action withContext:context shouldExecute:YES];
+    BOOL handled = [self handleSource:source withAction:action withContext:context shouldExecute:YES];
+    if (!handled) {
+        [Util warnWithMessage:@"Action could not be completed." andBlock:nil];
+    }
 }
 
 - (BOOL)handleSource:(id<STSource>)source withAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {

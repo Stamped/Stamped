@@ -65,13 +65,10 @@
 
 @synthesize window = _window;
 @synthesize menuController = _menuController;
-@synthesize navigationController = _navigationController;
 @synthesize grid = grid_;
 
 - (void)dealloc {
-    [_window release];
-    [_navigationController release];
-    [grid_ release];
+    //Not important
     [super dealloc];
 }
 
@@ -80,6 +77,10 @@
 }
 
 - (void)application:(UIApplication *)application didChangeStatusBarOrientation:(UIInterfaceOrientation)oldStatusBarOrientation {
+}
+
+- (UIImage*)stampImageWithPrimaryColor:(NSString*)primaryColor andSecondaryColor:(NSString*)secondaryColor {
+    return [Util gradientImage:[UIImage imageNamed:@"largestampedlogo"] withPrimaryColor:primaryColor secondary:secondaryColor];
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -93,13 +94,13 @@
     NSString* key;
     //key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
     key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
-//    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
+    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
 #endif
     
     
 #if defined (CONFIGURATION_Release)
 #warning QuincyKit Distribution is configured for this build
-//    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
+    //    [[BWQuincyManager sharedQuincyManager] setAppIdentifier:@"062d51bb10ae8a23648feb2bfea4bd1d"];
 #endif
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didLogIn:) name:STStampedAPILoginNotification object:nil];
     RKLogConfigureByName("RestKit*", RKLogLevelError);
@@ -109,37 +110,16 @@
     
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     self.window.backgroundColor = [UIColor whiteColor];
-    [[STRestKitLoader sharedInstance] authenticate];
-    if ([STStampedAPI sharedInstance].currentUser) {
-        [self didLogIn:nil];
-    }
-    BOOL openedWithAPNS = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey] != nil;
-    UIViewController* firstController;
-    if (openedWithAPNS && LOGGED_IN) {
-        firstController = [[[STUniversalNewsController alloc] init] autorelease];
-    }
-    else {
-        firstController =  [[[STInboxViewController alloc] init] autorelease];
-    }
-    STLeftMenuViewController *leftController = [[STLeftMenuViewController alloc] init];
-    STRightMenuViewController *rightController = [[STRightMenuViewController alloc] init];
+    STLeftMenuViewController *leftController = [[[STLeftMenuViewController alloc] init] autorelease];
+    STRightMenuViewController *rightController = [[[STRightMenuViewController alloc] init] autorelease];
     
-    STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:firstController];
-    _navigationController = [navController retain];
-    STMenuController* menuController = [[STMenuController alloc] initWithRootViewController:navController];
+    STMenuController* menuController = [[[STMenuController alloc] init] autorelease];
     menuController.leftViewController = leftController;
     menuController.rightViewController = rightController;
     self.menuController = menuController;
     self.menuController.pan.enabled = NO;
-    [Util addHomeButtonToController:firstController withBadge:!openedWithAPNS];
-    
-    [leftController release];
-    [rightController release];
-    [menuController release];
-    [navController release];
     [self.window setRootViewController:menuController];
     [self.window makeKeyAndVisible];
-    
     grid_ = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"column-grid"]];
     grid_.hidden = YES;
     [self.window addSubview:grid_];
@@ -149,18 +129,60 @@
         [Util removeOldCacheDirectories];
     }];
     
-    UIImageView *imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Default.png"]];
+    UIImageView *imageView = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"launchscreen"]] autorelease];
+    imageView.layer.shadowRadius = 8;
+    imageView.layer.shadowOffset = CGSizeMake(0, 4);
+    imageView.layer.shadowOpacity = .3;
+    imageView.layer.shadowColor = [UIColor blackColor].CGColor;
+    [Util reframeView:imageView withDeltas:CGRectMake(0, 20, 0, 0)];
+    UIImageView* stampView = [[[UIImageView alloc] initWithImage:[self stampImageWithPrimaryColor:@"0057D1" andSecondaryColor:@"004AB2"]] autorelease];
+    stampView.frame = [Util centeredAndBounded:stampView.image.size inFrame:CGRectMake(0, -20, imageView.frame.size.width, imageView.frame.size.height)];
+    [imageView addSubview:stampView];
     [self.window addSubview:imageView];
-    [imageView release];
     
-    [UIView animateWithDuration:0.3f animations:^{
-        imageView.alpha = 0.0f;
-    } completion:^(BOOL finished) {
-        [imageView removeFromSuperview];
+    
+    [[STRestKitLoader sharedInstance] authenticateWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {    
+        if ([STStampedAPI sharedInstance].currentUser) {
+            [self didLogIn:nil];
+        }
+        BOOL openedWithAPNS = [launchOptions objectForKey:UIApplicationLaunchOptionsRemoteNotificationKey] != nil;
+        UIViewController* firstController;
+        if (openedWithAPNS && LOGGED_IN) {
+            firstController = [[[STUniversalNewsController alloc] init] autorelease];
+        }
+        else {
+            firstController =  [[[STInboxViewController alloc] init] autorelease];
+        }
+        [Util addHomeButtonToController:firstController withBadge:!openedWithAPNS];
+        STRootViewController* navController = [[STRootViewController alloc] initWithRootViewController:firstController];
+        [self.menuController setRootController:navController animated:NO];
+        
+        if (LOGGED_IN) {
+            [[STUnreadActivity sharedInstance] update];
+            id<STUserDetail> currentUser = [STStampedAPI sharedInstance].currentUser;
+            if (currentUser) {
+                UIImageView* stampView2 = [[[UIImageView alloc] initWithImage:[self stampImageWithPrimaryColor:currentUser.primaryColor andSecondaryColor:currentUser.secondaryColor]] autorelease];
+                stampView2.frame = stampView.frame;
+                stampView2.alpha = 0;
+                [imageView addSubview:stampView2];
+                [UIView animateWithDuration:.3 delay:0 options:UIViewAnimationCurveEaseInOut animations:^{
+                    stampView2.alpha = 1;
+                    stampView.alpha = 0;
+                } completion:^(BOOL finished) {
+                    
+                }];
+            }
+        }
+        else {
+            [self.menuController showWelcome:NO];
+        }
+        [UIView animateWithDuration:.7 delay:1 options:UIViewAnimationCurveEaseInOut animations:^{
+            imageView.frame = CGRectOffset(imageView.frame, 0, -CGRectGetMaxY(imageView.frame));
+        } completion:^(BOOL finished) {
+            [imageView removeFromSuperview];
+        }];
     }];
     
-    
-    [[STUnreadActivity sharedInstance] update];
     return YES;
 }
 
@@ -176,10 +198,6 @@
 }
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification {
-}
-
-- (void)goToNews {
-    
 }
 
 /*
@@ -207,7 +225,7 @@
         [menuController setRootController:rootViewController animated:NO];
         [(STLeftMenuViewController*)menuController.leftViewController clearSelection];
         //TODO go staight to news
-//        [[STUnreadActivity sharedInstance] update];
+        //        [[STUnreadActivity sharedInstance] update];
     }
     else {
         [[STUnreadActivity sharedInstance] update];

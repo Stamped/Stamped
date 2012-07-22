@@ -1718,7 +1718,8 @@ class StampedAPI(AStampedAPI):
                 latLng = None
             else:
                 latLng = [ coordinates.lat, coordinates.lng ]
-            results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'})
+            results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'},
+                priority='high')
             #make list of names from results, remove duplicate entries, limit to 10
             if results is None:
                 return []
@@ -2222,7 +2223,7 @@ class StampedAPI(AStampedAPI):
         t1 = t0
 
         previewLength = kwargs.pop('previews', 10)
-        mini        = kwargs.pop('mini', False)
+        mini        = kwargs.pop('mini', True)
 
         authUserId  = kwargs.pop('authUserId', None)
         entityIds   = kwargs.pop('entityIds', {})
@@ -2359,12 +2360,12 @@ class StampedAPI(AStampedAPI):
 
         # Enrich missing user ids
         missingUserIds = allUserIds.difference(set(userIds.keys()))
-        users = self._userDB.lookupUsers(list(missingUserIds))
+        users = self._userDB.getUserMinis(list(missingUserIds))
 
         for user in users:
-            userIds[user.user_id] = user.minimize()
+            userIds[user.user_id] = user
 
-        logs.debug('Time for lookupUsers: %s' % (time.time() - t1))
+        logs.debug('Time for getUserMinis: %s' % (time.time() - t1))
         t1 = time.time()
 
 
@@ -3792,8 +3793,8 @@ class StampedAPI(AStampedAPI):
                 for stampPreview in item.stamps:
                     stampPreviewUser = userIds[stampPreview.user.user_id]
                     if stampPreviewUser is None:
-                        logs.warning("Stamp Preview: User (%s) not found in entity (%s)" % \
-                            (stampPreview.user.user_id, item.entity_id))
+                        logs.warning("Stamp Preview: User (%s) not found in entity (%s)" %\
+                                     (stampPreview.user.user_id, item.entity_id))
                         # Trigger update to entity stats
                         tasks.invoke(tasks.APITasks.updateEntityStats, args=[item.entity_id])
                         continue
@@ -4030,16 +4031,16 @@ class StampedAPI(AStampedAPI):
             avgPopularity = kwargs.pop('aggPopularity', [])
             timestamps = kwargs.pop('timestamps', [])
             result = 0
-            
+
             # Remove personal stamp from timestamps if it exists
             try:
                 personal_timestamp = (time.mktime(now.timetuple()) - timestamps.pop(authUserId)) / 60 / 60 / 24
             except KeyError:
                 personal_timestamp = None
-                
+
             # timestamps is now a list of each friends' most recent stamp time in terms of days since stamped 
             timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
-            
+
             #stamp_score
             stamp_score = 0
             personal_stamp_score = 0
@@ -4059,7 +4060,7 @@ class StampedAPI(AStampedAPI):
                     personal_stamp_score = 1.03125 - (.65 / 80 * personal_timestamp)
                 elif personal_timestamp < 290:
                     personal_stamp_score = .435 - (.3 / 200 * personal_timestamp)
-            
+
             section_coefs = {
                             'food': 0,
                             'music': 1.0,
@@ -4073,16 +4074,16 @@ class StampedAPI(AStampedAPI):
                 personal_stamp_score = section_coefs[section] * personal_stamp_score * len(timestamps)
             except KeyError:
                 personal_stamp_score = personal_stamp_score * len(timestamps)
-                
+
             ### PERSONAL TODO LIST
             personal_todo_score = 0
             if entity.entity_id in todos:
                 personal_todo_score = 1
-            
+
             if len(timestamps) > 0:
                 avgQuality = avgQuality / len(timestamps)
                 avgPopularity = avgPopularity / len(timestamps)
-            
+
             image_score = 1
             if entity.images is None:
                 image_score = 0.01
@@ -4187,12 +4188,12 @@ class StampedAPI(AStampedAPI):
                         item.todo_user_ids = userIds
                 cache.append(item)
             setattr(guide, section, cache)
-            
-        
+
+
         logs.info("Time to build guide: %s seconds" % (time.time() - t0))
 
         self._guideDB.updateGuide(guide)
-            
+
         return guide
 
 

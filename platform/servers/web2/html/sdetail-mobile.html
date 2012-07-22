@@ -39,18 +39,18 @@
 -->
 
 <!-- HTML Template Dependencies => sdetail-mobile.generated.html
-     - - - - - - - - - - - - - - - - - - - - - - - - - - -
+     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -->
 
 {% block styles %}
     {{ block.super }}
     
     {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.jscrollpane.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/mobile/sdetail.css">
     {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/mobile/sdetail.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>
@@ -325,16 +325,16 @@
     {{ block.super }}
      
     {% if DEBUG %}
-        <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.emoji.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
         
-        <script src="{{ STATIC_URL }}js/utils.js"></script>
-        <script src="{{ STATIC_URL }}js/mobile/sdetail.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/mobile/sdetail.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}generated/js/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 

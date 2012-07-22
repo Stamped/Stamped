@@ -6,6 +6,7 @@
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
+        script: libs/jquery.hotkeys.js
         script: libs/jquery.fancybox.js
         script: libs/jquery.fittext.js
         script: libs/jquery.event.drag.js
@@ -36,10 +37,10 @@
 {% block styles %}
     {{ block.super }}
     
-    {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/index.css">
     {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>
@@ -49,15 +50,15 @@
     </style>
     
     <!--[if lte IE 9]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.9.css">
     <![endif]-->
     
     <!--[if lte IE 8]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.8.css">
     <![endif]-->
     
     <!--[if lte IE 7]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.7.css">
     <![endif]-->
 {% endblock styles %}
 
@@ -74,24 +75,24 @@
     <div id="intro">
         <div id="intro-hero">
             <div class="text">
-                <div class="line active-line"><span class="blurred">FUCK</span><span class="unblurred">SCREW</span> MEDIOCRITY</div>
-                <div class="line">DOWNLOAD STAMPED</div>
-            </div>
-            
-            <div class="text">
                 <div class="line active-line">WHY SO SERIOUS?</div>
                 <div class="line">START STAMPING</div>
             </div>
             
             <div class="text">
-                <div class="line active-line">LIKES  ARE CHEAP</div>
-                <div class="line">STARS  ARE PASSÉ</div>
+                <div class="line active-line">LIKES ARE CHEAP</div>
+                <div class="line">STARS ARE PASSÉ</div>
                 <div class="line">STAMPS ARE <span class="italic">YOU</span></div>
             </div>
             
             <div class="text">
                 <div class="line active-line">SHARE YOUR PERSONALITY</div>
                 <div class="line">FIND COOL STUFF</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">SCREW MEDIOCRITY</div>
                 <div class="line">DOWNLOAD STAMPED</div>
             </div>
             
@@ -338,7 +339,9 @@
         <div id="iphone-hero">
             <div class="iphone-body-shadow iphone-body-shadow-0"></div>
             <div class="iphone-body-shadow iphone-body-shadow-1"></div>
-            <div class="iphone-body"></div>
+            <div class="iphone-body">
+                <div class="iphone-body-lighting iphone-body-lighting-0"></div>
+            </div>
             
             <div class="iphone-screens iphone-screen-active-inbox">
                 <div class="iphone-screen iphone-screen-inbox">
@@ -351,16 +354,12 @@
                 <div class="iphone-screen iphone-screen-sdetail iphone-screen-sdetail-active-0">
                     <div class="iphone-screen-back-button"></div>
                     <div class="iphone-screen-sdetail-0"></div>
-                    <div class="iphone-screen-sdetail-1"></div>
                 </div>
                 
                 <div class="iphone-screen iphone-screen-guide iphone-screen-guide-active-0">
                     <div class="iphone-screen-guide-0"></div>
                 </div>
             </div>
-            
-            <div class="iphone-body-lighting iphone-body-lighting-0"></div>
-            <div class="iphone-body-overlay"></div>
         </div>
     </div>
     
@@ -410,16 +409,17 @@
     {{ block.super }}
     
     {% if STAMPED_DEBUG %}
-        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.event.drag.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fittext.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.event.drag.js"></script>
         
-        <script src="{{ STATIC_URL }}js/utils.js"></script>
-        <script src="{{ STATIC_URL }}js/signup.js"></script>
-        <script src="{{ STATIC_URL }}js/index.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/signup.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/index.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}generated/js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 

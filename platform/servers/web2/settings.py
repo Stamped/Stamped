@@ -73,12 +73,17 @@ STATIC_ROOT = ''
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/assets/'
 
-# utilize static.stamped.com CDN gateway on prod; otherwise, fallback to using 
+# utilize static.stamped.com CDN gateway on ec2; otherwise, fallback to using 
 # less efficient but more accessible / productive local assets for development.
 if IS_PROD:
-    SITE_ROOT   = "http://static.stamped.com/"
+    SITE_ROOT   = "http://static.stamped.com"
 else:
     SITE_ROOT   = PROJ_ROOT
+
+if STAMPED_DEBUG:
+    STAMPED_STATIC_URL  = STATIC_URL
+else:
+    STAMPED_STATIC_URL  = "%s%sgenerated/" % ("http://static.stamped.com", STATIC_URL)
 
 STATIC_DOC_ROOT = SITE_ROOT
 

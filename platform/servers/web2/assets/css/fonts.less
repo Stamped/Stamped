@@ -23,10 +23,10 @@
 
 @font-face {
   font-family: "TitlingGothicFB LightComp";
-  src: url("http://static.stamped.com/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.eot");
-  src: url("http://static.stamped.com/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.eot?") format("embedded-opentype"),
-       url("http://static.stamped.com/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.woff") format("woff"),
-       url("http://static.stamped.com/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.ttf") format("truetype");
+  src: url("/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.eot");
+  src: url("/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.eot?") format("embedded-opentype"),
+       url("/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.woff") format("woff"),
+       url("/assets/fonts/TitlingGothicFB-LightComp/TitlingGothic-LightComp.ttf")  format("truetype");
   font-style:  normal;
   font-weight: normal;
 }
@@ -39,11 +39,23 @@
 
 @font-face {
   font-family: "TitlingGothicFB RegularComp";
-  src: url("http://static.stamped.com/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.eot");
-  src: url("http://static.stamped.com/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.eot?") format("embedded-opentype"),
-       url("http://static.stamped.com/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.woff") format("woff"),
-       url("http://static.stamped.com/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.ttf") format("truetype");
+  src: url("/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.eot");
+  src: url("/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.eot?") format("embedded-opentype"),
+       url("/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.woff") format("woff"),
+       url("/assets/fonts/TitlingGothicFB-RegularComp/TitlingGothic-RegularComp.ttf")  format("truetype");
   font-style:  normal;
   font-weight: normal;
+}
+
+
+/* **************************************************************************
+                          TitlingGothic Fallback
+   ************************************************************************** */
+
+
+@font-face {
+    font-family: "StampedFallbackFont";
+    src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
+    font-style: normal;
 }
 

@@ -18,12 +18,15 @@ from pprint          import pprint
 from libs.LRUCache        import lru_cache
 from libs.CachedFunction  import cachedFn
 from libs.CountedFunction import countedFn
+from libs.Request        import service_request
 from api.Schemas         import MediaCollectionEntity
+from APIKeys import get_api_key
 
+API_KEY = get_api_key('tvdb', 'api_key')
 
 class TheTVDB(object):
     
-    def __init__(self, api_key='F1D337C9BF2357FB'):
+    def __init__(self, api_key=API_KEY):
         self.api_key = api_key
 
     # note: these decorators add tiered caching to this function, such that
@@ -33,10 +36,12 @@ class TheTVDB(object):
     @lru_cache(maxsize=64)
     @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
-    def searchRaw(self, query):
-        url = self._get_url(query)
+    def searchRaw(self, query, priority='low'):
+
+        url = 'http://www.thetvdb.com/api/GetSeries.php'
+        params = { 'seriesname' : query }
         try:
-            xml = utils.getFile(url)
+            response, xml = service_request('tvdb', 'GET', url, query_params=params, priority=priority)
         except:
             return None
 
@@ -45,8 +50,8 @@ class TheTVDB(object):
         # other side.
         return xml.decode('utf-8')
 
-    def search(self, query, transform=True, detailed=False):
-        xml = self.searchRaw(query)
+    def search(self, query, transform=True, detailed=False, priority='low'):
+        xml = self.searchRaw(query, priority)
         if xml is None:
             return []
 
@@ -82,10 +87,11 @@ class TheTVDB(object):
     @lru_cache(maxsize=64)
     @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
-    def lookup(self, thetvdb_id):
+    def lookup(self, thetvdb_id, priority='low'):
         details_url = 'http://www.thetvdb.com/api/%s/series/%s/all/' % \
                       (self.api_key, thetvdb_id)
-        xml   = utils.getFile(details_url)
+
+        response, xml = service_request('tvdb', 'GET', details_url, priority=priority)
         tree  = objectify.fromstring(xml)
         items = tree.findall('.//Series')
         
@@ -181,11 +187,6 @@ class TheTVDB(object):
             utils.printException()
             return None
     
-    def _get_url(self, query):
-        if isinstance(query, unicode):
-            query = query.encode('utf-8')
-        params = { 'seriesname' : query }
-        return 'http://www.thetvdb.com/api/GetSeries.php?%s' % (urllib.urlencode(params))
 
 __globalTheTVDB = None
 

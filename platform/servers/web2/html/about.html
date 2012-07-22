@@ -17,10 +17,10 @@
 {% block styles %}
     {{ block.super }}
     
-    {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/about.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/about.css">
     {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/about.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/about.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>

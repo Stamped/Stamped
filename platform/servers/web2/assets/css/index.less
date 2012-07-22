@@ -219,18 +219,6 @@ body.main {
     z-index: 50;
 }
 
-#retina .active-pane-0 #pane-nav-0, 
-#retina .active-pane-1 #pane-nav-1, 
-#retina .active-pane-2 #pane-nav-2, 
-#retina .active-pane-3 #pane-nav-3, 
-#retina .active-pane-4 #pane-nav-4 {
-    background-position: -70px 0;
-    
-    &:hover {
-        background-position: -70px 0;
-    }
-}
-
 #main-header {
     margin-bottom: 12px;
     text-align: right;
@@ -416,10 +404,6 @@ body.main {
         opacity: 0;
         .transition(opacity, 0s, linear);
     }
-}
-
-#stamped-logo {
-    .transform(scale(1.0, 1.0));
 }
 
 .main-animating {
@@ -707,12 +691,6 @@ body.main {
     left: 60px;
 }
 
-#retina {
-    .iphone-body-shadow {
-        background: url(/assets/img/index/iphone_main_shadow_sprite@2x.png) no-repeat;
-    }
-}
-
 .iphone-body {
     background: url(/assets/img/index/iphone_sprite.png) no-repeat;
     position: relative;
@@ -722,38 +700,18 @@ body.main {
     pointer-events: auto;
 }
 
-/*@-webkit-keyframes -webkit-iphone-lighting-animation {
-    0%   { background-position: 75px 0; }
-    100% { background-position: -1245px 0; }
-}*/
-
 .iphone-body-lighting {
     position: absolute;
-    top:  0;
-    left: 50%;
-    margin-left: (-144.5px);
+    top:   0;
+    right: 0;
     
-    background: url(/assets/img/index/iphone_sprite.png) no-repeat;
-    //background: url(/assets/img/index/iphone_main_lighting_0.png) no-repeat;
-    background-position: -452px 0;
-    opacity: 0.3;
+    background: url(/assets/img/index/iphone_shine.png) no-repeat;
     
-    width:  289px;
+    width:  288px;
     height: 564px;
     
-    //.transition(background-position, 0.3s, ease-out);
     pointer-events: none;
-    
-    /*-webkit-animation-name:             -webkit-iphone-lighting-animation;
-    -webkit-animation-iteration-count:  infinite;
-    -webkit-animation-timing-function:  linear;
-    //-webkit-animation-direction:        alternate;
-    -webkit-animation-duration:         15s;*/
 }
-
-/*.iphone-body-lighting-1 {
-    -webkit-animation-delay:            7.5s;
-}*/
 
 .iphone-body-overlay {
     position: absolute;
@@ -809,12 +767,12 @@ body.main {
     }
     
     .iphone-inbox-body {
-        background: url(/assets/img/index/iphone_main_inbox_body.png) no-repeat;
+        background: url(/assets/img/index/iphone_main_inbox_body.jpg) no-repeat;
         width:  100%;
         height: 365px;
         
         position: absolute;
-        top:  0;
+        top:  51px;
         left: 0;
     }
     
@@ -842,14 +800,7 @@ body.main {
 
 .iphone-screen-sdetail {
     .iphone-screen-sdetail-0 {
-        background: url(/assets/img/index/iphone_main_sdetail_0.png) no-repeat;
-        height: 100%;
-        
-        display: none;
-    }
-    
-    .iphone-screen-sdetail-1 {
-        background: url(/assets/img/index/iphone_main_sdetail_1.png) no-repeat;
+        background: url(/assets/img/index/iphone_main_sdetail_0.jpg) no-repeat;
         height: 100%;
         
         display: none;
@@ -858,7 +809,7 @@ body.main {
 
 .iphone-screen-guide {
     .iphone-screen-guide-0 {
-        background: url(/assets/img/index/iphone_main_guide_0.png) no-repeat;
+        background: url(/assets/img/index/iphone_main_guide_0.jpg) no-repeat;
         height: 100%;
         
         display: none;
@@ -904,8 +855,6 @@ body.main {
     }
 }
 
-//.iphone-screen-active-inbox + .iphone-body-lighting-0 { }
-
 .iphone-screen-active-sdetail {
     .iphone-screen-inbox {
         left: -244px !important;
@@ -920,8 +869,6 @@ body.main {
     }
 }
 
-//.iphone-screen-active-sdetail + .iphone-body-lighting-0 { }
-
 .iphone-screen-active-guide {
     .iphone-screen-inbox {
         left: -244px !important;
@@ -933,18 +880,6 @@ body.main {
     
     .iphone-screen-guide {
         left: 0 !important;
-    }
-}
-
-//.iphone-screen-active-guide + .iphone-body-lighting-0 { }
-
-#retina {
-    #main-iphone {
-        margin: -530px 0 0 120px;
-    }
-    
-    .iphone-hero {
-        // TODO: retina iphone here!
     }
 }
 
@@ -978,10 +913,6 @@ footer {
     bottom: 0;
     
     padding: 12px 24px;
-}
-
-#retina footer .app-store-button {
-    margin-top: -36px;
 }
 
 #social {
@@ -1023,6 +954,7 @@ footer {
     text-align: center;
     top: .25em;
     
+    pointer-events: none;
     margin: 0 140px 0;
     font-size: 65%;
     color: #AAA;
@@ -1170,127 +1102,5 @@ footer {
 
 .third-party-logo-opentable {
     .third-party-logo-template(4, -56px);
-}
-
-
-/* **************************************************************************
-                            RETINA DISPLAY BUTTONS
-   ************************************************************************** */
-
-
-#retina {
-    .pane-nav-button {
-        background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
-        width:  31px;
-        height: 31px;
-        
-        &:hover {
-            background-position: -35px 0;
-        }
-        
-        &:active {
-            background-position: -70px 0;
-        }
-    }
-    
-    .active-pane-nav-button {
-        background-position: -70px 0;
-        
-        &:hover {
-            background-position: -70px 0;
-        }
-    }
-    
-    .social-button {
-        background: url(/assets/img/index/social_sprite@2x.png) no-repeat;
-        width:  40px;
-        height: 40px;
-    }
-    
-    .social-button-twitter {
-        .social-button-template(0, -44px);
-    }
-    
-    .social-button-facebook {
-        .social-button-template(1, -44px);
-    }
-    
-    .social-button-google {
-        .social-button-template(2, -44px);
-    }
-    
-    .launcher-icon-button {
-        background: url(/assets/img/index/launchericon_sprite@2x.png) no-repeat;
-        width:  128px;
-        height: 128px;
-        
-        &:hover, &:active {
-            background-position: -132px 0;
-        }
-    }
-    
-    .play-video-button-small {
-        background: url(/assets/img/index/playbutton_small_sprite@2x.png) no-repeat;
-        display: block;
-        
-        width:  80px;
-        height: 80px;
-        
-        &:hover, &:active {
-            background-position: -84px 0;
-        }
-    }
-    
-    .play-video-button-large {
-        background: url(/assets/img/index/playbutton_large_sprite@2x.png) no-repeat;
-        display: block;
-        
-        width:  128px;
-        height: 128px;
-        
-        &:hover, &:active {
-            background-position: -132px 0;
-        }
-    }
-    
-    .bieber-video-preview-icon {
-        background: url(/assets/img/index/bieberlittle@2x.gif) no-repeat;
-        width:  90px;
-        height: 90px;
-    }
-    
-    #category-illustration {
-        background: url(/assets/img/index/illustration@2x.png) no-repeat;
-        width:  746px;
-        height: 168px;
-    }
-    
-    .third-party-logo {
-        background: url(/assets/img/index/thirdparties_sprite@2x.png) no-repeat;
-        display: block;
-        
-        width:  108px;
-        height: 48px;
-    }
-    
-    .third-party-logo-spotify {
-        .third-party-logo-template(0, -112px);
-    }
-
-    .third-party-logo-rdio {
-        .third-party-logo-template(1, -112px);
-    }
-
-    .third-party-logo-netflix {
-        .third-party-logo-template(2, -112px);
-    }
-
-    .third-party-logo-fandango {
-        .third-party-logo-template(3, -112px);
-    }
-
-    .third-party-logo-opentable {
-        .third-party-logo-template(4, -112px);
-    }
 }
 

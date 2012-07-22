@@ -26,7 +26,6 @@ try:
     from pprint                     import pprint, pformat
     from abc                        import ABCMeta, abstractmethod, abstractproperty
     from datetime                   import datetime
-    from time                       import time
 except:
     report()
     raise

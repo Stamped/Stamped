@@ -5,7 +5,7 @@
 {% block head %}
     {{ block.super }}
     
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/test.css">
+    <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/test.css">
 {% endblock head %}
 
 {% block main %}
@@ -39,12 +39,12 @@
     {{ block.super }}
      
      <!-- jQuery plugins -->
-    <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-    <script src="{{ STATIC_URL }}js/libs/glfx2.js"></script>
+    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
+    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+    <script src="{{ STAMPED_STATIC_URL }}js/libs/glfx2.js"></script>
     
-    <script src="{{ STATIC_URL }}js/test.js"></script>
+    <script src="{{ STAMPED_STATIC_URL }}js/test.js"></script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
 {% endblock scripts %}

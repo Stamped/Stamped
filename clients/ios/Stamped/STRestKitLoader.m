@@ -418,6 +418,11 @@ static STRestKitLoader* _sharedInstance;
     [self autoreleaseHelper:helper];
 }
 
+- (BOOL)isOffline {
+    RKClient* client = [RKClient sharedClient];
+    return client.reachabilityObserver.isReachabilityDetermined && !client.isNetworkReachable;
+}
+
 - (STCancellation*)loadWithPath:(NSString*)path
                            post:(BOOL)post
                      authPolicy:(STRestKitAuthPolicy)policy
@@ -600,6 +605,7 @@ static STRestKitLoader* _sharedInstance;
     self.authToken.refreshToken = nil;
     self.authToken.accessToken = nil;
     [[NSUserDefaults standardUserDefaults] synchronize];
+    [[UIApplication sharedApplication] unregisterForRemoteNotifications];
     [self cancelAllWaitingRequests];
 }
 
@@ -610,73 +616,50 @@ static STRestKitLoader* _sharedInstance;
 - (STCancellation*)sendLoginRequest:(void (^)(id<STLoginResponse> response, NSError* error, STCancellation* cancellation))block {
     NSString* loginType = [[NSUserDefaults standardUserDefaults] objectForKey:_loginTypeUserDefaultsKey];
     if (!loginType) {
-        return nil;
+        loginType = _loginTypeStamped;
     }
-    else { 
-        NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                       _clientID, @"client_id",
-                                       _clientSecret, @"client_secret",
-                                       nil];
-        if ([loginType isEqualToString:_loginTypeStamped]) {
-            NSString* path = @"/oauth2/login.json";
-            NSString* username = [_passwordKeychainItem objectForKey:(id)kSecAttrAccount];
-            NSString* password = [_passwordKeychainItem objectForKey:(id)kSecValueData];
-            if (username.length && password.length) {
-                [params setObject:username forKey:@"login"];
-                [params setObject:password forKey:@"password"];
-                return [self loadOneWithPath:path
-                                        post:YES
-                               authenticated:NO
-                                      params:params
-                                     mapping:[STSimpleLoginResponse mapping]
-                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                     block(result, error, cancellation);
+    if ([loginType isEqualToString:_loginTypeStamped]) {
+        NSString* username = [_passwordKeychainItem objectForKey:(id)kSecAttrAccount];
+        NSString* password = [_passwordKeychainItem objectForKey:(id)kSecValueData];
+        if (username.length && password) {
+            return [self loginWithScreenName:username
+                                    password:password
+                                 andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+                                     block(response, error, cancellation);
                                  }];
-            }
-            else {
-                return nil;
-            }
-        }
-        else if ([loginType isEqualToString:_loginTypeFacebook]) {
-            NSString* path = @"/oauth2/login/facebook.json";
-            NSString* userToken = [_facebookUserTokenKeychainItem objectForKey:(id)kSecValueData];
-            if (userToken.length) {
-                [params setObject:userToken forKey:@"user_token"];
-                return [self loadOneWithPath:path
-                                        post:YES
-                               authenticated:NO
-                                      params:params
-                                     mapping:[STSimpleLoginResponse mapping]
-                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                     block(result, error, cancellation);
-                                 }];
-            }
-            else {
-                return nil;
-            }
-        }
-        else {
-            NSAssert1([loginType isEqualToString:_loginTypeTwitter], @"Unrecognized login type %@", loginType);
-            NSString* path = @"/oauth2/login/twitter.json";
-            NSString* userToken = [_twitterUserTokenKeychainItem objectForKey:(id)kSecValueData];
-            NSString* userSecret = [_twitterUserSecretKeychainItem objectForKey:(id)kSecValueData];
-            if (userToken.length && userSecret.length) {
-                [params setObject:userToken forKey:@"user_token"];
-                [params setObject:userSecret forKey:@"user_secret"];
-                return [self loadOneWithPath:path
-                                        post:YES
-                               authenticated:NO
-                                      params:params
-                                     mapping:[STSimpleLoginResponse mapping]
-                                 andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                     block(result, error, cancellation);
-                                 }];
-            }
-            else {
-                return nil;
-            }
         }
     }
+    else if ([loginType isEqualToString:_loginTypeFacebook]) {
+        NSString* userToken = [_facebookUserTokenKeychainItem objectForKey:(id)kSecValueData];
+        if (userToken.length) {
+            return [self loginWithFacebookUserToken:userToken
+                                        andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+                                            block(response, error, cancellation); 
+                                        }];
+        }
+    }
+    else if ([loginType isEqualToString:_loginTypeTwitter]) {
+        NSString* userToken = [_twitterUserTokenKeychainItem objectForKey:(id)kSecValueData];
+        NSString* userSecret = [_twitterUserSecretKeychainItem objectForKey:(id)kSecValueData];
+        if (userToken.length && userSecret.length) {
+            return [self loginWithTwitterUserToken:userToken
+                                        userSecret:userSecret
+                                       andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+                                           block(response, error, cancellation); 
+                                       }];
+        }
+    }
+    else {
+        NSAssert1(NO, @"Unrecognized login type %@", loginType);
+    }
+    
+    STCancellation* cancellation = [STCancellation cancellation];
+    [Util executeOnMainThread:^{
+        if (!cancellation.cancelled) {
+            block(nil, [NSError errorWithDomain:STRestKitLoaderErrorDomain code:STRestKitLoaderErrorFailedLogin userInfo:[NSDictionary dictionary]], cancellation);
+        }
+    }];
+    return cancellation;
 }
 
 - (STCancellation*)sendTokenRefreshRequestWithCallback:(void (^)(id<STOAuthToken> token, NSError* error, STCancellation* cancellation))block {
@@ -751,7 +734,6 @@ static STRestKitLoader* _sharedInstance;
                          }
                          block(result, error, cancellation);
                          if (response) {
-                             store(response);
                              [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPILoginNotification object:nil];
                              [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:nil];
                          }
@@ -835,16 +817,26 @@ static STRestKitLoader* _sharedInstance;
                } andCallback:block];
 }
 
-- (void)authenticate {
+- (STCancellation*)tryRelogin:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
+    return [self sendLoginRequest:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
+        if (response) {
+            if (!cancellation.cancelled) {
+                block(YES, nil, cancellation);
+            }
+        }
+        else {
+            [self clearAuthState];
+            if (!cancellation.cancelled) {
+                block(NO, error, cancellation);
+            }
+        }
+    }];
+}
+
+- (STCancellation*)authenticateWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
     NSDate* tokenExpirationDate = [[NSUserDefaults standardUserDefaults] objectForKey:_tokenExpirationUserDefaultsKey];
     // Fresh install.
-    if (!tokenExpirationDate) {
-        //NSLog(@"tokenExpirationDate not found");
-        [[UIApplication sharedApplication] unregisterForRemoteNotifications];
-        [self clearAuthState];
-        [Util launchFirstRun];
-    }
-    else {
+    if (tokenExpirationDate) {
         //NSLog(@"tokenExpirationDate found");
         NSData* userData = [[NSUserDefaults standardUserDefaults] objectForKey:_userDataUserDefaultsKey];
         NSString* refreshToken = [_refreshTokenKeychainItem objectForKey:(id)kSecValueData];
@@ -861,16 +853,17 @@ static STRestKitLoader* _sharedInstance;
                                                                    selector:@selector(refreshTimerFired:)
                                                                    userInfo:nil
                                                                     repeats:YES];
+                STCancellation* cancellation = [STCancellation cancellation];
+                [Util executeOnMainThread:^{
+                    if (!cancellation.cancelled) {
+                        block(YES, nil, cancellation);
+                    }
+                }];
+                return cancellation;
             }
-            else {
-                [self refreshToken];
-            }
-        } else {
-            //NSLog(@"user and refresh token not found: %@, %@", userData, refreshToken);
-            [self clearAuthState];
-            [Util launchFirstRun];
         }
     }
+    return [self tryRelogin:block];
 }
 
 - (BOOL)loggedIn {

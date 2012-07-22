@@ -14,7 +14,9 @@
 #import "UIColor+Stamped.h"
 
 @implementation PostStampHeaderView
+
 @synthesize titleLabel=_titleLabel;
+@synthesize stampView = _stampView;
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
@@ -33,7 +35,8 @@
         [self addSubview:avatar];
         [avatar release];
         
-        UserStampView *view = [[UserStampView alloc] initWithFrame:CGRectMake(0.0f, 22.0f, 18.0f, 18.0f)];
+        CGFloat delta = 4;
+        UserStampView *view = [[UserStampView alloc] initWithFrame:CGRectMake(0.0f - delta, 22.0f - delta, 18.0f + 2 * delta, 18.0f + 2 * delta)];
         view.size = STStampImageSize18;
         [view setupWithUser:user];
         [self addSubview:view];

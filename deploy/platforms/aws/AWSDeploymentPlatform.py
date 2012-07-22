@@ -30,7 +30,7 @@ class AWSDeploymentPlatform(DeploymentPlatform):
         optionsDict = vars(options)
         if 'db_stack' in optionsDict and optionsDict['db_stack'] is not None:
             dbStack = optionsDict['db_stack'].lower()
-        DeploymentPlatform.__init__(self, AWSDeploymentStack, db_stack=dbStack)
+        DeploymentPlatform.__init__(self, AWSDeploymentStack, db_stack=dbStack, options=optionsDict)
         self.options = options
         self._ami_re = re.compile('.*stamped\.base\.ami \(([0-9]+)-([0-9]+)-([0-9]+) +([0-9]+)\.([0-9]+)\.([0-9]+)\).*')
         self.name = str(self)

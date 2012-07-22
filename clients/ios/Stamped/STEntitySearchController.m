@@ -18,6 +18,8 @@
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
 #import "STNavigationBar.h"
+#import "STLoadingCell.h"
+#import "NoDataUtil.h"
 
 #define kAddEntityCellTag 101
 
@@ -192,7 +194,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 #pragma mark - UITableViewDataSource
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
+    if (self.searchCancellation) return tableView.frame.size.height;
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
@@ -211,7 +213,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    
+    if (self.searchCancellation) return 1;
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
@@ -238,7 +240,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    
+    if (self.searchCancellation) return 1;
     if (tableView == self.searchResultsTableView) {
         
         if (self.autoCompleteResults.count) {
@@ -254,7 +256,9 @@ static const CGFloat _offscreenCancelPadding = 5;
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
+    if (self.searchCancellation) {
+        return [[[STLoadingCell alloc] init] autorelease];
+    }
     if (tableView == self.searchResultsTableView && !self.autoCompleteResults.count) {
         NSInteger count = 0;
         if (self.searchSections) {
@@ -370,7 +374,7 @@ static const CGFloat _offscreenCancelPadding = 5;
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
-    
+    if (self.searchCancellation) return;
     BOOL add = NO;
     if (tableView == self.searchResultsTableView) {
         
@@ -447,6 +451,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     search.category = self.category;
     search.query = text;
     search.coordinates = self.coordinates;
+    self.searchSections = nil;
     self.searchCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySearch:search andCallback:^(NSArray<STEntitySearchSection> *sections, NSError *error, STCancellation* cancellation) {
         
         [self.searchView setLoading:NO];
@@ -457,7 +462,7 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
         
     }];
-    
+    [self.searchResultsTableView reloadData];
 }
 
 - (void)stSearchViewHitSearch:(STSearchView*)view withText:(NSString*)text {
@@ -498,7 +503,6 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)stSearchViewDidCancel:(STSearchView*)view {
     [super stSearchViewDidCancel:view];
-    
     [self.searchCancellation cancel];
     self.searchCancellation = nil;
     [self.autoCompleteCancellation cancel];
@@ -529,7 +533,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     suggested.category = self.category;
     
     self.requestCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested  andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
-        
+
         NSInteger sections = [self.tableView numberOfSections];
         self.requestCancellation = nil;
         if (results) {
@@ -566,12 +570,20 @@ static const CGFloat _offscreenCancelPadding = 5;
 
 - (void)setupNoDataView:(NoDataView*)view {
     
-    CGRect frame = view.frame;
-    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
-    frame.origin.y = height;
-    frame.size.height -= height;
-    view.frame = frame;
-    [view setupWithTitle:@"No Suggestions" detailTitle:@"No suggestions found."];
+    view.custom = YES;
+    
+    UIView* waterMark = [NoDataUtil waterMarkWithImage:nil
+                                                 title:@"No Suggestions" 
+                                                  body:@"Try searching for what you're looking for."
+                                               options:nil];
+    waterMark.frame = [Util centeredAndBounded:waterMark.frame.size inFrame:CGRectMake(0, -50, view.frame.size.width, view.frame.size.height)];
+    [view addSubview:waterMark];
+//    CGRect frame = view.frame;
+//    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
+//    frame.origin.y = height;
+//    frame.size.height -= height;
+//    view.frame = frame;
+//    [view setupWithTitle:@"No Suggestions" detailTitle:@"No suggestions found."];
     
 }
 

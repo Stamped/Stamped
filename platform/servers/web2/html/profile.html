@@ -14,6 +14,7 @@
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
+        script: libs/jquery.hotkeys.js
         script: libs/jquery.infinitescroll.js
         script: libs/jquery.isotope.js
         script: libs/jquery.emoji.js
@@ -55,12 +56,12 @@
 {% block styles %}
     {{ block.super }}
     
-    {% if True %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}generated/css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.jscrollpane.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/sdetail.css">
     {% else %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.jscrollpane.css">
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/profile.css">
-        <link rel="stylesheet" href="{{ STATIC_URL }}css/sdetail.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>
@@ -68,18 +69,18 @@
     </style>
     
     <!--[if lte IE 9]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.9.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.9.css">
     <![endif]-->
     
     <!--[if lte IE 8]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.8.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.8.css">
     <![endif]-->
     
     <!--[if lte IE 7]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/profile.lte.ie.7.css">
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/profile.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/sdetail.lte.ie.7.css">
     <![endif]-->
 {% endblock styles %}
 
@@ -358,24 +359,28 @@
                             <div class="ribbon-bottom"></div>
                         </div>
                         
-                        <div class="inset-stamp">
-                            <div class="stamp-count-dependent stamp-count-default">
-                                <div class="stamp-count user-primary">
-                                    {{user.num_stamps}}
-                                </div>
-                                
-                                <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
-                            </div>
-                            
-                            {% for distro in user.distribution %}
-                                <div class="stamp-count-dependent stamp-count-{{distro.category}}">
-                                    <div class="stamp-count user-primary">
-                                        {{distro.count}}
+                        <div class="inset-stamp-wrapper">
+                            <div class="inset-stamp-body">
+                                <div class="inset-stamp">
+                                    <div class="stamp-count-dependent stamp-count-default">
+                                        <div class="stamp-count user-primary">
+                                            {{user.num_stamps}}
+                                        </div>
+                                        
+                                        <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
                                     </div>
                                     
-                                    <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                    {% for distro in user.distribution %}
+                                        <div class="stamp-count-dependent stamp-count-{{distro.category}}">
+                                            <div class="stamp-count user-primary">
+                                                {{distro.count}}
+                                            </div>
+                                            
+                                            <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
-                            {% endfor %}
+                            </div>
                         </div>
                     </div>
                 {% endwith %}
@@ -460,25 +465,26 @@
     {{ block.super }}
      
     {% if STAMPED_DEBUG %}
-        <script src="{{ STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.isotope.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.emoji.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/history/jquery.history.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.rdio.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.isotope.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.emoji.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/history/jquery.history.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.rdio.js"></script>
         
-        <script src="{{ STATIC_URL }}js/libs/moment.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/moment.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
         
-        <script src="{{ STATIC_URL }}js/utils.js"></script>
-        <script src="{{ STATIC_URL }}js/social_sharing.js"></script>
-        <script src="{{ STATIC_URL }}js/signup.js"></script>
-        <script src="{{ STATIC_URL }}js/profile.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/social_sharing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/signup.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/profile.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}generated/js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/profile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
     
     {% if not lite %}

@@ -29,15 +29,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    if (!LOGGED_IN) {
-        [self showWelcome:YES];
-    }
-    
 }
 
-- (void)resetNavButtons {} // overide showing nav buttons, already handled by app
-
+- (void)resetNavButtons {
+} // overide showing nav buttons, already handled by app
 
 #pragma mark - Welcome
 

@@ -18,9 +18,10 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER		= 1.0.0
+ASSET_VERSION_NUMBER        = 1.1.7
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
+GENERATED_LINE_LENGTH		= 512
 
 LESS_CSS_DIRS               = assets/css assets/css/libs assets/css/ie assets/css/mobile
 LESS_CSS_SOURCE_SUFFIX      = less
@@ -39,7 +40,7 @@ CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 TEMPLATE_BASE_DIR		    = templates
-HTML_PAGES					= base profile index map about jobs
+HTML_PAGES					= base profile index map about jobs retina
 TEMPLATE_PROG				= bin/process_templates.py
 
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
@@ -69,15 +70,15 @@ endef
 define ADD_JS_TARGET
 $(GENERATED_JS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@mkdir -p $(GENERATED_JS_BASE_DIR)
-	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^))$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break 120 > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
-	@cat $$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^)) | java -jar bin/compressor.jar --type js --nomunge --line-break 120 > $$@
+	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^))$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break $(GENERATED_LINE_LENGTH) > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
+	@cat $$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^)) | java -jar bin/compressor.jar --type js --nomunge --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef
 
 define ADD_CSS_TARGET
 $(GENERATED_CSS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) css_targets $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@mkdir -p $(GENERATED_CSS_BASE_DIR)
-	cat $$(call REST,$$(call REST,$$^)) | java -jar bin/compressor.jar --type css --line-break 120 > $$@
+	cat $$(call REST,$$(call REST,$$^)) | java -jar bin/compressor.jar --type css --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef
 
@@ -90,12 +91,7 @@ endef
 
 all: $(ALL_TARGETS)
 
-.PHONY: all clean help version deploy css_targets
-
-#$(TEMPLATE_DEST): $(DEPENDENCIES)
-#	$(TEMPLATE_PROG) -o $(TEMPLATE_DEST)
-#	@$(CECHO) "Created '$(BOLD_COLOR)$(FR_COLOR_RED)$(TEMPLATE_DEST)$(END_COLOR)'."
-#	@echo
+.PHONY: all clean help update_version deploy css_targets
 
 $(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_LESS_CSS_TARGET,$(DIR))))
 $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_JS_TARGET,$(PAGE))))
@@ -105,16 +101,18 @@ $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_CSS_TARGET,$(PAGE))))
 css_targets: $(LESS_CSS_TARGETS);
 
 deploy: $(ALL_TARGETS)
-	@echo "TODO: upload all JS assets to S3"
-	@echo "$(foreach PAGE,$(HTML_PAGES),$(GENERATED_JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)"
-	@echo "TODO: upload all CSS assets to S3"
-	@echo "$(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.LESS_CSS_TARGET_SUFFIX))"
+	cd bin && python deploy_assets.py
+
+update_version:
+	@echo $(ASSET_VERSION_NUMBER)
+	cd bin && python deploy_version.py
 
 version:
 	@echo $(ASSET_VERSION_NUMBER)
 
 clean:
-	$(RM) -f $(ALL_TARGETS)
+	$(RM) -rf $(GENERATED_BASE_DIR)
+	$(RM) -f  $(ALL_TARGETS)
 	@echo
 
 help::
