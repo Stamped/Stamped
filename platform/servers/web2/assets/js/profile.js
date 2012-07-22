@@ -200,9 +200,18 @@ var g_update_stamps = null;
             }
         };
         
+        var update_empty_stamps = function() {
+            if ($(".stamp-gallery-item").length === 0) {
+                $(".empty-stamps").show();
+            } else {
+                $(".empty-stamps").hide();
+            }
+        };
+        
         var update_gallery = function(callback) {
             if ($gallery !== null) {
                 $gallery = $(".stamp-gallery").find(".stamps");
+                update_empty_stamps();
                 
                 $gallery.isotope('reLayout', callback);
             }
@@ -733,6 +742,8 @@ var g_update_stamps = null;
             if ($gallery.length <= 0) {
                 $gallery = null;
             } else {
+                update_empty_stamps();
+                
                 $gallery.isotope({
                     itemSelector        : '.stamp-gallery-item', 
                     layoutMode          : "masonry"/*, 
