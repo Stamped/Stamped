@@ -46,7 +46,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
 
     def _setCachedToken(self, token):
         key = str("obj::accesstoken::%s" % token.token_id)
-        cacheLength = 60 * 10 # 10 minutes
+        cacheLength = 60 * 60 # One hour
         try:
             self._cache.set(key, token, time=cacheLength)
         except Exception as e:
