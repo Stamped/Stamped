@@ -1710,45 +1710,43 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
-        return []
-        # if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
-        #     self.__autocomplete_last_loaded = datetime.now()
-        #     self.reloadAutoCompleteIndex()
-        # if category == 'place':
-        #     if coordinates is None:
-        #         latLng = None
-        #     else:
-        #         latLng = [ coordinates.lat, coordinates.lng ]
-        #     results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'},
-        #         priority='high')
-        #     #make list of names from results, remove duplicate entries, limit to 10
-        #     if results is None:
-        #         return []
-        #     names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
-        #     completions = []
-        #     for name in names:
-        #         completions.append( { 'completion' : name } )
-        #     return completions
+        if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
+            self.__autocomplete_last_loaded = datetime.now()
+            self.reloadAutoCompleteIndex()
+        if category == 'place':
+            if coordinates is None:
+                latLng = None
+            else:
+                latLng = [ coordinates.lat, coordinates.lng ]
+            results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'},
+                priority='high')
+            #make list of names from results, remove duplicate entries, limit to 10
+            if results is None:
+                return []
+            names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
+            completions = []
+            for name in names:
+                completions.append( { 'completion' : name } )
+            return completions
 
-        # return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
+        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
 
     def reloadAutoCompleteIndex(self, retries=5, delay=0):
-        return
-        # def setIndex(greenlet):
-        #     try:
-        #         self.__autocomplete = greenlet.get()
-        #     except Exception as e:
-        #         if retries:
-        #             self.reloadAutoCompleteIndex(retries-1, delay*2+1)
-        #         else:
-        #             email = {
-        #                 'from' : 'Stamped <noreply@stamped.com>',
-        #                 'to' : 'dev@stamped.com',
-        #                 'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
-        #                 'body' : '<pre>%s</pre>' % str(e),
-        #             }
-        #             utils.sendEmail(email, format='html')
-        # gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
+        def setIndex(greenlet):
+            try:
+                self.__autocomplete = greenlet.get()
+            except Exception as e:
+                if retries:
+                    self.reloadAutoCompleteIndex(retries-1, delay*2+1)
+                else:
+                    email = {
+                        'from' : 'Stamped <noreply@stamped.com>',
+                        'to' : 'dev@stamped.com',
+                        'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
+                        'body' : '<pre>%s</pre>' % str(e),
+                    }
+                    utils.sendEmail(email, format='html')
+        gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
 
     def updateAutoCompleteIndexAsync(self):
         return
