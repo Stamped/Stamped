@@ -465,7 +465,7 @@ class StampedSource(GenericSource):
 
     @lazyProperty
     def __entityDB(self):
-        if self._stamped_api:
+        if self._stamped_api is not None:
             return self._stamped_api._entityDB
         return MongoEntityCollection()
         
