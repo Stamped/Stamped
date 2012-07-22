@@ -82,7 +82,7 @@ def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
     
     if content_type is None: # image or font
         key_prefix, suffix = os.path.splitext(key)
-        suffix = .lower()
+        suffix = suffix.lower()
         
         if suffix == '.jpg' or suffix == '.jpeg':
             content_type = "image/jpeg"

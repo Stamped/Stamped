@@ -735,6 +735,9 @@ var g_update_stamps = null;
             }
         };
         
+        var layout_mode_index  = 0;
+        var layout_modes = [ "masonry", "fitRows", "cellsByRow" ];
+        
         // initialize the stamp gallery's layout with isotope and infinite scroll
         var init_gallery = function() {
             $gallery = $(".stamp-gallery .stamps");
@@ -746,8 +749,10 @@ var g_update_stamps = null;
                 
                 $gallery.isotope({
                     itemSelector        : '.stamp-gallery-item', 
-                    layoutMode          : "masonry"/*, 
-                    animationOptions    : {
+                    layoutMode          : layout_modes[layout_mode_index]
+                    //layoutMode          : "fitRows"
+                    //layoutMode          : "masonry"
+                    /*, animationOptions    : {
                         duration        : 800,
                         easing          : 'easeOut',
                         queue           : true
@@ -756,6 +761,17 @@ var g_update_stamps = null;
                 
                 $gallery.on("click", ".stamp-gallery-item", open_sdetail_click);
                 init_infinite_scroll();
+            }
+        };
+        
+        var toggle_gallery_layout_mode = function() {
+            if (!!$gallery) {
+                layout_mode_index = (layout_mode_index + 1) % layout_modes.length;
+                
+                $gallery.isotope({
+                    layoutMode          : layout_modes[layout_mode_index]
+                    //layoutMode          : "fitRows"
+                });
             }
         };
         
@@ -1397,6 +1413,7 @@ var g_update_stamps = null;
             
             var gallery_x       = $stamp_gallery.offset().left;
             var gallery_width   = $stamp_gallery.width();
+            var wide_body       = 'wide-body';
             var wide_gallery    = 'wide-gallery';
             var narrow_gallery  = 'wide-gallery';
             var max_blurb_width = 125;
@@ -1418,7 +1435,8 @@ var g_update_stamps = null;
                     var desired_width_header_px;
                     
                     if (gallery) {
-                        desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        //desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        desired_width_header_px = "232px";
                         desired_width_px = "auto";
                     } else {
                         //desired_width_header_px = (desired_width + 148) + "px";
@@ -1426,7 +1444,6 @@ var g_update_stamps = null;
                     }
                     
                     $elem.find('.content_1').css({
-                        'width'     : desired_width_px, 
                         'max-width' : desired_width_px
                     });
                     
@@ -1437,21 +1454,22 @@ var g_update_stamps = null;
                 });
             };
             
-            /*if (gallery_width <= min_col_width + 144) {
+            if (window.innerWidth <= 780) {
                 if (!$stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery).addClass(narrow_gallery);
+                    $body.addClass(wide_body);
                     update = true;
                     
                     reset_stamp_gallery_items(max_blurb_width);
                 } else {
                     force_no_update = true;
                 }
-            } else */
-            if (right < fixed_padding / 2) {
+            } else if (right < fixed_padding / 2) {
                 //console.debug("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
                 
                 if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery + " " + narrow_gallery);
+                    $body.removeClass(wide_body);
                     update = true;
                 }
                 
@@ -1462,6 +1480,7 @@ var g_update_stamps = null;
                 
                 if (!$stamp_gallery.hasClass(wide_gallery)) {
                     $stamp_gallery.removeClass(narrow_gallery).addClass(wide_gallery);
+                    $body.addClass(wide_body);
                     update = true;
                     
                     reset_stamp_gallery_items(max_blurb_width);
@@ -1478,7 +1497,8 @@ var g_update_stamps = null;
                         update = true;
                     } else {
                         //var cur_fixed_width_px = Math.Max(1000, 1 * width) + "px";
-                        var cur_fixed_width_px = fixed_width + "px";
+                        //var cur_fixed_width_px = fixed_width + "px";
+                        var cur_fixed_width_px = "75%";
                         
                         $('.fixedwidth').width(cur_fixed_width_px);
                     }
@@ -2165,6 +2185,10 @@ var g_update_stamps = null;
         // setup misc bindings
         // ---------------------------------------------------------------------
         
+        
+        $(document).bind('keydown', 'ctrl+t', function() {
+            toggle_gallery_layout_mode();
+        });
         
         // whenever the window scrolls, check if the header's layout needs to be updated
         $window.bind("scroll", update_dynamic_header);
