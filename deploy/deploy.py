@@ -48,7 +48,7 @@ def parseCommandLine():
     parser.add_option("-d", "--dbStack", dest="db_stack", default=None, type="string",
                       help="Denote an external stack to use for the database")
 
-    parser.add_option("-b", "--branch", action="store", default=None, type="string",
+    parser.add_option("-b", "--branch", action="store", default='master', type="string",
                       help="git branch to deploy, if not master")
 
     (options, args) = parser.parse_args()
