@@ -82,7 +82,7 @@ def main():
         raise Fail("'%s' does not support command '%s'" % (deploymentSystem, command))
 
     try:
-        func(*args[1:], **options)
+        func(*args[1:])
     except Exception:
         utils.log("Error: command '%s' on '%s' failed" % (command, deploymentSystem))
         raise

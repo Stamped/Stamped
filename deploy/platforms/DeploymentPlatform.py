@@ -14,11 +14,12 @@ from errors import Fail
 from ADeploymentPlatform import ADeploymentPlatform
 
 class DeploymentPlatform(ADeploymentPlatform):
-    def __init__(self, stack_class, db_stack=None):
+    def __init__(self, stack_class, db_stack=None, options=None):
         ADeploymentPlatform.__init__(self)
-        
+
         self.stack_class = stack_class
         self.db_stack = db_stack
+        self._options = options
         self._stacks = { }
         self._init_env()
     
@@ -61,7 +62,8 @@ class DeploymentPlatform(ADeploymentPlatform):
     def update(self, *args):
         stackName = args[0]
         stack = self._get_matching_stack(stackName)
-        stack.update(*args[1:])
+        branch = self._options.get('branch', None)
+        stack.update(branch=branch, *args[1:])
     
     def repair(self, *args):
         stackName = args[0]

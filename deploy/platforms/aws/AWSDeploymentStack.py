@@ -138,13 +138,12 @@ class AWSDeploymentStack(ADeploymentStack):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/ebs_backup.py', pty=False)
     
-    def update(self, *args, **options):
+    def update(self, branch=None, *args):
         force = (len(args) >= 1 and args[0] == 'force')
-        stack = options.get('stack', None)
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
-        
-        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s'" % \
-               (" --force" if force else "", " --stack %s" % stack if stack is not None else "")
+
+        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s'" %\
+              (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
         pp  = []
         separator = "-" * 80
         
