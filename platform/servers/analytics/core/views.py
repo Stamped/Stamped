@@ -187,7 +187,7 @@ def latency(request):
     is_blacklist = len(blacklist) > 0
     is_whitelist = len(whitelist) > 0
     
-    report = query.latencyReport(weekAgo(today()),now(),None,blacklist,whitelist)
+    report = query.latencyReport(dayAgo(today()),now(),None,blacklist,whitelist)
         
     t = loader.get_template('../html/latency.html')
     c = Context({
