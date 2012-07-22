@@ -72,7 +72,7 @@ try:
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
 
-    # from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
+    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
     from datetime                   import datetime, timedelta
 except Exception:
