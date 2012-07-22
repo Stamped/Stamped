@@ -6,8 +6,11 @@ import re
 from errors import *
 import oauth as oauth
 
-TWITTER_CONSUMER_KEY    = 'kn1DLi7xqC6mb5PPwyXw'
-TWITTER_CONSUMER_SECRET = 'AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU'
+from libs.Request       import *
+from APIKeys            import get_api_key
+
+TWITTER_CONSUMER_KEY    = get_api_key('twitter', 'consumer_key')
+TWITTER_CONSUMER_SECRET = get_api_key('twitter', 'consumer_secret')
 
 class Twitter(object):
     def __init__(self, consumer_key=TWITTER_CONSUMER_KEY, consumer_secret=TWITTER_CONSUMER_SECRET):
@@ -17,11 +20,9 @@ class Twitter(object):
         self.__signature_method     = oauth.OAuthSignatureMethod_HMAC_SHA1()
         self.__httpObj              = httplib2.Http()
 
-    def __http(self, verb, service, user_token=None, user_secret=None, **params):
+    def __http(self, verb, service, user_token=None, user_secret=None, priority='high', **params):
 
-        baseurl = 'https://api.twitter.com/'
-        encoded_params  = urllib.urlencode(params)
-        url     = "%s%s?%s" % (baseurl, service, encoded_params)
+        url = 'https://api.twitter.com/%s' % service
 
         # Generate the oauth token from the user_token and user_secret
         if user_token is not None and user_secret is not None:
@@ -38,26 +39,24 @@ class Twitter(object):
                 http_method=verb)
             oauthRequest.sign_request(  self.__signature_method, self.__consumer, token)
 
-            headers = oauthRequest.to_header()
+            header = oauthRequest.to_header()
         else:
-            headers = None
-#        body = oauthRequest.to_postdata() if verb == 'POST' else None
-        body = None
+            header = None
+        body = oauthRequest.to_postdata() if verb == 'POST' else None
         logs.debug(url)
 
-        print('### url: %s  method: %s  body: %s  headers: %s' % (url, verb, body, headers))
         # Send the http request
-        response, content = self.__httpObj.request(url, method=verb, body=body, headers=headers)
+        response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
         result = json.loads(content)
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
         return result
 
-    def __get(self, service, user_token=None, user_secret=None, **params):
-        return self.__http('GET', service, user_token, user_secret, **params)
+    def __get(self, service, user_token=None, user_secret=None, priority='high', **params):
+        return self.__http('GET', service, user_token, user_secret, priority, **params)
 
-    def __post(self, service, user_token=None, user_secret=None, **params):
-        return self.__http('POST', service, user_token, user_secret, **params)
+    def __post(self, service, user_token=None, user_secret=None, priority='high', **params):
+        return self.__http('POST', service, user_token, user_secret, priority, **params)
 
     def getUserInfo(self, user_token, user_secret):
         result = self.__get(
@@ -66,7 +65,8 @@ class Twitter(object):
             str(user_secret),
         )
         if 'id' not in result:
-            raise StampedThirdPartyError('An error occurred while retrieving user information from Twitter')
+            logs.info('')
+            raise StampedThirdPartyError('An error occurred while retrieving user information from Twitter: %s ' % result)
         # id is returned as an int, but we'll use it as a string for consistency
         result['id'] = str(result['id'])
         return result
@@ -154,7 +154,6 @@ TWITTER_USER_A0_SECRET     = "NpWLdSOrvHrtTpy2SALH4Ty1T5QUWdMZQhAMcW6Jp4"
 
 TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW"
 TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
-
 
 
 def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_SECRET, **params):

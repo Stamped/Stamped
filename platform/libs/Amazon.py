@@ -9,33 +9,35 @@ import Globals
 from logs import report
 
 try:
-    import keys.aws
     from libs import bottlenose
     import logs
-    
-    from libs.LibUtils       import xmlToPython
-    from libs.LRUCache       import lru_cache
-    from libs.CachedFunction import cachedFn
+
+    from libs.LibUtils        import xmlToPython
+    from libs.LRUCache        import lru_cache
+    from libs.CachedFunction  import cachedFn
     from libs.CountedFunction import countedFn
-    from libs.RateLimiter            import RateLimiter, RateException
+    from libs.RateLimiter     import RateLimiter, RateException
+    from APIKeys              import get_api_key
 except:
     report()
     raise
 
-__all__      = [ "Amazon" ]
-ASSOCIATE_ID = 'stamped01-20'
+__all__         = [ "Amazon" ]
+ASSOCIATE_ID        = get_api_key('amazon', 'associate_id')
+AWS_ACCESS_KEY_ID   = get_api_key('amazon', 'aws_access_key_id')
+AWS_SECRET_KEY      = get_api_key('amazon', 'aws_secret_key')
 
 class Amazon(object):
     """
         Amazon API wrapper (2)
     """
-    
+
     def __init__(self):
-        self.amazon = bottlenose.Amazon(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY, ASSOCIATE_ID, Timeout=5.0)
+        self.amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, ASSOCIATE_ID)
         self.__limiter = RateLimiter(cps=5)
 
     # note: these decorators add tiered caching to this function, such that
-    # results will be cached locally with a very small LRU cache of 64 items 
+    # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @countedFn(name='Amazon (before caching)')
     @lru_cache(maxsize=64)
@@ -45,8 +47,8 @@ class Amazon(object):
         logs.info("Amazon API: ItemSearch %s" % kwargs)
         return self._item_helper(self.amazon.ItemSearch, **kwargs)
 
-    # note: these decorators add tiered caching to this function, such that 
-    # results will be cached locally with a very small LRU cache of 64 items 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
     # and also cached in Mongo or Memcached with the standard TTL of 7 days.
     @countedFn(name='Amazon (before caching)')
     @lru_cache(maxsize=64)
@@ -55,10 +57,20 @@ class Amazon(object):
     def item_lookup(self, **kwargs):
         logs.info("Amazon API: ItemLookup %s" % kwargs)
         return self._item_helper(self.amazon.ItemLookup, **kwargs)
-    
+
     def _item_helper(self, func, **kwargs):
         with self.__limiter:
-            return xmlToPython(func(**kwargs))
+            string = func(**kwargs)
+
+        """# useful for debugging amazon queries
+        if 'ItemId' in kwargs:
+            f = open('amazon.%s.xml' % kwargs['ItemId'], 'w')
+            f.write(string)n
+            n
+            f.close()
+        """
+
+        return xmlToPython(string)
 
 __globalAmazon = None
 

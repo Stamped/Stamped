@@ -10,6 +10,7 @@ import feedparser, gevent, os, re
 
 from datetime       import datetime
 from optparse       import OptionParser
+from BeautifulSoup       import BeautifulSoup
 from libs.LibUtils  import parseDateString
 from api.Schemas    import *
 
@@ -117,7 +118,9 @@ class Fandango(object):
             try:
                 if self._verbose:
                     utils.log(url)
-                soup = utils.getSoup(url)
+
+                response, content = service_request('fandango', 'GET', url)
+                soup = BeautifulSoup(content)
                 info = soup.find('div', {'id' : 'info'}).findAll('li')[1].getText()
                 
                 try:

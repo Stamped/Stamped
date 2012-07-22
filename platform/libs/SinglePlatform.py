@@ -10,7 +10,7 @@ __license__   = "TODO"
 
 import Globals
 import base64, hashlib, hmac
-import json, urllib, urllib2, utils
+import json, urllib
 import datetime, logs, sys, time
 
 from pprint         import pprint
@@ -21,9 +21,13 @@ from api.Schemas    import Submenu
 from api.Schemas    import MenuSection
 from api.Schemas    import MenuItem
 from api.Schemas    import MenuPrice
-from urllib2        import HTTPError
 from threading      import Lock
-from gevent         import sleep
+from libs.Request   import service_request
+from APIKeys        import get_api_key
+
+CLIENT_ID   = get_api_key('singleplatform', 'client_id')
+SIGNING_KEY = get_api_key('singleplatform', 'signing_key')
+API_KEY     = get_api_key('singleplatform', 'api_key')
 
 _spicy_map = {
     'none':0,
@@ -126,28 +130,28 @@ class SinglePlatform(object):
         self.__cooldown = .4
         self.__throttled = 0
     
-    def search(self, query, page=0, count=20):
+    def search(self, query, page=0, count=20, priority='low'):
         params = {
             'q'     : query, 
             'page'  : page, 
             'count' : count, 
         }
         
-        return self._get_uri('/restaurants/search', params)
+        return self._get_uri('/restaurants/search', priority, params)
     
-    def lookup(self, location_id):
-        return self._get_uri('/restaurants/%s' % location_id)
+    def lookup(self, location_id, priority='low'):
+        return self._get_uri('/restaurants/%s' % location_id, priority)
     
-    def get_menu(self, location_id):
-        return self._get_uri('/restaurants/%s/menu' % location_id)
+    def get_menu(self, location_id, priority='low'):
+        return self._get_uri('/restaurants/%s/menu' % location_id, priority)
 
-    def get_menu_schema(self, location_id):
-        return toMenu(self.get_menu(location_id))
+    def get_menu_schema(self, location_id, priority='low'):
+        return toMenu(self.get_menu(location_id, priority))
     
-    def get_short_menu(self, location_id):
-        return self._get_uri('/restaurants/%s/shortmenu' % location_id)
+    def get_short_menu(self, location_id, priority='low'):
+        return self._get_uri('/restaurants/%s/shortmenu' % location_id, priority)
     
-    def _get_uri(self, uri, params=None):
+    def _get_uri(self, uri, priority='low', params=None):
         if params is not None:
             uri = "%s?%s" % (uri, urllib.urlencode(params))
         
@@ -155,28 +159,14 @@ class SinglePlatform(object):
         uri = "%s%sclient=%s" % (uri, '?' if params is None else '&', self._client_id)
         uri = uri.encode('utf-8')
         url = "%s%s&sig=%s" % (self.BASE_URL, uri, self._sign(uri))
-        
-        request = urllib2.Request(url)
-        request.add_header('Accept-encoding', 'gzip')
-        request.add_header('Accept', 'application/json')
+
+        header = {
+            'Accept-encoding': 'gzip',
+            'Accept' : 'application/json',
+        }
+        response, content = service_request('singleplatform', 'GET', url, header=header, priority=priority)
         logs.info(url)
-        result = None
-        try:
-            with self.__lock:
-                if self.__throttled > 5:
-                    raise HTTPError(url,403,'Internal rate limit exceeded',None,None)
-                elapsed = time.time() - self.__last_call
-                self.__last_call = time.time()
-                cooldown = self.__cooldown - elapsed
-                if cooldown > 0:
-                    sleep(cooldown)
-                result = json.loads(utils.getFile(url, request))
-                self.__last_call = time.time()
-        except HTTPError as e:
-            if e.code == 403:
-                self.__throttled += 1
-                sleep(1)
-            raise
+        result = json.loads(content)
         return result
     
     def _sign(self, uri):
@@ -189,9 +179,9 @@ class SinglePlatform(object):
 class StampedSinglePlatform(SinglePlatform):
     def __init__(self):
         SinglePlatform.__init__(self, 
-                                client_id='cyibvntpqlfgmsnynncnkbscg', 
-                                signing_key='1THU8A8TPUYw84LIXQTomgZNNx4yoKnQiDpNv9yDPuQ', 
-                                api_key='kpm48ecj0bb5zai7qc5wvq562')
+                                client_id=CLIENT_ID,
+                                signing_key=SIGNING_KEY,
+                                api_key=API_KEY)
 
 if __name__ == '__main__':
     sp = StampedSinglePlatform()

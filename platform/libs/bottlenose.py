@@ -7,7 +7,8 @@ import urllib2
 import hmac
 import time
 
-from hashlib import sha256
+from hashlib        import sha256
+from libs.Request   import service_request
 
 try:
     import cStringIO as StringIO
@@ -43,9 +44,9 @@ class AmazonError(Exception):
     pass
 
 class AmazonCall(object):
-    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
-            AssociateTag=None, Operation=None, Style=None, Version=None,
-            Region=None, Timeout=None):
+    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None, \
+            AssociateTag=None, Operation=None, Style=None, Version=None, \
+            Region=None):
         self.AWSAccessKeyId = AWSAccessKeyId
         self.AWSSecretAccessKey = AWSSecretAccessKey
         self.Operation = Operation
@@ -53,7 +54,6 @@ class AmazonCall(object):
         self.Version = Version
         self.Style = Style
         self.Region = Region
-        self.Timeout = Timeout
 
     def signed_request(self):
         pass
@@ -62,9 +62,9 @@ class AmazonCall(object):
         try:
             return object.__getattr__(self, k)
         except:
-            return AmazonCall(self.AWSAccessKeyId, self.AWSSecretAccessKey,
+            return AmazonCall(self.AWSAccessKeyId, self.AWSSecretAccessKey, \
                     self.AssociateTag, Operation=k, Version=self.Version,
-                    Style=self.Style, Region=self.Region, Timeout=self.Timeout)
+                    Style=self.Style, Region=self.Region)
 
     def __call__(self, **kwargs):
         kwargs['Timestamp'] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -95,53 +95,24 @@ class AmazonCall(object):
         signature = urllib.quote(b64encode(digest))
         
         api_string = "http://" + service_domain + "/onca/xml?" + quoted_strings + "&Signature=%s" % signature
-        api_request = urllib2.Request(api_string, headers={"Accept-Encoding": "gzip"})
-        
-        maxDelay = 32
-        delay = 0.5
-        
-        while True:
-            try:
-                response = urllib2.urlopen(api_request, timeout=self.Timeout)
-                break
-            except urllib2.HTTPError, e:
-                # reraise the exception if the request resulted in an HTTP client 4xx error code, 
-                # since it was a problem with the url / headers and retrying most likely won't 
-                # solve the problem.
-                if e.code >= 400 and e.code < 500:
-                    raise
-                
-                # if delay is already too large, request will likely not complete successfully, 
-                # so propagate the error and return.
-                if delay > maxDelay:
-                    raise
-            except (ValueError, IOError, httplib.BadStatusLine):
-                if delay > maxDelay:
-                    raise
-            except Exception, e:
-                print type(e)
-                print "Unexpected Error '%s' fetching url '%s'" % (str(e), url)
-                if delay > maxDelay:
-                    raise
-            
-            # put the current thread to sleep for a bit, increase the delay, 
-            # and retry the request
-            time.sleep(delay)
-            delay *= 2
-        
-        if "gzip" in response.info().getheader("Content-Encoding"):
-            gzipped_file  = gzip.GzipFile(fileobj=StringIO.StringIO(response.read()))
+
+        priority = kwargs.get('priority', 'low')
+        header={"Accept-Encoding": "gzip"}
+        response, content = service_request('amazon', 'GET', api_string, header=header, priority=priority)
+
+        if response.get('Content-Encoding', None) == 'gzip':
+            gzipped_file  = gzip.GzipFile(fileobj=StringIO.StringIO(content))
             response_text = gzipped_file.read()
         else:
-            response_text = response.read()
+            response_text = content
         return response_text
 
 class Amazon(AmazonCall):
-    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
-            AssociateTag=None, Operation=None, Style=None,
-            Version="2011-08-01", Region="US", Timeout=None):
-        AmazonCall.__init__(self, AWSAccessKeyId, AWSSecretAccessKey,
-            AssociateTag, Operation, Version=Version, Region=Region, Timeout=Timeout, Style=Style)
+    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None, \
+            AssociateTag=None, Operation=None, Style=None, \
+            Version="2011-08-01", Region="US"):
+        AmazonCall.__init__(self, AWSAccessKeyId, AWSSecretAccessKey, \
+            AssociateTag, Operation, Version=Version, Region=Region, Style=Style)
 
 __all__ = ["Amazon", "AmazonError"]
 
