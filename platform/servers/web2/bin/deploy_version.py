@@ -14,22 +14,9 @@ def get_current_version():
     return __version__
 
 def parse_current_version():
-    version = get_current_version()
+    version = get_current_version().split(".")
     
-    index = len(version) - 1
-    recur = True
-    
-    while index >= 0 and recur:
-        num = int(version[index]) + 1
-        
-        recur = (num >= 10)
-        if recur and index > 0:
-            num = 0
-        
-        version[index] = str(num)
-        
-        if recur:
-            index -= 1
+    version[-1] = str(int(version[-1]) + 1)
     
     return ".".join(version)
 
