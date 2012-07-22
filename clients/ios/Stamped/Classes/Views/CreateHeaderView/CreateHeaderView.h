@@ -9,11 +9,12 @@
 #import <UIKit/UIKit.h>
 
 @interface CreateHeaderView : UIControl {
-    UILabel *_titleLabel;
     UILabel *_detailTitleLabel;
     UIImageView *_imageView;
 }
 
 - (void)setupWithItem:(id)item;
+
+@property (nonatomic, readonly, assign) UILabel* titleLabel;
 
 @end

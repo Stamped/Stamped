@@ -784,16 +784,10 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
 }
 
 - (void)popupDismissed:(id)notImportant {
-    [self showTooltip];
+    if ([Util topController] == self) {
+        [self showTooltip];
+    }
 }
-
-
-
-
-
-
-
-
 
 
 

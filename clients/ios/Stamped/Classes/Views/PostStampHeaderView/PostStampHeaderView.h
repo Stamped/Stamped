@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 
 @class STAvatarView, UserStampView;
-@interface PostStampHeaderView : UIView {
-    UserStampView *_stampView;
-}
+@interface PostStampHeaderView : UIView
+
 @property(nonatomic,retain) UILabel *titleLabel;
+@property (nonatomic, readonly, assign) UIView* stampView;
+
 @end

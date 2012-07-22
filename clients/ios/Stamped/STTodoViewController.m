@@ -144,7 +144,6 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         [self.contentView addSubview:_todoDots];
         [self.contentView addSubview:_previews];
         [self.contentView addSubview:tapButton];
-        
     }
     return self;
 }   
@@ -166,6 +165,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)iconClicked:(id)notImportant {
+    //    self.editing = YES;
     [self.delegate clickedImageForTodo:self.todo];
 }
 
@@ -320,7 +320,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     
     [Util addHomeButtonToController:self withBadge:YES];
     [Util addCreateStampButtonToController:self];
-    
+    //self.tableView.editing = YES;
     self.dirty = YES;
 }
 
@@ -386,6 +386,30 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     STActionContext* context = [STActionContext context];
     id<STAction> action = [STStampedActions actionViewEntity:todo.source.entity.entityID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    return YES;
+}
+
+- (void)tableView:(UITableView *)tableView willBeginEditingRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+}
+
+- (void)tableView:(UITableView *)tableView didEndEditingRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+}
+
+- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return UITableViewCellEditingStyleDelete;
+}
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if(editingStyle == UITableViewCellEditingStyleDelete) {
+        id<STTodo> todo = [self.snapshot objectAtIndex:indexPath.row];
+        [[STStampedAPI sharedInstance] untodoWithStampID:nil entityID:todo.source.entity.entityID andCallback:^(BOOL success, NSError* error, STCancellation* cancellation) {
+            [self.cache refreshAtIndex:indexPath.row-1 force:YES];
+        }];
+    }
 }
 
 #pragma mark - Cache Methods
@@ -455,27 +479,6 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
                                                  title:@"No to-do's" 
                                                   body:@"To add a to-do, just tap this guy when you see it."
                                                options:nil];
-//    
-//    UIImageView* waterMark = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"watermark_no_todos"]] autorelease];
-//    UILabel* top = [Util viewWithText:@"No to-do's"
-//                                 font:[UIFont stampedBoldFontWithSize:12]
-//                                color:[UIColor stampedGrayColor]
-//                                 mode:UILineBreakModeTailTruncation
-//                           andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-//    UILabel* bottom = [Util viewWithText:@"To add a to-do, just tap this guy when you see it."
-//                                    font:[UIFont stampedFontWithSize:12]
-//                                   color:[UIColor stampedGrayColor]
-//                                    mode:UILineBreakModeTailTruncation
-//                              andMaxSize:CGSizeMake(135, CGFLOAT_MAX)];
-//    top.textAlignment = UITextAlignmentCenter;
-//    bottom.textAlignment = UITextAlignmentCenter;
-//    CGFloat adjustment = 84;
-//    top.frame = [Util centeredAndBounded:top.frame.size inFrame:waterMark.frame];
-//    [Util reframeView:top withDeltas:CGRectMake(0, -14 - adjustment, 0, 0)];
-//    bottom.frame = [Util centeredAndBounded:bottom.frame.size inFrame:waterMark.frame];
-//    [Util reframeView:bottom withDeltas:CGRectMake(0, 9 - adjustment, 0, 0)];
-//    [waterMark addSubview:top];
-//    [waterMark addSubview:bottom];
     waterMark.frame = [Util centeredAndBounded:waterMark.frame.size inFrame:CGRectMake(0, 0, view.frame.size.width, view.frame.size.height)];
     [view addSubview:waterMark];
 }
@@ -547,42 +550,41 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     }
 }
 
-
 #pragma mark - STTodoCellDelegate
 
 - (void)clickedImageForTodo:(id<STTodo>)todo {
-    self.actionSheetTodo = todo;
-    
-    NSArray* otherButtonTitles = nil;
-    STTodoState state = [STTodoViewController todoState:todo];
-    if (state == STTodoStateDone) {
-        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as undone", @"Stamp it", nil];
-    }
-    else if (state == STTodoStateStamped) {
-        otherButtonTitles = [NSArray arrayWithObject:@"View stamp"];
-    }
-    else {
-        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as done", @"Stamp it", nil];
-    }
-    
-    UIActionSheet *actionSheet = nil;
-    if (otherButtonTitles.count == 1) {
-        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                  delegate:self 
-                                         cancelButtonTitle:@"Cancel" 
-                                    destructiveButtonTitle:nil 
-                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], nil];
-    }
-    else {
-        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                  delegate:self 
-                                         cancelButtonTitle:@"Cancel" 
-                                    destructiveButtonTitle:nil 
-                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], [otherButtonTitles objectAtIndex:1], nil];
-    }
-    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
-    [actionSheet showInView:self.view];
-    [actionSheet release];
+    //    self.actionSheetTodo = todo;
+    //    
+    //    NSArray* otherButtonTitles = nil;
+    //    STTodoState state = [STTodoViewController todoState:todo];
+    //    if (state == STTodoStateDone) {
+    //        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as undone", @"Stamp it", nil];
+    //    }
+    //    else if (state == STTodoStateStamped) {
+    //        otherButtonTitles = [NSArray arrayWithObject:@"View stamp"];
+    //    }
+    //    else {
+    //        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as done", @"Stamp it", nil];
+    //    }
+    //    
+    //    UIActionSheet *actionSheet = nil;
+    //    if (otherButtonTitles.count == 1) {
+    //        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+    //                                                  delegate:self 
+    //                                         cancelButtonTitle:@"Cancel" 
+    //                                    destructiveButtonTitle:nil 
+    //                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], nil];
+    //    }
+    //    else {
+    //        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+    //                                                  delegate:self 
+    //                                         cancelButtonTitle:@"Cancel" 
+    //                                    destructiveButtonTitle:nil 
+    //                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], [otherButtonTitles objectAtIndex:1], nil];
+    //    }
+    //    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    //    [actionSheet showInView:self.view];
+    //    [actionSheet release];
 }
 
 @end

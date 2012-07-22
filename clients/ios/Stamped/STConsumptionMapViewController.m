@@ -18,6 +18,7 @@
 #import "STEntityAnnotation.h"
 #import "STPreviewsView.h"
 #import "UIColor+Stamped.h"
+#import "STMapIndicatorView.h"
 
 static NSString* const _cacheOverlayKey = @"Consumption.food.cacheOverlay";
 
@@ -30,7 +31,9 @@ static NSString* const _cafeNameKey = @"Consumption.food.cafe.name";
 static NSString* const _subcategoryType = @"subcategory";
 static NSString* const _filterType = @"filter";
 
-const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
+static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
+
+static const CGFloat _searchBarPadding = 5;
 
 typedef struct STTileRect {
 NSInteger x;
@@ -117,6 +120,10 @@ NSInteger zoom;
 @property (nonatomic, readwrite, assign) BOOL dirty;
 @property (nonatomic, readwrite, assign) MKCoordinateRegion lastRegion;
 @property (nonatomic, readwrite, assign) BOOL hasShown;
+@property (nonatomic, readonly, retain) STMapIndicatorView* mapIndicatorView;
+@property (nonatomic, readonly, retain) UIButton* userLocationButton;
+@property (nonatomic, readonly, retain) UIButton* cancelButton;
+@property (nonatomic, readwrite, assign) CGFloat searchAnimationDelta;
 
 @end
 
@@ -142,6 +149,10 @@ NSInteger zoom;
 @synthesize dirty = _dirty;
 @synthesize lastRegion = _lastRegion;
 @synthesize hasShown = _hasShown;
+@synthesize mapIndicatorView = _mapIndicatorView;
+@synthesize userLocationButton = _userLocationButton;
+@synthesize cancelButton = _cancelButton;
+@synthesize searchAnimationDelta = _searchAnimationDelta;
 
 - (STConsumptionToolbarItem*)rootItem {
     STConsumptionToolbarItem* item = [[STConsumptionToolbarItem alloc] init];
@@ -214,12 +225,28 @@ NSInteger zoom;
     [annotations_ release];
     [_previews release];
     [_previewContainer release];
+    [_mapIndicatorView release];
+    [_userLocationButton release];
+    [_cancelButton release];
     [super dealloc];
 }
 
 /*
  Styled and memory checked on 2012-07-04 -Landon
  */
+
+- (void)updateIndicator {
+    if (self.cancellations.count) {
+        self.mapIndicatorView.mode = STMapIndicatorViewModeLoading;
+    }
+    else if ([STRestKitLoader sharedInstance].isOffline) {
+        self.mapIndicatorView.mode = STMapIndicatorViewModeNoConnection;
+    }
+    else {
+        self.mapIndicatorView.mode = STMapIndicatorViewModeHidden;
+    }
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -228,12 +255,39 @@ NSInteger zoom;
     self.consumptionToolbar.delegate = self;
     if (!searchField_) {
         //Setup search bar
+        CGSize locationButtonSize = CGSizeMake(34, 30);
+        CGFloat buttonPadding = _searchBarPadding;
+        _userLocationButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+        [_userLocationButton setImage:[UIImage imageNamed:@"eSearch_location_button"] forState:UIControlStateNormal];
+        [_userLocationButton addTarget:self action:@selector(userLocationButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
         UIView* searchBar = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 40)] autorelease];
-        searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 300, 30)];
+        
+        searchField_ = [[STSearchField alloc] initWithFrame:CGRectMake(10, 5, 310 - (locationButtonSize.width + 2 * buttonPadding), 30)];
         searchField_.placeholder = @"Search for places";
         searchField_.enablesReturnKeyAutomatically = NO;
         searchField_.delegate = self;
         [searchBar addSubview:searchField_];
+        
+        _userLocationButton.frame = CGRectMake(CGRectGetMaxX(searchField_.frame) + buttonPadding, 5, 34, 30);
+        [searchBar addSubview:_userLocationButton];
+        
+        
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+        button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        UIImage *image = [UIImage imageNamed:@"search_cancel_btn.png"];
+        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
+        [button setTitleColor:[UIColor colorWithRed:0.600f green:0.600f blue:0.600f alpha:1.0f] forState:UIControlStateNormal];
+        button.frame = CGRectMake(CGRectGetMaxX(_userLocationButton.frame) + 10.0f, (searchBar.frame.size.height - image.size.height) / 2 , 60.0f, image.size.height);
+        button.titleLabel.shadowColor = [UIColor whiteColor];
+        [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
+        [button addTarget:self action:@selector(cancelButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+        [button setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
+        [searchBar addSubview:button];
+        button.hidden = YES;
+        _cancelButton = [button retain];
+        
+        self.searchAnimationDelta = CGRectGetMaxX(self.cancelButton.frame) + _searchBarPadding - self.view.frame.size.width;
+        
         searchBar.backgroundColor = [UIColor colorWithWhite:.9 alpha:1];
         [self.scrollView appendChildView:searchBar];
         
@@ -292,6 +346,9 @@ NSInteger zoom;
                 }
             }];
         }
+        _mapIndicatorView = [[STMapIndicatorView alloc] init];
+        [self.mapView addSubview:_mapIndicatorView];
+        [self updateIndicator];
     }
 }
 
@@ -352,6 +409,11 @@ NSInteger zoom;
 }
 
 #pragma mark - MKMapViewDelegate Methods
+
+- (void)userLocationButtonPressed:(id)notImportant {
+    [self zoomToCurrentLocation:YES];
+}
+
 
 - (BOOL)zoomToCurrentLocation:(BOOL)animated {
     if (mapView_.userLocation && !(mapView_.userLocation.coordinate.latitude == 0 && mapView_.userLocation.coordinate.longitude == 0)) {
@@ -565,10 +627,10 @@ NSInteger zoom;
     for (STCancellation* c in self.cancellations) {
         [c cancel];
     }
-    [self.cancellations removeAllObjects];
-    STCancellation* cancellation = [cache entitiesForRegion:self.mapView.region
+    [self.cancellations removeAllObjects];    STCancellation* cancellation = [cache entitiesForRegion:self.mapView.region
                                                 andCallback:^(NSArray<STEntityDetail> *entities, NSError *error, STCancellation *cancellation2) {
                                                     [self.cancellations removeObject:cancellation2];
+                                                    self.mapIndicatorView.mode = STMapIndicatorViewModeHidden;
                                                     NSMutableDictionary* doomed = [NSMutableDictionary dictionary];
                                                     for (STEntityAnnotation* annotation in self.annotations) {
                                                         [doomed setObject:annotation forKey:annotation.entityDetail.entityID];
@@ -598,8 +660,11 @@ NSInteger zoom;
                                                             [self.annotations addObject:annotation];
                                                         }
                                                     }
+                                                    [self updateIndicator];
                                                 }];
     [self.cancellations addObject:cancellation];
+    [self updateIndicator];
+
 }
 
 
@@ -620,13 +685,34 @@ NSInteger zoom;
 }
 
 - (void)textFieldDidBeginEditing:(UITextField*)textField {
-    //Override collapsing behavior
+    self.cancelButton.hidden = NO;
+    CGFloat delta = self.searchAnimationDelta;
+    [UIView animateWithDuration:.4 animations:^{
+        self.cancelButton.frame = CGRectOffset(self.cancelButton.frame, -delta, 0);
+        self.userLocationButton.frame = CGRectOffset(self.userLocationButton.frame, -delta, 0);
+        [Util reframeView:self.searchField withDeltas:CGRectMake(0, 0, -delta, 0)];
+    } completion:^(BOOL finished) {
+        
+    }];
+    
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+}
+
+- (void)cancelButtonPressed:(id)notImportant {
+    [self.searchField resignFirstResponder];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
-    //Override collapsing behavior
+    [self.navigationController setNavigationBarHidden:NO animated:YES];
     self.query = [textField.text isEqualToString:@""] ? nil : textField.text;
-    //[Util warnWithMessage:@"Search not implemented yet" andBlock:nil];
+    CGFloat delta = self.searchAnimationDelta;
+    [UIView animateWithDuration:.4 animations:^{
+        self.cancelButton.frame = CGRectOffset(self.cancelButton.frame, delta, 0);
+        self.userLocationButton.frame = CGRectOffset(self.userLocationButton.frame, delta, 0);
+        [Util reframeView:self.searchField withDeltas:CGRectMake(0, 0, delta, 0)];
+    } completion:^(BOOL finished) {
+        self.cancelButton.hidden = YES;
+    }];
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField*)textField {

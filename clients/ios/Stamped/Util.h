@@ -306,4 +306,6 @@ typedef enum STGradientStyle {
 
 + (BOOL)oncePerUserWithID:(NSString*)unique;
 
++ (CGRect)originRectWithRect:(CGRect)rect;
+
 @end
