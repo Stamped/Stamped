@@ -103,6 +103,7 @@ def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
     else:
         replace = [
             "img", 
+            #"fonts", 
         ]
         
         for replacement in replace:
