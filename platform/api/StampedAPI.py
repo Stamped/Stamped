@@ -83,9 +83,7 @@ CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per like
 
 stamp_num_collage_regeneration = frozenset([
-    1, 2, 3, 4, 5, 10, 15, 20, 25, 35, 50, 60, 70, 80, 90, 100, 
-    125, 150, 175, 200, 250, 300, 375, 450, 500, 600, 700, 800, 900, 
-    1000
+    25, 50, 100, 150, 200, 500, 750, 1000
 ])
 
 # TODO (travis): refactor API function calling conventions to place optional authUserId last
@@ -2754,8 +2752,9 @@ class StampedAPI(AStampedAPI):
         except StampedDocumentNotFoundError as e:
             logs.warning("User not found: %s" % userId)
             return 
-
-        categories  = [ 'default', category ]
+        
+        # NOTE (travis): disabling 'default' collage regeneration
+        categories  = [ category ]
         
         self._userImageCollageDB.process_user(user, categories)
     
@@ -2842,7 +2841,9 @@ class StampedAPI(AStampedAPI):
         return True
     
     def _should_regenerate_collage(self, stamp_num):
-        return (stamp_num in stamp_num_collage_regeneration)
+        # NOTE (travis): disabling collage regeneration for v2 launch triage
+        return False
+        #return (stamp_num in stamp_num_collage_regeneration)
     
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None, og_action_id=None):
         # Remove from user collection
