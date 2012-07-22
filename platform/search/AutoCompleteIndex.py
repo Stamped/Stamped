@@ -30,8 +30,12 @@ TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter()
 ENTITY_DB = MongoEntityCollection()
 
 def buildAutoCompleteIndex():
+    query = {
+        'sources.tombstone_id' : { '$exists':False },
+        'sources.user_generated_id' : { '$exists':False }
+    }
     allEntities = (convertEntity(entity) for entity in ENTITY_DB._collection.find(
-        fields=['title', 'last_popular', 'types']))
+        query, fields=['title', 'last_popular', 'types']))
     categoryMapping = emptyIndex()
     for entity in allEntities:
         category = categorizeEntity(entity)
