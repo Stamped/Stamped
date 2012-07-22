@@ -10,8 +10,11 @@ import os, utils
 PROJ_ROOT     = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 __version__   = utils.shell("cd %s && make version" % PROJ_ROOT)[0]
 
-def get_updated_version():
-    version = __version__.split(".")
+def get_current_version():
+    return __version__
+
+def parse_current_version():
+    version = get_current_version()
     
     index = len(version) - 1
     recur = True
@@ -31,7 +34,7 @@ def get_updated_version():
     return ".".join(version)
 
 def update_version():
-    version = get_updated_version()
+    version = parse_current_version()
     utils.shell(r"sed %s 's/^\(ASSET_VERSION_NUMBER *= *\).*$/\1%s/' %s" % ("-i ''", version, "../Makefile"))
     
     print version

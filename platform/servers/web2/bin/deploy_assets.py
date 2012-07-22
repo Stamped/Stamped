@@ -8,12 +8,15 @@ __license__   = "TODO"
 import Globals
 import os, utils
 
+import deploy_version
+
 from libs.S3Utils   import S3Utils
 from gevent.pool    import Pool
 
 import servers.web2.settings as settings
 
 STATIC_ROOT = "http://static.stamped.com"
+VERSION     = ".generated.%s" % deploy_version.get_current_version()
 
 def deploy_assets():
     sink    = S3Utils()
@@ -34,13 +37,14 @@ def deploy_assets():
             "path"          : "/assets/img", 
             "apply_gzip"    : False, 
         },
-        {
-            "path"          : "/assets/fonts", 
-            "apply_gzip"    : True, 
-            "headers"       : {
-                "Access-Control-Allow-Origin" : "*", 
-            }, 
-        }, 
+        #{  # NOTE (travis): S3 / Cloudfront doesn't support CORS, so serving fonts via 
+        #   #our CDN (which is technically an external domain) to FF/IE8 won't work.. balls
+        #    "path"          : "/assets/fonts", 
+        #    "apply_gzip"    : True, 
+        #    "headers"       : {
+        #        "Access-Control-Allow-Origin" : "*", 
+        #    }, 
+        #}, 
     ]
     
     for path in paths:
@@ -66,6 +70,9 @@ def deploy_assets():
                 pool.spawn(deploy_asset, filepath, key, sink, content_type, apply_gzip, headers)
     
     pool.join()
+    
+    # clean up temporary gzip files created by S3Utils
+    utils.shell(r"rm -f .temp.*")
 
 def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
     print "deploying '%s'" % key
@@ -74,7 +81,8 @@ def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
         data = f.read()
     
     if content_type is None: # image or font
-        suffix = os.path.splitext(key)[1].lower()
+        key_prefix, suffix = os.path.splitext(key)
+        suffix = .lower()
         
         if suffix == '.jpg' or suffix == '.jpeg':
             content_type = "image/jpeg"
@@ -100,6 +108,9 @@ def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
             content_type = "text/plain"
         else:
             raise Exception("unsupported file type: '" + suffix + "'")
+        
+        #if not key_prefix.endswith(VERSION):
+        #    key = "%s%s%s" % (key_prefix, VERSION, key_suffix)
     else:
         replace = [
             "img", 
