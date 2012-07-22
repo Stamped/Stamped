@@ -31,7 +31,8 @@
 @interface CreateStampViewController ()
 @property(nonatomic,readonly, retain) CreateHeaderView* headerView;
 @property(nonatomic,readonly, retain) CreateFooterView* footerView;
-@property(nonatomic,retain) CreateEditView *editView;
+@property(nonatomic, readwrite, retain) CreateEditView *editView;
+@property (nonatomic, readwrite, retain) STStampContainerView* stampContainerView;
 @property(nonatomic,retain) STS3Uploader *imageUploader;
 @property(nonatomic,copy) NSString *tempImagePath;
 @property(nonatomic,retain) id<STEntity> entity;
@@ -39,8 +40,9 @@
 @property(nonatomic,retain) EntityDetailViewController *todoViewController;
 @property(nonatomic,retain) UIButton *todoStampButton;
 @property(nonatomic,assign) BOOL waiting;
-@property(nonatomic, readwrite, retain) UITableViewCell* tableViewCell;
 @property (nonatomic, readwrite, assign) BOOL shareToTwitter;
+@property (nonatomic, readwrite, retain) NSString* savedBlurb;
+@property (nonatomic, readwrite, retain) UIImage* savedImage;
 
 @end
 
@@ -56,8 +58,10 @@
 @synthesize todoViewController;
 @synthesize todoStampButton;
 @synthesize waiting;
-@synthesize tableViewCell = _tableViewCell;
 @synthesize shareToTwitter = _shareToTwitter;
+@synthesize stampContainerView = _stampContainerView;
+@synthesize savedBlurb = _savedBlurb;
+@synthesize savedImage = _savedImage;
 
 - (void)commonInit {
     
@@ -95,7 +99,9 @@
     self.entity=nil;
     self.imageUploader=nil;
     self.creditUsers=nil;
-    self.tableViewCell = nil;
+    self.savedBlurb = nil;
+    self.editView = nil;
+    self.savedImage = nil;
     [super dealloc];
 }
 
@@ -151,6 +157,9 @@
 
 - (void)viewWillUnload {
     [super viewWillUnload];
+    self.savedBlurb = self.editView.textView.text;
+    self.savedImage = self.editView.imageView.image;
+    self.editView = nil;
     [_headerView release];
     _headerView = nil;
     [_footerView release];
@@ -170,6 +179,12 @@
 }
 
 #pragma mark - Stamp Posting
+
+- (void)goToPostStampWithStamp:(id<STStamp>)stamp {
+    PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
+    controller.navigationItem.hidesBackButton = YES;
+    [self.navigationController pushViewController:controller animated:YES];
+}
 
 - (void)postStamp {
     
@@ -208,9 +223,7 @@
                                              }];
                 }
             }
-            PostStampViewController *controller = [[[PostStampViewController alloc] initWithStamp:stamp] autorelease];
-            controller.navigationItem.hidesBackButton = YES;
-            [self.navigationController pushViewController:controller animated:YES];
+            [self goToPostStampWithStamp:stamp];
             
         } else {
             
@@ -382,7 +395,7 @@
 }
 
 - (void)creditPickerViewControllerCancelled:(CreditPickerViewController*)controller {
-   // [self dismissModalViewControllerAnimated:YES];
+    // [self dismissModalViewControllerAnimated:YES];
     [Util compareAndPopController:controller animated:YES];
 }
 
@@ -461,10 +474,10 @@
     
     [Util pushController:controller modal:YES animated:YES];
     //    
-//    STRootViewController *navContorller = [[STRootViewController alloc] initWithRootViewController:controller];
-//    [self presentModalViewController:navContorller animated:YES];
-//    [controller release];
-//    [navContorller release];
+    //    STRootViewController *navContorller = [[STRootViewController alloc] initWithRootViewController:controller];
+    //    [self presentModalViewController:navContorller animated:YES];
+    //    [controller release];
+    //    [navContorller release];
     
 }
 
@@ -527,29 +540,31 @@
 
 - (UITableViewCell*)tableView:(UITableView*)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    if (!self.tableViewCell) {
-        
-        UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
-        
-        STStampContainerView *view = [[[STStampContainerView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 270.0f)] autorelease];
-        view.tag = kEditContainerViewTag;
-        view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-        [cell addSubview:view];
-        
-        CreateEditView *editView = [[[CreateEditView alloc] initWithFrame:CGRectInset(view.bounds, 5.0f, 10.0f)] autorelease];
-        editView.dataSource = (id<CreateEditViewDataSource>)self;
-        editView.delegate = (id<CreateEditViewDelegate,UIScrollViewDelegate>)self;
-        [view addSubview:editView];
-        self.editView = editView;
-        if (self.creditUsers) {
-            [self.editView setupWithCreditUsernames:[self creditUsernames]];
-        }
-        self.tableViewCell = cell;
+    UITableViewCell* cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil] autorelease];
+    
+    STStampContainerView *view = [[[STStampContainerView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 270.0f)] autorelease];
+    view.tag = kEditContainerViewTag;
+    view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [cell addSubview:view];
+    
+    CreateEditView *editView = [[[CreateEditView alloc] initWithFrame:CGRectInset(view.bounds, 5.0f, 10.0f)] autorelease];
+    editView.dataSource = (id<CreateEditViewDataSource>)self;
+    editView.delegate = (id<CreateEditViewDelegate,UIScrollViewDelegate>)self;
+    self.editView = editView;
+    if (self.savedImage) {
+        editView.imageView.image = self.savedImage;
+    }
+    if (self.savedBlurb) {
+        editView.textView.text = self.savedBlurb;
+    }
+    [editView updateState];
+    
+    [view addSubview:editView];
+    if (self.creditUsers) {
+        [self.editView setupWithCreditUsernames:[self creditUsernames]];
     }
     
-    
-    return self.tableViewCell;
-    
+    return cell;
 }
 
 
@@ -574,9 +589,9 @@
         self.imageUploader.filePath = path;
         
         self.editView.imageView.image = image;
-        [self.editView.imageView setUploading:YES];
+        self.savedImage = image;
+        //[self.editView.imageView setUploading:YES];
         [self.editView updateState];
-        [self.editView layoutScrollView];
         
         //[self.footerView setUploading:YES animated:YES];
         [self.imageUploader startWithProgress:^(float progress) {

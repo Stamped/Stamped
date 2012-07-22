@@ -332,6 +332,26 @@
     }
 }
 
+.inset-stamp-wrapper {
+    position: relative;
+    width: 80%;
+}
+
+.inner-stamp-body {
+    position: relative;
+    width: 100%;
+}
+
+.wide-body {
+    .inset-stamp-wrapper {
+        width: 100%;
+    }
+    
+    .inner-stamp-body {
+        width: 100%;
+    }
+}
+
 .stamp-count-dependent {
     display: none;
 }
@@ -541,7 +561,7 @@ body.app {
 
 .stamp-gallery {
     position: relative;
-    width: 75%;
+    width: 80%;
     clear: both;
     text-align: center;
     left: -24px;
@@ -627,7 +647,7 @@ body.app {
                 color: #999;
                 
                 position: absolute;
-                right: 110%;
+                right: 100%;
                 top:   4px;
             }
             
@@ -774,7 +794,7 @@ body.app {
 @preview-width: 140px;
 @preview-wrapper-width: @preview-width + 8px;
 
-@wide-preview-width: 340px - 48px - 8px - 48px - 24px;
+@wide-preview-width: 280px - 48px - 8px;
 @wide-preview-wrapper-width: @wide-preview-width + 8px;
 
 .sized(@width) {
@@ -876,7 +896,8 @@ body.app {
     }
     
     .stamp-category-app img {
-        .rounded(28px);
+        /*.rounded(28px);*/
+        .rounded(20%);
     }
 }
 
@@ -983,15 +1004,6 @@ quotes: "\201C" "\201D";
     height: 115px;
 }
 
-#retina {
-    .empty-stamps {
-        background: url(/assets/img/nostamps@2x.png) no-repeat;
-        
-        width:  230px;
-        height: 230px;
-    }
-}
-
 
 /* **************************************************************************
                                WIDE STAMP GALLERY
@@ -1001,18 +1013,24 @@ quotes: "\201C" "\201D";
 .wide-gallery, .narrow-gallery {
     width: 100%;
     
-    .stamps {
-        width: 110%;
+    .stamp-gallery-header, .stamps {
+        width: 100%;
     }
     
     .stamp-gallery-item {
-        width:   340px;
-        margin:  0 24px 24px 0;
+        width:   280px;
+        margin:  0;
         
         .content {
             .entity-header {
-                max-width: @stamp-gallery-item-min-width - 64px;
-                margin-bottom: .5em;
+                max-width: 280px - 48px;
+                margin-left: 0;
+                margin-bottom: 0;
+                
+                .pronounced-title {
+                    max-width: 280px - 48px;
+                    font-size: 2.5em;
+                }
             }
             
             /*.content_0 {
@@ -1042,6 +1060,10 @@ quotes: "\201C" "\201D";
                 }
             }*/
             
+            .profile-image-medium {
+                display: none;
+            }
+            
             .content_0 {
                 display: block;
                 width: 100%;
@@ -1058,16 +1080,16 @@ quotes: "\201C" "\201D";
             
             .content_2 {
                 position: relative;
-                margin: 0 0 0 36px;
+                margin: 0 0 0 0;
                 left: 0;
                 float: none;
-                width: @wide-preview-width;
+                width: @wide-preview-width - 16px;
                 
                 .timestamp {
                     position: absolute;
                     left: auto;
                     right: -6px;
-                    top: -1.5em;
+                    top: -2.5em;
                 }
             }
             

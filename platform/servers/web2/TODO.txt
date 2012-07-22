@@ -84,9 +84,6 @@ TODO:
     * customize favicon.ico per profile
         * in addition to png, will need to generate 16x16 (and possibly 32x32?) .ico's
     
-    * incorporate versioning into asset management
-        * styles.vXXX.css
-    
     * optimization:
         * !!! Get static assets working when DEBUG=False !!!
         * http://developer.yahoo.com/performance/rules.html
@@ -276,7 +273,8 @@ OLD:
             * http://minidetector.googlecode.com/svn/trunk/minidetector/search_strings.txt
     * remove unused PRELOAD templates from per-page <script> include
         * USED: stamp-map-item and social-feedback
-
+    * incorporate versioning into asset management
+        * styles.vXXX.css
 
 ChangeList 6/8/2012:
 -------------------

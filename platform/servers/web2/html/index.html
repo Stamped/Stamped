@@ -6,6 +6,7 @@
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
+        script: libs/jquery.hotkeys.js
         script: libs/jquery.fancybox.js
         script: libs/jquery.fittext.js
         script: libs/jquery.event.drag.js
@@ -79,8 +80,8 @@
             </div>
             
             <div class="text">
-                <div class="line active-line">LIKES  ARE CHEAP</div>
-                <div class="line">STARS  ARE PASSÉ</div>
+                <div class="line active-line">LIKES ARE CHEAP</div>
+                <div class="line">STARS ARE PASSÉ</div>
                 <div class="line">STAMPS ARE <span class="italic">YOU</span></div>
             </div>
             
@@ -408,6 +409,7 @@
     {{ block.super }}
     
     {% if STAMPED_DEBUG %}
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fittext.js"></script>

@@ -334,7 +334,7 @@
         [vc setToRecipients:[NSArray arrayWithObject:@"feedback@stamped.com"]];
         [self presentModalViewController:vc animated:YES];
         [vc release];
-        
+//        
         //[tableView deselectRowAtIndexPath:indexPath animated:YES];
 //        [Util pushController:[[[STDebugViewController alloc] init] autorelease] modal:NO animated:YES];
 

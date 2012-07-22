@@ -71,6 +71,21 @@ def sdetail(request, schema, **kwargs):
         'entity'             : entity, 
     }, preload=[ 'user', 'stamp', 'entity' ])
 
+def index(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.index(*args, **kwargs)
+
+def about(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.about(*args, **kwargs)
+
+def jobs(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.jobs(*args, **kwargs)
+
 def password_reset(*args, **kwargs):
     kwargs['mobile'] = True
     

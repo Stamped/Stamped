@@ -14,7 +14,7 @@ from django.http                    import HttpResponseRedirect
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
 
-g_stampedAuth = MongoStampedAuth()
+#g_stampedAuth = MongoStampedAuth()
 
 @stamped_view()
 def password_reset(request, **kwargs):

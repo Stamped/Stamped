@@ -62,9 +62,7 @@ static id _sharedInstance;
     self = [super init];
     if (self) {
         _items = (id)[[NSMutableArray alloc] init];
-        _rdio = [[STRdio sharedRdio].rdio retain];
         _paused = YES;
-        self.rdio.player.delegate = self;
         _previewPlayer = [[AVPlayer alloc] init];
         [[NSNotificationCenter defaultCenter] addObserver:self 
                                                  selector:@selector(previewEnded:) 
@@ -76,6 +74,14 @@ static id _sharedInstance;
                                                    object:nil];
     }
     return self;
+}
+
+- (Rdio *)rdio {
+    if (!_rdio) {
+        _rdio = [[STRdio sharedRdio].rdio retain];
+        _rdio.player.delegate = self;
+    }
+    return _rdio;
 }
 
 - (void)dealloc
@@ -176,7 +182,7 @@ static id _sharedInstance;
     if (index == self.currentItemIndex) {
         if (!self.paused) {
             if ([self serviceForItem:item] == STPlayerServiceRdio) {
-                [_rdio.player stop];
+                [self.rdio.player stop];
             }
             if (index >= self.itemCount) {
                 _paused = YES;

@@ -35,6 +35,8 @@
 @property(nonatomic,strong) id<STStampedBy> stampedBy;
 @property(nonatomic,strong) NSArray *badges;
 @property(nonatomic,assign) BOOL firstBadge;
+
+@property (nonatomic, readwrite, assign) BOOL animatedAlready;
 @end
 
 @implementation PostStampViewController
@@ -46,6 +48,7 @@
 @synthesize badges=_badges;
 @synthesize firstBadge;
 @synthesize stampedBy = _stampedBy;
+@synthesize animatedAlready = _animatedAlready;
 
 
 - (id)initWithStamp:(id<STStamp>)stamp {
@@ -139,6 +142,20 @@
     [super viewWillAppear:animated];
     [Util setTitle:[NSString stringWithFormat:@"Your Stamp"]
      forController:self];
+    if (!self.animatedAlready) {
+        self.headerView.stampView.alpha = 0;
+        [Util executeWithDelay:.4 onMainThread:^{
+            CGRect frameBefore = self.headerView.stampView.frame;
+            self.headerView.stampView.frame = [Util scaledRectWithRect:frameBefore andScale:2];
+            [UIView animateWithDuration:.2 delay:0 options:UIViewAnimationCurveEaseIn animations:^{
+                self.headerView.stampView.frame = frameBefore;
+                self.headerView.stampView.alpha = 1;
+            } completion:^(BOOL finished) {
+                
+            }];            
+        }];
+    }
+    self.animatedAlready = YES;
 }
 
 - (void)viewWillDisappear:(BOOL)animated {

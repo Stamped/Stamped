@@ -5,9 +5,6 @@
 <!-- Javascript dependencies => assets/generated/js/map.generated.js
      - - - - - - - - - - - - - - - - - - - - - -
     
-    jQuery plugin dependencies:
-        script: libs/jquery.hotkeys.js
-    
     Third-party library dependencies:
         script: libs/handlebars.js
         script: libs/infobox.js
@@ -175,7 +172,6 @@
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyD4uiuKac5adB9_bwQK9fgJx3SyZVzQsSc&sensor=true"></script>
     
     {% if STAMPED_DEBUG %}
-        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/handlebars.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/infobox.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/markerclusterer.js"></script>

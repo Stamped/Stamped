@@ -14,6 +14,7 @@
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
+        script: libs/jquery.hotkeys.js
         script: libs/jquery.infinitescroll.js
         script: libs/jquery.isotope.js
         script: libs/jquery.emoji.js
@@ -358,24 +359,28 @@
                             <div class="ribbon-bottom"></div>
                         </div>
                         
-                        <div class="inset-stamp">
-                            <div class="stamp-count-dependent stamp-count-default">
-                                <div class="stamp-count user-primary">
-                                    {{user.num_stamps}}
-                                </div>
-                                
-                                <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
-                            </div>
-                            
-                            {% for distro in user.distribution %}
-                                <div class="stamp-count-dependent stamp-count-{{distro.category}}">
-                                    <div class="stamp-count user-primary">
-                                        {{distro.count}}
+                        <div class="inset-stamp-wrapper">
+                            <div class="inset-stamp-body">
+                                <div class="inset-stamp">
+                                    <div class="stamp-count-dependent stamp-count-default">
+                                        <div class="stamp-count user-primary">
+                                            {{user.num_stamps}}
+                                        </div>
+                                        
+                                        <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
                                     </div>
                                     
-                                    <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                    {% for distro in user.distribution %}
+                                        <div class="stamp-count-dependent stamp-count-{{distro.category}}">
+                                            <div class="stamp-count user-primary">
+                                                {{distro.count}}
+                                            </div>
+                                            
+                                            <p>{% if distro.count != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                        </div>
+                                    {% endfor %}
                                 </div>
-                            {% endfor %}
+                            </div>
                         </div>
                     </div>
                 {% endwith %}
@@ -460,6 +465,7 @@
     {{ block.super }}
      
     {% if STAMPED_DEBUG %}
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.infinitescroll.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.isotope.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.emoji.js"></script>

@@ -2097,6 +2097,7 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('amazon_url',                       basestring)
         cls.addProperty('netflix_url',                      basestring)
         cls.addProperty('singleplatform_url',               basestring)
+        cls.addProperty('spotify_id',                       basestring)
 
         # place
         cls.addProperty('address_street',                   basestring)

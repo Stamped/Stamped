@@ -33,6 +33,8 @@ if utils.is_ec2():
 BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
 logs.info('BROKER_URL: %s' % BROKER_URL)
 
+CELERYD_POOL = 'gevent'
+
 # use default concurrency; uncomment to use a single celeryd worker
 # (can be useful for debugging)
 #CELERYD_CONCURRENCY = 1

@@ -104,6 +104,8 @@ def formForEntity(entity_id, **hidden_params):
             except KeyError:
                 pass
         fields['rdio_url'] = rdio_url
+        fields['spotify_id'] = entity.sources.spotify_id
+
     if entity.isType('tv') or entity.isType('movie'):
         imdb_url = ''
         tmdb_id = entity.sources.tmdb_id
@@ -198,6 +200,11 @@ def update(updates):
         entity.sources.tmdb_id = tmdb_data['id']
         entity.sources.tmdb_source = 'seed'
         entity.sources.tmdb_timestamp = now
+    spotify_id = updates.spotify_id
+    if spotify_id is not None and spotify_id not in bad_versions:
+        entity.sources.spotify_id = spotify_id
+        entity.sources.spotify_source = 'seed'
+        entity.sources.spotify_timestamp = now
     # netflix_url = updates.netflix_url
     # if netflix_url is not None and netflix_url not in bad_versions:
     #     match = re.match(r'http://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?trkid=\d+)?',netflix_url)

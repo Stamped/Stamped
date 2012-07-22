@@ -28,12 +28,15 @@ typedef enum {
     STRestKitLoaderErrorLoggedOut,
     STRestKitLoaderErrorNotConnected,
     STRestKitLoaderErrorTimeout,
+    STRestKitLoaderErrorFailedLogin,
 } STRestKitLoaderError;
 
 extern NSString* const STRestKitLoaderErrorDomain;
 extern NSString* const STRestKitErrorIDKey;
 
 @interface STRestKitLoader : NSObject
+
+- (BOOL)isOffline;
 
 - (STCancellation*)loadWithPath:(NSString*)path
                            post:(BOOL)post
@@ -63,7 +66,7 @@ extern NSString* const STRestKitErrorIDKey;
                            mapping:(RKObjectMapping*)mapping 
                        andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block;
 
-- (void)authenticate;
+- (STCancellation*)authenticateWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)loginWithScreenName:(NSString*)screenName 
                               password:(NSString*)password 

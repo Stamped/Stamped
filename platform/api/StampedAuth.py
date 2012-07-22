@@ -80,8 +80,9 @@ class StampedAuth(AStampedAuth):
         ### TODO: remove hardcoded id / secret in plaintext!'
         clientIds = {
             'stampedtest'       : 'august1ftw',
-            'iphone8'           : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
+            'iphone8'           : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu', # 2.0
             'iphone8@2x'        : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
+            'iphone-2.0.1'      : '9ll4520o4m3706m3nmpn10871nl81340', # 2.0.1
         }
 
         if clientId not in clientIds:
