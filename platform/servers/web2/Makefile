@@ -40,7 +40,7 @@ CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 TEMPLATE_BASE_DIR		    = templates
-HTML_PAGES					= base profile index map about jobs
+HTML_PAGES					= base profile index map about jobs retina
 TEMPLATE_PROG				= bin/process_templates.py
 
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
@@ -111,7 +111,8 @@ version:
 	@echo $(ASSET_VERSION_NUMBER)
 
 clean:
-	$(RM) -f $(ALL_TARGETS)
+	$(RM) -rf $(GENERATED_BASE_DIR)
+	$(RM) -f  $(ALL_TARGETS)
 	@echo
 
 help::

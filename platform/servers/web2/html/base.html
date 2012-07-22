@@ -76,6 +76,11 @@
         
         {% endblock styles %}
         
+        {% block post_styles %}
+        <link rel="stylesheet"          href="{{STAMPED_STATIC_URL}}/css/retina.generated.{{ STAMPED_ASSET_VERSION}}.css" 
+                                        media="only screen and (-webkit-min-device-pixel-ratio: 2)" />
+        {% endblock post_styles %}
+        
         {% block post_head %}
     </head>
     {% endblock post_head %}

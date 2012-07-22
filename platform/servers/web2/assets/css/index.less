@@ -219,18 +219,6 @@ body.main {
     z-index: 50;
 }
 
-#retina .active-pane-0 #pane-nav-0, 
-#retina .active-pane-1 #pane-nav-1, 
-#retina .active-pane-2 #pane-nav-2, 
-#retina .active-pane-3 #pane-nav-3, 
-#retina .active-pane-4 #pane-nav-4 {
-    background-position: -70px 0;
-    
-    &:hover {
-        background-position: -70px 0;
-    }
-}
-
 #main-header {
     margin-bottom: 12px;
     text-align: right;
@@ -703,12 +691,6 @@ body.main {
     left: 60px;
 }
 
-#retina {
-    .iphone-body-shadow {
-        background: url(/assets/img/index/iphone_main_shadow_sprite@2x.png) no-repeat;
-    }
-}
-
 .iphone-body {
     background: url(/assets/img/index/iphone_sprite.png) no-repeat;
     position: relative;
@@ -901,16 +883,6 @@ body.main {
     }
 }
 
-#retina {
-    #main-iphone {
-        margin: -530px 0 0 120px;
-    }
-    
-    .iphone-hero {
-        // TODO: retina iphone here!
-    }
-}
-
 #main-iphone-dev {
     position: absolute;
     top:  0;
@@ -941,10 +913,6 @@ footer {
     bottom: 0;
     
     padding: 12px 24px;
-}
-
-#retina footer .app-store-button {
-    margin-top: -36px;
 }
 
 #social {
@@ -1134,127 +1102,5 @@ footer {
 
 .third-party-logo-opentable {
     .third-party-logo-template(4, -56px);
-}
-
-
-/* **************************************************************************
-                            RETINA DISPLAY BUTTONS
-   ************************************************************************** */
-
-
-#retina {
-    .pane-nav-button {
-        background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
-        width:  31px;
-        height: 31px;
-        
-        &:hover {
-            background-position: -35px 0;
-        }
-        
-        &:active {
-            background-position: -70px 0;
-        }
-    }
-    
-    .active-pane-nav-button {
-        background-position: -70px 0;
-        
-        &:hover {
-            background-position: -70px 0;
-        }
-    }
-    
-    .social-button {
-        background: url(/assets/img/index/social_sprite@2x.png) no-repeat;
-        width:  40px;
-        height: 40px;
-    }
-    
-    .social-button-twitter {
-        .social-button-template(0, -44px);
-    }
-    
-    .social-button-facebook {
-        .social-button-template(1, -44px);
-    }
-    
-    .social-button-google {
-        .social-button-template(2, -44px);
-    }
-    
-    .launcher-icon-button {
-        background: url(/assets/img/index/launchericon_sprite@2x.png) no-repeat;
-        width:  128px;
-        height: 128px;
-        
-        &:hover, &:active {
-            background-position: -132px 0;
-        }
-    }
-    
-    .play-video-button-small {
-        background: url(/assets/img/index/playbutton_small_sprite@2x.png) no-repeat;
-        display: block;
-        
-        width:  80px;
-        height: 80px;
-        
-        &:hover, &:active {
-            background-position: -84px 0;
-        }
-    }
-    
-    .play-video-button-large {
-        background: url(/assets/img/index/playbutton_large_sprite@2x.png) no-repeat;
-        display: block;
-        
-        width:  128px;
-        height: 128px;
-        
-        &:hover, &:active {
-            background-position: -132px 0;
-        }
-    }
-    
-    .bieber-video-preview-icon {
-        background: url(/assets/img/index/bieberlittle@2x.gif) no-repeat;
-        width:  90px;
-        height: 90px;
-    }
-    
-    #category-illustration {
-        background: url(/assets/img/index/illustration@2x.png) no-repeat;
-        width:  746px;
-        height: 168px;
-    }
-    
-    .third-party-logo {
-        background: url(/assets/img/index/thirdparties_sprite@2x.png) no-repeat;
-        display: block;
-        
-        width:  108px;
-        height: 48px;
-    }
-    
-    .third-party-logo-spotify {
-        .third-party-logo-template(0, -112px);
-    }
-
-    .third-party-logo-rdio {
-        .third-party-logo-template(1, -112px);
-    }
-
-    .third-party-logo-netflix {
-        .third-party-logo-template(2, -112px);
-    }
-
-    .third-party-logo-fandango {
-        .third-party-logo-template(3, -112px);
-    }
-
-    .third-party-logo-opentable {
-        .third-party-logo-template(4, -112px);
-    }
 }
 
