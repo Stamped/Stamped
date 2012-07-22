@@ -718,38 +718,18 @@ body.main {
     pointer-events: auto;
 }
 
-/*@-webkit-keyframes -webkit-iphone-lighting-animation {
-    0%   { background-position: 75px 0; }
-    100% { background-position: -1245px 0; }
-}*/
-
 .iphone-body-lighting {
     position: absolute;
-    top:  0;
-    left: 50%;
-    margin-left: (-144.5px);
+    top:   0;
+    right: 0;
     
-    background: url(/assets/img/index/iphone_sprite.png) no-repeat;
-    //background: url(/assets/img/index/iphone_main_lighting_0.png) no-repeat;
-    background-position: -452px 0;
-    opacity: 0.3;
+    background: url(/assets/img/index/iphone_shine@2x.png) no-repeat;
     
-    width:  289px;
+    width:  288px;
     height: 564px;
     
-    //.transition(background-position, 0.3s, ease-out);
     pointer-events: none;
-    
-    /*-webkit-animation-name:             -webkit-iphone-lighting-animation;
-    -webkit-animation-iteration-count:  infinite;
-    -webkit-animation-timing-function:  linear;
-    //-webkit-animation-direction:        alternate;
-    -webkit-animation-duration:         15s;*/
 }
-
-/*.iphone-body-lighting-1 {
-    -webkit-animation-delay:            7.5s;
-}*/
 
 .iphone-body-overlay {
     position: absolute;
@@ -805,12 +785,12 @@ body.main {
     }
     
     .iphone-inbox-body {
-        background: url(/assets/img/index/iphone_main_inbox_body.png) no-repeat;
+        background: url(/assets/img/index/iphone_main_inbox_body.jpg) no-repeat;
         width:  100%;
         height: 365px;
         
         position: absolute;
-        top:  0;
+        top:  51px;
         left: 0;
     }
     
@@ -838,14 +818,7 @@ body.main {
 
 .iphone-screen-sdetail {
     .iphone-screen-sdetail-0 {
-        background: url(/assets/img/index/iphone_main_sdetail_0.png) no-repeat;
-        height: 100%;
-        
-        display: none;
-    }
-    
-    .iphone-screen-sdetail-1 {
-        background: url(/assets/img/index/iphone_main_sdetail_1.png) no-repeat;
+        background: url(/assets/img/index/iphone_main_sdetail_0.jpg) no-repeat;
         height: 100%;
         
         display: none;
@@ -854,7 +827,7 @@ body.main {
 
 .iphone-screen-guide {
     .iphone-screen-guide-0 {
-        background: url(/assets/img/index/iphone_main_guide_0.png) no-repeat;
+        background: url(/assets/img/index/iphone_main_guide_0.jpg) no-repeat;
         height: 100%;
         
         display: none;
@@ -900,8 +873,6 @@ body.main {
     }
 }
 
-//.iphone-screen-active-inbox + .iphone-body-lighting-0 { }
-
 .iphone-screen-active-sdetail {
     .iphone-screen-inbox {
         left: -244px !important;
@@ -916,8 +887,6 @@ body.main {
     }
 }
 
-//.iphone-screen-active-sdetail + .iphone-body-lighting-0 { }
-
 .iphone-screen-active-guide {
     .iphone-screen-inbox {
         left: -244px !important;
@@ -931,8 +900,6 @@ body.main {
         left: 0 !important;
     }
 }
-
-//.iphone-screen-active-guide + .iphone-body-lighting-0 { }
 
 #retina {
     #main-iphone {

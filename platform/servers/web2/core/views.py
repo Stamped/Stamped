@@ -17,7 +17,7 @@ from servers.web2.core.helpers      import *
 
 # TODO: stricter input schema validation
 
-TRAVIS = True
+TRAVIS = False
 import travis_test
 
 @stamped_view()
