@@ -970,7 +970,26 @@ quotes: "\201C" "\201D";
 }
 
 .stamp-gallery-loading {
-    margin: 2em auto;
+    margin: 2em auto 0;
+}
+
+.empty-stamps {
+    background: url(/assets/img/nostamps.png) no-repeat;
+    display: none;
+    
+    margin: .5em auto;
+    
+    width:  115px;
+    height: 115px;
+}
+
+#retina {
+    .empty-stamps {
+        background: url(/assets/img/nostamps@2x.png) no-repeat;
+        
+        width:  230px;
+        height: 230px;
+    }
 }
 
 
@@ -980,7 +999,11 @@ quotes: "\201C" "\201D";
 
 
 .wide-gallery, .narrow-gallery {
-    width: 110%;
+    width: 100%;
+    
+    .stamps {
+        width: 110%;
+    }
     
     .stamp-gallery-item {
         width:   340px;
