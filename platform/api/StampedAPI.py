@@ -72,7 +72,7 @@ try:
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
 
-    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
+    # from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -1750,7 +1750,7 @@ class StampedAPI(AStampedAPI):
 
     def updateAutoCompleteIndexAsync(self):
         return ## TEMP
-        pushNewIndexToS3()
+        # pushNewIndexToS3()
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):
