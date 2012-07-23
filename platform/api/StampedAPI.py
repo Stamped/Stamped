@@ -5142,10 +5142,7 @@ class StampedAPI(AStampedAPI):
             raise StampedUnavailableError("Entity not found")
 
         if entity_id is None:
-            entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
-            for proxy in proxies[1:]:
-                entityBuilder.addSource(EntityProxySource(proxy))
-            entity = entityBuilder.buildEntity()
+            entity = EntityProxyContainer.EntityProxyContainer().addAllProxies(proxies).buildEntity()
             entity.third_party_ids = id_components
 
             entity = self._entityDB.addEntity(entity)
@@ -5392,8 +5389,7 @@ class StampedAPI(AStampedAPI):
         if entity_id is not None:
             pass
         elif source_id is not None and proxy is not None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-            entity = entityProxy.buildEntity()
+            entity = EntityProxyContainer.EntityProxyContainer().addProxy(proxy).buildEntity()
         else:
             return None
 
@@ -5434,12 +5430,13 @@ class StampedAPI(AStampedAPI):
         # We therefore can't rely on full enrichment to correctly pick up the data from those
         # sources. That is why we make sure we incorporate the data from the proxy here, either by
         # building a new entity or enriching an existing one.
-        entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
         if entity_id is None:
-            entity = entityProxy.buildEntity()
+            entity = EntityProxyContainer.EntityProxyContainer().addProxy(proxy).buildEntity()
         else:
             entity = self._entityDB.getEntity(entity_id)
-            entityProxy.enrichEntity(entity, {})
+            sourceContainer = BasicSourceContainer()
+            sourceContainer.addSource(EntityProxySource(proxy))
+            sourceContainer.enrichEntity(entity, {})
         self.mergeEntity(entity)
 
     """

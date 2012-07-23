@@ -264,11 +264,8 @@ class EntitySearch(object):
         # So this is ugly, but it's pretty common for two listings to have the same or virtually the same data quality
         # and using relevance as a tie-breaker is really helpful.
         filteredResults.sort(key=lambda r: (r.dataQuality + (r.relevance / 10.0), r.resolverObject.source, r.resolverObject.key), reverse=True)
-        entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
-        for result in filteredResults[1:]:
-            # TODO PRELAUNCH: Only use the best result from each source.
-            entityBuilder.addSource(EntityProxySource(result.resolverObject))
-        entity = entityBuilder.buildEntity()
+        # TODO PRELAUNCH: Only use the best result from each source.
+        entity = EntityProxyContainer().addAllProxies(result.resolverObject for result in filteredResults).buildEntity()
         for result in filteredResults:
             entity.addThirdPartyId(result.resolverObject.source, result.resolverObject.key)
         return entity
