@@ -37,7 +37,7 @@ class EntityProxyContainer(object):
         if entity.isType('book'):
             entity.title = self.__chooseBookTitle()
         else:
-            entity.title = self.__proxy.name
+            entity.title = primaryProxy.__proxy.name
 
         sourceContainer = BasicSourceContainer()
         for proxy in self.__proxies:
