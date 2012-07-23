@@ -6,7 +6,6 @@
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
-        script: libs/jquery.hotkeys.js
         script: libs/jquery.fancybox.js
         script: libs/jquery.fittext.js
         script: libs/jquery.event.drag.js
@@ -164,11 +163,13 @@
                 
                 <div id="pane-nav">
                     <ol>
+                        <li><a class="pane-nav-arrow pane-nav-arrow-up"></a></li>
                         <li><a href="#pane-0" id="pane-nav-0" class="pane-nav-button"></a></li>
                         <li><a href="#pane-1" id="pane-nav-1" class="pane-nav-button"></a></li>
                         <li><a href="#pane-2" id="pane-nav-2" class="pane-nav-button"></a></li>
                         <li><a href="#pane-3" id="pane-nav-3" class="pane-nav-button"></a></li>
                         <li><a href="#pane-4" id="pane-nav-4" class="pane-nav-button"></a></li>
+                        <li><a class="pane-nav-arrow pane-nav-arrow-down"></a></li>
                     </ol>
                 </div>
                 
@@ -189,7 +190,7 @@
                                 </p>
                                 
                                 <p>
-                                    Everyone gets a limited number of stamps to start, so you’ll discover only the best recommendations from people you trust. Try it out, it’s free!
+                                    Everyone gets a limited number of stamps to start, so you’ll discover only the best. Try it out, it’s free!
                                 </p>
                             </div>
                             
@@ -409,7 +410,6 @@
     {{ block.super }}
     
     {% if STAMPED_DEBUG %}
-        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.hotkeys.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fittext.js"></script>

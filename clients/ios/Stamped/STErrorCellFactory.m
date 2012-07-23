@@ -29,7 +29,7 @@ static STErrorCellFactory* _sharedInstance;
 }
 
 - (CGFloat)cellHeightForTableView:(UITableView*)tableView data:(id)data andStyle:(NSString*)style {
-  return 100;
+  return tableView.frame.size.height;
 }
 
 - (CGFloat)loadingCellHeightForTableView:(UITableView*)tableView andStyle:(NSString*)style {

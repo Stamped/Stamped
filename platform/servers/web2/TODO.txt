@@ -43,39 +43,25 @@
 
 TODO:
     * HIGH PRIORITY:
-        * profile
-            * DONE - header get-the-app button & texting functionality
-            * PUNT - sign-up & login via facebook or stamped
-                * PUNT - ASK anthony about sign-up, login, vs. get-the-app
-            * BETA - layout adjustments to gallery view
-            * navbar occasional missing graphics
         * misc:
-            * DONE - replace font usage w/ self-hosting option
-                * TEST
-            * retina display support & testing
-            * create 3 unique links => stamped.com
+            * get-the-app popup
+                * add "don't have an iphone" treatment
+            * test retina display support
+        * profile
+            * 
         * stamped.com
-            * DONE - replace intro hero font with skyline font
+            * misc:
+                * polish speech bubble to point to bieber
+                * test play button box-shadow infinite animation
             * subpages
                 * basic 404 page
-                    * cool 404 page w/ circle animation
+                    * cool 404 page w/ animation
                     * http://support.google.com/webmasters/bin/answer.py?hl=en&answer=136085&from=93644&rd=1
                 * basic 5XX page
                 * legal page
                 * jobs page
     
-    * stamped.com:
-        * intro:
-            * DONE - FIX ESC skips intro animation
-        * main:
-            * iphone:
-                * DONE - ADD SHADOWS
-                * DONE - move shadow & phone above other page content
-            * pane 3 (tastemakers):
-                * DONE - blue border on active tastemaker's image
-            * pane 4 (videos):
-                * get v1 video preview asset image
-    
+    * navbar occasional missing graphics
     * blurred FUCK MEDIOCRITY easter egg w/ f hotkey?
     /* Stop breaking my iphone font size! */
     div, p, a, li, td { -webkit-text-size-adjust:none; }
@@ -87,12 +73,12 @@ TODO:
     * optimization:
         * !!! Get static assets working when DEBUG=False !!!
         * http://developer.yahoo.com/performance/rules.html
-        * combine & minify JS, CSS, & HTML
+        * DONE - combine & minify JS, CSS, & HTML
         * test hosting assets on cloudfront
         * gzip components
         * configure ETags and cache expiration headers
         * ensure favicon.ico is optimized and cacheable
-        * address 301 / 304 redirect inefficiency for static assets
+        * DONE - address 301 / 304 redirect inefficiency for static assets
         * CSS:
             * http://css-tricks.com/efficiently-rendering-css/
             * https://developers.google.com/speed/docs/best-practices/rendering
@@ -275,6 +261,22 @@ OLD:
         * USED: stamp-map-item and social-feedback
     * incorporate versioning into asset management
         * styles.vXXX.css
+    * DONE - header get-the-app button & texting functionality
+    * PUNT - sign-up & login via facebook or stamped
+        * PUNT - ASK anthony about sign-up, login, vs. get-the-app
+    * DONE - layout adjustments to gallery view
+    * DONE - replace intro hero font with skyline font
+    * DONE - replace font usage w/ self-hosting option
+    * stamped.com
+        * intro:
+            * DONE - FIX ESC skips intro animation
+        * iphone:
+            * DONE - ADD SHADOWS
+            * DONE - move shadow & phone above other page content
+        * pane 3 (tastemakers):
+            * DONE - blue border on active tastemaker's image
+        * pane 4 (videos):
+            * get v1 video preview asset image
 
 ChangeList 6/8/2012:
 -------------------

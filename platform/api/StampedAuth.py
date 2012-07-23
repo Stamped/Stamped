@@ -189,6 +189,7 @@ class StampedAuth(AStampedAuth):
 
         # TODO: remove repetitious code here (same as api.getAccountByTwitterId()
         accounts = self._accountDB.getAccountsByTwitterId(tw_user['id'])
+        logs.info('### verifyTwitterUserCredentials')
         if len(accounts) == 0:
             raise StampedAccountNotFoundError("Unable to find account with twitter_id: %s" % tw_user['id'])
         elif len(accounts) > 1:
@@ -213,6 +214,10 @@ class StampedAuth(AStampedAuth):
         token = self.addRefreshToken(clientId, account.user_id)
 
         logs.info("Token created")
+
+        ### Update linked account
+        logs.info('account: %s' % account)
+        self._accountDB.updateLinkedAccount(account.user_id, account.linked.twitter)
 
         return account, token
 

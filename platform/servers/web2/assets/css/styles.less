@@ -120,19 +120,20 @@ header {
      
     .header-body {
         position: relative;
-        height: 64px;
+        height: 76px;
         
         p {
             position: absolute;
             line-height: 42px;
-            
-            margin: 0;
-            top:    0;
-            right:  12px;
             white-space: nowrap;
             
+            color: #888;
+            margin: 0;
+            top:    8px; // -2px
+            right:  12px;
+            
             .desc {
-                font-size: 90%;
+                font-size: 85%;
                 margin-right: 12px;
             }
             
@@ -587,8 +588,8 @@ header {
     .transition-rounded(0.3s, ease-out);
     
     .desc {
-        font-size: 80%;
-        font-weight: 700;
+        font-size: 85%;
+        font-weight: 400;
         white-space: nowrap;
         color: #333;
     }
@@ -634,7 +635,18 @@ a.sdetail, .pronounced-title a {
 
 .screen-name {
     text-transform: lowercase;
+    
+    color: #333;
+    
+    &:hover {
+        color: #0855C0;
+    }
+    
+    &:active {
+        color: lighten(#0855C0, 10%);
+    }
 }
+
 
 .pronounced-title a, a.pronounced-title {
     color: #262626;
@@ -646,6 +658,7 @@ a.sdetail, .pronounced-title a {
     .stamped-font();
     
     font-size: 2.8em;
+    font-weight: 200;
     letter-spacing: .05em;
     color: #262626;
 }
@@ -658,7 +671,7 @@ a.sdetail, .pronounced-title a {
     top:  -32px;
     left: -16px;
     
-    font: bold .9em;
+    font: bold 85%;
     padding: 8px;
     line-height: 100%;
     white-space: nowrap;
@@ -666,7 +679,7 @@ a.sdetail, .pronounced-title a {
     background: rgba(10, 10, 10, 0.75);
     color: #fff;
     
-    .rounded(4px);
+    .rounded(2px);
 }
 
 .close-button {
@@ -809,13 +822,16 @@ a.sdetail, .pronounced-title a {
         .pronounced-title {
             line-height: 100%;
             margin-bottom: 0;
+            padding-top: 15px;
             padding-bottom: 0;
         }
     }
     
     .popup-body {
         padding: 0 @popup-padding;
-        font-size: 90%;
+        font-size: 85%;
+        color: #999;
+        margin-bottom: 15px;
         
         p {
             margin: .5em 0;
@@ -823,30 +839,38 @@ a.sdetail, .pronounced-title a {
         
         .sms {
             position: relative;
-            border: 2px solid #AAA;
+            border: 1px solid #bfbfbf;
             margin: 0 auto;
             width: 70%;
             line-height: 31px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
             
             padding: 6px 12px;
             .rounded(4px);
             
             input {
-                text-align: left;
-                padding: 0;
+                text-align: center;
+                font-weight: 200;
+                font-size: 140%;
                 
-                color: #AAA;
+                margin-left: 52px;
+                margin-top: 8px;
+                
                 border: 0 none;
                 outline: none;
                 
                 &:focus {
                     border: 0 none;
                     outline: none;
-                    color: #1A60C3;
+                    color: #498ff2;
+
                 }
             }
             
             .send-button {
+                position: relative;
+                top: 4px;
+                
                 float: right;
                 opacity: .3;
                 
@@ -860,7 +884,7 @@ a.sdetail, .pronounced-title a {
         }
         
         .active {
-            border-color: #1A60C3;
+            border-color: #498ff2;
         }
         
         .error {
@@ -869,14 +893,23 @@ a.sdetail, .pronounced-title a {
         }
         
         .or {
-            margin-top: .5em;
+            margin-top: 15px;
+            margin-bottom: 15px;
             
             .dotted-left, .dotted-right {
                 display: inline-block;
-                width: 25%;
-                height: .5em;
-                padding-top: .5em;
-                border-bottom: 2px dotted #AAA;
+                width: 125px;
+                height: 1em;
+            }
+            
+            .dotted-left {
+                background: url(/assets/img/dottedline.png) repeat-x top right;
+                margin-right: 1em;
+            }
+            
+            .dotted-right {
+                background: url(/assets/img/dottedline.png) repeat-x top left;
+                margin-left: 1em;
             }
         }
     }

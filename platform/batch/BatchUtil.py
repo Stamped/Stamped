@@ -105,6 +105,9 @@ def processBatch(handler, query=None, output=None, offset=0, limit=None, thread_
         sequentially on the calling thread.
 
     """
+    #if no output function is provided, write back to collection using outputToCollection()
+    if output is None:
+        output = outputToCollection
     kwargs = {} # additional find() parameters
 
     # if not shuffling, use built in limit/offset support in query

@@ -217,6 +217,8 @@ class RdioGroup(AKindTypeGroup):
 
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.rdio_id = proxy.key
+        if hasattr(proxy, 'url'):
+            entity.sources.rdio_url = proxy.url
     
 
 class TheTVDBGroup(AKindTypeGroup):

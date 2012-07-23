@@ -9,7 +9,7 @@
 }
 
 .user-gradient-func(@angle: 135deg, @a: 50%) {
-    .user-gradient-func2(@angle, fade(@primary, @a), fade(@secondary, @a));
+    .user-gradient-func2(@angle, fade(@secondary, @a), fade(@primary, @a));
 }
 
 .tastemaker-logo-{{screen_name}} {

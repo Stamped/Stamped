@@ -605,6 +605,7 @@
             if (stamp_id !== null) {
                 if (lite) {
                     var stamp = get_stamp(stamp_id);
+                    
                     if (!!stamp && !!stamp.url && parent.frames.length > 0) {
                         var url = stamp.url.replace('http://www.stamped.com', '');
                         
@@ -688,6 +689,23 @@
                     queue    : false
                 });
             };
+        } else {
+            var handle_lite_link = function(event) {
+                var url = $(this).attr("href");
+                
+                if (!!url && parent.frames.length > 0) {
+                    event.preventDefault();
+                    
+                    top.location = url;
+                    return false;
+                } else {
+                    return true;
+                }
+            };
+            
+            $(".profile-image-medium-ish").click(handle_lite_link);
+            $(".screen-name").click(handle_lite_link);
+            $(".user-logo-large").click(handle_lite_link);
         }
         
         

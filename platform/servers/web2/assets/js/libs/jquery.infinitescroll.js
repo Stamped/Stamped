@@ -1,4 +1,4 @@
-/*
+/*!
 	--------------------------------
 	Infinite Scroll
 	--------------------------------
@@ -8,20 +8,17 @@
 	+ Licensed under the MIT license
 	
 	+ Documentation: http://infinite-scroll.com/
-	
 */
 
 (function (window, $, undefined) {
 	
 	$.infinitescroll = function infscr(options, callback, element) {
-		
 		this.element = $(element);
 		
-                // Flag the object in the event of a failed creation
+        // Flag the object in the event of a failed creation
 		if (!this._create(options, callback)) {
-                  this.failed = true;
-                }
-	
+            this.failed = true;
+        }
 	};
 	
 	$.infinitescroll.defaults = {
@@ -141,7 +138,9 @@
 
             // distance from nav links to bottom
             // computed as: height of the document + top offset of container - top offset of nav link
-            opts.pixelsFromNavToBottom = $(document).height() - $(opts.navSelector).offset().top;
+            // NOTE (travis): the following line has been changed from the original infinite-scroll logic 
+            // to triage a bug pre-v2-launch
+            opts.pixelsFromNavToBottom = 48; //$(document).height() - $(opts.navSelector).offset().top;
 
 			// determine loading.start actions
             opts.loading.start = opts.loading.start || function() {
@@ -674,19 +673,17 @@
         return this;
 
     };
-
-
-
+    
     /* 
-    * smartscroll: debounced scroll event for jQuery *
-    * https://github.com/lukeshumard/smartscroll
-    * Based on smartresize by @louis_remi: https://github.com/lrbabe/jquery.smartresize.js *
-    * Copyright 2011 Louis-Remi & Luke Shumard * Licensed under the MIT license. *
-    */
-
+     * smartscroll: debounced scroll event for jQuery *
+     * https://github.com/lukeshumard/smartscroll
+     * Based on smartresize by @louis_remi: https://github.com/lrbabe/jquery.smartresize.js *
+     * Copyright 2011 Louis-Remi & Luke Shumard * Licensed under the MIT license. *
+     */
+    
     var event = $.event,
 		scrollTimeout;
-
+    
     event.special.smartscroll = {
         setup: function () {
             $(this).bind("scroll", event.special.smartscroll.handler);
@@ -708,10 +705,9 @@
             }, execAsap === "execAsap" ? 0 : 100);
         }
     };
-
+    
     $.fn.smartscroll = function (fn) {
         return fn ? this.bind("smartscroll", fn) : this.trigger("smartscroll", ["execAsap"]);
     };
-
-
 })(window, jQuery);
+

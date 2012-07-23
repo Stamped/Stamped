@@ -33,18 +33,18 @@ class MongoGuideCollection(AMongoCollection):
 
     def checkIntegrity(self, key, repair=False, api=None):
         """
-        Check a stamp's stats to verify the following things:
+        Check a cached guide to verify the following things:
 
-        - Stamp still exists 
+        - User still exists 
 
-        - Stats are not out of date 
+        - Guide is not out of date 
 
         """
 
         regenerate = False
         document = None
 
-        # Remove stat if user no longer exists
+        # Remove if user no longer exists
         if self._collection._database['users'].find({'_id': key}).count() == 0:
             msg = "%s: User no longer exists"
             if repair:
@@ -54,11 +54,11 @@ class MongoGuideCollection(AMongoCollection):
             else:
                 raise StampedDataError(msg)
         
-        # Verify stat exists
+        # Verify guide exists
         try:
             document = self._getMongoDocumentFromId(key)
         except StampedDocumentNotFoundError:
-            msg = "%s: Stat not found" % key
+            msg = "%s: Guide not found" % key
             if repair:
                 logs.info(msg)
                 regenerate = True
@@ -74,11 +74,11 @@ class MongoGuideCollection(AMongoCollection):
             else:
                 raise StampedDataError(msg)
 
-        # Check if stats are stale
+        # Check if guide is stale
         elif document is not None and 'timestamp' in document:
             generated = document['timestamp']['generated']
             if generated < datetime.utcnow() - timedelta(days=2):
-                msg = "%s: Stale stats" % key
+                msg = "%s: Stale guide" % key
                 if repair:
                     logs.info(msg)
                     regenerate = True 
@@ -90,7 +90,7 @@ class MongoGuideCollection(AMongoCollection):
             if api is not None:
                 api.buildGuideAsync(str(key))
             else:
-                raise Exception("%s: API required to regenerate stats" % key)
+                raise Exception("%s: API required to regenerate guide" % key)
 
         return True
     

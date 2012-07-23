@@ -34,13 +34,16 @@
 
 @end
 
-@interface LoginViewController ()
+@interface LoginViewController () <UIAlertViewDelegate>
+
+@property (nonatomic, readwrite, assign) NSInteger failedAttempts;
 
 @end
 
 @implementation LoginViewController
 @synthesize loading=_loading;
 @synthesize delegate;
+@synthesize failedAttempts = _failedAttempts;
 
 - (id)init {
     
@@ -79,7 +82,7 @@
         UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
         [self.view addSubview:corner];
         [corner release];
-       
+        
         corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_right.png"]];
         [self.view addSubview:corner];
         [corner release];
@@ -89,7 +92,7 @@
         corner.frame = frame;
         
     }
-
+    
     if (!_textView) {
         LoginTextView *view = [[LoginTextView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height - (216.0f+44.0f), self.view.bounds.size.width, 44.0f)];
         view.delegate = self;
@@ -99,7 +102,7 @@
         _textView = view;
     }
     
-
+    
 }
 
 - (void)viewDidUnload {
@@ -142,7 +145,7 @@
     [window.layer addAnimation:animation forKey:nil];
     
     [CATransaction commit];
-        
+    
 }
 
 - (void)animateOut {
@@ -173,7 +176,7 @@
     _stampedImageView.layer.position = toPos;
     [CATransaction commit];
     
-
+    
 }
 
 
@@ -184,15 +187,18 @@
     NSString* login = [_textView username];
     NSString* password = [_textView password];
     [[STStampedAPI sharedInstance] loginWithScreenName:login password:password andCallback:^(id<STLoginResponse> response, NSError *error, STCancellation *cancellation) {
-
+        
         [self setLoading:NO];
-
+        
         if (error) {
-            [Util warnWithAPIError:error andBlock:^{
-                [_textView setEditing:YES];  
-            }];
-            
-        } else {
+            UIAlertView* alertView = [[[UIAlertView alloc] initWithTitle:@"Couldn't Log In"
+                                                                 message:@"The username and password you entered don't match."
+                                                                delegate:self
+                                                       cancelButtonTitle:@"Reset password"
+                                                       otherButtonTitles:@"      OK      ", nil] autorelease];
+            [alertView show];
+        }
+        else {
             
             [self animateOut];
             
@@ -202,16 +208,23 @@
     
 }
 
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == alertView.cancelButtonIndex) {
+        NSURL* url = [NSURL URLWithString:@"http://www.stamped.com/settings/password/forgot"];
+        [[UIApplication sharedApplication] openURL:url];
+    }
+    [_textView setEditing:YES];  
+}
 
 #pragma mark - Setters
 
 - (void)setLoading:(BOOL)loading {
     _loading = loading;
-
+    
     if (_loading) {
         
         [UIView animateWithDuration:0.3f animations:^{
-           
+            
             CGRect frame = _stampedImageView.frame;
             frame.origin.y = 0.0f;
             _stampedImageView.frame = frame;
@@ -219,7 +232,7 @@
         }];
         
         if (!_loadingView) {
-
+            
             LoginLoadingView *view = [[LoginLoadingView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height-82.0f, self.view.bounds.size.width, 60.0f)];
             [self.view addSubview:view];
             [view release];
@@ -257,7 +270,7 @@
         frame = _textView.frame;
         frame.origin.y = (self.view.bounds.size.height - (keyboardFrame.size.height+_textView.bounds.size.height));
         _textView.frame = frame;
-
+        
     }];
     
 }
@@ -269,7 +282,7 @@
     }
     
     [UIView animateWithDuration:0.25f animations:^{
-       
+        
         CGRect frame = _textView.frame;
         frame.origin.y = self.view.bounds.size.height;
         _textView.frame = frame;
@@ -298,7 +311,7 @@
 }
 
 - (void)cancel:(LoginTextView*)view {
-   
+    
     _animatingOut = YES;
     self.view.backgroundColor = [UIColor clearColor];
     
@@ -309,7 +322,7 @@
             break;
         }
     }
-
+    
     CGRect frame = window.frame;
     
     [UIView animateWithDuration:inOutAnimationDuration animations:^{
@@ -329,7 +342,7 @@
         window.frame = frame;
         
     } completion:^(BOOL finished) {
-       
+        
         BOOL _enabled = [UIView areAnimationsEnabled];
         [UIView setAnimationsEnabled:NO];
         window.frame = frame;
@@ -342,7 +355,7 @@
         
     }];
     
-
+    
 }
 
 @end
@@ -354,7 +367,7 @@
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
-                
+        
         self.backgroundColor = [UIColor clearColor];
         
         UIImageView *imageView = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"login_text_bg.png"] stretchableImageWithLeftCapWidth:1.0f topCapHeight:0.0f]];
@@ -426,7 +439,7 @@
         [_username becomeFirstResponder];
         
     } else {
-    
+        
         if (_loginButton) {
             [_loginButton removeFromSuperview], _loginButton=nil;
         }
@@ -528,7 +541,7 @@
             _loginButton = button;
             
         }
-
+        
     } 
     
 }
@@ -600,7 +613,7 @@
     
     image = [UIImage imageNamed:@"login_keyboard_btn_disabled.png"];
     [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateDisabled];
-
+    
     button.frame = CGRectMake(0.0f, 300.0f, 100.0f, image.size.height);
     
     return button;
