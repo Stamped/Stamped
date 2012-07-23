@@ -42,7 +42,7 @@ try:
     from api.AActivityDB                import AActivityDB
     from api.Schemas                import *
     from api.ActivityCollectionCache    import ActivityCollectionCache
-    from libs.Memcache                   import globalMemcache
+    from libs.Memcache                   import globalMemcache, generateKeyFromDictionary
     from api.HTTPSchemas                import generateStampUrl
 
     from crawler.RssFeedScraper     import RssFeedScraper
@@ -2238,7 +2238,6 @@ class StampedAPI(AStampedAPI):
             stampIds[stamp.stamp_id] = stamp
 
         stats = self.getStampStats(stampIds.keys())
-        # stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
 
         logs.debug('Time for getStatsForStamps: %s' % (time.time() - t1))
         t1 = time.time()
@@ -3578,7 +3577,7 @@ class StampedAPI(AStampedAPI):
             if timeSlice.before is not None:
                 start = timeSlice.before
 
-            key = str("fn::StampedAPI.getStampCollection::{scope:popular,limit:%s,before:%s}" % (limit, start.isoformat()))
+            key = str("fn::StampedAPI.getStampCollection::%s" % generateKeyFromDictionary(timeSlice.dataExport()))
 
             try:
                 stampIds = self._cache[key]
