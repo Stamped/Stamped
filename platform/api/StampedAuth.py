@@ -215,6 +215,9 @@ class StampedAuth(AStampedAuth):
 
         logs.info("Token created")
 
+        ### Update linked account
+        #self._accountDB.updateLinkedAccount(account.user_id, account.linked.twitter)
+
         return account, token
 
     
