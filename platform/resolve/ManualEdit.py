@@ -211,7 +211,7 @@ def update(updates):
         entity.sources.spotify_timestamp = now
     amazon_url = updates.amazon_url
     if amazon_url is not None and amazon_url not in bad_versions:
-        amazon_id = re.match(r'http://www.amazon.com(/.+)+/dp/([A-Za-z0-9]+)/(.+)?(\?.+)?',a).group(2)
+        amazon_id = re.match(r'http://www.amazon.com(/.+)+/dp/([A-Za-z0-9]+)/(.+)?(\?.+)?', amazon_url).group(2)
         entity.sources.amazon_id = amazon_id
         entity.sources.amazon_url = amazon_url
         entity.sources.amazon_source = 'seed'
