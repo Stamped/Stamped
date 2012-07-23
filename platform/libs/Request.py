@@ -52,7 +52,11 @@ class RateLimiterState(object):
         self.__emails = deque()
 
         # determine the private ip address of the ratelimiter instance for this stack
-        ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
+        ratelimiter_nodes = None
+        try:
+            ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
+        except:
+            pass
         if ratelimiter_nodes is None or len(ratelimiter_nodes) != 1:
             logs.error("Could not find a node with tag 'ratelimiter' on same stack")
             self.__host = 'localhost'
