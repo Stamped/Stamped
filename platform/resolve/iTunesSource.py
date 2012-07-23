@@ -1011,7 +1011,7 @@ class iTunesSource(GenericSource):
             'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
             'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
             'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch),
-            'ebook' : (applyBookTitleDataQualityTests, adjustBookRelevanceByQueryMatch),
+            'ebook' : (applyBookDataQualityTests, adjustBookRelevanceByQueryMatch),
         }
 
         if iTunesType in iTunesTypesToWeights:

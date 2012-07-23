@@ -64,32 +64,32 @@ class TitleUtilsTest(AStampedTestCase):
         self.__check_quality_tests_applied(
                 'Stamped: super edition book 2 of something trilogy',
                 'stamped',
-                applyBookTitleDataQualityTests,
+                applyBookDataQualityTests,
                 0.75 * 0.75 * 0.9)
         self.__check_quality_tests_applied(
                 'Stamped: super edition book 2 of something trilogy',
                 'trilogy',
-                applyBookTitleDataQualityTests,
+                applyBookDataQualityTests,
                 0.75 * 0.75)
         self.__check_quality_tests_applied(
                 'Stamped: super edition book 2 of something trilogy',
                 'book 2 trilogy',
-                applyBookTitleDataQualityTests,
+                applyBookDataQualityTests,
                 0.75)
         self.__check_quality_tests_applied(
                 'Stamped: the complete book collection',
                 'book 2 trilogy',
-                applyBookTitleDataQualityTests,
+                applyBookDataQualityTests,
                 0.75 * 0.9)
         self.__check_quality_tests_applied(
                 'Stamped: boxed set',
                 'stamped',
-                applyBookTitleDataQualityTests,
+                applyBookDataQualityTests,
                 0.75 * 0.75)
         self.__check_quality_tests_applied(
                 'Stamped: boxed set',
                 'boxed',
-                applyBookTitleDataQualityTests,
+                applyBookDataQualityTests,
                 0.75)
 
     def test_movie_title_quality(self):

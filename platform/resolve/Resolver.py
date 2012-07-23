@@ -146,7 +146,7 @@ class Resolver(object):
             applyMovieTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
         elif subcat == 'book':
             augmentBookDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
-            applyBookTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+            applyBookDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
         elif subcat == 'place':
             augmentPlaceDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
             applyPlaceTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)

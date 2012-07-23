@@ -1186,7 +1186,7 @@ class AmazonSource(GenericSource):
         self.__penalizeForMissingListPrice(searchResults)
         for searchResult in searchResults:
             adjustBookRelevanceByQueryMatch(searchResult, queryText)
-            applyBookTitleDataQualityTests(searchResult, queryText)
+            applyBookDataQualityTests(searchResult, queryText)
             if not searchResult.resolverObject.authors:
                 penaltyFactor = 0.2
                 searchResult.dataQuality *= penaltyFactor

@@ -430,8 +430,12 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
         exceptionQueryRegexps=(makeTokenRegexp('study'), makeTokenRegexp('guide'))),
 )
 
-def applyBookTitleDataQualityTests(searchResult, searchQuery):
+def applyBookDataQualityTests(searchResult, searchQuery):
     applyTitleTests(BOOK_TITLE_SUSPICIOUS_TESTS, searchResult, searchQuery)
+    for author in searchResult.resolverObject.authors:
+        if author['name'].lower().strip() == 'shmoop':
+            searchResult.dataQuality *= 0.5
+            searchResult.addDataQualityComponentDebugInfo('"shmoop" in author', 0.5)
 
 
 def isSuspiciousPrefixBookTitle(a, b):
