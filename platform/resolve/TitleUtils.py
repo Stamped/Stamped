@@ -398,9 +398,9 @@ def _makeSingleTokenSuspiciousTest(token, weight):
 BOOK_TITLE_SUSPICIOUS_TESTS = (
     TitleDataQualityRegexpTest(r'\bbest of\b', '"best of" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('best')),
-    TitleDataQualityRegexpTest(r'\bbook\s+\d', '"book #" in title', 0.25,
+    TitleDataQualityRegexpTest(r'\bbooks?\s+\d', '"book #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('book')),
-    TitleDataQualityRegexpTest(r'\bvolume\s+\d', '"volume #" in title', 0.25,
+    TitleDataQualityRegexpTest(r'\bvolumes?\s+\d', '"volume #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('volume')),
     TitleDataQualityRegexpTest('\(', 'parenthesis in title', 0.1),
     TitleDataQualityRegexpTest('\[', 'bracket in title', 0.1),
