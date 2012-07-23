@@ -406,6 +406,7 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
     TitleDataQualityRegexpTest('\[', 'bracket in title', 0.1),
 
     _makeSingleTokenSuspiciousTest('audiobook', 0.4),
+    _makeSingleTokenSuspiciousTest('guide', 0.4),  # Study guide, learning guide, etc.
 
     _makeSingleTokenSuspiciousTest('audio', 0.25),
     _makeSingleTokenSuspiciousTest('box', 0.25),
