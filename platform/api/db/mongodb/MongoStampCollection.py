@@ -20,7 +20,6 @@ from api.db.mongodb.AMongoCollectionView               import AMongoCollectionVi
 from api.db.mongodb.MongoUserLikesCollection           import MongoUserLikesCollection
 from api.db.mongodb.MongoUserLikesHistoryCollection    import MongoUserLikesHistoryCollection
 from api.db.mongodb.MongoStampLikesCollection          import MongoStampLikesCollection
-from api.db.mongodb.MongoStampViewsCollection          import MongoStampViewsCollection
 from api.db.mongodb.MongoUserStampsCollection          import MongoUserStampsCollection
 from api.db.mongodb.MongoInboxStampsCollection         import MongoInboxStampsCollection
 from api.db.mongodb.MongoCreditGiversCollection        import MongoCreditGiversCollection
@@ -259,10 +258,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         return MongoStampLikesCollection()
     
     @lazyProperty
-    def stamp_views_collection(self):
-        return MongoStampViewsCollection()
-    
-    @lazyProperty
     def user_likes_collection(self):
         return MongoUserLikesCollection()
     
@@ -457,7 +452,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     
     def getStampFromUserStampNum(self, userId, stampNum):
         try:
-            ### TODO: Index
             stampNum = int(stampNum)
             document = self._collection.find_one({
                 'user.user_id': userId, 
@@ -560,13 +554,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             raise
         except Exception:
             return False
-    
-    def addView(self, userId, stampId):
-        self.stamp_views_collection.addStampView(stampId, userId)
-    
-    def getStampViews(self, stampId):
-        # Returns user ids that have viewed the stamp
-        return self.stamp_views_collection.getStampViews(stampId) 
     
     def removeStamps(self, stampIds):
         if stampIds is None or len(stampIds) == 0:

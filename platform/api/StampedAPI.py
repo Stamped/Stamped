@@ -3255,8 +3255,7 @@ class StampedAPI(AStampedAPI):
 
         repliedUserIds = set()
         # Add activity for previous commenters
-        ### TODO: Limit this to the last 20 comments or so
-        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
+        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id, limit=20):
             repliedUserId = prevComment.user.user_id
 
             if repliedUserId not in commentedUserIds.union(mentionedUserIds).union(repliedUserIds) \
@@ -3571,29 +3570,39 @@ class StampedAPI(AStampedAPI):
     def getStampCollection(self, timeSlice, authUserId=None):
         # Special-case "tastemakers"
         if timeSlice.scope == 'popular':
-            stampIds = []
             limit = timeSlice.limit
             if limit <= 0:
                 limit = 20
+
             start = datetime.utcnow() - timedelta(hours=3)
             if timeSlice.before is not None:
                 start = timeSlice.before
-            daysOffset = 0
-            while len(stampIds) < limit and daysOffset < 7:
-                """
-                Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
-                have enough stamps, it should check the previous day, with a max of one week.
-                """
-                before = start - timedelta(hours=(24*daysOffset))
-                since = before - timedelta(hours=24)
-                stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
-                daysOffset += 1
-            stampIds = stampIds[:limit]
+
+            key = str("fn::getStampCollection::{scope:popular,limit:%s,before:%s}" % (limit, start.isoformat()))
+
+            try:
+                stampIds = self._cache[key]
+
+            except KeyError:
+                stampIds = []
+                daysOffset = 0
+                while len(stampIds) < limit and daysOffset < 7:
+                    """
+                    Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
+                    have enough stamps, it should check the previous day, with a max of one week.
+                    """
+                    before = start - timedelta(hours=(24*daysOffset))
+                    since = before - timedelta(hours=24)
+                    stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
+                    daysOffset += 1
+                stampIds = stampIds[:limit]
+                try:
+                    self._cache.set(key, stampIds, time=(60*30))
+                except Exception as e:
+                    logs.warning("Unable to set cache for tastemakers: %s" % e)
 
         else:
-            t0 = time.time()
             stampIds = self._getScopeStampIds(timeSlice.scope, timeSlice.user_id, authUserId)
-            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
