@@ -750,7 +750,7 @@ static STRestKitLoader* _sharedInstance;
                                  password, @"password",
                                  nil]
                storeCredentials:^(id<STLoginResponse> response) {
-                   [self storeStampedScreenName:screenName andPassword:password];
+                   [self storeStampedScreenName:response.user.screenName andPassword:password];
                } andCallback:block];
 }
 

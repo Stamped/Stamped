@@ -157,10 +157,7 @@ class RunEvalResolutions(AStampedTestCase):
         if not proxies:
             raise Exception('Completely unable to create entity from search ID: ' + searchId)
 
-        entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
-        for proxy in proxies[1:]:
-            entityBuilder.addSource(EntityProxySource.EntityProxySource(proxy))
-        entity = entityBuilder.buildEntity()
+        entity = EntityProxyContainer.EntityProxyContainer().addAllProxies(proxies).buildEntity()
         entity.third_party_ids = id_components
         original = entity.dataExport()
 
