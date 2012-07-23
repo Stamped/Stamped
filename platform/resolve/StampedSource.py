@@ -465,7 +465,9 @@ class StampedSource(GenericSource):
 
     @lazyProperty
     def __entityDB(self):
-        if self._stamped_api:
+        # Must check for None here. StampedAPI extends greenlet, whose truth value means if it's
+        # active.
+        if self._stamped_api is not None:
             return self._stamped_api._entityDB
         return MongoEntityCollection()
         
