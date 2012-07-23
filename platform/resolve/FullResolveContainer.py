@@ -22,8 +22,6 @@ except:
     report()
     raise
 
-seedPriority = 100
-
 class FullResolveContainer(BasicSourceContainer):
     """
     """
@@ -31,12 +29,9 @@ class FullResolveContainer(BasicSourceContainer):
     def __init__(self):
         BasicSourceContainer.__init__(self)
 
-        for group in allGroups:
-            self.addGroup(group())
         for source in allSources:
             self.addSource(source())
         
-        self.setGlobalPriority('seed', seedPriority)
         self.setGlobalPriority('entity', -1)
         self.setGlobalPriority('thetvdb', 2)
         self.setGlobalPriority('itunes', 1)
@@ -47,7 +42,7 @@ class FullResolveContainer(BasicSourceContainer):
         self.setGroupPriority('amazon', 'artists', -1)
 
         # Allow itunes to overwrite seed for iTunes id (necessary because ids can deprecate)
-        self.setGroupPriority('itunes', 'itunes', seedPriority + 1)
+        self.setGroupPriority('itunes', 'itunes', 101)
 
 
 def buildQueryFromArgs(args):
@@ -105,11 +100,7 @@ def getEntityFromSearchId(search_id):
 
     from resolve.EntityProxyContainer import EntityProxyContainer
     from resolve.EntityProxySource import EntityProxySource
-    builder = EntityProxyContainer(proxies[0])
-    for proxy in proxies[1:]:
-        builder.addSource(EntityProxySource(proxy))
-
-    return builder.buildEntity()
+    return EntityProxyContainer().addAllProxies(proxies).buildEntity()
 
 
 import sys

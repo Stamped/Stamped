@@ -19,33 +19,40 @@ except:
     report()
     raise
 
-seedPriority = 100
+class EntityProxyContainer(object):
+    def __init__(self):
+        self.__proxies = []
 
-class EntityProxyContainer(BasicSourceContainer):
-    """
-    """
+    def addProxy(self, proxy):
+        self.__proxies.append(proxy)
+        return self
 
-    def __init__(self, proxy):
-        BasicSourceContainer.__init__(self)
-
-        self.__proxy = proxy
-
-        for group in allGroups:
-            self.addGroup(group())
-
-        self.addSource(EntityProxySource(self.__proxy))
+    def addAllProxies(self, proxies):
+        self.__proxies.extend(proxies)
+        return self
         
-        self.setGlobalPriority('seed', seedPriority)
-
     def buildEntity(self):
-        entity              = Entity.buildEntity(kind=self.__proxy.kind)
-        entity.title        = self.__proxy.name
-        entity.kind         = self.__proxy.kind 
-        entity.types        = self.__proxy.types
+        if not self.__proxies:
+            raise Exception('No proxies added so far, cannot build entity')
         
-        decorations = {}
-        
-        modified = self.enrichEntity(entity, decorations, max_iterations=None, timestamp=None)
+        primaryProxy = self.__proxies[0]
+        entity = Entity.buildEntity(kind=primaryProxy.kind)
+        entity.kind = primaryProxy.kind 
+        entity.types = primaryProxy.types
+
+        if entity.isType('book'):
+            entity.title = self.__chooseBookTitle()
+        else:
+            entity.title = self.__proxy.name
+
+        sourceContainer = BasicSourceContainer()
+        for proxy in self.__proxies:
+            sourceContainer.addSource(EntityProxySource(proxy))
+
+        sourceContainer.enrichEntity(entity, {}, max_iterations=None, timestamp=None)
         
         return entity
+
+    def __chooseBookTitle(self):
+        return self.__proxies[0].name
 

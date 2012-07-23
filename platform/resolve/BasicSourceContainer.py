@@ -50,6 +50,10 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.failedCutoff    = 40
         self.failedCooldown  = 1
         self.failedPunishment = 20
+
+        for group in allGroups:
+            self.addGroup(group())
+        self.setGlobalPriority('seed', 100)
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):
         """
