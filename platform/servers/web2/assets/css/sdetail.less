@@ -56,15 +56,19 @@ body.sdetail_popup_animation, body.sdetail_popup {
     
     
     .section-entity {
-        float: right;
         position: relative;
+        float: right;
+        left: -100px;
+        
         max-width: 35%;
+        
         padding: .25em;
         margin-bottom: 2em;
         margin-left: 24px;
         
         .close-button {
-            float: right;
+            position: absolute;
+            right: -100px;
         }
         
         .stamp-preview, .stamp-preview-raw {

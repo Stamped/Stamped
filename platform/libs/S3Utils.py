@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import gzip, keys.aws, logs, threading, utils
+import gzip, keys.aws, logs, threading, time, utils
 
 from boto.s3.connection import S3Connection
 from boto.s3.key        import Key
@@ -17,8 +17,8 @@ class S3Utils(object):
         # find or create bucket
         # ---------------------
         conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-        rs = conn.get_all_buckets()
-        rs = filter(lambda b: b.name == bucket_name, rs)
+        rs   = conn.get_all_buckets()
+        rs   = filter(lambda b: b.name == bucket_name, rs)
         
         if 1 == len(rs):
             self.bucket = rs[0]
@@ -73,9 +73,21 @@ class S3Utils(object):
         if len(meta) > 0:
             key.update_metadata(meta)
         
-        # note that the order of setting the key's metadata, contents, and 
-        # ACL is important for some seriously stupid boto reason...
-        key.set_contents_from_string(value)
-        key.set_acl('public-read')
-        key.close()
+        retries = 5
+        
+        while True:
+            try:
+                # note that the order of setting the key's metadata, contents, and 
+                # ACL is important for some seriously stupid boto reason...
+                key.set_contents_from_string(value)
+                key.set_acl('public-read')
+                key.close()
+                break
+            except Exception:
+                retries -= 1
+                
+                if retries < 0:
+                    raise
+                
+                time.sleep(0.1)
 
