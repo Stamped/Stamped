@@ -96,6 +96,7 @@ def main():
     method      = options.pop('method', None)
     code        = options.pop('code', None)
     stack       = options.pop('stack', None)
+    slow        = options.pop('slow', None)
     
     if severity not in ['debug', 'info', 'warning', 'error', 'critical']:
         severity = None
