@@ -63,7 +63,7 @@ def parseCommandLine():
     parser.add_option("-c", "--code", dest="code", 
         default=None, type="int", help="Filter results on status code")
 
-    parser.add_option("-s", "--slow", dest="slow", action="store",
+    parser.add_option("-S", "--slow", dest="slow", action="store",
         default=None, type="int", help="Filter results that took longer than n seconds")
 
 
