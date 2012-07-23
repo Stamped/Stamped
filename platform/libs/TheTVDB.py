@@ -50,7 +50,7 @@ class TheTVDB(object):
         # other side.
         return xml.decode('utf-8')
 
-    def search(self, query, transform=True, detailed=False, priority='low', timeout=timeout):
+    def search(self, query, transform=True, detailed=False, priority='low', timeout=None):
         xml = self.searchRaw(query, priority=priority, timeout=timeout)
         if xml is None:
             return []
