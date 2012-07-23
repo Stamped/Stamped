@@ -78,37 +78,29 @@
                 
                 <div class='share-buttons clearfix'>
                     <div class='share-button facebook'>
-                        <div class="fb-like" data-layout="button_count" data-href="/{{user.screen_name}}/map"></div>
+                        <div class="fb-like" data-layout="button_count" data-href="www.stamped.com/{{user.screen_name}}/map"></div>
                     </div>
                     
                     <div class='share-button twitter'>
-                        <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="/{{user.screen_name}}/map" data-text="Check out {{user.screen_name}}'s map on Stamped">Tweet</a>
+                        <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="www.stamped.com/{{user.screen_name}}/map" data-text="Check out {{user.screen_name}}'s map on Stamped! www.stamped.com/{{user.screen_name}}/map">Tweet</a>
                     </div>
                     
                     <div class='share-button google'>
-                        <g:plusone size="medium" href="/{{user.screen_name}}/map"></g:plusone>
+                        <g:plusone size="medium" href="www.stamped.com/{{user.screen_name}}/map"></g:plusone>
                     </div>
                 </div>
             </div>
         {% endif %}
         
-        <div class="fixedwidth">
+        <div class="stamp-map-nav-layout">
             <div class="stamp-map-nav-wrapper">
                 <div class="stamp-map-nav">
                     <div class="nav-header clearfix">
-                        {% if lite %}
-                            {% handlebars_template "profile-image-medium-ish-lite" user %}
-                        {% else %}
-                            {% handlebars_template "profile-image-medium-ish" user %}
-                        {% endif %}
+                        {% handlebars_template "profile-image-medium-ish" user %}
                         
                         <div class="nav-header-title">
                             <div class="name">
-                                {% if lite %}
-                                    {{ user.screen_name }}'s
-                                {% else %}
-                                    {% handlebars_template "screen-name" user %}'s
-                                {% endif %}
+                                {% handlebars_template "screen-name" user %}'s
                             </div>
                             
                             <div class="stamp-map-title user-primary">Stamp Map</div>

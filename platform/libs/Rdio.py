@@ -33,9 +33,9 @@ try:
     import urllib
     import logs
     
-    from libs.RateLimiter            import RateLimiter, RateException
-    from libs.LRUCache               import lru_cache
-    from libs.CachedFunction         import cachedFn
+    from libs.RateLimiter       import RateLimiter, RateException
+    from libs.LRUCache          import lru_cache
+    from libs.CachedFunction    import cachedFn
     from libs.CountedFunction   import countedFn
     from urlparse               import parse_qsl
     from urllib2                import HTTPError
@@ -80,7 +80,7 @@ class Rdio(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Rdio (after caching)')
-    def method(self, method, priority='low', **kwargs):
+    def method(self, method, priority='low', timeout=None, **kwargs):
         for k,v in kwargs.items():
             if isinstance(v,int) or isinstance(v,float):
                 kwargs[k] = str(v)
@@ -103,7 +103,7 @@ class Rdio(object):
                     'Accept-encoding':'gzip'
         }
         response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/',
-                                            header=headers, body=body, priority=priority)
+                                            header=headers, body=body, priority=priority, timeout=timeout)
         return json.loads(content)
 
     def userMethod(self, token, token_secret, method, **kwargs):

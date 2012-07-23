@@ -151,9 +151,8 @@ def globalTwitter():
 TWITTER_USER_A0_TOKEN      = "558345111-gsOAXPBGrvjOaWNmTyCtivPcEoH6yHVh627IynHU"
 TWITTER_USER_A0_SECRET     = "NpWLdSOrvHrtTpy2SALH4Ty1T5QUWdMZQhAMcW6Jp4"
 
-TWITTER_USER_B0_TOKEN      = "596530357-ulJmvojQCVwAaPqFwK2Ng1NGa3kMTF254x7NhmhW"
-TWITTER_USER_B0_SECRET     = "r8ttIXxl79E9r3CDQJHnzW4K1vj81N11CMbyzEgh7k"
-
+#TWITTER_USER_A0_TOKEN      = "11131112-gJWVu3jAcXDy5ujuyFzD8C1NqU7sA2foMAlrA8RZs"
+#TWITTER_USER_A0_SECRET     = "5X0o2biSxIMZpXBbslujtCB8xtGx4sRKekg0D86KM"
 
 def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_SECRET, **params):
     from pprint import pprint
@@ -173,7 +172,7 @@ def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_S
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getFriendData'
+    methods = 'getUserInfo'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:

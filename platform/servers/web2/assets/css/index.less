@@ -128,11 +128,6 @@ body.main {
             width:  100%;
             height: 15px;
             
-            .rounded(2px);
-            
-            .ribbon {
-                .rounded(2px);
-            }
         }
         
         .ribbon-wrapper-bottom {
@@ -157,9 +152,9 @@ body.main {
                 .title {
                     .stamped-font();
                     
-                    letter-spacing: 0.03em;
+                    letter-spacing: 0.02em;
                     font-size: 3em;
-                    line-height: 115%;
+                    line-height: 110%;
                     color: #333;
                 }
                 
@@ -167,6 +162,7 @@ body.main {
                     color: #888;
                     font-weight: 200;
                     font-size: 80%;
+                    letter-spacing: 0.03em;
                 }
             }
             
@@ -187,12 +183,10 @@ body.main {
         top:   50%;
         margin-top: -50px;
         
-        .pane-nav-button {
-            margin-bottom: 4px;
-        }
+        .unselectable();
         
-        #pane-nav-4 {
-            margin-bottom: 0;
+        .pane-nav-arrow-up, .pane-nav-button {
+            margin-bottom: 4px;
         }
     }
 }
@@ -232,8 +226,10 @@ body.main {
         margin: 4px 12px 0 0;
         
         .desc {
-            font-size: 90%;
+            font-size: 80%;            
+            font-weight: 200;
             margin-bottom: 4px;
+            color: #999;
         }
     }
 }
@@ -492,6 +488,7 @@ body.main {
     
     .chrome-button {
         position: absolute;
+        display: none;
         
         background: url(/assets/img/index/chrome_buttons_sprite.png) no-repeat;
         width:  27px;
@@ -631,19 +628,19 @@ body.main {
 
 
 #pane-1 .title {
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.03em !important;
 }
 
-#pane-2 .title {
+/*#pane-2 .title {
     font-size: 2.9em !important;
-}
+}*/
 
 #pane-3 .title {
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.03em !important;
 }
 
 #pane-4 .title {
-    letter-spacing: 0.05em !important;
+    letter-spacing: 0.03em !important;
 }
 
 
@@ -656,9 +653,8 @@ body.main {
     position: absolute;
     top:  200%;
     left: 50%;
-    margin: -275px 0 0 120px;
+    margin: -290px 0 0 120px;
     z-index: 98;
-    
     width:  377px;
     height: 564px;
     pointer-events: none;
@@ -687,7 +683,7 @@ body.main {
 
 .iphone-body-shadow-1 {
     background-position: -372px 0;
-    top:  60px;
+    top:  70px;
     left: 60px;
 }
 
@@ -920,10 +916,11 @@ footer {
     top: 50%;
     right: 72px;
     
-    margin-top: -18px;
+    margin-top: -12px;
     
     .social-button {
         display: inline-block;
+        margin-left: 10px;
     }
 }
 
@@ -943,7 +940,7 @@ footer {
     
     .active {
         font-weight: 700;
-        text-shadow: 0px 2px 1.5px fade(#fff, 0.25);
+        text-shadow: 0 2px 1.5px fade(#fff, 0.25);
         color: #333;
     }
 }
@@ -952,12 +949,12 @@ footer {
     position: relative;
     display:  block;
     text-align: center;
-    top: .25em;
+    top: 5px;
     
     pointer-events: none;
     margin: 0 140px 0;
-    font-size: 65%;
-    color: #AAA;
+    font-size: 60%;
+    color: #bfbfbf;
 }
 
 
@@ -987,6 +984,27 @@ footer {
     &:hover {
         background-position: -36px 0;
     }
+}
+
+.pane-nav-arrow {
+    background: url(/assets/img/index/navdots_sprite.png) no-repeat;
+    display: block;
+    position: relative;
+    left: -2px;
+    
+    width:  20px;
+    height: 20px;
+    background-position: -54px 0;
+    
+    &:hover  { background-position: -76px 0; cursor: pointer; }
+    &:active { background-position: -98px 0; cursor: pointer; }
+}
+
+.pane-nav-arrow-down {
+    background-position: -120px 0;
+    
+    &:hover  { background-position: -142px 0; }
+    &:active { background-position: -164px 0; }
 }
 
 .social-button {
@@ -1042,12 +1060,28 @@ footer {
     }
 }
 
+@-webkit-keyframes -webkit-play-video-button-animation {
+    0%   { .box-shadow(0, 0, 50px, 0, darken(#588bd2, 15%)); }
+    100% { .box-shadow(0, 0, 10px, 0, #588bd2); }
+    //0%   { .box-shadow(0, 0, 50px, 0, #000); }//#588bd2); }
+    //100% { .box-shadow(0, 0, 10px, 0, #333); }//#588bd2); }
+}
+
 .play-video-button-large {
     background: url(/assets/img/index/playbutton_large_sprite.png) no-repeat;
     display: block;
     
     width:  64px;
     height: 64px;
+    
+    .rounded(32px);
+    .box-shadow(0, 0, 30px, 0, #588bd2);
+    
+    -webkit-animation-name:             -webkit-play-video-button-animation;
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function:  linear;
+    -webkit-animation-direction:        alternate;
+    -webkit-animation-duration:         1s;
     
     &:hover, &:active {
         background-position: -66px 0;

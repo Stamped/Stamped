@@ -16,6 +16,8 @@ from api.db.mongodb.MongoStampCommentsCollection import MongoStampCommentsCollec
 
 from api.ACommentDB import ACommentDB
 
+from libs.Memcache                              import globalMemcache
+
 class MongoCommentCollection(AMongoCollection, ACommentDB):
     
     def __init__(self):
@@ -24,6 +26,31 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
 
         self._collection.ensure_index('user.user_id')
         self._collection.ensure_index('timestamp.created')
+
+        self._cache = globalMemcache()
+
+
+    ### CACHING
+
+    def _getCachedComment(self, commentId):
+        key = str("obj::comment::%s" % commentId)
+        return self._cache[key]
+
+    def _setCachedComment(self, comment):
+        key = str("obj::comment::%s" % comment.comment_id)
+        cacheLength = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, comment, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (comment.comment_id, e))
+
+    def _delCachedComment(self, commentId):
+        key = str("obj::comment::%s" % commentId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
     
     ### PUBLIC
 
@@ -34,7 +61,8 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
     def addComment(self, comment):
         comment = self._addObject(comment)
         self.stamp_comments_collection.addStampComment(comment.stamp_id, comment.comment_id)
-        
+        self._setCachedComment(comment)
+
         return comment
     
     def removeComment(self, commentId):
@@ -42,18 +70,37 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
 
         comment = self.getComment(documentId)
         self.stamp_comments_collection.removeStampComment(comment.stamp_id, comment.comment_id)
+        self._delCachedComment(commentId)
 
         return self._removeMongoDocument(documentId)
     
     def getComment(self, commentId):
+        try:
+            return self._getCachedComment(commentId)
+        except KeyError:
+            pass
+
         documentId = self._getObjectIdFromString(commentId)
         document = self._getMongoDocumentFromId(documentId)
         return self._convertFromMongo(document)
     
     def getComments(self, commentIds):
-        documentIds = map(self._getObjectIdFromString, commentIds)
+        result = []
+
+        documentIds = []
+        for commentId in commentIds:
+            try:
+                result.append(self._getCachedComment(commentId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(commentId))
         documents = self._getMongoDocumentsFromIds(documentIds)
-        return map(self._convertFromMongo, documents)
+
+        for document in documents:
+            comment = self._convertFromMongo(document)
+            self._setCachedComment(comment)
+            result.append(comment)
+
+        return result
     
     def getCommentIds(self, stampId):
         return self.stamp_comments_collection.getStampCommentIds(stampId)
@@ -104,9 +151,6 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
             comments.append(self._convertFromMongo(document))
         
         return comments
-    
-    def getNumberOfComments(self, stampId):
-        return len(self.getCommentIds(stampId))
 
     def getUserCommentIds(self, userId):
         documents = self._collection.find({'user.user_id': userId})

@@ -156,7 +156,9 @@
             {% handlebars_template "close-button" %}
         </div>
         
-        {% handlebars_template "stamp-image-sdetail" stamp %}
+        <div class="stamp-image-sdetail">
+            {% handlebars_template "stamp-image-sdetail" stamp %}
+        </div>
         
         <div class='entity-data'>
             <div class='entity-data-header'>
@@ -329,9 +331,11 @@
                                     <a href="{{item.action.sources.0.link}}">
                                 {% endif %}
                                 
-                                {% if item.icon %}
+                                {% if item.name|lower == "category" %}
+                                    <span class="stamp-category-{{entity.category}}"><span class="stamp-subcategory-{{entity.subcategory}}"><span class="icon"></span></span></span>
+                                {% else %}{% if item.icon %}
                                     <img class='metadata-icon' src="{{item.icon}}" alt="{{item.value}}" />
-                                {% endif %}
+                                {% endif %}{% endif %}
                                 
                                 {{item.value}}
                                 
@@ -354,11 +358,11 @@
             
             <div class='share-buttons clearfix'>
                 <div class='share-button facebook'>
-                    <div class="fb-like" data-layout="button_count" data-href="/{{stamp.url}}"></div>
+                    <div class="fb-like" data-layout="button_count" data-href="{{stamp.url}}"></div>
                 </div>
                 
                 <div class='share-button twitter'>
-                    <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="{{stamp.url}}" data-text="Check out this stamp of {{entity.title}}">Tweet</a>
+                    <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="{{stamp.url}}" data-text='Check out this stamp of "{{entity.title}}." {{stamp.url}}'>Tweet</a>
                 </div>
                 
                 <div class='share-button google'>

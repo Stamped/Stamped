@@ -91,7 +91,7 @@ class RateLimiterState(object):
         output += "<p><i>There were %s failed requests to the rpc server within the last %s seconds</i></p>" %\
                   (self.__fail_limit, self.__fail_period)
         back_online = time.strftime('%m/%d/%Y %H:%M:%S', time.localtime(self.__blackout_start + self.__blackout_wait)) # Timestamp
-        output += "<p>Waiting for %s seconds.  Will use local Rate Limiter service in until: %s</p>" % (self.__blackout_wait, back_online)
+        output += "<p>Waiting for %s seconds.  Will use local Rate Limiter service until: %s</p>" % (self.__blackout_wait, back_online)
 
         output += '<h3>Fail Log</h3>'
 
@@ -184,7 +184,10 @@ class RateLimiterState(object):
             raise e
         except Exception as e:
             logs.error('RPC service request fail: %s' % e)
-            raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request")
+            raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request.  "
+                                                    "service: %s  method: %s  url: %s  body: %s  header: %s"
+                                                    "priority: %s  timeout: %s" %
+                                                    (service, method, url, body, header, priority, timeout))
 
         return pickle.loads(response), content
 
@@ -215,6 +218,8 @@ def rl_state():
 
 
 def service_request(service, method, url, body={}, header={}, query_params = {}, priority='low', timeout=DEFAULT_TIMEOUT):
+    if timeout is None:
+        timeout = DEFAULT_TIMEOUT
     if body is None:
         body = {}
     if header is None:
@@ -228,6 +233,8 @@ def service_request(service, method, url, body={}, header={}, query_params = {},
             url += "?%s" % encoded_params
         else:
             url += "&%s" % encoded_params
+
+    logs.info('### called service_request.  service: %s  url: %s  timeout: %s' % (service, url, timeout))
 
     response, content = rl_state().request(service, method, url, body, header, priority, timeout)
 

@@ -19,17 +19,15 @@ except ImportError:
 
 import os, sys
 
-# note: celeryd does not seem to work woth monkey patching enabled...
-if not 'celery' in sys.modules and not 'celery.task' in sys.modules:
-    # note: in order for gevent to work properly, this *must* be the first module 
-    # imported from any other python file which needs stdlib to play well with 
-    # gevent / greenlets (e.g., best practice is to always include this file first 
-    # regardless of whether or not patching is required except in possible extreme 
-    # cases).
-    from gevent import monkey
-    
-    # patches stdlib (including socket and ssl modules) to cooperate with other greenlets
-    monkey.patch_all()
+# note: in order for gevent to work properly, this *must* be the first module 
+# imported from any other python file which needs stdlib to play well with 
+# gevent / greenlets (e.g., best practice is to always include this file first 
+# regardless of whether or not patching is required except in possible extreme 
+# cases).
+from gevent import monkey
+
+# patches stdlib (including socket and ssl modules) to cooperate with other greenlets
+monkey.patch_all()
 
 #-----------------------------------------------------------
 

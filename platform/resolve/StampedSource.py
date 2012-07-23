@@ -465,7 +465,9 @@ class StampedSource(GenericSource):
 
     @lazyProperty
     def __entityDB(self):
-        if self._stamped_api:
+        # Must check for None here. StampedAPI extends greenlet, whose truth value means if it's
+        # active.
+        if self._stamped_api is not None:
             return self._stamped_api._entityDB
         return MongoEntityCollection()
         
@@ -720,10 +722,13 @@ class StampedSource(GenericSource):
             id_set = set()
             try:
                 for query in token_queries:
+                    tokenSearchQuery = formatSearchQuery(query)
+                    if not tokenSearchQuery:
+                        continue
                     mongo_query = {
                         'sources.tombstone_id' : {'$exists' : False},
                         'sources.user_generated_id' : {'$exists' : False},
-                        '$and' : formatSearchQuery(query),
+                        '$and' : tokenSearchQuery,
                     }
                     mongo_query.update(kwargs)
                     if query_obj.source == 'stamped' and query_obj.key:

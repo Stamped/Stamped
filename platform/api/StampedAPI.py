@@ -72,7 +72,7 @@ try:
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
 
-    # from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
+    from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
     from datetime                   import datetime, timedelta
 except Exception:
@@ -83,9 +83,7 @@ CREDIT_BENEFIT  = 1 # Per credit
 LIKE_BENEFIT    = 1 # Per like
 
 stamp_num_collage_regeneration = frozenset([
-    1, 2, 3, 4, 5, 10, 15, 20, 25, 35, 50, 60, 70, 80, 90, 100, 
-    125, 150, 175, 200, 250, 300, 375, 450, 500, 600, 700, 800, 900, 
-    1000
+    25, 50, 100, 150, 200, 500, 750, 1000
 ])
 
 # TODO (travis): refactor API function calling conventions to place optional authUserId last
@@ -152,10 +150,10 @@ class StampedAPI(AStampedAPI):
         if 'version' in kwargs:
             self.setVersion(kwargs['version'])
 
-        # self.__autocomplete = emptyIndex()
-        # self.__autocomplete_last_loaded = datetime.now()
-        # if utils.is_ec2():
-        #     self.reloadAutoCompleteIndex()
+        self.__autocomplete = emptyIndex()
+        self.__autocomplete_last_loaded = datetime.now()
+        if utils.is_ec2():
+            self.reloadAutoCompleteIndex()
 
     def setVersion(self, version):
         try:
@@ -1710,45 +1708,43 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def getEntityAutoSuggestions(self, query, category, coordinates=None, authUserId=None):
-        return []
-        # if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
-        #     self.__autocomplete_last_loaded = datetime.now()
-        #     self.reloadAutoCompleteIndex()
-        # if category == 'place':
-        #     if coordinates is None:
-        #         latLng = None
-        #     else:
-        #         latLng = [ coordinates.lat, coordinates.lng ]
-        #     results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'},
-        #         priority='high')
-        #     #make list of names from results, remove duplicate entries, limit to 10
-        #     if results is None:
-        #         return []
-        #     names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
-        #     completions = []
-        #     for name in names:
-        #         completions.append( { 'completion' : name } )
-        #     return completions
+        if datetime.now() - self.__autocomplete_last_loaded > timedelta(1):
+            self.__autocomplete_last_loaded = datetime.now()
+            self.reloadAutoCompleteIndex()
+        if category == 'place':
+            if coordinates is None:
+                latLng = None
+            else:
+                latLng = [ coordinates.lat, coordinates.lng ]
+            results = self._googlePlaces.getAutocompleteResults(latLng, query, {'radius': 500, 'types' : 'establishment'},
+                priority='high')
+            #make list of names from results, remove duplicate entries, limit to 10
+            if results is None:
+                return []
+            names = self._orderedUnique([place['terms'][0]['value'] for place in results])[:10]
+            completions = []
+            for name in names:
+                completions.append( { 'completion' : name } )
+            return completions
 
-        # return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
+        return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
 
     def reloadAutoCompleteIndex(self, retries=5, delay=0):
-        return
-        # def setIndex(greenlet):
-        #     try:
-        #         self.__autocomplete = greenlet.get()
-        #     except Exception as e:
-        #         if retries:
-        #             self.reloadAutoCompleteIndex(retries-1, delay*2+1)
-        #         else:
-        #             email = {
-        #                 'from' : 'Stamped <noreply@stamped.com>',
-        #                 'to' : 'dev@stamped.com',
-        #                 'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
-        #                 'body' : '<pre>%s</pre>' % str(e),
-        #             }
-        #             utils.sendEmail(email, format='html')
-        # gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
+        def setIndex(greenlet):
+            try:
+                self.__autocomplete = greenlet.get()
+            except Exception as e:
+                if retries:
+                    self.reloadAutoCompleteIndex(retries-1, delay*2+1)
+                else:
+                    email = {
+                        'from' : 'Stamped <noreply@stamped.com>',
+                        'to' : 'dev@stamped.com',
+                        'subject' : 'Error while reloading autocomplete index on ' + self.node_name,
+                        'body' : '<pre>%s</pre>' % str(e),
+                    }
+                    utils.sendEmail(email, format='html')
+        gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
 
     def updateAutoCompleteIndexAsync(self):
         return
@@ -2756,8 +2752,9 @@ class StampedAPI(AStampedAPI):
         except StampedDocumentNotFoundError as e:
             logs.warning("User not found: %s" % userId)
             return 
-
-        categories  = [ 'default', category ]
+        
+        # NOTE (travis): disabling 'default' collage regeneration
+        categories  = [ category ]
         
         self._userImageCollageDB.process_user(user, categories)
     
@@ -2844,7 +2841,9 @@ class StampedAPI(AStampedAPI):
         return True
     
     def _should_regenerate_collage(self, stamp_num):
-        return (stamp_num in stamp_num_collage_regeneration)
+        # NOTE (travis): disabling collage regeneration for v2 launch triage
+        return False
+        #return (stamp_num in stamp_num_collage_regeneration)
     
     def removeStampAsync(self, authUserId, stampId, entityId, credits=None, og_action_id=None):
         # Remove from user collection
@@ -3256,8 +3255,7 @@ class StampedAPI(AStampedAPI):
 
         repliedUserIds = set()
         # Add activity for previous commenters
-        ### TODO: Limit this to the last 20 comments or so
-        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
+        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id, limit=20):
             repliedUserId = prevComment.user.user_id
 
             if repliedUserId not in commentedUserIds.union(mentionedUserIds).union(repliedUserIds) \
@@ -3572,29 +3570,39 @@ class StampedAPI(AStampedAPI):
     def getStampCollection(self, timeSlice, authUserId=None):
         # Special-case "tastemakers"
         if timeSlice.scope == 'popular':
-            stampIds = []
             limit = timeSlice.limit
             if limit <= 0:
                 limit = 20
+
             start = datetime.utcnow() - timedelta(hours=3)
             if timeSlice.before is not None:
                 start = timeSlice.before
-            daysOffset = 0
-            while len(stampIds) < limit and daysOffset < 7:
-                """
-                Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
-                have enough stamps, it should check the previous day, with a max of one week.
-                """
-                before = start - timedelta(hours=(24*daysOffset))
-                since = before - timedelta(hours=24)
-                stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
-                daysOffset += 1
-            stampIds = stampIds[:limit]
+
+            key = str("fn::getStampCollection::{scope:popular,limit:%s,before:%s}" % (limit, start.isoformat()))
+
+            try:
+                stampIds = self._cache[key]
+
+            except KeyError:
+                stampIds = []
+                daysOffset = 0
+                while len(stampIds) < limit and daysOffset < 7:
+                    """
+                    Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
+                    have enough stamps, it should check the previous day, with a max of one week.
+                    """
+                    before = start - timedelta(hours=(24*daysOffset))
+                    since = before - timedelta(hours=24)
+                    stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
+                    daysOffset += 1
+                stampIds = stampIds[:limit]
+                try:
+                    self._cache.set(key, stampIds, time=(60*30))
+                except Exception as e:
+                    logs.warning("Unable to set cache for tastemakers: %s" % e)
 
         else:
-            t0 = time.time()
             stampIds = self._getScopeStampIds(timeSlice.scope, timeSlice.user_id, authUserId)
-            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 

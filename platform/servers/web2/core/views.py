@@ -142,8 +142,8 @@ def handle_profile(request, schema, **kwargs):
     if sdetail is not None:
         body_classes += " sdetail_popup";
     
-    if not mobile:
-        body_classes += " wide-body";
+    #if not mobile:
+    #    body_classes += " wide-body";
     
     if sdetail is not None and entity is not None:
         title = "%s - %s" % (title, stamp['entity']['title'])
@@ -208,6 +208,13 @@ def handle_map(request, schema, **kwargs):
     
     stamps = stampedAPIProxy.getUserStamps(s)
     stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
+    
+    if len(stamps) <= 0:
+        redirect_uri = "/%s?category=place" % screen_name
+        redirect_url = request.build_absolute_uri(redirect_uri)
+        logs.info("redirecting empty map from '%s' to: '%s'" % (uri, redirect_uri))
+        
+        return HttpResponseRedirect(redirect_url)
     
     for stamp in stamps:
         subcategory = stamp['entity']['subcategory']

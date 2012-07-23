@@ -24,14 +24,12 @@
 .header-selection() {
     position: relative !important;
     display: block !important;
-    top: 0 !important;
     z-index: 51 !important;
 }
 
 .header-hidden() {
     position: absolute !important;
     display: none !important;
-    top: -100% !important;
     z-index: 50 !important;
 }
 
@@ -60,12 +58,8 @@
             left: 0;
             
             .profile-header-body {
-                position: absolute;
-                top:  -100%;
-                left: 0;
-                
-                display: none;
-                overflow: hidden;
+                position: relative;
+                overflow: visible;
                 
                 width:   100%;
                 height:  100%;
@@ -90,13 +84,10 @@
                     -ms-transition:     -ms-transform     @duration-ease0, filter         @duration-ease1;
                     -o-transition:      -o-transform      @duration-ease0, filter         @duration-ease1;
                     transition:         transform         @duration-ease0, filter         @duration-ease1;
-                    
-                    /*
-                    -webkit-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                       -moz-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                        -ms-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                         -o-transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000); 
-                            transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);*/
+                }
+                
+                .header-collage {
+                    display: none;
                 }
                 
                 .header-overlay {
@@ -153,8 +144,7 @@
                         
                         a.screen-name {
                             color: #000;
-                            font-size: 80%;
-                            font-style: bold;
+                            font-style: normal;
                         }
                         
                         p {
@@ -170,13 +160,15 @@
                             color: #262626;
                             
                             display: block;
-                            margin:  0;
+                            margin-bottom: 10px;
                             padding: 0;
                         }
                         
                         p.name {
-                            font-weight: 400;
+                            font-weight: 800;
+                            letter-spacing: .02em;
                             color: #262626;
+                            margin-left: 5px;
                         }
                         
                         p.title {
@@ -192,7 +184,6 @@
                         }
                         
                         .user-location {
-                            font-size: 80%;
                             color: #000
                         }
                         
@@ -208,26 +199,33 @@
                         
                         .header-subsections {
                             position: relative;
-                            width: 70%;
                             float: left;
+                            width: 50%;
                             margin-left: 24px;
+                            
+                            .header-subsection {
+                                width: 150%;
+                            }
                         }
                         
                         .header-subsection {
-                            position: relative;
-                            display:  block;
+                            position: absolute;
+                            display:  none;
+                            top: -8px;
                             width: 100%;
                             
                             p.profile-title {
-                                font-size: 7em;
+                                font-size: 6em;
                             }
                             
                             p.subline-0 {
-                                font-size: 1.5em;
+                                font-size: 105%;
+                                letter-spacing: .02em;
                             }
                             
                             p.subline-1 {
-                                font-size: 1em;
+                                font-size: 85%;
+                                letter-spacing: .02em;
                             }
                         }
                     }
@@ -239,62 +237,13 @@
                 }
             }
             
-            .header-category-default {
-            }
-            
-            .header-category-place {
-                .header-blur {
-                    background: url(/assets/img/covers/place_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-music {
-                .header-blur {
-                    background: url(/assets/img/covers/music_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-book {
-                .header-blur {
-                    background: url(/assets/img/covers/book_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-film {
-                .header-blur {
-                    background: url(/assets/img/covers/film_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-category-app {
-                .header-blur {
-                    background: url(/assets/img/covers/app_cover_temp.png) no-repeat;
-                    background-size: 100% 100%;
-                }
-            }
-            
-            .header-animating {
-                position: absolute;
-                display: block;
-                top: -100%;
-                
-                z-index: 52;
-            }
-            
-            .header-selected {
-                .header-selection();
-            }
-            
             .profile-header-post {
                 position: relative;
                 z-index: 54;
-                width:  100%;
+                width:   100%;
                 height:  15px;
                 background: #fff;
+                pointer-events: none;
                 
                 .box-shadow(0, -4px, 5px, -2px, rgba(0,0,0,0.10));
                 
@@ -316,15 +265,16 @@
                         
                         font-size: 3.5em;
                         letter-spacing: .03em;
-                        margin: 0 0 3px;
-                        text-shadow: 0px 2px 1.5px rgba(0,0,0,0.25);
+                        margin: 0 0 0;
+                        text-shadow: 0 2px 1.5px rgba(0,0,0,0.25);
                         position: relative;
-                        top: 5px;
+                        top: 10px;
                     }
                     
                     p {
                         margin: 0 0 .5em;
                         color: #262626;
+                        letter-spacing: .04em;
                     }
                 }
             }
@@ -356,13 +306,13 @@
     display: none;
 }
 
-.profile-header-body:hover .header-overlay {
+/*.profile-header-body:hover .header-overlay {
     opacity: 0 !important;
 }
 
 .header-category-default:hover .header-overlay {
     opacity: 1 !important;
-}
+}*/
 
 body.default {
     .header-category-default {
@@ -470,7 +420,7 @@ body.app {
         .item {
             display: none;
             text-decoration: none;
-            font-size: 90%;
+            font-size: 85%;
             padding: .25em 24px;
             
             &:hover, &:active {
@@ -557,7 +507,7 @@ body.app {
    ************************************************************************** */
 
 
-@stamp-gallery-item-min-width: 305px - 24px - 24px;
+@stamp-gallery-item-min-width: 305px;
 
 .stamp-gallery {
     position: relative;
@@ -636,18 +586,18 @@ body.app {
             
             position: relative;
             top: 0;
-            left: -24px;
+            left: -36px;
             
             .timestamp_raw, .timestamp {
                 display: block;
                 
                 white-space: nowrap;
                 text-align: right;
-                font-size: 80%;
-                color: #999;
+                font-size: 85%;
+                color: #bfbfbf;
                 
                 position: absolute;
-                right: 100%;
+                right: 110%;
                 top:   4px;
             }
             
@@ -670,7 +620,7 @@ body.app {
 }
 
 .social-feedback {
-    font-size: 80%;
+    font-size: 85%;
     
     .social-feedback-item {
         display: inline;
@@ -689,7 +639,7 @@ body.app {
     .count {
         position: relative;
         top: -4px;
-        margin: 0px 7px 0px 0px;
+        margin: 0 7px;
     }
     
     .social-feedback-like {
@@ -739,7 +689,7 @@ body.app {
     opacity: 0;
     .transition(opacity, 0.2s, ease-out);
     
-    background: url(/assets/img/entityimagehover-sprite.png) no-repeat;
+    background: url(/assets/img/entityimage_sprite.png) no-repeat;
     
     &:hover {
         background-position: 0 -27px;
@@ -752,6 +702,14 @@ body.app {
     
     &:hover {
         background-position: -27px -27px;
+    }
+}
+
+.stamp-user-image .zoom {
+    background-position: -54px 0;
+    
+    &:hover {
+        background-position: -54px -27px;
     }
 }
 
@@ -831,7 +789,7 @@ body.app {
             //width: 85%;
             .box-shadow(0, 2px, 3px, -1px, rgba(0,0,0,0.3));
             //border: 10px solid #fbfbfb;
-            .rounded(4px);
+            .rounded(2px);
         }
     }
     
@@ -895,9 +853,16 @@ body.app {
         height: 140px;
     }
     
-    .stamp-category-app img {
-        /*.rounded(28px);*/
-        .rounded(20%);
+    .stamp-category-app {
+        img {
+            /*.rounded(28px);*/
+            .rounded(20%);
+        }
+        
+        .zoom {
+            top:   16px;
+            right: 16px;
+        }
     }
 }
 
@@ -914,7 +879,7 @@ body.app {
     text-align: left;
     font-family: 'helvetica', sans-serif;
     font-weight: 200;
-    color: #666;    
+    color: #595959;    
     
     line-height: 140%;
     letter-spacing: 0.02em;
@@ -922,6 +887,7 @@ body.app {
     
     position: relative;
     top: -8px;
+    left: 3px;
     
     a {
         color: #498FF2 !important;
@@ -954,7 +920,8 @@ quotes: "\201C" "\201D";
     position: relative;
     display: block;
     margin: -0.3em 0 0;
-    top: 0px;
+    margin-bottom: -2px;
+    top: -2px;
     left: -3px;
     
     p {
@@ -964,9 +931,9 @@ quotes: "\201C" "\201D";
     
     .subtitle {
         display: inline;
-        font-size: 80%;
+        font-size: 85%;
         position: relative;
-        top: -4.5px;
+        top: -4px;
         font-family: 'helvetica', sans-serif;
         font-weight: 200;
         color: #999;
@@ -1018,7 +985,8 @@ quotes: "\201C" "\201D";
     }
     
     .stamp-gallery-item {
-        width:   280px;
+        width:     280px;
+        min-width: 280px;
         margin:  0;
         
         .content {
@@ -1152,7 +1120,7 @@ quotes: "\201C" "\201D";
         overflow: inherit;
         text-overflow: clip;
         margin: 0 0 0em 0;
-        font-size: 80%;
+        font-size: 85%;
     }
 }
 
@@ -1190,9 +1158,9 @@ quotes: "\201C" "\201D";
     visibility: hidden;
     background: #666;
     
-    @radius: 0px;
-    .rounded(@radius);
-    .box-shadow(0, 3px, 15px, 0px, rgba(30, 30, 30, 0.4);
+    //@radius: 0;
+    //.rounded(@radius);
+    .box-shadow(0, 3px, 15px, 0, rgba(30, 30, 30, 0.4);
     
     top:   50%;
     right: 40px;
@@ -1213,7 +1181,7 @@ quotes: "\201C" "\201D";
         border-top: 2px solid #5e5e5e;
         width:  100%;
         height: 16px;
-        .border-radius(@radius, 0, 0, @radius);
+        //.border-radius(@radius, 0, 0, @radius);
     }
     
     .stamp-category-nav-bar-post {
@@ -1221,7 +1189,7 @@ quotes: "\201C" "\201D";
         border-bottom: 2px solid #5e5e5e;
         width:  100%;
         height: 16px;
-        .border-radius(0, @radius, @radius, 0);
+        //.border-radius(0, @radius, @radius, 0);
     }
     
     ol {
@@ -1768,7 +1736,7 @@ a.map-profile-link {
                 background-color: #fff;
                 .transition(background-color, 0.1s, ease-out);
                 
-                border-bottom: 1px solid #c2c2c2;
+                border-bottom: 1px solid #e5e5e5;
                 white-space: nowrap;
                 
                 padding: (@popup-padding / 2) @popup-padding;
@@ -1783,6 +1751,8 @@ a.map-profile-link {
                 }
                 
                 .stamp {
+                    position: relative;
+                    top: 5px;
                     margin-right: 6px;
                 }
                 
@@ -1793,13 +1763,18 @@ a.map-profile-link {
                     text-overflow: ellipsis;
                     
                     p {
+                        position: relative;
+                        top: 5px;
+                        font-size: 85%;
                         margin:  0;
-                        padding: 0;
+                        padding: 0px 0px 5px 0px;
                     }
                     
                     .fullname {
-                        font-weight: 700;
-                        margin:  0 0 .5em;
+                        position: relative;
+                        top: 5px;
+                        font-size: 85%;
+                        font-weight: bold;
                         padding: 0;
                     }
                     

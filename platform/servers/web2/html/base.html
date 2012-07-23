@@ -104,7 +104,7 @@
             {% block header %}
             <div class="header-body fixedwidth clearfix">
                 <p>
-                    <span class='desc'>Put your stamp of approval on the world.</span> <a class='download-the-free-app-button download-stamped-popup' href='{{ STAMPED_DOWNLOAD_APP_LINK }}'></a>
+                    <span class='desc'>{% if user %}<a href="/{{user.screen_name}}" class="screen-name">{{user.screen_name}}</a> is using <a href="/">Stamped</a>, a new way to record and share your favorite things.{% else %}Put your stamp of approval on the world.{% endif %}</span> <a class='download-the-free-app-button download-stamped-popup' href='{{ STAMPED_DOWNLOAD_APP_LINK }}'></a>
                 </p>
                 
                 <a href="/{{user.screen_name}}" class="user-logo-large"></a>

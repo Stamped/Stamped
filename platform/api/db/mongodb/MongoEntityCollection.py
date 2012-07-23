@@ -110,6 +110,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return document
 
 
+    ### CACHING
+
     def _getCachedEntity(self, entityId):
         key = str("obj::entity::%s" % entityId)
         return self._cache[key]

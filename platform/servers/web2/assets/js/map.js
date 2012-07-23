@@ -336,6 +336,7 @@
         // ---------------------------------------------------------------------
         
         
+        var $stamp_map_nav_layout   = $('.stamp-map-nav-layout');
         var $stamp_map_nav_wrapper  = $('.stamp-map-nav-wrapper');
         var $list                   = $stamp_map_nav_wrapper.find('.stamp-list-view');
         
@@ -510,6 +511,13 @@
                 
                 update_stamp_list_scrollbars();
             }
+            
+            var layout_clamped = "layout-clamped";
+            
+            $stamp_map_nav_layout.removeClass(layout_clamped);
+            if ($stamp_map_nav_layout.offset().left < 0) {
+                $stamp_map_nav_layout.addClass(layout_clamped);
+            }
         };
         
         $stamp_map_nav_wrapper.find('.nav-footer, .nav-dummy-footer').each(function(i, elem) {
@@ -597,6 +605,7 @@
             if (stamp_id !== null) {
                 if (lite) {
                     var stamp = get_stamp(stamp_id);
+                    
                     if (!!stamp && !!stamp.url && parent.frames.length > 0) {
                         var url = stamp.url.replace('http://www.stamped.com', '');
                         
@@ -680,6 +689,23 @@
                     queue    : false
                 });
             };
+        } else {
+            var handle_lite_link = function(event) {
+                var url = $(this).attr("href");
+                
+                if (!!url && parent.frames.length > 0) {
+                    event.preventDefault();
+                    
+                    top.location = url;
+                    return false;
+                } else {
+                    return true;
+                }
+            };
+            
+            $(".profile-image-medium-ish").click(handle_lite_link);
+            $(".screen-name").click(handle_lite_link);
+            $(".user-logo-large").click(handle_lite_link);
         }
         
         
