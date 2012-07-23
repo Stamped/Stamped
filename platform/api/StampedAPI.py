@@ -4071,7 +4071,7 @@ class StampedAPI(AStampedAPI):
             result = (((2 * stampScore) 
                     + (3 * personalTodoScore) 
                     + (1 * avgStampQuality) 
-                    + (1 * avgStampPopularity))
+                    + (0.5 * avgStampPopularity))
                     * (entityQuality)
                     * (personalStampMultiplier))
             
@@ -4085,7 +4085,7 @@ class StampedAPI(AStampedAPI):
         for stat in stampStats:
             if stat.entity_id not in stampPopularities:
                 stampPopularities[stat.entity_id] = []
-            stampPopularities[stat.entity_id].append(stat.popularity)
+            stampPopularities[stat.entity_id].append(min(5,stat.popularity)) 
             if stat.entity_id not in stampQualities:
                 stampQualities[stat.entity_id] = []
             stampQualities[stat.entity_id].append(stat.quality)
