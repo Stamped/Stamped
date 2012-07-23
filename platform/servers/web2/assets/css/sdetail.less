@@ -17,9 +17,9 @@
 @shadow-sdetail: rgba(50, 50, 50, 0.25);
 @shadow-light: fade(@shadow-sdetail, 15%);
 
-@text0: #666;
-@text1: #999;
-@text2: #444;
+@text0: #999999;
+@text1: #bfbfbf;
+@text2: #999999;
 
 .shadowed {
     .box-shadow(0, 3px, 4px, 0, @shadow-light);
@@ -75,7 +75,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
         }
         
         .entity-data {
-            font-size: 80%;
+            font-size: 85%;
             
             .entity-padding() {
                 padding: .5em 24px .5em 12px;
@@ -368,7 +368,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
                     .inner-value-cast, .inner-value-overview, .inner-value-description {
                         float: none;
                         clear: both;
-                        font-size: 90%;
+                        font-size: 85%;
                         text-align: left !important;
                         margin: 2em 0 1em;
                         
@@ -419,7 +419,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
         
         .timestamp, .timestamp_raw {
             text-align: right;
-            font-size: 80%;
+            font-size: 85%;
             color: #bfbfbf;
         }
         
@@ -454,14 +454,17 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         }
                         
                         .user-header {
-                            margin:10px 0px 12px 0px;
+                            margin: 10px 0px 14px 0px;
                             clear: both;
                             
                             .name {
+                                position: relative;
+                                left: 2px;
                                 float: left;
-                                
-                                font-size: 90%;
+                                font-weight: 200;
+                                font-size: 85%;
                                 color: #999;
+                                
                             }
                             
                             .timestamp {
@@ -471,7 +474,8 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         
                         .normal_blurb {
                             display: block;
-                            margin-bottom: 1em;
+                            margin-bottom: 1.5em;
+                            color: #262626;
                         }
                         
                         .stamp-preview {
@@ -549,11 +553,11 @@ body.sdetail_popup_animation, body.sdetail_popup {
                     }
                     
                     .credits {
-                        border-top: 1px solid #bbb;
+                        border-top: 1px solid #e5e5e5;
                         padding: .5em @space;
                         margin: 0;
                         
-                        font-size: 80%;
+                        font-size: 85%;
                         
                         .stamp_0 {
                             display: inline-block;
@@ -592,7 +596,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         margin:  0 24px;
                         padding: .8em 0;
                         
-                        font-size: 80%;
+                        font-size: 85%;
                         
                         .show {
                             display: none;
@@ -638,17 +642,18 @@ body.sdetail_popup_animation, body.sdetail_popup {
                                     
                                     .name {
                                         text-align: left;
+                                        letter-spacing: .02em;
                                     }
                                     .timestamp {
                                         position: absolute;
-                                        font-size: 80%;
+                                        font-size: 85%;
                                         top:   0;
                                         right: 0;
                                     }
                                 }
                                 
                                 p.normal_blurb {
-                                    font-size: 80%;
+                                    font-size: 85%;
                                     color: #595959
                                 }
                             }
@@ -703,7 +708,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
         
         p.share {
             font-weight: 700;
-            font-size: 80%;
+            font-size: 85%;
             letter-spacing: 0.01em;
             color: #595959;
         }
@@ -750,7 +755,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
             
             line-height: 130%;
             letter-spacing: 0.05em;
-            font-size: 67%;
+            font-size: 85%;
             color: #999;
         }
         
@@ -766,18 +771,18 @@ body.sdetail_popup_animation, body.sdetail_popup {
             .submenu-title {
                 color: #999;
                 
-                font: bold 80% "helvetica", sans-serif;
+                font: bold 85% "helvetica", sans-serif;
                 margin-bottom: 12px;
                 
                 /* TODO: use font shorthand here! */
             }
             
             .submenu-desc {
-                font: italic 80%;
+                font: italic 85%;
             }
             
             .submenu-footnote {
-                font: italic 80%;
+                font: italic 85%;
             }
             
             .section {
@@ -800,12 +805,13 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         margin-bottom: 1em;
                         
                         .item-title {
-                            font: bold 80%;
+                            font: bold 85%;
                             margin-bottom: 3px;
                         }
                         
                         .item-prices {
-                            font: italic 80%;
+                            font: italic 85%;
+                            font-weight: 200;
                             color: #bfbfbf;
                         }
                         
