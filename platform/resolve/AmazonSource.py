@@ -844,8 +844,8 @@ class AmazonSource(GenericSource):
             self.responseGroups = responseGroups
             self.proxyConstructor = proxyConstructor
 
-    def __searchIndexLite(self, searchIndexData, queryText, results):
-        searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
+    def __searchIndexLite(self, searchIndexData, queryText, results, timeout):
+        searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName, timeout=timeout,
             ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25, priority='high')
         #print "\n\n\n\nAMAZON\n\n\n\n\n"
         #pprint(searchResults)
@@ -864,7 +864,7 @@ class AmazonSource(GenericSource):
         resultsBySearchIndex = {}
         pool = Pool(len(searchIndexes))
         for searchIndexData in searchIndexes:
-            pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex)
+            pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex, timeout)
         pool.join(timeout)
         if logRawResults:
             logComponents = ['\n\n\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\n\n\n']
