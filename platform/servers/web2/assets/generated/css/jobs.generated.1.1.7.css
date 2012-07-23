@@ -1,0 +1,8 @@
+/*! common.less - styles shared across multiple stamped stylesheets
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */.bg-image-0{background:url(/assets/img/jobs/bg0.jpeg) no-repeat}.jobs-image,.jobs-image-inner{width:245px;height:180px}.section-company .jobs-image-inner{background:url(/assets/img/jobs/bg10.jpeg) no-repeat;background-size:100% 100%}.section-office .jobs-image-inner{background:url(/assets/img/jobs/bg3.jpeg) no-repeat;background-size:100% 100%}.section-perks .jobs-image-inner{background:url(/assets/img/jobs/bg5.jpeg) no-repeat;background-size:100% 100%}.section-jobs .jobs-image-inner{background:url(/assets/img/jobs/bg1.jpeg) no-repeat;background-size:100% 100%}
+.desc{width:60%}.post-main-section{margin-bottom:48px!important}

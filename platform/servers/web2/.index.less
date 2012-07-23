@@ -1,0 +1,26 @@
+
+@primary:   #0049FF;
+@secondary: #F4FF00;
+
+.user-gradient-func2(@angle: 135deg, @c0, @c1) {
+    background: @c0;
+    background: -webkit-linear-gradient(@angle, @c0, @c1);
+    background: linear-gradient(@angle, @c0, @c1);
+}
+
+.user-gradient-func(@angle: 135deg, @a: 50%) {
+    .user-gradient-func2(@angle, fade(@primary, @a), fade(@secondary, @a));
+}
+
+.tastemaker-logo-parislemon {
+    background: url(http://static.stamped.com/logos/0049FF-F4FF00-email-36x36.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+// target webkit browsers
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .tastemaker-logo-parislemon {
+        .user-gradient-func(135deg, 80%);
+    }
+}
+
