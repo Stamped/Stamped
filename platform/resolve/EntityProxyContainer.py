@@ -48,5 +48,10 @@ class EntityProxyContainer(object):
         return entity
 
     def __chooseBookTitle(self):
+        # If we have a title from iTunes, always use that. iTunes has much much better titles than
+        # Amazon.
+        for proxy in self.__proxies:
+            if proxy.source == 'itunes':
+                return proxy.name
         return self.__proxies[0].name
 
