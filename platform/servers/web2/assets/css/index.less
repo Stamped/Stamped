@@ -1061,8 +1061,10 @@ footer {
 }
 
 @-webkit-keyframes -webkit-play-video-button-animation {
-    0%   { .box-shadow(0, 0, 50px, 0, #588bd2); }
-    100% { .box-shadow(0, 0, 0px, 0, #588bd2); }
+    0%   { .box-shadow(0, 0, 50px, 0, darken(#588bd2, 15%)); }
+    100% { .box-shadow(0, 0, 10px, 0, #588bd2); }
+    //0%   { .box-shadow(0, 0, 50px, 0, #000); }//#588bd2); }
+    //100% { .box-shadow(0, 0, 10px, 0, #333); }//#588bd2); }
 }
 
 .play-video-button-large {

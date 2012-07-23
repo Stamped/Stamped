@@ -5,7 +5,7 @@ var init_social_sharing = function($scope, params) {
         var $fb_like_buttons = $scope.find('.fb-like');
         var $google_buttons  = $scope.find('.google');
         
-        var text = "Check out this stamp of " + params.title;
+        var text = "Check out this stamp of \"" + params.title + ".\" " + params.url;
         
         // TODO: prefer .data or .attr?
         $tweet_buttons.attr("data-text",    text);
