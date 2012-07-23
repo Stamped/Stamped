@@ -1011,6 +1011,7 @@ class iTunesSource(GenericSource):
             'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
             'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
             'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch),
+            'ebook' : (applyBookDataQualityTests, adjustBookRelevanceByQueryMatch),
         }
 
         if iTunesType in iTunesTypesToWeights:
@@ -1028,13 +1029,6 @@ class iTunesSource(GenericSource):
             for artistResult in searchResults:
                 if not artistResult.resolverObject.amgId:
                     artistResult.relevance = artistResult.relevance * 0.6
-
-        # TODO(geoff): This is a bit hacky, but because iTunes always has better quality data than
-        # amazon, we double the quality here so the title and author from iTunes will always be
-        # picked.
-        if iTunesType == 'ebook':
-            for result in searchResults:
-                result.dataQuality *= 2
 
         return searchResults
         # TODO: POTENTIALLY USE RELEASE DATE.

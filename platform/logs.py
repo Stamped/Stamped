@@ -54,7 +54,8 @@ class LoggingContext(object):
 
         self.__log['finish'] = datetime.datetime.utcnow()
         try:
-            self.__log['duration'] = (self.__log['finish'] - self.__log['begin']).microseconds
+            delta = self.__log['finish'] - self.__log['begin']
+            self.__log['duration'] = (delta.seconds * 1000000) + delta.microseconds
         except Exception as e:
             warning("FAILED TO CALCULATE DURATION: %s" % e)
             pass
