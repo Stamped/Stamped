@@ -596,7 +596,7 @@ class AMongoCollection(object):
                 # Add ref ids
                 addRefIds = newRefIds.difference(oldRefIds)
                 if len(addRefIds) > 0:
-                    msg = "%s: Adding ref ids (%s)" % (key, addRefIds))
+                    msg = "%s: Adding ref ids (%s)" % (key, addRefIds)
                     if repair:
                         logs.info(msg)
                         self._collection.update({'_id' : key}, {'$addToSet' : { 'ref_ids' : { '$each' : list(addRefIds)}}})
@@ -606,7 +606,7 @@ class AMongoCollection(object):
                 # Delete ref ids
                 delRefIds = oldRefIds.difference(newRefIds)
                 if len(delRefIds) > 0:
-                    msg = "%s: Removing ref ids (%s)" % (key, delRefIds))
+                    msg = "%s: Removing ref ids (%s)" % (key, delRefIds)
                     if repair:
                         logs.info(msg)
                         self._collection.update({'_id' : key}, {'$pullAll' : { 'ref_ids' : list(delRefIds)}})
