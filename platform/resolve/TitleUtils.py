@@ -384,6 +384,7 @@ BOOK_TITLE_REMOVAL_REGEXPS = (
     makeDelimitedSectionRe('version'),
     makeDelimitedSectionRe('vintage'),
     makeDelimitedSectionRe('volume'),
+    re.compile(':\s*a\s+novel\s*$', re.IGNORECASE),
 )
 
 def cleanBookTitle(bookTitle):
@@ -421,10 +422,12 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
     _makeSingleTokenSuspiciousTest('unabridged', 0.1),
 
     # TODO(geoff): this is a hacky way to demote the study guides. There are just so many of them...
-    TitleDataQualityRegexpTest('(Cliff.*Notes?)', '"cliff notes" in title', 0.4,
+    TitleDataQualityRegexpTest(r'\bCliffs? ?Notes?\b', '"cliffs notes" in title', 0.4,
         exceptionQueryRegexps=(makeTokenRegexp('cliff'), makeTokenRegexp('note'))),
     TitleDataQualityRegexpTest('(literature made easy)', '"literature made easy" in title', 0.4,
         exceptionQueryRegexps=(makeTokenRegexp('literature'), makeTokenRegexp('made'), makeTokenRegexp('easy'))),
+    TitleDataQualityRegexpTest(r'\bstudy guide\b', '"study guide" in title', 0.4,
+        exceptionQueryRegexps=(makeTokenRegexp('study'), makeTokenRegexp('guide'))),
 )
 
 def applyBookTitleDataQualityTests(searchResult, searchQuery):
