@@ -98,8 +98,10 @@
                 content     : $("#popup-signup").html(), 
                 type        : "html", 
                 width       : 480, 
-                minWidth    : 480
+                minWidth    : 480, 
             });
+            
+            popup_options.helpers.overlay.opacity = 0.9;
             
             $.fancybox.open(popup_options);
             return false;

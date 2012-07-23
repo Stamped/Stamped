@@ -384,24 +384,6 @@ var g_update_stamps = null;
             return output;
         };
         
-        var get_fancybox_popup_large_options = function(options) {
-            var output = get_fancybox_options({
-                scrolling   : 'no', // we prefer our own, custom jScrollPane scrolling
-                wrapCSS     : '', 
-                padding     : 0
-            });
-            
-            if (!!options) {
-                for (var key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        output[key] = options[key];
-                    }
-                }
-            }
-            
-            return output;
-        };
-        
         var find_valid_image = function($elem, selector, is_sdetail) {
             var $elements = $elem.find(selector);
             $elements     = $elements.filter(function() {
@@ -493,7 +475,7 @@ var g_update_stamps = null;
                     var angle_z = "10deg";
                     var perspective = 400;
                     
-                    var t = "perspective(" + perspective + ") translateY(-15px) scaleX(1.08) scaleY(1.08) rotateZ(" + angle_z + ") rotateX(" + angle_x + ") rotateY(" + angle_y + ")";
+                    var t = "perspective(" + perspective + ") translateY(-15px) rotateZ(" + angle_z + ") rotateX(" + angle_x + ") rotateY(" + angle_y + ")";
                     
                     $preview.css({
                         '-webkit-transform' : t, 

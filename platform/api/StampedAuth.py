@@ -284,9 +284,9 @@ class StampedAuth(AStampedAuth):
         
         params = {'url': url, 'prettyurl': prettyurl}
         msg['body'] = utils.parseTemplate(template, params)
-
+        
         utils.sendEmail(msg, format='html')
-
+        
         return True
 
     def verifyPasswordResetToken(self, resetToken):

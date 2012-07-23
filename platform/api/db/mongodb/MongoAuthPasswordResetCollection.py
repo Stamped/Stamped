@@ -53,4 +53,4 @@ class MongoAuthPasswordResetCollection(AMongoCollection, AAuthPasswordResetDB):
 
     def removeResetTokensForUser(self, userId):
         return self._collection.remove({'user_id': userId})
-        
+

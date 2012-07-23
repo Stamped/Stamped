@@ -10,11 +10,11 @@ import Globals
 from utils import lazyProperty
 from api.StampedAuth import StampedAuth
 
-from api.db.mongodb.MongoAccountCollection import MongoAccountCollection
-from api.db.mongodb.MongoAuthAccessTokenCollection import MongoAuthAccessTokenCollection
-from api.db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
-from api.db.mongodb.MongoAuthPasswordResetCollection import MongoAuthPasswordResetCollection
-from api.db.mongodb.MongoAuthEmailAlertsCollection import MongoAuthEmailAlertsCollection
+from api.db.mongodb.MongoAccountCollection              import MongoAccountCollection
+from api.db.mongodb.MongoAuthAccessTokenCollection      import MongoAuthAccessTokenCollection
+from api.db.mongodb.MongoAuthRefreshTokenCollection     import MongoAuthRefreshTokenCollection
+from api.db.mongodb.MongoAuthPasswordResetCollection    import MongoAuthPasswordResetCollection
+from api.db.mongodb.MongoAuthEmailAlertsCollection      import MongoAuthEmailAlertsCollection
 
 class MongoStampedAuth(StampedAuth):
     """
@@ -43,3 +43,4 @@ class MongoStampedAuth(StampedAuth):
     @lazyProperty
     def _emailAlertDB(self):
         return MongoAuthEmailAlertsCollection()
+
