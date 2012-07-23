@@ -4021,82 +4021,84 @@ class StampedAPI(AStampedAPI):
 
         def entityScore(**kwargs):
             section = kwargs.pop('section', None)
-            avgQuality = kwargs.pop('aggQuality', [])
-            avgPopularity = kwargs.pop('aggPopularity', [])
-            timestamps = kwargs.pop('timestamps', [])
+            avgStampQuality = kwargs.pop('avgStampQuality', 0.5)
+            avgStampPopularity = kwargs.pop('avgStampPopularity', 0)
+            stampTimestamps = kwargs.pop('stampTimestamps', {})
+            entityQuality = kwargs.pop('entityQuality', 0.5)
+            entityId = kwargs.pop('entityId', str())
+            
             result = 0
             
             # Remove personal stamp from timestamps if it exists
             try:
-                personal_timestamp = (time.mktime(now.timetuple()) - timestamps.pop(user.user_id)) / 60 / 60 / 24
+                personalStampAge = (time.mktime(now.timetuple()) - stampTimestamps.pop(user.user_id)) / 60 / 60 / 24
             except KeyError:
-                personal_timestamp = None
+                personalStampAge = None
                 
-            # timestamps is now a list of each friends' most recent stamp time in terms of days since stamped 
-            timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
+            stampAges = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), stampTimestamps.values())
             
-            #stamp_score
-            stamp_score = 0
-            personal_stamp_score = 0
-            for t in timestamps:
+            #stampScore - Primary factor for rankings
+            stampScore = 0
+            for t in stampAges:
                 if t < 10:
-                    stamp_score += 1 - (.05 / 10 * t)
+                    stampScore += 1 - (.05 / 10 * t)
                 elif t < 90:
-                    stamp_score += 1.03125 - (.65 / 80 * t)
+                    stampScore += 1.03125 - (.65 / 80 * t)
                 elif t < 290:
-                    stamp_score += .435 - (.3 / 200 * t) 
+                    stampScore += .435 - (.3 / 200 * t) 
             
-            #Personal stamp score - higher is worse
-            if personal_timestamp is not None:
-                if personal_timestamp < 10:
-                    personal_stamp_score = 1 - (.05 / 10 * personal_timestamp)
-                elif personal_timestamp < 90:
-                    personal_stamp_score = 1.03125 - (.65 / 80 * personal_timestamp)
-                elif personal_timestamp < 290:
-                    personal_stamp_score = .435 - (.3 / 200 * personal_timestamp)
-            
-            section_coefs = {
-                            'food': 0,
-                            'music': 1.0,
-                            'film': 0.5,
-                            'book': 10,
-                            'app': 10
-                            }
-            
-            #Magnify personal stamp score by number of stamps by other friends
-            try:
-                personal_stamp_score = section_coefs[section] * personal_stamp_score * len(timestamps)
-            except KeyError:
-                personal_stamp_score = personal_stamp_score * len(timestamps)
+
+            if section in ['book', 'app']:
+                slope = 0
+            elif section is 'film':
+                slope = 0.6 / 60
+            else:
+                slope = 0.6 / 100
+
+            #Personal stamp multiplier
+            personalStampMultiplier = 1
+            if personalStampAge is not None and section is not 'food':
+                if personalStampAge < 60:
+                    personalStampMultiplier = 0.2 + (slope * personalStampAge)
+                else:
+                    personalStampMultiplier = min(0.8, slope * personalStampAge)
                 
             ### PERSONAL TODO LIST
-            personal_todo_score = 0
-            if entity.entity_id in todos:
-                personal_todo_score = 1
-            
-            if len(timestamps) > 0:
-                avgQuality = avgQuality / len(timestamps)
-                avgPopularity = avgPopularity / len(timestamps)
-            
-            entityQuality = 0.5
-            if entity.quality is not None:
-                entityQuality = entity.quality
-            
-            result = ( (2 * stamp_score) 
-                    - (2 * personal_stamp_score) 
-                    + (3 * personal_todo_score) 
-                    + (1 * avgQuality) 
-                    + (1 * avgPopularity) ) * (entityQuality)
+            personalTodoScore = 0
+            if entityId in todos:
+                personalTodoScore = 1
+
+            result = (((2 * stampScore) 
+                    + (3 * personalTodoScore) 
+                    + (1 * avgStampQuality) 
+                    + (1 * avgStampPopularity))
+                    * (entityQuality)
+                    * (personalStampMultiplier))
             
             return result
 
-        # Build statsMap and todosMap
-        statsMap = {}
+        # Map entities to stamp stats and build todosMap
+        stampPopularities = {}
+        stampQualities = {}
+        stampTimestamps = {}
         todosMap = {}
         for stat in stampStats:
-            if stat.entity_id not in statsMap:
-                statsMap[stat.entity_id] = set()
-            statsMap[stat.entity_id].add(stat)
+            if stat.entity_id not in stampPopularities:
+                stampPopularities[stat.entity_id] = []
+            stampPopularities[stat.entity_id].append(stat.popularity)
+            if stat.entity_id not in stampQualities:
+                stampQualities[stat.entity_id] = []
+            stampQualities[stat.entity_id].append(stat.quality)
+            if stat.last_stamped is not None:
+                t = time.mktime(stat.last_stamped.timetuple())
+                if stat.entity_id not in stampTimestamps:
+                    stampTimestamps[stat.entity_id] = {}
+                try:
+                    if t > stampTimestamps[stat.entity_id][stat.user_id]:
+                        stampTimestamps[stat.entity_id][stat.user_id] = t
+                except KeyError:
+                    stampTimestamps[stat.entity_id][stat.user_id] = t
+
             if stat.preview_todos is not None:
                 if stat.entity_id not in todosMap:
                     todosMap[stat.entity_id] = set()
@@ -4113,24 +4115,21 @@ class StampedAPI(AStampedAPI):
         for section, entity_ids in sections.items():
             r = []
             for entity in sections[section]:
-                aggQuality = 0
-                aggPopularity = 0
-                timestamps = {}
-                for stat in statsMap[entity.entity_id]:
-                    if stat.quality is not None:
-                        aggQuality += stat.quality
-                    #Cap the popularity to prevent over-impact from tastemakers
-                    if stat.popularity is not None:
-                        aggPopularity += min(5,stat.popularity)
-                    if stat.last_stamped is not None:
-                        t = time.mktime(stat.last_stamped.timetuple())
-                        try:
-                            if t > timestamps[stat.user_id]:
-                                timestamps[stat.user_id] = t
-                        except KeyError:
-                            timestamps[stat.user_id] = t
                 
-                score = entityScore(section=section,aggQuality=aggQuality,aggPopularity=aggPopularity, timestamps=timestamps)
+                if len(stampQualities[entity.entity_id]) > 0:
+                    avgQuality = sum(stampQualities[entity.entity_id]) / len(stampQualities[entity.entity_id])
+
+                if len(stampPopularities[entity.entity_id]) > 0:
+                    avgPopularity = sum(stampPopularities[entity.entity_id]) / len(stampPopularities[entity.entity_id])
+
+                entityQuality = 0.5
+                if entity.quality is not None:
+                    entityQuality = entity.quality
+
+                score = entityScore(section=section, avgQuality=avgQuality,
+                                    avgPopularity=avgPopularity, stampTimestamps=stampTimestamps[entity.entity_id],
+                                    entityQuality=entityQuality, entityId=entity.entity_id)
+                
                 coordinates = None
                 if entity.lat is not None:
                     coordinates = Coordinates()
@@ -4155,13 +4154,13 @@ class StampedAPI(AStampedAPI):
                     item.tags = result[2]
                 if result[3] is not None:
                     item.coordinates = result[3]
-                if len(statsMap[result[0]]) > 0:
+                if len(stampTimestamps[result[0]]) > 0:
                     preview = []
-                    for stat in statsMap[result[0]]:
+                    for userId in stampTimestamps[result[0]].keys():
                         stampPreview = StampPreview()
                         stampPreview.stamp_id = stat.stamp_id
                         userPreview = UserMini()
-                        userPreview.user_id = stat.user_id
+                        userPreview.user_id = userId
                         stampPreview.user = userPreview
                         preview.append(stampPreview)
                     if len(preview) > 0:
