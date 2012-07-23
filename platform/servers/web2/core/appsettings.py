@@ -8,13 +8,16 @@ __license__   = "TODO"
 import Globals
 import utils
 
+from api.MongoStampedAPI            import globalMongoStampedAPI
+from api.MongoStampedAuth           import MongoStampedAuth
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
 
+from errors                         import *
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
 
-#g_stampedAuth = MongoStampedAuth()
+g_stamped_auth = MongoStampedAuth()
 
 @stamped_view()
 def password_reset(request, **kwargs):
@@ -254,4 +257,28 @@ def alert_settings(request, **kwargs):
         'page'              : 'alert_settings', 
         'title'             : 'Stamped - Alert Settings', 
     })
+
+@stamped_view(schema=HTTPResetEmailSchema)
+@require_http_methods(["POST"])
+def reset_email(request, schema, **kwargs):
+    email = schema.email
+    api   = globalMongoStampedAPI()
+    
+    if not utils.validate_email(email):
+        msg = "Invalid format for email address"
+        logs.warning(msg)
+        raise StampedInvalidEmailError("Invalid email address")
+    
+    # Verify account exists
+    try:
+        user = api.checkAccount(email)
+    except:
+        ### TODO: Display appropriate error message
+        errorMsg = 'No account information was found for that email address.'
+        raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
+
+    # Send email
+    result = g_stamped_auth.forgotPassword(email)
+    
+    return transform_output(result)
 

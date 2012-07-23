@@ -256,7 +256,7 @@ class NetflixSource(GenericSource):
 
     def entityProxyFromKey(self, netflix_id, **kwargs):
         try:
-            titleObj = self.__netflix.getTitleDetails(netflix_id)
+            titleObj = self.__netflix.getTitleDetails(netflix_id, timeout=MERGE_TIMEOUT)
             if titleObj['id'].find('/movies/') != -1:
                 return NetflixMovie(titleObj)
             elif titleObj['id'].find('/series/') != -1:
@@ -273,7 +273,7 @@ class NetflixSource(GenericSource):
     def __genericSourceGen(self, query, filter):
         def gen():
             try:
-                results = self.__netflix.searchTitles(query.name)
+                results = self.__netflix.searchTitles(query.name, timeout=MERGE_TIMEOUT)
 
                 for title in results['catalog_title']:
                     if (filter(title)):

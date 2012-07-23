@@ -221,8 +221,6 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True, schemaClasses=[]):
                 logs.warning("Couldn't connect to Mongo cache table; disabling Mongo cache.")
                 return userFunction(*fullArgs, **kwargs)
 
-            if result is None and exceptionOnCacheMiss:
-                raise CacheMissException(fnName)
             if result and result['expiration'] is None and not disableStaleness:
                 raise ValueError('We should never be using non-expiring cache entries outside of test fixtures!')
             if result and result['expiration'] is not None and disableStaleness:
@@ -231,6 +229,8 @@ def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True, schemaClasses=[]):
             if result and (disableStaleness or (result['expiration'] > now)) and not force_recalculate:
                 # We hit the cache and the result isn't stale! Woo!
                 return deserializeValue(result['value'], schemaClassesMap)
+            elif exceptionOnCacheMiss:
+                raise CacheMissException(fnName)
 
             expiration = None if disableStaleness else now + maxStaleness
             result = userFunction(*fullArgs, **kwargs)

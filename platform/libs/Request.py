@@ -234,7 +234,7 @@ def service_request(service, method, url, body={}, header={}, query_params = {},
         else:
             url += "&%s" % encoded_params
 
-    logs.info('### called service_request.  service: %s  url: %s  timeout: %s' % (service, url, timeout))
+    logs.info('### called service_request.  service: %s  url: %s   priority: %s  timeout: %s' % (service, url, priority, timeout))
 
     response, content = rl_state().request(service, method, url, body, header, priority, timeout)
 

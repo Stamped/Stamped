@@ -107,3 +107,9 @@ class HTTPDownloadAppSchema(Schema):
     def setSchema(cls):
         cls.addProperty('phone_number',                     basestring, required=True)
 
+class HTTPResetEmailSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('email',                            basestring, required=True)
+

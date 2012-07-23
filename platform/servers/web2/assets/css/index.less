@@ -717,17 +717,17 @@ body.main {
     
     background: url(/assets/img/index/iphone_sprite.png) no-repeat;
     background-position: -300px 0;
+    
     width:  289px;
     height: 564px;
     
     pointer-events: none;
-
 }
 
 .iphone-screens {
     position: absolute;
     
-    top:  100px;
+    top:  99px;
     left: 63px;
     
     width:  244px;
@@ -748,7 +748,7 @@ body.main {
     
     overflow: hidden;
     
-    .transition(left, .3s, ease-out);
+    .transition2(left, .3s, ease-out, opacity, .3s, ease-out);
 }
 
 .iphone-screen-inbox {
@@ -821,10 +821,10 @@ body.main {
     width:  52px;
     height: 25px;
     
-    &:hover, &:active {
+    /*&:hover, &:active {
         // TODO: replace with actual active state asset
         //background: red;
-    }
+    }*/
 }
 
 .iphone-screen-sdetail-active-0 .iphone-screen-sdetail-0, 
@@ -840,42 +840,51 @@ body.main {
 .iphone-screen-active-inbox {
     .iphone-screen-inbox {
         left: 0 !important;
+        opacity: 1;
     }
     
     .iphone-screen-sdetail {
         left: 244px !important;
+        opacity: 0;
     }
     
     .iphone-screen-guide {
-        left: 488px !important;
+        left: 244px !important;
+        opacity: 0;
     }
 }
 
 .iphone-screen-active-sdetail {
     .iphone-screen-inbox {
         left: -244px !important;
+        opacity: 0;
     }
     
     .iphone-screen-sdetail {
         left: 0 !important;
+        opacity: 1;
     }
     
     .iphone-screen-guide {
         left: 244px !important;
+        opacity: 0;
     }
 }
 
 .iphone-screen-active-guide {
     .iphone-screen-inbox {
         left: -244px !important;
+        opacity: 0;
     }
     
     .iphone-screen-sdetail {
         left: -244px !important;
+        opacity: 0;
     }
     
     .iphone-screen-guide {
         left: 0 !important;
+        opacity: 1;
     }
 }
 
@@ -1060,12 +1069,12 @@ footer {
     }
 }
 
-@-webkit-keyframes -webkit-play-video-button-animation {
+/*@-webkit-keyframes -webkit-play-video-button-animation {
     0%   { .box-shadow(0, 0, 50px, 0, darken(#588bd2, 15%)); }
     100% { .box-shadow(0, 0, 10px, 0, #588bd2); }
     //0%   { .box-shadow(0, 0, 50px, 0, #000); }//#588bd2); }
     //100% { .box-shadow(0, 0, 10px, 0, #333); }//#588bd2); }
-}
+}*/
 
 .play-video-button-large {
     background: url(/assets/img/index/playbutton_large_sprite.png) no-repeat;
@@ -1074,14 +1083,14 @@ footer {
     width:  64px;
     height: 64px;
     
-    .rounded(32px);
+    /*.rounded(32px);
     .box-shadow(0, 0, 30px, 0, #588bd2);
     
     -webkit-animation-name:             -webkit-play-video-button-animation;
     -webkit-animation-iteration-count:  infinite;
     -webkit-animation-timing-function:  linear;
     -webkit-animation-direction:        alternate;
-    -webkit-animation-duration:         1s;
+    -webkit-animation-duration:         1s;*/
     
     &:hover, &:active {
         background-position: -66px 0;
