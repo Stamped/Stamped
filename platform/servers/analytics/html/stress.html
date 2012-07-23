@@ -28,7 +28,7 @@
 				    	<tr>
 					        <td>Node</td>
 					        {% for header in headers %}
-					        	<td>header|time:"h:i:s"</td>
+					        	<td>{{ header|time:"h:i:s" }}</td>
 					        {% endfor %}
 					    </tr>
 					    {% for key,value in count_results %}
