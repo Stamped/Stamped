@@ -57,8 +57,9 @@ class RateLimiterState(object):
             ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
         except:
             logs.error("Could not find a node with tag 'ratelimiter on same stack")
+        if ratelimiter_nodes is None:
             self.__host = 'localhost'
-        if ratelimiter_nodes is not None:
+        else:
             self.__host = ratelimiter_nodes[0]['private_ip_address']
         self.__port = 18861
 
