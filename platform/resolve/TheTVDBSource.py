@@ -176,7 +176,7 @@ class TheTVDBSource(GenericSource):
         return self.generatorSource(self.__queryGen(query=query.name), 
                                     constructor=TheTVDBShow)
     
-    def __queryGen(self, **params):
+    def __queryGen(self, **params, timeout=None):
         results = self.__thetvdb.search(transform=True, detailed=True, **params)
         for result in results:
             yield result
@@ -186,7 +186,7 @@ class TheTVDBSource(GenericSource):
         if queryCategory != 'film':
             raise NotImplementedError()
         # Ugh. Why are we using entities?
-        rawResults = self.__thetvdb.search(queryText, transform=True, detailed=False, priority='high')
+        rawResults = self.__thetvdb.search(queryText, transform=True, detailed=False, priority='high', timeout=timeout)
         if logRawResults:
             logComponents = ['\n\n\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\n\n\n']
             for rawResult in rawResults:
