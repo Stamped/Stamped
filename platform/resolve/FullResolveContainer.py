@@ -40,8 +40,11 @@ class FullResolveContainer(BasicSourceContainer):
         self.setGroupPriority('amazon', 'albums', -1)
         self.setGroupPriority('amazon', 'artists', -1)
 
-        # Allow itunes to overwrite seed for iTunes id (necessary because ids can deprecate)
-        self.setGroupPriority('itunes', 'itunes', 101)
+        # Allow itunes and GooglePlaces to overwrite seed for for their own id, because they
+        # deprecate sometimes.
+        seedPriority = self.getGlobalPriority('seed')
+        self.setGroupPriority('itunes', 'itunes', seedPriority + 1)
+        self.setGroupPriority('googleplaces', 'googleplaces', seedPriority + 1)
 
 
 def buildQueryFromArgs(args):
