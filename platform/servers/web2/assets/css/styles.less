@@ -851,9 +851,10 @@ a.sdetail, .pronounced-title a {
             input {
                 text-align: center;
                 font-weight: 200;
-                font-size: 140%;
+                font-family: sans-serif;
+                font-size: 14pt;
                 
-                margin-left: 52px;
+                margin-left: 0;
                 margin-top: 8px;
                 
                 border: 0 none;
@@ -863,7 +864,6 @@ a.sdetail, .pronounced-title a {
                     border: 0 none;
                     outline: none;
                     color: #498ff2;
-
                 }
             }
             
@@ -897,6 +897,9 @@ a.sdetail, .pronounced-title a {
             margin-bottom: 15px;
             
             .dotted-left, .dotted-right {
+                position: relative;
+                top: 4px;
+                
                 display: inline-block;
                 width: 125px;
                 height: 1em;
@@ -911,6 +914,11 @@ a.sdetail, .pronounced-title a {
                 background: url(/assets/img/dottedline.png) repeat-x top left;
                 margin-left: 1em;
             }
+        }
+        
+        .active-link {
+            font-family: sans-serif !important;
+            font-size: 14pt !important;
         }
     }
     
@@ -952,11 +960,11 @@ a.sdetail, .pronounced-title a {
     background: url(/assets/img/index/appstore_sprite.png) no-repeat;
     display: block;
     
-    width:  116px;
+    width:  112px;
     height: 40px;
     
     &:hover, &:active {
-        background-position: -118px 0;
+        background-position: -114px 0;
     }
 }
 
@@ -967,9 +975,8 @@ a.sdetail, .pronounced-title a {
     width:  68px;
     height: 31px;
     
-    &:hover, &:active {
-        background-position: -70px 0;
-    }
+    &:hover  { background-position: -70px  0; }
+    &:active { background-position: -140px 0; }
 }
 
 .get-the-app-button {

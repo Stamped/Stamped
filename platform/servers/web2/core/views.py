@@ -9,6 +9,8 @@ import Globals
 import pprint, utils
 import libs.sms
 
+import servers.web2.settings as settings
+
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
 
@@ -391,6 +393,10 @@ def download_app(request, schema, **kwargs):
     result = sms_client.send_sms(schema.phone_number)
     
     return transform_output(True)
+
+@stamped_view()
+def download(request, **kwargs):
+    return HttpResponseRedirect(settings.STAMPED_DOWNLOAD_APP_LINK)
 
 @stamped_view(schema=HTTPIndexSchema)
 def index(request, schema, **kwargs):

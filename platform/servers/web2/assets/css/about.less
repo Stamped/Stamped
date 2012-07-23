@@ -374,15 +374,13 @@ footer {
 .social {
     white-space: nowrap;
     
-    .social-button-twitter {
+    .stamp-badge {
         position: relative;
         display:  inline-block;
         top: 4px;
-        
-        background-position: 0 -22px !important;
     }
     
-    .social-button-stamped {
+    .twitter-badge {
         position: relative;
         display:  inline-block;
         top: 4px;
@@ -393,16 +391,18 @@ footer {
     &:hover {
         color: #4099FF !important;
     }
-    
 }
 
-.social-button-stamped {
+.stamp-badge, .twitter-badge {
+    background: url(/assets/img/about/stamped_twitter_sprite.png) no-repeat;
     display: block;
-    background: url(/assets/img/about/stampbadge.png) no-repeat;
     
-    margin: 1px 0;
-    width:  20px;
-    height: 20px;
+    width:  16px;
+    height: 16px;
+}
+
+.twitter-badge {
+    background-position: -18px 0;
 }
 
 #apple-legal {
