@@ -14,6 +14,7 @@ try:
     import sys, traceback, string
     from resolve.ASourceContainer       import ASourceContainer
     from resolve.ASourceController      import ASourceController
+    from resolve.EntityGroups           import *
     from datetime               import datetime
     from datetime               import timedelta
     from copy                   import deepcopy

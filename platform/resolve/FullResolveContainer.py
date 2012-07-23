@@ -12,7 +12,6 @@ from logs import report
 
 try:
     from resolve.BasicSourceContainer   import BasicSourceContainer
-    from resolve.EntityGroups           import *
     from resolve.ResolverSources        import *
     from pprint                 import pformat
     import logs

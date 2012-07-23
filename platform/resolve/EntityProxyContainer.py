@@ -8,16 +8,10 @@ __license__   = "TODO"
 __all__ = [ 'EntityProxyContainer' ]
 
 import Globals
-from logs import report
 
-try:
-    from api import Entity
-    from resolve.BasicSourceContainer   import BasicSourceContainer
-    from resolve.EntityGroups           import *
-    from resolve.EntityProxySource      import EntityProxySource
-except:
-    report()
-    raise
+from api import Entity
+from resolve.BasicSourceContainer import BasicSourceContainer
+from resolve.EntityProxySource import EntityProxySource
 
 class EntityProxyContainer(object):
     def __init__(self):
