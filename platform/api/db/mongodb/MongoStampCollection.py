@@ -270,6 +270,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     @lazyProperty
     def stamp_stats(self):
         return MongoStampStatsCollection()
+
+    @lazyProperty
+    def whitelisted_tastemaker_stamps(self):
+        return MongoWhitelistedTastemakerStampIdsCollection()
     
     def addStamp(self, stamp):
         return self._addObject(stamp)
@@ -567,6 +571,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         
         return result
 
+    def getWhitelistedTastemakerStampIds(self):
+        return self.whitelisted_tastemaker_stamps.getStampIds()
+
 
 class MongoStampStatsCollection(AMongoCollection):
     
@@ -833,4 +840,17 @@ class MongoStampStatsCollection(AMongoCollection):
                         .limit(limit)
 
         return map(self._convertFromMongo, documents)
+
+
+
+class MongoWhitelistedTastemakerStampIdsCollection(AMongoCollection):
+    
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='tastemaker_whitelist', overflow=True)
+
+    ### PUBLIC
+    
+    def getStampIds(self):
+        documents = self._collection.find()
+        return map(lambda x: x['stamp_id'], documents)
 
