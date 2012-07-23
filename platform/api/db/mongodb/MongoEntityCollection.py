@@ -516,7 +516,8 @@ class MongoEntityStatsCollection(AMongoCollection):
         self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
         self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
         self._collection.ensure_index([ ('lat', pymongo.ASCENDING), \
-                                        ('lng', pymongo.ASCENDING) ])
+                                        ('lng', pymongo.ASCENDING), \
+                                        ('types', pymongo.ASCENDING) ])
 
         self._cache = globalMemcache()
 
