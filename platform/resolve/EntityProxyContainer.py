@@ -43,7 +43,7 @@ class EntityProxyContainer(object):
         for proxy in self.__proxies:
             sourceContainer.addSource(EntityProxySource(proxy))
 
-        sourceContainer.enrichEntity(entity, {}, max_iterations=None, timestamp=None)
+        sourceContainer.enrichEntity(entity, {})
         
         return entity
 
