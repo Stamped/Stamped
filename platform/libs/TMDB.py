@@ -92,7 +92,7 @@ class TMDB(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='TMDB (after caching)')
-    def __tmdb(self, service, max_retries=3, timeout=None, priority='low', **params):
+    def __tmdb(self, service, max_retries=3, priority='low', timeout=None, **params):
         if 'api_key' not in params:
             params['api_key'] = self.__key
         
@@ -104,8 +104,8 @@ class TMDB(object):
         url = 'http://api.themoviedb.org/3/%s?%s' % (service, urllib.urlencode(encodedParams))
         logs.info(url)
 
-        response, content = service_request('tmdb', 'GET', url, timeout=timeout, 
-                                            header={ 'Accept' : 'application/json' }, priority=priority)
+        response, content = service_request('tmdb', 'GET', url, header={ 'Accept' : 'application/json' },
+                                            priority=priority, timeout=timeout)
         data = json.loads(content)
         return data
 

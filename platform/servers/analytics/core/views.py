@@ -229,7 +229,7 @@ def stress(request):
             
             count_report,mean_report = query.qpsReport(now(),interval,window)
             
-            headers = map(lambda x: now() - timedelta(seconds=(interval * x), range(window / interval))
+            headers = map(lambda x: (now() - timedelta(seconds=(interval * x))), range(window / interval))
             
     else: form = qpsForm()
     

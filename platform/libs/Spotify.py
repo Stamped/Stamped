@@ -57,13 +57,13 @@ class Spotify(object):
         
     
     def search(self, method, priority='low', timeout=None, **params):
-        return self.method('search', method, priority, timeout=None, **params)
+        return self.method('search', method, priority, timeout=timeout, **params)
     
     def lookup(self, uri, extras=None, priority='low', timeout=None):
         if extras is None:
-            return self.method('lookup', '', priority=priority, timeout=timeout, uri=uri)
+            return self.method('lookup', '', priority, uri=uri, timeout=timeout)
         else:
-            return self.method('lookup', '', priority=priority, timeout=timeout, uri=uri, extras=extras)
+            return self.method('lookup', '', priority, uri=uri, extras=extras, timeout=timeout)
 
 __globalSpotify = None
 
