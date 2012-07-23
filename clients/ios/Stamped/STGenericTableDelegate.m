@@ -179,7 +179,7 @@
             return [self.tableViewCellFactory cellHeightForTableView:tableView data:data andStyle:self.style];
         }
         else {
-            return 100;
+            return tableView.frame.size.height;
         }
     }
     else {

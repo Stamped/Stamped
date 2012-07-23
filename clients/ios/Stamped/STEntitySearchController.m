@@ -27,14 +27,22 @@ static const CGFloat _innerBorderHeight = 40;
 static const CGFloat _offscreenCancelPadding = 5;
 
 @interface STEntitySearchTableViewCell : UITableViewCell
-@property(nonatomic,retain) UILabel *titleLabel;
-@property(nonatomic,retain) UILabel *detailTitleLabel;
-@property(nonatomic,retain) STCancellation *iconCancellation;
-@property(nonatomic,retain) UIImageView *iconView;
+
+@property (nonatomic, readwrite, retain) UILabel *titleLabel;
+@property (nonatomic, readwrite, retain) UILabel *detailTitleLabel;
+@property (nonatomic, readwrite, retain) STCancellation *iconCancellation;
+@property (nonatomic, readwrite, retain) UIImageView *iconView;
+@property (nonatomic, readwrite, retain) UILabel* distanceLabel;
+@property (nonatomic, readwrite, retain) UIImageView* locationImageView;
+
 - (void)setSearchResult:(id<STEntitySearchResult>)searchResult;
+
 @end
 
 @interface STEntitySearchCreateCell : UITableViewCell
+
+@property (nonatomic, readwrite, retain) UILabel *titleLabel;
+@property (nonatomic, readwrite, retain) UILabel *detailTitleLabel;
 
 - (id)initWithReuseIdentifier:(NSString *)reuseIdentifier;
 - (void)setupWithCategory:(NSString*)category andTitle:(NSString*)title;
@@ -108,10 +116,10 @@ static const CGFloat _offscreenCancelPadding = 5;
     self.showsSearchBar = YES;
     
     /*
-    STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
-    self.navigationItem.leftBarButtonItem = button;
-    [button release];
-    */
+     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancel:)];
+     self.navigationItem.leftBarButtonItem = button;
+     [button release];
+     */
     BOOL loadResults = YES;
     CLLocation* location = [STStampedAPI sharedInstance].currentUserLocation;
     if ([_category isEqualToString:@"place"]) {
@@ -533,7 +541,7 @@ static const CGFloat _offscreenCancelPadding = 5;
     suggested.category = self.category;
     
     self.requestCancellation = [[STStampedAPI sharedInstance] entityResultsForEntitySuggested:suggested  andCallback:^(NSArray<STEntitySearchSection> *results, NSError *error, STCancellation* cancellation) {
-
+        
         NSInteger sections = [self.tableView numberOfSections];
         self.requestCancellation = nil;
         if (results) {
@@ -548,7 +556,7 @@ static const CGFloat _offscreenCancelPadding = 5;
             } else {
                 
                 [self.tableView reloadData];
-
+                
             }
             
         }
@@ -578,12 +586,12 @@ static const CGFloat _offscreenCancelPadding = 5;
                                                options:nil];
     waterMark.frame = [Util centeredAndBounded:waterMark.frame.size inFrame:CGRectMake(0, -50, view.frame.size.width, view.frame.size.height)];
     [view addSubview:waterMark];
-//    CGRect frame = view.frame;
-//    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
-//    frame.origin.y = height;
-//    frame.size.height -= height;
-//    view.frame = frame;
-//    [view setupWithTitle:@"No Suggestions" detailTitle:@"No suggestions found."];
+    //    CGRect frame = view.frame;
+    //    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
+    //    frame.origin.y = height;
+    //    frame.size.height -= height;
+    //    view.frame = frame;
+    //    [view setupWithTitle:@"No Suggestions" detailTitle:@"No suggestions found."];
     
 }
 
@@ -598,6 +606,8 @@ static const CGFloat _offscreenCancelPadding = 5;
 @synthesize detailTitleLabel = _detailTitleLabel;
 @synthesize iconCancellation = _iconCancellation;
 @synthesize iconView = _iconView;
+@synthesize distanceLabel = _distanceLabel;
+@synthesize locationImageView = _locationImageView;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
     if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
@@ -628,6 +638,18 @@ static const CGFloat _offscreenCancelPadding = 5;
         _detailTitleLabel = [label retain];
         [label release];
         
+        _distanceLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+        _distanceLabel.backgroundColor = [UIColor clearColor];
+        _distanceLabel.textColor = [UIColor stampedLightGrayColor];
+        _distanceLabel.highlightedTextColor = [UIColor whiteColor];
+        _distanceLabel.font = [UIFont fontWithName:@"Helvetica-Bold" size:10];
+        [self.contentView addSubview:_distanceLabel];
+        
+        UIImage* locationImage = [UIImage imageNamed:@"small_location_icon"];
+        UIImage* highlightedLocationImage = [Util whiteMaskedImageUsingImage:locationImage];
+        _locationImageView = [[UIImageView alloc] initWithImage:locationImage
+                                               highlightedImage:highlightedLocationImage];
+        [self.contentView addSubview:_locationImageView];
     }
     return self;
 }
@@ -654,6 +676,8 @@ static const CGFloat _offscreenCancelPadding = 5;
     [_iconView release];
     [_detailTitleLabel release];
     [_titleLabel release];
+    [_distanceLabel release];
+    [_locationImageView release];
     [super dealloc];
 }
 
@@ -684,27 +708,85 @@ static const CGFloat _offscreenCancelPadding = 5;
         }
     }
     
+    if (searchResult.distance) {
+        CGFloat miles = searchResult.distance.floatValue;
+        if (miles < 2.0) {
+            self.distanceLabel.textColor = [UIColor colorWithRed:0.66 green:0.48 blue:0.8 alpha:1.0];
+            self.locationImageView.image = [UIImage imageNamed:@"small_location_icon_purple"];
+        }
+        else {
+            self.distanceLabel.textColor = [UIColor stampedLightGrayColor];
+            self.locationImageView.image = [UIImage imageNamed:@"small_location_icon"];
+        }
+        if (miles > 0.1) {
+            self.distanceLabel.text = [NSString stringWithFormat:@"%.1f mi", miles];
+        }
+        else {
+            self.distanceLabel.text = [NSString stringWithFormat:@"%.0f ft", miles * 5280.0f];
+        }
+        
+        [self.distanceLabel sizeToFit];
+        CGRect distanceFrame = self.distanceLabel.frame;
+        distanceFrame.origin.x = 311 - distanceFrame.size.width;
+        distanceFrame.origin.y = 22;
+        self.distanceLabel.frame = distanceFrame;
+        self.locationImageView.frame = CGRectMake(CGRectGetMinX(distanceFrame) - CGRectGetWidth(self.locationImageView.frame) - 3,
+                                              CGRectGetMinY(distanceFrame) + 2, 
+                                              CGRectGetWidth(self.locationImageView.frame),
+                                              CGRectGetHeight(self.locationImageView.frame));
+        self.distanceLabel.hidden = NO;
+        self.locationImageView.hidden = NO;
+    }
+    else {
+        self.distanceLabel.hidden = YES;
+        self.locationImageView.hidden = YES;
+    }
+    
 }
 
 @end
 
 @implementation STEntitySearchCreateCell
 
+@synthesize titleLabel = _titleLabel;
+@synthesize detailTitleLabel = _detailTitleLabel;
+
 - (id)initWithReuseIdentifier:(NSString *)reuseIdentifier {
     self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:reuseIdentifier];
     if (self) {
+        UIFont *font = [UIFont stampedBoldFontWithSize:14];
+        UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(36.0f, 14.0f, 0.0f, font.lineHeight)] autorelease];
+        label.textColor = [UIColor stampedDarkGrayColor];
+        label.highlightedTextColor = [UIColor whiteColor];
+        label.font = font;
+        label.backgroundColor = [UIColor whiteColor];
+        [self.contentView addSubview:label];
+        _titleLabel = [label retain];
         
+        UIFont* subtitleFont = [UIFont stampedFontWithSize:12];
+        label = [[[UILabel alloc] initWithFrame:CGRectMake(36.0f, CGRectGetMaxY(_titleLabel.frame)-2.0f, 0.0f, subtitleFont.lineHeight)] autorelease];
+        label.textColor = [UIColor stampedGrayColor];
+        label.highlightedTextColor = [UIColor whiteColor];
+        label.font = subtitleFont;
+        label.backgroundColor = [UIColor whiteColor];
+        [self.contentView addSubview:label];
+        _detailTitleLabel = [label retain];
     }
     return self;
 }
 
 - (void)setupWithCategory:(NSString *)category andTitle:(NSString *)title {
-    self.textLabel.text = @"Not found?";
-    self.textLabel.font = [UIFont stampedBoldFontWithSize:12];
-    self.textLabel.textColor = [UIColor stampedGrayColor];
-    self.detailTextLabel.text = [NSString stringWithFormat:@"Add \"%@\"", title];
-    self.detailTextLabel.font = [UIFont stampedFontWithSize:12];
-    self.detailTextLabel.textColor = [UIColor stampedLightGrayColor];
+    self.titleLabel.text = @"Not found?";
+    [self.titleLabel sizeToFit];
+    self.detailTitleLabel.text = [NSString stringWithFormat:@"Add \"%@\"", title];
+    [self.detailTitleLabel sizeToFit];
+}
+
+- (void)dealloc
+{
+    [_detailTitleLabel release];
+    [_titleLabel release];
+    [super dealloc];
 }
 
 @end
