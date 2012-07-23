@@ -24,9 +24,6 @@ def parseCommandLine():
     version = "%prog " + __version__
     parser  = OptionParser(usage=usage, version=version)
     
-    parser.add_option("-s", "--stack", default=None, type="string",
-        action="store", dest="stack", help="stack to pull logs from")
-    
     parser.add_option("-d", "--headers", action="store_true", dest="show_headers", 
         default=False, help="Include HTTP headers in results")
     
@@ -41,6 +38,9 @@ def parseCommandLine():
     
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", 
         default=False, help="Set verbosity of logs")
+    
+    parser.add_option("-s", "--stack", default=None, type="string",
+        action="store", dest="stack", help="stack to pull logs from")
     
     parser.add_option("-u", "--user-id", dest="user_id", 
         default=None, type="string", help="Filter results on user id")
@@ -62,6 +62,9 @@ def parseCommandLine():
     
     parser.add_option("-c", "--code", dest="code", 
         default=None, type="int", help="Filter results on status code")
+
+    parser.add_option("-s", "--slow", dest="slow", action="store",
+        default=None, type="int", help="Filter results that took longer than n seconds")
 
 
     (options, args) = parser.parse_args()
@@ -107,7 +110,7 @@ def main():
         size = LOG_COLLECTION_SIZE if is_ec2() else LOG_LOCAL_COLLECTION_SIZE
         logsCollection.convertToCapped(size)
     logs = logsCollection.getLogs(userId=user_id, requestId=request_id, limit=limit, errors=errors,
-                                            path=path, severity=severity, method=method, code=code)
+                                    path=path, severity=severity, method=method, code=code, slow=slow)
     for i in xrange(len(logs)):
         print 
         print

@@ -62,6 +62,7 @@ class MongoLogsCollection(AMongoCollection):
         requestId   = kwargs.pop('requestId', None)
         method      = kwargs.pop('method', None)
         code        = kwargs.pop('code', None)
+        slow        = kwargs.pop('slow', None)
 
         query = {}
 
@@ -79,6 +80,8 @@ class MongoLogsCollection(AMongoCollection):
             query['method'] = str(method).upper()
         if code is not None:
             query['result'] = code
+        if slow is not None:
+            query['duration'] = {'$gt': (slow * 1000000) }
 
         docs = self._collection.find(query).limit(limit).sort('begin', pymongo.DESCENDING)
         
