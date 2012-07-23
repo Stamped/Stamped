@@ -345,6 +345,8 @@ class BookEntityProxyComparator(AEntityProxyComparator):
             similarity = max(similarity, 0.9)
         else:
             subtitle_similarity = StringComparator.get_ratio(title1_without_subtitle, title2_without_subtitle)
+            if logComparisonLogic:
+                print 'Comparing titles', title1_without_subtitle, title2_without_subtitle
             similarity = max(similarity, subtitle_similarity - 0.1)
         return similarity
 
@@ -366,6 +368,8 @@ class BookEntityProxyComparator(AEntityProxyComparator):
         """
         """
         title_similarity = cls._compare_titles(book1.name, book2.name)
+        if logComparisonLogic:
+            print 'Title similarity:', title_similarity
         if book1.isbn and book1.isbn == book2.isbn and title_similarity > 0.5:
             return CompareResult.match(title_similarity + 1)
         if title_similarity < 0.75:
@@ -374,6 +378,8 @@ class BookEntityProxyComparator(AEntityProxyComparator):
         try:
             # TODO: Look for multiple authors, try to match intelligently.
             author_similarity = cls._compare_authors(book1.authors[0]['name'], book2.authors[0]['name'])
+            if logComparisonLogic:
+                print 'Author similarity:', author_similarity
             if title_similarity + author_similarity > 1.7:
                 return CompareResult.match(title_similarity + author_similarity)
         except KeyError:
