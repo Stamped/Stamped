@@ -218,6 +218,7 @@ def stress(request):
 
     count_report = {}
     mean_report = {}
+    headers = []
     window = 0
     interval = 1
     if request.method == 'POST': 
@@ -228,6 +229,7 @@ def stress(request):
             
             count_report,mean_report = query.qpsReport(now(),interval,window)
             
+            headers = map(lambda x: now() - timedelta(seconds=(interval * x), range(window / interval))
             
     else: form = qpsForm()
     
@@ -241,7 +243,8 @@ def stress(request):
                  'count_results': count_report.iteritems(),
                  'mean_results': mean_report.iteritems(),
                  'n': range(0, window, interval),
-                 'interval': interval
+                 'interval': interval,
+                 'headers': headers,
     })
     return HttpResponse(t.render(c))
 
