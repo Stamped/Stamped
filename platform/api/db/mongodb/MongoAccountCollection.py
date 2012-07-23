@@ -61,6 +61,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if 'linked' not in document:
             document['linked'] = {}
             if 'twitter' in linkedAccounts:
+                logs.info('### twitter in linkedAccounts')
                 twitterAcct = {
                     'service_name'          : 'twitter',
                     'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
