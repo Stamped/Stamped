@@ -69,7 +69,7 @@ class EntitySearch(object):
         for category in allCategories:
             self.__categories_to_sources_and_priorities[category] = []
 
-        self.__registerSource(StampedSource(), music=10, film=10, book=10, app=10, place=10)
+        self.__registerSource(StampedSource(), music=3, film=3, book=3, app=3, place=3)
         self.__registerSource(iTunesSource(), music=10, film=10, book=3, app=10)
         # TODO: Enable film for Amazon. Amazon film results blend TV and movies and have better retrieval than
         # iTunes. On the other hand, they're pretty dreadful -- no clear distinction between TV and movies, no
@@ -177,10 +177,6 @@ class EntitySearch(object):
             text = text.decode('utf-8')
         if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
-
-        import traceback
-        traceback.print_stack()
-        print('timeout: %s' % timeout)
 
         start = datetime.datetime.now()
         results = {}
