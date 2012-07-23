@@ -1099,7 +1099,11 @@ def getWebImage(url, desc=None):
     try:
         memcached = libs.Memcache.globalMemcache()
         
-        data = memcached.get(url)
+        try:
+            data = memcached.get(str(url))
+        except KeyError:
+            data = None 
+            
         if data is None:
             data = getFile(url)
             memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
