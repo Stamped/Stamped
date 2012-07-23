@@ -512,12 +512,17 @@ class MongoEntityStatsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='entitystats', primary_key='entity_id', obj=EntityStats)
-        self._collection.ensure_index([ ('score', pymongo.DESCENDING) ])
-        self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('lat', pymongo.ASCENDING), \
-                                        ('lng', pymongo.ASCENDING), \
-                                        ('types', pymongo.ASCENDING) ])
+        
+        self._collection.ensure_index([ 
+            ('types', pymongo.ASCENDING),
+            ('score', pymongo.DESCENDING),
+        ])
+        self._collection.ensure_index([ 
+            ('types', pymongo.ASCENDING),
+            ('lat', pymongo.ASCENDING), 
+            ('lng', pymongo.ASCENDING), 
+            ('score', pymongo.DESCENDING),
+        ])
 
         self._cache = globalMemcache()
 
@@ -683,15 +688,10 @@ class MongoEntityStatsCollection(AMongoCollection):
         return result
     
     def _buildPopularQuery(self, **kwargs):
-        kinds = kwargs.pop('kinds', None)
         types = kwargs.pop('types', None)
         viewport = kwargs.pop('viewport', None)
-        minScore = kwargs.pop('minScore', None)
 
         query = {}
-
-        if kinds is not None:
-            query['kinds'] = {'$in': list(kinds)}
 
         if types is not None:
             query['types'] = {'$in': list(types)}
@@ -720,9 +720,6 @@ class MongoEntityStatsCollection(AMongoCollection):
                         }, 
                     }, 
                 ]
-
-        if minScore is not None:
-            query['score'] = {'$gte' : minScore}
 
         return query
     
