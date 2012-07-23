@@ -1081,13 +1081,14 @@ class StampedAPI(AStampedAPI):
     def _getUserStampDistribution(self, userId):
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds)
-        stamps      = self._enrichStampObjects(stamps)
+        entityIds   = map(lambda x: x.entity.entity_id, stamps)
+        entities    = self._entityDB.getEntityMinis(entityIds)
 
         categories  = {}
-        num_stamps  = len(stamps)
+        num_stamps  = len(stampIds)
 
-        for stamp in stamps:
-            category = stamp.entity.category
+        for entity in entities:
+            category = entity.category
             categories.setdefault(category, 0)
             categories[category] += 1
 

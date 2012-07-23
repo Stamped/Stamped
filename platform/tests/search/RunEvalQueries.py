@@ -10,6 +10,7 @@ import Globals
 import pickle
 import tempfile
 
+from resolve import GenericSource
 from search.EntitySearch import EntitySearch
 from tests.StampedTestUtils import *
 from tests.framework.FixtureTest import *
@@ -449,4 +450,6 @@ class RunEvalQueries(AStampedTestCase):
 
 
 if __name__ == '__main__':
+    # Real fucking permissive on SxSs.
+    GenericSource.SEARCH_TIMEOUT = 30
     main()

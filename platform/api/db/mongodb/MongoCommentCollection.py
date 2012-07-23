@@ -115,6 +115,10 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         for documentId in self.getCommentIds(stampId):
             documentIds.append(self._getObjectIdFromString(documentId))
 
+        # Short circuit if no comments
+        if len(documentIds) == 0:
+            return []
+
         query = { '_id': { '$in': documentIds } }
         if before is not None:
             query['timestamp.created'] = { '$lte': before }
@@ -140,6 +144,7 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
         for commentId in commentIds:
             documentIds.append(self._getObjectIdFromString(commentId))
 
+        # Short circuit if no comments
         if len(documentIds) == 0:
             return []
         
