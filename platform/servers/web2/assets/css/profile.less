@@ -582,7 +582,7 @@ body.app {
             
             position: relative;
             top: 0;
-            left: -24px;
+            left: -36px;
             
             .timestamp_raw, .timestamp {
                 display: block;
@@ -593,7 +593,7 @@ body.app {
                 color: #999;
                 
                 position: absolute;
-                right: 100%;
+                right: 110%;
                 top:   4px;
             }
             
@@ -685,7 +685,7 @@ body.app {
     opacity: 0;
     .transition(opacity, 0.2s, ease-out);
     
-    background: url(/assets/img/entityimagehover-sprite.png) no-repeat;
+    background: url(/assets/img/entityimage_sprite.png) no-repeat;
     
     &:hover {
         background-position: 0 -27px;
@@ -698,6 +698,14 @@ body.app {
     
     &:hover {
         background-position: -27px -27px;
+    }
+}
+
+.stamp-user-image .zoom {
+    background-position: -54px 0;
+    
+    &:hover {
+        background-position: -54px -27px;
     }
 }
 

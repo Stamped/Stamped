@@ -156,7 +156,9 @@
             {% handlebars_template "close-button" %}
         </div>
         
-        {% handlebars_template "stamp-image-sdetail" stamp %}
+        <div class="stamp-image-sdetail">
+            {% handlebars_template "stamp-image-sdetail" stamp %}
+        </div>
         
         <div class='entity-data'>
             <div class='entity-data-header'>
@@ -329,9 +331,11 @@
                                     <a href="{{item.action.sources.0.link}}">
                                 {% endif %}
                                 
-                                {% if item.icon %}
+                                {% if item.name|lower == "category" %}
+                                    <span class="stamp-category-{{entity.category}}"><span class="stamp-subcategory-{{entity.subcategory}}"><span class="icon"></span></span></span>
+                                {% else %}{% if item.icon %}
                                     <img class='metadata-icon' src="{{item.icon}}" alt="{{item.value}}" />
-                                {% endif %}
+                                {% endif %}{% endif %}
                                 
                                 {{item.value}}
                                 

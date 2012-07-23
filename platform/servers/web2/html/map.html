@@ -96,19 +96,11 @@
             <div class="stamp-map-nav-wrapper">
                 <div class="stamp-map-nav">
                     <div class="nav-header clearfix">
-                        {% if lite %}
-                            {% handlebars_template "profile-image-medium-ish-lite" user %}
-                        {% else %}
-                            {% handlebars_template "profile-image-medium-ish" user %}
-                        {% endif %}
+                        {% handlebars_template "profile-image-medium-ish" user %}
                         
                         <div class="nav-header-title">
                             <div class="name">
-                                {% if lite %}
-                                    {{ user.screen_name }}'s
-                                {% else %}
-                                    {% handlebars_template "screen-name" user %}'s
-                                {% endif %}
+                                {% handlebars_template "screen-name" user %}'s
                             </div>
                             
                             <div class="stamp-map-title user-primary">Stamp Map</div>

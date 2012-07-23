@@ -218,15 +218,30 @@
         // ---------------------------------------------------------------------
         
         
+        var get_active_pane_index = function(offset) {
+            var index  = parseInt($main_body.get(0).className.replace("active-pane-", ""));
+            
+            if (typeof(offset) !== 'undefined') {
+                index += offset;
+                
+                if (index < 0) {
+                    index += 5;
+                }
+                
+                index %= 5;
+            }
+            
+            return index;
+        };
+        
         // auto-cycles the active pane until the user stops the animation by 
         // clicking one of the pane nav buttons
         var main_pane_cycle_animation = new Animation({
             duration    : 5000, 
             complete    : function() {
-                var active  = parseInt($main_body.get(0).className.replace("active-pane-", ""));
-                var next    = ((active + 1) % 5);
+                var index = get_active_pane_index(1);
                 
-                set_active_pane(next);
+                set_active_pane(index);
                 main_pane_cycle_animation.restart();
             }
         });
@@ -482,6 +497,25 @@
             var index   = id.slice("pane-nav-".length);
             
             set_active_pane(index);
+            return false;
+        });
+        
+        $main.on("click", ".pane-nav-arrow", function(event) {
+            event.preventDefault();
+            main_pane_cycle_animation.stop();
+            
+            var $this  = $(this);
+            var offset = 0;
+            
+            if ($this.hasClass("pane-nav-arrow-up")) {
+                offset = -1;
+            } else {
+                offset = 1;
+            }
+            
+            var index = get_active_pane_index(offset);
+            set_active_pane(index);
+            
             return false;
         });
         

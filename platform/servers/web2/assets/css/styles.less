@@ -120,16 +120,17 @@ header {
      
     .header-body {
         position: relative;
-        height: 64px;
+        height: 76px;
         
         p {
             position: absolute;
             line-height: 42px;
-            
-            margin: 0;
-            top:    0;
-            right:  12px;
             white-space: nowrap;
+            
+            color: #888;
+            margin: 0;
+            top:    8px;
+            right:  12px;
             
             .desc {
                 font-size: 90%;
@@ -634,7 +635,18 @@ a.sdetail, .pronounced-title a {
 
 .screen-name {
     text-transform: lowercase;
+    
+    color: #333;
+    
+    &:hover {
+        color: #0855C0;
+    }
+    
+    &:active {
+        color: lighten(#0855C0, 10%);
+    }
 }
+
 
 .pronounced-title a, a.pronounced-title {
     color: #262626;

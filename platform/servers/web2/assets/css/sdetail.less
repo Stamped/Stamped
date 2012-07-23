@@ -57,16 +57,21 @@ body.sdetail_popup_animation, body.sdetail_popup {
     
     .section-entity {
         float: right;
-        width: 30%;
+        position: relative;
+        max-width: 35%;
         padding: .25em;
         margin-bottom: 2em;
+        margin-left: 24px;
         
         .close-button {
             float: right;
         }
         
-        .stamp-preview {
+        .stamp-preview, .stamp-preview-raw {
             margin: 1em auto;
+            
+            width: 250px     !important;
+            max-width: 250px !important;
         }
         
         .entity-data {
@@ -320,6 +325,12 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         color: @text0;
                         text-align: left;
                         float: left;
+                    }
+                    
+                    .icon {
+                        position: relative;
+                        display: inline-block;
+                        top: 4px;
                     }
                     
                     .metadata-icon {
