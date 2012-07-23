@@ -3584,18 +3584,21 @@ class StampedAPI(AStampedAPI):
                 stampIds = self._cache[key]
 
             except KeyError:
-                stampIds = []
-                daysOffset = 0
-                while len(stampIds) < limit and daysOffset < 7:
-                    """
-                    Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
-                    have enough stamps, it should check the previous day, with a max of one week.
-                    """
-                    before = start - timedelta(hours=(24*daysOffset))
-                    since = before - timedelta(hours=24)
-                    stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
-                    daysOffset += 1
-                stampIds = stampIds[:limit]
+                # Start with any whitelisted stamp ids
+                stampIds = self._stampDB.getWhitelistedTastemakerStampIds()
+
+                # stampIds = []
+                # daysOffset = 0
+                # while len(stampIds) < limit and daysOffset < 7:
+                #     """
+                #     Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
+                #     have enough stamps, it should check the previous day, with a max of one week.
+                #     """
+                #     before = start - timedelta(hours=(24*daysOffset))
+                #     since = before - timedelta(hours=24)
+                #     stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
+                #     daysOffset += 1
+                # stampIds = stampIds[:limit]
                 try:
                     self._cache.set(key, stampIds, time=(60*30))
                 except Exception as e:
