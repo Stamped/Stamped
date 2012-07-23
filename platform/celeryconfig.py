@@ -8,6 +8,7 @@ __license__   = "TODO"
 import stamped
 import utils, logs
 import libs.ec2_utils
+import multiprocessing, os, sys
 
 from datetime import timedelta
 from celery.schedules import crontab
@@ -34,6 +35,9 @@ BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
 logs.info('BROKER_URL: %s' % BROKER_URL)
 
 CELERYD_POOL = 'gevent'
+
+if utils.is_ec2():
+    CELERYD_CONCURRENCY  = multiprocessing.cpu_count() * 2 + 1
 
 # use default concurrency; uncomment to use a single celeryd worker
 # (can be useful for debugging)
