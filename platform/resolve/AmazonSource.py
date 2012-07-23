@@ -845,7 +845,7 @@ class AmazonSource(GenericSource):
             self.proxyConstructor = proxyConstructor
 
     def __searchIndexLite(self, searchIndexData, queryText, results, timeout):
-        searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName, timeout=timeout,
+        searchResults = globalAmazon().item_search(timeout=timeout, SearchIndex=searchIndexData.searchIndexName,
             ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25, priority='high')
         #print "\n\n\n\nAMAZON\n\n\n\n\n"
         #pprint(searchResults)

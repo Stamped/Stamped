@@ -734,8 +734,11 @@ class MongoEntityStatsCollection(AMongoCollection):
                         .sort([('score', pymongo.DESCENDING)]) \
                         .limit(limit)
 
-        return map(self._convertFromMongo, documents)
-
+        try:
+            return map(self._convertFromMongo, documents)
+        except Exception:
+            logs.warning("Failed for query %s" % query)
+            raise
 
 class MongoEntitySeedCollection(AMongoCollection, AEntityDB):
     
