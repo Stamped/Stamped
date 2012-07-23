@@ -15,7 +15,7 @@ from logs import report
 
 try:
     import logs, re
-    from resolve.GenericSource              import GenericSource, multipleSource
+    from resolve.GenericSource              import GenericSource, multipleSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from resolve.TitleUtils                 import *
     from resolve.StringNormalizationUtils   import *
     from resolve.Resolver                   import *
@@ -73,7 +73,7 @@ class _AmazonObject(object):
         # We don't catch the LookupRequiredError here because if you are initializing a capped-lookup object without
         # passing in initial data, you are doing it wrong.
         self.countLookupCall('base data')
-        raw = globalAmazon().item_lookup(**self.__params)
+        raw = globalAmazon().item_lookup(timeout=MERGE_TIMEOUT, **self.__params)
         self.__data = xp(raw, 'ItemLookupResponse','Items','Item')
 
     @lazyProperty
@@ -152,7 +152,10 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
             for i in range(1,page_count):
                 page = i+1
                 self.countLookupCall('tracks')
-                data = globalAmazon().item_lookup(ItemId=self.key, ResponseGroup='Large,RelatedItems', RelationshipType='Tracks', RelatedItemPage=str(page))
+                data = globalAmazon().item_lookup(ItemId=self.key,
+                                                  ResponseGroup='Large,RelatedItems',
+                                                  RelationshipType='Tracks',
+                                                  RelatedItemPage=str(page))
                 tracks.extend( xp(data, 'ItemLookupResponse', 'Items', 'Item', 'RelatedItems')['c']['RelatedItem'] )
             track_d = {}
             for track in tracks:
@@ -716,7 +719,7 @@ class AmazonSource(GenericSource):
                         params['SearchIndex'] = 'All'
                     if 'ResponseGroup' not in params:
                         params['ResponseGroup'] = "ItemAttributes"
-                    results = globalAmazon().item_search(**params)
+                    results = globalAmazon().item_search(timeout=SEARCH_TIMEOUT, **params)
 
                     for item in _getSearchResults(results):
                         try:

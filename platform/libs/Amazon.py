@@ -16,7 +16,6 @@ try:
     from libs.LRUCache        import lru_cache
     from libs.CachedFunction  import cachedFn
     from libs.CountedFunction import countedFn
-    from libs.RateLimiter     import RateLimiter, RateException
     from APIKeys              import get_api_key
 except:
     report()
@@ -33,8 +32,7 @@ class Amazon(object):
     """
 
     def __init__(self):
-        self.amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, ASSOCIATE_ID, Timeout=5.0)
-        self.__limiter = RateLimiter(cps=5)
+        self.amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_KEY, ASSOCIATE_ID)
 
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
@@ -43,9 +41,9 @@ class Amazon(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='Amazon (after caching)')
-    def item_search(self, **kwargs):
+    def item_search(self, timeout=None, **kwargs):
         logs.info("Amazon API: ItemSearch %s" % kwargs)
-        return self._item_helper(self.amazon.ItemSearch, **kwargs)
+        return self._item_helper(self.amazon.ItemSearch, timeout, **kwargs)
 
     # note: these decorators add tiered caching to this function, such that
     # results will be cached locally with a very small LRU cache of 64 items
@@ -54,13 +52,14 @@ class Amazon(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='Amazon (after caching)')
-    def item_lookup(self, **kwargs):
+    def item_lookup(self, timeout=None, **kwargs):
         logs.info("Amazon API: ItemLookup %s" % kwargs)
-        return self._item_helper(self.amazon.ItemLookup, **kwargs)
+        return self._item_helper(self.amazon.ItemLookup,
+                                 timeout,
+                                 **kwargs)
 
-    def _item_helper(self, func, **kwargs):
-        with self.__limiter:
-            return xmlToPython(func(**kwargs))
+    def _item_helper(self, func, timeout=None, **kwargs):
+        return xmlToPython(func(timeout, **kwargs))
 
 __globalAmazon = None
 

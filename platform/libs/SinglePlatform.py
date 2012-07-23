@@ -14,8 +14,8 @@ import json, urllib
 import datetime, logs, sys, time
 
 from pprint         import pprint
-from libs.LRUCache       import lru_cache
-from libs.Memcache       import memcached_function
+from libs.LRUCache  import lru_cache
+from libs.Memcache  import memcached_function
 from api.Schemas    import Menu
 from api.Schemas    import Submenu
 from api.Schemas    import MenuSection
@@ -130,28 +130,28 @@ class SinglePlatform(object):
         self.__cooldown = .4
         self.__throttled = 0
     
-    def search(self, query, page=0, count=20, priority='low'):
+    def search(self, query, page=0, count=20, priority='low', timeout=None):
         params = {
             'q'     : query, 
             'page'  : page, 
             'count' : count, 
         }
         
-        return self._get_uri('/restaurants/search', priority, params)
+        return self._get('/restaurants/search', priority, timeout, params)
     
-    def lookup(self, location_id, priority='low'):
-        return self._get_uri('/restaurants/%s' % location_id, priority)
+    def lookup(self, location_id, priority='low', timeout=None):
+        return self._get('/restaurants/%s' % location_id, priority, timeout)
     
-    def get_menu(self, location_id, priority='low'):
-        return self._get_uri('/restaurants/%s/menu' % location_id, priority)
+    def get_menu(self, location_id, priority='low', timeout=None):
+        return self._get('/restaurants/%s/menu' % location_id, priority, timeout)
 
-    def get_menu_schema(self, location_id, priority='low'):
-        return toMenu(self.get_menu(location_id, priority))
+    def get_menu_schema(self, location_id, priority='low', timeout=None):
+        return toMenu(self.get_menu(location_id, priority, timeout))
     
     def get_short_menu(self, location_id, priority='low'):
-        return self._get_uri('/restaurants/%s/shortmenu' % location_id, priority)
+        return self._get('/restaurants/%s/shortmenu' % location_id, priority, timeout)
     
-    def _get_uri(self, uri, priority='low', params=None):
+    def _get(self, uri, priority='low', timeout=None, params=None):
         if params is not None:
             uri = "%s?%s" % (uri, urllib.urlencode(params))
         
@@ -164,7 +164,7 @@ class SinglePlatform(object):
             'Accept-encoding': 'gzip',
             'Accept' : 'application/json',
         }
-        response, content = service_request('singleplatform', 'GET', url, header=header, priority=priority)
+        response, content = service_request('singleplatform', 'GET', url, header=header, priority=priority, timeout=timeout)
         logs.info(url)
         result = json.loads(content)
         return result

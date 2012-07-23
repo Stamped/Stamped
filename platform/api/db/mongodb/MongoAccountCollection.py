@@ -58,52 +58,52 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccounts is None:
             return document
 
-        if 'linked' not in document:
-            document['linked'] = {}
-            if 'twitter' in linkedAccounts:
-                twitterAcct = {
-                    'service_name'          : 'twitter',
-                    'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
-                    'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
-                    'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
-                    }
-                twitterAcctSparse = {}
-                for k,v in twitterAcct.iteritems():
-                    if v is not None:
-                        twitterAcctSparse[k] = v
-                document['linked']['twitter'] = twitterAcctSparse
+        #if 'linked' not in document:
+        document['linked'] = {}
+        if 'twitter' in linkedAccounts:
+            twitterAcct = {
+                'service_name'          : 'twitter',
+                'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
+                'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
+                'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
+                }
+            twitterAcctSparse = {}
+            for k,v in twitterAcct.iteritems():
+                if v is not None:
+                    twitterAcctSparse[k] = v
+            document['linked']['twitter'] = twitterAcctSparse
 
-                if linkedAccounts['twitter'].pop('twitter_alerts_sent', False) and twitterAcct['linked_user_id'] is not None:
-                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'twitter', twitterAcct['linked_user_id'])
+            if linkedAccounts['twitter'].pop('twitter_alerts_sent', False) and twitterAcct['linked_user_id'] is not None:
+                self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'twitter', twitterAcct['linked_user_id'])
 
-            if 'facebook' in linkedAccounts:
-                facebookAcct = {
-                    'service_name'          : 'facebook',
-                    'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
-                    'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
-                    'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
-                    }
-                facebookAcctSparse = {}
-                for k,v in facebookAcct.iteritems():
-                    if v is not None:
-                        facebookAcctSparse[k] = v
-                document['linked']['facebook'] = facebookAcctSparse
+        if 'facebook' in linkedAccounts:
+            facebookAcct = {
+                'service_name'          : 'facebook',
+                'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
+                'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
+                'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
+                }
+            facebookAcctSparse = {}
+            for k,v in facebookAcct.iteritems():
+                if v is not None:
+                    facebookAcctSparse[k] = v
+            document['linked']['facebook'] = facebookAcctSparse
 
-                if linkedAccounts['facebook'].pop('facebook_alerts_sent', False) and facebookAcct['linked_user_id'] is not None:
-                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'facebook', facebookAcct['linked_user_id'])
+            if linkedAccounts['facebook'].pop('facebook_alerts_sent', False) and facebookAcct['linked_user_id'] is not None:
+                self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'facebook', facebookAcct['linked_user_id'])
 
-            if 'netflix' in linkedAccounts:
-                netflixAcct = {
-                    'service_name'          : 'netflix',
-                    'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
-                    'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
-                    'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
-                    }
-                netflixAcctSparse = {}
-                for k,v in netflixAcct.iteritems():
-                    if v is not None:
-                        netflixAcctSparse[k] = v
-                document['linked']['netflix'] = netflixAcctSparse
+        if 'netflix' in linkedAccounts:
+            netflixAcct = {
+                'service_name'          : 'netflix',
+                'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
+                'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
+                'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
+                }
+            netflixAcctSparse = {}
+            for k,v in netflixAcct.iteritems():
+                if v is not None:
+                    netflixAcctSparse[k] = v
+            document['linked']['netflix'] = netflixAcctSparse
 
         return document
 
@@ -305,15 +305,17 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def getAccountsByFacebookId(self, facebookId):
         documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
         accounts = [self._convertFromMongo(doc) for doc in documents]
+        oldIds = [acct.linked.facebook.linked_user_id for acct in accounts if acct.linked.facebook is not None]
         documents = self._collection.find({"linked.facebook.linked_user_id" : facebookId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        accounts.extend([self._convertFromMongo(doc) for doc in documents if doc['linked']['facebook']['linked_user_id'] not in oldIds])
         return accounts
 
     def getAccountsByTwitterId(self, twitterId):
         documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
         accounts = [self._convertFromMongo(doc) for doc in documents]
+        oldIds = [acct.linked.twitter.linked_user_id for acct in accounts if acct.linked.twitter is not None]
         documents = self._collection.find({"linked.twitter.linked_user_id" : twitterId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        accounts.extend([self._convertFromMongo(doc) for doc in documents if doc['linked']['twitter']['linked_user_id'] not in oldIds])
         return accounts
 
     def getAccountsByNetflixId(self, netflixId):
@@ -418,9 +420,17 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix', 'rdio'] :
             raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
 
+        userObjectId = self._getObjectIdFromString(userId)
+
         self._collection.update(
-            {'_id': self._getObjectIdFromString(userId)},
+            {'_id': userObjectId},
             {'$set': { 'linked.%s' % linkedAccount.service_name : linkedAccount.dataExport() } }
+        )
+
+        # remove old style linked account if it exists
+        self._collection.update(
+                {'_id': userObjectId},
+                {'$unset': { 'linked_accounts.%s' % linkedAccount.service_name : 1 } }
         )
 
 
