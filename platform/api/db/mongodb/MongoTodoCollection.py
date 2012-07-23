@@ -192,19 +192,16 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         self.user_todos_history_collection.addUserTodo(todo.user_id, todo.todo_id)
 
         # Add links to todo
-        self.user_todo_entities_collection.addUserTodosEntity(\
-            todo.user_id, todo.entity.entity_id)
+        self.user_todo_entities_collection.addUserTodosEntity(todo.user_id, todo.entity.entity_id)
 
         return todo
 
     def removeTodo(self, userId, entityId):
         try:
-            self._collection.remove({'entity.entity_id': entityId,\
-                                     'user_id': userId})
+            self._collection.remove({'entity.entity_id': entityId, 'user_id': userId})
 
             # Remove links to todo
-            self.user_todo_entities_collection.removeUserTodosEntity(\
-                userId, entityId)
+            self.user_todo_entities_collection.removeUserTodosEntity(userId, entityId)
         except:
             logs.warning("Cannot remove document")
             raise Exception

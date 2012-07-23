@@ -15,11 +15,11 @@ from logs import report
 
 try:
     import logs, traceback, utils
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
     from libs.TheTVDB               import TheTVDB, globalTheTVDB
-    from resolve.GenericSource              import GenericSource
+    from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from pprint                     import pformat, pprint
     from search.ScoringUtils        import *
@@ -173,11 +173,11 @@ class TheTVDBSource(GenericSource):
         return self.emptySource
     
     def tvSource(self, query):
-        return self.generatorSource(self.__queryGen(query=query.name), 
+        return self.generatorSource(self.__queryGen(query=query.name, timeout=MERGE_TIMEOUT),
                                     constructor=TheTVDBShow)
     
     def __queryGen(self, **params):
-        results = self.__thetvdb.search(transform=True, detailed=True, **params)
+        results = self.__thetvdb.search(transform=True, detailed=True, timeout=None, **params)
         for result in results:
             yield result
 
@@ -186,7 +186,7 @@ class TheTVDBSource(GenericSource):
         if queryCategory != 'film':
             raise NotImplementedError()
         # Ugh. Why are we using entities?
-        rawResults = self.__thetvdb.search(queryText, transform=True, detailed=False, priority='high')
+        rawResults = self.__thetvdb.search(queryText, transform=True, detailed=False, priority='high', timeout=SEARCH_TIMEOUT)
         if logRawResults:
             logComponents = ['\n\n\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\nTheTVDB RAW RESULTS\n\n\n']
             for rawResult in rawResults:

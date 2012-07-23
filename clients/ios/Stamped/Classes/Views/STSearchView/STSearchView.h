@@ -11,11 +11,6 @@
 
 @protocol STSearchViewDelegate;
 @interface STSearchView : UIView {
-    UIButton *_cancelButton;
-    UIImageView *_topLeftCorner;
-    UIImageView *_topRightCorner;
-    UITapGestureRecognizer *_tap;
-    UITextField *_textField;
     UIActivityIndicatorView *_activityView;
 }
 

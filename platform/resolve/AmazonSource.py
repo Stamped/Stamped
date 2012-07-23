@@ -155,7 +155,8 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
                 data = globalAmazon().item_lookup(ItemId=self.key,
                                                   ResponseGroup='Large,RelatedItems',
                                                   RelationshipType='Tracks',
-                                                  RelatedItemPage=str(page))
+                                                  RelatedItemPage=str(page),
+                                                  timeout=MERGE_TIMEOUT)
                 tracks.extend( xp(data, 'ItemLookupResponse', 'Items', 'Item', 'RelatedItems')['c']['RelatedItem'] )
             track_d = {}
             for track in tracks:
@@ -844,8 +845,8 @@ class AmazonSource(GenericSource):
             self.responseGroups = responseGroups
             self.proxyConstructor = proxyConstructor
 
-    def __searchIndexLite(self, searchIndexData, queryText, results):
-        searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
+    def __searchIndexLite(self, searchIndexData, queryText, results, timeout):
+        searchResults = globalAmazon().item_search(timeout=timeout, SearchIndex=searchIndexData.searchIndexName,
             ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25, priority='high')
         #print "\n\n\n\nAMAZON\n\n\n\n\n"
         #pprint(searchResults)
@@ -864,7 +865,7 @@ class AmazonSource(GenericSource):
         resultsBySearchIndex = {}
         pool = Pool(len(searchIndexes))
         for searchIndexData in searchIndexes:
-            pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex)
+            pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex, timeout)
         pool.join(timeout)
         if logRawResults:
             logComponents = ['\n\n\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\n\n\n']
@@ -1186,7 +1187,7 @@ class AmazonSource(GenericSource):
         self.__penalizeForMissingListPrice(searchResults)
         for searchResult in searchResults:
             adjustBookRelevanceByQueryMatch(searchResult, queryText)
-            applyBookTitleDataQualityTests(searchResult, queryText)
+            applyBookDataQualityTests(searchResult, queryText)
             if not searchResult.resolverObject.authors:
                 penaltyFactor = 0.2
                 searchResult.dataQuality *= penaltyFactor
@@ -1275,7 +1276,7 @@ class AmazonSource(GenericSource):
     
     def entityProxyFromKey(self, key, **kwargs):
         try:
-            lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key)
+            lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key, timeout=MERGE_TIMEOUT)
             result = _getLookupResult(lookupData)
             kind = xp(result, 'ItemAttributes', 'ProductGroup')['v'].lower()
             logs.debug(kind)

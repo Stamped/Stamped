@@ -77,7 +77,7 @@ class SimpleDB(object):
                 data['cid'] = stat['client_id']
 
             if 'duration' in stat:
-                data['dur'] = "{0:08d}".format(stat['duration'])
+                data['dur'] = "{0:10d}".format(stat['duration'])
 
             if len(data) > 0:
                 statId = str(ObjectId())

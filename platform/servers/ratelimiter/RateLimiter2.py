@@ -288,7 +288,7 @@ class RateLimiter(object):
 
         return dur_sum / len(self.__request_dur_log)
 
-    def _getExpectedWaitTime(self, now, priority=0):
+    def _getExpectedWaitTime(self, now, priority):
         ### determine the longest wait time for all of the rate limits, given the number of items in the queue
         ###
         if self.limit is None or self.period is None:

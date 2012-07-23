@@ -18,27 +18,13 @@ typedef enum {
 @protocol STSliderScopeViewDataSource;
 
 @class STTextCalloutView;
-@interface STSliderScopeView : UIView {
-    STTextCalloutView *_textCallout;
-    BOOL _dragging;
-    NSTimeInterval _dragBeginTime;
-    UIImageView *_draggingView;
-    CGPoint _beginPress;
-    BOOL _firstPan;
-    BOOL _firstPress;
-    UIImage *_userImage;
-    STStampedAPIScope _prevScope;
-    
-    STSliderScopeStyle _style; // default STSliderScopeStyleThree
-    
-}
+@interface STSliderScopeView : UIView
 
 - (id)initWithStyle:(STSliderScopeStyle)style frame:(CGRect)frame;
 
 - (void)moveToScope:(STStampedAPIScope)scope animated:(BOOL)animated duration:(CGFloat)duration completion:(void (^)(void))completion;
 @property (nonatomic,assign) NSInteger selectedIndex;
 @property (nonatomic,assign) STStampedAPIScope scope; // default STStampedAPIScopeYou
-@property (nonatomic,readonly) UILongPressGestureRecognizer *longPress;
 @property (nonatomic,assign) id <STSliderScopeViewDelegate> delegate;
 @property (nonatomic,assign) id <STSliderScopeViewDataSource> dataSource;
 

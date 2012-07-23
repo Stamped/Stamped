@@ -41,7 +41,7 @@ class _RdioObject(object):
     rdio - an instance of Rdio (API proxy)
     """
 
-    def __init__(self, data=None, rdio_id=None, rdio=None, extras=''):
+    def __init__(self, data=None, rdio_id=None, rdio=None, extras='', timeout=None):
         if rdio is None:
             rdio = globalRdio()
         if data == None:
@@ -52,7 +52,7 @@ class _RdioObject(object):
                 # __init__ means that all subclassers must first init ResolverObject or a subclass before initing
                 # _RdioObject.
                 self.countLookupCall('main data')
-                data = rdio.method('get',keys=rdio_id,extras=extras)['result'][rdio_id]
+                data = rdio.method('get', keys=rdio_id, extras=extras, timeout=timeout)['result'][rdio_id]
             except KeyError:
                 raise ValueError('bad rdio_id')
         elif rdio_id is not None:
@@ -114,7 +114,7 @@ class RdioArtist(_RdioObject, ResolverPerson):
     def albums(self):
         try:
             self.countLookupCall('albums')
-            album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
+            album_list = self.rdio.method('getAlbumsForArtist', artist=self.key, count=100, timeout=MERGE_TIMEOUT)['result']
         except LookupRequiredError:
             return []
         return [ 
@@ -130,7 +130,7 @@ class RdioArtist(_RdioObject, ResolverPerson):
     def tracks(self):
         try:
             self.countLookupCall('tracks')
-            track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
+            track_list = self.rdio.method('getTracksForArtist', artist=self.key, count=100, timeout=MERGE_TIMEOUT)['result']
         except LookupRequiredError:
             return []
         return [ 
@@ -169,7 +169,7 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
         try:
             keys = ','.join(self.data['trackKeys'])
             self.countLookupCall('tracks')
-            track_dict = self.rdio.method('get',keys=keys)['result']
+            track_dict = self.rdio.method('get', keys=keys, timeout=MERGE_TIMEOUT)['result']
         except LookupRequiredError:
             return []
         return [ 
@@ -326,6 +326,7 @@ class   RdioSource(GenericSource):
                 query=search,
                 types='Album',
                 extras='label,isCompilation',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioAlbum)
 
@@ -334,6 +335,7 @@ class   RdioSource(GenericSource):
                 query=query.name,
                 types='Artist',
                 extras='albumCount',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioArtist)
 
@@ -380,8 +382,13 @@ class   RdioSource(GenericSource):
     def searchLite(self, queryCategory, queryText, pool=None, timeout=None, coords=None, logRawResults=None):
         if queryCategory != 'music':
             raise Exception('Rdio only supports music!')
-        response = self.__rdio.method('search', query=queryText, count=25, types='Artist,Album,Track',
-            extras='albumCount,label,isCompilation', priority='high', timeout=SEARCH_TIMEOUT)
+        response = self.__rdio.method('search',
+                                      query=queryText,
+                                      count=25,
+                                      types='Artist,Album,Track',
+                                      extras='albumCount,label,isCompilation', 
+                                      priority='high',
+                                      timeout=SEARCH_TIMEOUT)
         if response['status'] != 'ok':
             # TODO: Proper error handling here. Tracking of how often this happens.
             print "Rdio error; see response:"
