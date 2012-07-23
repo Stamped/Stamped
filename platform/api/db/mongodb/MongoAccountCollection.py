@@ -313,7 +313,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def getAccountsByTwitterId(self, twitterId):
         documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
         accounts = [self._convertFromMongo(doc) for doc in documents]
-        logs.info('twitterId: %s  accounts: %s' % (twitterId, accounts))
         oldIds = [acct.linked.twitter.linked_user_id for acct in accounts if acct.linked.twitter is not None]
         documents = self._collection.find({"linked.twitter.linked_user_id" : twitterId })
         accounts.extend([self._convertFromMongo(doc) for doc in documents if doc['linked']['twitter']['linked_user_id'] not in oldIds])
