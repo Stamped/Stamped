@@ -16,21 +16,17 @@ from logs import report
 try:
     import logs
     from libs.Netflix               import globalNetflix
-    from resolve.GenericSource              import GenericSource
+    from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from pprint                     import pformat
     from datetime                   import datetime
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
 except:
     report()
     raise
-
-
-# TODO: this class is unfinished!
-
 
 class _NetflixObject(object):
     """
@@ -288,7 +284,7 @@ class NetflixSource(GenericSource):
 
                 # return all remaining results through separate page calls to the api
                 while result_counter < num_results:
-                    results = self.__netflix.searchTitles(query.name, start=result_counter)
+                    results = self.__netflix.searchTitles(query.name, start=result_counter, timeout=MERGE_TIMEOUT)
                     result_counter += results['results_per_page']
 
                     # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.

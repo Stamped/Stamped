@@ -15,18 +15,17 @@ from logs import report
 
 try:
     import logs
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
     from libs.Rdio                  import Rdio, globalRdio
-    from resolve.GenericSource              import GenericSource
+    from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from pprint                     import pformat
     from search.ScoringUtils        import *
 except:
     report()
     raise
-
 
 class _RdioObject(object):
     """
@@ -312,6 +311,7 @@ class   RdioSource(GenericSource):
                 query=search,
                 types='Track',
                 extras='',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioTrack)
     
@@ -352,16 +352,18 @@ class   RdioSource(GenericSource):
                 query=query.query_string,
                 types='Artist,Album,Track',
                 extras='albumCount,label,isCompilation',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioSearchAll)
     
-    def __queryGen(self, batches=(100,), **params):
+    def __queryGen(self, batches=(100,), timeout=None, **params):
         offset  = 0
         
         for batch in batches:
             response = self.__rdio.method('search',
                 start=offset,
                 count=batch,
+                timeout=timeout,
                 **params
             )
             if response['status'] == 'ok':
@@ -379,7 +381,7 @@ class   RdioSource(GenericSource):
         if queryCategory != 'music':
             raise Exception('Rdio only supports music!')
         response = self.__rdio.method('search', query=queryText, count=25, types='Artist,Album,Track',
-            extras='albumCount,label,isCompilation', priority='high')
+            extras='albumCount,label,isCompilation', priority='high', timeout=SEARCH_TIMEOUT)
         if response['status'] != 'ok':
             # TODO: Proper error handling here. Tracking of how often this happens.
             print "Rdio error; see response:"

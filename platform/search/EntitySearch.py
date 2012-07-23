@@ -20,6 +20,7 @@ from resolve.StampedSource import StampedSource
 from resolve.TMDBSource import TMDBSource
 from resolve.TheTVDBSource import TheTVDBSource
 from resolve.iTunesSource import iTunesSource
+from resolve.GenericSource import SEARCH_TIMEOUT
 from api.Schemas import PlaceEntity
 from search.SearchResultDeduper import SearchResultDeduper
 from search.DataQualityUtils import *
@@ -171,11 +172,15 @@ class EntitySearch(object):
             logs.report()
             resultsDict[source] = []
 
-    def search(self, category, text, timeout=None, limit=10, coords=None):
+    def search(self, category, text, timeout=SEARCH_TIMEOUT, limit=10, coords=None):
         if not isinstance(text, unicode):
             text = text.decode('utf-8')
         if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
+
+        import traceback
+        traceback.print_stack()
+        print('timeout: %s' % timeout)
 
         start = datetime.datetime.now()
         results = {}
@@ -201,7 +206,7 @@ class EntitySearch(object):
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, coords=coords)
 
 
         logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
@@ -308,7 +313,7 @@ class EntitySearch(object):
         entityAndClusterList.sort(key=scoreEntityAndCluster, reverse=True)
 
 
-    def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
+    def searchEntitiesAndClusters(self, category, text, timeout=SEARCH_TIMEOUT, limit=10, coords=None):
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
         searchDoneTime = datetime.datetime.now()
         entityResults = []

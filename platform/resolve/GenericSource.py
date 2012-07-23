@@ -25,6 +25,9 @@ from api.Schemas                import *
 from resolve.EntityGroups               import *
 from api.Entity                     import buildEntity
 
+MERGE_TIMEOUT   = 60*60*5 # 5 hour timeout
+SEARCH_TIMEOUT  = 3
+
 def generatorSource(generator, constructor=None, unique=False, tolerant=False):
     if constructor is None:
         constructor = lambda x: x

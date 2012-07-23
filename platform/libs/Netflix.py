@@ -76,7 +76,7 @@ class Netflix(object):
     def __isUserBlacklisted(self, user_id):
         return self.__blacklist.get(user_id, 0) >= self.__blacklistThreshold
 
-    def __http(self, verb, service, user_id=None, token=None, priority='low', **parameters):
+    def __http(self, verb, service, user_id=None, token=None, priority='low', timeout=None, **parameters):
         """
         Makes a request to the Netflix API
         """
@@ -108,9 +108,9 @@ class Netflix(object):
         logs.info(url)
 
         if verb == 'POST':
-            response, content = service_request('netflix', verb, url, body=params, header=headers, priority=priority)
+            response, content = service_request('netflix', verb, url, body=params, header=headers, priority=priority, timeout=timeout)
         else:
-            response, content = service_request('netflix', verb, url, query_params=params, header=headers, priority=priority)
+            response, content = service_request('netflix', verb, url, query_params=params, header=headers, priority=priority, timeout=timeout)
 
         # if the response is a 401 or 403, blacklist the user until the day expires
         if user_id is not None and response.status in (401, 403):
@@ -137,14 +137,14 @@ class Netflix(object):
             else:
                 raise StampedThirdPartyError(message)
 
-    def __get(self, service, user_id=None, token=None, priority='low', **parameters):
-        return self.__http('GET', service, user_id, token, priority, **parameters)
+    def __get(self, service, user_id=None, token=None, priority='low', timeout=None, **parameters):
+        return self.__http('GET', service, user_id, token, priority, timeout, **parameters)
 
-    def __post(self, service, user_id=None, token=None, priority='low', **parameters):
-        return self.__http('POST', service, user_id, token, priority, **parameters)
+    def __post(self, service, user_id=None, token=None, priority='low', timeout=None, **parameters):
+        return self.__http('POST', service, user_id, token, priority, timeout, **parameters)
 
-    def __delete(self, service, user_id=None, token=None, priority='low', **parameters):
-        return self.__http('DELETE', service, user_id, token, priority, **parameters)
+    def __delete(self, service, user_id=None, token=None, priority='low', timeout=None, **parameters):
+        return self.__http('DELETE', service, user_id, token, priority, timeout, **parameters)
     
     def __asList(self, elmt):
         if isinstance(elmt, list):
@@ -170,11 +170,12 @@ class Netflix(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Netflix (after caching)')
-    def autocomplete(self, term, priority='high'):
+    def autocomplete(self, term, priority='high', timeout=None):
         results = self.__get(
             service         = 'catalog/titles/autocomplete',
             term            = term,
             priority        = priority,
+            timeout         = timeout,
         )
         autocomplete = results.pop('autocomplete', None)
         if autocomplete is None or 'autocomplete_item' not in self.__asList(autocomplete)[0]:
@@ -193,7 +194,7 @@ class Netflix(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Netflix (after caching)')
-    def searchTitles(self, title, start=0, count=100, priority='low'):
+    def searchTitles(self, title, start=0, count=100, priority='low', timeout=None):
         """
         Searches the netflix catalog for titles with a given search string.
         returns the json result as a dict
@@ -204,6 +205,7 @@ class Netflix(object):
                         start_index     = start,
                         max_results     = count,
                         priority        = priority,
+                        timeout         = timeout,
                         expand          ='synopsis,cast,directors,formats,delivery_formats'
                     )
         return results.get('catalog_titles', None)
@@ -215,11 +217,12 @@ class Netflix(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Netflix (after caching)')
-    def getTitleDetails(self, netflix_id, priority='low'):
+    def getTitleDetails(self, netflix_id, priority='low', timeout=None):
         results = self.__get(
             service         = netflix_id,
             expand          = 'synopsis,cast,directors,formats,delivery_formats',
             priority        = priority,
+            timeout         = timeout,
         )
         return results.get('catalog_title', None)
 

@@ -16,19 +16,19 @@ from logs import report
 try:
     import logs, urllib2, datetime
     from libs.iTunes                import globaliTunes
-    from resolve.GenericSource              import GenericSource, listSource
+    from resolve.GenericSource      import GenericSource, listSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty, basicNestedObjectToString
     from gevent.pool                import Pool
     from pprint                     import pprint, pformat
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
     from libs.LibUtils              import parseDateString
-    from resolve.StampedSource              import StampedSource
-    from api.Entity                     import mapCategoryToTypes
+    from resolve.StampedSource      import StampedSource
+    from api.Entity                 import mapCategoryToTypes
     from search.ScoringUtils        import *
-    from resolve.Resolver                   import trackSimplify
-    from search.DataQualityUtils            import *
+    from resolve.Resolver           import trackSimplify
+    from search.DataQualityUtils    import *
 except Exception:
     report()
     raise
@@ -90,7 +90,7 @@ class _iTunesObject(object):
             # Here and in the later call, we don't bother catching the LookupRequiredError because if you're not passing
             # the data param into an iTunesSource with capped lookup calls you're doing it wrong.
             self.countLookupCall('full data')
-            return self.itunes.method('lookup', id=self.__itunes_id)['results'][0]
+            return self.itunes.method('lookup', id=self.__itunes_id, timeout=MERGE_TIMEOUT)['results'][0]
 
         entity_field = 'song'
         if self.isType('artist'):
@@ -105,7 +105,8 @@ class _iTunesObject(object):
         #    (if not hasattr(self, 'authors') self.authors = [])
         # Instead of being able to say "is ResolverPerson," then, you could instead use types, etc.
         self.countLookupCall('full data')
-        results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field, limit=1000)['results']
+        results = self.itunes.method('lookup', id=self.__itunes_id, entity=entity_field, limit=1000,
+            timeout=MERGE_TIMEOUT)['results']
         m = {
             'tracks':[],
             'albums':[],
@@ -190,7 +191,7 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         else:
             try:
                 self.countLookupCall('albums')
-                results = self.itunes.method('lookup', id=self.key, entity='album', limit=1000)['results']
+                results = self.itunes.method('lookup', id=self.key, entity='album', limit=1000, timeout=MERGE_TIMEOUT)['results']
             except LookupRequiredError:
                 results = []
         return [
@@ -216,7 +217,7 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
         else:
             try:
                 self.countLookupCall('tracks')
-                results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
+                results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000, timeout=MERGE_TIMEOUT)['results']
             except LookupRequiredError:
                 results = []
         return [
@@ -298,7 +299,7 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
         else:
             try:
                 self.countLookupCall('tracks')
-                results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000)['results']
+                results = self.itunes.method('lookup', id=self.key, entity='song', limit=1000, timeout=MERGE_TIMEOUT)['results']
             except LookupRequiredError:
                 results = []
         if results is None:
@@ -755,7 +756,7 @@ class iTunesSource(GenericSource):
 
     def entityProxyFromKey(self, itunesId, **kwargs):
         try:
-            rawData = self.__itunes.method('lookup',id=itunesId)
+            rawData = self.__itunes.method('lookup',id=itunesId, timeout=MERGE_TIMEOUT)
 
             if len(rawData['results']) == 0 or rawData['resultCount'] == 0:
                 """
@@ -783,7 +784,7 @@ class iTunesSource(GenericSource):
                         if source.code == 200 and source.url != url:
                             newId = source.url.split('?')[0].split('/')[-1].replace('id','')
                             if newId != itunesId:
-                                rawData = self.__itunes.method('lookup', id=newId)
+                                rawData = self.__itunes.method('lookup', id=newId, timeout=MERGE_TIMEOUT)
                 except Exception:
                     pass
 
@@ -848,31 +849,38 @@ class iTunesSource(GenericSource):
         return self.emptySource
 
     def trackSource(self, query):
-        items = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200)['results']
+        items = self.__itunes.method('search', term=query.name, entity='song', attribute='allTrackTerm', limit=200,
+            timeout=MERGE_TIMEOUT)['results']
         return listSource(items, constructor=lambda x: iTunesTrack(data=x))
     
     def albumSource(self, query):
-        items = self.__itunes.method('search', term=query.name, entity='album', attribute='albumTerm', limit=200)['results']
+        items = self.__itunes.method('search', term=query.name, entity='album', attribute='albumTerm', limit=200,
+            timeout=MERGE_TIMEOUT)['results']
         return listSource(items, constructor=lambda x: iTunesAlbum(data=x))
 
     def artistSource(self, query):
-        items = self.__itunes.method('search', term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100)['results']
+        items = self.__itunes.method('search', term=query.name, entity='allArtist', attribute='allArtistTerm', limit=100,
+            timeout=MERGE_TIMEOUT)['results']
         return listSource(items, constructor=lambda x: iTunesArtist(data=x))
 
     def movieSource(self, query):
-        items = self.__itunes.method('search', term=query.name, entity='movie', attribute='movieTerm', limit=100)['results']
+        items = self.__itunes.method('search', term=query.name, entity='movie', attribute='movieTerm', limit=100,
+            timeout=MERGE_TIMEOUT)['results']
         return listSource(items, constructor=lambda x: iTunesMovie(data=x))
 
     def bookSource(self, query):
-        items = self.__itunes.method('search', term=query.name, entity='ebook', limit=100)['results']
+        items = self.__itunes.method('search', term=query.name, entity='ebook', limit=100,
+            timeout=MERGE_TIMEOUT)['results']
         return listSource(items, constructor=lambda x: iTunesBook(data=x))
 
     def tvSource(self, query):
-        items = self.__itunes.method('search', term=query.name, entity='tvShow', attribute='showTerm', limit=100)['results']
+        items = self.__itunes.method('search', term=query.name, entity='tvShow', attribute='showTerm', limit=100,
+            timeout=MERGE_TIMEOUT)['results']
         return listSource(items, constructor=lambda x: iTunesTVShow(data=x))
 
     def appSource(self, query):
-        items = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100)['results']
+        items = self.__itunes.method('search', term=query.name, entity='software', attribute='softwareDeveloper', limit=100,
+            timeout=MERGE_TIMEOUT)['results']
         return listSource(items, constructor=lambda x: iTunesApp(data=x))
 
     def __createEntityProxy(self, value, maxLookupCalls=None):
@@ -903,11 +911,12 @@ class iTunesSource(GenericSource):
 
         return constructor(data=value, maxLookupCalls=maxLookupCalls)
 
-    def __searchEntityTypeLite(self, entityType, queryText, resultsDict):
+    def __searchEntityTypeLite(self, entityType, queryText, resultsDict, timeout):
         try:
             if isinstance(queryText, unicode):
                 queryText = queryText.encode('utf-8')
-            resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText, priority='high')['results']
+            resultsDict[entityType] = self.__itunes.method('search', entity=entityType, term=queryText, priority='high',
+                timeout=timeout)['results']
         except Exception:
             logs.report()
 
@@ -931,7 +940,7 @@ class iTunesSource(GenericSource):
         pool = Pool(len(iTunesTypes))
         rawResults = {}
         for iTunesType in iTunesTypes:
-            pool.spawn(self.__searchEntityTypeLite, iTunesType, queryText, rawResults)
+            pool.spawn(self.__searchEntityTypeLite, iTunesType, queryText, rawResults, timeout)
         pool.join(timeout=timeout)
 
         if logRawResults:
@@ -1102,7 +1111,10 @@ class iTunesSource(GenericSource):
                 raw_results = []
                 def helper(q):
                     raw_results.append(self.__itunes.method(
-                        'search', term=query.query_string, entity=q
+                        'search',
+                        term=query.query_string,
+                        entity=q,
+                        timeout=SEARCH_TIMEOUT,
                     )['results'])
                 
                 pool = Pool(len(queries))
