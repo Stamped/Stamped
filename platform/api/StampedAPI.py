@@ -51,6 +51,7 @@ try:
     from resolve.EntitySource       import EntitySource
     from resolve.EntityProxySource  import EntityProxySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
+    from resolve.BasicSourceContainer import BasicSourceContainer
     from resolve.AmazonSource               import AmazonSource
     from resolve.FactualSource              import FactualSource
     from resolve.GooglePlacesSource         import GooglePlacesSource
