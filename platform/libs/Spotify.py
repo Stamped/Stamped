@@ -43,27 +43,27 @@ class Spotify(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn('Spotify (after caching)')
-    def method(self, service, method, priority='low', **params):
+    def method(self, service, method, priority='low', timeout=None, **params):
         base_url = 'http://ws.spotify.com/%s/1/%s.json' % (service, method)
         for k,v in params.items():
             if isinstance(v,int) or isinstance(v,float):
                 params[k] = str(v)
             elif isinstance(v,unicode):
                 params[k] = v.encode('utf-8')
-        response, content = service_request('spotify', 'GET', base_url, query_params=params, priority=priority)
+        response, content = service_request('spotify', 'GET', base_url, query_params=params, priority=priority, timeout=timeout)
         if response.status >= 200 and response.status < 300:
             return json.loads(content)
         raise StampedThirdPartyError('Spotify returned error code: ' + str(response.status))
         
     
-    def search(self, method, priority='low', **params):
-        return self.method('search', method, priority, **params)
+    def search(self, method, priority='low', timeout=None, **params):
+        return self.method('search', method, priority, timeout=timeout, **params)
     
-    def lookup(self, uri, extras=None, priority='low'):
+    def lookup(self, uri, extras=None, priority='low', timeout=None):
         if extras is None:
-            return self.method('lookup', '', priority, uri=uri)
+            return self.method('lookup', '', priority, uri=uri, timeout=timeout)
         else:
-            return self.method('lookup', '', priority, uri=uri, extras=extras)
+            return self.method('lookup', '', priority, uri=uri, extras=extras, timeout=timeout)
 
 __globalSpotify = None
 

@@ -37,53 +37,53 @@ class TMDB(object):
     def __init__(self):
         self.__key = 'b4aaa79e39e12f8d066903b8574ee538'
 
-    def configuration(self, priority='low'):
-        return self.__tmdb('configuration', priority=priority)
+    def configuration(self, priority='low', timeout=None):
+        return self.__tmdb('configuration', priority=priority, timeout=timeout)
     
-    def person_search(self, query, page=1, priority='low'):
-        return self.__tmdb('search/person', query=query,page=page, priority=priority)
+    def person_search(self, query, page=1, priority='low', timeout=None):
+        return self.__tmdb('search/person', query=query,page=page, priority=priority, timeout=timeout)
     
-    def person_info(self, tmdb_id, priority='low'):
-        return self.__tmdb('person/%s' %(tmdb_id,), priority=priority)
+    def person_info(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('person/%s' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def person_credits(self, tmdb_id, priority='low'):
-        return self.__tmdb('person/%s/credits' %(tmdb_id,), priority=priority)
+    def person_credits(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('person/%s/credits' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def person_images(self, tmdb_id, priority='low'):
-        return self.__tmdb('person/%s/images' %(tmdb_id,), priority=priority)
+    def person_images(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('person/%s/images' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_latest(self, query, page=1, priority='low'):
-        return self.__tmdb('latest/movie',query=query,page=page, priority=priority)
+    def movie_latest(self, query, page=1, priority='low', timeout=None):
+        return self.__tmdb('latest/movie',query=query,page=page, priority=priority, timeout=timeout)
     
-    def movie_search(self, query, page=1, priority='low'):
-        return self.__tmdb('search/movie',query=query,page=page, priority=priority)
+    def movie_search(self, query, page=1, priority='low', timeout=None):
+        return self.__tmdb('search/movie',query=query,page=page, priority=priority, timeout=timeout)
     
-    def movie_info(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s' %(tmdb_id,), priority=priority)
+    def movie_info(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_casts(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s/casts' %(tmdb_id,), priority=priority)
+    def movie_casts(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s/casts' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_keywords(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s/keywords' %(tmdb_id,), priority=priority)
+    def movie_keywords(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s/keywords' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_alternative_titles(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s/alternative_titles' %(tmdb_id,), priority=priority)
+    def movie_alternative_titles(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s/alternative_titles' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_images(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s/images' %(tmdb_id,), priority=priority)
+    def movie_images(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s/images' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_releases(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s/releases' %(tmdb_id,), priority=priority)
+    def movie_releases(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s/releases' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_trailers(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s/trailers' %(tmdb_id,), priority=priority)
+    def movie_trailers(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s/trailers' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def movie_translations(self, tmdb_id, priority='low'):
-        return self.__tmdb('movie/%s/translations' %(tmdb_id,), priority=priority)
+    def movie_translations(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('movie/%s/translations' %(tmdb_id,), priority=priority, timeout=timeout)
     
-    def collection_info(self, tmdb_id, priority='low'):
-        return self.__tmdb('collection/%s' %(tmdb_id,), priority=priority)
+    def collection_info(self, tmdb_id, priority='low', timeout=None):
+        return self.__tmdb('collection/%s' %(tmdb_id,), priority=priority, timeout=timeout)
 
     # note: these decorators add tiered caching to this function, such that 
     # results will be cached locally with a very small LRU cache of 64 items 
@@ -92,7 +92,7 @@ class TMDB(object):
     @lru_cache(maxsize=64)
     @cachedFn()
     @countedFn(name='TMDB (after caching)')
-    def __tmdb(self, service, max_retries=3, priority='low', **params):
+    def __tmdb(self, service, max_retries=3, priority='low', timeout=None, **params):
         if 'api_key' not in params:
             params['api_key'] = self.__key
         
@@ -104,7 +104,8 @@ class TMDB(object):
         url = 'http://api.themoviedb.org/3/%s?%s' % (service, urllib.urlencode(encodedParams))
         logs.info(url)
 
-        response, content = service_request('tmdb', 'GET', url, header={ 'Accept' : 'application/json' }, priority=priority)
+        response, content = service_request('tmdb', 'GET', url, header={ 'Accept' : 'application/json' },
+                                            priority=priority, timeout=timeout)
         data = json.loads(content)
         return data
 

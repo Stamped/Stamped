@@ -155,7 +155,8 @@ class AmazonAlbum(_AmazonObject, ResolverMediaCollection):
                 data = globalAmazon().item_lookup(ItemId=self.key,
                                                   ResponseGroup='Large,RelatedItems',
                                                   RelationshipType='Tracks',
-                                                  RelatedItemPage=str(page))
+                                                  RelatedItemPage=str(page),
+                                                  timeout=MERGE_TIMEOUT)
                 tracks.extend( xp(data, 'ItemLookupResponse', 'Items', 'Item', 'RelatedItems')['c']['RelatedItem'] )
             track_d = {}
             for track in tracks:
@@ -846,7 +847,7 @@ class AmazonSource(GenericSource):
 
     def __searchIndexLite(self, searchIndexData, queryText, results):
         searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
-            ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25, priority='high')
+            ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25, priority='high', timeout=SEARCH_TIMEOUT)
         #print "\n\n\n\nAMAZON\n\n\n\n\n"
         #pprint(searchResults)
         #print "\n\n\n\nENDMAZON\n\n\n\n\n"
@@ -1275,7 +1276,7 @@ class AmazonSource(GenericSource):
     
     def entityProxyFromKey(self, key, **kwargs):
         try:
-            lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key)
+            lookupData = globalAmazon().item_lookup(ResponseGroup='Large', ItemId=key, timeout=MERGE_TIMEOUT)
             result = _getLookupResult(lookupData)
             kind = xp(result, 'ItemAttributes', 'ProductGroup')['v'].lower()
             logs.debug(kind)

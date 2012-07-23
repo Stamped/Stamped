@@ -178,10 +178,6 @@ class EntitySearch(object):
         if category not in Constants.categories:
             raise Exception("unrecognized category: (%s)" % category)
 
-        import traceback
-        traceback.print_stack()
-        print('timeout: %s' % timeout)
-
         start = datetime.datetime.now()
         results = {}
         times = {}
