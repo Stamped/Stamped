@@ -21,26 +21,34 @@ VERSION     = ".generated.%s" % deploy_version.get_current_version()
 def deploy_assets():
     sink    = S3Utils()
     prefix  = ".."
-    pool    = Pool(32)
+    pool    = Pool(16)
     paths   = [
         {
             "path"          : "/assets/generated/css", 
             "content_type"  : "text/css", 
             "apply_gzip"    : True, 
+            "ignore"        : [ ], 
         }, 
         {
             "path"          : "/assets/generated/js", 
             "content_type"  : "application/javascript", 
             "apply_gzip"    : True, 
+            "ignore"        : [ ], 
         }, 
         {
             "path"          : "/assets/img", 
             "apply_gzip"    : False, 
+            "ignore"        : [
+                "/assets/generated/img/emoji", 
+                "/assets/generated/img/public-home", 
+                "/assets/generated/img/public-home", 
+            ], 
         },
         #{  # NOTE (travis): S3 / Cloudfront doesn't support CORS, so serving fonts via 
         #   #our CDN (which is technically an external domain) to FF/IE8 won't work.. balls
         #    "path"          : "/assets/fonts", 
         #    "apply_gzip"    : True, 
+        #    "ignore"        : [ ], 
         #    "headers"       : {
         #        "Access-Control-Allow-Origin" : "*", 
         #    }, 
@@ -50,6 +58,7 @@ def deploy_assets():
     for path in paths:
         root = "%s%s" % (prefix, path['path'])
         apply_gzip      = path.get("apply_gzip", False)
+        ignore          = path.get("ignore", [])
         headers         = path.get("headers", None)
         content_type    = path.get("content_type", None)
         no_content_type = (content_type is None)
@@ -67,7 +76,17 @@ def deploy_assets():
                 if no_content_type:
                     key = "/assets/generated%s" % key[len("/assets"):]
                 
-                pool.spawn(deploy_asset, filepath, key, sink, content_type, apply_gzip, headers)
+                spawn = True
+                for p in ignore:
+                    if key.startswith(p):
+                        spawn = False
+                        break
+                
+                if spawn:
+                    print "deploying '%s'" % key
+                    pool.spawn(deploy_asset, filepath, key, sink, content_type, apply_gzip, headers)
+                else:
+                    print "ignoring  '%s'" % key
     
     pool.join()
     
@@ -75,8 +94,6 @@ def deploy_assets():
     utils.shell(r"rm -f .temp.*")
 
 def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
-    print "deploying '%s'" % key
-    
     with open(filepath, "rb") as f:
         data = f.read()
     

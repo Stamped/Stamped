@@ -15,9 +15,9 @@ from logs import report
 
 try:
     import logs, traceback, utils
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
     from libs.TheTVDB               import TheTVDB, globalTheTVDB
     from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty

@@ -845,9 +845,9 @@ class AmazonSource(GenericSource):
             self.responseGroups = responseGroups
             self.proxyConstructor = proxyConstructor
 
-    def __searchIndexLite(self, searchIndexData, queryText, results):
-        searchResults = globalAmazon().item_search(SearchIndex=searchIndexData.searchIndexName,
-            ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25, priority='high', timeout=SEARCH_TIMEOUT)
+    def __searchIndexLite(self, searchIndexData, queryText, results, timeout):
+        searchResults = globalAmazon().item_search(timeout=timeout, SearchIndex=searchIndexData.searchIndexName,
+            ResponseGroup=searchIndexData.responseGroups, Keywords=queryText, Count=25, priority='high')
         #print "\n\n\n\nAMAZON\n\n\n\n\n"
         #pprint(searchResults)
         #print "\n\n\n\nENDMAZON\n\n\n\n\n"
@@ -865,7 +865,7 @@ class AmazonSource(GenericSource):
         resultsBySearchIndex = {}
         pool = Pool(len(searchIndexes))
         for searchIndexData in searchIndexes:
-            pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex)
+            pool.spawn(self.__searchIndexLite, searchIndexData, queryText, resultsBySearchIndex, timeout)
         pool.join(timeout)
         if logRawResults:
             logComponents = ['\n\n\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\nAMAZON RAW RESULTS\n\n\n']
@@ -1187,7 +1187,7 @@ class AmazonSource(GenericSource):
         self.__penalizeForMissingListPrice(searchResults)
         for searchResult in searchResults:
             adjustBookRelevanceByQueryMatch(searchResult, queryText)
-            applyBookTitleDataQualityTests(searchResult, queryText)
+            applyBookDataQualityTests(searchResult, queryText)
             if not searchResult.resolverObject.authors:
                 penaltyFactor = 0.2
                 searchResult.dataQuality *= penaltyFactor

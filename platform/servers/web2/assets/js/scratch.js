@@ -137,6 +137,13 @@ var init_header_subsections = function() {
             'height'    : login_height
         });*/
 
+
+        // now that we have the static positions and sizes of the dynamic header 
+        // elements, initialize their new positioning /sizing to absolute and 
+        // non-auto, respectively.
+        /*$header.height(header_height);*/
+
+
                 // layout and style the header's login / join content
                 /*var cur_opacity = cur_ratio * cur_ratio;
                 var already_stamping_style = {

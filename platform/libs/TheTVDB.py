@@ -87,11 +87,11 @@ class TheTVDB(object):
     @lru_cache(maxsize=64)
     @cachedFn(schemaClasses=[MediaCollectionEntity])
     @countedFn(name='TheTVDB (after caching)')
-    def lookup(self, thetvdb_id, priority='low'):
+    def lookup(self, thetvdb_id, priority='low', timeout=None):
         details_url = 'http://www.thetvdb.com/api/%s/series/%s/all/' % \
                       (self.api_key, thetvdb_id)
 
-        response, xml = service_request('tvdb', 'GET', details_url, priority=priority)
+        response, xml = service_request('tvdb', 'GET', details_url, priority=priority, timeout=timeout)
         tree  = objectify.fromstring(xml)
         items = tree.findall('.//Series')
         

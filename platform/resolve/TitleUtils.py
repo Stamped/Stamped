@@ -8,6 +8,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import math
 import re
 from resolve.StringNormalizationUtils import format
 
@@ -384,6 +385,7 @@ BOOK_TITLE_REMOVAL_REGEXPS = (
     makeDelimitedSectionRe('version'),
     makeDelimitedSectionRe('vintage'),
     makeDelimitedSectionRe('volume'),
+    re.compile(':\s*a\s+novel\s*$', re.IGNORECASE),
 )
 
 def cleanBookTitle(bookTitle):
@@ -397,9 +399,9 @@ def _makeSingleTokenSuspiciousTest(token, weight):
 BOOK_TITLE_SUSPICIOUS_TESTS = (
     TitleDataQualityRegexpTest(r'\bbest of\b', '"best of" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('best')),
-    TitleDataQualityRegexpTest(r'\bbook\s+\d', '"book #" in title', 0.25,
+    TitleDataQualityRegexpTest(r'\bbooks?\s+\d', '"book #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('book')),
-    TitleDataQualityRegexpTest(r'\bvolume\s+\d', '"volume #" in title', 0.25,
+    TitleDataQualityRegexpTest(r'\bvolumes?\s+\d', '"volume #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('volume')),
     TitleDataQualityRegexpTest('\(', 'parenthesis in title', 0.1),
     TitleDataQualityRegexpTest('\[', 'bracket in title', 0.1),
@@ -421,14 +423,30 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
     _makeSingleTokenSuspiciousTest('unabridged', 0.1),
 
     # TODO(geoff): this is a hacky way to demote the study guides. There are just so many of them...
-    TitleDataQualityRegexpTest('(Cliff.*Notes?)', '"cliff notes" in title', 0.4,
+    TitleDataQualityRegexpTest(r'\bCliffs? ?Notes?\b', '"cliffs notes" in title', 0.4,
         exceptionQueryRegexps=(makeTokenRegexp('cliff'), makeTokenRegexp('note'))),
     TitleDataQualityRegexpTest('(literature made easy)', '"literature made easy" in title', 0.4,
         exceptionQueryRegexps=(makeTokenRegexp('literature'), makeTokenRegexp('made'), makeTokenRegexp('easy'))),
+    TitleDataQualityRegexpTest(r'\bstudy guide\b', '"study guide" in title', 0.4,
+        exceptionQueryRegexps=(makeTokenRegexp('study'), makeTokenRegexp('guide'))),
 )
 
-def applyBookTitleDataQualityTests(searchResult, searchQuery):
+def applyBookDataQualityTests(searchResult, searchQuery):
+    for author in searchResult.resolverObject.authors:
+        if author['name'].lower().strip() == 'shmoop':
+            searchResult.dataQuality *= 0.5
+            searchResult.addDataQualityComponentDebugInfo('"shmoop" in author', 0.5)
+            return
     applyTitleTests(BOOK_TITLE_SUSPICIOUS_TESTS, searchResult, searchQuery)
+
+    # Penalize for long author names. Penalty starts at 30 chars, reaches 0.4 (the cutoff for
+    # dropping item from cluster) at 100 chars.
+    if searchResult.resolverObject.authors:
+        maxAuthorLength = max(len(author['name']) for author in searchResult.resolverObject.authors)
+        if maxAuthorLength > 30:
+            authorLengthPenalty = math.log(maxAuthorLength - 29) / 10.656
+            searchResult.dataQuality *= 1 - authorLengthPenalty
+            searchResult.addDataQualityComponentDebugInfo('author name with length %d' % maxAuthorLength, authorLengthPenalty)
 
 
 def isSuspiciousPrefixBookTitle(a, b):

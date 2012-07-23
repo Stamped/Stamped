@@ -27,8 +27,8 @@
 				    	
 				    	<tr>
 					        <td>Node</td>
-					        {% for i in n %}
-					        	<td>t - {{ i }}</td>
+					        {% for header in headers %}
+					        	<td>header|time:"h:i:s"</td>
 					        {% endfor %}
 					    </tr>
 					    {% for key,value in count_results %}

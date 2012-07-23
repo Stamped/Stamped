@@ -9,14 +9,42 @@ import Globals
 
 from api.db.mongodb.AMongoCollection import AMongoCollection
 
+from libs.Memcache import globalMemcache
+
 class MongoUserTodosEntitiesCollection(AMongoCollection):
 
     def __init__(self):
         AMongoCollection.__init__(self, collection='userfaventities')
 
+        self._cache = globalMemcache()
+            
+
     """
     User Id -> Entity Ids 
     """
+
+
+    ### CACHING
+
+    def _getCachedRelationship(self, userId):
+        key = str("obj::userfaventities::%s" % userId)
+        return self._cache[key]
+
+    def _setCachedRelationship(self, userId, entityIds):
+        key = str("obj::userfaventities::%s" % userId)
+        cacheLength = 60 * 60 * 3 # 3 hours
+        try:
+            self._cache.set(key, entityIds, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (userId, e))
+
+    def _delCachedRelationship(self, userId):
+        key = str("obj::userfaventities::%s" % userId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
 
     ### INTEGRITY
 
@@ -35,16 +63,29 @@ class MongoUserTodosEntitiesCollection(AMongoCollection):
 
         return self._checkRelationshipIntegrity(key, keyCheck, regenerate, repair=repair)
 
+
     ### PUBLIC
 
     def addUserTodosEntity(self, userId, entityId):
         self._createRelationship(keyId=userId, refId=entityId)
+        self._delCachedRelationship(userId)
         return True
 
     def removeUserTodosEntity(self, userId, entityId):
-        return self._removeRelationship(keyId=userId, refId=entityId)
+        result = self._removeRelationship(keyId=userId, refId=entityId)
+        self._delCachedRelationship(userId)
+        return result
 
     def getUserTodosEntities(self, userId):
         ### TODO: Add limit? Add timestamp to slice?
-        return self._getRelationships(userId)
+        try:
+            return self._getCachedRelationship(userId)
+        except KeyError:
+            pass
+
+        entityIds = self._getRelationships(userId)
+
+        self._setCachedRelationship(userId, entityIds)
+
+        return entityIds
 

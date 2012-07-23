@@ -209,6 +209,13 @@ def handle_map(request, schema, **kwargs):
     stamps = stampedAPIProxy.getUserStamps(s)
     stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
     
+    if len(stamps) <= 0:
+        redirect_uri = "/%s?category=place" % screen_name
+        redirect_url = request.build_absolute_uri(redirect_uri)
+        logs.info("redirecting empty map from '%s' to: '%s'" % (uri, redirect_uri))
+        
+        return HttpResponseRedirect(redirect_url)
+    
     for stamp in stamps:
         subcategory = stamp['entity']['subcategory']
         

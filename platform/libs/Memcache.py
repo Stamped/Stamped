@@ -127,6 +127,11 @@ def globalMemcache():
     return __globalMemcache
 
 
+def generateKeyFromDictionary(dictionary):
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
+    return json.dumps(dictionary, sort_keys=True, separators=(',',':'), default=dthandler)
+
+
 def memcached_function(time=0, min_compress_len=0):
     
     def decorating_function(user_function):
@@ -147,8 +152,7 @@ def memcached_function(time=0, min_compress_len=0):
             def encode_arg(arg):
                 if isinstance(arg, Schema):
                     # Convert to JSON to efficiently convert to string / sort by keys
-                    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
-                    return json.dumps(arg.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
+                    return generateKeyFromDictionary(arg.dataExport())
                 else:
                     # Convert any unicode characters to string representation
                     return unicode(arg).encode('utf8')

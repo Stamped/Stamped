@@ -42,7 +42,7 @@ try:
     from api.AActivityDB                import AActivityDB
     from api.Schemas                import *
     from api.ActivityCollectionCache    import ActivityCollectionCache
-    from libs.Memcache                   import globalMemcache
+    from libs.Memcache                   import globalMemcache, generateKeyFromDictionary
     from api.HTTPSchemas                import generateStampUrl
 
     from crawler.RssFeedScraper     import RssFeedScraper
@@ -1081,13 +1081,14 @@ class StampedAPI(AStampedAPI):
     def _getUserStampDistribution(self, userId):
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds)
-        stamps      = self._enrichStampObjects(stamps)
+        entityIds   = map(lambda x: x.entity.entity_id, stamps)
+        entities    = self._entityDB.getEntityMinis(entityIds)
 
         categories  = {}
-        num_stamps  = len(stamps)
+        num_stamps  = len(stampIds)
 
-        for stamp in stamps:
-            category = stamp.entity.category
+        for entity in entities:
+            category = entity.category
             categories.setdefault(category, 0)
             categories[category] += 1
 
@@ -2238,7 +2239,6 @@ class StampedAPI(AStampedAPI):
             stampIds[stamp.stamp_id] = stamp
 
         stats = self.getStampStats(stampIds.keys())
-        # stats = self._stampStatsDB.getStatsForStamps(stampIds.keys())
 
         logs.debug('Time for getStatsForStamps: %s' % (time.time() - t1))
         t1 = time.time()
@@ -3255,8 +3255,7 @@ class StampedAPI(AStampedAPI):
 
         repliedUserIds = set()
         # Add activity for previous commenters
-        ### TODO: Limit this to the last 20 comments or so
-        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id):
+        for prevComment in self._commentDB.getCommentsForStamp(stamp.stamp_id, limit=20):
             repliedUserId = prevComment.user.user_id
 
             if repliedUserId not in commentedUserIds.union(mentionedUserIds).union(repliedUserIds) \
@@ -3571,29 +3570,39 @@ class StampedAPI(AStampedAPI):
     def getStampCollection(self, timeSlice, authUserId=None):
         # Special-case "tastemakers"
         if timeSlice.scope == 'popular':
-            stampIds = []
             limit = timeSlice.limit
             if limit <= 0:
                 limit = 20
+
             start = datetime.utcnow() - timedelta(hours=3)
             if timeSlice.before is not None:
                 start = timeSlice.before
-            daysOffset = 0
-            while len(stampIds) < limit and daysOffset < 7:
-                """
-                Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
-                have enough stamps, it should check the previous day, with a max of one week.
-                """
-                before = start - timedelta(hours=(24*daysOffset))
-                since = before - timedelta(hours=24)
-                stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
-                daysOffset += 1
-            stampIds = stampIds[:limit]
+
+            key = str("fn::StampedAPI.getStampCollection::%s" % generateKeyFromDictionary(timeSlice.dataExport()))
+
+            try:
+                stampIds = self._cache[key]
+
+            except KeyError:
+                stampIds = []
+                daysOffset = 0
+                while len(stampIds) < limit and daysOffset < 7:
+                    """
+                    Loop through daily passes to get a full limit's worth of stamps. If a given 24-hour period doesn't
+                    have enough stamps, it should check the previous day, with a max of one week.
+                    """
+                    before = start - timedelta(hours=(24*daysOffset))
+                    since = before - timedelta(hours=24)
+                    stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
+                    daysOffset += 1
+                stampIds = stampIds[:limit]
+                try:
+                    self._cache.set(key, stampIds, time=(60*30))
+                except Exception as e:
+                    logs.warning("Unable to set cache for tastemakers: %s" % e)
 
         else:
-            t0 = time.time()
             stampIds = self._getScopeStampIds(timeSlice.scope, timeSlice.user_id, authUserId)
-            logs.debug('Time for _getScopeStampIds: %s' % (time.time() - t0))
 
         return self._getStampCollection(stampIds, timeSlice, authUserId=authUserId)
 
@@ -3815,7 +3824,6 @@ class StampedAPI(AStampedAPI):
 
         return result
 
-    ### TODO: Add memcached wrapper
     def getTastemakerGuide(self, guideRequest):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
@@ -5133,10 +5141,7 @@ class StampedAPI(AStampedAPI):
             raise StampedUnavailableError("Entity not found")
 
         if entity_id is None:
-            entityBuilder = EntityProxyContainer.EntityProxyContainer(proxies[0])
-            for proxy in proxies[1:]:
-                entityBuilder.addSource(EntityProxySource(proxy))
-            entity = entityBuilder.buildEntity()
+            entity = EntityProxyContainer.EntityProxyContainer().addAllProxies(proxies).buildEntity()
             entity.third_party_ids = id_components
 
             entity = self._entityDB.addEntity(entity)
@@ -5383,8 +5388,7 @@ class StampedAPI(AStampedAPI):
         if entity_id is not None:
             pass
         elif source_id is not None and proxy is not None:
-            entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
-            entity = entityProxy.buildEntity()
+            entity = EntityProxyContainer.EntityProxyContainer().addProxy(proxy).buildEntity()
         else:
             return None
 
@@ -5425,12 +5429,13 @@ class StampedAPI(AStampedAPI):
         # We therefore can't rely on full enrichment to correctly pick up the data from those
         # sources. That is why we make sure we incorporate the data from the proxy here, either by
         # building a new entity or enriching an existing one.
-        entityProxy = EntityProxyContainer.EntityProxyContainer(proxy)
         if entity_id is None:
-            entity = entityProxy.buildEntity()
+            entity = EntityProxyContainer.EntityProxyContainer().addProxy(proxy).buildEntity()
         else:
             entity = self._entityDB.getEntity(entity_id)
-            entityProxy.enrichEntity(entity, {})
+            sourceContainer = BasicSourceContainer()
+            sourceContainer.addSource(EntityProxySource(proxy))
+            sourceContainer.enrichEntity(entity, {})
         self.mergeEntity(entity)
 
     """

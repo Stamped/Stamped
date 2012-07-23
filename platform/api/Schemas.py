@@ -922,7 +922,7 @@ class BasicEntity(BasicEntityMini):
                 self.addThirdPartyId(sourceName, sourceId)
 
     def _genericSubtitle(self):
-        if self.sources.user_generated_subtitle is not None:
+        if self.sources.user_generated_subtitle is not None and self.sources.user_generated_subtitle != '':
             return self.sources.user_generated_subtitle
         return unicode(self.subcategory).replace('_', ' ').title()
 
