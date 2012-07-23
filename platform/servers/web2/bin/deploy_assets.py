@@ -21,7 +21,7 @@ VERSION     = ".generated.%s" % deploy_version.get_current_version()
 def deploy_assets():
     sink    = S3Utils()
     prefix  = ".."
-    pool    = Pool(32)
+    pool    = Pool(16)
     paths   = [
         {
             "path"          : "/assets/generated/css", 
