@@ -10,7 +10,7 @@ import Globals
 import pickle
 import tempfile
 
-import resolve import GenericSource
+from resolve import GenericSource
 from search.EntitySearch import EntitySearch
 from tests.StampedTestUtils import *
 from tests.framework.FixtureTest import *
