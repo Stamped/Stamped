@@ -58,58 +58,52 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccounts is None:
             return document
 
-        logs.info('### linked_accounts: %s' % linkedAccounts)
+        #if 'linked' not in document:
+        document['linked'] = {}
+        if 'twitter' in linkedAccounts:
+            twitterAcct = {
+                'service_name'          : 'twitter',
+                'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
+                'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
+                'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
+                }
+            twitterAcctSparse = {}
+            for k,v in twitterAcct.iteritems():
+                if v is not None:
+                    twitterAcctSparse[k] = v
+            document['linked']['twitter'] = twitterAcctSparse
 
+            if linkedAccounts['twitter'].pop('twitter_alerts_sent', False) and twitterAcct['linked_user_id'] is not None:
+                self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'twitter', twitterAcct['linked_user_id'])
 
-        if 'linked' not in document:
-            document['linked'] = {}
-            if 'twitter' in linkedAccounts:
-                twitterAcct = {
-                    'service_name'          : 'twitter',
-                    'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
-                    'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
-                    'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
-                    }
-                twitterAcctSparse = {}
-                for k,v in twitterAcct.iteritems():
-                    if v is not None:
-                        twitterAcctSparse[k] = v
-                document['linked']['twitter'] = twitterAcctSparse
+        if 'facebook' in linkedAccounts:
+            facebookAcct = {
+                'service_name'          : 'facebook',
+                'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
+                'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
+                'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
+                }
+            facebookAcctSparse = {}
+            for k,v in facebookAcct.iteritems():
+                if v is not None:
+                    facebookAcctSparse[k] = v
+            document['linked']['facebook'] = facebookAcctSparse
 
-                if linkedAccounts['twitter'].pop('twitter_alerts_sent', False) and twitterAcct['linked_user_id'] is not None:
-                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'twitter', twitterAcct['linked_user_id'])
+            if linkedAccounts['facebook'].pop('facebook_alerts_sent', False) and facebookAcct['linked_user_id'] is not None:
+                self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'facebook', facebookAcct['linked_user_id'])
 
-            if 'facebook' in linkedAccounts:
-                facebookAcct = {
-                    'service_name'          : 'facebook',
-                    'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
-                    'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
-                    'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
-                    }
-                facebookAcctSparse = {}
-                for k,v in facebookAcct.iteritems():
-                    if v is not None:
-                        facebookAcctSparse[k] = v
-                document['linked']['facebook'] = facebookAcctSparse
-
-                if linkedAccounts['facebook'].pop('facebook_alerts_sent', False) and facebookAcct['linked_user_id'] is not None:
-                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'facebook', facebookAcct['linked_user_id'])
-
-            if 'netflix' in linkedAccounts:
-                netflixAcct = {
-                    'service_name'          : 'netflix',
-                    'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
-                    'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
-                    'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
-                    }
-                netflixAcctSparse = {}
-                for k,v in netflixAcct.iteritems():
-                    if v is not None:
-                        netflixAcctSparse[k] = v
-                document['linked']['netflix'] = netflixAcctSparse
-
-        logs.info('upgrade linked accounts returning: %s' % document)
-
+        if 'netflix' in linkedAccounts:
+            netflixAcct = {
+                'service_name'          : 'netflix',
+                'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
+                'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
+                'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
+                }
+            netflixAcctSparse = {}
+            for k,v in netflixAcct.iteritems():
+                if v is not None:
+                    netflixAcctSparse[k] = v
+            document['linked']['netflix'] = netflixAcctSparse
 
         return document
 
