@@ -58,8 +58,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccounts is None:
             return document
 
-        logs.info('upgrade linked accounts called')
-
         if 'linked' not in document:
             document['linked'] = {}
             if 'twitter' in linkedAccounts:
@@ -106,6 +104,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                     if v is not None:
                         netflixAcctSparse[k] = v
                 document['linked']['netflix'] = netflixAcctSparse
+
+        logs.info('upgrade linked accounts returning: %s' % document)
+
 
         return document
 
