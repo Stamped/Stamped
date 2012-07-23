@@ -4025,7 +4025,7 @@ class StampedAPI(AStampedAPI):
             avgStampPopularity = kwargs.pop('avgStampPopularity', 0)
             stampTimestamps = kwargs.pop('stampTimestamps', {})
             entityQuality = kwargs.pop('entityQuality', 0.5)
-            entityId = kwargs.pop('entityId', str())
+            entityId = kwargs.pop('entityId', None)
             
             result = 0
             
@@ -4116,9 +4116,11 @@ class StampedAPI(AStampedAPI):
             r = []
             for entity in sections[section]:
                 
+                avgQuality = 0.5
                 if len(stampQualities[entity.entity_id]) > 0:
                     avgQuality = sum(stampQualities[entity.entity_id]) / len(stampQualities[entity.entity_id])
 
+                avgPopularity = 0
                 if len(stampPopularities[entity.entity_id]) > 0:
                     avgPopularity = sum(stampPopularities[entity.entity_id]) / len(stampPopularities[entity.entity_id])
 
