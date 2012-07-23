@@ -58,6 +58,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccounts is None:
             return document
 
+        logs.info('upgrade linked accounts called')
+
         if 'linked' not in document:
             document['linked'] = {}
             if 'twitter' in linkedAccounts:
