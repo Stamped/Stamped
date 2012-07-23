@@ -3578,7 +3578,7 @@ class StampedAPI(AStampedAPI):
             if timeSlice.before is not None:
                 start = timeSlice.before
 
-            key = str("fn::getStampCollection::{scope:popular,limit:%s,before:%s}" % (limit, start.isoformat()))
+            key = str("fn::StampedAPI.getStampCollection::{scope:popular,limit:%s,before:%s}" % (limit, start.isoformat()))
 
             try:
                 stampIds = self._cache[key]
@@ -3824,7 +3824,6 @@ class StampedAPI(AStampedAPI):
 
         return result
 
-    ### TODO: Add memcached wrapper
     def getTastemakerGuide(self, guideRequest):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)

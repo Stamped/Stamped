@@ -518,6 +518,8 @@ class MongoEntityStatsCollection(AMongoCollection):
         self._collection.ensure_index([ ('lat', pymongo.ASCENDING), \
                                         ('lng', pymongo.ASCENDING) ])
 
+        self._cache = globalMemcache()
+
     ### INTEGRITY
 
     def checkIntegrity(self, key, repair=False, api=None):
@@ -593,6 +595,29 @@ class MongoEntityStatsCollection(AMongoCollection):
                 raise Exception("%s: API required to regenerate stats" % key)
 
         return True
+
+
+    ### CACHING
+
+    def _getCachedStat(self, entityId):
+        key = str("obj::entitystat::%s" % entityId)
+        return self._cache[key]
+
+    def _setCachedStat(self, stat):
+        key = str("obj::entitystat::%s" % stat.entity_id)
+        cacheLength = 60 * 60 # 1 hour
+        try:
+            self._cache.set(key, stat, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (stat.entity_id, e))
+
+    def _delCachedStat(self, entityId):
+        key = str("obj::entitystat::%s" % entityId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
     
     ### PUBLIC
     
@@ -601,42 +626,60 @@ class MongoEntityStatsCollection(AMongoCollection):
             stats.timestamp = StatTimestamp()
         stats.timestamp.generated = datetime.utcnow()
 
-        return self._addObject(stats)
+        result = self._addObject(stats)
+
+        self._setCachedStat(result)
+
+        return result
     
     def getEntityStats(self, entityId):
+        try:
+            return self._getCachedStat(entityId)
+        except KeyError:
+            pass
+
         documentId = self._getObjectIdFromString(entityId)
         document = self._getMongoDocumentFromId(documentId)
-        return self._convertFromMongo(document)
+        result = self._convertFromMongo(document)
+        self._setCachedStat(result)
 
+        return result
+        
     def getStatsForEntities(self, entityIds):
-        documentIds = map(self._getObjectIdFromString, entityIds)
+        result = []
+
+        documentIds = []
+        for entityId in entityIds:
+            try:
+                result.append(self._getCachedStat(entityId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
         documents = self._getMongoDocumentsFromIds(documentIds)
-        return map(self._convertFromMongo, documents)
+
+        for document in documents:
+            stat = self._convertFromMongo(document)
+            self._setCachedStat(stat)
+            result.append(stat)
+
+        return result
     
     def saveEntityStats(self, stats):
         if stats.timestamp is None:
             stats.timestamp = StatTimestamp()
         stats.timestamp.generated = datetime.utcnow()
 
-        return self.update(stats)
+        result = self.update(stats)
+
+        self._setCachedStat(result)
+
+        return result
     
     def removeEntityStats(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
-        return self._removeMongoDocument(documentId)
+        result = self._removeMongoDocument(documentId)
+        self._delCachedStat(entityId)
 
-    def updateNumStamps(self, entityId, numStamps):
-        self._collection.update(
-            { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$set' : { 'num_stamps' : numStamps } }
-        )
-        return True
-
-    def setPopular(self, entityId, userIds, stampIds):
-        self._collection.update(
-            { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$set' : { 'popular_users' : userIds, 'popular_stamps' : stampIds } }
-        )
-        return True
+        return result
     
     def _buildPopularQuery(self, **kwargs):
         kinds = kwargs.pop('kinds', None)
