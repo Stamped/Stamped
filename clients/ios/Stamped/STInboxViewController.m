@@ -309,7 +309,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
 
 - (id<STStamp>)stampForTableView:(UITableView*)tableView atIndexPath:(NSIndexPath*)indexPath {
     id<STStamp> stamp = nil;
-    if (tableView == _searchResultsTableView) {
+    if (tableView == self.searchResultsTableView) {
         stamp = [self.searchResults objectAtIndex:indexPath.row];
     }
     else {
@@ -330,7 +330,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    if (tableView == _searchResultsTableView) {
+    if (tableView == self.searchResultsTableView) {
         return self.searchResults.count == 0 ? 0 : 1;
     }
     else {
@@ -339,7 +339,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
 }
 
 - (NSInteger)tableView:(UITableView*)tableView numberOfRowsInSection:(NSInteger)section {
-    if (tableView == _searchResultsTableView) {
+    if (tableView == self.searchResultsTableView) {
         return self.searchResults.count;
     }
     else {
@@ -380,7 +380,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
 
 - (void)stStampCellAvatarTapped:(STStampCell*)cell {
     
-    UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
+    UITableView *tableview = [self isSearching] ? self.searchResultsTableView : self.tableView;
     NSIndexPath *indexPath = [tableview indexPathForCell:cell];
     id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];

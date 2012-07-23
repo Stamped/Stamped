@@ -148,7 +148,7 @@ static BOOL _friendsHasMore = YES;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [STEvents removeObserver:self];
-    [_slider release], _slider=nil;
+    [_slider release];
     [super dealloc];
 }
 
@@ -159,7 +159,6 @@ static BOOL _friendsHasMore = YES;
 }
 
 - (void)viewDidLoad {
-    NSLog(@"dfsjkakjafdss");
     [super viewDidLoad];
     [STUniversalNewsController dirtyAll];
     [STEvents addObserver:self selector:@selector(countUpdated:) event:EventTypeUnreadCountUpdated];
@@ -231,7 +230,6 @@ static BOOL _friendsHasMore = YES;
 #pragma mark - STSliderScopeViewDelegate
 
 - (void)sliderScopeView:(STSliderScopeView*)slider didChangeScope:(STStampedAPIScope)scope {
-    NSLog(@"hkajsfdkjfahsdj3333");
     [self setScope:scope];
 }
 

@@ -82,7 +82,6 @@
 - (void)userUpdated:(id)notImportant {
     if (IS_CURRENT_USER(self.user.userID)) {
         self.user = [STStampedAPI sharedInstance].currentUser;
-        NSLog(@"Updated profile");
         [self reloadDataSource];
         [self.headerView setupWithUser:self.user];
     }

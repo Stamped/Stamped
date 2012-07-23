@@ -287,7 +287,6 @@
         [UIImageJPEGRepresentation(image, 0.85) writeToFile:path atomically:NO];
         self.avatarUploader.filePath = path;
         [self.avatarUploader startWithProgress:^(float progress) {
-            NSLog(@"%f", progress);
         } completion:^(NSString *path, BOOL finished) {
             self.data.tempImageURL = path;
             if (finished) {
