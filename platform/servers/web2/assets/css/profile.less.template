@@ -42,6 +42,10 @@
 }
 
 .user-gradient-func(@angle: 135deg, @a: 50%) {
+    .user-gradient-func2(@angle, fade(@secondary, @a), fade(@primary, @a));
+}
+
+.user-gradient-func-reversed(@angle: 135deg, @a: 50%) {
     .user-gradient-func2(@angle, fade(@primary, @a), fade(@secondary, @a));
 }
 
@@ -50,8 +54,13 @@
     width: 100%;
 }
 
+.user-gradient-reversed {
+    .user-gradient-func-reversed(135deg, 40%);
+    width: 100%;
+}
+
 .post-header, .stamp-card-pre {
-    .user-gradient-func(135deg, 40%);
+    .user-gradient-func-reversed(135deg, 40%);
     
     width:  100%;
     margin: 0;
@@ -67,7 +76,7 @@
 
 .profile-header-wrapper {
     .profile-header {
-        .user-gradient-func(135deg, 100%);
+        .user-gradient-func-reversed(135deg, 100%);
     }
 }
 

@@ -229,7 +229,7 @@ body.main {
             font-size: 80%;            
             font-weight: 200;
             margin-bottom: 4px;
-            color: #999999;
+            color: #999;
         }
     }
 }
@@ -653,7 +653,7 @@ body.main {
     position: absolute;
     top:  200%;
     left: 50%;
-    margin: -290px 0 0px 120px;
+    margin: -290px 0 0 120px;
     z-index: 98;
     width:  377px;
     height: 564px;
@@ -940,7 +940,7 @@ footer {
     
     .active {
         font-weight: 700;
-        text-shadow: 0px 2px 1.5px fade(#fff, 0.25);
+        text-shadow: 0 2px 1.5px fade(#fff, 0.25);
         color: #333;
     }
 }
@@ -1060,12 +1060,26 @@ footer {
     }
 }
 
+@-webkit-keyframes -webkit-play-video-button-animation {
+    0%   { .box-shadow(0, 0, 50px, 0, #588bd2); }
+    100% { .box-shadow(0, 0, 0px, 0, #588bd2); }
+}
+
 .play-video-button-large {
     background: url(/assets/img/index/playbutton_large_sprite.png) no-repeat;
     display: block;
     
     width:  64px;
     height: 64px;
+    
+    .rounded(32px);
+    .box-shadow(0, 0, 30px, 0, #588bd2);
+    
+    -webkit-animation-name:             -webkit-play-video-button-animation;
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function:  linear;
+    -webkit-animation-direction:        alternate;
+    -webkit-animation-duration:         1s;
     
     &:hover, &:active {
         background-position: -66px 0;

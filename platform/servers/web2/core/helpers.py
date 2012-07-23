@@ -218,8 +218,9 @@ def stamped_view(schema=None,
                 response = fn(request, *args, **subkwargs)
                 logs.info("End request: Success")
                 
+                # TODO: audit cache headers!!
                 if utils.is_ec2():
-                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=10)).ctime()
+                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
                     response['Cache-Control'] = 'max-age=600'
                 else:
                     # disable caching for local development / debugging
