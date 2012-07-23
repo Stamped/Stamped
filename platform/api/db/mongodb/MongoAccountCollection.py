@@ -418,9 +418,17 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix', 'rdio'] :
             raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
 
+        userObjectId = self._getObjectIdFromString(userId)
+
         self._collection.update(
-            {'_id': self._getObjectIdFromString(userId)},
+            {'_id': userObjectId},
             {'$set': { 'linked.%s' % linkedAccount.service_name : linkedAccount.dataExport() } }
+        )
+
+        # remove old style linked account if it exists
+        self._collection.update(
+                {'_id': userObjectId},
+                {'$unset': { 'linked_accounts.%s' % linkedAccount.service_name : 1 } }
         )
 
 
