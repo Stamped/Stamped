@@ -15,6 +15,7 @@
 #import "SignupWelcomeViewController.h"
 #import "STEvents.h"
 #import "STNavigationItem.h"
+#import "STDebug.h"
 
 
 @interface TwitterAccountsViewController ()
@@ -199,8 +200,7 @@
     }
     [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
     
-    NSLog(@"twitter auth failed");
-    
+    [STDebug log:@"twitter auth failed"];
 }
 
 

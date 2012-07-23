@@ -35,6 +35,8 @@
 #import "STNavigationItem.h"
 #import "STRootViewController.h"
 #import "STTwitter.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
 
 typedef enum {
     CommentPanDirectionUp = 0,
@@ -323,7 +325,7 @@ typedef enum {
         
         if ([MFMailComposeViewController canSendMail])
             [sheet addButtonWithTitle:NSLocalizedString(@"Email stamp", nil)];
-        
+        [sheet addButtonWithTitle:@"Share to Instagram"];
         [sheet addButtonWithTitle:@"Copy link"];
         sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
         sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
@@ -709,11 +711,48 @@ typedef enum {
         }
         if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Copy link"]) {  // Copy link...
             [UIPasteboard generalPasteboard].string = self.stamp.URL;
-        } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Twitter", nil)] && canTweet) {  // Twitter or cancel depending...
+        } 
+        else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Twitter", nil)] && canTweet) {  // Twitter or cancel depending...
             [self showTweetViewController];
-        } else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
+        } 
+        else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
             [self showEmailViewController];
+        } 
+        else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
+            [self shareToInstagram];
         }
+}
+
+- (void)shareToInstagram {
+    CGSize size = CGSizeMake(612, 612);
+    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
+    //CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    [@"This is a text" drawAtPoint:CGPointMake(10, 40) withFont:[UIFont stampedBoldFontWithSize:24]];
+    
+    UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
+    NSURL* cacheDir = [Util cacheDirectory];
+    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.igo"];
+    BOOL success = [UIImageJPEGRepresentation(finalImage, 1.0) writeToURL:igImageHookFile atomically:YES];
+    NSLog(@"%@,%d", igImageHookFile, success);
+    
+    UIDocumentInteractionController *interactionController = [UIDocumentInteractionController interactionControllerWithURL:igImageHookFile];
+    interactionController.UTI = @"com.instagram.exclusivegram";
+    interactionController.delegate = self;
+    
+    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
+    //[interactionController presentPreviewAnimated:YES];
+    // OPEN THE HOOK
+//    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
+}
+- (BOOL) documentInteractionController: (UIDocumentInteractionController *) controller canPerformAction: (SEL) action {
+    return YES;
+}
+
+- (UIViewController *) documentInteractionControllerViewControllerForPreview: (UIDocumentInteractionController *) controller {
+    return self;
 }
 
 

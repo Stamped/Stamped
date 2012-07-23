@@ -10,15 +10,44 @@
 
 static CGFloat _shelfOffset = 9;
 
+@interface STRestViewController ()
+
+@property (nonatomic, readwrite, assign) UITableViewStyle tableStyle;
+@property (nonatomic, readwrite, retain) UILabel* searchNoResultsLabel;
+@property (nonatomic, readwrite, retain) UIImageView* stickyEnd;
+@property (nonatomic, readwrite, retain) EGORefreshTableFooterView* footerRefreshView;
+@property (nonatomic, readwrite, retain) EGORefreshTableHeaderView* headerRefreshView;
+@property (nonatomic, readwrite, retain) UIView* searchOverlay;
+@property (nonatomic, readwrite, retain) NoDataView* noDataView;
+
+@property (nonatomic, readwrite, retain) UITableView *tableView;
+@property (nonatomic, readwrite, retain) UITableView *searchResultsTableView;
+@property (nonatomic, readwrite, retain) UIView *headerView;
+@property (nonatomic, readwrite, retain) STSearchView *searchView;
+
+@property (nonatomic, readwrite, assign) BOOL explicitRefresh;
+@property (nonatomic, readwrite, assign) BOOL searching;
+
+@end
+
 @implementation STRestViewController
 
-@synthesize tableView=_tableView;
-@synthesize searchResultsTableView=_searchResultsTableView;
-@synthesize footerView=_footerView;
-@synthesize headerView=_headerView;
-@synthesize showsSearchBar=_showsSearchBar;
-@synthesize searchView=_searchView;
-@synthesize searching=_searching;
+@synthesize tableView = _tableView;
+@synthesize searchResultsTableView = _searchResultsTableView;
+@synthesize headerView = _headerView;
+@synthesize footerView = _footerView;
+@synthesize searchView = _searchView;
+@synthesize noDataView = _noDataView;
+@synthesize searchNoResultsLabel = _searchNoResultsLabel;
+@synthesize stickyEnd = _stickyEnd;
+@synthesize headerRefreshView = _headerRefreshView;
+@synthesize footerRefreshView = _footerRefreshView;
+@synthesize searchOverlay = _searchOverlay;
+
+@synthesize searching = _searching;
+@synthesize showsSearchBar = _showsSearchBar;
+@synthesize tableStyle = _tableStyle;
+@synthesize explicitRefresh = _explicitRefresh;
 
 - (id)init {
     if ((self = [super initWithNibName:nil bundle:nil])) {
@@ -32,13 +61,22 @@ static CGFloat _shelfOffset = 9;
 }
 
 - (void)dealloc {
-    [_tableView release], _tableView=nil;
-    [_headerView release], _headerView=nil;
-    [_footerView release], _footerView=nil;
-    _headerRefreshView = nil;
-    _footerRefreshView = nil;
-    _searchView = nil;
+    [self releaseAllViews];
     [super dealloc];
+}
+
+- (void)releaseAllViews {
+    self.tableView = nil;
+    self.searchResultsTableView = nil;
+    self.headerView = nil;
+    self.footerView = nil;
+    self.searchView = nil;
+    self.noDataView = nil;
+    self.searchNoResultsLabel = nil;
+    self.stickyEnd = nil;
+    self.headerRefreshView = nil;
+    self.footerRefreshView = nil;
+    self.searchOverlay = nil;
 }
 
 
@@ -54,78 +92,70 @@ static CGFloat _shelfOffset = 9;
     _restFlags.dataSourceIsEmpty = [self respondsToSelector:@selector(dataSourceIsEmpty)];
     _restFlags.dataSourceSetupNoDataView = [self respondsToSelector:@selector(setupNoDataView:)];
     
-    if (!_tableView) {
-        UITableView *tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:_tableStyle];
+    if (!self.tableView) {
+        UITableView *tableView = [[[UITableView alloc] initWithFrame:self.view.bounds style:_tableStyle] autorelease];
         tableView.clipsToBounds = NO;
         tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         tableView.delegate = (id<UITableViewDelegate>)self;
         tableView.dataSource = (id<UITableViewDataSource>)self;
         [Util reframeView:self.tableView withDeltas:CGRectMake(0, _shelfOffset, 0, -_shelfOffset)];
         [self.view addSubview:tableView];
-        _tableView = [tableView retain];
-        [tableView release];
+        self.tableView = tableView;
     }
     
-    if (!_headerRefreshView) {
+    if (!self.headerRefreshView) {
         
-        UIView *header = [[UIView alloc] initWithFrame:CGRectMake(0.0f, -300.0f, self.view.bounds.size.width, 241.0f)];
+        UIView *header = [[[UIView alloc] initWithFrame:CGRectMake(0.0f, -300.0f, self.view.bounds.size.width, 241.0f)] autorelease];
         header.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         header.backgroundColor = [UIColor colorWithRed:0.949f green:0.949f blue:0.949f alpha:1.0f];
         [self.tableView addSubview:header];
-        [header release];
         
-        EGORefreshTableHeaderView *view = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, -60.0f, self.tableView.bounds.size.width, 60.0f)];
+        EGORefreshTableHeaderView *view = [[[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, -60.0f, self.tableView.bounds.size.width, 60.0f)] autorelease];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         view.delegate = (id<EGORefreshTableHeaderDelegate>)self;
         [self.tableView addSubview:view];
-        _headerRefreshView = view;
-        [view release];
+        self.headerRefreshView = view;
         
     }
     
-    if (!_footerRefreshView && _restFlags.dataSourceHasMoreData) {
-        EGORefreshTableFooterView *view = [[EGORefreshTableFooterView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 40.0f)];
+    if (!self.footerRefreshView && _restFlags.dataSourceHasMoreData) {
+        EGORefreshTableFooterView *view = [[[EGORefreshTableFooterView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 40.0f)] autorelease];
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.tableView.tableFooterView = view;
-        _footerRefreshView = view;
-        [view release];
+        self.footerRefreshView = view;
     }
     
-    if (!_stickyEnd) {
-        UIImageView *imageView = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"refresh_sticky_end.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
+    if (!self.stickyEnd) {
+        UIImageView *imageView = [[[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"refresh_sticky_end.png"] 
+                                                                      stretchableImageWithLeftCapWidth:1 
+                                                                      topCapHeight:0]] autorelease];
         imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self.view addSubview:imageView];
         CGRect frame = imageView.frame;
         frame.size.width = self.view.bounds.size.width;
         imageView.frame = frame;
-        [imageView release];
-        _stickyEnd = imageView;
-        _stickyEnd.hidden = YES;
+        self.stickyEnd = imageView;
+        self.stickyEnd.hidden = YES;
     }
     
-    _explicitRefresh = NO;
+    self.explicitRefresh = NO;
     
 }
 
 - (void)viewDidUnload {
     [super viewDidUnload];
-    _footerRefreshView=nil;
-    _headerRefreshView=nil;
-    _stickyEnd=nil;
-    _searchView=nil;
-    self.tableView.tableHeaderView = nil;
-    self.tableView=nil;
+    [self releaseAllViews];
 }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    if (_searching) {
+    if (self.searching) {
         [self.navigationController setNavigationBarHidden:YES animated:NO];
-        [_searchResultsTableView deselectRowAtIndexPath:_searchResultsTableView.indexPathForSelectedRow animated:YES];
+        [self.searchResultsTableView deselectRowAtIndexPath:self.searchResultsTableView.indexPathForSelectedRow animated:YES];
     } else {
         [self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
-        if (_showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
+        if (self.showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
             //[self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
         }
     }
@@ -137,7 +167,7 @@ static CGFloat _shelfOffset = 9;
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
-    if (_searching) {
+    if (self.searching) {
         [self.navigationController setNavigationBarHidden:NO animated:NO];
     }
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIKeyboardWillShowNotification  object:nil];
@@ -146,7 +176,7 @@ static CGFloat _shelfOffset = 9;
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    if (!_searching && _showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
+    if (!self.searching && self.showsSearchBar && CGPointEqualToPoint(self.tableView.contentOffset, CGPointZero)) {
         //[self.tableView setContentOffset:CGPointMake(0.0f, 49.0f)];
     }
 }
@@ -202,13 +232,13 @@ static CGFloat _shelfOffset = 9;
     CGFloat origin = 0.0f;
     CGFloat height = self.view.bounds.size.height;
     
-    if (_headerView) {
-        origin = _headerView.bounds.size.height;
-        height -= _headerView.bounds.size.height;
+    if (self.headerView) {
+        origin = self.headerView.bounds.size.height;
+        height -= self.headerView.bounds.size.height;
     }
     
-    if (_footerView) {
-        height -= _footerView.bounds.size.height;
+    if (self.footerView) {
+        height -= self.footerView.bounds.size.height;
     }
     
     CGRect frame = self.tableView.frame;
@@ -225,11 +255,11 @@ static CGFloat _shelfOffset = 9;
 - (void)setContentInset:(UIEdgeInsets)inset {
     self.tableView.contentInset = inset;
     self.tableView.scrollIndicatorInsets = inset;
-    _headerRefreshView.tableInset = inset;
+    self.headerRefreshView.tableInset = inset;
 
-    if (_searchResultsTableView) {
-        _searchResultsTableView.contentInset = inset;
-        _searchResultsTableView.scrollIndicatorInsets = inset;
+    if (self.searchResultsTableView) {
+        self.searchResultsTableView.contentInset = inset;
+        self.searchResultsTableView.scrollIndicatorInsets = inset;
     }
     
 }
@@ -239,7 +269,8 @@ static CGFloat _shelfOffset = 9;
     // remove old header
     if (_headerView) {
         [_headerView removeFromSuperview];
-        [_headerView release], _headerView=nil;
+        [_headerView autorelease];
+        _headerView = nil;
     }
     
     // add header
@@ -262,7 +293,8 @@ static CGFloat _shelfOffset = 9;
     
     if (_footerView) {
         [_footerView removeFromSuperview];
-        [_footerView release], _footerView=nil;
+        [_footerView autorelease];
+        _footerView = nil;
     }
     
     if (footerView) {
@@ -274,7 +306,6 @@ static CGFloat _shelfOffset = 9;
         frame.origin.y = self.view.bounds.size.height - _footerView.bounds.size.height;
         frame.size.width = self.view.bounds.size.width;
         _footerView.frame = frame;
-
     }
     
     [self layoutTableView];
@@ -285,13 +316,13 @@ static CGFloat _shelfOffset = 9;
     
     if (_showsSearchBar) {
         
-        if (!_searchView) {
+        if (!self.searchView) {
             
             STSearchView *view = [[STSearchView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 52)];
             view.autoresizingMask = UIViewAutoresizingFlexibleWidth;
             view.delegate = (id<STSearchViewDelegate>)self;
             self.tableView.tableHeaderView = view;
-            _searchView = view;
+            self.searchView = view;
             [view release];
             
             self.tableView.contentOffset = CGPointMake(0.0f, -140.0f);
@@ -300,16 +331,14 @@ static CGFloat _shelfOffset = 9;
         
     } else {
         
-        if (_searchView) {
-            _searchView = nil;
+        if (self.searchView) {
+            self.searchView = nil;
             self.tableView.tableHeaderView = nil;
         }
         
     }
     
-    
-    _headerRefreshView.showingSearch = _showsSearchBar;
-    
+    self.headerRefreshView.showingSearch = _showsSearchBar;
 }
 
 
@@ -317,31 +346,32 @@ static CGFloat _shelfOffset = 9;
 
 - (void)setState {
 	
-	[_headerRefreshView updateRefreshState:self.tableView];
+	[self.headerRefreshView updateRefreshState:self.tableView];
     
     if (_restFlags.dataSourceReloading) {	
-		if ([[self.tableView tableFooterView] isKindOfClass:[EGORefreshTableFooterView class]] && _footerRefreshView) {
-            if (!_explicitRefresh) {
-                [_footerRefreshView setLoading:[(id<STRestController>)self dataSourceReloading]];
+		if ([[self.tableView tableFooterView] isKindOfClass:[EGORefreshTableFooterView class]] && self.footerRefreshView) {
+            if (!self.explicitRefresh) {
+                [self.footerRefreshView setLoading:[(id<STRestController>)self dataSourceReloading]];
             }
 		}
 	} 
 	
-	BOOL _empty = NO;
+	BOOL empty = NO;
 	if (_restFlags.dataSourceIsEmpty) {
-		_empty = [(id<STRestController>)self  dataSourceIsEmpty];
+		empty = [(id<STRestController>)self  dataSourceIsEmpty];
 	}
 
-	if (!_empty || [(id<STRestController>)self dataSourceReloading]) {
+	if (!empty || [(id<STRestController>)self dataSourceReloading]) {
 		
         self.tableView.scrollEnabled = YES;
-		if (_noDataView!=nil) {
-            [_noDataView removeFromSuperview], _noDataView=nil;
-		}
+		if (self.noDataView!=nil) {
+            [self.noDataView removeFromSuperview];
+            self.noDataView = nil;
+        }
 		
 	} else {
 		
-		if (_noDataView==nil) {
+		if (self.noDataView==nil) {
             
             CGFloat yOffset = self.tableView.tableHeaderView ? self.tableView.tableHeaderView.bounds.size.height : 0.0f;
 			NoDataView *view = [[NoDataView alloc] initWithFrame:CGRectMake(0.0f, yOffset, self.tableView.frame.size.width, floorf(self.tableView.frame.size.height))];
@@ -349,13 +379,13 @@ static CGFloat _shelfOffset = 9;
             view.backgroundColor = self.tableView.backgroundColor;
 			[self.tableView addSubview:view];
 			view.alpha = 0.01f;
-			_noDataView = view;
+			self.noDataView = view;
             view=nil;
 			
 		}
 		
 		[UIView animateWithDuration:0.2f animations:^{
-			_noDataView.alpha = 1.0f;
+			self.noDataView.alpha = 1.0f;
 		}];
 		
 		if (_restFlags.dataSourceSetupNoDataView) {
@@ -368,19 +398,19 @@ static CGFloat _shelfOffset = 9;
 
 - (void)reloadDataSource {
     
-    [_headerRefreshView updateRefreshState:self.tableView];
+    [self.headerRefreshView updateRefreshState:self.tableView];
     [self setState];
-    _explicitRefresh = NO;
+    self.explicitRefresh = NO;
 
 }
 
 - (void)dataSourceDidFinishLoading {
     
-    _explicitRefresh = NO;
-	[_headerRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:self.tableView];
+    self.explicitRefresh = NO;
+	[self.headerRefreshView egoRefreshScrollViewDataSourceDidFinishedLoading:self.tableView];
 	[self setState];
     
-    if (_searching) {
+    if (self.searching) {
         [self updateSearchState];
     }
     
@@ -393,12 +423,14 @@ static CGFloat _shelfOffset = 9;
     if (scrollView != self.tableView) return;
     
     BOOL hidden = scrollView.contentOffset.y <= 49.0f;
-    if (_stickyEnd.hidden != hidden) {
-        _stickyEnd.hidden = hidden;
+    if (self.stickyEnd.hidden != hidden) {
+        self.stickyEnd.hidden = hidden;
     }
-    [_headerRefreshView egoRefreshScrollViewDidScroll:scrollView];
+    [self.headerRefreshView egoRefreshScrollViewDidScroll:scrollView];
     if (_restFlags.dataSourceLoadNextPage && _restFlags.dataSourceHasMoreData && _restFlags.dataSourceReloading) {
-        if (![(id<STRestController>)self dataSourceReloading] && scrollView.contentOffset.y >= ((scrollView.contentSize.height - (scrollView.frame.size.height*2)) -10) && [(id<STRestController>)self dataSourceHasMoreData]) {
+        if (![(id<STRestController>)self dataSourceReloading] &&
+            scrollView.contentOffset.y >= ((scrollView.contentSize.height - (scrollView.frame.size.height*2)) -10) &&
+            [(id<STRestController>)self dataSourceHasMoreData]) {
             [(id<STRestController>)self loadNextPage];
             [self setState];
         }
@@ -407,10 +439,12 @@ static CGFloat _shelfOffset = 9;
 }
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset {
-    if (scrollView != self.tableView) return;
+    if (scrollView != self.tableView) {
+        return;
+    }
 
     if (scrollView.contentOffset.y < 0.0f) {
-        [_headerRefreshView egoRefreshScrollViewDidEndDragging:scrollView];
+        [self.headerRefreshView egoRefreshScrollViewDidEndDragging:scrollView];
     }
     
 }
@@ -421,7 +455,7 @@ static CGFloat _shelfOffset = 9;
 - (void)egoRefreshTableHeaderDidTriggerRefresh:(EGORefreshTableHeaderView*)view {
 	
 	if (_restFlags.dataSourceReloadDataSource) {
-        _explicitRefresh = YES;
+        self.explicitRefresh = YES;
 		return [self reloadDataSource];
 	}
 	
@@ -442,16 +476,16 @@ static CGFloat _shelfOffset = 9;
 
 - (void)updateSearchState {
     
-    if (_searchResultsTableView) {
+    if (self.searchResultsTableView) {
         
-        NSInteger count = [_searchResultsTableView numberOfRowsInSection:0];
+        NSInteger count = [self.searchResultsTableView numberOfRowsInSection:0];
         
-        if (count == 0 && _searchOverlay!=nil && _searchOverlay.hidden) {
+        if (count == 0 && self.searchOverlay!=nil && self.searchOverlay.hidden) {
             
             // no results
-            if (!_searchNoResultsLabel) {
+            if (!self.searchNoResultsLabel) {
                 
-                UILabel *label = [[UILabel alloc] initWithFrame:CGRectZero];
+                UILabel *label = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
                 label.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
                 label.font = [UIFont boldSystemFontOfSize:15];
                 label.backgroundColor = [UIColor clearColor];
@@ -459,9 +493,8 @@ static CGFloat _shelfOffset = 9;
                 label.text = @"";
                 //label.text = NSLocalizedString(@"No results.", @"No results.");
                 [label sizeToFit];
-                [_searchResultsTableView addSubview:label];
-                _searchNoResultsLabel = label;
-                [label release];
+                [self.searchResultsTableView addSubview:label];
+                self.searchNoResultsLabel = label;
                 
                 CGRect frame = label.frame;
                 frame.origin.x = floorf((self.view.bounds.size.width-label.bounds.size.width)/2);
@@ -470,13 +503,14 @@ static CGFloat _shelfOffset = 9;
                 
             }
             
-        } else {
+        }
+        else {
             
             // has results
-            if (_searchNoResultsLabel) {
-                [_searchNoResultsLabel removeFromSuperview], _searchNoResultsLabel=nil;
+            if (self.searchNoResultsLabel) {
+                [self.searchNoResultsLabel removeFromSuperview];
+                self.searchNoResultsLabel = nil;
             }
-            
             
         }
         
@@ -486,7 +520,7 @@ static CGFloat _shelfOffset = 9;
 
 - (void)overlayTapped:(UITapGestureRecognizer*)gesture {
     
-    [_searchView cancelSearch];
+    [self.searchView cancelSearch];
     
 }
 
@@ -499,26 +533,31 @@ static CGFloat _shelfOffset = 9;
     
     if (_searching) {
         
-        CGFloat barHeight = _searchView.bounds.size.height;
+        CGFloat barHeight = self.searchView.bounds.size.height;
         
-        if (!_searchResultsTableView) {
+        if (!self.searchResultsTableView) {
             
-            UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectMake(0.0f, _searchView.bounds.size.height, self.view.bounds.size.width, self.view.bounds.size.height - _searchView.bounds.size.height) style:UITableViewStylePlain];
+            UITableView *tableView = [[[UITableView alloc] initWithFrame:CGRectMake(0.0f, 
+                                                                                   self.searchView.bounds.size.height, 
+                                                                                   self.view.bounds.size.width, 
+                                                                                   self.view.bounds.size.height - _searchView.bounds.size.height) 
+                                                                  style:UITableViewStylePlain] autorelease];
             tableView.delegate = (id<UITableViewDelegate>)self;
             tableView.dataSource = (id<UITableViewDataSource>)self;
             [self.view addSubview:tableView];
-            _searchResultsTableView = tableView;
-            [tableView release];
-            _searchResultsTableView.hidden = YES;
+            self.searchResultsTableView = tableView;
+            self.searchResultsTableView.hidden = YES;
             
         }
         
-        if (!_searchOverlay) {
+        if (!self.searchOverlay) {
             
-            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, barHeight, self.view.bounds.size.width, self.view.bounds.size.height - barHeight)];
+            UIView *view = [[[UIView alloc] initWithFrame:CGRectMake(0.0f,
+                                                                     barHeight,
+                                                                     self.view.bounds.size.width, 
+                                                                     self.view.bounds.size.height - barHeight)] autorelease];
             [self.view addSubview:view];
-            _searchOverlay = view;
-            [view release];
+            self.searchOverlay = view;
 
             UIColor *color = [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.5f];
             CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"backgroundColor"];
@@ -526,21 +565,22 @@ static CGFloat _shelfOffset = 9;
             animation.toValue = (id)color.CGColor;
             animation.duration = 0.3f;
             animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-            [_searchOverlay.layer addAnimation:animation forKey:nil];
-            _searchOverlay.layer.backgroundColor = color.CGColor;
+            [self.searchOverlay.layer addAnimation:animation forKey:nil];
+            self.searchOverlay.layer.backgroundColor = color.CGColor;
             
-            UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(overlayTapped:)];
-            [_searchOverlay addGestureRecognizer:gesture];
-            [gesture release];
+            UITapGestureRecognizer *gesture = [[[UITapGestureRecognizer alloc] initWithTarget:self 
+                                                                                       action:@selector(overlayTapped:)] autorelease];
+            [self.searchOverlay addGestureRecognizer:gesture];
             
         }
         
-    } else {
+    } 
+    else {
         
-        if (_searchOverlay) {
+        if (self.searchOverlay) {
             
-            __block UIView *view = _searchOverlay;
-            _searchOverlay = nil;
+            UIView *view = self.searchOverlay;
+            self.searchOverlay = nil;
             
             [CATransaction begin];
             [CATransaction setAnimationDuration:0.3f];
@@ -562,13 +602,14 @@ static CGFloat _shelfOffset = 9;
         }
         [self updateSearchState];
         
-        if (_searchResultsTableView) {
-            [_searchResultsTableView removeFromSuperview], _searchResultsTableView=nil;
+        if (self.searchResultsTableView) {
+            [self.searchResultsTableView removeFromSuperview];
+            self.searchResultsTableView = nil;
         }
         
     }
     
-    _searchView.showCancelButton = _searching;
+    self.searchView.showCancelButton = _searching;
     
 }
 
@@ -594,9 +635,9 @@ static CGFloat _shelfOffset = 9;
 
 - (void)stSearchView:(STSearchView*)view textDidChange:(NSString*)text {
     
-    if (_searchOverlay) {
-        _searchOverlay.hidden = (text!=nil && [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0);
-        _searchResultsTableView.hidden = !_searchOverlay.hidden;
+    if (self.searchOverlay) {
+        self.searchOverlay.hidden = (text!=nil && [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length > 0);
+        self.searchResultsTableView.hidden = !self.searchOverlay.hidden;
     }
     
     [self updateSearchState];
@@ -604,8 +645,8 @@ static CGFloat _shelfOffset = 9;
 }
 
 - (void)setShowSearchTable:(BOOL)visible {
-    _searchOverlay.hidden = !visible;
-    _searchResultsTableView.hidden = visible;
+    self.searchOverlay.hidden = !visible;
+    self.searchResultsTableView.hidden = visible;
 }
 
 #pragma mark - UIKeyboard Notfications

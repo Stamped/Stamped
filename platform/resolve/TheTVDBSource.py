@@ -176,7 +176,7 @@ class TheTVDBSource(GenericSource):
         return self.generatorSource(self.__queryGen(query=query.name), 
                                     constructor=TheTVDBShow)
     
-    def __queryGen(self, **params, timeout=None):
+    def __queryGen(self, **params):
         results = self.__thetvdb.search(transform=True, detailed=True, **params)
         for result in results:
             yield result

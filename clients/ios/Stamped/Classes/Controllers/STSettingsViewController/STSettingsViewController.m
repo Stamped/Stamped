@@ -23,7 +23,6 @@
 #import "STDebugViewController.h"
 #import "AboutUsViewController.h"
 #import "WebViewController.h"
-#import "TOSViewController.h"
 #import <MessageUI/MFMailComposeViewController.h>
 
 @interface STSettingsViewController () <MFMailComposeViewControllerDelegate>

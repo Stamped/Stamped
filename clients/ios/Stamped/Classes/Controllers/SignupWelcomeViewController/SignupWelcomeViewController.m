@@ -579,7 +579,6 @@
         self.avatarUploader.filePath = path;
         [self.avatarUploader startWithProgress:^(float progress) {
             
-            NSLog(@"%f", progress);
             SignupCameraTableCell *cell = (SignupCameraTableCell*)[self.tableView cellForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]];
             if (cell) {
                 [cell setProgress:progress];

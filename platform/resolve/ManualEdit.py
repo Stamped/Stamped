@@ -105,7 +105,11 @@ def formForEntity(entity_id, **hidden_params):
                 pass
         fields['rdio_url'] = rdio_url
         fields['spotify_id'] = entity.sources.spotify_id
-
+    if entity.isType('tv') or entity.isType('movie') or entity.isType('album') or entity.isType('track') or entity.isType('book'):
+        amazon_url = ''
+        if entity.sources.amazon_id and entity.sources.amazon_url:
+            amazon_url = entity.sources.amazon_url
+        fields['amazon_url'] = amazon_url
     if entity.isType('tv') or entity.isType('movie'):
         imdb_url = ''
         tmdb_id = entity.sources.tmdb_id
@@ -205,6 +209,14 @@ def update(updates):
         entity.sources.spotify_id = spotify_id
         entity.sources.spotify_source = 'seed'
         entity.sources.spotify_timestamp = now
+    amazon_url = updates.amazon_url
+    if amazon_url is not None and amazon_url not in bad_versions:
+        amazon_id = re.match(r'http://www.amazon.com(/.+)+/dp/([A-Za-z0-9]+)/(.+)?(\?.+)?',a).group(2)
+        entity.sources.amazon_id = amazon_id
+        entity.sources.amazon_url = amazon_url
+        entity.sources.amazon_source = 'seed'
+        entity.sources.amazon_underlying = amazon_id
+        entity.sources.amazon_timestamp = now
     # netflix_url = updates.netflix_url
     # if netflix_url is not None and netflix_url not in bad_versions:
     #     match = re.match(r'http://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?trkid=\d+)?',netflix_url)
@@ -243,6 +255,7 @@ def update(updates):
             v = None
         if v != _invalidPlaceholder:
             setattr(entity, k, v)
+    db.updateEntity(entity)
     _stampedAPI().mergeEntity(entity)
 
 

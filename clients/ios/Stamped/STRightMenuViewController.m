@@ -233,8 +233,6 @@
             } else {
                 [self popInView1:view withDelay:delay];
             }
-            //double val = floorf(((double)arc4random() / 0x100000000) * 2.0f);
-            // NSLog(@"%f", val);
             delay += animated ? 0.06f : 0.08f;
         } else {
             delay = 0.1f;

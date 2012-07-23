@@ -15,21 +15,6 @@
 @protocol STRestController;
 
 @interface STRestViewController : UIViewController <STSearchViewDelegate> {
-    
-    UITableViewStyle _tableStyle;
-    UITableView *_tableView;
-    UITableView *_searchResultsTableView;
-    UILabel *_searchNoResultsLabel;
-    UIImageView *_stickyEnd;
-    
-    EGORefreshTableFooterView *_footerRefreshView;
-    EGORefreshTableHeaderView *_headerRefreshView;
-    UIView *_searchOverlay;
-    NoDataView *_noDataView;
-    
-    BOOL _explicitRefresh;
-    BOOL _searching;
-       
     struct {
         unsigned int dataSourceReloading:1;
         unsigned int dataSourceLoadNextPage:1;
@@ -41,13 +26,13 @@
     
 }
 
-@property(strong, nonatomic) UITableView *tableView;
-@property(strong, nonatomic) UITableView *searchResultsTableView;
-@property(strong, nonatomic) UIView *headerView;
-@property(strong, nonatomic) UIView *footerView;
-@property(readonly, nonatomic) STSearchView *searchView;
-@property(nonatomic, assign, getter = isShowingSearch) BOOL showsSearchBar;
-@property(nonatomic, readonly, getter = isSearching) BOOL searching;
+@property (nonatomic, readonly, retain) UITableView *tableView;
+@property (nonatomic, readonly, retain) UITableView *searchResultsTableView;
+@property (nonatomic, readonly, retain) UIView *headerView;
+@property (nonatomic, readwrite, retain) UIView *footerView;
+@property (nonatomic, readonly, retain) STSearchView *searchView;
+@property (nonatomic, assign, getter = isShowingSearch) BOOL showsSearchBar;
+@property (nonatomic, readonly, getter = isSearching) BOOL searching;
 
 - (void)setShowSearchTable:(BOOL)visible;
 
@@ -57,6 +42,7 @@
 - (void)reloadDataSource;
 - (void)dataSourceDidFinishLoading;
 - (void)animateIn;
+- (void)layoutTableView;
 
 @end
 
