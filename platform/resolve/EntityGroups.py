@@ -539,6 +539,7 @@ class LastPopularGroup(BasicFieldGroup):
         BasicFieldGroup.__init__(self, 'last_popular')
         self.addNameField()
         self.addField(['last_popular_info'])
+        self.addField(['total_popularity_measure'])
 
     def eligible(self, entity):
         return True
