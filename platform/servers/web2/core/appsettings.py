@@ -92,7 +92,7 @@ def alert_settings(request, schema, **kwargs):
         logs.info("user_id: %s" % user_id)
         logs.info("account: %s" % account)
         settings = account.alert_settings
-        user     = HTTPUser().importSchema(account).dataExport()
+        user     = schema.dataExport()
     
     options = [
         {
