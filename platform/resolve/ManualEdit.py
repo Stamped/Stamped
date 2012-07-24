@@ -76,8 +76,9 @@ def extraInfo(entity):
             try:
                 image_url        = _cleanImageURL(album.images[0].sizes[0].url)
                 extra.append("""
+<img src="%s"/>
 <a href="%s">%s</a><br/>
-                    """ % (image_url, album.title))
+                    """ % (image_url, image_url, album.title))
             except Exception as e:
                 print e
 
