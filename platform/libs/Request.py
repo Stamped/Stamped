@@ -9,6 +9,7 @@ from gevent     import monkey
 monkey.patch_all()
 from gevent.coros import Semaphore
 
+import Globals
 import logs
 import utils
 import rpyc
