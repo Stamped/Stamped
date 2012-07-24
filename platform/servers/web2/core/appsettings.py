@@ -89,8 +89,8 @@ def alert_settings(request, schema, **kwargs):
     else:
         user_id  = g_stamped_auth.verifyEmailAlertToken(token)
         account  = stampedAPIProxy.getAccount(user_id)
-        settings = account.alert_settings
-        user     = HTTPUser().importSchema(account).dataExport()
+        settings = account['alert_settings']
+        user     = HTTPUser().dataImport(account).dataExport()
     
     options = [
         {
