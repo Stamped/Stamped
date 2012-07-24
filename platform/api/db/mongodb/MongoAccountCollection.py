@@ -32,10 +32,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                                         ('_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
                                         ('_id', pymongo.ASCENDING)])
-        self._collection.ensure_index('linked_accounts.facebook.facebook_id')
-        self._collection.ensure_index('linked.facebook.linked_user_id')
-        self._collection.ensure_index('linked_accounts.twitter.twitter_id')
-        self._collection.ensure_index('linked.twitter.linked_user_id')
         self._collection.ensure_index('linked.netflix.linked_user_id')
 
 
@@ -309,25 +305,18 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return self._convertFromMongo(document)
 
     def getAccountsByFacebookId(self, facebookId):
-        documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
-        accounts = [self._convertFromMongo(doc) for doc in documents]
-        oldIds = [acct.linked.facebook.linked_user_id for acct in accounts if acct.linked.facebook is not None]
         documents = self._collection.find({"linked.facebook.linked_user_id" : facebookId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents if doc['linked']['facebook']['linked_user_id'] not in oldIds])
+        accounts = [self._convertFromMongo(doc) for doc in documents]
         return accounts
 
     def getAccountsByTwitterId(self, twitterId):
-        documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
-        accounts = [self._convertFromMongo(doc) for doc in documents]
-        oldIds = [acct.linked.twitter.linked_user_id for acct in accounts if acct.linked.twitter is not None]
         documents = self._collection.find({"linked.twitter.linked_user_id" : twitterId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents if doc['linked']['twitter']['linked_user_id'] not in oldIds])
+        accounts = [self._convertFromMongo(doc) for doc in documents]
         return accounts
 
     def getAccountsByNetflixId(self, netflixId):
         documents = self._collection.find({"linked.netflix.linked_user_id" : netflixId })
         accounts = [self._convertFromMongo(doc) for doc in documents]
-
         return accounts
 
     def addLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
