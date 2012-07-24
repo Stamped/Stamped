@@ -44,6 +44,11 @@ class UMDTrack(ResolverMediaItem):
     def last_popular(self):
         return self.__data['last_popular']
 
+    @lazyProperty
+    def popularity_score(self):
+        return self.__data['total_popularity']
+
+
 class UMDAlbum(ResolverMediaCollection):
     def __init__(self, data):
         ResolverMediaItem.__init__(self, types=['album'])
@@ -72,8 +77,13 @@ class UMDAlbum(ResolverMediaCollection):
     def last_popular(self):
         return self.__data['last_popular']
 
+    @lazyProperty
+    def popularity_score(self):
+        return self.__data['total_popularity']
+
 
 class UMDSource(DumbSource):
+    """Source for data scraped from www.umdmusic.com"""
     def __init__(self):
         super(UMDSource, self).__init__(
                 'umdmusic', groups=['artists', 'last_popular'], kinds=['media_item', 'media_collection'], types=['track', 'album'])
