@@ -1258,15 +1258,22 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getSuggestedUsers(self, authUserId, limit=None, offset=None):
         suggested = [
-            'mariobatali',
-            'nymag',
-            'time',
-            'urbandaddy',
-            'parislemon',
-            'michaelkors',
-            'petertravers',
-            'rebeccaminkoff',
-            'austinchronicle',
+            'justinbieber', 
+            'ellendegeneres', 
+            'ryanseacrest', 
+            'nytimes', 
+            'time', 
+            'nickswisher', 
+            'passionpit', 
+            'nymag', 
+            'mariobatali', 
+            'michaelkors', 
+            'parislemon', 
+            'kevinsystrom', 
+            'barondavis', 
+            'urbandaddy', 
+            'tconrad', 
+            'bostonglobe', 
         ]
         users = self.getUsers(None, suggested, authUserId)
         users.sort(key=lambda x: suggested.index(x.screen_name.lower()))
