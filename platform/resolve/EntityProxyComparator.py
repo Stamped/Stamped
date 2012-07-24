@@ -118,32 +118,33 @@ class AlbumEntityProxyComparator(AEntityProxyComparator):
         """
         Album comparison is easy -- just album name and artist name.
         """
-        raw_name_similarity = StringComparator.get_ratio(album1.name, album2.name)
-        simple_name_similarity = StringComparator.get_ratio(albumSimplify(album1.name),
-            albumSimplify(album2.name))
-        album_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
-        if album_name_sim <= 0.8:
-            return CompareResult.unknown()
-            # TODO: Handle case with multiple artists? Does this come up?
+        album_sim_score = titleComparison(album1.name, album2.name, albumSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(album1.raw_name), album1.source, album1.key,
+                repr(album2.raw_name), album2.source, album2.key,
+                )
+            print 'album title sim score', album_sim_score
 
         try:
             artist1_name = album1.artists[0]['name']
             artist2_name = album2.artists[0]['name']
-            raw_artist_similarity = StringComparator.get_ratio(artist1_name, artist2_name)
-            simple_artist_similarity = StringComparator.get_ratio(artistSimplify(artist1_name),
-                artistSimplify(artist2_name))
-            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
-            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
-                artist_name_sim = max(artist_name_sim, 0.9)
+
+            artist_sim_score = titleComparison(artist1_name, artist2_name, artistSimplify, comparator=ArtistTitleComparator)
+            if logComparisonLogic:
+                print 'artist title sim score', artist_sim_score
+
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
             # 'Various Artists' or whatever.
             return CompareResult.unknown()
 
-        if artist_name_sim <= 0.8:
-            return CompareResult.unknown()
-        score = album_name_sim * album_name_sim * artist_name_sim
-        return CompareResult.match(score)
+        total_sim_score = album_sim_score * (artist_sim_score ** 0.5)
+        if album_sim_score < 0.7 or artist_sim_score < 0.7 or total_sim_score < 0.6:
+            return CompareResult.definitely_not_match()
+        if album_sim_score > 0.875 and artist_sim_score > 0.875 and total_sim_score > 0.85:
+            return CompareResult.match(total_sim_score)
+        return CompareResult.unknown()
 
 
 class TrackEntityProxyComparator(AEntityProxyComparator):
@@ -152,32 +153,33 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
         """
         Track comparison is easy -- just track name and artist name.
         """
-        raw_name_similarity = StringComparator.get_ratio(track1.name, track2.name)
-        simple_name_similarity = StringComparator.get_ratio(trackSimplify(track1.name),
-            trackSimplify(track2.name))
-        track_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
-        if track_name_sim <= 0.8:
-            return CompareResult.unknown()
-            # TODO: Handle case with multiple artists? Does this come up?
+        track_sim_score = titleComparison(track1.name, track2.name, trackSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(track1.raw_name), track1.source, track1.key,
+                repr(track2.raw_name), track2.source, track2.key,
+                )
+            print 'track title sim score', track_sim_score
 
         try:
             artist1_name = track1.artists[0]['name']
             artist2_name = track2.artists[0]['name']
-            raw_artist_similarity = StringComparator.get_ratio(artist1_name, artist2_name)
-            simple_artist_similarity = StringComparator.get_ratio(artistSimplify(artist1_name),
-                artistSimplify(artist2_name))
-            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
-            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
-                artist_name_sim = max(artist_name_sim, 0.9)
+
+            artist_sim_score = titleComparison(artist1_name, artist2_name, artistSimplify, comparator=ArtistTitleComparator)
+            if logComparisonLogic:
+                print 'artist title sim score', artist_sim_score
+
         except IndexError:
-            # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
+            # TODO: Better handling here. Maybe pare out the artist-less track. Maybe check to see if both are by
             # 'Various Artists' or whatever.
             return CompareResult.unknown()
 
-        if artist_name_sim <= 0.8:
-            return CompareResult.unknown()
-        score = track_name_sim * artist_name_sim
-        return CompareResult.match(score)
+        total_sim_score = track_sim_score * (artist_sim_score ** 0.5)
+        if track_sim_score < 0.7 or artist_sim_score < 0.7 or total_sim_score < 0.6:
+            return CompareResult.definitely_not_match()
+        if track_sim_score > 0.875 and artist_sim_score > 0.875 and total_sim_score > 0.85:
+            return CompareResult.match(total_sim_score)
+        return CompareResult.unknown()
 
 
 class MovieEntityProxyComparator(AEntityProxyComparator):
@@ -412,19 +414,19 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
 
     @classmethod
     def compare_proxies(cls, place1, place2):
-        #print "COMPARING PLACES:", place1.name, "--", tryToGetStreetAddressFromPlace(place1), "--", place1.key, \
-        #      "       AND    ", place2.name, "--", tryToGetStreetAddressFromPlace(place2), "--", place2.key
-
-        raw_name_similarity = StringComparator.get_ratio(place1.name, place2.name)
-        simple_name_similarity = StringComparator.get_ratio(simplify(place1.name),
-            simplify(place2.name))
-        name_similarity = max(raw_name_similarity, simple_name_similarity - 0.15)
-        if place1.name.startswith(place2.name) or place2.name.startswith(place1.name):
-            name_similarity = max(name_similarity, 0.9)
+        sim_score = titleComparison(place1.name, place2.name, movieSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(place1.raw_name), place1.source, place1.key,
+                repr(place2.raw_name), place2.source, place2.key,
+                )
+            print 'sim score after title', sim_score
 
         #print "NAME SIM IS", name_similarity
 
-        if name_similarity < 0.5:
+        if sim_score < 0.5:
+            if logComparisonLogic:
+                print 'Exiting early due to obviously unfit match\n'
             return CompareResult.definitely_not_match()
 
         compared_locations = False
@@ -432,8 +434,13 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
 
         if place1.coordinates and place2.coordinates:
             distance_in_km = ScoringUtils.geoDistance(place1.coordinates, place2.coordinates)
+            if distance_in_km > 50:
+                if logComparisonLogic:
+                    print '> 50km apart; returning definitely_not_match'
+                return CompareResult.definitely_not_match()
             if distance_in_km > 10:
-                #print "CRAPPING OUT"
+                if logComparisonLogic:
+                    print '10-50km apart; returning unknown'
                 return CompareResult.unknown()
 
             # Min of 0.01m away.
@@ -441,7 +448,6 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
 
             # 0 if 1km apart, .27 if 0.1km, 0.54 if 0.01km.
             location_similarity = math.log(1.0 / distance_in_km, 5000)
-            #print "COORD-BASED LOCATION SIM IS", location_similarity
             compared_locations = True
 
         state1 = tryToGetStateFromPlace(place1)
@@ -461,14 +467,13 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
             elif zip1 == zip2:
                 location_similarity += 0.1
 
-        if compared_locations and name_similarity + location_similarity > 0.9:
-            #print "HOT DAMN! QUITTIN EARLY."
+        if compared_locations and sim_score + location_similarity > 1.0:
             # If we think these two businesses are extremely likely to be the same based on name and latlng, exit early.
             # The reason for this is that sometimes a business will have two addresses if it's on a corner or has two
             # entrances. We'll tank it in the address comparison. Exiting early makes sure that, when the latlngs and
             # names are close enough, we don't second-guess it because of an address issue.
             # #print "Matching after lat-lng with sim score", similarity_score
-            return CompareResult.match(name_similarity + location_similarity)
+            return CompareResult.match(sim_score + location_similarity)
 
         # TODO: Should really just get parsed-out map in one call since it's repeating same regexp matches over and
         # over again.
@@ -539,9 +544,9 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
         # other just knows the city. This isn't always feasible because half of Google results lack structured address
         # data but might be worth doing for the other half.
 
-        similarity_score = location_similarity + name_similarity
+        similarity_score = location_similarity + sim_score
         #print "FINAL TOTAL SIM IS", similarity_score
-        if similarity_score > 0.9:
+        if similarity_score > 1.1:
             #print "MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED WITH SCORE", similarity_score
             return CompareResult.match(similarity_score)
         elif similarity_score < 0.3:
