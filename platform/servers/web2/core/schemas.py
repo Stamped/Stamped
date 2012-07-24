@@ -126,3 +126,9 @@ class HTTPResetPasswordSchema(Schema):
         cls.addProperty('token',                            basestring, required=True)
         cls.addProperty('password',                         basestring, required=True)
 
+class HTTPSettingsSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('token',                            basestring, required=True)
+
