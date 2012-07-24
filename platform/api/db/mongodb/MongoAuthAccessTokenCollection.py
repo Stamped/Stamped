@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import datetime, copy
 import Globals, utils, logs
+import pymongo
 
 from errors import *
 from api.Schemas import *
