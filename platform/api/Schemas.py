@@ -619,6 +619,10 @@ class EntitySources(Schema):
         cls.addProperty('nytimes_source',                    basestring)
         cls.addProperty('nytimes_timestamp',                 datetime)
 
+        cls.addProperty('umdmusic_id',                        basestring)
+        cls.addProperty('umdmusic_source',                    basestring)
+        cls.addProperty('umdmusic_timestamp',                 datetime)
+
         cls.addProperty('opentable_id',                     basestring)
         cls.addProperty('opentable_url',                    basestring)
         cls.addProperty('opentable_source',                 basestring)

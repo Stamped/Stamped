@@ -18,7 +18,7 @@ import calendar, time
 from collections        import deque
 
 from django.utils.html  import escape
-from libs.ec2_utils     import is_ec2
+from libs.ec2_utils     import is_ec2, get_stack
 
 REQUEST_DUR_LOG_SIZE    = 10    # the size of the request duration log, which is used to determine the avg request duration
 REQUEST_DUR_CAP         = 10.0   # the cap for an individual request duration when determining the avg request duration
@@ -154,8 +154,16 @@ class RateLimiter(object):
         if len(self.__fails) == 0:
             return
 
+        stack_info = get_stack()
+        stack_name = 'localhost'
+        node_name = 'localhost'
+        if stack_info is not None:
+            stack_name = stack_info.instance.stack
+            node_name = stack_info.instance.name
+
         output = '<html>'
         output += "<h3>RateLimiter Fail Limit reached</h3>"
+        output += "<p>On stack '%s' instance '%s'.</p>" % (stack_name, node_name)
         output += "<p><i>There were %s failed requests to service '%s' within the last %s seconds</p></i>" %  \
                   (self.fail_limit, self.__service_name, self.fail_period)
         back_online = time.strftime('%m/%d/%Y %H:%M:%S', time.localtime(self.blackout_start + self.blackout_wait)) # Timestamp

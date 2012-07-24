@@ -255,6 +255,7 @@ class SpotifyGroup(AKindTypeGroup):
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.spotify_id = proxy.key
 
+
 class iTunesGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'itunes',
