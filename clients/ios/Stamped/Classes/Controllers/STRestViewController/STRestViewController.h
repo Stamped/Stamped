@@ -44,6 +44,8 @@
 - (void)animateIn;
 - (void)layoutTableView;
 
+@property (nonatomic, readwrite, assign) BOOL loadingLocked;
+
 @end
 
 @protocol STRestController <NSObject>
