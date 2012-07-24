@@ -580,7 +580,6 @@ static id __instance;
                                                                        params:params
                                                                       mapping:[STSimpleBooleanResponse mapping]
                                                                   andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                                      NSLog(@"called add:%@", error);
                                                                       if (!localCancellation.cancelled) {
                                                                           block( result ? YES : NO, error , localCancellation);
                                                                       }

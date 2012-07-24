@@ -35,11 +35,24 @@
 #import "STNavigationItem.h"
 #import "STEvents.h"
 #import "NoDataUtil.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import "STSimpleActivityReference.h"
+#import "STSimpleAction.h"
+#import "STTextChunk.h"
+#import "STAttributedLabel.h"
 
 #import "STStampsViewController.h"
 #import <MessageUI/MFMailComposeViewController.h>
 
-@interface STUserViewController () <UIActionSheetDelegate, MFMailComposeViewControllerDelegate>
+#import <Twitter/Twitter.h>
+
+static NSString* const _shareOptionEmail = @"Share with Email";
+static NSString* const _shareOptionCopy = @"Copy Link";
+static NSString* const _shareOptionView = @"View in Safari";
+static NSString* const _shareOptionTwitter = @"Share to Twitter";
+
+@interface STUserViewController () <UIActionSheetDelegate, MFMailComposeViewControllerDelegate, STAttributedLabelDelegate>
 
 @property (nonatomic, readonly, assign) BOOL loadingUser;
 @property (nonatomic, readonly, retain) STCache* stampCache;
@@ -51,7 +64,8 @@
 @property (nonatomic, readwrite, retain) STCancellation* stampCacheCreationCancellation;
 @property (nonatomic, readwrite, assign) BOOL loadingStamps;
 @property (nonatomic, readwrite, retain) STUserHeaderView* userHeaderView;
-
+@property (nonatomic, readwrite, retain) UIView* userProfileCallout;
+@property (nonatomic, readwrite, retain) UIView* userProfileCalloutCloseButton;
 
 @end
 
@@ -66,9 +80,10 @@
 @synthesize stampCacheCreationCancellation = _stampCacheCreationCancellation;
 @synthesize loadingStamps = _loadingStamps;
 @synthesize userHeaderView = _userHeaderView;
+@synthesize userProfileCallout = _userProfileCallout;
+@synthesize userProfileCalloutCloseButton = _userProfileCalloutCloseButton;
 
 - (void)commonInit {
-    
     _sectionViews = [[NSMutableArray alloc] initWithObjects:[NSNull null], [NSNull null], nil];
     _infoDataSource = [[NSArray array] retain];
     _loadingStamps = YES;
@@ -76,7 +91,6 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheWillLoadPage:) name:STCacheWillLoadPageNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cacheDidLoadPage:) name:STCacheDidLoadPageNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(userUpdated:) name:STStampedAPIUserUpdatedNotification object:nil];
-    
 }
 
 - (void)userUpdated:(id)notImportant {
@@ -137,8 +151,126 @@
     [_stampSnapshot release];
     [_stampCache release];
     [_sectionViews release], _sectionViews=nil;
+    [_userProfileCallout release];
+    [_userProfileCalloutCloseButton release];
     [super dealloc];
 }
+
+- (void)closeCallout:(id)notImportant {
+    [self.userProfileCalloutCloseButton removeFromSuperview];
+    self.userProfileCalloutCloseButton = nil;
+    [self.userProfileCallout removeFromSuperview];
+    self.userProfileCallout = nil;
+}
+
+//- (void)addCalloutContent {
+//    UIFont* font = [UIFont stampedBoldFontWithSize:12];
+//    UIFont* linkFont = [UIFont stampedFontWithSize:12];
+//    UIColor* color = [UIColor whiteColor];
+//    UIColor* linkColor = [UIColor colorWithRed:53/255. green:125/255. blue:215/255. alpha:1];
+//    NSString* linkString = [NSString stringWithFormat:@"stamped.com/%@", self.user.screenName];
+//    NSString* string = [NSString stringWithFormat:@"Check out your profile on the web!\n%@", linkString];
+//    NSRange linkRange = [string rangeOfString:linkString];
+//    id<STAction> action = [[[STSimpleAction alloc] init] autorelease];
+//    STSimpleActivityReference* reference = [STSimpleActivityReference referenceWithAction:action
+//                                                                                 andRange:linkRange];
+//    NSArray<STActivityReference>* references = [NSArray arrayWithObject:reference];
+//    CGFloat lineHeight = 16;
+//    NSAttributedString* attributedString = [Util attributedStringForString:string
+//                                                                references:references
+//                                                                      font:font
+//                                                                     color:color
+//                                                             referenceFont:linkFont
+//                                                            referenceColor:linkColor
+//                                                                lineHeight:16
+//                                                                    indent:0
+//                                                                   kerning:0];
+//    
+//    STAttributedLabel* label = [[[STAttributedLabel alloc] initWithAttributedString:attributedString
+//                                                                              width:290
+//                                                                      andReferences:references] autorelease];
+//    label.referenceDelegate = self;
+//    [Util reframeView:label withDeltas:CGRectMake(16, 11, 0, 0)];
+//    [self.userProfileCallout addSubview:label];
+//}
+//
+//- (void)attributedLabel:(STAttributedLabel *)label didSelectReference:(id<STActivityReference>)reference {
+//    [self showShareMenu];
+//}
+
+//- (void)showShareMenu {
+//    
+//    UIActionSheet* sheet = [[[UIActionSheet alloc] initWithTitle:nil
+//                                                        delegate:self
+//                                               cancelButtonTitle:nil
+//                                          destructiveButtonTitle:nil
+//                                               otherButtonTitles:nil] autorelease];
+//    
+//    if ([TWTweetComposeViewController canSendTweet]) {
+//        [sheet addButtonWithTitle:_shareOptionTwitter];
+//    }
+//    
+//    if ([MFMailComposeViewController canSendMail]) {
+//        [sheet addButtonWithTitle:_shareOptionEmail];
+//    }
+//    [sheet addButtonWithTitle:_shareOptionCopy];
+//    [sheet addButtonWithTitle:_shareOptionView];
+//    sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
+//    sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+//    [sheet showInView:self.view];
+//}
+//
+//- (NSString*)userProfileURL {
+//    return [NSString stringWithFormat:@"http://www.stamped.com/%@", self.user.screenName];
+//}
+//
+//- (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+//    NSString* title = [actionSheet buttonTitleAtIndex:buttonIndex];
+//    if ([title isEqualToString:_shareOptionCopy]) {
+//        [UIPasteboard generalPasteboard].string = [self userProfileURL];
+//    } 
+//    else if ([title isEqualToString:_shareOptionTwitter]) {
+//        [self showTweetViewController];
+//        
+//        
+//            TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
+//            
+//            NSString* owner = nil;
+//            if ([self.stamp.user.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
+//                owner = @"my";
+//            }
+//            else {
+//                owner = [NSString stringWithFormat:@"%@'s", self.stamp.user.screenName];
+//            }
+//            NSString* text = [NSString stringWithFormat:@"Check %@ stamp of %@ at %@",
+//                              owner,
+//                              self.stamp.entity.title,
+//                              self.stamp.URL];
+//            if (text.length > 140) {
+//                text =[NSString stringWithFormat:@"Check %@ stamp at %@",
+//                       owner,
+//                       self.stamp.URL];
+//            }
+//            if (text.length > 140) {
+//                text = [NSString stringWithFormat:@"Check out %@", self.stamp.URL];
+//            }
+//            [twitter setInitialText:text];
+//            
+//            if ([TWTweetComposeViewController canSendTweet]) {
+//                [self presentViewController:twitter animated:YES completion:nil];
+//            }
+//            
+//            twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
+//                [self dismissModalViewControllerAnimated:YES];
+//            };
+//    } 
+//    else if ([title isEqualToString:_shareOptionEmail]) {
+//        [self showEmailViewController];
+//    } 
+//    else if ([title isEqualToString:_shareOptionView]) {
+//        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[self userProfileURL]]];
+//    }
+//}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -162,6 +294,30 @@
         STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Edit" style:UIBarButtonItemStyleBordered target:self action:@selector(editProfile:)];
         self.navigationItem.rightBarButtonItem = button;
         [button release];
+        
+//        UIImage *image = [UIImage imageNamed:@"st_detail_action_bg"];
+//        
+//        UIImageView *background = [[UIImageView alloc] initWithImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0]];
+//        CGFloat toolbarHeight = 58;
+//        background.frame = [Util centeredAndBounded:CGSizeMake(290, toolbarHeight) inFrame:CGRectMake(0, 
+//                                                                                                      self.view.frame.size.height - (toolbarHeight + 44),
+//                                                                                                      self.view.frame.size.width,
+//                                                                                                      toolbarHeight)];
+//        [self.view addSubview:background];
+//        background.userInteractionEnabled = YES;
+//        UIImage* closeButtonImage = [UIImage imageNamed:@"closebutton_black"];
+//        UIButton* closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+//        [closeButton setImage:closeButtonImage forState:UIControlStateNormal];
+//        closeButton.frame = CGRectMake(0, 0, closeButtonImage.size.width, closeButtonImage.size.height);
+//        [Util reframeView:closeButton withDeltas:CGRectMake( 2.5 - closeButton.frame.size.width / 2, 3.5 - closeButton.frame.size.height / 2, 0, 0)];
+//        [Util reframeView:closeButton withDeltas:CGRectMake(background.frame.origin.x, background.frame.origin.y, 0, 0)];
+//        [closeButton addTarget:self action:@selector(closeCallout:) forControlEvents:UIControlEventTouchUpInside];
+//        [self.view addSubview:closeButton];
+//        
+//        self.userProfileCalloutCloseButton = closeButton;
+//        self.userProfileCallout = background;
+//        
+//        [self addCalloutContent];
     }
     STGenericCacheConfiguration* config = [[[STGenericCacheConfiguration alloc] init] autorelease];
     config.pageSource = [[[STInboxPageSource alloc] initWithUserID:self.userIdentifier] autorelease];
@@ -762,12 +918,12 @@
     waterMark.frame = [Util centeredAndBounded:waterMark.frame.size inFrame:CGRectMake(0, 0, view.frame.size.width, 160)];
     [view addSubview:waterMark];
     
-//    CGRect frame = view.frame;
-//    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
-//    frame.origin.y = height;
-//    frame.size.height -= height;
-//    view.frame = frame;
-//    [view setupWithTitle:@"No stamps" detailTitle:[NSString stringWithFormat:@"No stamps found for %@.", (self.user==nil) ? @"this user" : self.user.screenName]];
+    //    CGRect frame = view.frame;
+    //    CGFloat height = self.tableView.tableHeaderView.bounds.size.height;
+    //    frame.origin.y = height;
+    //    frame.size.height -= height;
+    //    view.frame = frame;
+    //    [view setupWithTitle:@"No stamps" detailTitle:[NSString stringWithFormat:@"No stamps found for %@.", (self.user==nil) ? @"this user" : self.user.screenName]];
     
 }
 #pragma mark - Cache Methods

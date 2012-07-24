@@ -51,7 +51,6 @@
 }
 
 - (void)didReceiveMemoryWarning {
-    NSLog(@"received");
 }
 
 - (void)toggleGrid:(id)nothing {

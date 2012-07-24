@@ -77,7 +77,6 @@
             CFRelease(nameRef);
         }
         if (ABPersonHasImageData(person)) {
-            NSLog(@"image for %@", contact.name);
             CFDataRef dataRef = ABPersonCopyImageDataWithFormat(person, kABPersonImageFormatThumbnail);
             if (dataRef) {
                 contact.image = [UIImage imageWithData:(NSData*)dataRef];

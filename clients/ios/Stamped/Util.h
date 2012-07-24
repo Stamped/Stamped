@@ -308,4 +308,6 @@ typedef enum STGradientStyle {
 
 + (CGRect)originRectWithRect:(CGRect)rect;
 
++ (void)showTweetComposerFromController:(UIViewController*)controller withInitialText:(NSString*)text;
+
 @end

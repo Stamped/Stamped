@@ -381,6 +381,7 @@ class Netflix(object):
            'oauth/access_token',
             token                   = token,
             priority                = 'high',
+            timeout                 = 15,
             #parameters              = { 'application_name': 'Stamped' },
         )
         return result
