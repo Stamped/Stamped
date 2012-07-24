@@ -554,7 +554,7 @@ class AMongoCollection(object):
     def checkIntegrity(self, key, repair=True):
         raise NotImplementedError
 
-    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, repair=True):
+    def _checkRelationshipIntegrity(self, key, keyCheck, regenerate, repair=False):
 
         """
         Verify that the key exists in the referenced table. If not, remove the key.
@@ -565,7 +565,8 @@ class AMongoCollection(object):
             if repair:
                 ### TODO: Delete item
                 self._collection.remove({'_id' : key})
-            raise StampedStaleRelationshipKeyError("Stale key '%s'" % key)
+                return True
+            raise StampedDataError("%s: Stale key" % key)
 
         """
         Verify that the existing value is equal to the "generated" one. If not, replace the existing value. 
@@ -584,26 +585,33 @@ class AMongoCollection(object):
 
         if newRefIds != oldRefIds:
             if old is None:
-                logs.debug("Creating ref ids")
+                msg = "%s: Creating ref ids" % key
                 if repair:
+                    logs.info(msg)
                     self._collection.insert(new)
+                else:
+                    raise StampedDataError(msg)
 
             else:
                 # Add ref ids
                 addRefIds = newRefIds.difference(oldRefIds)
                 if len(addRefIds) > 0:
-                    logs.debug("Adding ref ids: %s" % addRefIds)
+                    msg = "%s: Adding ref ids (%s)" % (key, addRefIds)
                     if repair:
+                        logs.info(msg)
                         self._collection.update({'_id' : key}, {'$addToSet' : { 'ref_ids' : { '$each' : list(addRefIds)}}})
+                    else:
+                        raise StampedDataError(msg)
 
                 # Delete ref ids
                 delRefIds = oldRefIds.difference(newRefIds)
                 if len(delRefIds) > 0:
-                    logs.debug("Removing ref ids: %s" % delRefIds)
+                    msg = "%s: Removing ref ids (%s)" % (key, delRefIds)
                     if repair:
+                        logs.info(msg)
                         self._collection.update({'_id' : key}, {'$pullAll' : { 'ref_ids' : list(delRefIds)}})
-
-            raise StampedStaleRelationshipDataError("Relationships have changed for key '%s'" % key)
+                    else:
+                        raise StampedDataError(msg)
 
         return True
 

@@ -94,6 +94,8 @@
         self.avatarView.alpha = 0.0f;
         [avatar release];
         
+        
+        CGFloat offsetY = -10;
         UIImage *image = [UIImage imageNamed:@"button_addcomment"];
         UIImage *imageHi = [UIImage imageNamed:@"button_addcomment_down"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -101,7 +103,7 @@
         //        [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
         //        [button setTitle:@"Add a comment" forState:UIControlStateNormal];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 60.0f, 200.0f, image.size.height);
+        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 60.0f+ offsetY, 200.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
         [self.scrollView addSubview:button];
@@ -115,7 +117,7 @@
         [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
         //[button setImage:[UIImage imageNamed:@"camera_icon_small.png"] forState:UIControlStateNormal];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 11.0f, 200.0f, image.size.height);
+        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 11.0f + offsetY, 200.0f, image.size.height);
         //        button.frame = CGRectMake((self.bounds.size.width-85.0f)/2, 110.0f, 85.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
@@ -165,12 +167,14 @@
 }
 
 - (void)layoutScrollView {
+    //TODO move up 10 pt
+    CGFloat offsetY = -10;
     CGSize size = self.scrollView.contentSize;
     size.width = self.scrollView.frame.size.width;
     if (self.imageView.image) {
         
         CGRect frame = self.imageView.frame;
-        frame.origin.y = MAX(50.0f, CGRectGetMaxY(self.textView.frame));
+        frame.origin.y = MAX(50.0f + offsetY, CGRectGetMaxY(self.textView.frame));
         if (!_commentButton.hidden) {
             frame.origin.y = MAX(frame.origin.y, CGRectGetMaxY(_commentButton.frame));
         }

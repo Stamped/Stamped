@@ -48,7 +48,7 @@ class MongoUserLikesCollection(AMongoCollection):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=True, api=None):
 
         def regenerate(key):
             stampIds = set()

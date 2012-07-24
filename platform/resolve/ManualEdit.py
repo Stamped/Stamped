@@ -121,16 +121,16 @@ def formForEntity(entity_id, **hidden_params):
             except KeyError:
                 pass
         fields['imdb_url'] = imdb_url
-        # netflix_url = ''
-        # netflix_id = entity.sources.netflix_id
-        # if netflix_id is not None:
-        #     netflix_url = _invalidPlaceholder
-        #     try:
-        #         netflix_number = netflix_id.split('/')[-1]
-        #         netflix_url = 'http://movies.netflix.com/WiMovie/%s' % netflix_number
-        #     except Exception:
-        #         pass
-        # fields['netflix_url'] = netflix_url
+        netflix_url = ''
+        netflix_id = entity.sources.netflix_id
+        if netflix_id is not None:
+            netflix_url = _invalidPlaceholder
+            try:
+                netflix_number = netflix_id.split('/')[-1]
+                netflix_url = 'http://movies.netflix.com/WiMovie/%s' % netflix_number
+            except Exception:
+                pass
+        fields['netflix_url'] = netflix_url
     hidden_params['entity_id'] = entity_id
     html = []
     desc = entity.desc
@@ -217,25 +217,33 @@ def update(updates):
         entity.sources.amazon_source = 'seed'
         entity.sources.amazon_underlying = amazon_id
         entity.sources.amazon_timestamp = now
-    # netflix_url = updates.netflix_url
-    # if netflix_url is not None and netflix_url not in bad_versions:
-    #     match = re.match(r'http://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?trkid=\d+)?',netflix_url)
-    #     netflix_number = match.group(2)
-    #     netflix_id = None
-    #     if entity.isType('movie'):
-    #         netflix_id = 'http://api.netflix.com/catalog/titles/movies/%s' % netflix_number
-    #     if netflix_id is not None:
-    #         entity.sources.netflix_id = netflix_id
-    #         entity.sources.netflix_source = 'seed'
-    #         entity.sources.netflix_timestamp = now
+    netflix_url = updates.netflix_url
+    if netflix_url is not None and netflix_url not in bad_versions:
+        match = re.match(r'http://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?trkid=\d+)?',netflix_url)
+        netflix_number = match.group(2)
+        netflix_id = None
+        if entity.isType('movie'):
+            netflix_id = 'http://api.netflix.com/catalog/titles/movies/%s' % netflix_number
+        elif entity.isType('tv'):
+            netflix_id = 'http://api.netflix.com/catalog/titles/series/%s' % netflix_number
+        if netflix_id is not None:
+            entity.sources.netflix_id = netflix_id
+            entity.sources.netflix_source = 'seed'
+            entity.sources.netflix_timestamp = now
     itunes_url = updates.itunes_url
     if itunes_url is not None and itunes_url not in bad_versions:
         itunes_id = None
         if entity.isType('artist'):
-            match = re.match(r'http://itunes.apple.com/us/artist/(.+)/id(\d+)(\?.+)?', itunes_url)
+            match = re.match(r'http://itunes.apple.com/(.+)/artist/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(2)
+        elif entity.isType('album'):
+            match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)(\?.+)?', itunes_url)
+            itunes_id = match.group(2)
+        elif entity.isType('track'):
+            match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)\?i=(\d+)', itunes_url)
+            itunes_id = match.group(3)
         if itunes_id is not None:
-            itunes_data = _itunes.method('lookup', id=itunes_id)['results'][0]
+            itunes_data = _itunes().method('lookup', id=itunes_id)['results'][0]
             if 'previewUrl' in itunes_data:
                 entity.sources.itunes_preview = itunes_data['previewUrl']
             if entity.isType('artist'):

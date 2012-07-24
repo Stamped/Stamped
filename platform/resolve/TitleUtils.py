@@ -452,6 +452,8 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
         exceptionQueryRegexps=makeTokenRegexp('book')),
     TitleDataQualityRegexpTest(r'\bvolumes?\s+\d', '"volume #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('volume')),
+    TitleDataQualityRegexpTest(r'\bvol\.?\s+\d', '"vol #" in title', 0.25,
+        exceptionQueryRegexps=makeTokenRegexp('vol')),
     TitleDataQualityRegexpTest('\(', 'parenthesis in title', 0.1),
     TitleDataQualityRegexpTest('\[', 'bracket in title', 0.1),
 
