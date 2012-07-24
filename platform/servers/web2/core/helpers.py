@@ -65,9 +65,9 @@ class StampedAPIProxy(object):
         else:
             raise NotImplementedError
     
-    def updateSettings(self, user_id, on, off):
+    def updateAlerts(self, user_id, on, off):
         if self._ec2:
-            return self.api.updateSettings(user_id, on, off)
+            return self.api.updateAlerts(user_id, on, off)
         else:
             raise NotImplementedError
     
