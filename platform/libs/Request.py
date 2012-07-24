@@ -189,8 +189,8 @@ class RateLimiterState(object):
             logs.error('RPC service request fail: %s' % e)
             raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request.  "
                                                     "service: %s  method: %s  url: %s  body: %s  header: %s"
-                                                    "priority: %s  timeout: %s" %
-                                                    (service, method, url, body, header, priority, timeout))
+                                                    "priority: %s  timeout: %s  Exception: %s" %
+                                                    (service, method, url, body, header, priority, timeout, e))
 
         return pickle.loads(response), content
 
