@@ -50,6 +50,27 @@ class TheTVDB(object):
         # other side.
         return xml.decode('utf-8')
 
+    # note: these decorators add tiered caching to this function, such that
+    # results will be cached locally with a very small LRU cache of 64 items
+    # and also cached in Mongo or Memcached with the standard TTL of 7 days.
+    @countedFn(name='TheTVDB (before caching)')
+    @lru_cache(maxsize=64)
+    @cachedFn(schemaClasses=[MediaCollectionEntity])
+    @countedFn(name='TheTVDB (after caching)')
+    def lookupIMDBRaw(self, imdb_id, priority='low', timeout=None):
+
+        url = 'http://www.thetvdb.com/api/GetSeriesByRemoteID.php'
+        params = { 'imdbid' : imdb_id }
+        try:
+            response, xml = service_request('tvdb', 'GET', url, query_params=params, priority=priority, timeout=timeout)
+        except:
+            return None
+
+        # Putting results into the mongo cache will convert them to unicode, so in order to keep things parallel between
+        # the case where this does go through the cache and the case where it doesn't, we decode here and encode on the
+        # other side.
+        return xml.decode('utf-8')
+
     def search(self, query, transform=True, detailed=False, priority='low', timeout=None):
         xml = self.searchRaw(query, priority, timeout)
         if xml is None:
@@ -106,7 +127,7 @@ class TheTVDB(object):
             
             return self._parse_entity(item)
         
-        return None
+        return
 
     # TODO: There's a lot of similar code to this in other places translating between schemas; consolidate into a single
     # utility class somewhere!
