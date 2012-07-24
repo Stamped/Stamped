@@ -1,0 +1,103 @@
+/*! settings.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "common.less";
+
+
+/* **************************************************************************
+                            BASIC HIGH-LEVEL SETUP
+   ************************************************************************** */
+
+
+.desc {
+    margin: 1em 0;
+    font-size: 105%;
+}
+
+.title {
+    text-align: center;
+}
+
+.post-main-overlay {
+    display: none;
+}
+
+.alert-settings-form {
+    position: relative;
+    margin: 0 auto;
+    width: 70%;
+    
+    .option {
+        margin-bottom: 18px;
+        
+        .lhs {
+            float: left;
+            width: 100%;
+            
+            .option-icon {
+                float: left;
+                width:  32px;
+                height: 32px;
+                background: red;
+                margin-right: 24px;
+            }
+            
+            .option-info {
+                float: left;
+                width: 70%;
+                
+                .human-name {
+                    font-weight: 700;
+                    font-size: 120%;
+                }
+                
+                .option-desc {
+                    width: 140%;
+                    font-size: 80%;
+                    color: #999;
+                }
+            }
+        }
+        
+        .rhs {
+            float: right;
+            width: 25%;
+            
+            input {
+                border: 1px solid #bfbfbf;
+                outline: none;
+                display: inline-block;
+                
+                box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+                .rounded(4px);
+                
+                &:focus {
+                    border: 1px solid #498ff2;
+                    outline: none;
+                }
+            }
+            
+            .apns {
+                margin-right: 32px;
+            }
+        }
+    }
+    
+    .submit-button {
+        margin: 0 auto;
+        border: 0 none;
+        outline: none;
+    }
+}
+
