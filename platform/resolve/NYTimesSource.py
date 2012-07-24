@@ -66,5 +66,5 @@ class NYTimesBook(ResolverMediaItem):
 
 class NYTimesSource(DumbSource):
     def __init__(self):
-        super(NYTimesSource, self).__init__('nytimes', groups=['last_popular'])
+        super(NYTimesSource, self).__init__('nytimes', groups=['last_popular', 'authors'])
 
