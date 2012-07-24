@@ -212,7 +212,7 @@ def reset_password(request, schema, **kwargs):
 @stamped_view(schema=HTTPUpdateSettingsSchema)
 @require_http_methods(["POST"])
 def update_alert_settings(request, schema, **kwargs):
-    user_id  = g_stamped_auth.verifyEmailAlertToken(token)
+    user_id  = g_stamped_auth.verifyEmailAlertToken(schema.token)
     settings = schema.dataExport()
     del settings['token']
     
