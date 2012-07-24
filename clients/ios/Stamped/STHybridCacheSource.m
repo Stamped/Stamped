@@ -96,7 +96,6 @@
         NSDate* date = [self.cacheDates objectForKey:key];
         NSAssert1(date == nil || [date isKindOfClass:[NSDate class]], @"Wrong class for date value %@", date);
         if (!date || [self ageFromDate:date].doubleValue > maxAge.doubleValue) {
-            NSLog(@"Removing in memory %@", key);
             result = nil;
             [self.cache removeObjectForKey:key];
             [self removeCacheBookkeepingForObject:result withKey:key];

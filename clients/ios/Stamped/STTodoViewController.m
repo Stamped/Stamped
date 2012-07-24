@@ -322,6 +322,8 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
     [Util addCreateStampButtonToController:self];
     //self.tableView.editing = YES;
     self.dirty = YES;
+    
+    [self layoutTableView];
 }
 
 - (void)viewDidUnload

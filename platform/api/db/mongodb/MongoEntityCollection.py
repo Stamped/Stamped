@@ -45,6 +45,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
                 'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
                 'sources.netflix_id', 'sources.thetvdb_id')
+
+        self._collection.ensure_index([
+                                    ('search_tokens',               pymongo.ASCENDING),
+                                    ('sources.user_generated_id',   pymongo.ASCENDING),
+                                    ('sources.tombstone_id',        pymongo.ASCENDING),
+                                ])
+
+
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
         self._collection.ensure_index('search_tokens')
@@ -292,6 +300,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 if repair:
                     logs.info(msg)
                     del(entity.images)
+                    del(entity.images_timestamp)
+                    del(entity.images_source)
                     modified = True
                 else:
                     raise StampedDataError(msg)
@@ -339,6 +349,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                     entity.images = images
                 else:
                     del(entity.images)
+
+            if entity.images_source == 'seed':
+                msg = "%s: Image source set as seed" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.images_source)
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
 
         # Check that any existing links are valid
         def _checkLink(field):
@@ -464,13 +483,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
     def getEntitiesByQuery(self, queryDict):
         return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
-
-    def getEntitiesByTypes(self, types, limit=None):
-        entityList = self._collection.find({'types': {'$in': types}})
-        if limit is not None:
-            entityList = entityList[:limit]
-        return map(lambda x: self._convertFromMongo(x), entityList)
-
 
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)

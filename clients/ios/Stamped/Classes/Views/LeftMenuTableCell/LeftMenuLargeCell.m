@@ -17,7 +17,6 @@ static const CGFloat _cellHeight = 72;
 
 @implementation LeftMenuLargeCell
 
-@synthesize badgeCount=_badgeCount;
 @synthesize titleLabel=_titleLabel;
 @synthesize icon=_icon;
 @synthesize border=_border;
@@ -28,9 +27,8 @@ static const CGFloat _cellHeight = 72;
     if ((self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])) {
         
         UIFont *font = [UIFont stampedTitleLightFontWithSize:40];
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(14, floorf((self.bounds.size.height - font.lineHeight)/2), 0.0f, font.lineHeight)];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(14, 18 + floorf((self.bounds.size.height - font.lineHeight)/2), 0.0f, font.lineHeight)];
         label.backgroundColor = [UIColor clearColor];
-        label.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         label.font = font;
         label.textColor = [UIColor whiteColor];
         label.shadowOffset = CGSizeMake(0.0f, -1.0f);
@@ -52,9 +50,11 @@ static const CGFloat _cellHeight = 72;
                 CGContextTranslateCTM(ctx, 0, rect.size.height);
                 CGContextScaleCTM(ctx, 1.0, -1.0);
                 
-//                CGRect fillRect = CGRectMake(90, 10, _icon.size.width, _icon.size.height);
                 CGRect fillRect = CGRectMake(CGRectGetMaxX(self.titleLabel.frame), _cellHeight - 28, _icon.size.width, _icon.size.height);
-                
+                //HACK
+                if ([self.titleLabel.text isEqualToString:@"The Guide"]) {
+                    fillRect = CGRectOffset(fillRect, -4, -4);
+                }
                 
                 CGContextSaveGState(ctx);
                 CGContextSetFillColorWithColor(ctx, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.2f].CGColor);
@@ -71,7 +71,8 @@ static const CGFloat _cellHeight = 72;
                     CGContextClearRect(ctx, fillRect);
                     CGContextFillRect(ctx, fillRect);
                     
-                } else {
+                } 
+                else {
                     CGContextDrawImage(ctx, fillRect, _icon.CGImage);
                     //                    [[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.2f] setFill];
                 }
@@ -100,7 +101,6 @@ static const CGFloat _cellHeight = 72;
     [_icon release], _icon=nil;
     [_titleLabel removeObserver:self forKeyPath:@"text"];
     [_titleLabel release], _titleLabel=nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super dealloc];
 }
 
@@ -184,9 +184,6 @@ static const CGFloat _cellHeight = 72;
 
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
     [super setHighlighted:highlighted animated:animated];
-    if (_badgeView) {
-        [_badgeView setNeedsDisplay];
-    }
     [_iconView setNeedsDisplay];
     [self showHighlightedView:highlighted];
     self.titleLabel.highlighted = highlighted;
@@ -194,73 +191,8 @@ static const CGFloat _cellHeight = 72;
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
-    if (_badgeView) {
-        [_badgeView setNeedsDisplay];
-    }
     [_iconView setNeedsDisplay];
     [self showSelectedView:selected];
-    
-}
-
-- (void)setBadgeCount:(NSInteger)badgeCount {
-    _badgeCount = badgeCount;
-    
-    if (_badgeCount > 0) {
-        
-        if (!_badgeView) {
-            
-            STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectZero];
-            view.backgroundColor = [UIColor clearColor];
-            [self addSubview:view];
-            [view setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
-                
-                rect.size.height -= 1.0f; // shadow inset
-                CGContextAddPath(ctx, [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:self.bounds.size.height/2].CGPath);
-                
-                if ([self isHighlighted] || [self isSelected]) {
-                    
-                    [[UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:1.0f] setFill];
-                    CGContextFillPath(ctx);                    
-                    CGContextSetBlendMode(ctx, kCGBlendModeClear);
-                    
-                } else {
-                    
-                    CGContextSetShadowWithColor(ctx, CGSizeMake(0.0f, 1.0f), 0.0f, [UIColor colorWithRed:1.0f green:1.0f blue:1.0f alpha:0.1f].CGColor);
-                    [[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.4f] setFill];
-                    CGContextFillPath(ctx);
-                    
-                    CGContextSetShadowWithColor(ctx, CGSizeMake(0.0f, 1.0f), 0.0f, [UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.4f].CGColor);
-                    [[UIColor colorWithRed:0.765f green:0.765f blue:0.765f alpha:1.0f] setFill];
-                    
-                }
-                
-                rect.origin.y += 2.0f;
-                NSString *title = [NSString stringWithFormat:@"%i", _badgeCount];
-                [title drawInRect:rect withFont:[UIFont boldSystemFontOfSize:12] lineBreakMode:UILineBreakModeClip alignment:UITextAlignmentCenter];
-                
-            }];
-            _badgeView = view;
-            [view release];
-            
-        }
-        
-        CGSize size = [[NSString stringWithFormat:@"%i", _badgeCount] sizeWithFont:[UIFont boldSystemFontOfSize:12]];
-        CGRect frame = _badgeView.frame;
-        frame.size.width = floorf(size.width + 16.0f);
-        frame.size.height = 20.0f;
-        frame.origin.x = floorf(self.bounds.size.width - (frame.size.width+58.0f));
-        frame.origin.y = floorf(((self.bounds.size.height-frame.size.height)/2) + 2.0f);
-        _badgeView.frame = frame;
-        [_badgeView setNeedsDisplay];
-        
-    } else {
-        
-        if (_badgeView) {
-            [_badgeView removeFromSuperview], _badgeView = nil;
-        }
-        
-    }
-    
     
 }
 
@@ -327,13 +259,6 @@ static const CGFloat _cellHeight = 72;
     }
     
     
-}
-
-
-#pragma mark - Notifications 
-
-- (void)countUpdated:(id)notImportant {
-    [self setBadgeCount:[STUnreadActivity sharedInstance].count];
 }
 
 @end

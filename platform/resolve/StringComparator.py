@@ -12,6 +12,18 @@ from libs.LRUCache import lru_cache
 
 # TODO: Handle pluralization and possessives properly.
 
+WORTHLESS_SUBTITLE_TOKENS = set([
+    # film/tv
+    'uncut', 'unrated', 'nr', 'pg', 'r', 'edition', 'collection', 'volume', 'vol', 'cut', 'version', 'starring',
+    'episodes', 'eps', 'vols', 'volumes', 'film', 'movie', 'rated',
+    # books
+    'paperback', 'hardcover', 'print', 'illustrated', 'novel', 'story', 'stories', 'tale', 'tales', 'biography',
+    'autobiography', 'history', 'abridged', 'complete', 'book', 'books',
+    # music
+    'remix', 'mix', 'remixed', 're-mix', 're-mixed', 'featuring', 'feat', 'inst', 'instrumental', 'karaoke', 'vocals',
+    'dub', 'edit', 'remix', 'limited'
+])
+
 class StringComparator(object):
     TOKEN_RE = re.compile(r'\b\w+(-\w+)?(\'s)?\b')
     @classmethod
@@ -30,7 +42,7 @@ class StringComparator(object):
     @classmethod
     def get_skip_word_cost(cls, string, skip_begin, skip_end):
         word = string[skip_begin:skip_end].strip().lower()
-        return cls.SKIP_WORD_COSTS.get(word, len(word) * 0.6)
+        return cls.SKIP_WORD_COSTS.get(word, len(word) * 0.7)
 
     PREFIX_RE = re.compile('.*\w+.*[-:(\(][^\w]*$')
     @classmethod
@@ -38,17 +50,22 @@ class StringComparator(object):
         prefix = string[:new_start_idx]
         if prefix.lower().strip() in cls.SKIP_WORD_COSTS:
             return cls.SKIP_WORD_COSTS[prefix.lower().strip()] * 0.8
+        tokens = set([group1.lower() for group1, group2 in cls.TOKEN_RE.findall(prefix)])
+        worthless_indicator_tokens = tokens & WORTHLESS_SUBTITLE_TOKENS
         if cls.PREFIX_RE.match(prefix):
-            return len(prefix) * 0.4
-        return len(prefix) * 0.5
+            return len(prefix) * 0.2 * (0.6 ** len(worthless_indicator_tokens))
+
+        return len(prefix) * 0.5 * (0.85 ** len(worthless_indicator_tokens))
 
     SUFFIX_RE = re.compile('[^\w]*[-:(\(].*\w+.*')
     @classmethod
     def get_skip_suffix_cost(cls, string, new_end_idx):
         suffix = string[new_end_idx:]
+        tokens = set([group1.lower() for group1, group2 in cls.TOKEN_RE.findall(suffix)])
+        worthless_indicator_tokens = tokens & WORTHLESS_SUBTITLE_TOKENS
         if cls.SUFFIX_RE.match(suffix):
-            return len(suffix) * 0.4
-        return len(suffix) * 0.5
+            return len(suffix) * 0.2 * (0.6 ** len(worthless_indicator_tokens))
+        return len(suffix) * 0.5 * (0.85 ** len(worthless_indicator_tokens))
 
     @classmethod
     def get_difference(cls, s1, s2, max_difference=None):
@@ -59,9 +76,10 @@ class StringComparator(object):
         starts1, ends1 = cls.get_token_starts_and_ends(s1)
         starts2, ends2 = cls.get_token_starts_and_ends(s2)
 
-        return fastcompare.get_difference(
+        result = fastcompare.get_difference(
                 s1, s2, starts1, ends1, starts2, ends2, cls.get_skip_prefix_cost,
                 cls.get_skip_suffix_cost, cls.get_skip_word_cost)
+        return result
 
     @classmethod
     @lru_cache()
@@ -71,6 +89,17 @@ class StringComparator(object):
             return 0
         max_difference = rough_max_distance * (1.0 - min_ratio)
         return 1.0 - (float(cls.get_difference(s1, s2, max_difference=max_difference)) / rough_max_distance)
+
+
+class ArtistTitleComparator(StringComparator):
+    TWO_ARTISTS_RE = re.compile('[^\w]*(and |with |\&|featuring |feat\.? ).*\w+.*')
+    MORE_ARTISTS_RE = re.compile('[^\w]*,.*[^\w]+(and|&).*\w+.*')
+    @classmethod
+    def get_skip_suffix_cost(cls, string, new_end_idx):
+        suffix = string[new_end_idx:]
+        if cls.TWO_ARTISTS_RE.match(suffix) or cls.MORE_ARTISTS_RE.match(suffix):
+            return len(suffix) * 0.05
+        return len(suffix) * 0.5
 
 
 
@@ -132,6 +161,7 @@ def target_sim(unc):
 def get_odds_from_sim_unc(sim, unc):
     if sim <= 0:
         return 0
+    unc = max(unc, 5.0)
     return (sim ** 1.2) * ((sim / target_sim(unc)) ** 1.2) * ((unc / 8) ** 0.2)
 
 SUBTITLE_RE = re.compile('(\w)\s*[:|-]+\s\w+.*$')
@@ -139,22 +169,12 @@ COMMA_SUBTITLE_RE = re.compile('(\w)\s*,\s*\w+.*$')
 PARENTHETICAL_RE = re.compile('[.,;: -]+[(\[][^\])]+[)\]]\s*$')
 TOKENS_RE = re.compile('[a-zA-Z0-9]+')
 # TODO get this unified with token lists used in TitleUtils!
-WORTHLESS_SUBTITLE_TOKENS = set([
-    # film/tv
-    'uncut', 'unrated', 'nr', 'pg', 'r', 'edition', 'collection', 'volume', 'vol', 'cut', 'version', 'starring',
-    'episodes', 'eps', 'vols', 'volumes', 'film', 'movie',
-    # books
-    'paperback', 'hardcover', 'print', 'illustrated', 'novel', 'story', 'stories', 'tale', 'tales', 'biography',
-    'autobiography', 'history', 'abridged', 'complete', 'book', 'books',
-    # music
-    'remix', 'mix', 'remixed', 're-mix', 're-mixed', 'featuring', 'feat', 'inst', 'instrumental', 'karaoke'
-])
 def strip_subtitle(title):
     match = SUBTITLE_RE.search(title)
     if match:
         subtitle_tokens = [token.lower() for token in TOKENS_RE.findall(match.group(0)[1:])]
         print 'TOKENS:', subtitle_tokens
-        subtitle_is_worthless = bool(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
+        worthless_tokens_found = len(set(subtitle_tokens) & WORTHLESS_SUBTITLE_TOKENS)
         return SUBTITLE_RE.sub('\\1', title), subtitle_is_worthless
 
     match = COMMA_SUBTITLE_RE.search(title)
@@ -172,13 +192,15 @@ def strip_subtitle(title):
         return PARENTHETICAL_RE.sub('', title), subtitle_is_worthless
 
 
-def titleComparison(title1, title2, simplificationFn):
-    score1 = get_odds_from_sim_unc(StringComparator.get_ratio(title1, title2),
-        min(complexUncommonness(title1), complexUncommonness(title2)))
+def titleComparison(title1, title2, simplificationFn, comparator=StringComparator):
+    def combinedUncommonness(unc1, unc2):
+        return (min(unc1, unc2) * min(unc1, unc2) * max(unc1, unc2)) ** (1.0/3)
+    score1 = get_odds_from_sim_unc(comparator.get_ratio(title1, title2),
+        combinedUncommonness(complexUncommonness(title1), complexUncommonness(title2)))
     simple_title1 = simplificationFn(title1)
     simple_title2 = simplificationFn(title2)
-    score2 = get_odds_from_sim_unc(StringComparator.get_ratio(simple_title1, simple_title2) * 0.98,
-        min(complexUncommonness(simple_title1), complexUncommonness(simple_title2)))
+    score2 = get_odds_from_sim_unc(comparator.get_ratio(simple_title1, simple_title2) * 0.98,
+        combinedUncommonness(complexUncommonness(simple_title1), complexUncommonness(simple_title2)))
     return max(score1, score2)
 
 

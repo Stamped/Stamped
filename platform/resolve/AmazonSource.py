@@ -1163,9 +1163,11 @@ class AmazonSource(GenericSource):
         for albumResult in albums:
             applyAlbumTitleDataQualityTests(albumResult, queryText)
             adjustAlbumRelevanceByQueryMatch(albumResult, queryText)
+            augmentAlbumDataQualityOnBasicAttributePresence(albumResult)
         for trackResult in tracks:
             applyTrackTitleDataQualityTests(trackResult, queryText)
             adjustTrackRelevanceByQueryMatch(trackResult, queryText)
+            augmentTrackDataQualityOnBasicAttributePresence(trackResult)
 
         self.__adjustScoresBySalesRank(albums)
         self.__penalizeForMissingListPrice(albums)
@@ -1188,6 +1190,7 @@ class AmazonSource(GenericSource):
         for searchResult in searchResults:
             adjustBookRelevanceByQueryMatch(searchResult, queryText)
             applyBookDataQualityTests(searchResult, queryText)
+            augmentBookDataQualityOnBasicAttributePresence(searchResult)
             if not searchResult.resolverObject.authors:
                 penaltyFactor = 0.2
                 searchResult.dataQuality *= penaltyFactor

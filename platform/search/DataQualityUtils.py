@@ -87,10 +87,18 @@ def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
 ############################################################################################################
 
 def augmentTrackDataQualityOnBasicAttributePresence(trackSearchResult):
-    pass
+    if (not trackSearchResult.resolverObject.artists or
+        'name' not in trackSearchResult.resolverObject.artists[0]):
+        penalty = 0.3
+        trackSearchResult.dataQuality *= 1 - penalty
+        trackSearchResult.addDataQualityComponentDebugInfo('penalty for missing artist', penalty)
 
 def augmentAlbumDataQualityOnBasicAttributePresence(albumSearchResult):
-    pass
+    if (not albumSearchResult.resolverObject.artists or
+        'name' not in albumSearchResult.resolverObject.artists[0]):
+        penalty = 0.3
+        albumSearchResult.dataQuality *= 1 - penalty
+        albumSearchResult.addDataQualityComponentDebugInfo('penalty for missing artist', penalty)
 
 def augmentArtistDataQualityOnBasicAttributePresence(artistSearchResult):
     pass
@@ -100,7 +108,11 @@ def augmentArtistDataQualityOnBasicAttributePresence(artistSearchResult):
 ############################################################################################################
 
 def augmentBookDataQualityOnBasicAttributePresence(bookSearchResult):
-    pass
+    if (not bookSearchResult.resolverObject.authors or
+        'name' not in bookSearchResult.resolverObject.authors[0]):
+        penalty = 0.3
+        bookSearchResult.dataQuality *= 1 - penalty
+        bookSearchResult.addDataQualityComponentDebugInfo('penalty for missing author', penalty)
 
 
 ############################################################################################################

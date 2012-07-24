@@ -231,7 +231,6 @@
                 }
                 [self triggerTimer];
             }];
-            [self performSelector:@selector(hideTextCallout) withObject:nil afterDelay:1.5f];
         }
         else {
             self.draggingView.layer.position = [self positionForScope:_scope];

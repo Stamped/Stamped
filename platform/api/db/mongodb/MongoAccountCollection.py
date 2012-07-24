@@ -28,9 +28,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
-        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING), \
+        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING),
                                         ('_id', pymongo.ASCENDING)])
-        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
+        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING),
                                         ('_id', pymongo.ASCENDING)])
 
     @lazyProperty
