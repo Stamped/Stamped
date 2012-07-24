@@ -11,12 +11,15 @@ import Globals
 import math
 import re
 from resolve.StringNormalizationUtils import format
+from collections import namedtuple
 
 # TODO: Merge with search/DataQualityUtils.py somewhere common (to avoid dependency loop)
 
 ############################################################################################################
 ################################################   UTILS    ################################################
 ############################################################################################################
+
+Penalty = namedtuple('Penalty', ['description', 'score'])
 
 # Tools for fixing up titles.
 
@@ -62,19 +65,30 @@ class TitleDataQualityRegexpTest(object):
     def matchesTitle(self, title, query=None):
         return self.titleRegexp.search(title) and not (query and self.__matchesException(query))
 
+    def runTest(self, title, searchQuery):
+        if self.matchesTitle(title, searchQuery):
+            return [Penalty(self.message, self.penalty)]
+        return []
+
     def applyTest(self, searchResult, searchQuery):
         title = searchResult.resolverObject.raw_name if self.rawName else searchResult.resolverObject.name
-        anyMatches = False
-        if self.matchesTitle(title, searchQuery):
-            searchResult.dataQuality *= 1 - self.penalty
-            searchResult.addDataQualityComponentDebugInfo(self.message, self.penalty)
-            anyMatches = True
-        return anyMatches
+        penalties = self.runTest(title, searchQuery)
+        for penalty in penalties:
+            searchResult.dataQuality *= 1 - penalty.score
+            searchResult.addDataQualityComponentDebugInfo(penalty.description, penalty.score)
+        return bool(penalties)
 
 
 def applyTitleTests(titleTests, searchResult, searchQuery):
     modified = [titleTest.applyTest(searchResult, searchQuery) for titleTest in titleTests]
     return any(modified)
+
+
+def runTitleTests(titleTests, title, searchQuery):
+    penalties = []
+    for titleTest in titleTests:
+        penalties.extend(titleTest.runTest(searchResult, searchQuery))
+    return penalties
 
 
 def makeTokenRegexp(token):
@@ -168,6 +182,17 @@ class Token(object):
         else:
             # This is actually multiple words. So we'll hack a little.
             return self.text in ' '.join(tokenList)
+
+
+def runTokenTests(tokens, title, query, defaultPenalty=0.1):
+    queryTokens = tokenizeString(query)
+    # TODO: Should I use raw_name?
+    titleTokens = tokenizeString(title)
+    penalties = []
+    for token in tokens:
+        if token.isIn(titleTokens) and not token.isIn(queryTokens):
+            penalties.append(Penalty("token hit '%s'" % token.text, token.penalty or defaultPenalty))
+    return penalties
 
 
 def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
@@ -311,11 +336,24 @@ def applyMovieTitleDataQualityTests(searchResult, searchQuery):
 ################################################   MUSIC    ################################################
 ############################################################################################################
 
+ARTIST_TITLE_BAD_TOKENS = (
+    Token('karaoke', penalty=0.4, rawName=True),
+    Token('tribute', penalty=0.4, rawName=True),
+    Token('cover', penalty=0.4, rawName=True),
+    Token('featuring', penalty=0.4, rawName=True)
+    )
+# Artist titles don't really have problems, either.
+def cleanArtistTitle(artistTitle):
+    return artistTitle
+
+def applyArtistTitleDataQualityTests(searchResult, searchQuery):
+    applyTokenTests(ARTIST_TITLE_BAD_TOKENS, searchResult, searchQuery)
+
 # These are things we're so confident don't belong in track/album titles that we're willing to strip them out wantonly.
 # These aren't things that reflect badly on a movie for being in its title.
 ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
     re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|single)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|single|vinyl|album|ep|lp)[ ,:\])-]*$", re.IGNORECASE),
 )
 
 TRACK_TITLE_SUSPICIOUS_TESTS = (
@@ -346,6 +384,16 @@ def applyTrackTitleDataQualityTests(searchResult, searchQuery):
     if not applyTitleTests(TRACK_TITLE_SUSPICIOUS_TESTS, searchResult, searchQuery):
         applyTokenTests(TRACK_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.25)
 
+    if searchResult.resolverObject.artists:
+        try:
+            artistName = searchResult.resolverObject.artists[0]['name']
+            artistPenalties = runTokenTests(ARTIST_TITLE_BAD_TOKENS, artistName, searchQuery)
+            for artistPenalty in artistPenalties:
+                searchResult.dataQuality *= (1 - artistPenalty.score) ** 0.5
+                searchResult.addDataQualityComponentDebugInfo('Artist title penalty: %s' % repr(artistPenalty.description), artistPenalty.score)
+        except KeyError:
+            pass
+
 # Album titles don't really have problems.
 def cleanAlbumTitle(albumTitle):
     return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, albumTitle)
@@ -353,20 +401,21 @@ def cleanAlbumTitle(albumTitle):
 ALBUM_TITLE_BAD_TOKENS = (
     Token('ep', penalty=0.25),
     Token('karaoke', penalty=0.4, rawName=True),
+    Token('cover', penalty=0.4, rawName=True),
+    Token('tribute', penalty=0.3, rawName=True),
 )
 def applyAlbumTitleDataQualityTests(searchResult, searchQuery):
     applyTokenTests(ALBUM_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
 
-ARTIST_TITLE_BAD_TOKENS = (
-    Token('karaoke', penalty=0.4, rawName=True),
-    Token('featuring')
-)
-# Artist titles don't really have problems, either.
-def cleanArtistTitle(artistTitle):
-    return artistTitle
-
-def applyArtistTitleDataQualityTests(searchResult, searchQuery):
-    applyTokenTests(ARTIST_TITLE_BAD_TOKENS, searchResult, searchQuery)
+    if searchResult.resolverObject.artists:
+        try:
+            artistName = searchResult.resolverObject.artists[0]['name']
+            artistPenalties = runTokenTests(ARTIST_TITLE_BAD_TOKENS, artistName, searchQuery)
+            for artistPenalty in artistPenalties:
+                searchResult.dataQuality *= (1 - artistPenalty.score) ** 0.5
+                searchResult.addDataQualityComponentDebugInfo('Artist title penalty: %s' % repr(artistPenalty.description), artistPenalty.score)
+        except KeyError:
+            pass
 
 ############################################################################################################
 ################################################   BOOKS    ################################################
