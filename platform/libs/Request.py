@@ -120,7 +120,7 @@ class RateLimiterState(object):
         try:
             email = {}
             email['from'] = 'Stamped <noreply@stamped.com>'
-            email['to'] = 'dev@stamped.com'
+            email['to'] = 'mike@stamped.com'
             email['subject'] = "RateLimiter RPC server failure"
             email['body'] = output
             utils.sendEmail(email, format='html')
@@ -174,8 +174,8 @@ class RateLimiterState(object):
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
         time.sleep(0)
-        #if self.__conn is None:
-        self.__conn = rpyc.connect(host, port)
+        if self.__conn is None:
+            self.__conn = rpyc.connect(host, port)
 
         async_request = rpyc.async(self.__conn.root.request)
         try:
