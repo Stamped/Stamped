@@ -21,6 +21,7 @@ class MongoActivityLinkCollection(AMongoCollection):
                                         overflow=True)
 
         self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('timestamp.modified', pymongo.ASCENDING)])
+        self._collection.ensure_index([('activity_id', pymongo.ASCENDING),('user_id', pymongo.ASCENDING)])
     
     ### PUBLIC
 

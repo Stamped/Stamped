@@ -32,6 +32,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                                         ('_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
                                         ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index('linked_accounts.facebook.facebook_id')
+        self._collection.ensure_index('linked.facebook.linked_user_id')
+        self._collection.ensure_index('linked_accounts.twitter.twitter_id')
+        self._collection.ensure_index('linked.twitter.linked_user_id')
+        self._collection.ensure_index('linked.netflix.linked_user_id')
+
 
     @lazyProperty
     def alert_apns_collection(self):
@@ -247,7 +253,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             logs.warning("Unable to add account: %s" % e)
             if self._collection.find_one({"email": user.email}) is not None:
                 raise StampedDuplicateEmailError("An account already exists with email '%s'" % user.email)
-            elif self._collection.find_one({"screen_name": user.screen_name.lower()}) is not None:
+            elif self._collection.find_one({"screen_name_lower": user.screen_name.lower()}) is not None:
                 raise StampedDuplicateScreenNameError("An account already exists with screen name '%s'" % user.screen_name)
             else:
                 raise StampedDuplicationError("Account information already exists: %s" % e)
@@ -319,10 +325,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return accounts
 
     def getAccountsByNetflixId(self, netflixId):
-        documents = self._collection.find({"linked_accounts.twitter.netflix_user_id" : netflixId})
-        accounts = [self._convertFromMongo(doc) for doc in documents]
         documents = self._collection.find({"linked.netflix.linked_user_id" : netflixId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        accounts = [self._convertFromMongo(doc) for doc in documents]
+
         return accounts
 
     def addLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
