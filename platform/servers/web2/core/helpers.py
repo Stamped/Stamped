@@ -61,11 +61,9 @@ class StampedAPIProxy(object):
     
     def getAccount(self, user_id):
         if self._ec2:
-            account = self.api.getAccount(user_id)
-            
-            return HTTPAccount().importAccount(account).dataExport()
+            return self.api.getAccount(user_id)
         else:
-            return self._handle_get("accounts/show.json", { 'user_id' : user_id })
+            raise NotImplementedError
     
     def updateSettings(self, user_id, on, off):
         if self._ec2:
