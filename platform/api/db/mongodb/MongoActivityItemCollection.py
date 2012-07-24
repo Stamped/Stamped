@@ -24,7 +24,7 @@ class MongoActivityItemCollection(AMongoCollection):
         self._collection.ensure_index([('verb', pymongo.ASCENDING), ('subjects', pymongo.ASCENDING), ('timestamp.modified', pymongo.DESCENDING)])
         self._collection.ensure_index([('verb', pymongo.ASCENDING), ('objects.stamp_ids', pymongo.ASCENDING), ('timestamp.created', pymongo.DESCENDING)])
         self._collection.ensure_index([('verb', pymongo.ASCENDING), ('objects.user_ids', pymongo.ASCENDING), ('timestamp.created', pymongo.DESCENDING)])
-        self._collection.ensure_index([('objects.entity_ids', pymongo.ASCENDING), ('verb', pymongo.ASCENDING), ('timestamp.created', pymongo.DESCENDING)])
+        self._collection.ensure_index([('verb', pymongo.ASCENDING), ('objects.entity_ids', pymongo.ASCENDING), ('timestamp.created', pymongo.DESCENDING)])
 
 
     
