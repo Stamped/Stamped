@@ -234,13 +234,13 @@ def update(updates):
     if itunes_url is not None and itunes_url not in bad_versions:
         itunes_id = None
         if entity.isType('artist'):
-            match = re.match(r'http://itunes.apple.com/us/artist/(.+)/id(\d+)(\?.+)?', itunes_url)
+            match = re.match(r'http://itunes.apple.com/(.+)/artist/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(2)
         elif entity.isType('album'):
-            match = re.match(r'http://itunes.apple.com/us/album/(.+)/id(\d+)(\?.+)?', itunes_url)
+            match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(2)
         elif entity.isType('track'):
-            match = re.match(r'http://itunes.apple.com/us/album/(.+)/id(\d+)\?i=(\d+)', itunes_url)
+            match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)\?i=(\d+)', itunes_url)
             itunes_id = match.group(3)
         if itunes_id is not None:
             itunes_data = _itunes.method('lookup', id=itunes_id)['results'][0]

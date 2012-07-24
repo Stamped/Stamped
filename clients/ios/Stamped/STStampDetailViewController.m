@@ -752,7 +752,8 @@ static CATransform3D MakePerspetiveTransform() {
     UIFont* subtitleFont = [UIFont stampedFontWithSize:24];
     [stamp.entity.subtitle drawAtPoint:CGPointMake(50, 140 - subtitleFont.leading) withFont:subtitleFont];
     
-//    CALayer* layer = [[CALayer alloc] init]
+    CALayer* layer = [[[CALayer alloc] init] autorelease];
+    [layer drawInContext:context];
     
     UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
