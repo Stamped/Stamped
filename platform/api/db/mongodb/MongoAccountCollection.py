@@ -58,8 +58,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccounts is None:
             return document
 
-        #if 'linked' not in document:
-        document['linked'] = {}
+        if 'linked' not in document:
+            document['linked'] = {}
         if 'twitter' in linkedAccounts:
             twitterAcct = {
                 'service_name'          : 'twitter',
