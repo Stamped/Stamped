@@ -1,3 +1,18 @@
+                            
+                            /*$target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
+                                if (category !== g_category) {
+                                    return;
+                                }
+                                
+                                if (status === "error") {
+                                    //console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
+                                    //console.debug(response);
+                                    //console.debug(xhr);
+                                    
+                                    //alert("TODO: handle AJAX and backend errors gracefuly");
+                                    return;
+                                }
+                        }*/
 
 $("#subnav").on("click", ".subnav_button", function(event) {
     event.preventDefault();

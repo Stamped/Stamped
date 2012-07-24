@@ -83,6 +83,7 @@ class StampedAuth(AStampedAuth):
             'iphone8'           : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu', # 2.0
             'iphone8@2x'        : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
             'iphone-2.0.1'      : '9ll4520o4m3706m3nmpn10871nl81340', # 2.0.1
+            'web-1.0.0'         : '9lm4520o4m3718m3nmpn10h71nlbmui5', 
         }
 
         if clientId not in clientIds:
@@ -235,18 +236,18 @@ class StampedAuth(AStampedAuth):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise StampedInputError(msg)
-
+        
         # Verify user exists
         account = self._accountDB.getAccountByEmail(email)
         if not account or not account.user_id:
             msg = "User does not exist"
             logs.warning(msg)
             raise StampedInputError(msg)
-
+        
         attempt = 1
         max_attempts = 5
         expire = 1800    # 30 minutes
-            
+        
         while True:
             try:
                 rightNow = datetime.utcnow()
@@ -255,7 +256,10 @@ class StampedAuth(AStampedAuth):
                 resetToken.token_id = auth.generateToken(36)
                 resetToken.user_id = account.user_id
                 resetToken.expires = rightNow + timedelta(seconds=expire)
-                resetToken.timestamp.created = rightNow
+                
+                timestamp = BasicTimestamp()
+                timestamp.created = rightNow
+                resetToken.timestamp = timestamp
                 
                 self._passwordResetDB.addResetToken(resetToken)
                 break
@@ -293,10 +297,10 @@ class StampedAuth(AStampedAuth):
         ### Verify Refresh Token
         try:
             token = self._passwordResetDB.getResetToken(resetToken)
-            if token.user_id == None:
+            if token.user_id is None:
                 raise
 
-            if token['expires'] > datetime.utcnow():
+            if token.expires > datetime.utcnow():
                 logs.info("Valid reset token for user id: %s" % token.user_id)
                 return token.user_id
             
@@ -394,7 +398,7 @@ class StampedAuth(AStampedAuth):
         ### Verify Refresh Token
         try:
             token = self._refreshTokenDB.getRefreshToken(refreshToken)
-            if token.user_id == None:
+            if token.user_id is None:
                 raise
         except:
             raise StampedInvalidRefreshTokenError("Invalid refresh token")
@@ -504,7 +508,7 @@ class StampedAuth(AStampedAuth):
     def verifyEmailAlertToken(self, tokenId):
         try:
             token = self._emailAlertDB.getToken(tokenId)
-            if token.user_id == None:
+            if token.user_id is None:
                 raise
             return token.user_id
         except:
