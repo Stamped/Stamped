@@ -157,7 +157,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         friendId    = friendship.friend_id
         
         logs.debug("Check Block: %s -> %s" % (userId, friendId))
-        status = self.block_collection.checkBlock(userId=userId, \
+        status = self.block_collection.checkBlock(userId=userId,
             friendId=friendId)
         return status
     
@@ -167,11 +167,11 @@ class MongoFriendshipCollection(AFriendshipDB):
         friendId    = friendship.friend_id
         
         logs.debug("Check Block: %s -> %s" % (userId, friendId))
-        statusA = self.block_collection.checkBlock(userId=userId, \
+        statusA = self.block_collection.checkBlock(userId=userId,
             friendId=friendId)
         
         logs.debug("Check Block: %s -> %s" % (friendId, userId))
-        statusB = self.block_collection.checkBlock(userId=friendId, \
+        statusB = self.block_collection.checkBlock(userId=friendId,
             friendId=userId)
         
         if statusA or statusB:
@@ -183,7 +183,7 @@ class MongoFriendshipCollection(AFriendshipDB):
         friendId    = friendship.friend_id
         
         logs.debug("Remove Block: %s -> %s" % (userId, friendId))
-        return self.block_collection.removeBlock(userId=userId, \
+        return self.block_collection.removeBlock(userId=userId,
             friendId=friendId)
     
     def getBlocks(self, userId):
