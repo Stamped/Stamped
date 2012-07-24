@@ -67,6 +67,12 @@ class StampedAPIProxy(object):
         else:
             return self._handle_get("accounts/show.json", { 'user_id' : user_id })
     
+    def updateSettings(self, user_id, on, off):
+        if self._ec2:
+            return self.api.updateSettings(user_id, on, off)
+        else:
+            raise NotImplementedError
+    
     def getUser(self, params):
         if self._ec2:
             key = str("web::getUser::%s" % generateKeyFromDictionary(params))

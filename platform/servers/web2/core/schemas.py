@@ -137,11 +137,5 @@ class HTTPUpdateSettingsSchema(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('token',                            basestring, required=True)
-        cls.addProperty('email_alert_credit',               bool, required=True)
-        cls.addProperty('email_alert_like',                 bool, required=True)
-        cls.addProperty('email_alert_fav',                  bool, required=True)
-        cls.addProperty('email_alert_mention',              bool, required=True)
-        cls.addProperty('email_alert_comment',              bool, required=True)
-        cls.addProperty('email_alert_reply',                bool, required=True)
-        cls.addProperty('email_alert_follow',               bool, required=True)
+        cls.addProperty('settings',                         AccountAlertSettings, required=True)
 

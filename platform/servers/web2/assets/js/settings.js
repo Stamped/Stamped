@@ -26,9 +26,10 @@
             $this.find("input").each(function(i, elem) {
                 var $elem = $(elem);
                 
-                settings[$elem.attr("name")] = (!!$elem.atr("checked"));
+                settings[$elem.attr("name")] = (!!$elem.attr("checked"));
             });
             
+            console.debug(settings);
             var ajaxP  = $.ajax({
                 type        : "POST", 
                 url         : "/settings/alerts/update", 
