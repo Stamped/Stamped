@@ -30,18 +30,24 @@ def deploy_assets():
     sink    = S3Utils()
     prefix  = ".."
     pool    = Pool(16)
+    headers = {
+        "Cache-Control" : "max-age=290304000", 
+        "Expires"       : "Sat, 29 Apr 2017 13:31:45-0000 GMT", 
+    }
     paths   = [
         {
             "path"          : "/assets/generated/css", 
             "content_type"  : "text/css", 
             "apply_gzip"    : True, 
             "ignore"        : [ ], 
+            "headers"       : headers, 
         }, 
         {
             "path"          : "/assets/generated/js", 
             "content_type"  : "application/javascript", 
             "apply_gzip"    : True, 
             "ignore"        : [ ], 
+            "headers"       : headers, 
         }, 
         {
             "path"          : "/assets/img", 
@@ -51,6 +57,7 @@ def deploy_assets():
                 "/assets/generated/img/public-home", 
                 "/assets/generated/img/public-home", 
             ], 
+            "headers"       : headers, 
         },
         #{  # NOTE (travis): S3 / Cloudfront doesn't support CORS, so serving fonts via 
         #   #our CDN (which is technically an external domain) to FF/IE8 won't work.. balls
