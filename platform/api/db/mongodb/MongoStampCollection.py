@@ -41,25 +41,25 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), ('credits.user.user_id', pymongo.ASCENDING)])
         
         # Indices for _getTimeSlice within AMongoCollectionView
-        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
-        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
-        self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        # self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
 
-        # Indices for _getSearchSlice
-        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), 
-                                        ('contents.blurb', pymongo.ASCENDING), ('entity.title', pymongo.ASCENDING),
-                                        ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-                                        ('timestamp.stamped', pymongo.DESCENDING)])
-        self._collection.ensure_index([('entity.types', pymongo.ASCENDING), 
-                                        ('contents.blurb', pymongo.ASCENDING), ('entity.title', pymongo.ASCENDING),
-                                        ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-                                        ('timestamp.stamped', pymongo.DESCENDING)])
-        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), 
-                                        ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-                                        ('timestamp.stamped', pymongo.DESCENDING)])
-        self._collection.ensure_index([('entity.types', pymongo.ASCENDING), 
-                                        ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-                                        ('timestamp.stamped', pymongo.DESCENDING)])
+        # # Indices for _getSearchSlice
+        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), 
+        #                                 ('contents.blurb', pymongo.ASCENDING), ('entity.title', pymongo.ASCENDING),
+        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
+        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
+        # self._collection.ensure_index([('entity.types', pymongo.ASCENDING), 
+        #                                 ('contents.blurb', pymongo.ASCENDING), ('entity.title', pymongo.ASCENDING),
+        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
+        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
+        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), 
+        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
+        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
+        # self._collection.ensure_index([('entity.types', pymongo.ASCENDING), 
+        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
+        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
 
 
     def _upgradeDocument(self, document):

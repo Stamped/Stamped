@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import datetime, copy
-import Globals, utils, logs
+import Globals, utils, logs, pymongo
 
 from errors import *
 from api.Schemas import *

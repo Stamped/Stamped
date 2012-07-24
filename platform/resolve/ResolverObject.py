@@ -71,7 +71,7 @@ class ResolverObject(object):
         self.__maxLookupCalls = maxLookupCalls
         self.__lookupCallsMade = 0
         self._properties = [ 'name', 'raw_name', 'source', 'key', 'kind', 'types', 'url', 'keywords', 'related_terms',
-                             'description', 'priority', 'subcategory', 'images']
+                             'description', 'priority', 'subcategory', 'images', 'last_popular', 'popularity_score']
 
     __metaclass__ = ABCMeta
 
@@ -177,6 +177,14 @@ class ResolverObject(object):
     @property 
     def images(self):
         return []
+
+    @property
+    def last_popular(self):
+        return None
+
+    @property
+    def popularity_score(self):
+        return None
 
     def isType(self, t):
         return t in self.types
@@ -394,7 +402,7 @@ class ResolverMediaItem(ResolverObject):
         super(ResolverMediaItem, self).__init__(*args, **kwargs)
         self._properties.extend([
             'artists', 'authors', 'cast', 'directors', 'publishers', 'studios', 'networks', 'release_date', 'genres',
-            'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number', 'last_popular',
+            'length', 'mpaa_rating', 'albums', 'isbn', 'sku_number',
         ])
 
     @property
@@ -456,10 +464,6 @@ class ResolverMediaItem(ResolverObject):
 
     @property
     def sku_number(self):
-        return None
-
-    @property
-    def last_popular(self):
         return None
 
     @lazyProperty

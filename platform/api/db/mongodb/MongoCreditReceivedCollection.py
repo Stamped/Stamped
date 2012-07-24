@@ -5,7 +5,7 @@ __version__   = '1.0'
 __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
-import Globals
+import Globals, pymongo
 
 from api.db.mongodb.AMongoCollection import AMongoCollection
 

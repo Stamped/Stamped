@@ -550,6 +550,10 @@ class LastPopularGroup(BasicFieldGroup):
             if entity.last_popular is None or proxy.last_popular > entity.last_popular:
                 entity.last_popular = proxy.last_popular
 
+        if proxy.popularity_score:
+            if entity.total_popularity_measure is None or proxy.popularity_score > entity.total_popularity_measure:
+                entity.total_popularity_measure = proxy.popularity_score
+
 
 class ImagesGroup(BasicFieldGroup):
     def __init__(self):
