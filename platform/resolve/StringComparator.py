@@ -30,7 +30,7 @@ class StringComparator(object):
     @classmethod
     def get_skip_word_cost(cls, string, skip_begin, skip_end):
         word = string[skip_begin:skip_end].strip().lower()
-        return cls.SKIP_WORD_COSTS.get(word, len(word) * 0.6)
+        return cls.SKIP_WORD_COSTS.get(word, len(word) * 0.7)
 
     PREFIX_RE = re.compile('.*\w+.*[-:(\(][^\w]*$')
     @classmethod

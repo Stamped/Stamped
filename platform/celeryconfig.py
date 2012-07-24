@@ -97,7 +97,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'make-new-autocomplete-index' : {
         'task' : 'tasks.APITasks.updateAutoCompleteIndex',
-        'schedule' : crontab(hour=4),
+        'schedule' : crontab(hour=4, minute=0),
     },
 }
 

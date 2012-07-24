@@ -1,73 +1,73 @@
 <!doctype html>
 <html lang="en">
-	{% extends 'base.html' %}
+    {% extends 'base.html' %}
 
-	{% block head %}
-	
-	{{ block.super }}
-	
-	<script src="/assets/js/sorttable.js"></script>
-	{% endblock head %}
-	
-	{% block content %}
-	
-	    <div class="contentWrapper">
-		    <h1>Stress Report </h1>
-		    
-		    <div class="qps">
-		    	<form action='/stress/' method='post'>
-		    		{{form}}
-		    		<input type='submit' />
-		    	</form>
-		    
-		    	<h2> QPS Report </h2>
-			    {% if count_results|length > 0 %}
-			    	
-				    <table class="sortable latencyTable">
-				    	
-				    	<tr>
-					        <td>Node</td>
-					        {% for header in headers %}
-					        	<td>header|time:"h:i:s"</td>
-					        {% endfor %}
-					    </tr>
-					    {% for key,value in count_results %}
-					        <tr>
-					        	<td>{{key}}</td>
-					        	{% for item in value %}
-					        		<td>{{item}}</td>
-					        	{% endfor %}
-					        </tr>
-					   	{% endfor %}
-				   	</table>
-			    {% endif %}
-			    
-			    <h2> Mean Latency Report </h3>
-			    
-			    {% if count_results|length > 0 %}
-			    	
-				    <table class="sortable latencyTable">
-				    	
-				    	<tr>
-					        <td>Node</td>
-					        {% for i in n %}
-					        	<td>t - {{ i }}</td>
-					        {% endfor %}
-					    </tr>
-					    {% for key,value in mean_results %}
-					        <tr>
-					        	<td>{{key}}</td>
-					        	{% for item in value %}
-					        		<td>{{item}}</td>
-					        	{% endfor %}
-					        </tr>
-					   	{% endfor %}
-				   	</table>
-			    {% endif %}
-		    </div>
-		    
-		    <div>
+    {% block head %}
+    
+    {{ block.super }}
+    
+    <script src="/assets/js/sorttable.js"></script>
+    {% endblock head %}
+    
+    {% block content %}
+    
+        <div class="contentWrapper">
+            <h1>Stress Report </h1>
+            
+            <div class="qps">
+                <form action='/stress/' method='post'>
+                    {{form}}
+                    <input type='submit' />
+                </form>
+            
+                <h2> QPS Report </h2>
+                {% if count_results|length > 0 %}
+                    
+                    <table class="sortable latencyTable">
+                        
+                        <tr>
+                            <td>Node</td>
+                            {% for header in headers %}
+                                <td>{{ header|time:"h:i:s" }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% for key,value in count_results %}
+                            <tr>
+                                <td>{{key}}</td>
+                                {% for item in value %}
+                                    <td>{{item}}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+                
+                <h2> Mean Latency Report </h3>
+                
+                {% if count_results|length > 0 %}
+                    
+                    <table class="sortable latencyTable">
+                        
+                        <tr>
+                            <td>Node</td>
+                            {% for header in headers %}
+                                <td>{{ header|time:"h:i:s" }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% for key,value in mean_results %}
+                            <tr>
+                                <td>{{key}}</td>
+                                {% for item in value %}
+                                    <td>{{item}}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+            
+            <div>
 
-   	{% endblock content %}
-   	
-   	
+    {% endblock content %}
+    
+    

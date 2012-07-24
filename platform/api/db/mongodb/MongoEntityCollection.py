@@ -292,6 +292,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 if repair:
                     logs.info(msg)
                     del(entity.images)
+                    del(entity.images_timestamp)
+                    del(entity.images_source)
                     modified = True
                 else:
                     raise StampedDataError(msg)
@@ -339,6 +341,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                     entity.images = images
                 else:
                     del(entity.images)
+
+            if entity.images_source == 'seed':
+                msg = "%s: Image source set as seed" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.images_source)
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
 
         # Check that any existing links are valid
         def _checkLink(field):
