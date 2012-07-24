@@ -243,7 +243,7 @@ def update(updates):
             match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)\?i=(\d+)', itunes_url)
             itunes_id = match.group(3)
         if itunes_id is not None:
-            itunes_data = _itunes.method('lookup', id=itunes_id)['results'][0]
+            itunes_data = _itunes().method('lookup', id=itunes_id)['results'][0]
             if 'previewUrl' in itunes_data:
                 entity.sources.itunes_preview = itunes_data['previewUrl']
             if entity.isType('artist'):
