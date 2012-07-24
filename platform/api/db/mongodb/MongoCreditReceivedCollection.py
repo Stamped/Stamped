@@ -14,6 +14,8 @@ class MongoCreditReceivedCollection(AMongoCollection):
     def __init__(self):
         AMongoCollection.__init__(self, collection='creditreceived')
 
+        self._collection.ensure_index([('credits.user.user_id', pymongo.ASCENDING)])
+
     """
     Credited User Id -> Stamp Ids 
     """
@@ -25,10 +27,6 @@ class MongoCreditReceivedCollection(AMongoCollection):
         def regenerate(key):
             stampIds = set()
             stamps = self._collection._database['stamps'].find({'credits.user.user_id': key}, fields=['_id'])
-            for stamp in stamps:
-                stampIds.add(str(stamp['_id']))
-            # Support for deprecated structure
-            stamps = self._collection._database['stamps'].find({'credit.user_id': key}, fields=['_id'])
             for stamp in stamps:
                 stampIds.add(str(stamp['_id']))
 

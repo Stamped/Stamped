@@ -21,7 +21,8 @@ class MongoAlertQueueCollection(AMongoCollection):
         AMongoCollection.__init__(self, collection='alertqueue', primary_key='alert_id', obj=Alert)
         # AAlertDB.__init__(self)
 
-        self._collection.ensure_index('created', unique=False)
+        self._collection.ensure_index('timestamp.created', unique=False)
+        self._collection.ensure_index([('recipient_id',pymongo.ASCENDING), ('timestamp.created',pymongo.ASCENDING)])
 
     ### PUBLIC
 

@@ -19,6 +19,8 @@ class MongoAuthPasswordResetCollection(AMongoCollection, AAuthPasswordResetDB):
     def __init__(self):
         AMongoCollection.__init__(self, collection='passwordreset')
         AAuthPasswordResetDB.__init__(self)
+
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING)])
     
     def _convertToMongo(self, token):
         document = token.dataExport()

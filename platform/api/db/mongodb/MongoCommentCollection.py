@@ -26,6 +26,7 @@ class MongoCommentCollection(AMongoCollection, ACommentDB):
 
         self._collection.ensure_index('user.user_id')
         self._collection.ensure_index('timestamp.created')
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('timestamp.created',pymongo.DESCENDING)])
 
         self._cache = globalMemcache()
 

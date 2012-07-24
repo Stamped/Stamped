@@ -18,6 +18,8 @@ class MongoActivityItemCollection(AMongoCollection):
                                         primary_key='activity_id', 
                                         obj=Activity, 
                                         overflow=True)
+
+        self._collection.ensure_index('timestamp.modified')
     
     ### PUBLIC
     

@@ -238,6 +238,7 @@ class AMongoCollection(object):
     def _init_collection(self, db, collection, cap_size=None):
         cfg = self._dbConfig
         self._collection = MongoCollectionProxy(self, cfg.connection, db, collection, cap_size)
+        self._collection.ensure_index('timestamp.created')
         
         logs.debug("Connected to MongoDB collection: %s" % collection)
 
