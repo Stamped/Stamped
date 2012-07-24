@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, utils
+import os, random, utils
 
 import deploy_version
 
@@ -15,8 +15,16 @@ from gevent.pool    import Pool
 
 import servers.web2.settings as settings
 
-STATIC_ROOT = "http://static.stamped.com"
-VERSION     = ".generated.%s" % deploy_version.get_current_version()
+VERSION      = ".generated.%s" % deploy_version.get_current_version()
+STATIC_ROOTS = [
+    "http://static.stamped.com", 
+    "http://static1.stamped.com", 
+    "http://static2.stamped.com", 
+    "http://static3.stamped.com", 
+]
+
+def get_static_root():
+    return STATIC_ROOTS[random.randint(0, len(STATIC_ROOTS) - 1)]
 
 def deploy_assets():
     sink    = S3Utils()
@@ -135,7 +143,7 @@ def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
         ]
         
         for replacement in replace:
-            data = data.replace("/assets/%s" % replacement, "%s%s" % (STATIC_ROOT, "/assets/generated/%s" % replacement))
+            data = data.replace("/assets/%s" % replacement, "%s%s" % (get_static_root(), "/assets/generated/%s" % replacement))
     
     sink.add_key(key, data, content_type=content_type, apply_gzip=apply_gzip, headers=headers)
 

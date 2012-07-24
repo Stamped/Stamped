@@ -260,7 +260,7 @@ def alert_settings(request, **kwargs):
 
 @stamped_view(schema=HTTPResetEmailSchema)
 @require_http_methods(["POST"])
-def reset_email(request, schema, **kwargs):
+def send_reset_email(request, schema, **kwargs):
     email = schema.email
     api   = globalMongoStampedAPI()
     
@@ -271,13 +271,21 @@ def reset_email(request, schema, **kwargs):
     
     # Verify account exists
     try:
-        user = api.checkAccount(email)
-    except:
+        logs.info("resetting email for '%s'" % email)
+        user = stampedAPIProxy.checkAccount(email)
+        
+        if user is None:
+            raise
+    except Exception:
+        utils.printException()
+        logs.error("ERROR: invalid email '%s'" % email)
+        
         ### TODO: Display appropriate error message
         errorMsg = 'No account information was found for that email address.'
         raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
-
+    
     # Send email
+    logs.info("sending email to '%s' (user: '%s')" % (email, user.screen_name))
     result = g_stamped_auth.forgotPassword(email)
     
     return transform_output(result)

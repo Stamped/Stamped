@@ -1248,19 +1248,17 @@ var g_update_stamps = null;
                             
                             // load in new content via AJAX
                             var $target = $("<div></div>");
-                            $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
+                            
+                            $.get(url, params, function(data, stat) {
                                 if (category !== g_category) {
                                     return;
                                 }
                                 
-                                if (status === "error") {
-                                    //console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
-                                    //console.debug(response);
-                                    //console.debug(xhr);
-                                    
-                                    //alert("TODO: handle AJAX and backend errors gracefuly");
+                                if (stat === "error") {
                                     return;
                                 }
+                                
+                                $target.html(data);
                                 
                                 // TODO: optimize!!
                                 var $elements = $target.find('.stamp-gallery-item').remove();
@@ -1522,6 +1520,7 @@ var g_update_stamps = null;
             }
             
             var clamped = 'stamp-category-nav-bar-clamped';
+            // NOTE: nav_bar is ~400px tall
             
             // clamp the navbar's vertical offset to never overlap too far into the page's header
             if (window.innerHeight / 2 - 198 <= 250) {
