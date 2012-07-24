@@ -1767,6 +1767,10 @@ static STPopUpView* volatile _currentPopUp = nil;
     return _currentPopUp != nil;
 }
 
++ (void)showTweetComposerFromController:(UIViewController*)controller withInitialText:(NSString*)text {
+    
+}
+
 @end
 
 @implementation STPopUpView

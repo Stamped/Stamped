@@ -1421,10 +1421,8 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
-            if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available and
-                entity.sources.netflix_instant_available_until is not None and
-                entity.sources.netflix_instant_available_until > datetime.now()):
+            # CHANGE: removed references to netflix_instant_available_until -Landon
+            if entity.sources.netflix_id is not None and entity.sources.netflix_is_instant_available:
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'

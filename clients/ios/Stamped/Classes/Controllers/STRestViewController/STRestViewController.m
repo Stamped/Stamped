@@ -28,6 +28,8 @@ static CGFloat _shelfOffset = 9;
 @property (nonatomic, readwrite, assign) BOOL explicitRefresh;
 @property (nonatomic, readwrite, assign) BOOL searching;
 
+@property (nonatomic, readwrite, retain) UIActivityIndicatorView* loadingLockView;
+
 @end
 
 @implementation STRestViewController
@@ -43,11 +45,13 @@ static CGFloat _shelfOffset = 9;
 @synthesize headerRefreshView = _headerRefreshView;
 @synthesize footerRefreshView = _footerRefreshView;
 @synthesize searchOverlay = _searchOverlay;
+@synthesize loadingLockView = _loadingLockView;
 
 @synthesize searching = _searching;
 @synthesize showsSearchBar = _showsSearchBar;
 @synthesize tableStyle = _tableStyle;
 @synthesize explicitRefresh = _explicitRefresh;
+@synthesize loadingLocked = _loadingLocked;
 
 - (id)init {
     if ((self = [super initWithNibName:nil bundle:nil])) {
@@ -77,8 +81,24 @@ static CGFloat _shelfOffset = 9;
     self.headerRefreshView = nil;
     self.footerRefreshView = nil;
     self.searchOverlay = nil;
+    self.loadingLockView = nil;
 }
 
+- (void)setLoadingLocked:(BOOL)loadingLocked {
+    if (loadingLocked != _loadingLocked) {
+        _loadingLocked = loadingLocked;
+        if (loadingLocked) {
+            self.loadingLockView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
+            self.loadingLockView.frame = [Util originRectWithRect:self.view.frame];
+            [self.view addSubview:self.loadingLockView];
+            [self.loadingLockView startAnimating];
+        }
+        else {
+            [self.loadingLockView removeFromSuperview];
+            self.loadingLockView = nil;
+        }
+    }
+}
 
 #pragma mark - View lifecycle
 

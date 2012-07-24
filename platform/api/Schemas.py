@@ -609,6 +609,10 @@ class EntitySources(Schema):
         cls.addProperty('rdio_source',                      basestring)
         cls.addProperty('rdio_timestamp',                   datetime)
 
+        cls.addProperty('rdio_is_playable',                 bool)
+        cls.addProperty('rdio_is_playable_source',          basestring)
+        cls.addProperty('rdio_is_playable_timestamp',       datetime)
+
         cls.addProperty('amazon_id',                        basestring)
         cls.addProperty('amazon_url',                       basestring)
         cls.addProperty('amazon_underlying',                basestring)
@@ -637,9 +641,12 @@ class EntitySources(Schema):
         cls.addProperty('netflix_id',                       basestring)
         cls.addProperty('netflix_url',                      basestring)
         cls.addProperty('netflix_source',                   basestring)
+        cls.addProperty('netflix_timestamp',                datetime)
+
         cls.addProperty('netflix_is_instant_available',     bool)
         cls.addProperty('netflix_instant_available_until',  datetime)
-        cls.addProperty('netflix_timestamp',                datetime)
+        cls.addProperty('netflix_available_source',         basestring)
+        cls.addProperty('netflix_available_timetsamp',      datetime)
 
         cls.addProperty('singleplatform_id',                basestring)
         cls.addProperty('singleplatform_url',               basestring)
