@@ -30,11 +30,6 @@ def password_reset(request, schema, **kwargs):
     if user_id is None:
         raise StampedInputError("invalid token")
     
-    account = stampedAPIProxy.getAccount(user_id)
-    
-    if account is None:
-        raise StampedInputError("invalid account")
-    
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 
         'page'              : 'password_reset', 
