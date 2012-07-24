@@ -298,7 +298,10 @@ def update(updates):
             elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
                 entity.sources.itunes_url = itunes_data['trackViewUrl']
             elif entity.isType('tv'):
-                entity.sources.itunes_url = itunes_data['artistViewUrl']
+                try:
+                    entity.sources.itunes_url = itunes_data['artistViewUrl']
+                except KeyError:
+                    entity.sources.itunes_url = itunes_data['artistLinkUrl']
             entity.sources.itunes_id = itunes_id
             entity.sources.itunes_source = 'seed'
             entity.sources.itunes_timestamp = now

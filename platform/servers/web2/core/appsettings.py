@@ -58,37 +58,94 @@ def alert_settings(request, schema, **kwargs):
         user = travis_test.user
         
         settings = {
-            'email_alert_credit'    : alerts.email_alert_credit, 
-            'email_alert_like'      : alerts.email_alert_like, 
-            'email_alert_fav'       : alerts.email_alert_fav, 
-            'email_alert_mention'   : alerts.email_alert_mention, 
-            'email_alert_comment'   : alerts.email_alert_comment, 
-            'email_alert_reply'     : alerts.email_alert_reply, 
-            'email_alert_follow'    : alerts.email_alert_follow, 
+            'alerts_credits_apns'   : False, 
+            'alerts_credits_email'  : False, 
+            
+            'alerts_likes_apns'     : True, 
+            'alerts_likes_email'    : False, 
+            
+            'alerts_todos_apns'     : True, 
+            'alerts_todos_email'    : True, 
+            
+            'alerts_mentions_apns'  : True, 
+            'alerts_mentions_email' : True, 
+            
+            'alerts_comments_apns'  : False, 
+            'alerts_comments_email' : True, 
+            
+            'alerts_replies_apns'   : True, 
+            'alerts_replies_email'  : True, 
+            
+            'alerts_followers_apns' : True, 
+            'alerts_followers_email': False, 
+            
+            'alerts_friends_apns'   : True, 
+            'alerts_friends_email'  : True, 
+            
+            'alerts_actions_apns'   : False, 
+            'alerts_actions_email'  : True, 
         }
     else:
-        user_id = g_stamped_auth.verifyEmailAlertToken(schema.token)
-        account = stampedAPIProxy.getAccount(user_id)
+        user_id  = g_stamped_auth.verifyEmailAlertToken(schema.token)
+        account  = stampedAPIProxy.getAccount(user_id)
+        settings = account.alert_settings.dataExport()
+        user     = HTTPUser().importSchema(account).dataExport()
+    
+    options = [
+        {
+            'human_name'    : 'Credit', 
+            'name'          : 'credits', 
+            'desc'          : 'Someone awards you credit on a stamp', 
+        }, 
+        {
+            'human_name'    : 'Likes', 
+            'name'          : 'likes', 
+            'desc'          : 'Someone likes one of your stamps', 
+        }, 
+        {
+            'human_name'    : 'Todos', 
+            'name'          : 'todos', 
+            'desc'          : 'Someone todos one of your stamps', 
+        }, 
+        {
+            'human_name'    : 'Mentions', 
+            'name'          : 'mentions', 
+            'desc'          : 'Someone you on a stamp or comment', 
+        }, 
+        {
+            'human_name'    : 'Replies', 
+            'name'          : 'replies', 
+            'desc'          : 'Someone replies to one of your comments', 
+        }, 
+        {
+            'human_name'    : 'Followers', 
+            'name'          : 'followers', 
+            'desc'          : 'Someone follows you on Stamped', 
+        }, 
+        {
+            'human_name'    : 'Friends', 
+            'name'          : 'friends', 
+            'desc'          : 'A friend from Facebook or Twitter joins Stamped', 
+        }, 
+        {
+            'human_name'    : 'Actions', 
+            'name'          : 'actions', 
+            'desc'          : 'Someone performs an action on one of your stamps (e.g., listening to a song, makes a reversation, etc.)', 
+        }, 
+    ]
+    
+    for option in options:
+        name = option['name']
         
-        alerts  = HTTPAccountAlerts().importSchema(account)
-        user    = HTTPUser().importSchema(account).dataExport()
-        
-        settings = {
-            'email_alert_credit'    : alerts.email_alert_credit, 
-            'email_alert_like'      : alerts.email_alert_like, 
-            'email_alert_fav'       : alerts.email_alert_fav, 
-            'email_alert_mention'   : alerts.email_alert_mention, 
-            'email_alert_comment'   : alerts.email_alert_comment, 
-            'email_alert_reply'     : alerts.email_alert_reply, 
-            'email_alert_follow'    : alerts.email_alert_follow, 
-        }
+        option['enabled_apns']  = settings['alerts_%s_apns'  % name]
+        option['enabled_email'] = settings['alerts_%s_email' % name]
     
     return stamped_render(request, 'settings.html', {
         'body_classes'      : body_classes, 
         'page'              : 'settings', 
-        'title'             : 'Stamped - Alert Settings', 
+        'title'             : 'Stamped - Notification Settings', 
         'user'              : user, 
-        'settings'          : settings
+        'settings'          : options
     })
 
 @stamped_view(schema=HTTPResetEmailSchema)
@@ -135,16 +192,10 @@ def reset_password(request, schema, **kwargs):
     
     return transform_output(result)
 
-@stamped_view(schema=HTTPUpdateAlertSettingsSchema)
+@stamped_view(schema=HTTPUpdateSettingsSchema)
 @require_http_methods(["POST"])
 def update_alert_settings(request, schema, **kwargs):
-    user_id = g_stamped_auth.verifyPasswordResetToken(schema.token)
+    stampedAPIProxy.updateAlerts(user_id, on, off)
     
-    if schema.password is None or len(schema.password) <= 0:
-        raise StampedInputError("invalid password")
-    
-    # store password            
-    result = g_stamped_auth.updatePassword(user_id, schema.password)
-    
-    return transform_output(result)
+    return transform_output(True)
 
