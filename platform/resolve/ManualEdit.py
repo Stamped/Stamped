@@ -85,7 +85,7 @@ def formForEntity(entity_id, **hidden_params):
             try:
                 itunes_data = _itunes().method('lookup',id=itunes_id)['results'][0]
                 if entity.isType('artist'):
-                    itunes_url = itunes_data['artistViewUrl']
+                    itunes_url = itunes_data['artistLinkUrl']
                 elif entity.isType('album'):
                     itunes_url = itunes_data['collectionViewUrl']
                 elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
@@ -275,6 +275,13 @@ def update(updates):
         elif entity.isType('book'):
             match = re.match(r'http://itunes.apple.com/(.+)/book/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(3)
+        elif entity.isType('tv'):
+            match = re.match(r'http://itunes.apple.com/(.+)/tv-season/(.+)/id(\d+)(\?.+)?', itunes_url)
+            itunes_id = match.group(3)
+        elif entity.isType('movie'):
+            match = re.match(r'http://itunes.apple.com/(.+)/movie/(.+)/id(\d+)(\?.+)?', itunes_url)
+            itunes_id = match.group(3)
+
         if itunes_id is not None:
             itunes_data = _itunes().method('lookup', id=itunes_id)['results'][0]
             if 'previewUrl' in itunes_data:
