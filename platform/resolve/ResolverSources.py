@@ -23,6 +23,7 @@ from resolve.NetflixSource import NetflixSource
 from resolve.InstagramSource import InstagramSource
 from resolve.FandangoSource import FandangoSource
 from resolve.NYTimesSource import NYTimesSource
+from resolve.UMDSource import UMDSource
 
 allSources = [
     SeedSource,
@@ -41,6 +42,7 @@ allSources = [
     NetflixSource,
     StampedSource,
     NYTimesSource,
+    UMDSource,
 ]
 
 def getSource(name):

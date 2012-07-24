@@ -619,6 +619,10 @@ class EntitySources(Schema):
         cls.addProperty('nytimes_source',                    basestring)
         cls.addProperty('nytimes_timestamp',                 datetime)
 
+        cls.addProperty('umdmusic_id',                        basestring)
+        cls.addProperty('umdmusic_source',                    basestring)
+        cls.addProperty('umdmusic_timestamp',                 datetime)
+
         cls.addProperty('opentable_id',                     basestring)
         cls.addProperty('opentable_url',                    basestring)
         cls.addProperty('opentable_source',                 basestring)
@@ -855,6 +859,26 @@ class BasicEntity(BasicEntityMini):
 
         # The last date/time we got some input indicating that this is currently popular.
         cls.addProperty('last_popular',                     datetime)
+        # Float indicating just how fucking popular this was. Rough guidelines:
+        #
+        #  MUSIC
+        #  - In top 10 on the charts charts for three weeks ~ 100
+        #  - Charted at spot 30 for a week ~ 10
+        #  - Topped charts for two months straight ~ 500
+        #
+        #  FILM
+        #  - Typical big-budget film with average performance ~100
+        #  - Some crapass indie film ~10
+        #  - Huge iconic hit (Star Wars, Jaws, etc.) ~ 500
+        #
+        #  BOOKS
+        #  - Typical NYT best-seller ~100
+        #  - Book that published but never made it anywhere ~10
+        #  - Harry Potter ~500
+        #  - Hamlet ~1000
+        #
+        #  Etc.
+        cls.addProperty('total_popularity_measure',         float)
         cls.addProperty('last_popular_source',              basestring)
         cls.addProperty('last_popular_timestamp',           datetime)
         # Not to be exposed to users -- just some internal data letting us know what sort

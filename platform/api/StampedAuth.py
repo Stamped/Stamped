@@ -83,6 +83,7 @@ class StampedAuth(AStampedAuth):
             'iphone8'           : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu', # 2.0
             'iphone8@2x'        : 'LnIFbmL0a75G8iQeHCV8VOT4fWFAWhzu',
             'iphone-2.0.1'      : '9ll4520o4m3706m3nmpn10871nl81340', # 2.0.1
+            'web-1.0.0'         : '9lm4520o4m3718m3nmpn10h71nlbmui5', 
         }
 
         if clientId not in clientIds:
@@ -235,18 +236,18 @@ class StampedAuth(AStampedAuth):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise StampedInputError(msg)
-
+        
         # Verify user exists
         account = self._accountDB.getAccountByEmail(email)
         if not account or not account.user_id:
             msg = "User does not exist"
             logs.warning(msg)
             raise StampedInputError(msg)
-
+        
         attempt = 1
         max_attempts = 5
         expire = 1800    # 30 minutes
-            
+        
         while True:
             try:
                 rightNow = datetime.utcnow()
