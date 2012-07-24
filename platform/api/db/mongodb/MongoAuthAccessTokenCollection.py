@@ -22,6 +22,8 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
         AAuthAccessTokenDB.__init__(self)
 
         self._cache = globalMemcache()
+
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING)])
     
     def _convertToMongo(self, token):
         document = token.dataExport()

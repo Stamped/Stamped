@@ -29,6 +29,12 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         self._collection.ensure_index([('user_id', pymongo.ASCENDING),\
             ('timestamp.created', pymongo.DESCENDING)])
 
+        # Indices for _getTimeSlice within AMongoCollectionView
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+
+
     def _convertFromMongo(self, document):
         """
         Keep in mind this is returning a RawTodo, which is less-enriched than a Todo
