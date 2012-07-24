@@ -31,6 +31,8 @@
         var stamps_  = {};
         var markers  = [];
         var def_zoom = 12;
+        var map      = null;
+        var init_marker_clusterer = null;
         
         // build dict of stamp_id => stamp for fast lookups
         $.each(stamps, function(i, stamp) {
@@ -46,7 +48,7 @@
         };
         
         if (!lite) {
-            options = {
+            var options = {
                 mapTypeId           : google.maps.MapTypeId.ROADMAP, 
                 center              : center, 
                 zoom                : 8, 
@@ -66,7 +68,7 @@
                 }
             };
             
-            var map = new google.maps.Map(canvas, options);
+            map = new google.maps.Map(canvas, options);
             
             var update_map_center = function(pos) {
                 // TODO: only use user_pos or update center on resize if we're still at the default center
@@ -109,7 +111,7 @@
                 alignBottom: true
             });
             
-            var init_marker_clusterer = function() {
+            init_marker_clusterer = function() {
                 if (!!marker_clusterer) {
                     return;
                 }
@@ -154,7 +156,7 @@
             };
             
             if (stamps.length > 0) {
-                var coords0     = (stamps[0]['entity']['coordinates']).split(",");
+                var coords0     = (stamps[0].entity.coordinates).split(",");
                 var lat0        = parseFloat(coords0[0]);
                 var lng0        = parseFloat(coords0[1]);
                 var pos0        = new google.maps.LatLng(lat0, lng0);
@@ -172,7 +174,7 @@
                 google.maps.event.addListener(map, 'click',         close_popup);
                 google.maps.event.addListener(map, 'zoom_changed',  close_popup);
                 
-                var partial_templates = {}
+                var partial_templates = {};
                 
                 $(".handlebars-template").each(function (i) {
                     var $this = $(this);
@@ -199,7 +201,7 @@
                     }
                     
                     if (!!multires_image) {
-                        for (image in multires_image.sizes) {
+                        for (var image in multires_image.sizes) {
                             if (image.width === size) {
                                 url  = image.url;
                                 okay = true;
@@ -208,8 +210,8 @@
                         }
                         
                         if (!okay) {
-                            for (image in multires_image.sizes) {
-                                url  = image.url;
+                            for (var image2 in multires_image.sizes) {
+                                url  = image2.url;
                                 okay = true;
                                 break;
                             }
@@ -228,11 +230,11 @@
                 
                 // for each stamp, initialize a marker and add it to the map
                 $.each(stamps, function(i, stamp) {
-                    var coords  = (stamp['entity']['coordinates']).split(",");
+                    var coords  = (stamp.entity.coordinates).split(",");
                     var lat     = parseFloat(coords[0]);
                     var lng     = parseFloat(coords[1]);
                     var pos     = new google.maps.LatLng(lat, lng);
-                    var title   = stamp['entity']['title'];
+                    var title   = stamp.entity.title;
                     
                     var marker  = new google.maps.Marker({
                         position    : pos, 
@@ -309,7 +311,7 @@
                         if (!!e) {
                             e.stop();
                         }
-                    }
+                    };
                     
                     stamp_map_popups[stamp.stamp_id] = open_popup;
                     google.maps.event.addListener(marker, 'click', open_popup);
@@ -428,7 +430,7 @@
                             }
                         });
                         
-                        if (max_pos !== null && max_size >= 4 && (depth == 0 || max_size > 10)) {
+                        if (max_pos !== null && max_size >= 4 && (depth === 0 || max_size > 10)) {
                             var max_cluster_bounds = new google.maps.LatLngBounds();
                             var total_dist  = 0.0;
                             var total_dist2 = 0.0;
@@ -459,7 +461,7 @@
                                 }
                             });
                             
-                            if (pts.length == 1) {
+                            if (pts.length === 1) {
                                 map.setCenter(pts[0]);
                             } else {
                                 //console.debug(pts.length + " vs " + max_size);
@@ -486,7 +488,7 @@
                                 
                                 init_clusterer(depth + 1);
                             }
-                        } else if (depth == 0 && max_size > 0) {
+                        } else if (depth === 0 && max_size > 0) {
                             set_temp_max_zoom(13);
                         }
                     };
@@ -549,7 +551,7 @@
             
             if ($nav.hasClass(min_cls)) { // collapsing animation
                 $nav.parent().css({
-                    'pointer-events' : 'none', 
+                    'pointer-events' : 'none'
                 });
                 
                 $canvas.addClass("blur-none").removeClass("blur-nohover");
@@ -577,7 +579,7 @@
                     complete : function() {
                         update_stamp_list_scrollbars();
                     }
-                })
+                });
             }
             
             return false;

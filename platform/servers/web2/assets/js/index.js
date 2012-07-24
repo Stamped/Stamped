@@ -428,7 +428,7 @@
                     $map_window.append(iframe);
                     $map_window_iframe = $("#tastemaker-map-window-iframe");
                 } else {
-                    $map_window_iframe.attr("src", iframe_src)
+                    $map_window_iframe.attr("src", iframe_src);
                     
                     $map_window_overlay
                         .stop(true, false)
@@ -551,7 +551,7 @@
                 'closeSpeed'    : 300, 
                 
                 'tpl'           : {
-				    'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                    'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
                     'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
                 }, 
                 
@@ -563,7 +563,7 @@
                 'swf'           : {
                     'wmode'             : 'transparent',
                     'allowfullscreen'   : 'true'
-                }, 
+                }
             });
             
             return false;
@@ -771,7 +771,7 @@
         // ---------------------------------------------------------------------
         
         $(document).bind('keydown', function(e) {
-            if (e.which == 27) { // ESC
+            if (e.which === 27) { // ESC
                 // skip the intro animation if the user presses escape
                 if (intro_animation.is_running()) {
                     intro_animation.stop(true, true);
