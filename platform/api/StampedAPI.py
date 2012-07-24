@@ -4161,7 +4161,7 @@ class StampedAPI(AStampedAPI):
                     coordinates.lng = entity.lng
                 r.append((entity.entity_id, score, entity.types, coordinates))
                 if entity.entity_id in todos:
-                    if entity_id not in todosMap:
+                    if entity.entity_id not in todosMap:
                         todosMap[entity.entity_id] = set()
                     todosMap[entity.entity_id].add(user.user_id)
 
