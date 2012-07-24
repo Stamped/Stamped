@@ -33,10 +33,24 @@
     display: none;
 }
 
-.alert-settings-form {
+.header {
     position: relative;
     margin: 0 auto;
-    width: 70%;
+    width: 80%;
+    
+    .option-icon {
+        float: right;
+    }
+    
+    .option-email-icon {
+        margin-right: 50px;
+    }
+}
+
+.alert-settings-form {
+    position: relative;
+    margin: 12px auto 0;
+    width: 80%;
     
     .option {
         margin-bottom: 18px;
@@ -47,15 +61,12 @@
             
             .option-icon {
                 float: left;
-                width:  32px;
-                height: 32px;
-                background: red;
                 margin-right: 24px;
             }
             
             .option-info {
                 float: left;
-                width: 70%;
+                width: 60%;
                 
                 .human-name {
                     font-weight: 700;
@@ -63,7 +74,7 @@
                 }
                 
                 .option-desc {
-                    width: 140%;
+                    width: 160%;
                     font-size: 80%;
                     color: #999;
                 }
@@ -94,10 +105,58 @@
         }
     }
     
-    .submit-button {
+    .save-button {
         margin: 0 auto;
         border: 0 none;
         outline: none;
     }
+}
+
+.option-icon {
+    background: url(/assets/img/notificationicons.png) no-repeat;
+    display: block;
+    
+    width:  46px;
+    height: 46px;
+}
+
+.option-phone-icon {
+    background-position: -48px * 0;
+}
+
+.option-email-icon {
+    background-position: -48px * 1;
+}
+
+.option-credits .option-icon {
+    background-position: -48px * 2;
+}
+
+.option-likes .option-icon {
+    background-position: -48px * 3;
+}
+
+.option-todos .option-icon {
+    background-position: -48px * 4;
+}
+
+.option-mentions .option-icon {
+    background-position: -48px * 5;
+}
+
+.option-replies .option-icon {
+    background-position: -48px * 6;
+}
+
+.option-followers .option-icon {
+    background-position: -48px * 7;
+}
+
+.option-friends .option-icon {
+    background-position: -48px * 8;
+}
+
+.option-actions .option-icon {
+    background-position: -48px * 9;
 }
 

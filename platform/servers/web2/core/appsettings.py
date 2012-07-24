@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import utils
+import travis_test
 
 from api.MongoStampedAPI            import globalMongoStampedAPI
 from api.MongoStampedAuth           import MongoStampedAuth
@@ -19,8 +20,6 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-TEST = True
-import travis_test
 
 @stamped_view(schema=HTTPResetPasswordViewSchema)
 def password_reset(request, schema, **kwargs):
@@ -55,7 +54,7 @@ def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
     token        = schema.token
     
-    if False:
+    if True:
         user = travis_test.user
         
         settings = {
