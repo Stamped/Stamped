@@ -99,7 +99,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
     MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
     vc.mailComposeDelegate = self;
     [vc setToRecipients:[NSArray arrayWithObject:@"liz@stamped.com"]];
-    [vc setMessageBody:[NSString stringWithFormat:@"%@\n%@", self.entityDetail.title, self.entityID] isHTML:NO];
+    [vc setMessageBody:[NSString stringWithFormat:@"%@\nhttps://api1.stamped.com/v1/entities/edit.html?secret=supersmash&entity_id=%@", self.entityDetail.title, self.entityID] isHTML:NO];
     [self presentModalViewController:vc animated:YES];
     [vc release];
 }
