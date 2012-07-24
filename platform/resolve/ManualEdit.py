@@ -91,7 +91,7 @@ def formForEntity(entity_id, **hidden_params):
                 elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
                     itunes_url = itunes_data['trackViewUrl']
                 elif entity.isType('tv'):
-                    itunes_url = itunes_data['artistLinkUrl']
+                    itunes_url = itunes_data['collectionViewUrl']
             except KeyError:
                 raise
             except IndexError:
