@@ -55,6 +55,14 @@ class StampedAPIProxy(object):
                 'client_secret' : CLIENT_SECRET, 
             })
     
+    def getAccount(self, user_id):
+        if self._ec2:
+            account = self.api.getAccount(user_id)
+            
+            return HTTPAccount().importAccount(account).dataExport()
+        else:
+            return self._handle_get("accounts/show.json", { 'user_id' : user_id })
+    
     def getUser(self, params):
         if self._ec2:
             user = self.api.getUser(HTTPUserId().dataImport(params), None)
