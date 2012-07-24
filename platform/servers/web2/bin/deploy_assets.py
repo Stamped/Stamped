@@ -30,10 +30,12 @@ def deploy_assets():
     sink    = S3Utils()
     prefix  = ".."
     pool    = Pool(16)
+    
     headers = {
         "Cache-Control" : "max-age=290304000", 
         "Expires"       : "Sat, 29 Apr 2017 13:31:45-0000 GMT", 
     }
+    
     paths   = [
         {
             "path"          : "/assets/generated/css", 

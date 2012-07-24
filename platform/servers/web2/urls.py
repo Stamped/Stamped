@@ -52,8 +52,11 @@ urlpatterns = patterns('',
     # e.g., stamped.com/mobile/settings/alerts/update.json
     url(R'^mobile/settings/alerts/update.json$',        'mobile.views.alert_settings_update'),
     
-    url(r'^/?mobile/settings/password/send-reset-email$',  'core.appsettings.send_reset_email'), 
-    url(r'^/?settings/password/send-reset-email$',         'core.appsettings.send_reset_email'), 
+    url(r'^/?mobile/settings/password/send-reset-email$',   'core.appsettings.send_reset_email'), 
+    url(r'^/?settings/password/send-reset-email$',          'core.appsettings.send_reset_email'), 
+    
+    url(r'^/?mobile/settings/password/reset-password$',     'core.appsettings.reset_password'), 
+    url(r'^/?settings/password/reset-password$',            'core.appsettings.reset_password'), 
     
     
     # ------------------------------ INDEX -------------------------------------

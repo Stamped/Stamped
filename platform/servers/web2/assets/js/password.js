@@ -95,7 +95,7 @@
             var value   = $input.val().trim();
             value       = is_valid_input(value);
             
-            console.log(value);
+            //console.log(value);
             if (!value) {
                 return false;
             }
