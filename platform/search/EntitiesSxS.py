@@ -27,6 +27,7 @@ from search.DataQualityUtils import MIN_RESULT_DATA_QUALITY_TO_INCLUDE
 import datetime
 import search.SearchResultCluster
 from api.Schemas import PlaceEntity
+from resolve.ResolverObject import *
 
 def loadSearchResultsFromFile(filename):
     returnDict = {}
@@ -92,7 +93,16 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
 
 
 def getProxySummary(proxy):
-    return ('%s, %s:%s' % (proxy.raw_name, proxy.source, str(proxy.key)[:15]))
+    title = repr(proxy.raw_name)
+    if isBook(proxy) and proxy.authors:
+        title = '%s by %s' % (proxy.raw_name, proxy.authors[0]['name'])
+    elif isAlbum(proxy) and proxy.artists:
+        title = '%s by %s' % (proxy.raw_name, proxy.artists[0]['name'])
+    elif isTrack(proxy) and proxy.artists:
+        title = '%s by %s' % (proxy.raw_name, proxy.artists[0]['name'])
+    elif isTvShow(proxy) and proxy.release_date:
+        title = '%s (%d)' % (proxy.raw_name, proxy.release_date.year)
+    return ('%s, %s:%s' % (title, proxy.source, str(proxy.key)[:15]))
 
 
 def getClusteringDifference(cellId, oldCluster, newCluster):

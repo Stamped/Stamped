@@ -45,6 +45,14 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
                 'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
                 'sources.netflix_id', 'sources.thetvdb_id')
+
+        self._collection.ensure_index([
+                                    ('search_tokens',               pymongo.ASCENDING),
+                                    ('sources.user_generated_id',   pymongo.ASCENDING),
+                                    ('sources.tombstone_id',        pymongo.ASCENDING),
+                                ])
+
+
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
         self._collection.ensure_index('search_tokens')
@@ -393,6 +401,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     ### PUBLIC
 
     def addEntity(self, entity):
+        if entity.timestamp is None:
+            entity.timestamp = BasicTimestamp()
+        entity.timestamp.created = datetime.utcnow()
+        
         entity = self._addObject(entity)
         self.seed_collection.addEntity(entity)
         self._setCachedEntity(entity)
@@ -419,11 +431,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
 
     def getEntity(self, entityId, forcePrimary=False):
-        if not forcePrimary:
-            try:
-                return self._getCachedEntity(entityId)
-            except KeyError:
-                pass 
+        # if not forcePrimary:
+        #     try:
+        #         return self._getCachedEntity(entityId)
+        #     except KeyError:
+        #         pass 
 
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
@@ -475,13 +487,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
     def getEntitiesByQuery(self, queryDict):
         return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
-
-    def getEntitiesByTypes(self, types, limit=None):
-        entityList = self._collection.find({'types': {'$in': types}})
-        if limit is not None:
-            entityList = entityList[:limit]
-        return map(lambda x: self._convertFromMongo(x), entityList)
-
 
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)

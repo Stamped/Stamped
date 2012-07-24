@@ -169,9 +169,9 @@ def customizeStamp(request, authUserId, data, **kwargs):
 
 
 @require_http_methods(["POST"])
-@handleHTTPRequest(requires_auth=False,
-                   requires_client=True,
-                   http_schema=HTTPAccountCheck,
+@handleHTTPRequest(requires_auth=False, 
+                   requires_client=True, 
+                   http_schema=HTTPAccountCheck, 
                    exceptions=accountExceptions)
 def check(request, client_id, http_schema, **kwargs):
     user = stampedAPI.checkAccount(http_schema.login)

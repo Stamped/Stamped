@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, utils
+import os, random, utils
 
 import deploy_version
 
@@ -15,25 +15,41 @@ from gevent.pool    import Pool
 
 import servers.web2.settings as settings
 
-STATIC_ROOT = "http://static.stamped.com"
-VERSION     = ".generated.%s" % deploy_version.get_current_version()
+VERSION      = ".generated.%s" % deploy_version.get_current_version()
+STATIC_ROOTS = [
+    "http://static.stamped.com", 
+    "http://static1.stamped.com", 
+    "http://static2.stamped.com", 
+    "http://static3.stamped.com", 
+]
+
+def get_static_root():
+    return STATIC_ROOTS[random.randint(0, len(STATIC_ROOTS) - 1)]
 
 def deploy_assets():
     sink    = S3Utils()
     prefix  = ".."
     pool    = Pool(16)
+    
+    headers = {
+        "Cache-Control" : "max-age=290304000", 
+        "Expires"       : "Sat, 29 Apr 2017 13:31:45-0000 GMT", 
+    }
+    
     paths   = [
         {
             "path"          : "/assets/generated/css", 
             "content_type"  : "text/css", 
             "apply_gzip"    : True, 
             "ignore"        : [ ], 
+            "headers"       : headers, 
         }, 
         {
             "path"          : "/assets/generated/js", 
             "content_type"  : "application/javascript", 
             "apply_gzip"    : True, 
             "ignore"        : [ ], 
+            "headers"       : headers, 
         }, 
         {
             "path"          : "/assets/img", 
@@ -43,6 +59,7 @@ def deploy_assets():
                 "/assets/generated/img/public-home", 
                 "/assets/generated/img/public-home", 
             ], 
+            "headers"       : headers, 
         },
         #{  # NOTE (travis): S3 / Cloudfront doesn't support CORS, so serving fonts via 
         #   #our CDN (which is technically an external domain) to FF/IE8 won't work.. balls
@@ -135,7 +152,7 @@ def deploy_asset(filepath, key, sink, content_type, apply_gzip, headers):
         ]
         
         for replacement in replace:
-            data = data.replace("/assets/%s" % replacement, "%s%s" % (STATIC_ROOT, "/assets/generated/%s" % replacement))
+            data = data.replace("/assets/%s" % replacement, "%s%s" % (get_static_root(), "/assets/generated/%s" % replacement))
     
     sink.add_key(key, data, content_type=content_type, apply_gzip=apply_gzip, headers=headers)
 

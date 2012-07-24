@@ -1008,10 +1008,14 @@ class iTunesSource(GenericSource):
                        lambda result, _ : augmentMovieDataQualityOnBasicAttributePresence(result)),
             'tvShow' : (applyTvTitleDataQualityTests, adjustTvRelevanceByQueryMatch,
                         lambda result, _ : augmentTvDataQualityOnBasicAttributePresence(result)),
-            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch),
-            'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch),
-            'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch),
-            'ebook' : (applyBookDataQualityTests, adjustBookRelevanceByQueryMatch),
+            'musicArtist' : (applyArtistTitleDataQualityTests, adjustArtistRelevanceByQueryMatch,
+                             lambda result, _ : augmentArtistDataQualityOnBasicAttributePresence(result)),
+            'album' : (applyAlbumTitleDataQualityTests, adjustAlbumRelevanceByQueryMatch,
+                       lambda result, _ : augmentAlbumDataQualityOnBasicAttributePresence(result)),
+            'song' : (applyTrackTitleDataQualityTests, adjustTrackRelevanceByQueryMatch,
+                      lambda result, _ : augmentTrackDataQualityOnBasicAttributePresence(result)),
+            'ebook' : (applyBookDataQualityTests, adjustBookRelevanceByQueryMatch,
+                       lambda result, _ : augmentBookDataQualityOnBasicAttributePresence(result)),
         }
 
         if iTunesType in iTunesTypesToWeights:

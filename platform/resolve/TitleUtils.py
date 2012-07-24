@@ -11,12 +11,15 @@ import Globals
 import math
 import re
 from resolve.StringNormalizationUtils import format
+from collections import namedtuple
 
 # TODO: Merge with search/DataQualityUtils.py somewhere common (to avoid dependency loop)
 
 ############################################################################################################
 ################################################   UTILS    ################################################
 ############################################################################################################
+
+Penalty = namedtuple('Penalty', ['description', 'score'])
 
 # Tools for fixing up titles.
 
@@ -62,19 +65,30 @@ class TitleDataQualityRegexpTest(object):
     def matchesTitle(self, title, query=None):
         return self.titleRegexp.search(title) and not (query and self.__matchesException(query))
 
+    def runTest(self, title, searchQuery):
+        if self.matchesTitle(title, searchQuery):
+            return [Penalty(self.message, self.penalty)]
+        return []
+
     def applyTest(self, searchResult, searchQuery):
         title = searchResult.resolverObject.raw_name if self.rawName else searchResult.resolverObject.name
-        anyMatches = False
-        if self.matchesTitle(title, searchQuery):
-            searchResult.dataQuality *= 1 - self.penalty
-            searchResult.addDataQualityComponentDebugInfo(self.message, self.penalty)
-            anyMatches = True
-        return anyMatches
+        penalties = self.runTest(title, searchQuery)
+        for penalty in penalties:
+            searchResult.dataQuality *= 1 - penalty.score
+            searchResult.addDataQualityComponentDebugInfo(penalty.description, penalty.score)
+        return bool(penalties)
 
 
 def applyTitleTests(titleTests, searchResult, searchQuery):
     modified = [titleTest.applyTest(searchResult, searchQuery) for titleTest in titleTests]
     return any(modified)
+
+
+def runTitleTests(titleTests, title, searchQuery):
+    penalties = []
+    for titleTest in titleTests:
+        penalties.extend(titleTest.runTest(title, searchQuery))
+    return penalties
 
 
 def makeTokenRegexp(token):
@@ -157,10 +171,9 @@ def tokenizeString(string):
 
 # Tools for demoting based on title token matches.
 class Token(object):
-    def __init__(self, text, penalty=None, rawName=False):
+    def __init__(self, text, penalty=None):
         self.text = text
         self.penalty = penalty
-        self.useRawName = rawName
 
     def isIn(self, tokenList):
         if ' ' not in self.text:
@@ -170,20 +183,23 @@ class Token(object):
             return self.text in ' '.join(tokenList)
 
 
-def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1):
-    queryTokens = tokenizeString(searchQuery)
-    # TODO: Should I use raw_name?
-    titleTokens = tokenizeString(searchResult.resolverObject.name)
-    rawTitleTokens = tokenizeString(searchResult.resolverObject.raw_name)
-    anyMatches = False
+def runTokenTests(tokens, title, query, defaultPenalty=0.1):
+    queryTokens = tokenizeString(query)
+    titleTokens = tokenizeString(title)
+    penalties = []
     for token in tokens:
-        currTitleTokens = rawTitleTokens if token.useRawName else titleTokens
-        if token.isIn(currTitleTokens) and not token.isIn(queryTokens):
-            penalty = token.penalty or defaultPenalty
-            searchResult.dataQuality *= 1 - penalty
-            searchResult.addDataQualityComponentDebugInfo("token '%s' in title but not query" % token.text, penalty)
-            anyMatches = True
-    return anyMatches
+        if token.isIn(titleTokens) and not token.isIn(queryTokens):
+            penalties.append(Penalty("token hit '%s'" % token.text, token.penalty or defaultPenalty))
+    return penalties
+
+
+def applyTokenTests(tokens, searchResult, searchQuery, defaultPenalty=0.1, rawName=False):
+    title = searchResult.resolverObject.raw_name if rawName else searchResult.resolverObject.name
+    penalties = runTokenTests(tokens, title, searchQuery, defaultPenalty=defaultPenalty)
+    for penalty in penalties:
+        searchResult.dataQuality *= 1 - penalty.score
+        searchResult.addDataQualityComponentDebugInfo(penalty.description, penalty.score)
+    return bool(penalties)
 
 
 ############################################################################################################
@@ -218,14 +234,16 @@ TV_TITLE_REMOVAL_REGEXPS = (
 def cleanTvTitle(tvTitle):
     return applyRemovalRegexps(TV_TITLE_REMOVAL_REGEXPS, tvTitle)
 
+# Tests that indicate that we haven't cleaned the TV title properly.
 TV_THE_COMPLETE_REGEX_CONFIDENT = re.compile('\s*(^|[:,\[\(-])\s*The Complete ', re.IGNORECASE)
-TV_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
+TV_BAD_TITLE_TESTS = (
     # I didn't quite feel confident enough to strip this one out.
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' prefix in title", 0.35,
         exceptionQueryRegexps=makeTokenRegexp('complete')),
 )
 
-TV_TITLE_BAD_TOKENS = (
+# Tokens that indicate that we haven't cleaned the TV title properly.
+TV_BAD_TITLE_TOKENS = (
     Token('season'), Token('seasons'),
     Token('episode'), Token('episodes'),
     Token('collector'), Token('collection'),
@@ -235,11 +253,11 @@ TV_TITLE_BAD_TOKENS = (
 )
 
 def applyTvTitleDataQualityTests(searchResult, searchQuery):
-    if applyTitleTests(TV_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS, searchResult, searchQuery):
+    if applyTitleTests(TV_BAD_TITLE_TESTS, searchResult, searchQuery):
         # We've already found a severe problem and demoted heavily. Skip the token tests, which are weaker and may
         # be duplicative.
         return
-    applyTokenTests(TV_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
+    applyTokenTests(TV_BAD_TITLE_TOKENS, searchResult, searchQuery, defaultPenalty=0.15, rawName=False)
 
 
 # These are things we're so confident don't belong in movie titles that we're willing to strip them out wantonly.
@@ -266,9 +284,10 @@ def getFilmReleaseYearFromTitle(rawTitle):
     if match:
         return int(match.group(1))
 
-# These aren't things we expect, or things we remove. These are things that probably indicate that there's
-# something wrong with a movie. Most likely, it's actually a TV show or a box set.
-MOVIE_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
+
+# These aren't things we expect, or things we remove. These aren't problems with a title; they're things in a title that
+# indicate problems in the underlying entity. Most likely, it's actually a TV show or a box set.
+MOVIE_BAD_ENTITY_TITLE_TESTS = (
     TitleDataQualityRegexpTest(TV_THE_COMPLETE_REGEX_CONFIDENT, "'the complete' in title", 0.35,
                                exceptionQueryRegexps=makeTokenRegexp('complete'), rawName=True),
     TitleDataQualityRegexpTest(TV_SEASON1_REGEX_CONFIDENT, "season specification in title", 0.5,
@@ -282,91 +301,135 @@ MOVIE_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS = (
                                exceptionQueryRegexps=makeTokenRegexp('best'), rawName=True)
 )
 
-MOVIE_TITLE_BAD_TOKENS = (
-    # Raw name tests -- these are things that, if they are in the raw name, indicate that this may not be a single
-    # movie, it may be a collection, or a TV show.
-    Token('season', rawName=True), Token('seasons', rawName=True),
-    Token('volume', rawName=True), Token('volumes', rawName=True),
-    Token('box set', penalty=0.35, rawName=True), Token('boxed set', penalty=0.35, rawName=True),
-    Token('trilogy', penalty=0.35, rawName=True),
-    Token('collection', rawName=True),
-    # Processed name tests -- these aren't things that indicate that this isn't a movie, but they're things that
-    # indicate we weren't able to fix the title completely.
-    Token('edition', rawName=False, penalty=0.15),
-    Token('remastered', rawName=False, penalty=0.15),
-    Token('re-mastered', rawName=False, penalty=0.15),
-    Token('version', rawName=False, penalty=0.15),
-    Token('HD', rawName=False, penalty=0.15),
+# Token tests for things that indicate that the entity itself is bad.
+MOVIE_BAD_ENTITY_TOKENS = (
+    Token('season'), Token('seasons'),
+    Token('volume'), Token('volumes'),
+    Token('box set', penalty=0.35), Token('boxed set', penalty=0.35),
+    Token('trilogy', penalty=0.35),
+    Token('collection'),
+)
+
+# Token tests for things that indicate that we just haven't done a good job cleaning the title.
+# TODO(geoff): Use in title summarization!
+MOVIE_BAD_TITLE_TOKENS = (
+    Token('edition', penalty=0.15),
+    Token('remastered', penalty=0.15),
+    Token('re-mastered', penalty=0.15),
+    Token('version', penalty=0.15),
+    Token('HD', penalty=0.15),
 )
 
 def applyMovieTitleDataQualityTests(searchResult, searchQuery):
-    if applyTitleTests(MOVIE_TITLE_HIGH_CONFIDENCE_QUALITY_TESTS, searchResult, searchQuery):
-        # We've already found a severe problem and demoted heavily. Skip the token tests, which are weaker and may
-        # be duplicative.
-        return
-    applyTokenTests(MOVIE_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
+    # Try to find definitive evidence that this is a shit entity.
+    if not applyTitleTests(MOVIE_BAD_ENTITY_TITLE_TESTS, searchResult, searchQuery):
+        # Failing that, try to find significant evidence.
+        applyTokenTests(MOVIE_BAD_ENTITY_TOKENS, searchResult, searchQuery, defaultPenalty=0.25, rawName=True)
+
+    # Now look for evidence that the title sucks.
+    applyTokenTests(MOVIE_BAD_TITLE_TOKENS, searchResult, searchQuery, defaultPenalty=0.1, rawName=False)
 
 
 ############################################################################################################
 ################################################   MUSIC    ################################################
 ############################################################################################################
 
-# These are things we're so confident don't belong in track/album titles that we're willing to strip them out wantonly.
-# These aren't things that reflect badly on a movie for being in its title.
-ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
-    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
-    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|single)[ ,:\])-]*$", re.IGNORECASE),
-)
-
-TRACK_TITLE_SUSPICIOUS_TESTS = (
-    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Mix|Remix|Re-mix|Remixed|Re-Mixed)[ ,:\])-]*$', 'mix in title', 0.5,
-        exceptionQueryRegexps=makeTokensRegexp('mix', 'remix'), rawName=True),
-    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Cut|Edit|Version)[ ,:\])-]*$', 'version info in title', 0.5,
-        exceptionQueryRegexps=makeTokensRegexp('cut', 'edit', 'version'), rawName=True),
-    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*(Instrumental)[ ,:\])-]*$', 'instrumental in title', 0.5,
-        exceptionQueryRegexps=makeTokenRegexp('instrumental'), rawName=True)
-)
-def cleanTrackTitle(trackTitle):
-    return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, trackTitle)
-
-TRACK_TITLE_BAD_TOKENS = (
-    Token('mix', rawName=True), Token('remix', rawName=True),
-    Token('re-mix', rawName=True), Token('remixed', rawName=True), Token('re-mixed', rawName=True),
-    Token('cut', rawName=True), Token('edit', rawName=True), Token('instrumental', rawName=True),
-    Token('inst', rawName=True), Token('cover', rawName=True),
-    Token('tribute', rawName=True), Token('karaoke', rawName=True, penalty=0.4),
-    Token('remastered', rawName=False, penalty=0.15),
-    Token('re-mastered', rawName=False, penalty=0.15),
-    Token('version', rawName=False),
-    Token('LP', rawName=False),
-)
-def applyTrackTitleDataQualityTests(searchResult, searchQuery):
-    # Even though we cut this mix/edit/etc. bullshit out of the title we want to demote results that had these terms
-    # in their raw names in order to favor the non-mixed/edited/whatever versions.
-    if not applyTitleTests(TRACK_TITLE_SUSPICIOUS_TESTS, searchResult, searchQuery):
-        applyTokenTests(TRACK_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.25)
-
-# Album titles don't really have problems.
-def cleanAlbumTitle(albumTitle):
-    return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, albumTitle)
-
-ALBUM_TITLE_BAD_TOKENS = (
-    Token('ep', penalty=0.25),
-    Token('karaoke', penalty=0.4, rawName=True),
-)
-def applyAlbumTitleDataQualityTests(searchResult, searchQuery):
-    applyTokenTests(ALBUM_TITLE_BAD_TOKENS, searchResult, searchQuery, defaultPenalty=0.2)
-
-ARTIST_TITLE_BAD_TOKENS = (
-    Token('karaoke', penalty=0.4, rawName=True),
-    Token('featuring')
+ARTIST_BAD_ENTITY_TOKENS = (
+    Token('karaoke', penalty=0.4),
+    Token('tribute', penalty=0.4),
+    Token('cover', penalty=0.4),
+    Token('featuring', penalty=0.4)
 )
 # Artist titles don't really have problems, either.
 def cleanArtistTitle(artistTitle):
     return artistTitle
 
 def applyArtistTitleDataQualityTests(searchResult, searchQuery):
-    applyTokenTests(ARTIST_TITLE_BAD_TOKENS, searchResult, searchQuery)
+    applyTokenTests(ARTIST_BAD_ENTITY_TOKENS, searchResult, searchQuery, defaultPenalty=0.4, rawName=True)
+
+# These are things we're so confident don't belong in track/album titles that we're willing to strip them out wantonly.
+# These aren't things that reflect badly on a movie for being in its title.
+ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
+    re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
+    re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|single|vinyl|album|ep|lp)[ ,:\])-]*$", re.IGNORECASE),
+)
+
+def cleanTrackTitle(trackTitle):
+    return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, trackTitle)
+
+# These are tests that indicate that this is probably not the canonical version of this track.
+TRACK_BAD_ENTITY_TITLE_TESTS = (
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Mix|Remix|Re-mix|Remixed|Re-Mixed)[ ,:\])-]*$', 'mix in title', 0.4,
+        exceptionQueryRegexps=makeTokensRegexp('mix', 'remix'), rawName=True),
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*([a-zA-Z0-9\']{3,20}\s+){1,2}(Cut|Edit|Version)[ ,:\])-]*$', 'version info in title', 0.4,
+        exceptionQueryRegexps=makeTokensRegexp('cut', 'edit', 'version'), rawName=True),
+    TitleDataQualityRegexpTest(r'\s*[,:\[(-]+\s*(Instrumental)[ ,:\])-]*$', 'instrumental in title', 0.5,
+        exceptionQueryRegexps=makeTokenRegexp('instrumental'), rawName=True)
+)
+
+# Tokens that indicate that we haven't cleaned the title well.
+TRACK_BAD_TITLE_TOKENS = (
+    Token('remastered'),
+    Token('re-mastered'),
+    Token('version'),
+    Token('LP'),
+)
+
+# Tokens that indicate that this isn't a canonical version of the track.
+TRACK_BAD_ENTITY_TOKENS = (
+    Token('mix'), Token('remix'),
+    Token('re-mix'), Token('remixed'), Token('re-mixed'),
+    Token('cut'), Token('edit'), Token('instrumental', penalty=0.4),
+    Token('inst', penalty=0.4), Token('cover', penalty=0.4),
+    Token('tribute', penalty=0.4), Token('karaoke', penalty=0.4),
+)
+def applyTrackTitleDataQualityTests(searchResult, searchQuery):
+    # Strict bad entity tests.
+    if not applyTitleTests(TRACK_BAD_ENTITY_TITLE_TESTS, searchResult, searchQuery):
+        # If we didn't find strong evidence of it being a bad entity, look a little deeper (with lower penalties because
+        # these tests give less certainty.
+        applyTokenTests(TRACK_BAD_ENTITY_TOKENS, searchResult, searchQuery, defaultPenalty=0.3, rawName=True)
+
+    # Now check if it has a title we failed to clean well.
+    applyTokenTests(TRACK_BAD_TITLE_TOKENS, searchResult, searchQuery, defaultPenalty=0.1, rawName=False)
+
+    if searchResult.resolverObject.artists:
+        try:
+            artistName = searchResult.resolverObject.artists[0]['name']
+            artistPenalties = runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artistName, searchQuery)
+            for artistPenalty in artistPenalties:
+                searchResult.dataQuality *= (1 - artistPenalty.score) ** 0.5
+                searchResult.addDataQualityComponentDebugInfo('Artist title penalty: %s' % repr(artistPenalty.description), artistPenalty.score)
+        except KeyError:
+            pass
+
+# Album titles don't really have problems.
+def cleanAlbumTitle(albumTitle):
+    return applyRemovalRegexps(ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS, albumTitle)
+
+ALBUM_BAD_TITLE_TOKENS = (
+    Token('ep'),
+    Token('lp'),
+)
+
+ALBUM_BAD_ENTITY_TOKENS = (
+    Token('karaoke', penalty=0.4),
+    Token('cover', penalty=0.4),
+    Token('tribute', penalty=0.3),
+)
+def applyAlbumTitleDataQualityTests(searchResult, searchQuery):
+    applyTokenTests(ALBUM_BAD_ENTITY_TOKENS, searchResult, searchQuery, defaultPenalty=0.3, rawName=True)
+    applyTokenTests(ALBUM_BAD_TITLE_TOKENS, searchResult, searchQuery, defaultPenalty=0.1, rawName=False)
+
+    if searchResult.resolverObject.artists:
+        try:
+            artistName = searchResult.resolverObject.artists[0]['name']
+            artistPenalties = runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artistName, searchQuery)
+            for artistPenalty in artistPenalties:
+                searchResult.dataQuality *= (1 - artistPenalty.score) ** 0.5
+                searchResult.addDataQualityComponentDebugInfo('Artist title penalty: %s' % repr(artistPenalty.description), artistPenalty.score)
+        except KeyError:
+            pass
 
 ############################################################################################################
 ################################################   BOOKS    ################################################
@@ -403,6 +466,8 @@ BOOK_TITLE_SUSPICIOUS_TESTS = (
         exceptionQueryRegexps=makeTokenRegexp('book')),
     TitleDataQualityRegexpTest(r'\bvolumes?\s+\d', '"volume #" in title', 0.25,
         exceptionQueryRegexps=makeTokenRegexp('volume')),
+    TitleDataQualityRegexpTest(r'\bvol\.?\s+\d', '"vol #" in title', 0.25,
+        exceptionQueryRegexps=makeTokenRegexp('vol')),
     TitleDataQualityRegexpTest('\(', 'parenthesis in title', 0.1),
     TitleDataQualityRegexpTest('\[', 'bracket in title', 0.1),
 

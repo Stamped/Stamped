@@ -77,10 +77,10 @@
             var $button = $form.find(".submit-button");
             
             if (is_valid_input(value) !== null) {
-                console.log("VALID: " + value);
+                //console.log("VALID: " + value);
                 $button.removeAttr('disabled').addClass("active-button");
             } else {
-                console.log("INVALID: " + value);
+                //console.log("INVALID: " + value);
                 $button.attr('disabled', true).removeClass("active-button");
             }
             
@@ -95,7 +95,7 @@
             var value   = $input.val().trim();
             value       = is_valid_input(value);
             
-            console.log(value);
+            //console.log(value);
             if (!value) {
                 return false;
             }

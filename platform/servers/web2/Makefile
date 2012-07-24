@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.16
+ASSET_VERSION_NUMBER        = 1.1.24
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -40,7 +40,7 @@ CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 TEMPLATE_BASE_DIR		    = templates
-HTML_PAGES					= base profile index map about jobs retina password_forgot
+HTML_PAGES					= base profile index map about jobs retina password password_reset
 TEMPLATE_PROG				= bin/process_templates.py
 
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
@@ -91,7 +91,7 @@ endef
 
 all: $(ALL_TARGETS)
 
-.PHONY: all clean help update_version deploy css_targets
+.PHONY: all clean help update update_version deploy css_targets
 
 $(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_LESS_CSS_TARGET,$(DIR))))
 $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_JS_TARGET,$(PAGE))))
@@ -104,6 +104,10 @@ deploy: $(ALL_TARGETS)
 	cd bin && python deploy_assets.py
 
 update_version:
+	@echo $(ASSET_VERSION_NUMBER)
+	cd bin && python deploy_version.py
+
+update:
 	@echo $(ASSET_VERSION_NUMBER)
 	cd bin && python deploy_version.py
 

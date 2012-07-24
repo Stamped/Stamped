@@ -9,7 +9,7 @@
 (function() {
 // usage: log('inside coolFunc', this, arguments);
 // paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
-    window.log = function f(){ log.history = log.history || []; log.history.push(arguments); if(this.console) { var args = arguments, newarr; args.callee = args.callee.caller; newarr = [].slice.call(args); if (typeof console.log === 'object') log.apply.call(console.log, console, newarr); else console.log.apply(console, newarr);}};
+    window.log = function f() { log.history = log.history || []; log.history.push(arguments); if(this.console) { var args = arguments, newarr; args.callee = args.callee.caller; newarr = [].slice.call(args); if (typeof console.log === 'object') log.apply.call(console.log, console, newarr); else console.log.apply(console, newarr);}};
     
     if(typeof(console.debug) === 'undefined') {
         console.debug = console.log;
@@ -25,7 +25,7 @@
         var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
         
         // The base Class implementation (does nothing)
-        this.Class = function(){};
+        window.Class = function() {};
         
         // Create a new Class that inherits from this class
         Class.extend = function(prop) {

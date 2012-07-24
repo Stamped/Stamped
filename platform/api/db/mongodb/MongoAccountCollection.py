@@ -16,6 +16,7 @@ from pymongo.errors             import DuplicateKeyError
 from api.db.mongodb.AMongoCollection           import AMongoCollection
 from api.db.mongodb.MongoAlertAPNSCollection   import MongoAlertAPNSCollection
 from api.db.mongodb.MongoUserLinkedAlertsHistoryCollection import MongoUserLinkedAlertsHistoryCollection
+from api.db.mongodb.MongoGuideCollection        import MongoGuideCollection
 from api.AAccountDB                 import AAccountDB
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
@@ -28,9 +29,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
-        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING), \
+        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING),
                                         ('_id', pymongo.ASCENDING)])
-        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
+        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING),
                                         ('_id', pymongo.ASCENDING)])
         self._collection.ensure_index('linked.netflix.linked_user_id')
 
@@ -42,6 +43,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     @lazyProperty
     def user_linked_alerts_history_collection(self):
         return MongoUserLinkedAlertsHistoryCollection()
+
+    @lazyProperty
+    def guide_collection(self):
+        return MongoGuideCollection()
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
@@ -60,8 +65,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccounts is None:
             return document
 
-        #if 'linked' not in document:
-        document['linked'] = {}
+        if 'linked' not in document:
+            document['linked'] = {}
         if 'twitter' in linkedAccounts:
             twitterAcct = {
                 'service_name'          : 'twitter',
@@ -237,6 +242,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(account))
+
+        # Check integrity for guide
+        self.guide_collection.checkIntegrity(key, repair=repair, api=api)
 
         return True
     
