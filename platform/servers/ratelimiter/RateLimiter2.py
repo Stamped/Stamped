@@ -7,6 +7,7 @@ from gevent.event       import AsyncResult
 from gevent.coros       import Semaphore
 
 import Globals
+import logs
 import urllib
 import httplib2
 import datetime
