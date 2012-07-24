@@ -28,6 +28,10 @@ def _tmdb():
     import libs.TMDB
     return libs.TMDB.globalTMDB()
 
+def _thetvdb():
+    import libs.TheTVDB
+    return libs.TheTVDB.globalTheTVDB()
+
 def _itunes():
     import libs.iTunes
     return libs.iTunes.globaliTunes()
@@ -112,14 +116,24 @@ def formForEntity(entity_id, **hidden_params):
         fields['amazon_url'] = amazon_url
     if entity.isType('tv') or entity.isType('movie'):
         imdb_url = ''
-        tmdb_id = entity.sources.tmdb_id
-        if tmdb_id is not None:
-            imdb_url = _invalidPlaceholder
-            try:
-                imdb_id = _tmdb().movie_info(tmdb_id)['imdb_id']
-                imdb_url = 'http://www.imdb.com/title/%s/' % imdb_id
-            except KeyError:
-                pass
+        imdb_id = entity.sources.imdb_id
+        if imdb_id is None:
+            if entity.isType('movie'):
+                tmdb_id = entity.sources.tmdb_id
+                if tmdb_id is not None:
+                    try:
+                        imdb_id = _tmdb().movie_info(tmdb_id)['imdb_id']
+                    except KeyError:
+                        pass
+            elif entity.isType('tv'):
+                tvdb_id = entity.sources.thetvdb_id
+                if tvdb_id is not None:
+                    try:
+                        imdb_id = _thetvdb().lookup(tvdb_id).sources.imdb_id
+                    except Exception as e:
+                        print(e)
+        if imdb_id is not None:
+            imdb_url = 'http://www.imdb.com/title/%s/' % imdb_id    
         fields['imdb_url'] = imdb_url
         netflix_url = ''
         netflix_id = entity.sources.netflix_id
@@ -205,10 +219,21 @@ def update(updates):
     imdb_url = updates.imdb_url
     if imdb_url is not None and imdb_url not in bad_versions:
         imdb_id = imdb_url.replace('http://www.imdb.com/title/','').replace('/','')
-        tmdb_data = _tmdb().movie_info(imdb_id)
-        entity.sources.tmdb_id = tmdb_data['id']
-        entity.sources.tmdb_source = 'seed'
-        entity.sources.tmdb_timestamp = now
+        entity.sources.imdb_id = imdb_id
+        entity.sources.imdb_timestamp = now
+        entity.sources.imdb_source = 'seed'
+        if entity.isType('movie'):
+            tmdb_data = _tmdb().movie_info(imdb_id)
+            entity.sources.tmdb_id = tmdb_data['id']
+            entity.sources.tmdb_source = 'seed'
+            entity.sources.tmdb_timestamp = now
+        elif entity.isType('tv'):
+            tvdb_raw_data = _thetvdb().lookupIMDBRaw(imdb_id)
+            match = re.match(r'.*<id>(\d+)</id>.*', tvdb_raw_data.replace('\n',''))
+            tvdb_id = match.group(1)
+            entity.sources.thetvdb_id = tvdb_id
+            entity.sources.thetvdb_source = 'seed'
+            entity.sources.thetvdb_timestamp = now 
     spotify_id = updates.spotify_id
     if spotify_id is not None and spotify_id not in bad_versions:
         entity.sources.spotify_id = spotify_id
@@ -224,8 +249,8 @@ def update(updates):
         entity.sources.amazon_timestamp = now
     netflix_url = updates.netflix_url
     if netflix_url is not None and netflix_url not in bad_versions:
-        match = re.match(r'http://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?trkid=\d+)?',netflix_url)
-        netflix_number = match.group(2)
+        match = re.match(r'http(s)?://movies.netflix.com/WiMovie/(.+/)?(\d+)(\?.+)?',netflix_url)
+        netflix_number = match.group(3)
         netflix_id = None
         if entity.isType('movie'):
             netflix_id = 'http://api.netflix.com/catalog/titles/movies/%s' % netflix_number
@@ -240,12 +265,15 @@ def update(updates):
         itunes_id = None
         if entity.isType('artist'):
             match = re.match(r'http://itunes.apple.com/(.+)/artist/(.+)/id(\d+)(\?.+)?', itunes_url)
-            itunes_id = match.group(2)
+            itunes_id = match.group(3)
         elif entity.isType('album'):
             match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)(\?.+)?', itunes_url)
-            itunes_id = match.group(2)
+            itunes_id = match.group(3)
         elif entity.isType('track'):
             match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)\?i=(\d+)', itunes_url)
+            itunes_id = match.group(4)
+        elif entity.isType('book'):
+            match = re.match(r'http://itunes.apple.com/(.+)/book/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(3)
         if itunes_id is not None:
             itunes_data = _itunes().method('lookup', id=itunes_id)['results'][0]
