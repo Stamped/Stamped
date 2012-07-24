@@ -43,9 +43,7 @@ class AMongoCollectionView(AMongoCollection):
         # handle before / since filters
         # -----------------------------
         if timeSlice.before is not None:
-            add_or_query ([
-                {'timestamp.stamped': { '$lt': timeSlice.before }}
-            ])
+            query['timestamp.stamped'] = { '$lt': timeSlice.before }
 
         # handle category / subcategory filters
         # -------------------------------------
@@ -54,7 +52,7 @@ class AMongoCollectionView(AMongoCollection):
             subcategories = list(timeSlice.types)
             if 'track' in timeSlice.types:
                 subcategories.append('song')
-            add_or_query([{'entity.types': {'$in': list(timeSlice.types)}}])
+            query['entity.types'] = {'$in': list(timeSlice.types)}
         
 
         # logs.debug("QUERY: %s" % query)
@@ -95,7 +93,7 @@ class AMongoCollectionView(AMongoCollection):
             subcategories = list(searchSlice.types)
             if 'track' in searchSlice.types:
                 subcategories.append('song')
-            add_or_query([  {'entity.types': {'$in': list(searchSlice.types)}} ])
+            query['entity.types'] = {'$in': list(searchSlice.types)}}
 
         # Query
         if searchSlice.query is not None:
@@ -106,9 +104,7 @@ class AMongoCollectionView(AMongoCollection):
             except Exception:
                 logs.warning("Unable to normalize query to ascii: %s" % user_query)
             
-            ### TODO: check multiple blurbs
-            add_or_query([ { "contents.blurb"   : { "$regex" : user_query, "$options" : 'i', } },
-                           { "entity.title"     : { "$regex" : user_query, "$options" : 'i', } } ])
+            query["search_blurb"] = { "$regex" : user_query, "$options" : 'i' }
         
         # handle viewport filter
         # ----------------------
