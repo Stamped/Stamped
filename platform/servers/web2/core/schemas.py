@@ -113,6 +113,12 @@ class HTTPResetEmailSchema(Schema):
     def setSchema(cls):
         cls.addProperty('email',                            basestring, required=True)
 
+class HTTPResetPasswordViewSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('token',                            basestring, required=True)
+
 class HTTPResetPasswordSchema(Schema):
     
     @classmethod

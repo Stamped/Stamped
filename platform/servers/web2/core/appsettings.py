@@ -19,14 +19,21 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-@stamped_view(schema=HTTPResetPasswordSchema)
+@stamped_view(schema=HTTPResetPasswordViewSchema)
 def password_reset(request, schema, **kwargs):
     body_classes = "password_reset main"
     token        = schema.token
     
     # Verify token is valid
-    #user_id = stampedAuth.verifyPasswordResetToken(token)
-    #count    = stampedAPIProxy.getAccount(user_id)
+    user_id = stampedAuth.verifyPasswordResetToken(token)
+    
+    if user_id is None:
+        raise StampedInputError("invalid token")
+    
+    account = stampedAPIProxy.getAccount(user_id)
+    
+    if account is None:
+        raise StampedInputError("invalid account")
     
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 
