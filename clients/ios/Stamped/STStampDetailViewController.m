@@ -326,7 +326,7 @@ typedef enum {
         
         if ([MFMailComposeViewController canSendMail])
             [sheet addButtonWithTitle:NSLocalizedString(@"Email stamp", nil)];
-        [sheet addButtonWithTitle:@"Share to Instagram"];
+//        [sheet addButtonWithTitle:@"Share to Instagram"];
         [sheet addButtonWithTitle:@"Copy link"];
         sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
         sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
@@ -730,60 +730,61 @@ static CATransform3D MakePerspetiveTransform() {
     return perspective;
 }
 
-- (void)shareToInstagramWithStamp:(id<STStamp>)stamp 
-                        heroImage:(UIImage*)image  
-                         andBlurb:(NSString*)blurb {
-    CGSize size = CGSizeMake(612, 612);
-    UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
-    //CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    [[UIColor redColor] setStroke];
-    UIFont* titleFont = [UIFont stampedTitleFontWithSize:80];
-    [stamp.entity.title drawAtPoint:CGPointMake(42, 110 - titleFont.leading) withFont:titleFont];
-    
-    UIImage* categoryImage = [Util categoryIconForCategory:stamp.entity.category
-                                               subcategory:stamp.entity.subcategory 
-                                                    filter:nil
-                                                   andSize:STCategoryIconSize15];
-    categoryImage = [Util gradientImage:categoryImage withPrimaryColor:@"999999" secondary:@"999999"];
-    
-    [categoryImage drawInRect:CGRectMake(26, 124, categoryImage.size.width, categoryImage.size.height)];
-    
-    UIFont* subtitleFont = [UIFont stampedFontWithSize:24];
-    [stamp.entity.subtitle drawAtPoint:CGPointMake(50, 140 - subtitleFont.leading) withFont:subtitleFont];
-    
-    CALayer* layer = [[[CALayer alloc] init] autorelease];
-    [layer drawInContext:context];
-    
-    UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
-    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString* cacheString = [paths objectAtIndex:0];
-    NSURL* cacheDir = [NSURL fileURLWithPath:cacheString];
-    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.ig"];
-    BOOL success = [UIImageJPEGRepresentation(finalImage, 1.0) writeToURL:igImageHookFile atomically:YES];
-    
-    UIDocumentInteractionController *interactionController = [[UIDocumentInteractionController interactionControllerWithURL:igImageHookFile] retain];
-    interactionController.UTI = @"com.instagram.photo";
-    interactionController.delegate = self;
-    if (blurb) {
-        interactionController.annotation = [NSDictionary dictionaryWithObject:blurb forKey:@"InstagramCaption"];
-    }
-    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
-}
+//- (void)shareToInstagramWithStamp:(id<STStamp>)stamp 
+//                        heroImage:(UIImage*)image  
+//                         andBlurb:(NSString*)blurb {
+//    CGSize size = CGSizeMake(612, 612);
+//    UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
+//    CGContextRef context = UIGraphicsGetCurrentContext();
+//    
+//    [[UIColor redColor] setStroke];
+//    UIFont* titleFont = [UIFont stampedTitleFontWithSize:80];
+//    [stamp.entity.title drawAtPoint:CGPointMake(42, 110 - titleFont.leading) withFont:titleFont];
+//    
+//    UIImage* categoryImage = [Util categoryIconForCategory:stamp.entity.category
+//                                               subcategory:stamp.entity.subcategory 
+//                                                    filter:nil
+//                                                   andSize:STCategoryIconSize15];
+//    categoryImage = [Util gradientImage:categoryImage withPrimaryColor:@"999999" secondary:@"999999"];
+//    
+//    [categoryImage drawInRect:CGRectMake(26, 124, categoryImage.size.width, categoryImage.size.height)];
+//    
+//    UIFont* subtitleFont = [UIFont stampedFontWithSize:24];
+//    [stamp.entity.subtitle drawAtPoint:CGPointMake(50, 140 - subtitleFont.leading) withFont:subtitleFont];
+//    
+//    CALayer* layer = [[[CALayer alloc] init] autorelease];
+//    [layer setContents:image.CGImage];
+//    [layer drawInContext:context];
+//    
+//    UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+//    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
+//    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+//    NSString* cacheString = [paths objectAtIndex:0];
+//    NSURL* cacheDir = [NSURL fileURLWithPath:cacheString];
+//    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.ig"];
+//    BOOL success = [UIImageJPEGRepresentation(finalImage, 1.0) writeToURL:igImageHookFile atomically:YES];
+//    
+//    UIDocumentInteractionController *interactionController = [[UIDocumentInteractionController interactionControllerWithURL:igImageHookFile] retain];
+//    interactionController.UTI = @"com.instagram.photo";
+//    interactionController.delegate = self;
+//    if (blurb) {
+//        interactionController.annotation = [NSDictionary dictionaryWithObject:blurb forKey:@"InstagramCaption"];
+//    }
+//    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
+//}
 
-- (void)shareToInstagram {
-    NSString* blurb = nil;
-    if (self.stamp.contents.count) {
-        id<STContentItem> contentItem = [self.stamp.contents objectAtIndex:0];
-        blurb = contentItem.blurb;
-    }
-    NSString* entityImageURL = [Util entityImageURLForEntity:self.stamp.entity];
-    [[STImageCache sharedInstance] imageForImageURL:entityImageURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-        [self shareToInstagramWithStamp:self.stamp heroImage:image andBlurb:blurb];
-    }];
-}
+//- (void)shareToInstagram {
+//    NSString* blurb = nil;
+//    if (self.stamp.contents.count) {
+//        id<STContentItem> contentItem = [self.stamp.contents objectAtIndex:0];
+//        blurb = contentItem.blurb;
+//    }
+//    NSString* entityImageURL = [Util entityImageURLForEntity:self.stamp.entity];
+//    [[STImageCache sharedInstance] imageForImageURL:entityImageURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+//        [self shareToInstagramWithStamp:self.stamp heroImage:image andBlurb:blurb];
+//    }];
+//}
 
 -(void)documentInteractionController:(UIDocumentInteractionController *)controller 
        willBeginSendingToApplication:(NSString *)application {

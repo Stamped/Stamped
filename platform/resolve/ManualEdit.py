@@ -131,6 +131,11 @@ def formForEntity(entity_id, **hidden_params):
             except Exception:
                 pass
         fields['netflix_url'] = netflix_url
+    if entity.isType('movie'):
+        fandango_url = ''
+        if entity.sources.fandango_url and entity.sources.fandango_id:
+            fandango_url = entity.sources.fandango_url
+        fields['fandango_url'] = fandango_url
     hidden_params['entity_id'] = entity_id
     html = []
     desc = entity.desc
@@ -257,6 +262,14 @@ def update(updates):
             entity.sources.itunes_id = itunes_id
             entity.sources.itunes_source = 'seed'
             entity.sources.itunes_timestamp = now
+    fandango_url = updates.fandango_url
+    if fandango_url is not None and fandango_url not in bad_versions:
+        match = re.match(r'http://www.fandango.com/(.+)_(\d+)/(.+)(\?.+)?', fandango_url)
+        fandango_raw_id = match.group(2)
+        entity.sources.fandango_id = 'http://www.fandango.com/rss/%s' % fandango_raw_id
+        entity.sources.fandango_url = 'http://www.qksrv.net/click-5348839-10576760?url=http%3a%2f%2fmobile.fandango.com%3fa%3d%26m%3d' + fandango_raw_id
+        entity.sources.fandango_timestamp = now
+        entity.sources.fandango_source = 'seed'
     for k in simple_fields:
         v = getattr(updates, k)
         if v == '':
