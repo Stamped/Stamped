@@ -287,13 +287,13 @@ def update(updates):
             if 'previewUrl' in itunes_data:
                 entity.sources.itunes_preview = itunes_data['previewUrl']
             if entity.isType('artist'):
-                entity.sources.itunes_url = itunes_data['artistViewUrl']
+                entity.sources.itunes_url = itunes_data['artistLinkUrl']
             elif entity.isType('album'):
                 entity.sources.itunes_url = itunes_data['collectionViewUrl']
             elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
                 entity.sources.itunes_url = itunes_data['trackViewUrl']
             elif entity.isType('tv'):
-                entity.sources.itunes_url = itunes_data['artistLinkUrl']
+                entity.sources.itunes_url = itunes_data['collectionViewUrl']
             entity.sources.itunes_id = itunes_id
             entity.sources.itunes_source = 'seed'
             entity.sources.itunes_timestamp = now
