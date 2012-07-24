@@ -53,7 +53,7 @@ static const CGFloat _cellHeight = 72;
                 CGRect fillRect = CGRectMake(CGRectGetMaxX(self.titleLabel.frame), _cellHeight - 28, _icon.size.width, _icon.size.height);
                 //HACK
                 if ([self.titleLabel.text isEqualToString:@"The Guide"]) {
-                    fillRect = CGRectOffset(fillRect, -4, 0);
+                    fillRect = CGRectOffset(fillRect, -4, -4);
                 }
                 
                 CGContextSaveGState(ctx);

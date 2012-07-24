@@ -1258,15 +1258,22 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getSuggestedUsers(self, authUserId, limit=None, offset=None):
         suggested = [
-            'mariobatali',
-            'nymag',
-            'time',
-            'urbandaddy',
-            'parislemon',
-            'michaelkors',
-            'petertravers',
-            'rebeccaminkoff',
-            'austinchronicle',
+            'justinbieber', 
+            'ellendegeneres', 
+            'ryanseacrest', 
+            'nytimes', 
+            'time', 
+            'nickswisher', 
+            'passionpit', 
+            'nymag', 
+            'mariobatali', 
+            'michaelkors', 
+            'parislemon', 
+            'kevinsystrom', 
+            'barondavis', 
+            'urbandaddy', 
+            'tconrad', 
+            'bostonglobe', 
         ]
         users = self.getUsers(None, suggested, authUserId)
         users.sort(key=lambda x: suggested.index(x.screen_name.lower()))
@@ -4161,7 +4168,7 @@ class StampedAPI(AStampedAPI):
                     coordinates.lng = entity.lng
                 r.append((entity.entity_id, score, entity.types, coordinates))
                 if entity.entity_id in todos:
-                    if entity_id not in todosMap:
+                    if entity.entity_id not in todosMap:
                         todosMap[entity.entity_id] = set()
                     todosMap[entity.entity_id].add(user.user_id)
 
