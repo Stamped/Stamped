@@ -216,7 +216,7 @@ class RateLimiter(object):
         self.__semaphore.release()
 
         if count > self.fail_limit:
-            print('### hit fail limit')
+            logs.warning("hit fail limit for service '%s'" % self.__service_name)
             self.blackout_start = time.time()
 
             # Email dev if a fail limit was reached
@@ -333,7 +333,7 @@ class RateLimiter(object):
 
             return asyncresult
         except Exception as e:
-            print('### Exception: %s' % e)
+            logs.error('addRequest threw exception: %s' % e)
             traceback.print_exc()
             raise e
 
