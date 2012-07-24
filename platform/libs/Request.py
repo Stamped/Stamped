@@ -147,15 +147,12 @@ class RateLimiterState(object):
 
         count = len(self.__fails)
 
-        print('### len fails: %s' % len(self.__fails))
         if count >= self.__fail_limit:
             print('### RPC server fail threshold reached')
-            logs.error('### testing error')
             self.__blackout_start = time.time()
             self.__local_rlservice.loadDbLog()    # update the local call log from the db
 
 
-            print ('almost sending email')
             logs.error('RPC server request FAIL THRESHOLD REACHED')
             # Email dev if a fail limit was reached
             if self.__is_ec2:
@@ -205,7 +202,7 @@ class RateLimiterState(object):
             print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
         except Exception as e:
-            print('### failed while attempting rpc service request: %s' % e)
+            logs.warning('### failed while attempting rpc service request: %s' % e)
             self._fail(e)
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 

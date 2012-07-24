@@ -13,6 +13,7 @@ from gevent.hub         import GreenletExit
 
 import os
 from time               import sleep
+import logs
 from datetime           import datetime
 import RateLimiter2
 from RateLimiter2       import RateLimiter, Request, RateException
@@ -107,13 +108,13 @@ class StampedRateLimiterService():
                 print("### Could not find '%s': no limits defined" % filename)
                 return
         except Exception as e:
-            print("Exception while trying to execute '%s' file: %s" % (filename, e))
+            logs.error("Exception while trying to execute '%s' file: %s" % (filename, e))
             return
 
         try:
             limits = meta['limits']
         except:
-            print('limits var is not being set in config file.  skipping load step')
+            logs.error('limits var is not being set in config file.  skipping load step')
             return
 
         for k,v in limits.iteritems():
@@ -137,9 +138,9 @@ class StampedRateLimiterService():
                         cpd = min(cpd, day_calls + (cpd-day_calls) / 10)
             except Exception as e:
                 if service_name is not None:
-                    print ("Exception while reading limiter for service '%s' in limits config, skipping: %s" % (service_name, e))
+                    logs.error ("Exception while reading limiter for service '%s' in limits config, skipping: %s" % (service_name, e))
                 else:
-                    print ('Exception while reading limiter in limits config, skipping')
+                    logs.error ('Exception while reading limiter in limits config, skipping')
                 continue
 
             try:
@@ -147,10 +148,10 @@ class StampedRateLimiterService():
                 if limiter is not None:
                     limiter.update_limits(limit, period, cpd, fail_limit, fail_period, blackout_wait)
                 else:
-                    print("adding rate limiter for service '%s'" % service_name)
+                    logs.info("adding rate limiter for service '%s'" % service_name)
                     self.__limiters[service_name] = RateLimiter(service_name, limit, period, cpd, fail_limit, fail_period, blackout_wait)
             except:
-                print ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
+                logs.error ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
                 return
 
     def handleRequest(self, service, priority, timeout, verb, url, body = None, headers = None):

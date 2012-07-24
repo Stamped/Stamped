@@ -3702,8 +3702,8 @@ class StampedAPI(AStampedAPI):
 
         try:
             allItems = getattr(guide, guideRequest.section)
-            logs.info("Nothing in guide")
             if allItems is None:
+                logs.info("Nothing in guide")
                 return []
         except AttributeError:
             raise StampedInputError("Guide request for invalid section: %s" % guideRequest.section)
@@ -4111,13 +4111,25 @@ class StampedAPI(AStampedAPI):
         stampQualities = {}
         stampTimestamps = {}
         todosMap = {}
+        stampStatsMap = {}
+
         for stat in stampStats:
+            # Build stampStatsMap
+            if stat.entity_id not in stampStatsMap:
+                stampStatsMap[stat.entity_id] = []
+            stampStatsMap[stat.entity_id].append(stat)
+
+            # Build stampPopularities
             if stat.entity_id not in stampPopularities:
                 stampPopularities[stat.entity_id] = []
             stampPopularities[stat.entity_id].append(min(5,stat.popularity)) 
+
+            # Build stampQualities
             if stat.entity_id not in stampQualities:
                 stampQualities[stat.entity_id] = []
             stampQualities[stat.entity_id].append(stat.quality)
+
+            # Build stampTimestamps
             if stat.last_stamped is not None:
                 t = time.mktime(stat.last_stamped.timetuple())
                 if stat.entity_id not in stampTimestamps:
@@ -4128,6 +4140,7 @@ class StampedAPI(AStampedAPI):
                 except KeyError:
                     stampTimestamps[stat.entity_id][stat.user_id] = t
 
+            # Build todosMap
             if stat.preview_todos is not None:
                 if stat.entity_id not in todosMap:
                     todosMap[stat.entity_id] = set()
@@ -4185,24 +4198,27 @@ class StampedAPI(AStampedAPI):
                     item.tags = result[2]
                 if result[3] is not None:
                     item.coordinates = result[3]
-                if len(stampTimestamps[result[0]]) > 0:
+
+                # Build preview for associated stamps
+                if item.entity_id in stampStatsMap:
                     preview = []
-                    for userId in stampTimestamps[result[0]].keys():
+                    for stat in stampStatsMap[item.entity_id]:
                         stampPreview = StampPreview()
                         stampPreview.stamp_id = stat.stamp_id
                         userPreview = UserMini()
-                        userPreview.user_id = userId
+                        userPreview.user_id = stat.user_id
                         stampPreview.user = userPreview
                         preview.append(stampPreview)
                     if len(preview) > 0:
                         item.stamps = preview
-                if result[0] in todosMap:
+
+                if item.entity_id in todosMap:
                     userIds = list(todosMap[result[0]])
                     if len(userIds) > 0:
                         item.todo_user_ids = userIds
+
                 cache.append(item)
             setattr(guide, section, cache)
-
 
         logs.info("Time to build guide: %s seconds" % (time.time() - t0))
 

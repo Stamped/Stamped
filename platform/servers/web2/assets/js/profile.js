@@ -37,14 +37,14 @@ var g_update_stamps = null;
         var close_sdetail_func      = null;
         
         var is_blacklisted_image    = function(url) {
-            return (url.indexOf(static_prefix) != -1);
+            return (url.indexOf(static_prefix) !== -1);
         };
         
         var extract_data = function($target, prefix, default_value) {
             var classes = $target.get(0).className.split(/\s+/);
             var value   = default_value;
             
-            for (i = 0; i < classes.length; ++i) {
+            for (var i = 0; i < classes.length; ++i) {
                 var c = classes[i];
                 
                 if (c.indexOf(prefix) === 0) {
@@ -227,10 +227,10 @@ var g_update_stamps = null;
             }
             
             $scope.find('.timestamp_raw').each(function(i, elem) {
+                var $elem = $(elem);
                 var expl  = "";
                 
                 try {
-                    var $elem = $(elem);
                     var ts    = moment.utc($elem.text(), "YYYY-MM-DD HH:mm:ss.SSSS");
                     var now   = moment();
                     
@@ -258,7 +258,7 @@ var g_update_stamps = null;
             is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
             recur      = (typeof(recur)      === 'undefined' ? false : recur);
             
-            gallery_is_visible |= is_visible;
+            gallery_is_visible = gallery_is_visible || is_visible;
             
             var handle_recur = function() {
                 if (recur) {
@@ -310,7 +310,7 @@ var g_update_stamps = null;
                 closeSpeed      : 300, 
                 
                 tpl             : {
-				    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
                     closeBtn    : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
                 }, 
                 
@@ -339,7 +339,7 @@ var g_update_stamps = null;
             }
             
             if (!!options) {
-                for (var key in options) {
+                for (key in options) {
                     if (options.hasOwnProperty(key)) {
                         output[key] = options[key];
                     }
@@ -580,11 +580,11 @@ var g_update_stamps = null;
                     $sdetail_wrapper
                         .stop(true, false)
                         .css({
-                            'top' : hidden, 
+                            'top' : hidden
                         })
                         .addClass('animating')
                         .animate({
-                            top : offset, 
+                            top : offset
                         }, {
                             duration : anim_duration, 
                             specialEasing : { 
@@ -600,15 +600,15 @@ var g_update_stamps = null;
                                 }
                             }
                         });
-                } else if (sdetail_status == 'closing') {
+                } else if (sdetail_status === 'closing') {
                     $sdetail_wrapper
                         .stop(true, false)
                         .css({
-                            'top' : offset, 
+                            'top' : offset
                         })
                         .addClass('animating')
                         .animate({
-                            top : hidden, 
+                            top : hidden
                         }, {
                             duration : anim_duration, 
                             specialEasing : { 
@@ -627,7 +627,7 @@ var g_update_stamps = null;
                     $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
                     
                     $sdetail_wrapper.css({
-                        'top' : offset, 
+                        'top' : offset
                     });
                 }
                 
@@ -666,7 +666,7 @@ var g_update_stamps = null;
                 
                 if (init) {
                     // TODO: customize loading image
-                    var bufferPx = window.innerHeight * .2;
+                    var bufferPx = window.innerHeight * 0.2;
                     
                     infinite_scroll = $gallery.infinitescroll({
                         bufferPx        : bufferPx, 
@@ -688,8 +688,8 @@ var g_update_stamps = null;
                             }
                             
                             if (!!match) {
-                                offset = parseInt(match[2]);
-                                console.log("PATH 0: " + offset + "; bufferPx: " + bufferPx);
+                                var offset = parseInt(match[2]);
+                                //console.log("PATH 0: " + offset + "; bufferPx: " + bufferPx);
                                 
                                 // TODO: this is a hack..
                                 return {
@@ -701,7 +701,7 @@ var g_update_stamps = null;
                                     }
                                 };
                             } else {
-                                console.log("PATH 1: " + path + "; bufferPx: " + bufferPx);
+                                //console.log("PATH 1: " + path + "; bufferPx: " + bufferPx);
                                 
                                 return [ path ];
                             }
@@ -1081,9 +1081,7 @@ var g_update_stamps = null;
                     'width'             : cur_logo_width, 
                     'height'            : cur_logo_width, 
                     'background-size'   : cur_logo_size, 
-                    '-webkit-mask-size' : cur_logo_size, 
-                    //top                 : cur_logo_top, 
-                    //left                : cur_logo_left
+                    '-webkit-mask-size' : cur_logo_size
                 });
                 
                 //console.debug("DYNAMIC HEADER: ratio=" + cur_ratio);
@@ -1166,8 +1164,8 @@ var g_update_stamps = null;
                             }
                         }
                         
-                        if (typeof(custom_params['category']) !== 'undefined') {
-                            category = custom_params['category'];
+                        if (typeof(custom_params.category) !== 'undefined') {
+                            category = custom_params.category;
                         } else {
                             category = 'default';
                         }
@@ -1176,13 +1174,13 @@ var g_update_stamps = null;
                         
                         if (category === 'default') {
                             category = null;
-                            custom_params['category'] = null;
+                            custom_params.category = null;
                         }
                         
                         if (orig_category !== g_category) {
                             var params    = get_custom_params(custom_params);
-                            var url       = get_custom_url(params);
                             var $items    = $('.stamp-gallery-item');
+                            url           = get_custom_url(params);
                             
                             $gallery.css({
                                 visibility : 'hidden', 
@@ -1250,19 +1248,17 @@ var g_update_stamps = null;
                             
                             // load in new content via AJAX
                             var $target = $("<div></div>");
-                            $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
+                            
+                            $.get(url, params, function(data, stat) {
                                 if (category !== g_category) {
                                     return;
                                 }
                                 
-                                if (status == "error") {
-                                    console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
-                                    console.debug(response);
-                                    console.debug(xhr);
-                                    
-                                    //alert("TODO: handle AJAX and backend errors gracefuly");
+                                if (stat === "error") {
                                     return;
                                 }
+                                
+                                $target.html(data);
                                 
                                 // TODO: optimize!!
                                 var $elements = $target.find('.stamp-gallery-item').remove();
@@ -1326,11 +1322,11 @@ var g_update_stamps = null;
                     var is_match = (i >= len - 1);
                     
                     if (!!is_match_func) {
-                        is_match |= is_match_func(state, url, relative_url);
+                        is_match = is_match || is_match_func(state, url, relative_url);
                     }
                     
                     if (is_match) {
-                        console.log("History matched view '" + view.title + "'");
+                        //console.log("History matched view '" + view.title + "'");
                         
                         view.apply_func(state, url, relative_url);
                         break;
@@ -1382,8 +1378,8 @@ var g_update_stamps = null;
                     title += " - " + text;
                 }
                 
-                if (!params['category']) {
-                    delete params['category'];
+                if (!params.category) {
+                    delete params.category;
                 }
                 
                 History.pushState(params, title, params_str);
@@ -1524,6 +1520,7 @@ var g_update_stamps = null;
             }
             
             var clamped = 'stamp-category-nav-bar-clamped';
+            // NOTE: nav_bar is ~400px tall
             
             // clamp the navbar's vertical offset to never overlap too far into the page's header
             if (window.innerHeight / 2 - 198 <= 250) {
@@ -1541,13 +1538,13 @@ var g_update_stamps = null;
                 };
                 
                 if (last_nav_pos_x === null) {
-                    style['right'] = 'auto';
+                    style.right = 'auto';
                 }
                 
                 ++update_navbar_count;
                 
                 if (gallery || update_navbar_count >= 1) {
-                    style['visibility'] = 'visible';
+                    style.visibility = 'visible';
                 }
                 
                 last_nav_pos_x = pos;
@@ -1576,7 +1573,7 @@ var g_update_stamps = null;
                     
                     if (!!g_category) {
                         if (!g_category || g_category === 'default') {
-                            delete options['category'];
+                            delete options.category;
                         } else {
                             options.category = g_category;
                         }
@@ -1726,10 +1723,10 @@ var g_update_stamps = null;
             if (!!href) {
                 // initialize sDetail popup after AJAX load
                 $target2.load(href, { 'ajax' : true }, function(response, status, xhr) {
-                    if (status == "error") {
-                        console.debug("AJAX ERROR (sdetail): " + url);
-                        console.debug(response);
-                        console.debug(xhr);
+                    if (status === "error") {
+                        //console.debug("AJAX ERROR (sdetail): " + url);
+                        //console.debug(response);
+                        //console.debug(xhr);
                         
                         alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
                         
@@ -1842,11 +1839,11 @@ var g_update_stamps = null;
             // initialize menu action
             var $action_menu = $sdetail.find('.action-menu');
             
-            if ($action_menu.length == 1) {
+            if ($action_menu.length === 1) {
                 var $temp = $action_menu.parents('.entity-id');
                 var $link = $action_menu.parent('a.action-link');
                 
-                if ($temp.length == 1 && $link.length == 1) {
+                if ($temp.length === 1 && $link.length === 1) {
                     $link.each(function(i, link) {
                         var $link        = $(link);
                         var entity_id    = extract_data($temp, 'entity-id-', null);
@@ -2001,7 +1998,7 @@ var g_update_stamps = null;
                     });
                     
                     $rdio.bind('playStateChanged.rdio', function(e, playState) {
-                        if (playState == 0) { // paused
+                        if (playState === 0) { // paused
                             $elem.removeClass("media-loading playing").addClass("stopped");
                         } else {
                             // note: empirically, rdio adds an ease-in, so we show the loading 
@@ -2238,7 +2235,7 @@ var g_update_stamps = null;
         
         $(document).bind('keydown', function(e) {
             // close lightboxes, sDetail, and/or map popups when the user presses ESC
-            if (e.which == 27) { // ESC
+            if (e.which === 27) { // ESC
                 if ($('.fancybox-opened').length <= 0) {
                     close_sdetail();
                 }

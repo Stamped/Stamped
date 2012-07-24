@@ -33,6 +33,8 @@ from api.Entity                     import buildEntity
 # TODO GET RID OF SEARCH IMPORTS
 from search.SearchResult import SearchResult
 from search.ScoringUtils import *
+from search.DataQualityUtils import *
+from resolve.TitleUtils import *
 from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection, MongoEntityCollection
 
 from libs.SearchUtils import formatSearchQuery
@@ -706,7 +708,40 @@ class StampedSource(GenericSource):
             result.relevance = 0.3 + 0.2 * (num_stamps ** 0.5)
             result.addRelevanceComponentDebugInfo('Initial score based on Entity with %d stamps' % num_stamps,
                                                   result.relevance)
-            result.relevance *= stringRelevance(queryText, entityProxy.name)[0]
+
+            if isTrack(result.resolverObject):
+                applyTrackTitleDataQualityTests(result, queryText)
+                adjustTrackRelevanceByQueryMatch(result, queryText)
+                augmentTrackDataQualityOnBasicAttributePresence(result)
+            elif isAlbum(result.resolverObject):
+                applyAlbumTitleDataQualityTests(result, queryText)
+                adjustAlbumRelevanceByQueryMatch(result, queryText)
+                augmentAlbumDataQualityOnBasicAttributePresence(result)
+            elif isArtist(result.resolverObject):
+                applyArtistTitleDataQualityTests(result, queryText)
+                adjustArtistRelevanceByQueryMatch(result, queryText)
+                augmentArtistDataQualityOnBasicAttributePresence(result)
+            elif isTvShow(result.resolverObject):
+                applyTvTitleDataQualityTests(result, queryText)
+                adjustTvRelevanceByQueryMatch(result, queryText)
+                augmentTvDataQualityOnBasicAttributePresence(result)
+            elif isMovie(result.resolverObject):
+                applyMovieTitleDataQualityTests(result, queryText)
+                adjustMovieRelevanceByQueryMatch(result, queryText)
+                augmentMovieDataQualityOnBasicAttributePresence(result)
+            elif isBook(result.resolverObject):
+                applyBookTitleDataQualityTests(result, queryText)
+                adjustBookRelevanceByQueryMatch(result, queryText)
+                augmentBookDataQualityOnBasicAttributePresence(result)
+            elif isPlace(result.resolverObject):
+                applyPlaceTitleDataQualityTests(result, queryText)
+                augmentPlaceRelevanceScoresForTitleMatchAndProximity(result, queryText, coords)
+                augmentPlaceDataQualityOnBasicAttributePresence(result)
+            elif isApp(result.resolverObject):
+                applyAppTitleDataQualityTests(result, queryText)
+                augmentAppDataQualityOnBasicAttributePresence(result)
+
+
             results.append(result)
         sortByRelevance(results)
         return results
@@ -714,7 +749,7 @@ class StampedSource(GenericSource):
 
     def __id_query(self, mongo_query):
         import pymongo
-        logs.debug(str(mongo_query))
+        #logs.debug(str(mongo_query))
         return self.__entityDB._collection.find(mongo_query, fields=['_id'], limit=1000).sort('_id',pymongo.ASCENDING)
 
     def __querySource(self, token_queries, query_obj, **kwargs):

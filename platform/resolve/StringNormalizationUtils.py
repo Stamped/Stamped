@@ -66,6 +66,7 @@ WEAKLY_SEPARATED_STUFF_REMOVAL_PATTERN = (
 _track_removals = [
     (re.compile(STRONGLY_SEPARATED_STUFF_REMOVAL_PATTERN %
                 r'(remix|mix|version|edit|dub|tribute|cover|bpm|single|(\w+ +){1,3}version)'), 1),
+    (re.compile(r'.*\w+.*?([(\[:, -]+(feat|feat\.|featuring)\s+.*)$'), 1),
 ]
 
 # album-specific removal patterns

@@ -92,8 +92,8 @@
 #if defined (CONFIGURATION_Beta)
 #warning QuincyKit Beta (Ad Hoc) is configured for this build
     NSString* key;
-    key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
-//    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
+//    key = @"bdc37071b6cd3a6cee047008f0d1a792"; //internal
+    key = @"eed3b68dbf577e8e1a9ce46a83577ead"; //beta
     [[BWQuincyManager sharedQuincyManager] setAppIdentifier:key];
 #endif
     

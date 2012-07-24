@@ -408,12 +408,15 @@ class   RdioSource(GenericSource):
             if isinstance(searchResult.resolverObject, RdioTrack):
                 applyTrackTitleDataQualityTests(searchResult, queryText)
                 adjustTrackRelevanceByQueryMatch(searchResult, queryText)
+                augmentTrackDataQualityOnBasicAttributePresence(searchResult)
             elif isinstance(searchResult.resolverObject, RdioAlbum):
                 applyAlbumTitleDataQualityTests(searchResult, queryText)
                 adjustAlbumRelevanceByQueryMatch(searchResult, queryText)
+                augmentAlbumDataQualityOnBasicAttributePresence(searchResult)
             elif isinstance(searchResult.resolverObject, RdioArtist):
                 applyArtistTitleDataQualityTests(searchResult, queryText)
                 adjustArtistRelevanceByQueryMatch(searchResult, queryText)
+                augmentArtistDataQualityOnBasicAttributePresence(searchResult)
         sortByRelevance(searchResults)
         return searchResults
 
