@@ -236,18 +236,18 @@ class StampedAuth(AStampedAuth):
             msg = "Invalid format for email address"
             logs.warning(msg)
             raise StampedInputError(msg)
-
+        
         # Verify user exists
         account = self._accountDB.getAccountByEmail(email)
         if not account or not account.user_id:
             msg = "User does not exist"
             logs.warning(msg)
             raise StampedInputError(msg)
-
+        
         attempt = 1
         max_attempts = 5
         expire = 1800    # 30 minutes
-            
+        
         while True:
             try:
                 rightNow = datetime.utcnow()
