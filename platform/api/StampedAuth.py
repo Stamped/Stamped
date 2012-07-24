@@ -256,7 +256,10 @@ class StampedAuth(AStampedAuth):
                 resetToken.token_id = auth.generateToken(36)
                 resetToken.user_id = account.user_id
                 resetToken.expires = rightNow + timedelta(seconds=expire)
-                resetToken.timestamp.created = rightNow
+                
+                timestamp = BasicTimestamp()
+                timestamp.created = rightNow
+                resetToken.timestamp = timestamp
                 
                 self._passwordResetDB.addResetToken(resetToken)
                 break
@@ -294,10 +297,10 @@ class StampedAuth(AStampedAuth):
         ### Verify Refresh Token
         try:
             token = self._passwordResetDB.getResetToken(resetToken)
-            if token.user_id == None:
+            if token.user_id is None:
                 raise
 
-            if token['expires'] > datetime.utcnow():
+            if token.expires > datetime.utcnow():
                 logs.info("Valid reset token for user id: %s" % token.user_id)
                 return token.user_id
             
@@ -395,7 +398,7 @@ class StampedAuth(AStampedAuth):
         ### Verify Refresh Token
         try:
             token = self._refreshTokenDB.getRefreshToken(refreshToken)
-            if token.user_id == None:
+            if token.user_id is None:
                 raise
         except:
             raise StampedInvalidRefreshTokenError("Invalid refresh token")
@@ -505,7 +508,7 @@ class StampedAuth(AStampedAuth):
     def verifyEmailAlertToken(self, tokenId):
         try:
             token = self._emailAlertDB.getToken(tokenId)
-            if token.user_id == None:
+            if token.user_id is None:
                 raise
             return token.user_id
         except:

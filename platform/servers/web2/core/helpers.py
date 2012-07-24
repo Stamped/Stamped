@@ -45,7 +45,7 @@ class StampedAPIProxy(object):
     
     def checkAccount(self, email):
         if self._ec2:
-            user = self.api.checkUser(email)
+            user = self.api.checkAccount(email)
             
             return HTTPUser().importUser(user).dataExport()
         else:
