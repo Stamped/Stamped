@@ -141,7 +141,7 @@ def password_forgot(request, **kwargs):
     return True
     """
     
-    return stamped_render(request, 'password_forgot.html', {
+    return stamped_render(request, 'password.html', {
         'body_classes'      : body_classes, 
         'page'              : 'password_forgot', 
         'title'             : 'Stamped - Forgot Password', 
