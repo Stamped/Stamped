@@ -43,6 +43,7 @@ class MongoCollectionProxy(object):
         
         while True:
             try:
+                print ('### Cursor: %s' % self._collection.find(spec, **kwargs).explain()['cursor'])
                 ret = self._collection.find(spec, **kwargs)
                 
                 if limit is not None:
