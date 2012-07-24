@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import datetime, copy
 import Globals, utils, logs
+import pymongo
 
 from errors import *
 from api.Schemas import *
@@ -19,6 +20,8 @@ class MongoAuthRefreshTokenCollection(AMongoCollection, AAuthRefreshTokenDB):
     def __init__(self):
         AMongoCollection.__init__(self, collection='refreshtokens')
         AAuthRefreshTokenDB.__init__(self)
+
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING)])
     
     def _convertToMongo(self, token):
         document = token.dataExport()
