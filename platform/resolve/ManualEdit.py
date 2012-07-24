@@ -212,6 +212,10 @@ desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
     for k,v in fields.items():
         if v is None:
             v = ''
+        if k == 'image_url' and v != '':
+            html.append("""
+<img src="%s"/><br/>
+                """ % v)
         html.append("""
 %s: <input type="text" name="%s" value="%s" size="100"/>%s<br />
             """ % (k, k, v, _quickLink(k,v)))
