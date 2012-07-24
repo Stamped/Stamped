@@ -137,8 +137,6 @@ def alert_settings(request, schema, **kwargs):
         }, 
     ]
     
-    from pprint import pformat
-    logs.info(pformat(settings))
     for option in options:
         name = option['name']
         
@@ -215,7 +213,8 @@ def reset_password(request, schema, **kwargs):
 @require_http_methods(["POST"])
 def update_alert_settings(request, schema, **kwargs):
     user_id  = g_stamped_auth.verifyEmailAlertToken(token)
-    settings = schema.settings.dataExport()
+    settings = schema.dataExport()
+    del settings['token']
     
     on  = filter(lambda k: settings[k], settings.keys())
     off = filter(lambda k: not settings[k], settings.keys())
