@@ -12,6 +12,8 @@ from django.conf.urls.defaults  import patterns, include, url
 from django.core.exceptions     import ImproperlyConfigured
 
 urlpatterns = patterns('',
+    url(r'^test$',                                      'core.views.test_view'), 
+    
     # --------------------------------------------------------------------------
     # ------------------------------ MOBILE ------------------------------------
     # --------------------------------------------------------------------------
