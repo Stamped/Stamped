@@ -175,7 +175,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         modified = False
 
         # Check if old schema version
-        if 'contents' not in document or 'credit' in document:
+        if 'contents' not in document or 'credit' in document or 'search_blurb' not in document:
             msg = "%s: Old schema" % key
             if repair:
                 logs.info(msg)
