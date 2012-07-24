@@ -91,8 +91,8 @@ def alert_settings(request, schema, **kwargs):
         account  = stampedAPIProxy.getAccount(user_id)
         logs.info("user_id: %s" % user_id)
         logs.info("account: %s" % account)
-        settings = account.alert_settings
-        user     = schema.dataExport()
+        user     = account.dataExport()
+        settings = user['alert_settings']
     
     options = [
         {
