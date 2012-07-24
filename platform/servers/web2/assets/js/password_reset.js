@@ -58,7 +58,7 @@
             return true;
         });
         
-        $body.on("submit", ".email-form", function(event) {
+        $body.on("submit", ".password-form", function(event) {
             event.preventDefault();
             
             var $this   = $(this);
