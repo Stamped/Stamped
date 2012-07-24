@@ -91,7 +91,10 @@ def formForEntity(entity_id, **hidden_params):
                 elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
                     itunes_url = itunes_data['trackViewUrl']
                 elif entity.isType('tv'):
-                    itunes_url = itunes_data['collectionViewUrl']
+                    try:
+                        itunes_url = itunes_data['artistViewUrl']
+                    except KeyError:
+                        itunes_url = itunes_data['artistLinkUrl']
             except KeyError:
                 raise
             except IndexError:
@@ -276,7 +279,9 @@ def update(updates):
             match = re.match(r'http://itunes.apple.com/(.+)/book/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(3)
         elif entity.isType('tv'):
-            match = re.match(r'http://itunes.apple.com/(.+)/tv-season/(.+)/id(\d+)(\?.+)?', itunes_url)
+            match = re.match(r'http://itunes.apple.com/(.+)/tv-show/(.+)/id(\d+)(\?.+)?', itunes_url)
+            if match is None:
+                match = re.match(r'http://itunes.apple.com/(.+)/tv-season/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(3)
         elif entity.isType('movie'):
             match = re.match(r'http://itunes.apple.com/(.+)/movie/(.+)/id(\d+)(\?.+)?', itunes_url)
@@ -293,7 +298,7 @@ def update(updates):
             elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
                 entity.sources.itunes_url = itunes_data['trackViewUrl']
             elif entity.isType('tv'):
-                entity.sources.itunes_url = itunes_data['collectionViewUrl']
+                entity.sources.itunes_url = itunes_data['artistViewUrl']
             entity.sources.itunes_id = itunes_id
             entity.sources.itunes_source = 'seed'
             entity.sources.itunes_timestamp = now
