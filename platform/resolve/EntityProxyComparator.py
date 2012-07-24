@@ -89,6 +89,17 @@ class ArtistEntityProxyComparator(AEntityProxyComparator):
                 )
             print 'sim score after title', sim_score
 
+        # Check for any warning signs that exist in one title but not the other.
+        title_penalties = (runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist1.raw_name, artist2.raw_name) +
+                           runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist2.raw_name, artist1.raw_name))
+        for penalty in title_penalties:
+            modifiedPenalty = penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, penalty.description
+                )
+            sim_score *= 1.0 - modifiedPenalty
+
         # TODO: It might be worth it here to get the songs that have been linked to these sources at the
         # ____Source.searchLite() level and compare names.
         if (hasattr(artist1, 'amgId') and
@@ -126,6 +137,17 @@ class AlbumEntityProxyComparator(AEntityProxyComparator):
                 )
             print 'album title sim score', album_sim_score
 
+        # Check for any warning signs that exist in one title but not the other.
+        title_penalties = (runTokenTests(ALBUM_BAD_ENTITY_TOKENS, album1.raw_name, album2.raw_name) +
+                           runTokenTests(ALBUM_BAD_ENTITY_TOKENS, album2.raw_name, album1.raw_name))
+        for penalty in title_penalties:
+            modifiedPenalty = penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, penalty.description
+                )
+            album_sim_score *= 1.0 - modifiedPenalty
+
         try:
             artist1_name = album1.artists[0]['name']
             artist2_name = album2.artists[0]['name']
@@ -134,9 +156,13 @@ class AlbumEntityProxyComparator(AEntityProxyComparator):
             if logComparisonLogic:
                 print 'artist title sim score', artist_sim_score
 
+            artist_penalties = (runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist1_name, artist2_name) +
+                                runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist2_name, artist1_name))
+            for penalty in artist_penalties:
+                artist_sim_score *= 1.0 - (penalty.score ** 1.5)
+
         except IndexError:
-            # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
-            # 'Various Artists' or whatever.
+            # TODO PRELAUNCH FUCK FUCK: Better handling here.
             return CompareResult.unknown()
 
         total_sim_score = album_sim_score * (artist_sim_score ** 0.5)
@@ -161,6 +187,18 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
                 )
             print 'track title sim score', track_sim_score
 
+        title_penalties = ((runTitleTests(TRACK_BAD_ENTITY_TITLE_TESTS, track1.raw_name, track2.raw_name) or
+                            runTokenTests(TRACK_BAD_ENTITY_TOKENS, track1.raw_name, track2.raw_name)) +
+                           (runTitleTests(TRACK_BAD_ENTITY_TITLE_TESTS, track2.raw_name, track1.raw_name) or
+                            runTokenTests(TRACK_BAD_ENTITY_TOKENS, track2.raw_name, track1.raw_name)))
+        for title_penalty in title_penalties:
+            modifiedPenalty = title_penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, title_penalty.description
+                )
+            track_sim_score *= 1.0 - modifiedPenalty
+
         try:
             artist1_name = track1.artists[0]['name']
             artist2_name = track2.artists[0]['name']
@@ -168,6 +206,11 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
             artist_sim_score = titleComparison(artist1_name, artist2_name, artistSimplify, comparator=ArtistTitleComparator)
             if logComparisonLogic:
                 print 'artist title sim score', artist_sim_score
+
+            artist_penalties = (runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist1_name, artist2_name) +
+                                runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist2_name, artist1_name))
+            for penalty in artist_penalties:
+                artist_sim_score *= 1.0 - (penalty.score ** 1.5)
 
         except IndexError:
             # TODO: Better handling here. Maybe pare out the artist-less track. Maybe check to see if both are by
@@ -207,6 +250,18 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
                 repr(movie2.raw_name), movie2.source, movie2.key,
             )
             print 'sim score after title', sim_score
+
+        title_penalties = ((runTitleTests(MOVIE_BAD_ENTITY_TITLE_TESTS, movie1.raw_name, movie2.raw_name) or
+                            runTokenTests(MOVIE_BAD_ENTITY_TOKENS, movie1.raw_name, movie2.raw_name)) +
+                           (runTitleTests(MOVIE_BAD_ENTITY_TITLE_TESTS, movie2.raw_name, movie1.raw_name) or
+                            runTokenTests(MOVIE_BAD_ENTITY_TOKENS, movie2.raw_name, movie1.raw_name)))
+        for title_penalty in title_penalties:
+            modifiedPenalty = title_penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, title_penalty.description
+                    )
+            sim_score *= 1.0 - modifiedPenalty
 
         if movie1.source == 'tmdb' and movie2.source == 'tmdb' and movie1.key != movie2.key:
             sim_score *= 0.7
