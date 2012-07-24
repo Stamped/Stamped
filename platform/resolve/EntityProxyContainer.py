@@ -37,7 +37,7 @@ class EntityProxyContainer(object):
         if entity.isType('book'):
             entity.title = self.__chooseBookTitle()
         else:
-            entity.title = primaryProxy.name
+            entity.title = self.__chooseBestTitle()
 
         sourceContainer = BasicSourceContainer()
         for proxy in self.__proxies:
@@ -47,11 +47,18 @@ class EntityProxyContainer(object):
         
         return entity
 
+    def __chooseBestTitle(self):
+        def penaltyChar(c):
+            return not (c.isalpha() or c.isspace())
+        def titleScore(title):
+            return -len(title) - len(filter(penaltyChar, title)) * 2
+        return max((proxy.name for proxy in self.__proxies), key=titleScore)
+
     def __chooseBookTitle(self):
         # If we have a title from iTunes, always use that. iTunes has much much better titles than
         # Amazon.
         for proxy in self.__proxies:
             if proxy.source == 'itunes':
                 return proxy.name
-        return self.__proxies[0].name
+        return self.__chooseBestTitle()
 
