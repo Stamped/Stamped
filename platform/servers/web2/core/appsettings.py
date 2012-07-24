@@ -142,8 +142,21 @@ def alert_settings(request, schema, **kwargs):
     for option in options:
         name = option['name']
         
-        option['enabled_apns']  = settings['alerts_%s_apns'  % name]
-        option['enabled_email'] = settings['alerts_%s_email' % name]
+        enabled_apns  = False
+        enabled_email = False
+        
+        try:
+            enabled_apns = settings['alerts_%s_apns'  % name]
+        except KeyError:
+            pass
+        
+        try:
+            enabled_email = settings['alerts_%s_email' % name]
+        except KeyError:
+            pass
+        
+        option['enabled_apns']  = enabled_apns
+        option['enabled_email'] = enabled_email
     
     return stamped_render(request, 'settings.html', {
         'body_classes'      : body_classes, 
