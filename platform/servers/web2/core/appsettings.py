@@ -137,6 +137,8 @@ def alert_settings(request, schema, **kwargs):
         }, 
     ]
     
+    from pprint import pformat
+    logs.info(pformat(settings))
     for option in options:
         name = option['name']
         
