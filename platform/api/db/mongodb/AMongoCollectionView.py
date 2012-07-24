@@ -93,7 +93,7 @@ class AMongoCollectionView(AMongoCollection):
             subcategories = list(searchSlice.types)
             if 'track' in searchSlice.types:
                 subcategories.append('song')
-            query['entity.types'] = {'$in': list(searchSlice.types)}}
+            query['entity.types'] = {'$in': list(searchSlice.types)}
 
         # Query
         if searchSlice.query is not None:
