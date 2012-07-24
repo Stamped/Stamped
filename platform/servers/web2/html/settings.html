@@ -47,8 +47,8 @@
                         </div>
                         
                         <div class="rhs">
-                            <input type="checkbox" name="alerts_{{options.name}}_apns" class="setting apns" {% if option.enabled_apns %} checked="checked" {% endif %}></input>
-                            <input type="checkbox" name="alerts_{{options.name}}_email" class="setting email" {% if option.enabled_email %} checked="checked" {% endif %}></input>
+                            <input type="checkbox" name="alerts_{{option.name}}_apns" class="setting apns" {% if option.enabled_apns %} checked="checked" {% endif %}></input>
+                            <input type="checkbox" name="alerts_{{option.name}}_email" class="setting email" {% if option.enabled_email %} checked="checked" {% endif %}></input>
                         </div>
                     </div>
                 {% endfor %}

@@ -26,16 +26,16 @@
             $this.find("input").each(function(i, elem) {
                 var $elem = $(elem);
                 
-                settings[$elem.attr("name")] = (!!$elem.atr("checked"));
+                settings[$elem.attr("name")] = (!!$elem.attr("checked"));
             });
+            
+            console.debug(settings);
+            settings.token = token;
             
             var ajaxP  = $.ajax({
                 type        : "POST", 
                 url         : "/settings/alerts/update", 
-                data        : {
-                    "token"     : token, 
-                    "settings"  : settings
-                }
+                data        : settings
             }).done(function () {
                 alert("success");
             }).fail(function() {

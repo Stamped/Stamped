@@ -53,8 +53,9 @@ def password_forgot(request, **kwargs):
 @stamped_view(schema=HTTPSettingsSchema)
 def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
+    token        = schema.token
     
-    if TEST:
+    if False:
         user = travis_test.user
         
         settings = {
@@ -86,10 +87,12 @@ def alert_settings(request, schema, **kwargs):
             'alerts_actions_email'  : True, 
         }
     else:
-        user_id  = g_stamped_auth.verifyEmailAlertToken(schema.token)
+        user_id  = g_stamped_auth.verifyEmailAlertToken(token)
         account  = stampedAPIProxy.getAccount(user_id)
-        settings = account.alert_settings.dataExport()
-        user     = HTTPUser().importSchema(account).dataExport()
+        logs.info("user_id: %s" % user_id)
+        logs.info("account: %s" % account)
+        user     = account.dataExport()
+        settings = user['alert_settings']
     
     options = [
         {
@@ -137,16 +140,30 @@ def alert_settings(request, schema, **kwargs):
     for option in options:
         name = option['name']
         
-        option['enabled_apns']  = settings['alerts_%s_apns'  % name]
-        option['enabled_email'] = settings['alerts_%s_email' % name]
+        enabled_apns  = False
+        enabled_email = False
+        
+        try:
+            enabled_apns = settings['alerts_%s_apns'  % name]
+        except KeyError:
+            pass
+        
+        try:
+            enabled_email = settings['alerts_%s_email' % name]
+        except KeyError:
+            pass
+        
+        option['enabled_apns']  = enabled_apns
+        option['enabled_email'] = enabled_email
     
     return stamped_render(request, 'settings.html', {
         'body_classes'      : body_classes, 
         'page'              : 'settings', 
         'title'             : 'Stamped - Notification Settings', 
         'user'              : user, 
-        'settings'          : options
-    })
+        'settings'          : options, 
+        'token'             : token
+    }, preload=[ 'token' ])
 
 @stamped_view(schema=HTTPResetEmailSchema)
 @require_http_methods(["POST"])
@@ -195,7 +212,13 @@ def reset_password(request, schema, **kwargs):
 @stamped_view(schema=HTTPUpdateSettingsSchema)
 @require_http_methods(["POST"])
 def update_alert_settings(request, schema, **kwargs):
-    stampedAPIProxy.updateAlerts(user_id, on, off)
+    user_id  = g_stamped_auth.verifyEmailAlertToken(schema.token)
+    settings = schema.dataExport()
+    del settings['token']
     
+    on  = filter(lambda k: settings[k], settings.keys())
+    off = filter(lambda k: not settings[k], settings.keys())
+    
+    stampedAPIProxy.updateAlerts(user_id, on, off)
     return transform_output(True)
 

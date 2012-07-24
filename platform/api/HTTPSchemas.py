@@ -2086,6 +2086,7 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('secret',                           basestring, required=True)          
         cls.addProperty('title',                            basestring)
         cls.addProperty('desc',                             basestring)
+        cls.addProperty('image_url',                        basestring)
         
         # sources
         cls.addProperty('rdio_url',                         basestring)
