@@ -44,7 +44,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.opentable_id', 'sources.tmdb_id', 'sources.factual_id',
                 'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
                 'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
-                'sources.netflix_id', 'sources.thetvdb_id')
+                'sources.netflix_id', 'sources.thetvdb_id', 'sources.nytimes_id', 'sources.umdmusic_id')
 
         self._collection.ensure_index([
                                     ('search_tokens',               pymongo.ASCENDING),
