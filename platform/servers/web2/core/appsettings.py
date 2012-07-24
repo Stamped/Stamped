@@ -25,7 +25,7 @@ def password_reset(request, schema, **kwargs):
     token        = schema.token
     
     # Verify token is valid
-    user_id = stampedAuth.verifyPasswordResetToken(token)
+    user_id = g_stamped_auth.verifyPasswordResetToken(token)
     
     if user_id is None:
         raise StampedInputError("invalid token")
