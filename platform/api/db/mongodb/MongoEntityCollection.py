@@ -401,6 +401,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     ### PUBLIC
 
     def addEntity(self, entity):
+        if entity.timestamp is None:
+            entity.timestamp = BasicTimestamp()
+        entity.timestamp.created = datetime.utcnow()
+        
         entity = self._addObject(entity)
         self.seed_collection.addEntity(entity)
         self._setCachedEntity(entity)
@@ -427,11 +431,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
 
     def getEntity(self, entityId, forcePrimary=False):
-        if not forcePrimary:
-            try:
-                return self._getCachedEntity(entityId)
-            except KeyError:
-                pass 
+        # if not forcePrimary:
+        #     try:
+        #         return self._getCachedEntity(entityId)
+        #     except KeyError:
+        #         pass 
 
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)

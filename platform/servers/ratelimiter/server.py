@@ -8,6 +8,7 @@ __license__   = "TODO"
 from gevent             import monkey
 monkey.patch_all()
 
+import Globals
 import pickle
 import rpyc
 from GreenletServer     import GreenletServer

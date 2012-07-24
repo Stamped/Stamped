@@ -66,7 +66,7 @@ class MongoGuideCollection(AMongoCollection):
                 raise StampedDataError(msg)
 
         # Check if old schema version
-        if 'timestamp' not in document:
+        if document is not None and 'timestamp' not in document:
             msg = "%s: Old schema" % key
             if repair:
                 logs.info(msg)

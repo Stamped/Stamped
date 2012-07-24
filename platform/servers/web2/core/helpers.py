@@ -31,6 +31,9 @@ _baseurl = "https://dev.stamped.com/v1"
 STAMPED_SETTINGS = filter(lambda s: s.startswith('STAMPED_'), dir(settings))
 STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETTINGS))
 
+CLIENT_ID        = 'web-1.0.0'
+CLIENT_SECRET    = '9lm4520o4m3718m3nmpn10h71nlbmui5'
+
 # TODO (travis): move StampedAPIProxy to its own file!
 class StampedAPIProxy(object):
     
@@ -39,6 +42,26 @@ class StampedAPIProxy(object):
         self._ec2  = utils.is_ec2()
         
         self.api   = globalMongoStampedAPI()
+    
+    def checkAccount(self, email):
+        if self._ec2:
+            user = self.api.checkAccount(email)
+            
+            return HTTPUser().importUser(user).dataExport()
+        else:
+            return self._handle_post("account/check.json", {
+                'login'         : email, 
+                'client_id'     : CLIENT_ID, 
+                'client_secret' : CLIENT_SECRET, 
+            })
+    
+    def getAccount(self, user_id):
+        if self._ec2:
+            account = self.api.getAccount(user_id)
+            
+            return HTTPAccount().importAccount(account).dataExport()
+        else:
+            return self._handle_get("accounts/show.json", { 'user_id' : user_id })
     
     def getUser(self, params):
         if self._ec2:

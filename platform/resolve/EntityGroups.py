@@ -255,6 +255,7 @@ class SpotifyGroup(AKindTypeGroup):
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.spotify_id = proxy.key
 
+
 class iTunesGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
         AKindTypeGroup.__init__(self, 'itunes',
@@ -539,6 +540,7 @@ class LastPopularGroup(BasicFieldGroup):
         BasicFieldGroup.__init__(self, 'last_popular')
         self.addNameField()
         self.addField(['last_popular_info'])
+        self.addField(['total_popularity_measure'])
 
     def eligible(self, entity):
         return True
@@ -547,6 +549,10 @@ class LastPopularGroup(BasicFieldGroup):
         if proxy.last_popular:
             if entity.last_popular is None or proxy.last_popular > entity.last_popular:
                 entity.last_popular = proxy.last_popular
+
+        if proxy.popularity_score:
+            if entity.total_popularity_measure is None or proxy.popularity_score > entity.total_popularity_measure:
+                entity.total_popularity_measure = proxy.popularity_score
 
 
 class ImagesGroup(BasicFieldGroup):
