@@ -13,6 +13,7 @@ class MongoStampLikesCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='stamplikes')
+        self._collection.ensure_index('ref_ids')
     
     ### PUBLIC
     
