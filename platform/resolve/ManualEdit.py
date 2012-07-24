@@ -131,6 +131,11 @@ def formForEntity(entity_id, **hidden_params):
             except Exception:
                 pass
         fields['netflix_url'] = netflix_url
+    if entity.isType('movie'):
+        fandango_url = ''
+        if entity.sources.fandango_url and entity.sources.fandango_id:
+            fandango_url = entity.sources.fandango_url
+        fields['fandango_url'] = fandango_url
     hidden_params['entity_id'] = entity_id
     html = []
     desc = entity.desc
@@ -234,10 +239,16 @@ def update(updates):
     if itunes_url is not None and itunes_url not in bad_versions:
         itunes_id = None
         if entity.isType('artist'):
-            match = re.match(r'http://itunes.apple.com/us/artist/(.+)/id(\d+)(\?.+)?', itunes_url)
+            match = re.match(r'http://itunes.apple.com/(.+)/artist/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(2)
+        elif entity.isType('album'):
+            match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)(\?.+)?', itunes_url)
+            itunes_id = match.group(2)
+        elif entity.isType('track'):
+            match = re.match(r'http://itunes.apple.com/(.+)/album/(.+)/id(\d+)\?i=(\d+)', itunes_url)
+            itunes_id = match.group(3)
         if itunes_id is not None:
-            itunes_data = _itunes.method('lookup', id=itunes_id)['results'][0]
+            itunes_data = _itunes().method('lookup', id=itunes_id)['results'][0]
             if 'previewUrl' in itunes_data:
                 entity.sources.itunes_preview = itunes_data['previewUrl']
             if entity.isType('artist'):
@@ -251,6 +262,14 @@ def update(updates):
             entity.sources.itunes_id = itunes_id
             entity.sources.itunes_source = 'seed'
             entity.sources.itunes_timestamp = now
+    fandango_url = updates.fandango_url
+    if fandango_url is not None and fandango_url not in bad_versions:
+        match = re.match(r'http://www.fandango.com/(.+)_(\d+)/(.+)(\?.+)?', fandango_url)
+        fandango_raw_id = match.group(2)
+        entity.sources.fandango_id = 'http://www.fandango.com/rss/%s' % fandango_raw_id
+        entity.sources.fandango_url = 'http://www.qksrv.net/click-5348839-10576760?url=http%3a%2f%2fmobile.fandango.com%3fa%3d%26m%3d' + fandango_raw_id
+        entity.sources.fandango_timestamp = now
+        entity.sources.fandango_source = 'seed'
     for k in simple_fields:
         v = getattr(updates, k)
         if v == '':

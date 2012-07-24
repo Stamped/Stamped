@@ -45,22 +45,24 @@ def main():
     if len(proxies) < 2:
         raise Exception('You are shit at this.')
 
-    if isinstance(proxies[0], ResolverMediaCollection) and 'album' in proxies[0].types:
+    if isAlbum(proxies[0]):
         comparator = EntityProxyComparator.AlbumEntityProxyComparator
-    elif isinstance(proxies[0], ResolverPerson) and 'artist' in proxies[0].types:
+    elif isArtist(proxies[0]):
         comparator = EntityProxyComparator.ArtistEntityProxyComparator
-    elif isinstance(proxies[0], ResolverMediaItem) and 'track' in proxies[0].types:
+    elif isTrack(proxies[0]):
         comparator = EntityProxyComparator.TrackEntityProxyComparator
-    elif isinstance(proxies[0], ResolverMediaCollection) and 'tv' in proxies[0].types:
+    elif isTvShow(proxies[0]):
         comparator = EntityProxyComparator.TvEntityProxyComparator
-    elif isinstance(proxies[0], ResolverMediaItem) and 'movie' in proxies[0].types:
+    elif isMovie(proxies[0]):
         comparator = EntityProxyComparator.MovieEntityProxyComparator
-    elif isinstance(proxies[0], ResolverMediaItem) and 'book' in proxies[0].types:
+    elif isBook(proxies[0]):
         comparator = EntityProxyComparator.BookEntityProxyComparator
-    elif isinstance(proxies[0], ResolverPlace):
+    elif isPlace(proxies[0]):
         comparator = EntityProxyComparator.PlaceEntityProxyComparator
-    elif isinstance(proxies[0], ResolverSoftware):
+    elif isApp(proxies[0]):
         comparator = EntityProxyComparator.AppEntityProxyComparator
+    else:
+        raise Exception('Unrecognized proxy type!')
 
     for i in range(len(proxies)):
         for j in range(i):

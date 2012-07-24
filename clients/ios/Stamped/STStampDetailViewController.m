@@ -37,6 +37,7 @@
 #import "STTwitter.h"
 #import "UIFont+Stamped.h"
 #import "UIColor+Stamped.h"
+#import "STImageCache.h"
 
 typedef enum {
     CommentPanDirectionUp = 0,
@@ -55,7 +56,7 @@ typedef enum {
 
 @end
 
-@interface STStampDetailViewController () <UIActionSheetDelegate, UITextViewDelegate, MFMailComposeViewControllerDelegate>
+@interface STStampDetailViewController () <UIActionSheetDelegate, UITextViewDelegate, MFMailComposeViewControllerDelegate, UIDocumentInteractionControllerDelegate>
 
 @property (nonatomic, readwrite, retain) id<STStamp> stamp;
 
@@ -325,7 +326,7 @@ typedef enum {
         
         if ([MFMailComposeViewController canSendMail])
             [sheet addButtonWithTitle:NSLocalizedString(@"Email stamp", nil)];
-        [sheet addButtonWithTitle:@"Share to Instagram"];
+//        [sheet addButtonWithTitle:@"Share to Instagram"];
         [sheet addButtonWithTitle:@"Copy link"];
         sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
         sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
@@ -380,7 +381,7 @@ typedef enum {
 
 - (void)stCreateCommentViewWillBeginEditing:(STCreateCommentView*)view {
     
-//    self.title = @"Comment";
+    //    self.title = @"Comment";
     [self.navigationController.navigationBar setNeedsDisplay];
     
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleBordered target:self action:@selector(cancelComment:)];
@@ -650,7 +651,7 @@ typedef enum {
 
 - (void)showTweetViewController {
     TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
-
+    
     NSString* owner = nil;
     if ([self.stamp.user.userID isEqualToString:[STStampedAPI sharedInstance].currentUser.userID]) {
         owner = @"my";
@@ -664,8 +665,8 @@ typedef enum {
                       self.stamp.URL];
     if (text.length > 140) {
         text =[NSString stringWithFormat:@"Check %@ stamp at %@",
-         owner,
-         self.stamp.URL];
+               owner,
+               self.stamp.URL];
     }
     if (text.length > 140) {
         text = [NSString stringWithFormat:@"Check out %@", self.stamp.URL];
@@ -705,55 +706,109 @@ typedef enum {
 }
 
 - (void)actionSheet:(UIActionSheet*)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-        BOOL canTweet = NO;
-        if ([TWTweetComposeViewController canSendTweet]) {
-            canTweet = YES;
-        }
-        if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Copy link"]) {  // Copy link...
-            [UIPasteboard generalPasteboard].string = self.stamp.URL;
-        } 
-        else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Twitter", nil)] && canTweet) {  // Twitter or cancel depending...
-            [self showTweetViewController];
-        } 
-        else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
-            [self showEmailViewController];
-        } 
-        else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
-            [self shareToInstagram];
-        }
+    BOOL canTweet = NO;
+    if ([TWTweetComposeViewController canSendTweet]) {
+        canTweet = YES;
+    }
+    if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Copy link"]) {  // Copy link...
+        [UIPasteboard generalPasteboard].string = self.stamp.URL;
+    } 
+    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Twitter", nil)] && canTweet) {  // Twitter or cancel depending...
+        [self showTweetViewController];
+    } 
+    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
+        [self showEmailViewController];
+    } 
+    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
+        [self shareToInstagram];
+    }
 }
 
-- (void)shareToInstagram {
-    CGSize size = CGSizeMake(612, 612);
-    UIGraphicsBeginImageContextWithOptions(size, NO, 0.0);
-    //CGContextRef context = UIGraphicsGetCurrentContext();
-    
-    [@"This is a text" drawAtPoint:CGPointMake(10, 40) withFont:[UIFont stampedBoldFontWithSize:24]];
-    
-    UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
-    NSURL* cacheDir = [Util cacheDirectory];
-    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.igo"];
-    BOOL success = [UIImageJPEGRepresentation(finalImage, 1.0) writeToURL:igImageHookFile atomically:YES];
-    NSLog(@"%@,%d", igImageHookFile, success);
-    
-    UIDocumentInteractionController *interactionController = [UIDocumentInteractionController interactionControllerWithURL:igImageHookFile];
-    interactionController.UTI = @"com.instagram.exclusivegram";
-    interactionController.delegate = self;
-    
-    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
-    //[interactionController presentPreviewAnimated:YES];
-    // OPEN THE HOOK
+static CATransform3D MakePerspetiveTransform() { 
+    CATransform3D perspective = CATransform3DIdentity;
+    perspective.m34 = -1./2000.;
+    return perspective;
+}
+
+//- (void)shareToInstagramWithStamp:(id<STStamp>)stamp 
+//                        heroImage:(UIImage*)image  
+//                         andBlurb:(NSString*)blurb {
+//    CGSize size = CGSizeMake(612, 612);
+//    UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
+//    CGContextRef context = UIGraphicsGetCurrentContext();
+//    
+//    [[UIColor redColor] setStroke];
+//    UIFont* titleFont = [UIFont stampedTitleFontWithSize:80];
+//    [stamp.entity.title drawAtPoint:CGPointMake(42, 110 - titleFont.leading) withFont:titleFont];
+//    
+//    UIImage* categoryImage = [Util categoryIconForCategory:stamp.entity.category
+//                                               subcategory:stamp.entity.subcategory 
+//                                                    filter:nil
+//                                                   andSize:STCategoryIconSize15];
+//    categoryImage = [Util gradientImage:categoryImage withPrimaryColor:@"999999" secondary:@"999999"];
+//    
+//    [categoryImage drawInRect:CGRectMake(26, 124, categoryImage.size.width, categoryImage.size.height)];
+//    
+//    UIFont* subtitleFont = [UIFont stampedFontWithSize:24];
+//    [stamp.entity.subtitle drawAtPoint:CGPointMake(50, 140 - subtitleFont.leading) withFont:subtitleFont];
+//    
+//    CALayer* layer = [[[CALayer alloc] init] autorelease];
+//    [layer setContents:image.CGImage];
+//    [layer drawInContext:context];
+//    
+//    UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
+//    UIGraphicsEndImageContext();
+//    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
+//    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+//    NSString* cacheString = [paths objectAtIndex:0];
+//    NSURL* cacheDir = [NSURL fileURLWithPath:cacheString];
+//    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.ig"];
+//    BOOL success = [UIImageJPEGRepresentation(finalImage, 1.0) writeToURL:igImageHookFile atomically:YES];
+//    
+//    UIDocumentInteractionController *interactionController = [[UIDocumentInteractionController interactionControllerWithURL:igImageHookFile] retain];
+//    interactionController.UTI = @"com.instagram.photo";
+//    interactionController.delegate = self;
+//    if (blurb) {
+//        interactionController.annotation = [NSDictionary dictionaryWithObject:blurb forKey:@"InstagramCaption"];
+//    }
 //    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
-}
-- (BOOL) documentInteractionController: (UIDocumentInteractionController *) controller canPerformAction: (SEL) action {
-    return YES;
+//}
+
+//- (void)shareToInstagram {
+//    NSString* blurb = nil;
+//    if (self.stamp.contents.count) {
+//        id<STContentItem> contentItem = [self.stamp.contents objectAtIndex:0];
+//        blurb = contentItem.blurb;
+//    }
+//    NSString* entityImageURL = [Util entityImageURLForEntity:self.stamp.entity];
+//    [[STImageCache sharedInstance] imageForImageURL:entityImageURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+//        [self shareToInstagramWithStamp:self.stamp heroImage:image andBlurb:blurb];
+//    }];
+//}
+
+-(void)documentInteractionController:(UIDocumentInteractionController *)controller 
+       willBeginSendingToApplication:(NSString *)application {
+    NSLog(@"will start sending to %@", application);
 }
 
-- (UIViewController *) documentInteractionControllerViewControllerForPreview: (UIDocumentInteractionController *) controller {
-    return self;
+-(void)documentInteractionController:(UIDocumentInteractionController *)controller 
+          didEndSendingToApplication:(NSString *)application {
+    NSLog(@"did end sending to %@", application);
 }
+
+-(void)documentInteractionControllerDidDismissOpenInMenu:(UIDocumentInteractionController *)controller {
+    NSLog(@"did dismiss");
+    //[controller autorelease];
+}
+//
+//- (BOOL) documentInteractionController: (UIDocumentInteractionController *) controller canPerformAction: (SEL) action {
+//    return YES;
+//}
+//
+//
+//- (UIViewController *) documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController*)controller {
+//    return self;
+//}
 
 
 @end

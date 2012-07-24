@@ -13,7 +13,15 @@ __all__ = [
     'ResolverMediaItem',
     'ResolverSoftware',
     'ResolverSearchAll',
-    'LookupRequiredError'
+    'LookupRequiredError',
+    'isArtist',
+    'isAlbum',
+    'isTrack',
+    'isTvShow',
+    'isMovie',
+    'isBook',
+    'isPlace',
+    'isApp'
 ]
 
 import Globals
@@ -520,7 +528,6 @@ class ResolverSoftware(ResolverObject):
             v for v in l if v != ''
         ]
 
-
 class ResolverSearchAll(ResolverObject):
 
     @property 
@@ -536,439 +543,32 @@ class ResolverSearchAll(ResolverObject):
         return None
 
 
-# #
-# # Artist
-# #
 
 
-# class ResolverArtist(ResolverObject):
-#     """
-#     Interface for Artist objects.
+#                       #
+#   UTILITY FUNCTIONS   #
+#                       #
 
-#     Attributes:
+def isAlbum(resolver_object):
+    return isinstance(resolver_object, ResolverMediaCollection) and 'album' in resolver_object.types
 
-#     albums - a list of artist dicts which must at least contain a 'name' string.
-#     tracks - a list of track dicts which must at least contain a 'name' string.
-#     """
-#     @abstractproperty
-#     def albums(self):
-#         pass
+def isArtist(resolver_object):
+    return isinstance(resolver_object, ResolverPerson) and 'artist' in resolver_object.types
 
-#     @abstractproperty
-#     def tracks(self):
-#         pass
+def isTrack(resolver_object):
+    return isinstance(resolver_object, ResolverMediaItem) and 'track' in resolver_object.types
 
-#     @property
-#     def genres(self):
-#         return []
-        
-#     @property 
-#     def type(self):
-#         return 'artist'
+def isTvShow(resolver_object):
+    return isinstance(resolver_object, ResolverMediaCollection) and 'tv' in resolver_object.types
 
-#     @property 
-#     def subcategory(self):
-#         return 'artist'
+def isMovie(resolver_object):
+    return isinstance(resolver_object, ResolverMediaItem) and 'movie' in resolver_object.types
 
-#     @lazyProperty
-#     def related_terms(self):
-#         l = [
-#                 self.type,
-#                 self.name,
-#             ]
-#         l.extend([ track['name'] for track in self.tracks])
-#         l.extend([ album['name'] for album in self.albums])
-#         return [
-#             v for v in l if v != ''
-#         ]
+def isBook(resolver_object):
+    return isinstance(resolver_object, ResolverMediaItem) and 'book' in resolver_object.types
 
-# #
-# # Album
-# # 
+def isPlace(resolver_object):
+    return isinstance(resolver_object, ResolverPlace)
 
-# class ResolverAlbum(ResolverObject):
-#     """
-#     Interface for album objects
-
-#     Attributes:
-
-#     artist - an artist dict containing at least a 'name' string.
-#     tracks - a list of track dicts each containing at least a 'name' string.
-#     """
-#     @abstractproperty
-#     def artist(self):
-#         pass
-
-#     @abstractproperty
-#     def tracks(self):
-#         pass
-
-#     @property
-#     def genres(self):
-#         return []
-
-#     @property
-#     def date(self):
-#         return None
-
-#     @property 
-#     def type(self):
-#         return 'album'
-
-#     @property 
-#     def subcategory(self):
-#         return 'album'
-
-#     @lazyProperty
-#     def related_terms(self):
-#         l = [
-#                 self.type,
-#                 self.name,
-#                 self.artist['name'],
-#             ]
-#         l.extend([ track['name'] for track in self.tracks])
-#         return [
-#             v for v in l if v != ''
-#         ]
-
-
-# #
-# # Tracks
-# #
-
-# class ResolverTrack(ResolverObject):
-#     """
-#     Interface for track objects
-
-#     Attributes:
-
-#     artist - an artist dict containing at least a 'name' string
-#     album - an album dict containing at least a 'name' string
-#     length - a number (possibly float) inticating the length of the track in seconds
-#     """
-#     @abstractproperty
-#     def artist(self):
-#         pass
-
-#     @abstractproperty
-#     def album(self):
-#         pass
-
-#     @abstractproperty
-#     def length(self):
-#         pass
-
-#     @property
-#     def genres(self):
-#         return []
-
-#     @property
-#     def date(self):
-#         return None
-
-#     @property 
-#     def type(self):
-#         return 'track'
-
-#     @property 
-#     def subcategory(self):
-#         return 'song'
-        
-#     @lazyProperty
-#     def related_terms(self):
-#         return [
-#             v for v in [
-#                 self.type,
-#                 'song',
-#                 self.name,
-#                 self.artist['name'],
-#                 self.album['name'],
-#             ]
-#                 if v != ''
-#         ]
-
-# #
-# # Movie
-# #
-
-# class ResolverMovie(ResolverObject):
-#     """
-#     Interface for movie objects
-
-#     Attributes:
-
-#     cast - a list of actor dicts containing at least 'name' strings and possibly 'character' strings
-#     director - a director dict containing at least a 'name' string
-#     date - a datetime indicating the release date or None for unknown
-#     length - a number indicating the length of the movie in seconds or a negative number (-1) for unknown
-#     rating - a string indicating the MPAA rating of the movie or '' for unknown
-#     genres - a list of genre strings
-#     """
-#     @property
-#     def cast(self):
-#         return []
-
-#     @property
-#     def director(self):
-#         return {'name':''}
-
-#     @property
-#     def date(self):
-#         return None
-
-#     @property
-#     def length(self):
-#         return -1
-
-#     @property
-#     def rating(self):
-#         return None
-
-#     @property 
-#     def genres(self):
-#         return []
-
-#     @property 
-#     def type(self):
-#         return 'movie'
-
-#     @property 
-#     def subcategory(self):
-#         return 'movie'
-
-#     @lazyProperty
-#     def related_terms(self):
-#         l = [
-#                 self.type,
-#                 self.name,
-#                 self.director['name']
-#             ]
-#         l.extend(self.genres)
-#         for actor in self.cast:
-#             l.append(actor['name'])
-#             if 'character' in actor:
-#                 l.append(actor['character'])
-        
-#         return [ v for v in l if v != '' ]
-# #
-# # TV Show
-# #
-
-# class ResolverTVShow(ResolverObject):
-#     """
-#     Interface for tv show objects
-
-#     Attributes:
-
-#     cast - a list of actor dicts containing at least 'name' strings and possibly 'character' strings
-#     director - a director dict containing at least a 'name' string
-#     date - a datetime indicating the release date or None for unknown
-#     rating - a string indicating the MPAA rating of the show or '' for unknown
-#     genres - a list of genre strings
-#     seasons - the number of seasons of the show
-#     """
-#     @property
-#     def cast(self):
-#         return []
-
-#     @property
-#     def director(self):
-#         return {'name':''}
-
-#     @property
-#     def date(self):
-#         return None
-
-#     @property
-#     def rating(self):
-#         return None
-
-#     @property 
-#     def genres(self):
-#         return []
-
-#     @property 
-#     def type(self):
-#         return 'tv'
-
-#     @property 
-#     def subcategory(self):
-#         return 'tv'
-
-#     @property
-#     def seasons(self):
-#         return -1
-
-#     @lazyProperty
-#     def related_terms(self):
-#         l = [
-#                 self.type,
-#                 self.name,
-#                 self.director['name']
-#             ]
-#         l.extend(self.genres)
-#         for actor in self.cast:
-#             l.append(actor['name'])
-#             if 'character' in actor:
-#                 l.append(actor['character'])
-        
-#         return [ v for v in l if v != '' ]
-
-# #
-# # Books
-# #
-
-# class ResolverBook(ResolverObject):
-#     """
-#     Interface for book objects
-
-#     Attributes:
-
-#     author - an author dict containing at least a 'name' string
-#     publisher - an publisher dict containing at least a 'name' string
-#     length - a number (possibly float) inticating the length of the book in pages
-#     """
-#     @abstractproperty
-#     def author(self):
-#         pass
-
-#     @abstractproperty
-#     def publisher(self):
-#         pass
-
-#     @property
-#     def date(self):
-#         return None
-
-#     @property
-#     def length(self):
-#         return -1
-
-#     @property
-#     def isbn(self):
-#         return None
-
-#     @property
-#     def eisbn(self):
-#         return None
-
-#     @property
-#     def sku(self):
-#         return None
-
-#     @property 
-#     def genres(self):
-#         return []
-
-#     @property 
-#     def type(self):
-#         return 'book'
-
-#     @property 
-#     def subcategory(self):
-#         return 'book'
-
-#     @lazyProperty
-#     def related_terms(self):
-#         l = [
-#                 self.type,
-#                 self.name,
-#                 self.author['name'],
-#                 self.publisher['name'],
-#             ]
-#         return [ v for v in l if v != '' ]
-
-
-# #
-# # Apps
-# #
-
-# class ResolverApp(ResolverObject):
-#     """
-#     Interface for app objects
-
-#     Attributes:
-
-#     genres - a list containing any applicable genres
-#     publisher - an publisher dict containing at least a 'name' string
-#     """
-#     @abstractproperty
-#     def publisher(self):
-#         pass
-
-#     @property
-#     def date(self):
-#         return None
-
-#     @property 
-#     def genres(self):
-#         return []
-
-#     @property 
-#     def type(self):
-#         return 'app'
-
-#     @property 
-#     def subcategory(self):
-#         return 'app'
-
-#     @lazyProperty
-#     def related_terms(self):
-#         l = [
-#                 self.type,
-#                 self.name,
-#                 self.publisher['name'],
-#             ]
-#         return [ v for v in l if v != '' ]
-
-#     @lazyProperty 
-#     def screenshots(self):
-#         return []
-
-# class ResolverVideoGame(ResolverObject):
-#     """
-#     Interface for video game objects
-    
-#     Attributes:
-    
-#     author - an author dict containing at least a 'name' string
-#     publisher - an publisher dict containing at least a 'name' string
-#     """
-    
-#     @abstractproperty
-#     def author(self):
-#         pass
-    
-#     @abstractproperty
-#     def publisher(self):
-#         pass
-    
-#     @property
-#     def date(self):
-#         return None
-    
-#     @property
-#     def sku(self):
-#         return None
-    
-#     @property 
-#     def genres(self):
-#         return []
-    
-#     @property 
-#     def type(self):
-#         return 'video_game'
-    
-#     @property 
-#     def subcategory(self):
-#         return 'video_game'
-    
-#     @lazyProperty
-#     def related_terms(self):
-#         l = [
-#                 self.type, 
-#                 self.name, 
-#                 self.author['name'], 
-#                 self.publisher['name'], 
-#             ]
-#         return [ v for v in l if v != '' ]
+def isApp(resolver_object):
+    return isinstance(resolver_object, ResolverSoftware)

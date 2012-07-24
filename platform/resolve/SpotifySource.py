@@ -454,16 +454,19 @@ class SpotifySource(GenericSource):
         for track in tracks:
             applyTrackTitleDataQualityTests(track, queryText)
             adjustTrackRelevanceByQueryMatch(track, queryText)
+            augmentTrackDataQualityOnBasicAttributePresence(track)
 
         albums  = scoreResultsWithBasicDropoffScoring(albums, sourceScore=0.7)
         for album in albums:
             applyAlbumTitleDataQualityTests(album, queryText)
             adjustAlbumRelevanceByQueryMatch(album, queryText)
+            augmentAlbumDataQualityOnBasicAttributePresence(album)
 
         artists = scoreResultsWithBasicDropoffScoring(artists, sourceScore=0.6)
         for artist in artists:
             applyArtistTitleDataQualityTests(artist, queryText)
             adjustArtistRelevanceByQueryMatch(artist, queryText)
+            augmentArtistDataQualityOnBasicAttributePresence(artist)
 
         self.__augmentArtistsAndAlbumsWithTracks(artists, albums, tracks)
         smoothRelevanceScores(tracks), smoothRelevanceScores(albums), smoothRelevanceScores(artists)

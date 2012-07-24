@@ -50,7 +50,7 @@
 @property (nonatomic, retain, readonly) UITableView *infoTableView;
 @property (nonatomic, readwrite, retain) STCancellation* stampCacheCreationCancellation;
 @property (nonatomic, readwrite, assign) BOOL loadingStamps;
-@property (nonatomic, readwrite, retain) STUserHeaderView* headerView;
+@property (nonatomic, readwrite, retain) STUserHeaderView* userHeaderView;
 
 
 @end
@@ -65,7 +65,7 @@
 @synthesize infoTableView = _infoTableView;
 @synthesize stampCacheCreationCancellation = _stampCacheCreationCancellation;
 @synthesize loadingStamps = _loadingStamps;
-@synthesize headerView = _headerView;
+@synthesize userHeaderView = _userHeaderView;
 
 - (void)commonInit {
     
@@ -83,7 +83,7 @@
     if (IS_CURRENT_USER(self.user.userID)) {
         self.user = [STStampedAPI sharedInstance].currentUser;
         [self reloadDataSource];
-        [self.headerView setupWithUser:self.user];
+        [self.userHeaderView setupWithUser:self.user];
     }
 }
 
@@ -121,7 +121,7 @@
 }
 
 - (void)dealloc {
-    [_headerView release];
+    [_userHeaderView release];
     [_stampCacheCreationCancellation cancel];
     [_stampCacheCreationCancellation release];
     [STEvents removeObserver:self];
@@ -155,7 +155,7 @@
         if (self.user) {
             [view setupWithUser:self.user];
         }
-        self.headerView = view;
+        self.userHeaderView = view;
     }
     
     if (LOGGED_IN && IS_CURRENT_USER(self.userIdentifier)) {
