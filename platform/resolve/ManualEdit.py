@@ -76,8 +76,9 @@ def extraInfo(entity):
             try:
                 image_url        = _cleanImageURL(album.images[0].sizes[0].url)
                 extra.append("""
+<img src="%s"/>
 <a href="%s">%s</a><br/>
-                    """ % (image_url, album.title))
+                    """ % (image_url, image_url, album.title))
             except Exception as e:
                 print e
 
@@ -211,6 +212,10 @@ desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
     for k,v in fields.items():
         if v is None:
             v = ''
+        if k == 'image_url' and v != '':
+            html.append("""
+<img src="%s"/><br/>
+                """ % v)
         html.append("""
 %s: <input type="text" name="%s" value="%s" size="100"/>%s<br />
             """ % (k, k, v, _quickLink(k,v)))
