@@ -788,7 +788,11 @@ class StampedSource(GenericSource):
     @property
     def urlField(self):
         return None
-    
+
+    def resolve(self, query, **options):
+        options['groups'] = [1000]
+        return self.resolver.resolve(query, self.matchSource(query), **options)
+
     def resolve_fast_batch(self, sourcesAndKeys):
         SOURCES = set(['amazon', 'spotify', 'rdio', 'opentable', 'tmdb', 'factual', 'instagram',
                 'singleplatform', 'foursquare', 'fandango', 'googleplaces', 'itunes', 'netflix',
