@@ -170,8 +170,8 @@ def parseCommandLine():
     parser.add_option("-a", "--action", dest="action", 
         default='print', type="string", help="Specify destination - %s" % ', '.join(_actions.keys()) )
 
-    parser.add_option("-f", "--file", dest="file", 
-        default=None, type="string", help="Save entities to given file")
+    # parser.add_option("-f", "--file", dest="file", 
+    #     default=None, type="string", help="Save entities to given file")
 
     parser.add_option("-k", "--keys", dest="keys", 
         default=None, type="string", help="Sparsely print specific fields")
@@ -201,9 +201,9 @@ if __name__ == '__main__':
     for arg in args:
         command = _commands[arg]
         output = _actions[options.action]
-        if options.file is not None:
-            f = open(options.file, 'w')
-            output = createOutputToFile(f)
+        # if options.file is not None:
+        #     f = open(options.file, 'w')
+        #     output = createOutputToFile(f)
         if options.keys is not None:
             keys = options.keys.split(',')
 
