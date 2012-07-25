@@ -52,7 +52,10 @@ class StampedRateLimiterService():
         self.__throttle = throttle
         self.__limiters = {}
         self.__stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
-        self.__rllog = MongoRateLimiterLogCollection()
+        try:
+            self.__rllog = MongoRateLimiterLogCollection()
+        except:
+            logs.error('Error connecting to db')
         self.loadDbLog()
         self.loadLimiterConfig()
         self.__config_loader_thread = None
