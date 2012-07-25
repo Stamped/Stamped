@@ -181,7 +181,7 @@ class RateLimiterState(object):
                 'instantiate_custom_exceptions' : True,
                 'import_custom_exceptions' : True,
             }
-            self.__conn = rpyc.connect(host, port)
+            self.__conn = rpyc.connect(host, port, config=config)
 
         time.sleep(0)
         async_request = rpyc.async(self.__conn.root.request)
