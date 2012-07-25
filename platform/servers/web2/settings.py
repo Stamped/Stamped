@@ -75,10 +75,10 @@ STATIC_URL = '/assets/'
 
 # utilize static.stamped.com CDN gateway on ec2; otherwise, fallback to using 
 # less efficient but more accessible / productive local assets for development.
-if IS_PROD:
-    SITE_ROOT   = "http://static.stamped.com"
-else:
-    SITE_ROOT   = PROJ_ROOT
+#if IS_PROD:
+#    SITE_ROOT   = "http://static.stamped.com"
+#else:
+SITE_ROOT   = PROJ_ROOT
 
 if STAMPED_DEBUG:
     STAMPED_STATIC_URL  = STATIC_URL
