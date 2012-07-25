@@ -33,17 +33,46 @@
     display: none;
 }
 
+.option-info {
+    float: left;
+    width: 60%;
+    
+    .human-name {
+        font-weight: 700;
+        font-size: 120%;
+    }
+}
+
 .header {
     position: relative;
     margin: 0 auto;
     width: 80%;
     
-    .option-icon {
-        float: right;
+    .lhs {
+        float: left;
+        width: 60%;
+        
+        .profile-image-small {
+            float: left;
+            margin-right: 24px;
+        }
+        
+        .action-info {
+            overflow: visible;
+        }
     }
     
-    .option-email-icon {
-        margin-right: 50px;
+    .rhs {
+        float: right;
+        width: 35%;
+        
+        .option-icon {
+            float: right;
+        }
+        
+        .option-email-icon {
+            margin-right: 50px;
+        }
     }
 }
 
@@ -64,20 +93,10 @@
                 margin-right: 24px;
             }
             
-            .option-info {
-                float: left;
-                width: 60%;
-                
-                .human-name {
-                    font-weight: 700;
-                    font-size: 120%;
-                }
-                
-                .option-desc {
-                    width: 160%;
-                    font-size: 80%;
-                    color: #999;
-                }
+            .option-desc {
+                width: 160%;
+                font-size: 80%;
+                color: #999;
             }
         }
         
