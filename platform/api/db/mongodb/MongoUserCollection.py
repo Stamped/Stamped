@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import logs, re, bson
+import pymongo
 
 from logs                       import report
 from datetime                   import datetime
@@ -38,6 +39,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         self._collection.ensure_index('phone')
         self._collection.ensure_index('linked.twitter.linked_user_id')
         self._collection.ensure_index('linked.facebook.linked_user_id')
+        self._collection.ensure_index([('screen_name_lower', pymongo.ASCENDING), ('_id', pymongo.ASCENDING)])
 
         self._cache = globalMemcache()
 
@@ -397,16 +399,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def findUsersByTwitter(self, twitterIds, limit=0):
         twitterIds = map(str, twitterIds)
 
-        # old format find
-        data = self._collection.find(
-            {"linked_accounts.twitter.twitter_id": {"$in": twitterIds}}
-        ).limit(limit)
-
         result = []
-        for item in data:
-            user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked_accounts']['twitter']['twitter_id']
-            result.append(user)
 
         # new format find
         data = self._collection.find(
@@ -422,15 +415,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def findUsersByFacebook(self, facebookIds, limit=0):
         facebookIds = map(str, facebookIds)
         
-        data = self._collection.find(
-            {"linked_accounts.facebook.facebook_id": {"$in": facebookIds}}
-        ).limit(limit)
-
         result = []
-        for item in data:
-            user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked_accounts']['facebook']['facebook_id']
-            result.append(user)
 
         # new format find
         data = self._collection.find(

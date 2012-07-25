@@ -20,7 +20,7 @@ class MongoInviteQueueCollection(AMongoCollection):
     def __init__(self):
         AMongoCollection.__init__(self, collection='invitequeue', primary_key='invite_id', obj=Invite)
 
-        self._collection.ensure_index('created', unique=False)
+        self._collection.ensure_index('timestamp.created', unique=False)
 
     ### PUBLIC
 

@@ -37,9 +37,9 @@ def password_reset(request, schema, **kwargs):
     if account is None:
         raise StampedInputError("invalid account")
     
-    auth_service = acount['auth_service']
+    auth_service = acount.auth_service
     if auth_service != 'stamped':
-        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account['screen_name'], auth_service))
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (accountscreen_name, auth_service))
     
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 
@@ -195,6 +195,12 @@ def send_reset_email(request, schema, **kwargs):
         ### TODO: Display appropriate error message
         errorMsg = 'No account information was found for that email address.'
         raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
+    
+    account = stampedAPIProxy.getAccount(user['user_id'])
+    auth_service = account.auth_service
+    
+    if auth_service != 'stamped':
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account.screen_name, auth_service))
     
     # send email
     logs.info("sending email to '%s' (user: '%s')" % (email, user['screen_name']))
