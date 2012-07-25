@@ -5282,16 +5282,11 @@ class StampedAPI(AStampedAPI):
                 stubId = stub.entity_id
                 resolved = self._resolveStub(stub, True)
                 if resolved is None:
-                    # It's okay to fail resolution here, since we're only resolving against our own
-                    # db. We never try to resolve an unknown album, for performance reasons. Also
-                    # we don't go from albums to artists, since we will to to the tracks, which lead
-                    # to the artists.
-                    if attr != 'albums' or entity.isType('album') and attr == 'artists':
-                        resolvedList.append(stub)
-                    continue
-                resolvedList.append(resolved.minimize())
-                if stubId != resolved.entity_id:
-                    stubsModified = True
+                    resolvedList.append(stub)
+                else:
+                    resolvedList.append(resolved.minimize())
+                    if stubId != resolved.entity_id:
+                        stubsModified = True
 
             if entity.isType('artist'):
                 # Do a quick dedupe of songs in case the same song appears in different albums.
@@ -5325,25 +5320,21 @@ class StampedAPI(AStampedAPI):
             if not stubList:
                 return
 
-            mergeEntityTasks = []
-            for stub in stubList:
-                resolvedFull = self._resolveStub(stub, False)
-                if resolvedFull is None:
-                    logs.warning('stub resolution failed: %s' % stub)
-                    mergeEntityTasks.append(None)
-                else:
-                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
-            
             modified = False
             visitedStubs = []
             mergedEntities = []
-            for stub, task in zip(stubList, mergeEntityTasks):
-                if task is None:
+            for stub in stubList:
+                resolvedFull = self._resolveStub(stub, False)
+                if resolvedFull is None:
                     modified = True
-                    continue
-                mergedEntities.append(task.get())
-                visitedStubs.append(mergedEntities[-1].minimize())
-                modified = modified or (visitedStubs[-1] != stub)
+                    logs.warning('stub resolution failed: %s' % stub)
+                    if attr == 'artists':
+                        visitedStubs.append(stub)
+                else:
+                    mergedEntity = self._enrichAndPersistEntity(resolvedFull, persisted)
+                    mergedEntities.append(mergedEntity)
+                    visitedStubs.append(mergedEntity.minimize())
+                    modified = modified or (visitedStubs[-1] != stub)
             setattr(entity, attr, visitedStubs)
             if modified:
                 self._entityDB.updateEntity(entity)
