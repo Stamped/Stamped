@@ -23,8 +23,14 @@
 {% block pane-body %}
     <p class="title">Legal Stuff</p>
     
-    <div>
+    <div id="views" class="active-view-privacy-policy">
+        <div class="view view-privacy-policy">
+            {% include "privacy-policy.html" %}
+        </div>
         
+        <div class="view view-terms-of-service">
+            {% include "terms-of-service.html" %}
+        </div>
     </div>
 {% endblock pane-body %}
 
