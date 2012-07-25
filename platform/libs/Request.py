@@ -53,17 +53,7 @@ class RateLimiterState(object):
         self.__emails = deque()
 
         # determine the private ip address of the ratelimiter instance for this stack
-        ratelimiter_nodes = None
-        try:
-            ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
-        except:
-            logs.error("Could not find a node with tag 'ratelimiter on same stack")
-        if ratelimiter_nodes is None:
-            self.__host = 'localhost'
-        else:
-            self.__host = ratelimiter_nodes[0]['private_ip_address']
-        self.__port = 18861
-
+        self._getHost()
         print('### host: %s' % self.__host)
 
     class FailLog(object):
@@ -84,6 +74,18 @@ class RateLimiterState(object):
             self.__service_init_semaphore.release()
 
         return self.__local_rlservice
+
+    def _getHost(self):
+        ratelimiter_nodes = None
+        try:
+            ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
+        except:
+            logs.error("Could not find a node with tag 'ratelimiter on same stack")
+        if ratelimiter_nodes is None:
+            self.__host = 'localhost'
+        else:
+            self.__host = ratelimiter_nodes[0]['private_ip_address']
+        self.__port = 18861
 
     def sendFailLogEmail(self):
         if len(self.__fails) == 0:
@@ -131,6 +133,7 @@ class RateLimiterState(object):
 
     def _fail(self, exception):
         self.__conn = None
+        self._getHost()
         if self.__blackout_start is not None:
             return
 
@@ -173,15 +176,21 @@ class RateLimiterState(object):
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-        time.sleep(0)
+
+        print('made it past sleep')
         if self.__conn is None:
             self.__conn = rpyc.connect(host, port)
 
+        time.sleep(0)
+        print('made it past connect')
         async_request = rpyc.async(self.__conn.root.request)
         try:
+            print('about to create asyncresult')
             asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
             asyncresult.set_expiry(timeout)
+            print('waiting for response in value')
             response, content = asyncresult.value
+            print('got value response')
         except RateException as e:
             logs.info('RateException occurred during third party request: %s' % e)
             raise e

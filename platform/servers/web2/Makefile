@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.36
+ASSET_VERSION_NUMBER        = 1.1.44
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -101,6 +101,8 @@ $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_CSS_TARGET,$(PAGE))))
 css_targets: $(LESS_CSS_TARGETS);
 
 deploy: $(ALL_TARGETS)
+	mkdir -p $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
+	cp -rf assets/css/ie/* $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
 	cd bin && python deploy_assets.py
 
 update_version:

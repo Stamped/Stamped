@@ -24,7 +24,7 @@
         
         {% block head %}
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=8" />
         
         <title>{% if title %}{{title}}{% else %}Stamped{% endif %}</title>
         
@@ -63,15 +63,15 @@
         {% endif %}
         
         <!--[if lte IE 9]>
-        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/styles.lte.ie.9.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/{{ STAMPED_ASSET_VERSION }}/styles.lte.ie.9.css">
         <![endif]-->
         
         <!--[if lte IE 8]>
-        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/styles.lte.ie.8.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/{{ STAMPED_ASSET_VERSION }}/styles.lte.ie.8.css">
         <![endif]-->
         
         <!--[if lte IE 7]>
-        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/styles.lte.ie.7.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/{{ STAMPED_ASSET_VERSION }}/styles.lte.ie.7.css">
         <![endif]-->
         
         {% endblock styles %}
