@@ -32,6 +32,15 @@ def password_reset(request, schema, **kwargs):
     if user_id is None:
         raise StampedInputError("invalid token")
     
+    account = stampedAPIProxy.getAccount(user_id)
+    
+    if account is None:
+        raise StampedInputError("invalid account")
+    
+    auth_service = acount.auth_service
+    if auth_service != 'stamped':
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (accountscreen_name, auth_service))
+    
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 
         'page'              : 'password_reset', 
@@ -54,7 +63,7 @@ def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
     token        = schema.token
     
-    if False: # testing
+    if True: # testing
         user = travis_test.user
         
         settings = {
@@ -88,8 +97,6 @@ def alert_settings(request, schema, **kwargs):
     else:
         user_id  = g_stamped_auth.verifyEmailAlertToken(token)
         account  = stampedAPIProxy.getAccount(user_id)
-        logs.info("user_id: %s" % user_id)
-        logs.info("account: %s" % account)
         user     = account.dataExport()
         settings = user['alert_settings']
     
@@ -188,6 +195,12 @@ def send_reset_email(request, schema, **kwargs):
         ### TODO: Display appropriate error message
         errorMsg = 'No account information was found for that email address.'
         raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
+    
+    account = stampedAPIProxy.getAccount(user['user_id'])
+    auth_service = account.auth_service
+    
+    if auth_service != 'stamped':
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account.screen_name, auth_service))
     
     # send email
     logs.info("sending email to '%s' (user: '%s')" % (email, user['screen_name']))

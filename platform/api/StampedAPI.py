@@ -1270,6 +1270,7 @@ class StampedAPI(AStampedAPI):
             'michaelkors', 
             'parislemon', 
             'kevinsystrom', 
+            'harvard',
             'barondavis', 
             'urbandaddy', 
             'tconrad', 

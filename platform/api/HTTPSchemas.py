@@ -2097,6 +2097,7 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('netflix_url',                      basestring)
         cls.addProperty('singleplatform_url',               basestring)
         cls.addProperty('spotify_id',                       basestring)
+        cls.addProperty('opentable_url',                    basestring)
 
         # place
         cls.addProperty('address_street',                   basestring)
@@ -3365,6 +3366,12 @@ class HTTPActivity(Schema):
             if self.verb == 'notification_welcome':
                 _addUserObjects()
                 self.header = "Welcome to Stamped"
+                self.image = _getIconURL('news_welcome')
+                self.action = _buildUserAction(self.objects.users[0])
+                
+            elif self.verb == 'notification_upgrade':
+                _addUserObjects()
+                self.header = "Welcome to Stamped 2.0"
                 self.image = _getIconURL('news_welcome')
                 self.action = _buildUserAction(self.objects.users[0])
 
