@@ -625,7 +625,7 @@
             event.preventDefault();
             
             var $this       = $(this);
-            var stamp_id    = get_stamp_list_view_item_id($item);
+            var stamp_id    = get_stamp_list_view_item_id($this);
             
             if (stamp_id !== null) {
                 if (lite) {
