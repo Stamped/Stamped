@@ -282,7 +282,7 @@ def update(updates):
         simple_fields.extend(_place_fields)
     singleplatform_url = updates.singleplatform_url
     if singleplatform_url is not None and singleplatform_url not in bad_versions:
-        singleplatform_id = re.match(r'http://www.singlepage.com/(.+)/menu\?.*', singleplatform_url).group(1)
+        singleplatform_id = re.match(r'http://www.singlepage.com/(.+)/menu(\?.*)?', singleplatform_url).group(1)
         entity.sources.singleplatform_url = singleplatform_url
         entity.sources.singleplatform_id = singleplatform_id
         entity.sources.singleplatform_source = 'seed'
@@ -382,6 +382,7 @@ def update(updates):
             entity.sources.itunes_timestamp = now
     fandango_url = updates.fandango_url
     if fandango_url is not None and fandango_url not in bad_versions:
+        #'http://www.qksrv.net/click-5348839-10576760?url=http%3a%2f%2fmobile.fandango.com%3fa%3d%26m%3d154970
         match = re.match(r'http://www.fandango.com/(.+)_(\d+)/(.+)(\?.+)?', fandango_url)
         fandango_raw_id = match.group(2)
         entity.sources.fandango_id = 'http://www.fandango.com/rss/%s' % fandango_raw_id
