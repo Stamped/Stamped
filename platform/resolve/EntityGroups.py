@@ -191,13 +191,29 @@ class NetflixGroup(AKindTypeGroup):
 
         self.addField(['sources', 'netflix_id'])
         self.addField(['sources', 'netflix_url'])
-        self.addField(['sources', 'netflix_is_instant_available'])
-        self.addField(['sources', 'netflix_instant_available_until'])
+        # self.addField(['sources', 'netflix_is_instant_available'])
+        # self.addField(['sources', 'netflix_instant_available_until'])
 
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.netflix_is_instant_available = proxy.is_instant_available
         entity.sources.netflix_instant_available_until = proxy.instant_available_until
 
+
+class NetflixAvailableGroup(AKindTypeGroup):
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'netflix_available',
+            source_path=['sources', 'netflix_available_source'], 
+            timestamp_path=['sources', 'netflix_available_timestamp']
+        )
+        self.addKind('media_item')
+        self.addKind('media_collection')
+        self.addType('movie')
+        self.addType('tv')
+
+        self.addField(['sources', 'netflix_is_instant_available'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.netflix_is_instant_available = proxy.is_instant_available
 
 class RdioGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):

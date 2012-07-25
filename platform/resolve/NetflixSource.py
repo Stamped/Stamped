@@ -230,6 +230,7 @@ class NetflixSource(GenericSource):
                 'images',
                 'length',
                 'url',
+                'netflix_available',
             ],
             kinds=[
                 'media_item',
