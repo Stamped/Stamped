@@ -63,6 +63,20 @@ var g_update_stamps = null;
         
         
         // ---------------------------------------------------------------------
+        // initialize basic error handling
+        // ---------------------------------------------------------------------
+        
+        
+        var show_error = function() {
+            var $error = $("#error");
+            
+            if ($error.length > 0) {
+                $error.show().delay(3000).fadeOut(1000);
+            }
+        };
+        
+        
+        // ---------------------------------------------------------------------
         // initialize profile header navigation
         // ---------------------------------------------------------------------
         
@@ -1258,6 +1272,8 @@ var g_update_stamps = null;
                                 }
                                 
                                 if (status === "error") {
+                                    show_error();
+                                    
                                     return;
                                 }
                                 
@@ -1632,6 +1648,7 @@ var g_update_stamps = null;
             var sdetail_initialized = false;
             var sdetail_anim_loaded = false;
             var sdetail_ajax_loaded = false;
+            var sdetail_ajax_error  = false;
             var scroll_top = 0;
             var $target, $target2;
             
@@ -1664,12 +1681,17 @@ var g_update_stamps = null;
                     sdetail_initialized = true;
                     
                     setTimeout(function() {
-                        $target.replaceWith($target2);
-                        init_sdetail($target2);
-                        
-                        // TODO: which order should these two statements appear in?
-                        resize_sdetail_wrapper($target2);
-                        $target2.removeClass('sdetail-loading');
+                        if (sdetail_ajax_error) {
+                            show_error();
+                            close_sdetail();
+                        } else {
+                            $target.replaceWith($target2);
+                            init_sdetail($target2);
+                            
+                            // TODO: which order should these two statements appear in?
+                            resize_sdetail_wrapper($target2);
+                            $target2.removeClass('sdetail-loading');
+                        }
                     }, 150);
                 }
             };
@@ -1730,10 +1752,7 @@ var g_update_stamps = null;
                         //console.debug(response);
                         //console.debug(xhr);
                         
-                        alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
-                        
-                        close_sdetail();
-                        return;
+                        sdetail_ajax_error = true;
                     }
                     
                     sdetail_ajax_loaded = true;
