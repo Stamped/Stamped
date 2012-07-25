@@ -17,7 +17,7 @@ import pickle
 import time
 from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
-from servers.ratelimiter.RateLimiter2 import RateException
+from servers.ratelimiter.RateLimiter2 import *
 import libs.ec2_utils
 from collections                import deque
 
@@ -176,30 +176,16 @@ class RateLimiterState(object):
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-
-        print('made it past sleep')
         if self.__conn is None:
             self.__conn = rpyc.connect(host, port)
 
         time.sleep(0)
-        print('made it past connect')
         async_request = rpyc.async(self.__conn.root.request)
-        try:
-            print('about to create asyncresult')
-            asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
-            asyncresult.set_expiry(timeout)
-            print('waiting for response in value')
-            response, content = asyncresult.value
-            print('got value response')
-        except RateException as e:
-            logs.info('RateException occurred during third party request: %s' % e)
-            raise e
+        asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
+        asyncresult.set_expiry(timeout)
+        response, content = asyncresult.value
         except Exception as e:
-            logs.error('RPC service request fail: %s' % e)
-            raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request.  "
-                                                    "service: %s  method: %s  url: %s  body: %s  header: %s"
-                                                    "priority: %s  timeout: %s  Exception: %s" %
-                                                    (service, method, url, body, header, priority, timeout, e))
+
 
         return pickle.loads(response), content
 
@@ -213,8 +199,17 @@ class RateLimiterState(object):
         try:
             print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
+        except DailyLimitException as e:
+            logs.warning("Hit daily rate limit for service: '%s'" % service)
+        except WaitTooLongException as e:
+            logs.warning("'%s' service request estimated wait time longer than timeout" % service)
+        except TimeoutException as e:
+            logs.warning("'%s' request timed out." % service)
         except Exception as e:
-            logs.warning('### failed while attempting rpc service request: %s' % e)
+            logs.error("RPC Service Request fail."
+                        "service: %s  method: %s  url: %s  body: %s  header: %s"
+                        "priority: %s  timeout: %s  Exception: %s" %
+                        (service, method, url, body, header, priority, timeout, e))
             self._fail(e)
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 
