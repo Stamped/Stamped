@@ -127,7 +127,6 @@ body.main {
             background: #c7c7c7;
             width:  100%;
             height: 15px;
-            
         }
         
         .ribbon-wrapper-bottom {
@@ -247,12 +246,17 @@ body.main {
         margin-left: 8px;
         
         .bieber-video-preview-icon {
-            display: inline-block;
             position: relative;
+            display:  inline-block;
             top: 12px;
         }
         
         .overview-video {
+            position: relative;
+            display: none;
+        }
+        
+        .overview-video-preview-icon {
             display: none;
         }
     }
@@ -272,6 +276,15 @@ body.main {
     
     .overview-video {
         display: block !important;
+    }
+    
+    .overview-video-preview-icon {
+        display: inline-block !important;
+    }
+    
+    .speech-bubble {
+        position: relative;
+        top: -20px;
     }
 }
 
@@ -1093,6 +1106,13 @@ footer {
     
     width:  45px;
     height: 45px;
+}
+
+.overview-video-preview-icon {
+    background: url(/assets/img/index/overviewvideo.png) no-repeat;
+    
+    width:  112px;
+    height: 65px;
 }
 
 #category-illustration {

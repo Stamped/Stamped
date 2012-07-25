@@ -80,8 +80,11 @@ class Memcache(object):
     
     def __getitem__(self, key):
         if self._client is not None:
-            return self._client[key]
-
+            try:
+                return self._client[key]
+            except Exception:
+                logs.warn(utils.getFormattedException())
+        
         raise KeyError(key)
 
     def __delitem__(self, key):
