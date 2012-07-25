@@ -329,15 +329,15 @@ class RateLimiter(object):
 
             if priority == 0 and self.__requests.qsize() > 0 and \
                (expected_wait_time + expected_request_time) > request.timeout:
-                raise WaitTooLongException("Expected request time too long. Expected: %s Timeout: %s" %
-                                           (expected_total_time + expected_request_time, request.timeout))
+                raise WaitTooLongException("'%s': Expected request time too long. Expected: %s Timeout: %s" %
+                                           (self.__service_name, expected_total_time + expected_request_time, request.timeout))
 
             if self._isBlackout():
-                raise TooManyFailedRequestsException("Too many failed requests. Wait time remaining: %s seconds" %
-                                                     (self.blackout_wait - (now - self.blackout_start)))
+                raise TooManyFailedRequestsException("'%s': Too many failed requests. Wait time remaining: %s seconds" %
+                                                     (self.__service_name, self.blackout_wait - (now - self.blackout_start)))
             if self._isDayLimit():
-                raise DailyLimitException("Hit the daily request cap.  Wait time remaining: %s minutes" %
-                                        (((self.__day_start + 60*60*24) - now) / 60))
+                raise DailyLimitException("'%s': Hit the daily request cap.  Wait time remaining: %s minutes" %
+                                        (self.__service_name, ((self.__day_start + 60*60*24) - now) / 60))
 
             asyncresult = AsyncResult()
 
