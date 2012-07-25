@@ -364,6 +364,7 @@
         </div>
     </div>
     
+    {% if not mobile %}
     <div id="tastemaker-map-window" class="main-content forward-button-active refresh-button-active">
         <div id="back-button"    class="chrome-button"></div>
         <div id="forward-button" class="chrome-button"></div>
@@ -375,6 +376,7 @@
             <div id="tastemaker-map-window-loading"></div>
         </div>
     </div>
+    {% endif %}
 {% endblock main %}
 
 {% block pre_footer %}
