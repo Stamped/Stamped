@@ -37,7 +37,6 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         
         self.api = api
         self._collection.ensure_index('phone')
-        self._collection.ensure_index('email')
         self._collection.ensure_index('linked.twitter.linked_user_id')
         self._collection.ensure_index('linked.facebook.linked_user_id')
         self._collection.ensure_index([('screen_name_lower', pymongo.ASCENDING), ('_id', pymongo.ASCENDING)])
