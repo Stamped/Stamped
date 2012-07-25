@@ -237,6 +237,7 @@ def handle_map(request, schema, **kwargs):
         'body_classes'  : body_classes, 
         'title'         : title, 
         'URL'           : url, 
+        'mobile'        : mobile, 
     }, preload=[ 'user', 'stamps', 'stamp_id', 'lite' ])
 
 @stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
@@ -288,6 +289,7 @@ def sdetail(request, schema, **kwargs):
         'feedback_users'     : users, 
         'stamp'              : stamp, 
         'entity'             : entity, 
+        'mobile'             : mobile, 
     })
     
     if ajax:
@@ -440,11 +442,13 @@ def index(request, schema, **kwargs):
         'tastemakers'       : tastemakers, 
         'page'              : 'index', 
         'title'             : 'Stamped', 
+        'mobile'            : schema.mobile
     })
 
 @stamped_view()
 def about(request, **kwargs):
     body_classes = "about main main-animating"
+    mobile   = kwargs.get('mobile', False)
     
     founders = [
         {
@@ -588,15 +592,18 @@ def about(request, **kwargs):
         'team'              : team, 
         'advisors'          : advisors, 
         'title'             : 'Stamped - About Us', 
+        'mobile'            : mobile, 
     })
 
 @stamped_view()
 def jobs(request, **kwargs):
     body_classes = "jobs main main-animating"
+    mobile       = schema.mobile
     
     return stamped_render(request, 'jobs.html', {
         'body_classes'      : body_classes, 
         'page'              : 'jobs', 
         'title'             : 'Stamped - Jobs', 
+        'mobile'            : mobile, 
     })
 

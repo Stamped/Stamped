@@ -235,6 +235,24 @@ class RdioGroup(AKindTypeGroup):
         entity.sources.rdio_id = proxy.key
         if hasattr(proxy, 'url'):
             entity.sources.rdio_url = proxy.url
+
+class RdioAvailableGroup(AKindTypeGroup):
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'rdio_available',
+            source_path=['sources', 'rdio_available_source'], 
+            timestamp_path=['sources', 'rdio_available_timestamp']
+        )
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addKind('media_item')
+        self.addType('track')
+
+        self.addField(['sources', 'rdio_available_stream'])
+        self.addField(['sources', 'rdio_available_sample'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.rdio_available_stream = proxy.canStream
+        entity.sources.rdio_available_sample = proxy.canSample
     
 
 class TheTVDBGroup(AKindTypeGroup):

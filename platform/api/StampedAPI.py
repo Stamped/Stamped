@@ -1270,6 +1270,7 @@ class StampedAPI(AStampedAPI):
             'michaelkors', 
             'parislemon', 
             'kevinsystrom', 
+            'harvard',
             'barondavis', 
             'urbandaddy', 
             'tconrad', 
@@ -4032,21 +4033,22 @@ class StampedAPI(AStampedAPI):
 
         sections = {}
         for entity in entityStats:
-            if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
-                section = 'food'
-            elif entity.isType('track') or entity.isType('artist') or entity.isType('album'):
-                section = 'music'
-            elif entity.isType('movie') or entity.isType('tv'):
-                section = 'film'
-            elif entity.isType('book'):
-                section = 'book'
-            elif entity.isType('app'):
-                section = 'app'
-            else:
-                section = 'other'
-            if section not in sections:
-                sections[section] = set()
-            sections[section].add(entity)
+            if entity.types is not None:
+                if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
+                    section = 'food'
+                elif entity.isType('track') or entity.isType('artist') or entity.isType('album'):
+                    section = 'music'
+                elif entity.isType('movie') or entity.isType('tv'):
+                    section = 'film'
+                elif entity.isType('book'):
+                    section = 'book'
+                elif entity.isType('app'):
+                    section = 'app'
+                else:
+                    section = 'other'
+                if section not in sections:
+                    sections[section] = set()
+                sections[section].add(entity)
 
         def entityScore(**kwargs):
             section = kwargs.pop('section', None)
