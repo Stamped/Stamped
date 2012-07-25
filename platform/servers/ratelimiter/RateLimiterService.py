@@ -58,9 +58,10 @@ class StampedRateLimiterService():
         self.__config_loader_thread = None
         self.__update_log_thread = None
         self.__config_loader_thread = gevent.spawn(configLoaderLoop, self, CONFIG_LOAD_INTERVAL)
+
+        # If we're throttling, we're running locally and don't want to update the db log
         if not self.__throttle:
             self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
-            #self.startThreads()
 
     def updateDbLog(self):
         callmap = dict()
@@ -155,7 +156,6 @@ class StampedRateLimiterService():
                 return
 
     def handleRequest(self, service, priority, timeout, verb, url, body = None, headers = None):
-        print ('calling exposed_request')
         if timeout is None:
             raise StampedInputError("Timeout period must be provided")
         request = Request(timeout, verb, url, body, headers)

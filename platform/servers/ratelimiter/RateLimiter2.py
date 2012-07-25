@@ -35,7 +35,7 @@ class RLPriorityQueue(PriorityQueue):
         """
         count = 0
         for item in self.queue:
-            if item[0] <= priority:
+            if item[0][0] <= priority:
                 count += 1
         return count
 
@@ -76,7 +76,6 @@ class RequestLog():
         self.expected_wait_time = 0
         self.expected_dur = None
         self.items_in_queue = 0
-        self.count = 0
 
 class Request():
     def __init__(self, timeout, verb, url, body, headers):
@@ -115,8 +114,6 @@ class RateLimiter(object):
     def __init__(self, service_name=None, limit=None, period=None, cpd=None, fail_limit=None, fail_period=None, blackout_wait=None):
         self.__service_name = service_name
         self.__requests = RLPriorityQueue()
-
-        self.count = 0
 
         self.limit = limit
         self.period = period
@@ -331,14 +328,10 @@ class RateLimiter(object):
         num_pending_requests = self.__requests.qsize_priority(priority)
         queue_wait = (num_pending_requests / self.limit) * self.period
 
-#        print('rate_wait: %s queue_wait: %s' % (rate_wait, queue_wait))
-
         return rate_wait + queue_wait
 
     def addRequest(self, request, priority):
         global events
-        request.log.count = self.count
-        self.count += 1
         try:
             now = time.time()
 
@@ -348,10 +341,6 @@ class RateLimiter(object):
             request.log.expected_wait_time = expected_wait_time
             request.log.expected_request_time = expected_request_time
             request.log.expected_dur = expected_total_time
-            request.log.items_in_queue = self.__requests.qsize_priority(priority)
-
-#            events.append('Service: %s  Request %s:   Received request' %
-#                          (self.__service_name, request.log.count))
 
             if priority == 0 and self.__requests.qsize() > 0 and \
                (expected_wait_time + expected_request_time) > request.timeout:
@@ -370,21 +359,13 @@ class RateLimiter(object):
             if self.__curr_timeblock_start is None:
                 self.__curr_timeblock_start = now
             if self.limit is None or self.period is None or self.__calls < self.limit:
-
-#                events.append('Service: %s  Request %s:   calls: %s is < limit: %s Making request Immediately' %
-#                              (self.__service_name, request.log.count, self.__calls, self.limit))
                 self.call()
                 self.doRequest(request, asyncresult)
             else:
-                events.append('Service: %s  Request %s   QueueSize: %s:   Adding request to queue' %
-                              (self.__service_name, request.log.count, self.__requests.qsize()))
-                self.__requests.put((priority, request, asyncresult))
-
-            #                print('queue_size: %s' % self.__requests.qsize())
+                self.__requests.put(((priority, request.created), request, asyncresult))
 
             return asyncresult
         except Exception as e:
-#            events.append('Service: %s  Request %s:   addRequest threw exception: %s' % (self.__service_name, request.log.count, e))
             logs.error('addRequest threw exception: %s' % e)
             traceback.print_exc()
             raise e
@@ -400,15 +381,11 @@ class RateLimiter(object):
         while self.__calls < self.limit:
             try:
                 requests.append(self.__requests.get(block=False))
-                events.append('Service: %s  Request %s  QueueSize: %s:   Pulled from queue' %
-                              (self.__service_name, requests[-1][1].log.count, self.__requests.qsize()))
                 self.call()
             except gevent.queue.Empty:
                 break
 
         for priority, request, asyncresult in requests:
-            events.append('Service: %s  Request %s  QueueSize: %s   Spawning doRequest thread' %
-                          (self.__service_name, request.log.count, self.__requests.qsize()))
             gevent.spawn(self.doRequest, request, asyncresult)
 
     def doRequest(self, request, asyncresult):
@@ -429,8 +406,6 @@ class RateLimiter(object):
             body = None
             if request.body is not None:
                 body = urllib.urlencode(request.body, True)
-#            events.append('Service: %s  Request %s:   Making request.  Realized wait %s' %
-#                          (self.__service_name, request.log.count, begin - request.created))
             response, content = http.request(request.url, request.verb, headers=request.headers, body=body)
             if response.status >= 400:
                 self.fail(request, response, content)
@@ -442,16 +417,11 @@ class RateLimiter(object):
             realized_dur = end - request.created
 
 
-#            events.append('Service: %s  Request %s:   Request finished.  Request time: %s  Realized total time: %s  '
-#                          'Expected Total Time: %s  Expected wait time: %s  Expected request time: %s  Items originally in Queue: %s' %
-#                          (self.__service_name, request.log.count, elapsed, realized_dur,
-#                           request.log.expected_dur, request.log.expected_wait_time, request.log.expected_request_time,
-#                              request.log.items_in_queue))
-
-
-#            print("service: %s  realized dur: %s  expected dur: %s  expected wait: %s  expected request time: %s  queue size: %s" %
-#                  (self.__service_name, realized_dur, request.log.expected_dur, request.log.expected_wait_time,
-#                   request.log.expected_request_time, request.log.items_in_queue), )
+            logs.info('Service: %s  Request %s:   Request finished.  Request time: %s  Realized total time: %s  '
+                          'Expected Total Time: %s  Expected wait time: %s  Expected request time: %s  Items originally in Queue: %s' %
+                          (self.__service_name, request.log.count, elapsed, realized_dur,
+                           request.log.expected_dur, request.log.expected_wait_time, request.log.expected_request_time,
+                              request.log.items_in_queue))
 
             self._addDurationLog(elapsed)
 
