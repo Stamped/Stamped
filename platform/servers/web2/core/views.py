@@ -288,8 +288,7 @@ def sdetail(request, schema, **kwargs):
         'user'               : user, 
         'feedback_users'     : users, 
         'stamp'              : stamp, 
-        'entity'             : entity, 
-        'mobile'             : mobile, 
+        'entity'             : entity
     })
     
     if ajax:
