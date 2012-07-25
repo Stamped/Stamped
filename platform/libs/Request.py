@@ -213,7 +213,7 @@ class RateLimiterState(object):
             raise StampedThirdPartyRequestFailError("%s" % e)
         except Exception as e:
             print('### caught exception  type: %s  e: %s' % (type(e), e))
-            logs.error("RPC Service Request fail."
+            logs.info("RPC Service Request fail."
                         "service: %s  method: %s  url: %s  body: %s  header: %s"
                         "priority: %s  timeout: %s  Exception: %s" %
                         (service, method, url, body, header, priority, timeout, e))
