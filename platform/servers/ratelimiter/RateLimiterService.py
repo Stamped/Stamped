@@ -52,47 +52,35 @@ class StampedRateLimiterService():
         self.__throttle = throttle
         self.__limiters = {}
         self.__stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
-        try:
-            self.__rllog = MongoRateLimiterLogCollection()
-            self.loadDbLog()
-        except:
-            logs.error('Error connecting to db')
         self.loadLimiterConfig()
         self.__config_loader_thread = None
         self.__update_log_thread = None
         self.__config_loader_thread = gevent.spawn(configLoaderLoop, self, CONFIG_LOAD_INTERVAL)
 
+#        try:
+#            self.__rllog = MongoRateLimiterLogCollection()
+#            self.loadDbLog()
+#        except:
+#            import traceback
+#            traceback.print_exc()
+
         # If we're throttling, we're running locally and don't want to update the db log
-        if not self.__throttle:
-            self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
+#        if not self.__throttle:
+#            self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
 
-    def updateDbLog(self):
-        callmap = dict()
-        for k,v in self.__limiters:
-            callmap[k] = v.day_calls
-        self.__rllog.updateLog(callmap)
-
-    def loadDbLog(self):
-        callmap = self.__rllog.getLog()
-        if callmap is None:
-            return
-        for k,v in callmap.iteritems():
-            if k in self.__limiters:
-                self.__limiters[k].day_calls = v
-
-    def startThreads(self):
-        if self.__config_loader_thread is None:
-            self.__config_loader_thread = gevent.spawn(configLoaderLoop, self, CONFIG_LOAD_INTERVAL)
-        if self.__update_log_thread is None:
-            self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
-
-    def stopThreads(self):
-        if self.__config_loader_thread is not None:
-            self.__config_loader_thread.kill()
-            self.__config_loader_thread = None
-        if self.__update_log_thread is not None:
-            self.__update_log_thread.kill()
-            self.__update_log_thread = None
+#    def updateDbLog(self):
+#        callmap = dict()
+#        for k,v in self.__limiters:
+#            callmap[k] = v.day_calls
+#        self.__rllog.updateLog(callmap)
+#
+#    def loadDbLog(self):
+#        callmap = self.__rllog.getLog()
+#        if callmap is None:
+#            return
+#        for k,v in callmap.iteritems():
+#            if k in self.__limiters:
+#                self.__limiters[k].day_calls = v
 
 
     def loadLimiterConfig(self):

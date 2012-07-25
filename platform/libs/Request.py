@@ -183,8 +183,11 @@ class RateLimiterState(object):
             self.__conn = rpyc.connect(host, port, config=config)
 
         time.sleep(0)
+        logs.info('about to create async object')
         async_request = rpyc.async(self.__conn.root.request)
+        logs.info('about to make async request')
         asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
+        logs.info('made async request, about to wait for return')
         asyncresult.set_expiry(timeout)
         response, content = asyncresult.value
 
@@ -209,11 +212,12 @@ class RateLimiterState(object):
         except TooManyFailedRequestsException as e:
             raise StampedThirdPartyRequestFailError("%s" % e)
         except Exception as e:
+            import traceback
             print('### caught exception  type: %s  e: %s' % (type(e), e))
-            logs.error("RPC Service Request fail."
+            logs.info("RPC Service Request fail."
                         "service: %s  method: %s  url: %s  body: %s  header: %s"
-                        "priority: %s  timeout: %s  Exception: %s" %
-                        (service, method, url, body, header, priority, timeout, e))
+                        "priority: %s  timeout: %s  Exception: %s  Stack: %s" %
+                        (service, method, url, body, header, priority, timeout, e, traceback.format_exc()))
             self._fail(e)
         logs.info('### Falling back to local rate limiter request')
         return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)

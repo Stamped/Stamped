@@ -1,0 +1,24 @@
+{% extends "about.html" %}
+{% load stamped_tags %}
+
+{% block styles %}
+    {{ block.super }}
+    
+    <style>
+        .title { text-align: center; }
+        .desc  { margin-top: 16px; font-size: 120% !important; }
+    </style>
+{% endblock styles %}
+
+{% block pane-body %}
+    <div class="title">404 Error</div>
+    
+    <p class="desc">
+        Sorry, the page you requested could not be found. Please check to make sure the link is valid and doesn't contain any typos or head back to Stamped's <a href="/">homepage</a>.
+    </p>
+{% endblock pane-body %}
+
+{% block post-main %}
+    <div class="made-in-nyc-logo"></div>
+{% endblock post-main %}
+
