@@ -543,10 +543,9 @@
         $main.on("click", ".lightbox-video", function(event) {
             event.preventDefault();
             
-            var wmode = 'transparent';
-            
             if (!!$.browser.msie) {
-                wmode = 'opaque';
+                // Sadly, Fancybox Youtube videos and IE are not friends...
+                return true;
             }
             
             $.fancybox({
