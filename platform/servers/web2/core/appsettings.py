@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import utils
+import travis_test
 
 from api.MongoStampedAPI            import globalMongoStampedAPI
 from api.MongoStampedAuth           import MongoStampedAuth
@@ -19,127 +20,37 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-@stamped_view()
-def password_reset(request, **kwargs):
+
+@stamped_view(schema=HTTPResetPasswordViewSchema)
+def password_reset(request, schema, **kwargs):
     body_classes = "password_reset main"
+    token        = schema.token
     
-    """
-    token  = kwargs.pop('token', None)
-
-    errorMsg = 'An error occurred. Please try again.'
-
-    try:
-        # Verify token is valid
-        authUserId = stampedAuth.verifyPasswordResetToken(token)
-
-        # Check if a form exists with data
-        if request.method == 'POST':
-            # User submitted the form
-            data = request.POST
-
-            # Verify passwords match and len > 0
-            if not data['password']:
-                logs.warning("Invalid password: %s" % data['password'])
-                raise StampedInvalidPasswordError("Invalid password")
-
-            if data['password'] != data['confirm']:
-                logs.warning("Password match failed")
-                raise StampedInvalidPasswordError("Invalid password")
-            
-            # Store password            
-            stampedAuth.updatePassword(authUserId, data['password'])
-
-            # Return success
-            response = HttpResponseRedirect('/settings/password/success')
-
-        else:
-            # Display 'change password' form
-            account = stampedAPI.getAccount(authUserId)
-            params = {
-                'token' : token,
-                'form'  : True,
-            }
-            response = render_to_response('password-reset.html', params)
-
-        return response
-
-    except Exception as e:
-        logs.begin(
-            addLog=stampedAPI._logsDB.addLog, 
-            saveLog=stampedAPI._logsDB.saveLog,
-            saveStat=stampedAPI._statsDB.addStat,
-            requestData=request,
-        )
-        logs.request(request)
-        logs.warning("500 Error: %s" % e)
-        logs.error(500)
-        logs.save()
-
-        return render_to_response('password-reset.html', {'error': errorMsg})
-    """
+    # Verify token is valid
+    user_id = g_stamped_auth.verifyPasswordResetToken(token)
+    
+    if user_id is None:
+        raise StampedInputError("invalid token")
+    
+    account = stampedAPIProxy.getAccount(user_id)
+    
+    if account is None:
+        raise StampedInputError("invalid account")
+    
+    auth_service = acount.auth_service
+    if auth_service != 'stamped':
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (accountscreen_name, auth_service))
     
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 
         'page'              : 'password_reset', 
         'title'             : 'Stamped - Reset Password', 
-    })
+        'token'             : token
+    }, preload=[ 'token' ])
 
 @stamped_view()
 def password_forgot(request, **kwargs):
     body_classes = "password_forgot main"
-    
-    """
-    errorMsg = 'An error occurred. Please try again.'
-
-    try:
-        # Check if a form exists with data
-        if request.method == 'POST':
-            # User submitted the form
-            data = request.POST
-
-            # Validate email address
-            email = str(data['forgotemail']).lower().strip()
-            if not utils.validate_email(email):
-                msg = "Invalid format for email address"
-                logs.warning(msg)
-                raise StampedInvalidEmailError("Invalid email address")
-            
-            # Verify account exists
-            try:
-                user = stampedAPI.checkAccount(email)
-            except:
-                ### TODO: Display appropriate error message
-                errorMsg = 'No account information was found for that email address.'
-                raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
-
-            # Send email
-            stampedAuth.forgotPassword(email)
-
-            # Return success
-            response = HttpResponseRedirect('/settings/password/sent')
-
-        else:
-            # Display 'submit email' form
-            response = render_to_response('password-forgot.html', None)
-
-        return response
-
-    except Exception as e:
-        logs.begin(
-            addLog=stampedAPI._logsDB.addLog, 
-            saveLog=stampedAPI._logsDB.saveLog,
-            saveStat=stampedAPI._statsDB.addStat,
-            requestData=request,
-        )
-        logs.request(request)
-        logs.warning("500 Error: %s" % e)
-        logs.error(500)
-        logs.save()
-
-        return render_to_response('password-forgot.html', {'error': errorMsg})
-
-    return True
-    """
     
     return stamped_render(request, 'password.html', {
         'body_classes'      : body_classes, 
@@ -147,116 +58,118 @@ def password_forgot(request, **kwargs):
         'title'             : 'Stamped - Forgot Password', 
     })
 
-@stamped_view()
-def alert_settings(request, **kwargs):
-    body_classes = "alert_settings main"
+@stamped_view(schema=HTTPSettingsSchema)
+def alert_settings(request, schema, **kwargs):
+    body_classes = "settings main"
+    token        = schema.token
     
-    """ alertSettings
-    try:
-        # Check token
-        tokenId     = request.GET.get('token', None)
-        authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
-
-        # Display 'change settings' form
-        account = stampedAPI.getAccount(authUserId)
-
-        alerts  = HTTPAccountAlerts().importSchema(account)
-        user    = HTTPUser().importSchema(account)
-
-        image_url = user['image_url'].replace('.jpg', '-31x31.jpg')
-        stamp_url = 'http://static.stamped.com/logos/%s-%s-credit-18x18.png' % \
-                    (user.color_primary, user.color_secondary)
-
+    if True: # testing
+        user = travis_test.user
+        
         settings = {
-            'email_alert_credit':   alerts.email_alert_credit,
-            'email_alert_like':     alerts.email_alert_like,
-            'email_alert_fav':      alerts.email_alert_fav,
-            'email_alert_mention':  alerts.email_alert_mention,
-            'email_alert_comment':  alerts.email_alert_comment,
-            'email_alert_reply':    alerts.email_alert_reply,
-            'email_alert_follow':   alerts.email_alert_follow,
+            'alerts_credits_apns'   : False, 
+            'alerts_credits_email'  : False, 
+            
+            'alerts_likes_apns'     : True, 
+            'alerts_likes_email'    : False, 
+            
+            'alerts_todos_apns'     : True, 
+            'alerts_todos_email'    : True, 
+            
+            'alerts_mentions_apns'  : True, 
+            'alerts_mentions_email' : True, 
+            
+            'alerts_comments_apns'  : False, 
+            'alerts_comments_email' : True, 
+            
+            'alerts_replies_apns'   : True, 
+            'alerts_replies_email'  : True, 
+            
+            'alerts_followers_apns' : True, 
+            'alerts_followers_email': False, 
+            
+            'alerts_friends_apns'   : True, 
+            'alerts_friends_email'  : True, 
+            
+            'alerts_actions_apns'   : False, 
+            'alerts_actions_email'  : True, 
         }
-
-        params = {
-            'screen_name':      user.screen_name,
-            'name':             user.name,
-            'image_url':        image_url,
-            'stamp_url':        stamp_url,
-            'action_token':     tokenId,
-            'json_settings':    json.dumps(settings, sort_keys=True)
-        }
-        
-        return render_to_response('notifications.html', params)
-
-    except Exception as e:
-        logs.begin(
-            addLog=stampedAPI._logsDB.addLog, 
-            saveLog=stampedAPI._logsDB.saveLog,
-            saveStat=stampedAPI._statsDB.addStat,
-            requestData=request,
-        )
-        logs.request(request)
-        logs.warning("500 Error: %s" % e)
-        logs.error(500)
-        logs.save()
-
-        ### TODO: CHANGE URL
-        return render_to_response('password-reset.html', {'error': 'FAIL'})
+    else:
+        user_id  = g_stamped_auth.verifyEmailAlertToken(token)
+        account  = stampedAPIProxy.getAccount(user_id)
+        user     = account.dataExport()
+        settings = user['alert_settings']
     
-    ##### alertSettingsUpdate
+    options = [
+        {
+            'human_name'    : 'Credit', 
+            'name'          : 'credits', 
+            'desc'          : 'Someone awards you credit on a stamp', 
+        }, 
+        {
+            'human_name'    : 'Likes', 
+            'name'          : 'likes', 
+            'desc'          : 'Someone likes one of your stamps', 
+        }, 
+        {
+            'human_name'    : 'Todos', 
+            'name'          : 'todos', 
+            'desc'          : 'Someone todos one of your stamps', 
+        }, 
+        {
+            'human_name'    : 'Mentions', 
+            'name'          : 'mentions', 
+            'desc'          : 'Someone you on a stamp or comment', 
+        }, 
+        {
+            'human_name'    : 'Replies', 
+            'name'          : 'replies', 
+            'desc'          : 'Someone replies to one of your comments', 
+        }, 
+        {
+            'human_name'    : 'Followers', 
+            'name'          : 'followers', 
+            'desc'          : 'Someone follows you on Stamped', 
+        }, 
+        {
+            'human_name'    : 'Friends', 
+            'name'          : 'friends', 
+            'desc'          : 'A friend from Facebook or Twitter joins Stamped', 
+        }, 
+        {
+            'human_name'    : 'Actions', 
+            'name'          : 'actions', 
+            'desc'          : 'Someone performs an action on one of your stamps (e.g., listening to a song, makes a reversation, etc.)', 
+        }, 
+    ]
     
-    try:
-        # Check token
-        tokenId     = request.POST.get('token', None)
-        authUserId  = stampedAuth.verifyEmailAlertToken(tokenId)
-
-        def _checkBool(v):
-            if v in ['True', 'true', '1', 1, True]:
-                return True
-            return False
-
-        # Get settings
-        alerts = {
-            'email_alert_credit':   _checkBool(request.POST.get('email_alert_credit', False)),
-            'email_alert_like':     _checkBool(request.POST.get('email_alert_like', False)),
-            'email_alert_fav':      _checkBool(request.POST.get('email_alert_fav', False)),
-            'email_alert_mention':  _checkBool(request.POST.get('email_alert_mention', False)),
-            'email_alert_comment':  _checkBool(request.POST.get('email_alert_comment', False)),
-            'email_alert_reply':    _checkBool(request.POST.get('email_alert_reply', False)),
-            'email_alert_follow':   _checkBool(request.POST.get('email_alert_follow', False)),
-        }
-
-        stampedAPI.updateAlerts(authUserId, alerts)
+    for option in options:
+        name = option['name']
         
-        params = {}
-        params.setdefault('content_type', 'text/javascript; charset=UTF-8')
-        params.setdefault('mimetype', 'application/json')
+        enabled_apns  = False
+        enabled_email = False
         
-        output_json = json.dumps(alerts, sort_keys=True)
-        output = HttpResponse(output_json, **params)
+        try:
+            enabled_apns = settings['alerts_%s_apns'  % name]
+        except KeyError:
+            pass
         
-        return output
+        try:
+            enabled_email = settings['alerts_%s_email' % name]
+        except KeyError:
+            pass
+        
+        option['enabled_apns']  = enabled_apns
+        option['enabled_email'] = enabled_email
     
-    except Exception as e:
-        logs.begin(
-            addLog=stampedAPI._logsDB.addLog, 
-            saveLog=stampedAPI._logsDB.saveLog,
-            saveStat=stampedAPI._statsDB.addStat,
-            requestData=request,
-        )
-        logs.request(request)
-        logs.warning("500 Error: %s" % e)
-        logs.error(500)
-        logs.save()
-        
-        return HttpResponse("internal server error", status=500)
-    """
-    
-    return stamped_render(request, 'alert_settings.html', {
+    return stamped_render(request, 'settings.html', {
         'body_classes'      : body_classes, 
-        'page'              : 'alert_settings', 
-        'title'             : 'Stamped - Alert Settings', 
-    })
+        'page'              : 'settings', 
+        'title'             : 'Stamped - Notification Settings', 
+        'user'              : user, 
+        'settings'          : options, 
+        'token'             : token
+    }, preload=[ 'token' ])
 
 @stamped_view(schema=HTTPResetEmailSchema)
 @require_http_methods(["POST"])
@@ -269,9 +182,8 @@ def send_reset_email(request, schema, **kwargs):
         logs.warning(msg)
         raise StampedInvalidEmailError("Invalid email address")
     
-    # Verify account exists
+    # verify account exists
     try:
-        logs.info("resetting email for '%s'" % email)
         user = stampedAPIProxy.checkAccount(email)
         
         if user is None:
@@ -284,9 +196,41 @@ def send_reset_email(request, schema, **kwargs):
         errorMsg = 'No account information was found for that email address.'
         raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
     
-    # Send email
+    account = stampedAPIProxy.getAccount(user['user_id'])
+    auth_service = account.auth_service
+    
+    if auth_service != 'stamped':
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account.screen_name, auth_service))
+    
+    # send email
     logs.info("sending email to '%s' (user: '%s')" % (email, user['screen_name']))
     result = g_stamped_auth.forgotPassword(email)
     
     return transform_output(result)
+
+@stamped_view(schema=HTTPResetPasswordSchema)
+@require_http_methods(["POST"])
+def reset_password(request, schema, **kwargs):
+    user_id = g_stamped_auth.verifyPasswordResetToken(schema.token)
+    
+    if schema.password is None or len(schema.password) <= 0:
+        raise StampedInputError("invalid password")
+    
+    # store password            
+    result = g_stamped_auth.updatePassword(user_id, schema.password)
+    
+    return transform_output(result)
+
+@stamped_view(schema=HTTPUpdateSettingsSchema)
+@require_http_methods(["POST"])
+def update_alert_settings(request, schema, **kwargs):
+    user_id  = g_stamped_auth.verifyEmailAlertToken(schema.token)
+    settings = schema.dataExport()
+    del settings['token']
+    
+    on  = filter(lambda k: settings[k], settings.keys())
+    off = filter(lambda k: not settings[k], settings.keys())
+    
+    stampedAPIProxy.updateAlerts(user_id, on, off)
+    return transform_output(True)
 

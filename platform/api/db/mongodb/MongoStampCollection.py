@@ -11,7 +11,7 @@ import bson, logs, pprint, pymongo, re
 from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
 from api.Schemas                        import *
-from api.Entity                             import buildEntity
+from api.Entity                             import buildEntity, getSimplifiedTitle
 from pprint                             import pprint
 
 from api.AStampDB                       import AStampDB
@@ -41,25 +41,28 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), ('credits.user.user_id', pymongo.ASCENDING)])
         
         # Indices for _getTimeSlice within AMongoCollectionView
-        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
-        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
-        # self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
 
-        # # Indices for _getSearchSlice
-        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), 
-        #                                 ('contents.blurb', pymongo.ASCENDING), ('entity.title', pymongo.ASCENDING),
-        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
-        # self._collection.ensure_index([('entity.types', pymongo.ASCENDING), 
-        #                                 ('contents.blurb', pymongo.ASCENDING), ('entity.title', pymongo.ASCENDING),
-        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
-        # self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), 
-        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
-        # self._collection.ensure_index([('entity.types', pymongo.ASCENDING), 
-        #                                 ('entity.coordinates.lng', pymongo.ASCENDING), ('entity.coordinates.lat', pymongo.ASCENDING), 
-        #                                 ('timestamp.stamped', pymongo.DESCENDING)])
+        # Indices for _getSearchSlice
+        self._collection.ensure_index([ ('_id', pymongo.ASCENDING), 
+                                        ('entity.types', pymongo.ASCENDING), 
+                                        ('search_blurb', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lng', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lat', pymongo.ASCENDING), 
+                                        ('timestamp.stamped', pymongo.DESCENDING) ])
+        
+        self._collection.ensure_index([ ('_id', pymongo.ASCENDING), 
+                                        ('entity.types', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lng', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lat', pymongo.ASCENDING), 
+                                        ('timestamp.stamped', pymongo.DESCENDING) ])
+
+        self._collection.ensure_index([ ('entity.types', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lng', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lat', pymongo.ASCENDING), 
+                                        ('timestamp.stamped', pymongo.DESCENDING) ])
 
 
     def _upgradeDocument(self, document):
@@ -123,10 +126,24 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['credits'] = credit
 
         return document
+
+    def _convertToMongo(self, stamp):
+        document = AMongoCollectionView._convertToMongo(self, stamp)
+
+        searchBlurb = getSimplifiedTitle(stamp.entity.title)
+        for content in stamp.contents:
+            if content.blurb is not None:
+                searchBlurb = "%s %s" % (searchBlurb, getSimplifiedTitle(content.blurb))
+        
+        document['search_blurb'] = searchBlurb
+        return document
     
     def _convertFromMongo(self, document):
         if document is None:
             return None
+
+        if 'search_blurb' in document:
+            del(document['search_blurb'])
 
         document = self._upgradeDocument(document)
         
@@ -147,6 +164,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         return stamp 
 
+
     ### INTEGRITY
 
     def checkIntegrity(self, key, repair=False, api=None):
@@ -157,7 +175,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         modified = False
 
         # Check if old schema version
-        if 'contents' not in document or 'credit' in document:
+        if 'contents' not in document or 'credit' in document or 'search_blurb' not in document:
             msg = "%s: Old schema" % key
             if repair:
                 logs.info(msg)
@@ -599,14 +617,9 @@ class MongoStampStatsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='stampstats', primary_key='stamp_id', obj=StampStats)
-    
-        self._collection.ensure_index([ ('score', pymongo.DESCENDING) ])
-        self._collection.ensure_index([ ('last_stamped', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('lat', pymongo.ASCENDING), ('lng', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING) ])
-
+        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING), ('last_stamped', pymongo.ASCENDING), ('score', pymongo.DESCENDING) ])
+        self._collection.ensure_index([ ('last_stamped', pymongo.ASCENDING), ('score', pymongo.DESCENDING) ])
+        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING), ('score', pymongo.DESCENDING) ])
         self._cache = globalMemcache()
 
     ### INTEGRITY
@@ -769,46 +782,12 @@ class MongoStampStatsCollection(AMongoCollection):
         return result
 
     def _buildPopularQuery(self, **kwargs):
-        kinds       = kwargs.pop('kinds', None)
-        types       = kwargs.pop('types', None)
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
-        viewport    = kwargs.pop('viewport', None)
         entityId    = kwargs.pop('entityId', None)
         minScore    = kwargs.pop('minScore', None)
 
         query = {}
-
-        if kinds is not None:
-            query['kinds'] = {'$in': list(kinds)}
-
-        if types is not None:
-            query['types'] = {'$in': list(types)}
-
-        if viewport is not None:
-            query["lat"] = {
-                "$gte" : viewport.lower_right.lat, 
-                "$lte" : viewport.upper_left.lat, 
-            }
-            
-            if viewport.upper_left.lng <= viewport.lower_right.lng:
-                query["lng"] = { 
-                    "$gte" : viewport.upper_left.lng, 
-                    "$lte" : viewport.lower_right.lng, 
-                }
-            else:
-                # handle special case where the viewport crosses the +180 / -180 mark
-                query["$or"] = [{
-                        "lng" : {
-                            "$gte" : viewport.upper_left.lng, 
-                        }, 
-                    }, 
-                    {
-                        "lng" : {
-                            "$lte" : viewport.lower_right.lng, 
-                        }, 
-                    }, 
-                ]
 
         if entityId is not None:
             query['entity_id'] = entityId

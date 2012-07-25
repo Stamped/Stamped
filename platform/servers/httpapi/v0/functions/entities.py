@@ -60,7 +60,7 @@ def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
 
     result = transformOutput(entity.dataExport())
 
-    setCache(uri, http_schema, result, ttl=1800)
+    # setCache(uri, http_schema, result, ttl=1800)
     
     return result
 

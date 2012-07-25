@@ -17,8 +17,8 @@
         var $body = $("body");
         
         var message_default  = "email address";
-        var message_success  = "Email sent..";
-        var message_error    = "Error sending email.";
+        var message_success  = "email sent!";
+        var message_error    = "error sending email";
         var input_selector   = ".email";
         var $views           = $("#views");
         
@@ -95,7 +95,7 @@
             var value   = $input.val().trim();
             value       = is_valid_input(value);
             
-            console.log(value);
+            //console.log(value);
             if (!value) {
                 return false;
             }

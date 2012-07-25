@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.20
+ASSET_VERSION_NUMBER        = 1.1.39
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -26,7 +26,7 @@ GENERATED_LINE_LENGTH		= 512
 LESS_CSS_DIRS               = assets/css assets/css/libs assets/css/ie assets/css/mobile
 LESS_CSS_SOURCE_SUFFIX      = less
 LESS_CSS_TARGET_SUFFIX      = css
-LESS_CSS_PROG_EC2           = /stamped/node/node_modules/less/bin/lessc
+LESS_CSS_PROG_EC2           = /stamped/bootstrap/node_modules/less/bin/lessc
 LESS_CSS_PROG               = $(if $(call EXISTS,$(LESS_CSS_PROG_EC2)),$(LESS_CSS_PROG_EC2),lessc)
 LESS_CSS_SOURCES            = $(strip \
     $(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
@@ -40,7 +40,7 @@ CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 TEMPLATE_BASE_DIR		    = templates
-HTML_PAGES					= base profile index map about jobs retina password
+HTML_PAGES					= base profile index map about jobs retina fonts password password_reset settings
 TEMPLATE_PROG				= bin/process_templates.py
 
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
@@ -91,7 +91,7 @@ endef
 
 all: $(ALL_TARGETS)
 
-.PHONY: all clean help update_version deploy css_targets
+.PHONY: all clean help update update_version deploy css_targets
 
 $(foreach DIR,$(LESS_CSS_DIRS),$(eval $(call ADD_LESS_CSS_TARGET,$(DIR))))
 $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_JS_TARGET,$(PAGE))))
@@ -101,9 +101,15 @@ $(foreach PAGE,$(HTML_PAGES),  $(eval $(call ADD_CSS_TARGET,$(PAGE))))
 css_targets: $(LESS_CSS_TARGETS);
 
 deploy: $(ALL_TARGETS)
+	mkdir -p $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
+	cp -rf assets/css/ie/* $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
 	cd bin && python deploy_assets.py
 
 update_version:
+	@echo $(ASSET_VERSION_NUMBER)
+	cd bin && python deploy_version.py
+
+update:
 	@echo $(ASSET_VERSION_NUMBER)
 	cd bin && python deploy_version.py
 

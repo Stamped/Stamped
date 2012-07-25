@@ -29,6 +29,7 @@ static const CGFloat _batchSize = 100;
 @property (nonatomic, readwrite, retain) STCancellation* pendingEmailCancellation;
 @property (nonatomic, readwrite, retain) NSArray<STUserDetail>* emailResponse;
 @property (nonatomic, readwrite, retain) NSArray<STUserDetail>* phoneResponse;
+@property (nonatomic, readwrite, retain) STCancellation* sendCancellation;
 
 @property (nonatomic, readonly, retain) NSMutableSet* resolvedUserIDs;
 @property (nonatomic, readonly, retain) NSMutableArray* resolvedContacts;
@@ -49,6 +50,7 @@ static const CGFloat _batchSize = 100;
 @synthesize pendingEmailCancellation = _pendingEmailCancellation;
 @synthesize emailResponse = _emailResponse;
 @synthesize phoneResponse = _phoneResponse;
+@synthesize sendCancellation = _sendCancellation;
 
 @synthesize resolvedUserIDs = _resolvedUserIDs;
 @synthesize resolvedContacts = _resolvedContacts;
@@ -95,46 +97,55 @@ static const CGFloat _batchSize = 100;
 }
 
 - (void)sendButtonClicked:(id)notImportant {
-    NSString* message;
-    NSMutableArray* contacts = [NSMutableArray array];
-    for (NSNumber* index in self.inviteIndices) {
-        STContact* contact = [self.unresolvedContacts objectAtIndex:index.integerValue];
-        [contacts addObject:contact];
-    }
-    NSAssert1(contacts.count > 0, @"contacts should not be empty:%@", self.inviteIndices);
-    if (contacts.count == 0) return;
-    STContact* first = [contacts objectAtIndex:0];
-    NSString* firstName = first.name ? first.name : [first.emailAddresses objectAtIndex:0];
-    if (contacts.count == 1) {
-        message = [NSString stringWithFormat:@"Invite %@ to Stamped via email?", firstName ];
-    }
-    else if (contacts.count == 2) {
-        STContact* second = [contacts objectAtIndex:1];
-        message = [NSString stringWithFormat:@"Invite %@ and %@ to Stamped via email?", firstName, second.name ? second.name : [second.emailAddresses objectAtIndex:0]];
-    }
-    else {
-        message = [NSString stringWithFormat:@"Invite %@ and %d others to Stamped via email?", firstName, contacts.count - 1];
-    }
-    [Util confirmWithMessage:message action:@"Send" destructive:NO withBlock:^(BOOL success) {
-        if (success) {
-            NSMutableArray* emails = [NSMutableArray array];
-            for (STContact* contact in contacts) {
-                contact.invite = NO;
-                [emails addObject:contact.primaryEmailAddress];
-            }
-            NSString* emailList = [emails componentsJoinedByString:@","];
-            [[STRestKitLoader sharedInstance] loadOneWithPath:@"/friendships/invite.json"
-                                                         post:YES
-                                                authenticated:YES
-                                                       params:[NSDictionary dictionaryWithObject:emailList forKey:@"emails"]
-                                                      mapping:[STSimpleBooleanResponse mapping]
-                                                  andCallback:^(id result, NSError *error, STCancellation *cancellation) {
-                                                      
-                                                  }];
-            [self.inviteIndices removeAllObjects];
-            [self updateSendButton];
+    if (!self.sendCancellation) {
+        NSString* message;
+        NSMutableArray* contacts = [NSMutableArray array];
+        for (NSNumber* index in self.inviteIndices) {
+            STContact* contact = [self.unresolvedContacts objectAtIndex:index.integerValue];
+            [contacts addObject:contact];
         }
-    }];
+        NSAssert1(contacts.count > 0, @"contacts should not be empty:%@", self.inviteIndices);
+        if (contacts.count == 0) return;
+        STContact* first = [contacts objectAtIndex:0];
+        NSString* firstName = first.name ? first.name : [first.emailAddresses objectAtIndex:0];
+        if (contacts.count == 1) {
+            message = [NSString stringWithFormat:@"Invite %@ to Stamped via email?", firstName ];
+        }
+        else if (contacts.count == 2) {
+            STContact* second = [contacts objectAtIndex:1];
+            message = [NSString stringWithFormat:@"Invite %@ and %@ to Stamped via email?", firstName, second.name ? second.name : [second.emailAddresses objectAtIndex:0]];
+        }
+        else {
+            message = [NSString stringWithFormat:@"Invite %@ and %d others to Stamped via email?", firstName, contacts.count - 1];
+        }
+        [Util confirmWithMessage:message action:@"Send" destructive:NO withBlock:^(BOOL success) {
+            if (success) {
+                NSMutableArray* emails = [NSMutableArray array];
+                for (STContact* contact in contacts) {
+                    contact.invite = NO;
+                    [emails addObject:contact.primaryEmailAddress];
+                }
+                NSString* emailList = [emails componentsJoinedByString:@","];
+                self.loadingLocked = YES;
+                self.sendCancellation = [[STRestKitLoader sharedInstance] loadOneWithPath:@"/friendships/invite.json"
+                                                                                     post:YES
+                                                                            authenticated:YES
+                                                                                   params:[NSDictionary dictionaryWithObject:emailList forKey:@"emails"]
+                                                                                  mapping:[STSimpleBooleanResponse mapping]
+                                                                              andCallback:^(id result, NSError *error, STCancellation *cancellation) {
+                                                                                  self.sendCancellation = nil;
+                                                                                  self.loadingLocked = NO;
+                                                                                  if (result) {
+                                                                                      [self.inviteIndices removeAllObjects];
+                                                                                      [self updateSendButton];
+                                                                                  }
+                                                                                  else {
+                                                                                      [Util warnWithAPIError:error andBlock:nil];
+                                                                                  }
+                                                                              }];
+            }
+        }];
+    }
 }
 
 - (void)updateSendButton {
@@ -214,6 +225,8 @@ static const CGFloat _batchSize = 100;
 }
 
 - (void)clearAll {
+    [self.sendCancellation cancel];
+    self.sendCancellation = nil;
     self.offset = 0;
     self.consumedAllContacts = NO;
     [self.resolvedContacts removeAllObjects];

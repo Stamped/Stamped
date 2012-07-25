@@ -730,12 +730,12 @@ class StampedSource(GenericSource):
                 adjustMovieRelevanceByQueryMatch(result, queryText)
                 augmentMovieDataQualityOnBasicAttributePresence(result)
             elif isBook(result.resolverObject):
-                applyBookTitleDataQualityTests(result, queryText)
+                applyBookDataQualityTests(result, queryText)
                 adjustBookRelevanceByQueryMatch(result, queryText)
                 augmentBookDataQualityOnBasicAttributePresence(result)
             elif isPlace(result.resolverObject):
                 applyPlaceTitleDataQualityTests(result, queryText)
-                augmentPlaceRelevanceScoresForTitleMatchAndProximity(result, queryText, coords)
+                # augmentPlaceRelevanceScoresForTitleMatchAndProximity(result, queryText, coords)
                 augmentPlaceDataQualityOnBasicAttributePresence(result)
             elif isApp(result.resolverObject):
                 applyAppTitleDataQualityTests(result, queryText)
@@ -747,6 +747,7 @@ class StampedSource(GenericSource):
         return results
 
 
+    # TODO: Make this faster via indexing
     def __id_query(self, mongo_query):
         import pymongo
         #logs.debug(str(mongo_query))

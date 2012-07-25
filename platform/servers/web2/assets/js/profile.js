@@ -670,7 +670,7 @@ var g_update_stamps = null;
                     
                     infinite_scroll = $gallery.infinitescroll({
                         bufferPx        : bufferPx, 
-                        debug           : true, 
+                        debug           : false, 
                         
                         navSelector     : "div.stamp-gallery-nav", 
                         nextSelector    : infinite_scroll_next_selector, 
@@ -1249,16 +1249,17 @@ var g_update_stamps = null;
                             // load in new content via AJAX
                             var $target = $("<div></div>");
                             
-                            $.get(url, params, function(data, stat) {
+                            console.log("GET: " + url);
+                            
+                            //$target.load(url, params, function(data, stat));
+                            $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
                                 if (category !== g_category) {
                                     return;
                                 }
                                 
-                                if (stat === "error") {
+                                if (status === "error") {
                                     return;
                                 }
-                                
-                                $target.html(data);
                                 
                                 // TODO: optimize!!
                                 var $elements = $target.find('.stamp-gallery-item').remove();
@@ -1267,6 +1268,7 @@ var g_update_stamps = null;
                                 //$('.inset-stamp .number').html(stamps.length);
                                 var s = ".stamp-gallery-nav a";
                                 var href = $($target.find(s).get(0)).attr('href');
+                                
                                 if (typeof(href) === 'undefined') {
                                     href = "#";
                                 }

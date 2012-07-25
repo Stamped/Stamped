@@ -44,7 +44,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.opentable_id', 'sources.tmdb_id', 'sources.factual_id',
                 'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
                 'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
-                'sources.netflix_id', 'sources.thetvdb_id')
+                'sources.netflix_id', 'sources.thetvdb_id', 'sources.nytimes_id', 'sources.umdmusic_id')
 
         self._collection.ensure_index([
                                     ('search_tokens',               pymongo.ASCENDING),
@@ -61,6 +61,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self._collection.ensure_index('artists.title')
         self._collection.ensure_index('authors.title')
         self._collection.ensure_index('tracks.title')
+
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('sources.user_generated_id', pymongo.ASCENDING)])
 
         self._cache = globalMemcache()
 
@@ -503,8 +505,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def removeCustomEntity(self, entityId, userId):
         try:
             query = {'_id': self._getObjectIdFromString(entityId), 'sources.user_generated_id': userId}
-            self._collection.remove(query)
-            query = {'_id': self._getObjectIdFromString(entityId), 'sources.userGenerated.user_id': userId} # Deprecated version
             self._collection.remove(query)
             self._delCachedEntity(entityId)
             return True

@@ -20,19 +20,18 @@ __rlServiceGlobal = None
 def globalRateLimiterService():
     global __rlServiceGlobal
     if __rlServiceGlobal is None:
+        print('creating ratelimiter service')
         __rlServiceGlobal = StampedRateLimiterService()
     return __rlServiceGlobal
 
 class StampedRateLimiterRPCService(rpyc.Service):
 
     def __init__(self, port):
-        print('### hit rpservice init')
         rpyc.Service.__init__(self, port)
         self.__rl_service = globalRateLimiterService()
 
 
     def on_connect(self):
-        print('### hit_connect')
         # code that runs when a connection is created
         # (to init the serivce, if needed
         pass

@@ -30,10 +30,12 @@ def deploy_assets():
     sink    = S3Utils()
     prefix  = ".."
     pool    = Pool(16)
+    
     headers = {
         "Cache-Control" : "max-age=290304000", 
         "Expires"       : "Sat, 29 Apr 2017 13:31:45-0000 GMT", 
     }
+    
     paths   = [
         {
             "path"          : "/assets/generated/css", 
@@ -55,7 +57,10 @@ def deploy_assets():
             "ignore"        : [
                 "/assets/generated/img/emoji", 
                 "/assets/generated/img/public-home", 
-                "/assets/generated/img/public-home", 
+                "/assets/generated/img/index", 
+                "/assets/generated/img/about", 
+                "/assets/generated/img/jobs", 
+                "/assets/generated/img/entity_fallbacks", 
             ], 
             "headers"       : headers, 
         },

@@ -52,8 +52,11 @@ urlpatterns = patterns('',
     # e.g., stamped.com/mobile/settings/alerts/update.json
     url(R'^mobile/settings/alerts/update.json$',        'mobile.views.alert_settings_update'),
     
-    url(r'^/?mobile/settings/password/send-reset-email$',  'core.appsettings.send_reset_email'), 
-    url(r'^/?settings/password/send-reset-email$',         'core.appsettings.send_reset_email'), 
+    url(r'^/?mobile/settings/password/send-reset-email$',   'core.appsettings.send_reset_email'), 
+    url(r'^/?settings/password/send-reset-email$',          'core.appsettings.send_reset_email'), 
+    
+    url(r'^/?mobile/settings/password/reset-password$',     'core.appsettings.reset_password'), 
+    url(r'^/?settings/password/reset-password$',            'core.appsettings.reset_password'), 
     
     
     # ------------------------------ INDEX -------------------------------------
@@ -119,11 +122,11 @@ urlpatterns = patterns('',
     url(R'^settings/password/forgot/?$',        'core.appsettings.password_forgot'),
     url(R'^settings/password/reset/?$',         'core.appsettings.password_reset'),
     
-    url(R'^settings/alerts/?$',                 'core.appsettings.alert_settings'),
-    url(R'^settings/alerts/update.json$',       'core.appsettings.alert_settings_update'),
-    
     url(r'^/?mobile/settings/password/send-reset-email$',   'core.appssettings.reset_email'), 
     url(r'^/?settings/password/send-reset-email$',          'core.appsettings.reset_email'), 
+    
+    url(R'^settings/alerts/?$',                 'core.appsettings.alert_settings'),
+    url(R'^settings/alerts/update$',            'core.appsettings.update_alert_settings'),
     
     
     # ------------------------------- BLOG -------------------------------------

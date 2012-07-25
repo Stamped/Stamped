@@ -30,7 +30,7 @@
 -->
 
 {% block viewport %}
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=0.36">
 {% endblock viewport %}
 
 {% block styles %}
@@ -364,6 +364,7 @@
         </div>
     </div>
     
+    {% if not mobile %}
     <div id="tastemaker-map-window" class="main-content forward-button-active refresh-button-active">
         <div id="back-button"    class="chrome-button"></div>
         <div id="forward-button" class="chrome-button"></div>
@@ -375,6 +376,7 @@
             <div id="tastemaker-map-window-loading"></div>
         </div>
     </div>
+    {% endif %}
 {% endblock main %}
 
 {% block pre_footer %}

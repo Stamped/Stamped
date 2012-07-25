@@ -1,0 +1,63 @@
+<!doctype html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=8" />
+        
+        <title>Stamped</title>
+        
+        <meta name="author"             content="Stamped, Inc.">
+        <meta name="copyright"          content="Stamped, Inc.">
+        <meta name="robots"             content="index,follow">
+        
+        <meta name="viewport"           content="width=device-width, initial-scale=0.36">
+        <meta name="application-name"   content="Stamped">
+        
+        <link rel="shortcut icon"       href="http://static.stamped.com/assets/img/favicon.ico"/>
+        <link rel="apple-touch-icon"    href="http://static.stamped.com/assets/img/apple-touch-icon.png"/>
+        
+        <meta property="og:image"       content="http://static.stamped.com/assets/img/stamped-logo.png"/>
+        <meta property="og:title"       content="Stamped"/>
+        <meta property="og:site_name"   content="Stamped"/>
+        <meta property="og:type"        content="website"/>
+        
+        <style>
+            body    { background: #f2f2f2; }
+            .hidden { display: none; }
+            
+            .teaser {
+                background: url('http://static1.stamped.com/assets/img/teaser.png') no-repeat;
+                width:  620px;
+                height: 536px;
+                
+                position: fixed;
+                top:  50%;
+                left: 50%;
+                
+                margin: -268px 0 0 -310px;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div class="teaser"></div>
+        <div class="hidden">Stamped 2.0 coming soon!!!</div>
+        
+        <div id="scripts">
+            <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="/assets/js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
+            
+            <script>
+                var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];
+                    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+                    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+                    s.parentNode.insertBefore(g,s)}(document,'script'));
+                
+                {{ STAMPED_PRELOAD_JS|safe }}
+            </script>
+        </div>
+    </body>
+</html>
+

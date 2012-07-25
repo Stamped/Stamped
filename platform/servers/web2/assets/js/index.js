@@ -373,6 +373,10 @@
         
         // reveals the embedded map window via a translation from the right-hand-side of the window onto the page
         var map_window_show = function() {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             $social.hide(800);
             
             $map_window
@@ -388,6 +392,10 @@
         
         // hides the embedded map window via a translation off the right-hand-side of the window
         var map_window_hide = function() {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             $map_window
                 .stop(true, false)
                 .animate({
@@ -535,6 +543,12 @@
         $main.on("click", ".lightbox-video", function(event) {
             event.preventDefault();
             
+            var wmode = 'transparent';
+            
+            if (!!$.browser.msie) {
+                wmode = 'opaque';
+            }
+            
             $.fancybox({
                 'padding'       : 0,
                 'autoScale'     : false, 
@@ -561,7 +575,7 @@
                 'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
                 'type'          : 'swf',
                 'swf'           : {
-                    'wmode'             : 'transparent',
+                    'wmode'             : wmode,
                     'allowfullscreen'   : 'true'
                 }
             });
