@@ -202,7 +202,7 @@ class CustomCSSTemplateLibrary(object):
         proxy   = ".%s.less" % template_name
         
         if utils.is_ec2():
-            prog = "/stamped/bootstrap/node_modules/less/bin/lessc"
+            prog = "/stamped/node_modules/less/bin/lessc"
         else:
             prog = "lessc"
         

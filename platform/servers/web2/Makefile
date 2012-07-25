@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.48
+ASSET_VERSION_NUMBER        = 1.1.53
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -26,7 +26,7 @@ GENERATED_LINE_LENGTH		= 512
 LESS_CSS_DIRS               = assets/css assets/css/libs assets/css/ie assets/css/mobile
 LESS_CSS_SOURCE_SUFFIX      = less
 LESS_CSS_TARGET_SUFFIX      = css
-LESS_CSS_PROG_EC2           = /stamped/bootstrap/node_modules/less/bin/lessc
+LESS_CSS_PROG_EC2           = /stamped/node_modules/less/bin/lessc
 LESS_CSS_PROG               = $(if $(call EXISTS,$(LESS_CSS_PROG_EC2)),$(LESS_CSS_PROG_EC2),lessc)
 LESS_CSS_SOURCES            = $(strip \
     $(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
