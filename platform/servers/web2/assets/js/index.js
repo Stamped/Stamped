@@ -569,8 +569,8 @@
                 }, 
                 
                 'title'         : this.title, 
-                'width'         : 752, // 680
-                'height'        : 320, // 495
+                'width'         : 800, // 680
+                'height'        : 340 + 32, // 495
                 'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
                 'type'          : 'swf',
                 'swf'           : {
