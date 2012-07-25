@@ -184,8 +184,6 @@ class RateLimiterState(object):
         asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
         asyncresult.set_expiry(timeout)
         response, content = asyncresult.value
-        except Exception as e:
-
 
         return pickle.loads(response), content
 
