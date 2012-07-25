@@ -259,6 +259,36 @@ def addTMDBImages(**kwargs):
         return []
     processBatch(handler, query=query, **kwargs)
 
+# def clearTracks(**kwargs):
+#     """
+#     REMOVES tracks from albums and artists
+
+#     WARNING - this is method is meant to be used with a custom query.
+#     """
+#     regex = r'.+\((\d\d\d\d)\)$'
+#     # doesn't match anything
+#     query = {
+#         '_id': {
+#             '$exists':0
+#         }
+#     }
+#     query = kwargs.pop('query', query)
+#     def handler(entity):
+#         tmdb_id = entity.sources.tmdb_id
+#         if tmdb_id is not None:
+#             images = _tmdb().movie_images(tmdb_id)
+#             if images is not None and 'posters' in images:
+#                 posters = images['posters']
+#                 if len(posters) > 0:
+#                     poster = posters[0]
+#                     filepath = poster.pop('file_path', None)
+#                     if filepath is not None:
+#                         url = format_string % filepath
+#                         _setImage(entity, url, 'tmdb')
+#                         return [entity]
+#         return []
+#     processBatch(handler, query=query, **kwargs)
+
 
 _commands = {
     'track_previews': fixBadPlaylists,
@@ -347,6 +377,9 @@ if __name__ == '__main__':
                 output = doubleOutput
             else:
                 output = sparse_output
-        command(output=output, limit=options.limit, offset=options.offset, shuffle=options.shuffle, thread_count=options.thread_count)
+        if options.query is not None:
+            command(output=output, limit=options.limit, offset=options.offset, shuffle=options.shuffle, thread_count=options.thread_count, query=options.query)
+        else:
+            command(output=output, limit=options.limit, offset=options.offset, shuffle=options.shuffle, thread_count=options.thread_count)
 
 
