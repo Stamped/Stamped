@@ -24,10 +24,6 @@ from libs.ec2_utils     import is_ec2, get_stack
 REQUEST_DUR_LOG_SIZE    = 10    # the size of the request duration log, which is used to determine the avg request duration
 REQUEST_DUR_CAP         = 10.0   # the cap for an individual request duration when determining the avg request duration
 
-
-
-events = []
-
 class RLPriorityQueue(PriorityQueue):
     def qsize_priority(self, priority):
         """ Return the number of entries in the queue of equal or higher priority.  Assumes the entries are a sequence
@@ -99,15 +95,6 @@ def workerProcess(limit):
             gevent.sleep(period)
         sleep(0)
 
-def printProcess(limit):
-    global events
-
-    while True:
-        sleep(10)
-        for e in events:
-            print e
-        events = []
-
 
 class RateLimiter(object):
 
@@ -144,8 +131,6 @@ class RateLimiter(object):
 
         if self.limit is not None and self.period is not None:
             self.__worker = gevent.spawn(workerProcess, self)
-
-        gevent.spawn(printProcess, self)
 
     def update_limits(self, limit, period, cpd, fail_limit, fail_period, blackout_wait):
         if self.limit != limit:
