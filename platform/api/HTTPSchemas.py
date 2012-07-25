@@ -1772,8 +1772,8 @@ class HTTPEntity(Schema):
                         item.name   = song.title
                         if song.length is not None:
                             item.length = song.length
-                        if song.entity_id is not None:
-                            item.entity_id = song.entity_id
+                        # if song.entity_id is not None:
+                        #     item.entity_id = song.entity_id
                         # item.icon   = None ### TODO
 
                         sources = []
@@ -1833,9 +1833,7 @@ class HTTPEntity(Schema):
                         data.append(item)
 
                     except Exception as e:
-                        print """
-EXCEPTION %s
-                        """ % e
+                        print "\n\nEXCEPTION %s\n\n" % e
 
                 if len(data) > 0:
                     playlist.data = data
