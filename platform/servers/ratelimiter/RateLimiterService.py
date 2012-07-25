@@ -15,14 +15,14 @@ import os
 from time               import sleep
 import logs
 from datetime           import datetime
-import RateLimiter2
-from RateLimiter2       import RateLimiter, Request
+import servers.ratelimiter.RateLimiter2
+from servers.ratelimiter.RateLimiter2       import RateLimiter, Request
 from libs.ec2_utils     import get_stack
 
 from db.mongodb.MongoRateLimiterLogCollection import MongoRateLimiterLogCollection
 
 
-LIMITS_DIR = os.path.dirname(RateLimiter2.__file__)
+LIMITS_DIR = os.path.dirname(servers.ratelimiter.RateLimiter2.__file__)
 CONFIG_LOAD_INTERVAL = 60*3
 UPDATE_LOG_INTERVAL  = 60*3 # seconds to wait between updating the db with log of daily calls to each service
 
