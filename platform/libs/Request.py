@@ -121,7 +121,7 @@ class RateLimiterState(object):
         try:
             email = {}
             email['from'] = 'Stamped <noreply@stamped.com>'
-            email['to'] = 'mike@stamped.com'
+            email['to'] = 'dev@stamped.com'
             email['subject'] = "RateLimiter RPC server failure"
             email['body'] = output
             utils.sendEmail(email, format='html')

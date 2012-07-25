@@ -162,7 +162,15 @@ class AlbumEntityProxyComparator(AEntityProxyComparator):
                 artist_sim_score *= 1.0 - (penalty.score ** 1.5)
 
         except IndexError:
-            # TODO PRELAUNCH FUCK FUCK: Better handling here.
+            try:
+                album1_has_artist = album1.artists and album1.artists[0] and 'name' in album1.artists[0]
+                album2_has_artist = album2.artists and album2.artists[0] and 'name' in album2.artists[0]
+                if not album1_has_artist and not album2_has_artist and album_sim_score >= 1:
+                    return CompareResult.match(album_sim_score)
+
+            except Exception:
+                pass
+
             return CompareResult.unknown()
 
         total_sim_score = album_sim_score * (artist_sim_score ** 0.5)
@@ -213,8 +221,15 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
                 artist_sim_score *= 1.0 - (penalty.score ** 1.5)
 
         except IndexError:
-            # TODO: Better handling here. Maybe pare out the artist-less track. Maybe check to see if both are by
-            # 'Various Artists' or whatever.
+            try:
+                track1_has_artist = track1.artists and track1.artists[0] and 'name' in track1.artists[0]
+                track2_has_artist = track2.artists and track2.artists[0] and 'name' in track2.artists[0]
+                if not track1_has_artist and not track2_has_artist and track_sim_score >= 1:
+                    return CompareResult.match(track_sim_score)
+
+            except Exception:
+                pass
+
             return CompareResult.unknown()
 
         total_sim_score = track_sim_score * (artist_sim_score ** 0.5)

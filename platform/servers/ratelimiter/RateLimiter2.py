@@ -194,7 +194,7 @@ class RateLimiter(object):
         try:
             email = {}
             email['from'] = 'Stamped <noreply@stamped.com>'
-            email['to'] = 'mike@stamped.com'
+            email['to'] = 'dev@stamped.com'
             email['subject'] = "RateLimiter '%s' fail limit reached" % self.__service_name
             email['body'] = output
             utils.sendEmail(email, format='html')
