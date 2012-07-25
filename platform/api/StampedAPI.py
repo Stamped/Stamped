@@ -531,7 +531,7 @@ class StampedAPI(AStampedAPI):
 
                 try:
                     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                    path = os.path.join(base, 'alerts', 'templates', 'email_welcome.html.j2')
+                    path = os.path.join(base, 'alerts', 'new-templates', 'email_welcome.html')
                     template = open(path, 'r')
                 except Exception:
                     ### TODO: Add error logging?
