@@ -91,11 +91,13 @@ def _sparsePrint(schema, keys, keypath):
         else:
             _sparsePrint(getattr(schema, key), keys[1:], keypath)
 
-def createSparseOutputToConsole(keypaths):
+def createSparseOutputToConsole(keypaths, sparse=False):
     """
     """
     db = _entityDB()
     def sparseOutputToConsole(entity_id, result_entities):
+        if sparse and len(result_entities) == 0:
+            return
         original_entity = db.getEntity(entity_id)
         print("\nORIGINAL:%s" % entity_id)
         for keypath in keypaths:
