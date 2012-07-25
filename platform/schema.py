@@ -187,7 +187,7 @@ class Schema(object):
         if self.__class__ != other.__class__:
             return False
 
-        if self.__properties.viewkeys() != other.__properties.viewkeys():
+        if set(self.__properties.keys()) != set(other.__properties.keys()):
             return False
 
         for k, v in self.__properties.iteritems():
