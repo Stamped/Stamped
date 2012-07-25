@@ -58,6 +58,7 @@ def deploy_assets():
                 "/assets/generated/img/emoji", 
                 "/assets/generated/img/public-home", 
                 "/assets/generated/img/index", 
+                "/assets/generated/img/about", 
                 "/assets/generated/img/jobs", 
                 "/assets/generated/img/entity_fallbacks", 
             ], 
