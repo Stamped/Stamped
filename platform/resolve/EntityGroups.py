@@ -34,6 +34,7 @@ def importEntityMinisFromProxyField(field, entityClass, entityType):
                     setattr(entityMini.sources, '%s_source' % proxy.source, proxy.source)
                 if 'url' in subfield:
                     setattr(entityMini.sources, '%s_url' % proxy.source, subfield['url'])
+                results.append(entityMini)
             except Exception:
                 report()
                 logs.info('%s import failure: %s for %s' % (field, subfield['name'], proxy.name))
