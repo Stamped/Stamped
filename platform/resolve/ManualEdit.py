@@ -382,7 +382,7 @@ def update(updates):
             entity.sources.itunes_source = 'seed'
             entity.sources.itunes_timestamp = now
     fandango_url = updates.fandango_url
-    if fandango_url is not None and fandango_url not in bad_versions:
+    if fandango_url is not None and fandango_url not in bad_versions and not fandango_url.startswith('http://www.qksrv.net/'):
         #'http://www.qksrv.net/click-5348839-10576760?url=http%3a%2f%2fmobile.fandango.com%3fa%3d%26m%3d154970
         match = re.match(r'http://www.fandango.com/(.+)_(\d+)/(.+)(\?.+)?', fandango_url)
         fandango_raw_id = match.group(2)
