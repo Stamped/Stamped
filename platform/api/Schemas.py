@@ -614,10 +614,6 @@ class EntitySources(Schema):
         cls.addProperty('rdio_available_source',            basestring)
         cls.addProperty('rdio_available_timestamp',         datetime)
 
-        cls.addProperty('rdio_is_playable',                 bool)
-        cls.addProperty('rdio_is_playable_source',          basestring)
-        cls.addProperty('rdio_is_playable_timestamp',       datetime)
-
         cls.addProperty('amazon_id',                        basestring)
         cls.addProperty('amazon_url',                       basestring)
         cls.addProperty('amazon_underlying',                basestring)
