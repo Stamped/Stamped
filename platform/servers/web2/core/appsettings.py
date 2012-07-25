@@ -196,6 +196,12 @@ def send_reset_email(request, schema, **kwargs):
         errorMsg = 'No account information was found for that email address.'
         raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
     
+    account = stampedAPIProxy.getAccount(user['user_id'])
+    auth_service = account['auth_service']
+    
+    if auth_service != 'stamped':
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account['screen_name'], auth_service))
+    
     # send email
     logs.info("sending email to '%s' (user: '%s')" % (email, user['screen_name']))
     result = g_stamped_auth.forgotPassword(email)
