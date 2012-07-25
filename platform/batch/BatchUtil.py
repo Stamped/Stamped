@@ -15,10 +15,14 @@ try:
     from abc                    import ABCMeta, abstractmethod, abstractproperty
     from pymongo                import json_util
     import json
-    from pprint                 import pformat
+    from pprint                 import pformat, pprint
     from gevent.pool            import Pool
+    from schema import Schema
 except:
     raise
+
+def _api():
+    return globalMongoStampedAPI()
 
 def _entityDB():
     api = globalMongoStampedAPI()
@@ -36,6 +40,17 @@ def outputToCollection(entity_id, result_entities):
     """
     for entity in result_entities:
         _entityDB().updateEntity(entity)
+
+def outputToCollectionAndEnrich(entity_id, result_entities):
+    """
+    Outputs the given results to the local mongo entity collection.
+
+    This function is intended to be used the 'output' argument of processBatch().
+    It is also the default function used if no 'output' function is provided.
+    """
+    for entity in result_entities:
+        _entityDB().updateEntity(entity)
+        _api().mergeEntity(entity)
 
 def outputToConsole(entity_id, result_entities):
     """
@@ -62,6 +77,38 @@ def outputToConsole(entity_id, result_entities):
     for entity in result_entities:
         accum.append('%s\n' % pformat(entity.dataExport()))
     print(''.join(accum))
+
+def _sparsePrint(schema, keys, keypath):
+    if len(keys) == 0:
+        if isinstance(schema, Schema):
+            schema = schema.dataExport()
+        print("%s: %s" % (keypath, pformat(schema)))
+    else:
+        key = keys[0]
+        if key == '*':
+            for value in schema:
+                _sparsePrint(value, keys[1:], keypath)
+        else:
+            _sparsePrint(getattr(schema, key), keys[1:], keypath)
+
+def createSparseOutputToConsole(keypaths):
+    """
+    """
+    db = _entityDB()
+    def sparseOutputToConsole(entity_id, result_entities):
+        original_entity = db.getEntity(entity_id)
+        print("\nORIGINAL:%s" % entity_id)
+        for keypath in keypaths:
+            keys = keypath.split('.')
+            _sparsePrint(original_entity, keys, keypath)
+        print('RESULTS %d' % len(result_entities))
+        for entity in result_entities:
+            if entity.entity_id != entity_id:
+                print('entity_id: %s' % entity.entity_id)
+            for keypath in keypaths:
+                keys = keypath.split('.')
+                _sparsePrint(entity, keys, keypath)
+    return sparseOutputToConsole
 
 def createOutputToFile(f):
     """
