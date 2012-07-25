@@ -83,7 +83,7 @@ class Memcache(object):
             try:
                 return self._client[key]
             except Exception:
-                logs.warn(utils.getFormattedException())
+                pass
         
         raise KeyError(key)
 

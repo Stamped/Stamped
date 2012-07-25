@@ -87,17 +87,26 @@ def fixBadPlaylists(**kwargs):
     itunes = _itunes()
     def handler(entity):
         tracks = entity.tracks
+        itunes_ids = set()
         for track in tracks:
             itunes_id = track.sources.itunes_id
             itunes_preview = track.sources.itunes_preview
             if itunes_id is not None and itunes_preview is None:
-                itunes_data = itunes.method('lookup', id=itunes_id)
-                if itunes_data is not None and 'results' in itunes_data:
-                    result = itunes_data['results']
-                    if len(result) > 0:
-                        track_data = result[0]
-                        if 'previewUrl' in track_data:
-                            track.sources.itunes_preview = track_data['previewUrl']
+                itunes_ids.add(itunes_id)
+
+        itunes_data = itunes.method('lookup', id=','.join(itunes_ids))
+        datums = {}
+        if itunes_data is not None and 'results' in itunes_data:
+            for datum in itunes_data['results']:
+                itunes_id = str(datum.pop('trackId',None))
+                if itunes_id is not None:
+                    datums[itunes_id] = datum
+        for track in tracks:
+            itunes_id = track.sources.itunes_id
+            if itunes_id in datums:
+                track_data = datums[itunes_id]
+                if 'previewUrl' in track_data:
+                    track.sources.itunes_preview = track_data['previewUrl']
         return [entity]
     processBatch(handler, query=query, **kwargs)
 
