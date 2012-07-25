@@ -33,7 +33,7 @@
         <meta name="robots"             content="index,follow">
         
         {% block viewport %}
-            <meta name="viewport"       content="width=device-width, initial-scale=0.36">
+            <meta name="viewport"       content="{% if mobile %} width=device-width,initial-scale=1" {% else %} "width=device-width, initial-scale=0.36" {% endif %}>
         {% endblock viewport %}
         
         <meta name="application-name"   content="Stamped">
