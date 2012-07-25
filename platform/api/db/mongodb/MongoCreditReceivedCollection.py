@@ -15,6 +15,7 @@ class MongoCreditReceivedCollection(AMongoCollection):
         AMongoCollection.__init__(self, collection='creditreceived')
 
         self._collection.ensure_index([('credits.user.user_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('ref_ids', pymongo.ASCENDING)])
 
     """
     Credited User Id -> Stamp Ids 
