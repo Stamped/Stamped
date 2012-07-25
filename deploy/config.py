@@ -102,7 +102,16 @@ __stack = {
         'template' : {
             'roles' : [ 'work-enrich', 'work', 'mem' ], 
         }, 
-    }, 
+    },
+
+    # rate limiter manages third party request traffic
+    'ratelimiter' : {
+        'count' : 1,
+
+        'template' : {
+            'roles' : [ 'ratelimiter', ],
+        },
+    },
     
     # dedicated memcached nodes
     'mem' : {
