@@ -17,7 +17,7 @@ import pickle
 import time
 from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
-from servers.ratelimiter.RateLimiter2 import *
+from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException
 import libs.ec2_utils
 from collections                import deque
 

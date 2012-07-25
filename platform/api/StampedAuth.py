@@ -9,9 +9,7 @@ import Globals, utils
 from api import auth
 import time, hashlib, random, base64, struct, os
 
-import datetime
-from datetime               import timedelta
-#from datetime               import datetime, timedelta
+from datetime               import datetime, timedelta
 from errors                 import *
 from api.Schemas            import *
 
@@ -252,7 +250,7 @@ class StampedAuth(AStampedAuth):
         
         while True:
             try:
-                rightNow = datetime.datetime.utcnow()
+                rightNow = datetime.utcnow()
 
                 resetToken = PasswordResetToken()
                 resetToken.token_id = auth.generateToken(36)
@@ -368,7 +366,7 @@ class StampedAuth(AStampedAuth):
         while True:
             try:
                 timestamp = BasicTimestamp()
-                timestamp.created = datetime.datetime.utcnow()
+                timestamp.created = datetime.utcnow()
 
                 refreshToken = RefreshToken()
                 refreshToken.token_id = auth.generateToken(43)
@@ -427,7 +425,7 @@ class StampedAuth(AStampedAuth):
             
         while True:
             try:
-                rightNow = datetime.datetime.utcnow()
+                rightNow = datetime.utcnow()
 
                 timestamp = BasicTimestamp()
                 timestamp.created = rightNow
@@ -489,7 +487,7 @@ class StampedAuth(AStampedAuth):
         while True:
             try:
                 timestamp = BasicTimestamp()
-                timestamp.created = datetime.datetime.utcnow()
+                timestamp.created = datetime.utcnow()
 
                 token = SettingsEmailAlertToken()
                 token.token_id = auth.generateToken(43)
