@@ -15,7 +15,7 @@ class MongoInboxStampsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='inboxstamps')
-        self._collection.ensure_index([('user.user_id', pymongo.ASCENDING)])
+        self._collection._database['stamps'].ensure_index([('user.user_id', pymongo.ASCENDING)])
         
 
     """
