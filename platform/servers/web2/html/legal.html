@@ -1,0 +1,68 @@
+{% extends "about.html" %}
+{% load stamped_tags %}
+
+<!-- Javascript Dependencies => assets/generated/js/legal.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    Core stamped dependencies:
+        script: legal.js
+-->
+
+<!-- CSS Dependencies => assets/generated/css/legal.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+    
+    Core stamped dependencies:
+        stylesheet: legal.css
+-->
+
+{% block styles %}
+    {{ block.super }}
+    
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/legal.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/legal.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
+{% endblock styles %}
+
+{% block vertically_centered_pre %}
+{% endblock vertically_centered_pre %}
+
+{% block vertically_centered_post %}
+{% endblock vertically_centered_post %}
+
+{% block pane-body %}
+    <p class="title">Legal Stuff</p>
+    
+    <div id="views" class="active-view-privacy-policy">
+        <div id="view-switcher">
+            <a class="view-switcher active-view-privacy-policy"   href="#privacy-policy">Privacy Policy</a>
+            <a class="view-switcher active-view-terms-of-service" href="#terms-of-service">Terms of Service</a>
+        </div>
+        
+        <div id="privacy-policy" class="view view-privacy-policy">
+            {% include "privacy-policy.html" %}
+        </div>
+        
+        <div id="terms-of-service" class="view view-terms-of-service">
+            {% include "terms-of-service.html" %}
+        </div>
+    </div>
+{% endblock pane-body %}
+
+{% block post-main %}
+    <div class="made-in-nyc-logo"></div>
+{% endblock post-main %}
+
+{% block scripts %}
+    {{ block.super }}
+    
+    {% if STAMPED_DEBUG %}
+        <script src="{{ STAMPED_STATIC_URL }}js/legal.js"></script>
+    {% else %}
+        <script src="{{ STAMPED_STATIC_URL }}js/legal.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+    {% endif %}
+{% endblock scripts %}
+

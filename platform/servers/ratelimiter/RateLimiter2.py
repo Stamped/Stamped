@@ -35,17 +35,12 @@ class RLPriorityQueue(PriorityQueue):
                 count += 1
         return count
 
-#class RateException(Exception):
-#    def __init__(self, msg=None):
-#        Exception.__init__(self, msg)
-#        print(msg)
-
-class TooManyFailedRequestsException(Exception):
+class RateException(Exception):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
         print(msg)
 
-class RateLimitExceededException(Exception):
+class TooManyFailedRequestsException(Exception):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
         print(msg)
