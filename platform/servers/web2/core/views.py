@@ -609,11 +609,11 @@ def jobs(request, **kwargs):
 @stamped_view()
 def legal(request, **kwargs):
     body_classes = "legal main"
-    mobile       = schema.mobile
+    mobile       = kwargs.get('mobile', False)
     
     return stamped_render(request, 'legal.html', {
         'body_classes'      : body_classes, 
-        'page'              : 'legal'
+        'page'              : 'legal', 
         'title'             : 'Stamped - Legal', 
         'mobile'            : mobile, 
     })
