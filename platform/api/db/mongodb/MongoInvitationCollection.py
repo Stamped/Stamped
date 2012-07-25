@@ -9,6 +9,7 @@ import Globals, utils, logs
 from datetime   import datetime
 from utils      import lazyProperty
 from api.Schemas    import *
+import pymongo
 
 from api.db.mongodb.AMongoCollection           import AMongoCollection
 from api.db.mongodb.MongoInviteQueueCollection import MongoInviteQueueCollection
@@ -17,6 +18,7 @@ class MongoInvitationCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, 'invitations')
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('invited_by', pymongo.ASCENDING)])
     
     ### PUBLIC
     

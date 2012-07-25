@@ -7,6 +7,7 @@ __license__   = 'TODO'
 
 import Globals
 import logs
+import pymongo
 
 from api.db.mongodb.AMongoCollection import AMongoCollection
 
@@ -14,6 +15,7 @@ class MongoInboxStampsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='inboxstamps')
+        
 
     """
     User Id -> Stamp Ids 

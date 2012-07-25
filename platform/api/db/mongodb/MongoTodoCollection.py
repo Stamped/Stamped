@@ -33,6 +33,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
         self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
         self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('source_stamp_ids', pymongo.ASCENDING), ('stamp.stamp_id', pymongo.ASCENDING)])
 
 
     def _convertFromMongo(self, document):

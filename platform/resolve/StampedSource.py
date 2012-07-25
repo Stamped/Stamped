@@ -747,6 +747,7 @@ class StampedSource(GenericSource):
         return results
 
 
+    # TODO: Make this faster via indexing
     def __id_query(self, mongo_query):
         import pymongo
         #logs.debug(str(mongo_query))
