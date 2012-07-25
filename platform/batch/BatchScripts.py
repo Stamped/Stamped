@@ -143,6 +143,9 @@ def parseCommandLine():
     parser.add_option("-s", "--shuffle", action="store_true", dest="shuffle", 
         default=False, help="Randomize order and slice")
 
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", 
+        default=False, help="Use keys and action.")
+
     parser.add_option("-l", "--limit", dest="limit", 
         default=None, type="int", help="Limit number of entities processed")
 
@@ -171,7 +174,7 @@ def parseCommandLine():
         if arg not in _commands:
             invalid = True
 
-    if len(args) < 1 or invalid or options.action not in _actions:
+    if len(args) < 1 or invalid or options.action not in _actions or (options.verbose and options.keys is None):
         print "Error: must provide commands from the list of available commands:"
         for command in _commands:
             print "   %s" % command
@@ -191,7 +194,16 @@ if __name__ == '__main__':
             output = createOutputToFile(f)
         if options.keys is not None:
             keys = options.keys.split(',')
-            output = createSparseOutputToConsole(keys)
+
+            sparse_output = createSparseOutputToConsole(keys)
+            if options.verbose:
+                old_output = output
+                def doubleOutput(entity_id, results):
+                    sparse_output(entity_id, results)
+                    old_output(entity_id, results)
+                output = doubleOutput
+            else:
+                output = sparse_output
         command(output=output, limit=options.limit, offset=options.offset, shuffle=options.shuffle, thread_count=options.thread_count)
 
 
