@@ -5280,13 +5280,13 @@ class StampedAPI(AStampedAPI):
 
             for stub in stubList:
                 stubId = stub.entity_id
-                resolved = self._resolveStub(stub)
+                resolved = self._resolveStub(stub, True)
                 if resolved is None:
                     resolvedList.append(stub)
                 else:
                     resolvedList.append(resolved.minimize())
-                if stubId != resolved.entity_id:
-                    stubsModified = True
+                    if stubId != resolved.entity_id:
+                        stubsModified = True
 
             if entity.isType('artist'):
                 # Do a quick dedupe of songs in case the same song appears in different albums.
@@ -5320,28 +5320,21 @@ class StampedAPI(AStampedAPI):
             if not stubList:
                 return
 
-            mergeEntityTasks = []
-            for stub in stubList:
-                resolvedFull = self._resolveStub(stub)
-                if resolvedFull is None:
-                    logs.warning('stub resolution failed: %s' % stub)
-                    if attr == 'artists':
-                        mergeEntityTasks.append(gevent.spawn(lambda x: x, stub))
-                    else:
-                        mergeEntityTasks.append(None)
-                else:
-                    mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
-            
             modified = False
             visitedStubs = []
             mergedEntities = []
-            for stub, task in zip(stubList, mergeEntityTasks):
-                if task is None:
+            for stub in stubList:
+                resolvedFull = self._resolveStub(stub, False)
+                if resolvedFull is None:
                     modified = True
-                    continue
-                mergedEntities.append(task.get())
-                visitedStubs.append(mergedEntities[-1].minimize())
-                modified = modified or (visitedStubs[-1] != stub)
+                    logs.warning('stub resolution failed: %s' % stub)
+                    if attr == 'artists':
+                        visitedStubs.append(stub)
+                else:
+                    mergedEntity = self._enrichAndPersistEntity(resolvedFull, persisted)
+                    mergedEntities.append(mergedEntity)
+                    visitedStubs.append(mergedEntity.minimize())
+                    modified = modified or (visitedStubs[-1] != stub)
             setattr(entity, attr, visitedStubs)
             if modified:
                 self._entityDB.updateEntity(entity)
@@ -5350,7 +5343,7 @@ class StampedAPI(AStampedAPI):
                 self._followOutLinks(mergedEntity, persisted, depth+1)
         self._iterateOutLinks(entity, followStubList)
 
-    def _resolveStub(self, stub):
+    def _resolveStub(self, stub, quickResolveOnly):
         """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
 
         Tries to fast resolve Stamped DB using existing third-party source IDs.
@@ -5387,7 +5380,7 @@ class StampedAPI(AStampedAPI):
                         source_id = getattr(stub.sources, '%s_id' % sourceName)
                         # Attempt to resolve against the Stamped DB (quick)
                         entity_id = stampedSource.resolve_fast(sourceName, source_id)
-                        if entity_id is None:
+                        if entity_id is None and not quickResolveOnly:
                             # Attempt to resolve against the Stamped DB (full)
                             proxy = source.entityProxyFromKey(source_id, entity=stub)
                             results = stampedSource.resolve(proxy)
