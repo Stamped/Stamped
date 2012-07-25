@@ -219,7 +219,7 @@
                     }
                     
                     if (!okay) {
-                        console.debug("no image of size '" + size + "' for user '" + screen_name + "'");
+                        //console.debug("no image of size '" + size + "' for user '" + screen_name + "'");
                     }
                     
                     return new Handlebars.SafeString('<img alt="' + alt + '" src="' + url + '" />');
@@ -299,6 +299,29 @@
                                             
                                             return g_open_sdetail_click(event);
                                         });
+                                        
+                                        if (!!$.browser.msie) {
+                                            // fix for IE stamp-map-item clickability
+                                            $s.find(".sdetail").click(function(event) {
+                                                return g_open_sdetail_click(event);
+                                            });
+                                            
+                                            $s.find(".entity-header").click(function(event) {
+                                                return g_open_sdetail_click(event);
+                                            });
+                                            
+                                            $s.find(".content").click(function(event) {
+                                                event.target = $(this).parents(".stamp-map-item");
+                                                
+                                                return g_open_sdetail_click(event);
+                                            });
+                                            
+                                            $s.find("p").click(function(event) {
+                                                event.target = $(this).parents(".stamp-map-item");
+                                                
+                                                return g_open_sdetail_click(event);
+                                            });
+                                        }
                                     }
                                     
                                     g_update_stamps($s);
@@ -319,10 +342,10 @@
             }
             
             var open_stamp_map_popup = function(stamp_id) {
-                console.debug("open_stamp_map_popup: " + stamp_id);
+                //console.debug("open_stamp_map_popup: " + stamp_id);
                 
                 if (!stamp_map_popups.hasOwnProperty(stamp_id)) {
-                    console.debug("ERROR: couldn't find stamp-list-view-item for stamp_id " + stamp_id);
+                    //console.debug("ERROR: couldn't find stamp-list-view-item for stamp_id " + stamp_id);
                     // TODO: better error reporting!
                     
                     return;
@@ -591,7 +614,7 @@
             var stamp_id = g_extract_data($elem, 'stamp-id-', null);
             
             if (stamp_id === null) {
-                console.debug("ERROR: no stamp_id for stamp-list-view-item: " + $elem);
+                //console.debug("ERROR: no stamp_id for stamp-list-view-item: " + $elem);
             }
             
             return stamp_id;
@@ -602,7 +625,7 @@
             event.preventDefault();
             
             var $this       = $(this);
-            var stamp_id    = get_stamp_list_view_item_id($this);
+            var stamp_id    = get_stamp_list_view_item_id($item);
             
             if (stamp_id !== null) {
                 if (lite) {
@@ -738,13 +761,13 @@
                                 var lng  = position.coords.longitude;
                                 user_pos = new google.maps.LatLng(lat, lng);
                                 
-                                console.debug("user_pos: " + user_pos);
+                                //console.debug("user_pos: " + user_pos);
                                 update_map_center(user_pos);
                             }
                             
                             finally_func();
                         }, function() {
-                            console.debug("ERROR: navigator.geolocation.getCurrentPosition failed!");
+                            //console.debug("ERROR: navigator.geolocation.getCurrentPosition failed!");
                             
                             finally_func();
                         });
