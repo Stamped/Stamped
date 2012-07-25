@@ -16,6 +16,7 @@ try:
     import sys
     import re
     from datetime import datetime
+    from api.Schemas import *
 except:
     raise
 
@@ -218,12 +219,54 @@ def setRdioAvailability(**kwargs):
             return []
     processBatch(handler, query=query, **kwargs)
 
+def _setImage(entity, image_url, source='seed'):
+    img = ImageSchema()
+    size = ImageSizeSchema()
+    size.url = image_url
+    img.sizes = [size]
+    entity.images = [img]
+    entity.images_source = source
+    entity.images_timestamp = datetime.utcnow()
+
+def addTMDBImages(**kwargs):
+    """
+    Ensures that for any album or track with an rdio_id, the rdio_available group is set.
+    """
+    regex = r'.+\((\d\d\d\d)\)$'
+    query = {
+        'types' : 'movie',
+        'images' : {'$exists' : 0},
+        'sources.tmdb_id' : {'$exists' : 1},
+    }
+    query = kwargs.pop('query', query)
+    configuration = _tmdb().configuration()
+    base_url = configuration['images']['base_url']
+    size = 'w500' # TODO make introspective
+    format_string = base_url + size + '%s'
+    def handler(entity):
+        tmdb_id = entity.sources.tmdb_id
+        if tmdb_id is not None:
+            images = _tmdb().movie_images(tmdb_id)
+            if images is not None and 'posters' in images:
+                posters = images['posters']
+                if len(posters) > 0:
+                    poster = posters[0]
+                    filepath = poster.pop('file_path', None)
+                    if filepath is not None:
+                        url = format_string % filepath
+                        _setImage(entity, url, 'tmdb')
+                        return [entity]
+        return []
+    processBatch(handler, query=query, **kwargs)
+
+
 _commands = {
     'track_previews': fixBadPlaylists,
     'rdio_urls': addRdioUrls,
     'clean_titles': cleanTitles,
     'remove_itunes_release_dates': removeITunesReleaseDates,
     'scrape_date_from_title': scrapeDateFromTitle,
+    'tmdb_images': addTMDBImages,
 }
 
 _actions = {
