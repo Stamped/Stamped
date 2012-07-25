@@ -4412,7 +4412,7 @@ class StampedAPI(AStampedAPI):
                         stampPreview = StampPreview()
                         stampPreview.stamp_id = stamp.stamp_id
                         userPreview = UserMini()
-                        userPreview.user_id = stamp.user.user_id
+                        userPreview.user_id = stamp.user_id
                         stampPreview.user = userPreview
                         preview.append(stampPreview)
                     if len(preview) > 0:
