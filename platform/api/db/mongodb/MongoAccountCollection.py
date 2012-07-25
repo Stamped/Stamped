@@ -19,6 +19,8 @@ from api.db.mongodb.MongoUserLinkedAlertsHistoryCollection import MongoUserLinke
 from api.db.mongodb.MongoGuideCollection        import MongoGuideCollection
 from api.AAccountDB                 import AAccountDB
 
+from libs.Memcache                              import globalMemcache
+
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     
     def __init__(self):
@@ -34,6 +36,8 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING),
                                         ('_id', pymongo.ASCENDING)])
         self._collection.ensure_index('linked.netflix.linked_user_id')
+
+        self._cache = globalMemcache()
 
 
     @lazyProperty
@@ -177,6 +181,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         else:
             return document
 
+    def _delCachedUserMini(self, userId):
+        key = str("obj::usermini::%s" % userId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
     ### INTEGRITY
 
     def checkIntegrity(self, key, repair=False, api=None):
@@ -286,11 +297,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def updateAccount(self, user):
         ### TODO: Only update certain fields (i.e. remove race conditions if 
         ###     user gets credit while modifying account)
+        self._delCachedUserMini(user.user_id)
         document = self._convertToMongo(user)
         document = self._updateMongoDocument(document)
         return self._convertFromMongo(document)
     
     def removeAccount(self, userId):
+        self._delCachedUserMini(userId)
         documentId = self._getObjectIdFromString(userId)
         return self._removeMongoDocument(documentId)
     
