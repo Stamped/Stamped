@@ -1340,9 +1340,6 @@
 		63026A2315ADE5F6007B87B1 /* watermark_theguide@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A1F15ADE5F6007B87B1 /* watermark_theguide@2x.png */; };
 		63026A2415ADE5F6007B87B1 /* watermark_theguide@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A1F15ADE5F6007B87B1 /* watermark_theguide@2x.png */; };
 		63026A2515ADE5F6007B87B1 /* watermark_theguide@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A1F15ADE5F6007B87B1 /* watermark_theguide@2x.png */; };
-		63026A2815ADECCB007B87B1 /* closebutton_black.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A2615ADECCB007B87B1 /* closebutton_black.png */; };
-		63026A2915ADECCB007B87B1 /* closebutton_black.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A2615ADECCB007B87B1 /* closebutton_black.png */; };
-		63026A2A15ADECCB007B87B1 /* closebutton_black.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A2615ADECCB007B87B1 /* closebutton_black.png */; };
 		63026A2B15ADECCB007B87B1 /* closebutton_black@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A2715ADECCB007B87B1 /* closebutton_black@2x.png */; };
 		63026A2C15ADECCB007B87B1 /* closebutton_black@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A2715ADECCB007B87B1 /* closebutton_black@2x.png */; };
 		63026A2D15ADECCB007B87B1 /* closebutton_black@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63026A2715ADECCB007B87B1 /* closebutton_black@2x.png */; };
@@ -3810,7 +3807,6 @@
 		63026A1A15ADD080007B87B1 /* NoDataUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoDataUtil.m; sourceTree = "<group>"; };
 		63026A1E15ADE5F6007B87B1 /* watermark_theguide.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = watermark_theguide.png; sourceTree = "<group>"; };
 		63026A1F15ADE5F6007B87B1 /* watermark_theguide@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "watermark_theguide@2x.png"; sourceTree = "<group>"; };
-		63026A2615ADECCB007B87B1 /* closebutton_black.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = closebutton_black.png; sourceTree = "<group>"; };
 		63026A2715ADECCB007B87B1 /* closebutton_black@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "closebutton_black@2x.png"; sourceTree = "<group>"; };
 		63026A3015ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pop-up_findfriendstofollow_btn.png"; sourceTree = "<group>"; };
 		63026A3115ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "pop-up_findfriendstofollow_btn@2x.png"; sourceTree = "<group>"; };
@@ -7830,7 +7826,6 @@
 				633FACB715AE5520001F937F /* guide_bubble@2x.png */,
 				63026A3015ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn.png */,
 				63026A3115ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn@2x.png */,
-				63026A2615ADECCB007B87B1 /* closebutton_black.png */,
 				63026A2715ADECCB007B87B1 /* closebutton_black@2x.png */,
 				63026A1E15ADE5F6007B87B1 /* watermark_theguide.png */,
 				63026A1F15ADE5F6007B87B1 /* watermark_theguide@2x.png */,
@@ -8922,7 +8917,6 @@
 				639A944315ACCF8800F69935 /* watermark_nostamps@2x.png in Resources */,
 				63026A2215ADE5F6007B87B1 /* watermark_theguide.png in Resources */,
 				63026A2515ADE5F6007B87B1 /* watermark_theguide@2x.png in Resources */,
-				63026A2A15ADECCB007B87B1 /* closebutton_black.png in Resources */,
 				63026A2D15ADECCB007B87B1 /* closebutton_black@2x.png in Resources */,
 				63026A3A15ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn.png in Resources */,
 				63026A3D15ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn@2x.png in Resources */,
@@ -9633,7 +9627,6 @@
 				639A944215ACCF8800F69935 /* watermark_nostamps@2x.png in Resources */,
 				63026A2115ADE5F6007B87B1 /* watermark_theguide.png in Resources */,
 				63026A2415ADE5F6007B87B1 /* watermark_theguide@2x.png in Resources */,
-				63026A2915ADECCB007B87B1 /* closebutton_black.png in Resources */,
 				63026A2C15ADECCB007B87B1 /* closebutton_black@2x.png in Resources */,
 				63026A3915ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn.png in Resources */,
 				63026A3C15ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn@2x.png in Resources */,
@@ -10345,7 +10338,6 @@
 				639A944115ACCF8800F69935 /* watermark_nostamps@2x.png in Resources */,
 				63026A2015ADE5F6007B87B1 /* watermark_theguide.png in Resources */,
 				63026A2315ADE5F6007B87B1 /* watermark_theguide@2x.png in Resources */,
-				63026A2815ADECCB007B87B1 /* closebutton_black.png in Resources */,
 				63026A2B15ADECCB007B87B1 /* closebutton_black@2x.png in Resources */,
 				63026A3815ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn.png in Resources */,
 				63026A3B15ADFEE9007B87B1 /* pop-up_findfriendstofollow_btn@2x.png in Resources */,

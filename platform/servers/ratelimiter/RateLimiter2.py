@@ -7,6 +7,7 @@ from gevent.event       import AsyncResult
 from gevent.coros       import Semaphore
 
 import Globals
+import logs
 import urllib
 import httplib2
 import datetime
@@ -145,7 +146,10 @@ class RateLimiter(object):
             self.blackout_wait = blackout_wait
 
     class FailLog(object):
-        def __init__(self, status_code, content):
+        def __init__(self, url, body, headers, status_code, content):
+            self.url = url
+            self.body = body
+            self.headers = headers
             self.timestamp = time.time()
             self.status_code = status_code
             self.content = content
@@ -173,7 +177,7 @@ class RateLimiter(object):
 
         output += '<table border=1 cellpadding=5>'
         output += '<tr>'
-        labels = ['Timestamp', 'Code', 'Content']
+        labels = ['Timestamp', 'Url', 'Body', 'Headers', 'Code', 'Content']
         for label in labels:
             output += '<td style="font-weight:bold">%s</td>' % label
         output += '</tr>'
@@ -181,6 +185,9 @@ class RateLimiter(object):
         for fail in self.__fails:
             output += '<tr>'
             output += '<td valign=top>%s</td>' % time.strftime('%m/%d/%Y %H:%M:%S', time.localtime(fail.timestamp)) # Timestamp
+            output += '<td valign=top>%s</td>' % fail.url
+            output += '<td valign=top>%s</td>' % fail.body
+            output += '<td valign=top>%s</td>' % fail.headers
             output += '<td valign=top>%s</td>' % fail.status_code
             output += '<td valign=top>%s</td>' % escape(fail.content)
             output += '</tr>'
@@ -191,7 +198,7 @@ class RateLimiter(object):
         try:
             email = {}
             email['from'] = 'Stamped <noreply@stamped.com>'
-            email['to'] = 'dev@stamped.com'
+            email['to'] = 'mike@stamped.com'
             email['subject'] = "RateLimiter '%s' fail limit reached" % self.__service_name
             email['body'] = output
             utils.sendEmail(email, format='html')
@@ -200,7 +207,7 @@ class RateLimiter(object):
 
         return output
 
-    def fail(self, response, content):
+    def fail(self, request, response, content):
         if self.fail_limit is None or self.fail_period is None or self.blackout_wait is None:
             return
 
@@ -209,7 +216,7 @@ class RateLimiter(object):
         ### Was getting deque() corruption error when the server was uploaded with requests.  This is to help prevent that.
         self.__semaphore.acquire()
 
-        self.__fails.append(self.FailLog(response.status, content))
+        self.__fails.append(self.FailLog(request.url, request.body, request.headers, response.status, content))
 
         cutoff = now - self.fail_period
         count = 0
@@ -317,7 +324,7 @@ class RateLimiter(object):
             request.log.expected_dur = expected_total_time
 
             if priority == 0 and self.__requests.qsize() > 0 and \
-               expected_wait_time + expected_request_time > request.timeout:
+               (expected_wait_time + expected_request_time) > request.timeout:
                 raise WaitTooLongException("Expected request time too long. Expected: %s Timeout: %s" %
                                            (expected_total_time + expected_request_time, request.timeout))
 
@@ -364,21 +371,23 @@ class RateLimiter(object):
             http = httplib2.Http()
 
             if (begin - request.created) > request.timeout:
-                raise TimeoutException('The request timed out while waiting in the rate limiter queue')
+                raise TimeoutException('The request timed out while waiting in the rate limiter queue.  Expected time: %s' %
+                                        request.log.expected_dur)
 
             body = None
             if request.body is not None:
                 body = urllib.urlencode(request.body, True)
             response, content = http.request(request.url, request.verb, headers=request.headers, body=body)
             if response.status >= 400:
-                self.fail(response, content)
+                self.fail(request, response, content)
 
             asyncresult.set((response, content))
 
             end = time.time()
             elapsed = end - begin
             realized_dur = end - request.created
-            print("service: %s  realized dur: %s  expected dur: %s" % (self.__service_name, realized_dur, request.log.expected_dur))
+            print("service: %s  realized dur: %s  expected dur: %s" %
+                  (self.__service_name, realized_dur, request.log.expected_dur), )
 
             self._addDurationLog(elapsed)
 

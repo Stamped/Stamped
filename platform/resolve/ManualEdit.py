@@ -13,6 +13,8 @@ try:
     from datetime               import datetime
     import logs
     import re
+    import urlparse
+    from api.Schemas            import *
 except:
     raise
 
@@ -48,13 +50,55 @@ def _entityDB():
     db = _stampedAPI()._entityDB
     return db
 
+# copied HTTPSchemas.py
+def _cleanImageURL(url):
+    domain = urlparse.urlparse(url).netloc
+
+    if 'mzstatic.com' in domain:
+        # try to return the maximum-resolution apple photo possible if we have 
+        # a lower-resolution version stored in our db
+        url = url.replace('100x100', '200x200').replace('170x170', '200x200')
+
+    elif 'amazon.com' in domain:
+        # strip the 'look inside' image modifier
+        url = amazon_image_re.sub(r'\1.jpg', url)
+    elif 'nflximg.com' in domain:
+        # replace the large boxart with hd
+        url = url.replace('/large/', '/ghd/')
+
+    return url
+
 # Paul, add your extra output here
 def extraInfo(entity):
-    return """
-<pre>
-No extra info
-</pre>
-    """
+    extra = []
+    if entity.isType('artist') and entity.albums is not None and len(entity.albums) > 0:
+        for album in entity.albums[:10]:
+            try:
+                image_url        = _cleanImageURL(album.images[0].sizes[0].url)
+                extra.append("""
+<img src="%s"/>
+<a href="%s">%s</a><br/>
+                    """ % (image_url, image_url, album.title))
+            except Exception as e:
+                print e
+    itunes_id = entity.sources.itunes_id
+    if itunes_id is not None:
+        extra.append('<h1>From iTunes:</h1><br/>')
+        entity_group = ''
+        if entity.isType('artist'):
+            entity_group = 'album'
+        elif entity.isType('tv'):
+            entity_group = 'tvSeason'
+        itunes_results = _itunes().method('lookup', id=itunes_id, entity=entity_group)
+        for result in itunes_results['results']:
+            if 'artworkUrl100' in result:
+                art_url = _cleanImageURL(result['artworkUrl100'])
+                extra.append("""
+<img src="%s"/>
+<a href="%s">%s</a><br/>
+                """ % (art_url, art_url, result.pop('collectionName','<unknown>')))
+
+    return ''.join(extra)
 
 def _quickLink(key, value):
     if value is None or value == '' or value == _invalidPlaceholder or value.find('http') == -1:
@@ -62,6 +106,14 @@ def _quickLink(key, value):
     return """
 <a href="%s">%s</a>
 """ % (value, key)
+
+def primaryImageURL(entity):
+    try:
+        return _cleanImageURL(entity.images[0].sizes[0].url)
+    except Exception as e:
+        print e
+        return None
+
 
 def formForEntity(entity_id, **hidden_params):
     db = _entityDB()
@@ -91,7 +143,10 @@ def formForEntity(entity_id, **hidden_params):
                 elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
                     itunes_url = itunes_data['trackViewUrl']
                 elif entity.isType('tv'):
-                    itunes_url = itunes_data['collectionViewUrl']
+                    try:
+                        itunes_url = itunes_data['artistViewUrl']
+                    except KeyError:
+                        itunes_url = itunes_data['artistLinkUrl']
             except KeyError:
                 raise
             except IndexError:
@@ -150,6 +205,7 @@ def formForEntity(entity_id, **hidden_params):
         if entity.sources.fandango_url and entity.sources.fandango_id:
             fandango_url = entity.sources.fandango_url
         fields['fandango_url'] = fandango_url
+    fields['image_url'] = primaryImageURL(entity)
     hidden_params['entity_id'] = entity_id
     html = []
     desc = entity.desc
@@ -172,6 +228,10 @@ desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
     for k,v in fields.items():
         if v is None:
             v = ''
+        if k == 'image_url' and v != '':
+            html.append("""
+<img src="%s"/><br/>
+                """ % v)
         html.append("""
 %s: <input type="text" name="%s" value="%s" size="100"/>%s<br />
             """ % (k, k, v, _quickLink(k,v)))
@@ -241,7 +301,7 @@ def update(updates):
         entity.sources.spotify_timestamp = now
     amazon_url = updates.amazon_url
     if amazon_url is not None and amazon_url not in bad_versions:
-        amazon_id = re.match(r'http://www.amazon.com(/.+)+/dp/([A-Za-z0-9]+)/(.+)?(\?.+)?', amazon_url).group(2)
+        amazon_id = re.match(r'http://www.amazon.com(/.+)+/dp/([A-Za-z0-9]+)(/.+)?(\?.+)?', amazon_url).group(2)
         entity.sources.amazon_id = amazon_id
         entity.sources.amazon_url = amazon_url
         entity.sources.amazon_source = 'seed'
@@ -276,7 +336,9 @@ def update(updates):
             match = re.match(r'http://itunes.apple.com/(.+)/book/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(3)
         elif entity.isType('tv'):
-            match = re.match(r'http://itunes.apple.com/(.+)/tv-season/(.+)/id(\d+)(\?.+)?', itunes_url)
+            match = re.match(r'http://itunes.apple.com/(.+)/tv-show/(.+)/id(\d+)(\?.+)?', itunes_url)
+            if match is None:
+                match = re.match(r'http://itunes.apple.com/(.+)/tv-season/(.+)/id(\d+)(\?.+)?', itunes_url)
             itunes_id = match.group(3)
         elif entity.isType('movie'):
             match = re.match(r'http://itunes.apple.com/(.+)/movie/(.+)/id(\d+)(\?.+)?', itunes_url)
@@ -293,7 +355,10 @@ def update(updates):
             elif entity.isType('track') or entity.isType('movie') or entity.isType('app') or entity.isType('book'):
                 entity.sources.itunes_url = itunes_data['trackViewUrl']
             elif entity.isType('tv'):
-                entity.sources.itunes_url = itunes_data['collectionViewUrl']
+                try:
+                    entity.sources.itunes_url = itunes_data['artistViewUrl']
+                except KeyError:
+                    entity.sources.itunes_url = itunes_data['artistLinkUrl']
             entity.sources.itunes_id = itunes_id
             entity.sources.itunes_source = 'seed'
             entity.sources.itunes_timestamp = now
@@ -305,6 +370,15 @@ def update(updates):
         entity.sources.fandango_url = 'http://www.qksrv.net/click-5348839-10576760?url=http%3a%2f%2fmobile.fandango.com%3fa%3d%26m%3d' + fandango_raw_id
         entity.sources.fandango_timestamp = now
         entity.sources.fandango_source = 'seed'
+    image_url = updates.image_url
+    if image_url is not None and image_url not in bad_versions:
+        img = ImageSchema()
+        size = ImageSizeSchema()
+        size.url = image_url
+        img.sizes = [size]
+        entity.images = [img]
+        entity.images_source = 'seed'
+        entity.images_timestamp = now
     for k in simple_fields:
         v = getattr(updates, k)
         if v == '':

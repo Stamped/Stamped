@@ -74,4 +74,11 @@
     return nil;
 }
 
++ (STSimpleActivityReference*)referenceWithAction:(id<STAction>)action andRange:(NSRange)range {
+    STSimpleActivityReference* reference = [[[STSimpleActivityReference alloc] init] autorelease];
+    reference.action = action;
+    reference.indices = [NSArray arrayWithObjects:[NSNumber numberWithInteger:range.location], [NSNumber numberWithInteger:range.location + range.length], nil];
+    return reference;
+}
+
 @end

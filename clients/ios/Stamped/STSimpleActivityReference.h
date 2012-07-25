@@ -16,6 +16,8 @@
 @property (nonatomic, readwrite, retain) id<STAction> action;
 @property (nonatomic, readwrite, copy) NSDictionary* format;
 
++ (STSimpleActivityReference*)referenceWithAction:(id<STAction>)action andRange:(NSRange)range;
+
 + (RKObjectMapping*)mapping;
 
 @end

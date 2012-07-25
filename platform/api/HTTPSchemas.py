@@ -1421,10 +1421,8 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
-            if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available and
-                entity.sources.netflix_instant_available_until is not None and
-                entity.sources.netflix_instant_available_until > datetime.now()):
+            # CHANGE: removed references to netflix_instant_available_until -Landon
+            if entity.sources.netflix_id is not None and entity.sources.netflix_is_instant_available:
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'
@@ -2088,6 +2086,7 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('secret',                           basestring, required=True)          
         cls.addProperty('title',                            basestring)
         cls.addProperty('desc',                             basestring)
+        cls.addProperty('image_url',                        basestring)
         
         # sources
         cls.addProperty('rdio_url',                         basestring)
@@ -3340,6 +3339,7 @@ class HTTPActivity(Schema):
                     'news_fandango_group',
                     'news_itunes_group',
                     'news_listen_group',
+                    'news_menu_group',
                     'news_netflix_group',
                     'news_opentable_group',
                     'news_playlist_group',
@@ -3365,6 +3365,12 @@ class HTTPActivity(Schema):
             if self.verb == 'notification_welcome':
                 _addUserObjects()
                 self.header = "Welcome to Stamped"
+                self.image = _getIconURL('news_welcome')
+                self.action = _buildUserAction(self.objects.users[0])
+                
+            elif self.verb == 'notification_upgrade':
+                _addUserObjects()
+                self.header = "Welcome to Stamped 2.0"
                 self.image = _getIconURL('news_welcome')
                 self.action = _buildUserAction(self.objects.users[0])
 
