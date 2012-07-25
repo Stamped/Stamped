@@ -62,6 +62,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self._collection.ensure_index('authors.title')
         self._collection.ensure_index('tracks.title')
 
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('sources.user_generated_id', pymongo.ASCENDING)])
+
         self._cache = globalMemcache()
 
     @lazyProperty
@@ -431,11 +433,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
 
     def getEntity(self, entityId, forcePrimary=False):
-        # if not forcePrimary:
-        #     try:
-        #         return self._getCachedEntity(entityId)
-        #     except KeyError:
-        #         pass 
+        if not forcePrimary:
+            try:
+                return self._getCachedEntity(entityId)
+            except KeyError:
+                pass 
 
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
@@ -503,8 +505,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def removeCustomEntity(self, entityId, userId):
         try:
             query = {'_id': self._getObjectIdFromString(entityId), 'sources.user_generated_id': userId}
-            self._collection.remove(query)
-            query = {'_id': self._getObjectIdFromString(entityId), 'sources.userGenerated.user_id': userId} # Deprecated version
             self._collection.remove(query)
             self._delCachedEntity(entityId)
             return True
