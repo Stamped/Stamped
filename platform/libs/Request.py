@@ -177,6 +177,7 @@ class RateLimiterState(object):
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
         time.sleep(0)
+        print('made it past sleep')
         if self.__conn is None:
             self.__conn = rpyc.connect(host, port)
 
