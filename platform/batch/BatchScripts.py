@@ -12,6 +12,7 @@ try:
     from optparse   import OptionParser
     from batch.BatchUtil import *
     from pprint import pprint
+    from resolve.TitleUtils import *
     import sys
 except:
     raise
@@ -51,6 +52,7 @@ def addRdioUrls(**kwargs):
         'sources.rdio_id' : {'$exists':1},
         'sources.rdio_url' : {'$exists':0},
     }
+    query = kwargs.pop('query', query)
     def handler(entity):
         rdio_id = entity.sources.rdio_id
         rdio_data = rdio.method('get', keys=rdio_id)
@@ -71,6 +73,7 @@ def fixBadPlaylists(**kwargs):
             }
         }
     }
+    query = kwargs.pop('query', query)
     itunes = _itunes()
     def handler(entity):
         tracks = entity.tracks
@@ -88,10 +91,42 @@ def fixBadPlaylists(**kwargs):
         return [entity]
     processBatch(handler, query=query, **kwargs)
 
+def _titleCleanerForEntity(entity):
+    if entity.kind == 'place':
+        return cleanPlaceTitle
+    elif entity.isType('app'):
+        return cleanAppTitle
+    elif entity.isType('book'):
+        return cleanBookTitle
+    elif entity.isType('artist'):
+        return cleanArtistTitle
+    elif entity.isType('album'):
+        return cleanAlbumTitle
+    elif entity.isType('track'):
+        return cleanTrackTitle
+    elif entity.isType('movie'):
+        return cleanMovieTitle
+    elif entity.isType('tv'):
+        return cleanAppTitle
+    return lambda x: x
+
+def cleanTitles(**kwargs):
+    query = {}
+    query = kwargs.pop('query', query)
+    def handler(entity):
+        title = entity.title
+        cleaner = _titleCleanerForEntity(entity)
+        entity.title = cleaner(title)
+        if entity.title != title:
+            return [entity]
+        else:
+            return []
+    processBatch(handler, query=query, **kwargs)
 
 _commands = {
     'track_previews': fixBadPlaylists,
     'rdio_urls': addRdioUrls,
+    'clean_titles': cleanTitles,
 }
 
 _actions = {
@@ -125,6 +160,9 @@ def parseCommandLine():
 
     parser.add_option("-k", "--keys", dest="keys", 
         default=None, type="string", help="Sparsely print specific fields")
+
+    parser.add_option("-q", "--query", dest="query", 
+        default=None, type="string", help="Override query")
 
     (options, args) = parser.parse_args()
     
