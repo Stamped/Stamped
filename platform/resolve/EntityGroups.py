@@ -34,6 +34,8 @@ def importEntityMinisFromProxyField(field, entityClass, entityType):
                     setattr(entityMini.sources, '%s_source' % proxy.source, proxy.source)
                 if 'url' in subfield:
                     setattr(entityMini.sources, '%s_url' % proxy.source, subfield['url'])
+                if 'previewUrl' in subfield:
+                    setattr(entityMini.sources, '%s_preview' % proxy.source, subfield['previewUrl'])
                 results.append(entityMini)
             except Exception:
                 report()
@@ -331,6 +333,26 @@ class NYTimesGroup(AKindTypeGroup):
         self.addKind('media_item')
         self.addType('book')
         self.addField(['sources', 'nytimes_id'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.nytimes_id = proxy.key
+
+
+class UMDGroup(AKindTypeGroup):
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'umdmusic',
+            source_path=['sources', 'umdmusic_source'], 
+            timestamp_path=['sources', 'umdmusic_timestamp']
+        )
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addKind('media_item')
+        self.addType('track')
+
+        self.addField(['sources', 'umdmusic_id'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.umdmusic_id = proxy.key
 
 
 class FormattedAddressGroup(APlaceGroup):

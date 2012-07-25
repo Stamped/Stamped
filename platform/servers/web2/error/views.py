@@ -6,23 +6,31 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, pprint, utils
+import utils
 
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
 
-@require_http_methods(["GET", "POST"])
+from servers.web2.core.schemas      import *
+from servers.web2.core.helpers      import *
+
+@stamped_view()
 def error_404(request, **kwargs):
-    # TODO
-    return None
+    body_classes = "error 404"
+    
+    return stamped_render(request, '404.html', {
+        'body_classes'      : body_classes, 
+        'page'              : '404', 
+        'title'             : 'Stamped - 404 Error Not Found', 
+    })
 
-@require_http_methods(["GET", "POST"])
-def error_503(request, **kwargs):
-    # TODO
-    return None
-
-@require_http_methods(["GET", "POST"])
+@stamped_view()
 def error_500(request, **kwargs):
-    # TODO
-    return None
+    body_classes = "error 500"
+    
+    return stamped_render(request, '500.html', {
+        'body_classes'      : body_classes, 
+        'page'              : '500', 
+        'title'             : 'Stamped - 500 Internal Server Error', 
+    })
 
