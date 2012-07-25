@@ -184,6 +184,7 @@ class RateLimiterState(object):
         print('made it past connect')
         async_request = rpyc.async(self.__conn.root.request)
         try:
+            print('about to create asyncresult')
             asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
             asyncresult.set_expiry(timeout)
             print('waiting for response in value')
