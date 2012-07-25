@@ -434,11 +434,11 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return entity
 
     def getEntity(self, entityId, forcePrimary=False):
-        # if not forcePrimary:
-        #     try:
-        #         return self._getCachedEntity(entityId)
-        #     except KeyError:
-        #         pass 
+        if not forcePrimary:
+            try:
+                return self._getCachedEntity(entityId)
+            except KeyError:
+                pass 
 
         documentId  = self._getObjectIdFromString(entityId)
         document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
