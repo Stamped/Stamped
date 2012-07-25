@@ -292,6 +292,7 @@ def update(updates):
         rdio_data = _rdio().method('getObjectFromUrl', url=rdio_url)
         rdio_id = rdio_data['result']['key']
         entity.sources.rdio_id = rdio_id
+        entity.sources.rdio_url = rdio_url
         entity.sources.rdio_source = 'seed'
         entity.sources.rdio_timestamp = now
     imdb_url = updates.imdb_url

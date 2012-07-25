@@ -17,10 +17,33 @@ import pickle
 import time
 from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
-from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException
+from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException, TooManyFailedRequestsException
 import libs.ec2_utils
 from collections                import deque
 
+#import rpyc.core.vinegar
+#
+#def vinegarify(remote_name):
+#    def deco(cls):
+#        rpyc.core.vinegar._generic_exceptions_cache[remote_name] = cls
+#        return cls
+#    return deco
+#
+#@vinegarify
+#class DailyLimitException(Exception):
+#    pass
+#
+#@vinegarify
+#class WaitTooLongException(Exception):
+#    pass
+#
+#@vinegarify
+#class TimeoutException(Exception):
+#    pass
+#
+#@vinegarify
+#class TooManyFailedRequestsException(Exception):
+#    pass
 
 FAIL_LIMIT = 10
 FAIL_PERIOD = 60*3
@@ -177,7 +200,11 @@ class RateLimiterState(object):
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
         if self.__conn is None:
-            self.__conn = rpyc.connect(host, port)
+            config = {
+                'instantiate_custom_exceptions' : True,
+                'import_custom_exceptions' : True,
+            }
+            self.__conn = rpyc.connect(host, port, config=config)
 
         time.sleep(0)
         async_request = rpyc.async(self.__conn.root.request)
@@ -197,19 +224,25 @@ class RateLimiterState(object):
         try:
             print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
+#        except rpyc.core.vinegar.GenericException as e:
+#            print('got generic exception')
         except DailyLimitException as e:
-            logs.warning("Hit daily rate limit for service: '%s'" % service)
+            print('hit daily limitexception')
+            raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
         except WaitTooLongException as e:
-            logs.warning("'%s' service request estimated wait time longer than timeout" % service)
+            raise StampedThirdPartyRequestFailError("'%s' request estimated wait time longer than timeout" % service)
         except TimeoutException as e:
-            logs.warning("'%s' request timed out." % service)
+            raise StampedThirdPartyRequestFailError("'%s' request timed out." % service)
+        except TooManyFailedRequestsException as e:
+            raise StampedThirdPartyRequestFailError("%s" % e)
         except Exception as e:
+            print('### caught exception  type: %s  e: %s' % (type(e), e))
             logs.error("RPC Service Request fail."
                         "service: %s  method: %s  url: %s  body: %s  header: %s"
                         "priority: %s  timeout: %s  Exception: %s" %
                         (service, method, url, body, header, priority, timeout, e))
             self._fail(e)
-            return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
+        return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 
 
 __rl_state = None

@@ -1833,7 +1833,9 @@ class HTTPEntity(Schema):
                         data.append(item)
 
                     except Exception as e:
-                        pass
+                        print """
+EXCEPTION %s
+                        """ % e
 
                 if len(data) > 0:
                     playlist.data = data

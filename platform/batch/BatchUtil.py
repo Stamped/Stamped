@@ -13,12 +13,16 @@ try:
     import logs
     import random
     from abc                    import ABCMeta, abstractmethod, abstractproperty
-    from pymongo                import json_util
+    # from pymongo                import json_util
     import json
-    from pprint                 import pformat
+    from pprint                 import pformat, pprint
     from gevent.pool            import Pool
+    from schema import Schema
 except:
     raise
+
+def _api():
+    return globalMongoStampedAPI()
 
 def _entityDB():
     api = globalMongoStampedAPI()
@@ -36,6 +40,17 @@ def outputToCollection(entity_id, result_entities):
     """
     for entity in result_entities:
         _entityDB().updateEntity(entity)
+
+def outputToCollectionAndEnrich(entity_id, result_entities):
+    """
+    Outputs the given results to the local mongo entity collection.
+
+    This function is intended to be used the 'output' argument of processBatch().
+    It is also the default function used if no 'output' function is provided.
+    """
+    for entity in result_entities:
+        _entityDB().updateEntity(entity)
+        _api().mergeEntity(entity)
 
 def outputToConsole(entity_id, result_entities):
     """
@@ -63,21 +78,56 @@ def outputToConsole(entity_id, result_entities):
         accum.append('%s\n' % pformat(entity.dataExport()))
     print(''.join(accum))
 
-def createOutputToFile(f):
-    """
-    Creates an output function that writes JSON to the given file.
+def _sparsePrint(schema, keys, keypath):
+    if len(keys) == 0:
+        if isinstance(schema, Schema):
+            schema = schema.dataExport()
+        print("%s: %s" % (keypath, pformat(schema)))
+    else:
+        key = keys[0]
+        if key == '*':
+            for value in schema:
+                _sparsePrint(value, keys[1:], keypath)
+        else:
+            _sparsePrint(getattr(schema, key), keys[1:], keypath)
 
-    This function is intended to be used as the 'output' argument of processBatch().
+def createSparseOutputToConsole(keypaths, sparse=False):
+    """
     """
     db = _entityDB()
-    def outputToFile(entity_id, result_entities):
+    def sparseOutputToConsole(entity_id, result_entities):
+        if sparse and len(result_entities) == 0:
+            return
+        original_entity = db.getEntity(entity_id)
+        print("\nORIGINAL:%s" % entity_id)
+        for keypath in keypaths:
+            keys = keypath.split('.')
+            _sparsePrint(original_entity, keys, keypath)
+        print('RESULTS %d' % len(result_entities))
         for entity in result_entities:
-            bson = db._convertToMongo(entity)
-            # converts bson to json using pymongo's built in support for handling datetime, ObjectID, etc.
-            string = json.dumps(bson, default=json_util.default)
-            # delimit objects with newlines to match mongoexport format
-            f.write('%s\n' % string)
-    return outputToFile
+            if entity.entity_id != entity_id:
+                print('entity_id: %s' % entity.entity_id)
+            for keypath in keypaths:
+                keys = keypath.split('.')
+                _sparsePrint(entity, keys, keypath)
+    return sparseOutputToConsole
+
+# Breaks on prod because json_util isn't available
+# def createOutputToFile(f):
+#     """
+#     Creates an output function that writes JSON to the given file.
+
+#     This function is intended to be used as the 'output' argument of processBatch().
+#     """
+#     db = _entityDB()
+#     def outputToFile(entity_id, result_entities):
+#         for entity in result_entities:
+#             bson = db._convertToMongo(entity)
+#             # converts bson to json using pymongo's built in support for handling datetime, ObjectID, etc.
+#             string = json.dumps(bson, default=json_util.default)
+#             # delimit objects with newlines to match mongoexport format
+#             f.write('%s\n' % string)
+#     return outputToFile
 
 def processBatch(handler, query=None, output=None, offset=0, limit=None, thread_count=None, shuffle=False):
     """

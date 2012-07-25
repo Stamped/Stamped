@@ -122,7 +122,7 @@ def handleStampedExceptions(e, handlers=None):
                 email['to'] = 'dev@stamped.com'
                 email['subject'] = '%s - 500 Error - %s' % (stampedAPI.node_name, datetime.utcnow().isoformat())
                 email['body'] = logs.getHtmlFormattedLog()
-#                utils.sendEmail(email, format='html')
+                utils.sendEmail(email, format='html')
             except Exception as e:
                 logs.warning('UNABLE TO SEND EMAIL: %s')
 
