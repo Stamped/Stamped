@@ -13,6 +13,7 @@ import pickle
 import rpyc
 from GreenletServer     import GreenletServer
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
+#from servers.ratelimiter.RateLimiter2 import TooManyFailedRequestsException, WaitTooLongException, DailyLimitException, TimeoutException
 
 from optparse           import OptionParser
 
@@ -42,6 +43,8 @@ class StampedRateLimiterRPCService(rpyc.Service):
         pass
 
     def exposed_request(self, service, priority, timeout, verb, url, body = None, headers = None):
+        logs.info('Received request.  service: %s  priority: %s  timeout: %s  verb: %s  url: %s  body: %s  headers: %s' %
+                  (service, priority, timeout, verb, url, body, headers))
         if body is not None:
             body = pickle.loads(body)
         if headers is not None:
