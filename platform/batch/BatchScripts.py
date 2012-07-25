@@ -47,6 +47,9 @@ def _entityDB():
     return db
 
 def addRdioUrls(**kwargs):
+    """
+    Addes sources.rdio_url for entities that only have sources.rdio_id
+    """
     rdio = _rdio()
     query = {
         'sources.rdio_id' : {'$exists':1},
@@ -65,6 +68,9 @@ def addRdioUrls(**kwargs):
     processBatch(handler, query=query, **kwargs)
 
 def fixBadPlaylists(**kwargs):
+    """
+    Adds itunes_preview to tracks.
+    """
     query = {
         'tracks': {
             '$elemMatch' : { 
@@ -111,6 +117,9 @@ def _titleCleanerForEntity(entity):
     return lambda x: x
 
 def cleanTitles(**kwargs):
+    """
+    Cleans titles using vertical specific functions from TitleUtils
+    """
     query = {}
     query = kwargs.pop('query', query)
     def handler(entity):
@@ -140,11 +149,14 @@ def parseCommandLine():
     version = "1.0.0"
     parser  = OptionParser(usage=usage, version=version)
         
-    parser.add_option("-s", "--shuffle", action="store_true", dest="shuffle", 
+    parser.add_option("-r", "--randomize", action="store_true", dest="shuffle", 
         default=False, help="Randomize order and slice")
 
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", 
         default=False, help="Use keys and action.")
+
+    parser.add_option("-s", "--sparse", action="store_true", dest="sparse", 
+        default=False, help="Only print keys for non-empty results.")
 
     parser.add_option("-l", "--limit", dest="limit", 
         default=None, type="int", help="Limit number of entities processed")
@@ -177,7 +189,7 @@ def parseCommandLine():
     if len(args) < 1 or invalid or options.action not in _actions or (options.verbose and options.keys is None):
         print "Error: must provide commands from the list of available commands:"
         for command in _commands:
-            print "   %s" % command
+            print "   %s %s" % (command, _commands[command].__doc__)
         
         parser.print_help()
         sys.exit(1)
@@ -195,7 +207,7 @@ if __name__ == '__main__':
         if options.keys is not None:
             keys = options.keys.split(',')
 
-            sparse_output = createSparseOutputToConsole(keys)
+            sparse_output = createSparseOutputToConsole(keys, sparse=options.sparse)
             if options.verbose:
                 old_output = output
                 def doubleOutput(entity_id, results):
