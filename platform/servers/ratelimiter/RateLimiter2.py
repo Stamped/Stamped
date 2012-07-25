@@ -402,9 +402,9 @@ class RateLimiter(object):
             realized_dur = end - request.created
 
 
-            logs.info('Service: %s  Request %s:   Request finished.  Request time: %s  Realized total time: %s  '
+            logs.info('Service: %s :   Request finished.  Request time: %s  Realized total time: %s  '
                           'Expected Total Time: %s  Expected wait time: %s  Expected request time: %s  Items originally in Queue: %s' %
-                          (self.__service_name, request.log.count, elapsed, realized_dur,
+                          (self.__service_name, elapsed, realized_dur,
                            request.log.expected_dur, request.log.expected_wait_time, request.log.expected_request_time,
                               request.log.items_in_queue))
 
