@@ -9,6 +9,7 @@ from gevent             import monkey
 monkey.patch_all()
 
 import Globals
+import logs
 import pickle
 import rpyc
 from GreenletServer     import GreenletServer
