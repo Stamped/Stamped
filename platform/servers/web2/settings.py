@@ -4,8 +4,8 @@ import Globals
 import utils, os, libs.ec2_utils
 
 IS_PROD         = libs.ec2_utils.is_prod_stack()
-DEBUG           = (not IS_PROD)
-STAMPED_DEBUG   = (not utils.is_ec2())
+DEBUG           = (not utils.is_ec2())
+STAMPED_DEBUG   = DEBUG
 TEMPLATE_DEBUG  = DEBUG
 PROJ_ROOT       = os.path.abspath(os.path.dirname(__file__))
 
