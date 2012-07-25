@@ -376,8 +376,8 @@ class RateLimiter(object):
                 self.call()
                 self.doRequest(request, asyncresult)
             else:
-                events.append('Service: %s  Request %s:   Adding request to queue' %
-                              (self.__service_name, request.log.count))
+                events.append('Service: %s  Request %s   QueueSize: %s:   Adding request to queue' %
+                              (self.__service_name, request.log.count, self.__requests.qsize()))
                 self.__requests.put((priority, request, asyncresult))
 
             #                print('queue_size: %s' % self.__requests.qsize())
@@ -400,8 +400,8 @@ class RateLimiter(object):
         while self.__calls < self.limit:
             try:
                 requests.append(self.__requests.get(block=False))
-                events.append('Service: %s  Request %s:   Pulled from queue' %
-                              (self.__service_name, requests[-1][1].log.count))
+                events.append('Service: %s  Request %s  QueueSize: %s:   Pulled from queue' %
+                              (self.__service_name, requests[-1][1].log.count, self.__requests.qsize()))
                 self.call()
             except gevent.queue.Empty:
                 break
