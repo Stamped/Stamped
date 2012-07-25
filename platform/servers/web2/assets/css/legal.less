@@ -1,0 +1,76 @@
+/*! legal.less
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "common.less";
+
+
+/* **************************************************************************
+                            BASIC HIGH-LEVEL SETUP
+   ************************************************************************** */
+
+
+#main-header {
+    display: none;
+}
+
+.view {
+    display: none;
+}
+
+.active-view-privacy-policy   .view-privacy-policy, 
+.active-view-terms-of-service .view-terms-of-service {
+    display: block;
+}
+
+#view-switcher {
+    text-align: center;
+    font-size:   1em;
+    font-weight: 700;
+    margin: 24px 0 0;
+    
+    .view-switcher {
+        display: inline-block;
+        padding: 6px 12px;
+        .rounded(8px);
+    }
+    
+    .active-view-privacy-policy {
+        margin-right: 48px;
+    }
+}
+
+.active-view-privacy-policy .active-view-privacy-policy, 
+.active-view-terms-of-service .active-view-terms-of-service {
+    color: #498ff2;
+    .box-shadow(0, 0, 10px, 0, @shadow);
+}
+
+.title {
+    text-align: center;
+}
+
+h1, h2, h3, h4 {
+    .stamped-font();
+}
+
+h1 { font-size: 2.5em; }
+h2 { font-size: 2.0em; }
+h3 { font-size: 1.5em; }
+h4 { font-size: 1.3em; }
+
+#views p {
+    font-size: 90%;
+    margin-bottom: 1em;
+}
+

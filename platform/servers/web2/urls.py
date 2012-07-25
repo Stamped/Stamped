@@ -77,6 +77,11 @@ urlpatterns = patterns('',
     url(r'^mobile/jobs$',                               'mobile.views.jobs'), 
     url(r'^mobile/jobs\.html?$',                        'mobile.views.jobs'), 
     
+    # ----------------------------- LEGAL --------------------------------------
+    # e.g., stamped.com/mobile/legal, stamped.com/mobile/legal.html
+    url(r'^mobile/legal$',                              'mobile.views.legal'), 
+    url(r'^mobile/legal\.html?$',                       'mobile.views.legal'), 
+    
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
@@ -180,6 +185,11 @@ urlpatterns = patterns('',
     url(r'^jobs$',                              'core.views.jobs'), 
     url(r'^jobs\.html?$',                       'core.views.jobs'), 
     
+    # ----------------------------- LEGAL --------------------------------------
+    # e.g., stamped.com/legal, stamped.com/legal.html
+    url(r'^legal$',                             'core.views.legal'), 
+    url(r'^legal\.html?$',                      'core.views.legal'), 
+   
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/travis

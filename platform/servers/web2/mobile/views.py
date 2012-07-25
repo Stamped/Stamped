@@ -86,6 +86,11 @@ def jobs(*args, **kwargs):
     
     return views.jobs(*args, **kwargs)
 
+def legal(*args, **kwargs):
+    kwargs['mobile'] = True
+    
+    return views.legal(*args, **kwargs)
+
 def password_reset(*args, **kwargs):
     kwargs['mobile'] = True
     

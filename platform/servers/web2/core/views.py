@@ -606,3 +606,15 @@ def jobs(request, **kwargs):
         'mobile'            : mobile, 
     })
 
+@stamped_view()
+def legal(request, **kwargs):
+    body_classes = "legal main"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'legal.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'legal', 
+        'title'             : 'Stamped - Legal', 
+        'mobile'            : mobile, 
+    }, preload=[ 'page' ])
+
