@@ -252,7 +252,7 @@ class Factual(object):
     def search(self, query, limit=_limit, coordinates=None, radius=5000, priority="low"):
         params = {}
         params['prefix']    = 't'
-        params['limit']     = limit
+        #params['limit']     = limit
         if isinstance(query, unicode):
             query = query.encode('utf-8')
         params['q']         = urllib.quote(query)
@@ -282,7 +282,7 @@ class Factual(object):
         and will operate on partial names.
         """
         string = json.dumps(data)
-        r = self.__factual('resolve', limit=limit, values=urllib.quote(string), priority=priority)
+        r = self.__factual('resolve', values=urllib.quote(string), priority=priority)
         if r != None and len(r) > limit:
             r = r[:limit]
         return r
@@ -292,7 +292,7 @@ class Factual(object):
         A stricter search than resolve. Seems to only produce entities which exactly match the given fields (at least for name).
         """
         string = urllib.quote(json.dumps(data))
-        return self.__factual('global', prefix='t', limit=limit, filters=string, priority=priority)
+        return self.__factual('global', prefix='t', filters=string, priority=priority)
 
     def place(self, factual_id, priority="low"):
         result = self.places({'factual_id':factual_id}, 1, priority)
@@ -316,13 +316,11 @@ class Factual(object):
         namespace_id - the string id within the namespace (i.e. 'ino') or '' if unknown/non-existant
         url - the url associated with the entity or '' (i.e. 'http://www.menuism.com/restaurants/ino-new-york-253388')
         """
-        args = {'limit':limit,'factual_id':factual_id}
+        args = {'factual_id':factual_id}
         if namespace != None:
             args['only'] = namespace
-            del args['limit']
         elif namespaces != None:
             args['only'] = ','.join(namespaces)
-            del args['limit']
         return self.__factual('crosswalk', priority=priority, **args)
 
     def crosswalk_external(self, space, space_id, namespace=None, limit=_limit, priority="low"):
@@ -337,7 +335,7 @@ class Factual(object):
         namespace_id - the string id within the namespace (i.e. 'ino') or '' if unknown/non-existant
         url - the url associated with the entity or '' (i.e. 'http://www.menuism.com/restaurants/ino-new-york-253388')
         """
-        args = {'limit':limit,'namespace':space,'namespace_id':space_id}
+        args = {'namespace':space,'namespace_id':space_id}
         if namespace != None:
             args['only'] = namespace
         return self.__factual('crosswalk', priority=priority, **args)
@@ -346,13 +344,13 @@ class Factual(object):
         """
         Use Crossref service to find urls that pertain to the given entity.
         """
-        return self.__factual('crossref', factual_id=factual_id, limit=limit, priority=priority)
+        return self.__factual('crossref', factual_id=factual_id, priority=priority)
 
     def crossref_url(self, url, limit=_limit, priority="low"):
         """
         User Crossref service to find the entities related/mentioned at the given url.
         """
-        return self.__factual('crossref', url=urllib.quote(url), limit=limit, priority=priority)
+        return self.__factual('crossref', url=urllib.quote(url), priority=priority)
 
     def restaurant(self, factual_id, priority="low"):
         """
