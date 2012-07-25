@@ -214,7 +214,7 @@ class EntityStats(Schema):
             if t in self.types:
                 return True
         except TypeError:
-            logs.warning("Type field in stamp stat set to None")
+            logs.warning("Type field in entity stat set to None")
         return False
 
 
@@ -608,6 +608,11 @@ class EntitySources(Schema):
         cls.addProperty('rdio_url',                         basestring)
         cls.addProperty('rdio_source',                      basestring)
         cls.addProperty('rdio_timestamp',                   datetime)
+
+        cls.addProperty('rdio_available_stream',            bool)
+        cls.addProperty('rdio_available_sample',            bool)
+        cls.addProperty('rdio_available_source',            basestring)
+        cls.addProperty('rdio_available_timestamp',         datetime)
 
         cls.addProperty('rdio_is_playable',                 bool)
         cls.addProperty('rdio_is_playable_source',          basestring)
