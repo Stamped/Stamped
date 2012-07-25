@@ -26,7 +26,7 @@ GENERATED_LINE_LENGTH		= 512
 LESS_CSS_DIRS               = assets/css assets/css/libs assets/css/ie assets/css/mobile
 LESS_CSS_SOURCE_SUFFIX      = less
 LESS_CSS_TARGET_SUFFIX      = css
-LESS_CSS_PROG_EC2           = /stamped/bootstrap/node_modules/less/bin/lessc
+LESS_CSS_PROG_EC2           = /stamped/node_modules/less/bin/lessc
 LESS_CSS_PROG               = $(if $(call EXISTS,$(LESS_CSS_PROG_EC2)),$(LESS_CSS_PROG_EC2),lessc)
 LESS_CSS_SOURCES            = $(strip \
     $(foreach DIR,$(LESS_CSS_DIRS),$(wildcard $(DIR)/*.$(LESS_CSS_SOURCE_SUFFIX))))
