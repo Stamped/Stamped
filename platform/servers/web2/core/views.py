@@ -409,10 +409,10 @@ def index(request, schema, **kwargs):
             'color_secondary'   : 'FFEA00', 
         }, 
         {
-            'screen_name'       : 'rebeccaminkoff', 
-            'image_url'         : 'http://static.stamped.com/users/rebeccaminkoff-60x60.jpg', 
-            'color_primary'     : '04004F', 
-            'color_secondary'   : '46008C', 
+            'screen_name'       : 'urbandaddy', 
+            'image_url'         : 'http://static.stamped.com/users/urbandaddy-60x60.jpg', 
+            'color_primary'     : '9A0004', 
+            'color_secondary'   : '000130', 
         }, 
         {
             'screen_name'       : 'nymag', 
