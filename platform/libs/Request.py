@@ -181,6 +181,7 @@ class RateLimiterState(object):
         if self.__conn is None:
             self.__conn = rpyc.connect(host, port)
 
+        print('made it past connect')
         async_request = rpyc.async(self.__conn.root.request)
         try:
             asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
