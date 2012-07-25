@@ -225,6 +225,8 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
                 'name':             track['trackName'],
                 'key':              track['trackId'],
                 'url':              track['trackViewUrl'],
+                'track_number':     track['trackNumber'],
+                'previewUrl':       track['previewUrl'],
             }
                 for track in results if track.pop('wrapperType', None) == 'track'
         ]
@@ -310,6 +312,7 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
                 'key':              track['trackId'],
                 'url':              track['trackViewUrl'],
                 'track_number':     track['trackNumber'],
+                'previewUrl':       track['previewUrl'],
             }
                 for track in results if track.pop('wrapperType', None) == 'track' 
         ]
