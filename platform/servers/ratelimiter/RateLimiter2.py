@@ -13,8 +13,6 @@ import httplib2
 from datetime import datetime
 import traceback
 
-import rpyc.core.vinegar
-
 import utils
 
 import calendar, time
@@ -37,52 +35,30 @@ class RLPriorityQueue(PriorityQueue):
                 count += 1
         return count
 
-#class RateException(Exception):
-#    def __init__(self, msg=None):
-#        Exception.__init__(self, msg)
-#        print(msg)
-#
-#class TooManyFailedRequestsException(Exception):
-#    def __init__(self, msg=None):
-#        Exception.__init__(self, msg)
-#        print(msg)
+class RateException(Exception):
+    def __init__(self, msg=None):
+        Exception.__init__(self, msg)
+        print(msg)
 
-#class WaitTooLongException(Exception):
-#    def __init__(self, msg=None):
-#        Exception.__init__(self, msg)
-#        print(msg)
-#
-#class DailyLimitException(Exception):
-#    def __init__(self, msg=None):
-#        Exception.__init__(self, msg)
-#        print(msg)
-#
-#class TimeoutException(Exception):
-#    def __init__(self, msg=None):
-#        Exception.__init__(self, msg)
-#        print(msg)
-
-def vinegarify(remote_name):
-    def deco(cls):
-        rpyc.core.vinegar._generic_exceptions_cache[remote_name] = cls
-        return cls
-    return deco
-
-@vinegarify
-class DailyLimitException(Exception):
-    pass
-
-@vinegarify
-class WaitTooLongException(Exception):
-    pass
-
-@vinegarify
-class TimeoutException(Exception):
-    pass
-
-@vinegarify
 class TooManyFailedRequestsException(Exception):
-    pass
+    def __init__(self, msg=None):
+        Exception.__init__(self, msg)
+        print(msg)
+
+class WaitTooLongException(Exception):
+    def __init__(self, msg=None):
+        Exception.__init__(self, msg)
+        print(msg)
+
+class DailyLimitException(Exception):
+    def __init__(self, msg=None):
+        Exception.__init__(self, msg)
+        print(msg)
+
+class TimeoutException(Exception):
+    def __init__(self, msg=None):
+        Exception.__init__(self, msg)
+        print(msg)
 
 class RequestLog():
     def __init__(self):

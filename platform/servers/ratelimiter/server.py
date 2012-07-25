@@ -12,7 +12,7 @@ import Globals
 import pickle
 import rpyc
 from GreenletServer     import GreenletServer
-from RateLimiterService import StampedRateLimiterService
+from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
 
 from optparse           import OptionParser
 
