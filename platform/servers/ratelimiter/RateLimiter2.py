@@ -10,7 +10,7 @@ import Globals
 import logs
 import urllib
 import httplib2
-import datetime
+from datetime import datetime
 import traceback
 
 import utils
@@ -275,8 +275,8 @@ class RateLimiter(object):
     def _getDay(self):
         """ Get beginning of current utc day in seconds since the epoch
         """
-        now = datetime.datetime.utcnow()
-        date = datetime.datetime(now.year, now.month, now.day)
+        now = datetime.utcnow()
+        date = datetime(now.year, now.month, now.day)
         return calendar.timegm(date.timetuple())
 
     def _addDurationLog(self, elapsed):
