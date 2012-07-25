@@ -13,6 +13,8 @@ import httplib2
 from datetime import datetime
 import traceback
 
+import rpyc.core.vinegar
+
 import utils
 
 import calendar, time
@@ -39,31 +41,48 @@ class RLPriorityQueue(PriorityQueue):
 #    def __init__(self, msg=None):
 #        Exception.__init__(self, msg)
 #        print(msg)
+#
+#class TooManyFailedRequestsException(Exception):
+#    def __init__(self, msg=None):
+#        Exception.__init__(self, msg)
+#        print(msg)
 
-class TooManyFailedRequestsException(Exception):
-    def __init__(self, msg=None):
-        Exception.__init__(self, msg)
-        print(msg)
+#class WaitTooLongException(Exception):
+#    def __init__(self, msg=None):
+#        Exception.__init__(self, msg)
+#        print(msg)
+#
+#class DailyLimitException(Exception):
+#    def __init__(self, msg=None):
+#        Exception.__init__(self, msg)
+#        print(msg)
+#
+#class TimeoutException(Exception):
+#    def __init__(self, msg=None):
+#        Exception.__init__(self, msg)
+#        print(msg)
 
-class RateLimitExceededException(Exception):
-    def __init__(self, msg=None):
-        Exception.__init__(self, msg)
-        print(msg)
+def vinegarify(remote_name):
+    def deco(cls):
+        rpyc.core.vinegar._generic_exceptions_cache[remote_name] = cls
+        return cls
+    return deco
 
-class WaitTooLongException(Exception):
-    def __init__(self, msg=None):
-        Exception.__init__(self, msg)
-        print(msg)
-
+@vinegarify
 class DailyLimitException(Exception):
-    def __init__(self, msg=None):
-        Exception.__init__(self, msg)
-        print(msg)
+    pass
 
+@vinegarify
+class WaitTooLongException(Exception):
+    pass
+
+@vinegarify
 class TimeoutException(Exception):
-    def __init__(self, msg=None):
-        Exception.__init__(self, msg)
-        print(msg)
+    pass
+
+@vinegarify
+class TooManyFailedRequestsException(Exception):
+    pass
 
 class RequestLog():
     def __init__(self):
