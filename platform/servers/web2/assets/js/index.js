@@ -543,6 +543,12 @@
         $main.on("click", ".lightbox-video", function(event) {
             event.preventDefault();
             
+            var wmode = 'transparent';
+            
+            if (!!$.browser.msie) {
+                wmode = 'opaque';
+            }
+            
             $.fancybox({
                 'padding'       : 0,
                 'autoScale'     : false, 
@@ -569,7 +575,7 @@
                 'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
                 'type'          : 'swf',
                 'swf'           : {
-                    'wmode'             : 'transparent',
+                    'wmode'             : wmode,
                     'allowfullscreen'   : 'true'
                 }
             });
