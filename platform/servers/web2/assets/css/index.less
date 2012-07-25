@@ -748,8 +748,13 @@ body.main {
     height: 366px;
     
     overflow: hidden;
+    z-index: 30;
     
-    .transition2(left, .3s, ease-out, opacity, .3s, ease-out);
+    @duration: .3s;
+    @easing: ease-out;
+    
+    //.transition(left, @duration, @easing);
+    .transition(opacity, @duration, @easing);
 }
 
 .iphone-screen-inbox {
@@ -840,51 +845,51 @@ body.main {
 
 .iphone-screen-active-inbox {
     .iphone-screen-inbox {
-        left: 0 !important;
+        //left: 0 !important;
         opacity: 1;
     }
     
     .iphone-screen-sdetail {
-        left: 244px !important;
+        //left: 244px !important;
         opacity: 0;
     }
     
     .iphone-screen-guide {
-        left: 244px !important;
+        //left: 244px !important;
         opacity: 0;
     }
 }
 
 .iphone-screen-active-sdetail {
     .iphone-screen-inbox {
-        left: -244px !important;
+        //left: -244px !important;
         opacity: 0;
     }
     
     .iphone-screen-sdetail {
-        left: 0 !important;
+        //left: 0 !important;
         opacity: 1;
     }
     
     .iphone-screen-guide {
-        left: 244px !important;
+        //left: 244px !important;
         opacity: 0;
     }
 }
 
 .iphone-screen-active-guide {
     .iphone-screen-inbox {
-        left: -244px !important;
+        //left: -244px !important;
         opacity: 0;
     }
     
     .iphone-screen-sdetail {
-        left: -244px !important;
+        //left: -244px !important;
         opacity: 0;
     }
     
     .iphone-screen-guide {
-        left: 0 !important;
+        //left: 0 !important;
         opacity: 1;
     }
 }
