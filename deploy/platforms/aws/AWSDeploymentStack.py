@@ -782,7 +782,7 @@ class AWSDeploymentStack(ADeploymentStack):
         return None
     
     def add(self, *args):
-        types = [ 'db', 'api', 'web', 'work', 'mem', 'mon', 'stat', 'work-api', 'work-enrich' ]
+        types = [ 'db', 'api', 'web', 'work', 'mem', 'mon', 'stat', 'work-api', 'work-enrich', 'ratelimiter' ]
         if 0 == len(args) or args[0] not in types:
             raise Fail("must specify what type of instance to add (e.g., %s)" % types)
         

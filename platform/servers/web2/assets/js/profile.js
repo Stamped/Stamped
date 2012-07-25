@@ -670,7 +670,7 @@ var g_update_stamps = null;
                     
                     infinite_scroll = $gallery.infinitescroll({
                         bufferPx        : bufferPx, 
-                        debug           : true, 
+                        debug           : false, 
                         
                         navSelector     : "div.stamp-gallery-nav", 
                         nextSelector    : infinite_scroll_next_selector, 

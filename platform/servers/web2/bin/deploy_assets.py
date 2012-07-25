@@ -57,7 +57,9 @@ def deploy_assets():
             "ignore"        : [
                 "/assets/generated/img/emoji", 
                 "/assets/generated/img/public-home", 
-                "/assets/generated/img/public-home", 
+                "/assets/generated/img/index", 
+                "/assets/generated/img/jobs", 
+                "/assets/generated/img/entity_fallbacks", 
             ], 
             "headers"       : headers, 
         },

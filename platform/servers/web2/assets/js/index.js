@@ -373,6 +373,10 @@
         
         // reveals the embedded map window via a translation from the right-hand-side of the window onto the page
         var map_window_show = function() {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             $social.hide(800);
             
             $map_window
@@ -388,6 +392,10 @@
         
         // hides the embedded map window via a translation off the right-hand-side of the window
         var map_window_hide = function() {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             $map_window
                 .stop(true, false)
                 .animate({
@@ -532,42 +540,45 @@
             return false;
         });*/
         
-        $main.on("click", ".lightbox-video", function(event) {
-            event.preventDefault();
-            
-            $.fancybox({
-                'padding'       : 0,
-                'autoScale'     : false, 
+        // Sadly, Fancybox Youtube videos and IE are not friends...
+        if (!$.browser.msie) {
+            $main.on("click", ".lightbox-video", function(event) {
+                event.preventDefault();
                 
-                'transitionIn'  : 'none', 
-                'transitionOut' : 'none', 
+                $.fancybox({
+                    'padding'       : 0,
+                    'autoScale'     : false, 
+                    
+                    'transitionIn'  : 'none', 
+                    'transitionOut' : 'none', 
+                    
+                    'openEffect'    : 'elastic', 
+                    'openEasing'    : 'easeOutBack', 
+                    'openSpeed'     : 300, 
+                    
+                    'closeEffect'   : 'elastic', 
+                    'closeEasing'   : 'easeInBack', 
+                    'closeSpeed'    : 300, 
+                    
+                    'tpl'           : {
+                        'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                        'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
+                    }, 
+                    
+                    'title'         : this.title, 
+                    'width'         : 800, // 680
+                    'height'        : 340 + 32, // 495
+                    'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
+                    'type'          : 'swf',
+                    'swf'           : {
+                        'wmode'             : 'transparent',
+                        'allowfullscreen'   : 'true'
+                    }
+                });
                 
-                'openEffect'    : 'elastic', 
-                'openEasing'    : 'easeOutBack', 
-                'openSpeed'     : 300, 
-                
-                'closeEffect'   : 'elastic', 
-                'closeEasing'   : 'easeInBack', 
-                'closeSpeed'    : 300, 
-                
-                'tpl'           : {
-                    'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
-                    'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
-                }, 
-                
-                'title'         : this.title, 
-                'width'         : 680, 
-                'height'        : 495,
-                'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
-                'type'          : 'swf',
-                'swf'           : {
-                    'wmode'             : 'transparent',
-                    'allowfullscreen'   : 'true'
-                }
+                return false;
             });
-            
-            return false;
-        });
+        }
         
         $main.on("click", ".tastemaker", function(event) {
             event.preventDefault();

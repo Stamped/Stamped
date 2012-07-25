@@ -17,7 +17,7 @@ import pickle
 import time
 from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
-from servers.ratelimiter.RateLimiter2 import RateException
+from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException
 import libs.ec2_utils
 from collections                import deque
 
@@ -53,17 +53,7 @@ class RateLimiterState(object):
         self.__emails = deque()
 
         # determine the private ip address of the ratelimiter instance for this stack
-        ratelimiter_nodes = None
-        try:
-            ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
-        except:
-            logs.error("Could not find a node with tag 'ratelimiter on same stack")
-        if ratelimiter_nodes is None:
-            self.__host = 'localhost'
-        else:
-            self.__host = ratelimiter_nodes[0]['private_ip_address']
-        self.__port = 18861
-
+        self._getHost()
         print('### host: %s' % self.__host)
 
     class FailLog(object):
@@ -84,6 +74,18 @@ class RateLimiterState(object):
             self.__service_init_semaphore.release()
 
         return self.__local_rlservice
+
+    def _getHost(self):
+        ratelimiter_nodes = None
+        try:
+            ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
+        except:
+            logs.error("Could not find a node with tag 'ratelimiter on same stack")
+        if ratelimiter_nodes is None:
+            self.__host = 'localhost'
+        else:
+            self.__host = ratelimiter_nodes[0]['private_ip_address']
+        self.__port = 18861
 
     def sendFailLogEmail(self):
         if len(self.__fails) == 0:
@@ -131,6 +133,7 @@ class RateLimiterState(object):
 
     def _fail(self, exception):
         self.__conn = None
+        self._getHost()
         if self.__blackout_start is not None:
             return
 
@@ -173,24 +176,14 @@ class RateLimiterState(object):
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-        time.sleep(0)
         if self.__conn is None:
             self.__conn = rpyc.connect(host, port)
 
+        time.sleep(0)
         async_request = rpyc.async(self.__conn.root.request)
-        try:
-            asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
-            asyncresult.set_expiry(timeout)
-            response, content = asyncresult.value
-        except RateException as e:
-            logs.info('RateException occurred during third party request: %s' % e)
-            raise e
-        except Exception as e:
-            logs.error('RPC service request fail: %s' % e)
-            raise StampedThirdPartyRequestFailError("There was an error fulfilling a third party http request.  "
-                                                    "service: %s  method: %s  url: %s  body: %s  header: %s"
-                                                    "priority: %s  timeout: %s  Exception: %s" %
-                                                    (service, method, url, body, header, priority, timeout, e))
+        asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
+        asyncresult.set_expiry(timeout)
+        response, content = asyncresult.value
 
         return pickle.loads(response), content
 
@@ -204,10 +197,19 @@ class RateLimiterState(object):
         try:
             print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
+        except DailyLimitException as e:
+            raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
+        except WaitTooLongException as e:
+            raise StampedThirdPartyRequestFailError("'%s' service request estimated wait time longer than timeout" % service)
+        except TimeoutException as e:
+            raise StampedThirdPartyRequestFailError("'%s' request timed out." % service)
         except Exception as e:
-            logs.warning('### failed while attempting rpc service request: %s' % e)
+            logs.error("RPC Service Request fail."
+                        "service: %s  method: %s  url: %s  body: %s  header: %s"
+                        "priority: %s  timeout: %s  Exception: %s" %
+                        (service, method, url, body, header, priority, timeout, e))
             self._fail(e)
-            return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
+        return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 
 
 __rl_state = None

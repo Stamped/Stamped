@@ -299,40 +299,53 @@ footer {
             
             .press-links {
                 .press-link {
+                    background: url(/assets/img/about/press_sprite.png) no-repeat;
                     display: block;
                     float: left;
                     
-                    height: 32px;
+                    width:  184px;
+                    height: 84px;
+                    
                     margin: 0 24px 24px 0;
+                    opacity: 0.75;
+                    
+                    .transition(opacity, 0.4s, ease-out);
                     
                     &:hover {
-                        background-position: 0 -32px;
+                        opacity: 1.0;
                     }
                 }
                 
-                .press-link-techcrunch {
-                    background: url(/assets/img/about/press/press-techcrunch-sprite.png) no-repeat;
-                    width:  198px;
+                .press-link-tl {
+                    background-position: (-186px * 0) 0;
                 }
                 
-                .press-link-wsj {
-                    background: url(/assets/img/about/press/press-wsj-sprite.png) no-repeat;
-                    width:  279px;
+                .press-link-time-startups {
+                    background-position: (-186px * 1) 0;
                 }
                 
-                .press-link-daringfireball {
-                    background: url(/assets/img/about/press/press-daringfireball-sprite.png) no-repeat;
-                    width:  194px;
+                .press-link-sxsw {
+                    background-position: (-186px * 2) 0;
                 }
                 
                 .press-link-mashable {
-                    background: url(/assets/img/about/press/press-mashable-sprite.png) no-repeat;
-                    width:  130px;
+                    background-position: (-186px * 3) 0;
                 }
                 
-                .press-link-gigaom {
-                    background: url(/assets/img/about/press/press-gigaom-sprite.png) no-repeat;
-                    width:  157px;
+                .press-link-webby {
+                    background-position: (-186px * 4) 0;
+                }
+                
+                .press-link-techcrunch {
+                    background-position: (-186px * 5) 0;
+                }
+                
+                .press-link-business-insider {
+                    background-position: (-186px * 6) 0;
+                }
+                
+                .press-link-wsj {
+                    background-position: (-186px * 7) 0;
                 }
             }
         }
@@ -542,7 +555,7 @@ footer {
 }
 
 .made-in-nyc-logo {
-    background: url(/assets/img/about/nyctoken.png) no-repeat;
+    background: url(/assets/img/about/nyctoken.1.png) no-repeat;
     
     display: block;
     width:  105px;

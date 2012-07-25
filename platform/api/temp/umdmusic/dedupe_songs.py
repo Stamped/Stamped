@@ -13,11 +13,12 @@ with open(argv[1]) as fin:
         popularDate[key] = song['last_popular']
         ranks[key].append(song['rank'])
 
-for key, ranks in ranks.iteritems():
-    bestRank = min(ranks)
-    if bestRank <= 1:
+for key, popular in popularDate.iteritems():
+    allRanks = ranks[key]
+    bestRank = min(allRanks)
+    sincePopular = datetime.datetime.today() - popular
+    if sincePopular.days * bestRank < 15000:
         name, artist = key
-        popular = popularDate[key]
-        totalPopularity = sum(100 / (2 ** r) for r in ranks)
+        totalPopularity = sum(100 / (2 ** r) for r in allRanks)
         print repr({'name' : name, 'artist' : artist, 'last_popular' : popular, 'total_popularity' : totalPopularity})
         

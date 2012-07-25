@@ -30,7 +30,7 @@
 -->
 
 {% block viewport %}
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=0.36">
 {% endblock viewport %}
 
 {% block styles %}
@@ -295,7 +295,7 @@
                                     </div>
                                     
                                     <div id="hero-video-preview" class="user-video-preview">
-                                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
+                                        <a href="http://www.youtube.com/watch?v=ZNiBeAbMLMQ&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
                                         
                                         <div class="user-video-desc">
                                             <div class="screen-names"><a href="/justinbieber">@justinbieber</a></div>
@@ -316,9 +316,9 @@
                 <div class="watch-video">
                     <div class="speech-bubble clearfix">
                         <div class="default-video">
-                            <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
+                            <a href="http://www.youtube.com/watch?v=ZNiBeAbMLMQ&autoplay=1" class="play-video-button-small lightbox-video"></a>
                             
-                            <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the video with <a href="/justinbieber" class="bolded">@justinbieber</a></p>
+                            <p class="desc"><a href="http://www.youtube.com/watch?v=ZNiBeAbMLMQ&autoplay=1" class="watch lightbox-video">Watch</a> the video with <a href="/justinbieber" class="bolded">@justinbieber</a></p>
                         </div>
                         
                         <div class="overview-video">
@@ -364,6 +364,7 @@
         </div>
     </div>
     
+    {% if not mobile %}
     <div id="tastemaker-map-window" class="main-content forward-button-active refresh-button-active">
         <div id="back-button"    class="chrome-button"></div>
         <div id="forward-button" class="chrome-button"></div>
@@ -375,6 +376,7 @@
             <div id="tastemaker-map-window-loading"></div>
         </div>
     </div>
+    {% endif %}
 {% endblock main %}
 
 {% block pre_footer %}
