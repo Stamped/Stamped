@@ -5280,16 +5280,11 @@ class StampedAPI(AStampedAPI):
 
             for stub in stubList:
                 stubId = stub.entity_id
-                resolved = self._resolveStub(stub, True)
+                resolved = self._resolveStub(stub)
                 if resolved is None:
-                    # It's okay to fail resolution here, since we're only resolving against our own
-                    # db. We never try to resolve an unknown album, for performance reasons. Also
-                    # we don't go from albums to artists, since we will to to the tracks, which lead
-                    # to the artists.
-                    if attr != 'albums' or entity.isType('album') and attr == 'artists':
-                        resolvedList.append(stub)
-                    continue
-                resolvedList.append(resolved.minimize())
+                    resolvedList.append(stub)
+                else:
+                    resolvedList.append(resolved.minimize())
                 if stubId != resolved.entity_id:
                     stubsModified = True
 
@@ -5327,10 +5322,13 @@ class StampedAPI(AStampedAPI):
 
             mergeEntityTasks = []
             for stub in stubList:
-                resolvedFull = self._resolveStub(stub, False)
+                resolvedFull = self._resolveStub(stub)
                 if resolvedFull is None:
                     logs.warning('stub resolution failed: %s' % stub)
-                    mergeEntityTasks.append(None)
+                    if attr == 'artists':
+                        mergeEntityTasks.append(gevent.spawn(lambda x: x, stub))
+                    else:
+                        mergeEntityTasks.append(None)
                 else:
                     mergeEntityTasks.append(gevent.spawn(self._enrichAndPersistEntity, resolvedFull, persisted))
             
@@ -5352,7 +5350,7 @@ class StampedAPI(AStampedAPI):
                 self._followOutLinks(mergedEntity, persisted, depth+1)
         self._iterateOutLinks(entity, followStubList)
 
-    def _resolveStub(self, stub, quickResolveOnly):
+    def _resolveStub(self, stub):
         """Tries to return either an existing StampedSource entity or a third-party source entity proxy.
 
         Tries to fast resolve Stamped DB using existing third-party source IDs.
@@ -5389,7 +5387,7 @@ class StampedAPI(AStampedAPI):
                         source_id = getattr(stub.sources, '%s_id' % sourceName)
                         # Attempt to resolve against the Stamped DB (quick)
                         entity_id = stampedSource.resolve_fast(sourceName, source_id)
-                        if entity_id is None and not quickResolveOnly:
+                        if entity_id is None:
                             # Attempt to resolve against the Stamped DB (full)
                             proxy = source.entityProxyFromKey(source_id, entity=stub)
                             results = stampedSource.resolve(proxy)
