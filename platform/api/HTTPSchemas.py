@@ -3368,6 +3368,12 @@ class HTTPActivity(Schema):
                 self.header = "Welcome to Stamped"
                 self.image = _getIconURL('news_welcome')
                 self.action = _buildUserAction(self.objects.users[0])
+                
+            elif self.verb == 'notification_upgrade':
+                _addUserObjects()
+                self.header = "Welcome to Stamped 2.0"
+                self.image = _getIconURL('news_welcome')
+                self.action = _buildUserAction(self.objects.users[0])
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

@@ -34,8 +34,16 @@
         <div class="view view-default">
             <p class="desc">We like to keep you posted on what's happening on Stamped, but feel free to adjust when and how often we should contact you.</p>
             
-            <div class="clearfix">
-                <div class="header">
+            <div class="header clearfix">
+                <div class="lhs clearfix">
+                    {% handlebars_template "profile-image-small" user %}
+                    
+                    <div class="option-info">
+                        <div class="human-name">{{user.screen_name}}</div>
+                    </div>
+                </div>
+                
+                <div class="rhs clearfix">
                     <div class="option-icon option-email-icon"></div>
                     <div class="option-icon option-phone-icon"></div>
                 </div>
