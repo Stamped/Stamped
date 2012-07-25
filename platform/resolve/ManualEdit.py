@@ -110,6 +110,10 @@ def extraInfo(entity):
 <a href="%s">%s</a><br/>
                 """ % (art_url, art_url, result.pop('collectionName','<unknown>')))
 
+    extra.append("""
+<a href="https://api1.stamped.com/v1/entities/show.json?entity_id=%s">entity/show.json</a><br/>
+<a href="https://api1.stamped.com/v1/entities/edit.html?secret=supersmash&entity_id=%s">entity/edit.html</a><br/>
+        """ % (entity.entity_id, entity.entity_id))
     return ''.join(extra)
 
 def _quickLink(key, value):
@@ -238,6 +242,10 @@ def formForEntity(entity_id, **hidden_params):
 title:<input type="text" name="title" value="%s"/><br/>
 desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
  """ % (entity.title, entity.title, desc))
+    if entity.isType('album') or entity.isType('artist'):
+        html.append("""
+<input type="checkbox" name="purge_tracks"/> Purge Tracks<br/>
+            """)
     for k,v in hidden_params.items():
         html.append("""
 <input type="hidden" name="%s" value="%s"/>
@@ -419,6 +427,11 @@ def update(updates):
         entity.images = [img]
         entity.images_source = 'seed'
         entity.images_timestamp = now
+    if updates.purge_tracks == 'on':
+        del entity.tracks
+        del entity.tracks_timestamp
+        del entity.tracks_source
+        print("hererererere")
     for k in simple_fields:
         v = getattr(updates, k)
         if v == '':
