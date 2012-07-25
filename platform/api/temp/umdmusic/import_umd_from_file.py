@@ -11,6 +11,6 @@ stampedSource = StampedSource(api)
 with open(argv[1]) as fileIn:
     for line in fileIn:
         data = eval(line)
-        proxy = UMDTrack(data)
+        proxy = UMDAlbum(data)
         api.mergeProxyIntoDb(proxy, stampedSource)
         
