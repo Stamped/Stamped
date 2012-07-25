@@ -79,7 +79,7 @@ class _RdioObject(object):
 
     @lazyProperty
     def url(self):
-        return self.data['url']
+        return 'http://www.rdio.com%s' % self.data['url']
 
     @lazyProperty
     def canStream(self):
