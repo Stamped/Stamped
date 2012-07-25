@@ -352,6 +352,7 @@ def applyArtistTitleDataQualityTests(searchResult, searchQuery):
 ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
     re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
     re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|single|vinyl|album|ep|lp)[ ,:\])-]*$", re.IGNORECASE),
+    re.compile('\s*[(-\[]+\s*(with|feat\.?|featuring) [a-z0-9_\'-]+(,? [a-z0-9_\'-]+){0,3}\)?]?', re.IGNORECASE)
 )
 
 def cleanTrackTitle(trackTitle):

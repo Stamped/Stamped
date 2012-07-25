@@ -115,7 +115,7 @@ class AlertEmail(Email):
             msg = u'Your friend %s (@%s) joined Stamped' % (self._subject.name, self._subject.screen_name)
 
         elif self._verb.startswith('action'):
-            msg = u'%s (@%s) did something to your stamp' % (self._subject.name, self._subject.screen_name)
+            msg = u'%s (@%s) checked out your stamp' % (self._subject.name, self._subject.screen_name)
 
         else:
             logs.warning("Invalid verb for title: %s" % self.verb)
@@ -183,6 +183,9 @@ class AlertEmail(Email):
             if len(title) < len(params['title']):
                 title = "%s..." % title
             params['title'] = title
+
+        if 'blurb' in params and params['blurb'] is None:
+            params['blurb'] = ''
 
         params['image_url_96'] = params['image_url'].replace('.jpg', '-96x96.jpg')
 
@@ -280,7 +283,7 @@ class PushNotification(object):
             msg = 'Your friend %s joined Stamped' % (self._subject.screen_name)
 
         elif self._verb.startswith('action_'):
-            msg = '%s interacted with your stamp' % (self._subject.screen_name)
+            msg = '%s checked out your stamp' % (self._subject.screen_name)
 
         else:
             raise Exception("Unrecognized verb: %s" % verb)
