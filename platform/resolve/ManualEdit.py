@@ -170,7 +170,6 @@ def formForEntity(entity_id, **hidden_params):
             except IndexError:
                 raise
         fields['itunes_url'] = itunes_url
-
     if entity.isType('artist') or entity.isType('album') or entity.isType('track'):
         rdio_url = ''
         rdio_id = entity.sources.rdio_id
