@@ -14,9 +14,12 @@ try:
     from pprint import pprint
     from resolve.TitleUtils import *
     import sys
+    import re
+    from datetime import datetime
 except:
     raise
 
+_derived_source = 'derived'
 
 def _rdio():
     import libs.Rdio
@@ -132,10 +135,61 @@ def cleanTitles(**kwargs):
             return []
     processBatch(handler, query=query, **kwargs)
 
+def removeITunesReleaseDates(**kwargs):
+    """
+    Removes release_date's and bookkeeping set by iTunes
+    """
+    query = {
+        'release_date_source': 'itunes'
+    }
+    query = kwargs.pop('query', query)
+    def handler(entity):
+        del entity.release_date_source
+        del entity.release_date_timestamp
+        del entity.release_date
+        return [entity]
+    processBatch(handler, query=query, **kwargs)
+
+def scrapeDateFromTitle(**kwargs):
+    """
+    Parses out release_date from titles of format r'.+\(\d\d\d\d)' if no release_date is set
+    """
+    regex = r'.+\((\d\d\d\d)\)$'
+    query = {
+        '$or' : [
+            {'kind': 'software'},
+            {'kind': 'media_item'},
+            {'kind': 'media_collection'},
+        ], 
+        'title' : {
+            '$regex': regex
+        },
+        'release_date_source': {
+            '$exists':0
+        },
+        'release_date': {
+            '$exists':0
+        },
+    }
+    query = kwargs.pop('query', query)
+    def handler(entity):
+        match = re.match(regex, entity.title)
+        if match:
+            year = int(match.group(1))
+            entity.release_date = datetime(year, 1, 1)
+            entity.release_date_source = _derived_source
+            entity.release_date_timestamp = datetime.utcnow()
+            return [entity]
+        else:
+            return []
+    processBatch(handler, query=query, **kwargs)
+
 _commands = {
     'track_previews': fixBadPlaylists,
     'rdio_urls': addRdioUrls,
     'clean_titles': cleanTitles,
+    'remove_itunes_release_dates': removeITunesReleaseDates,
+    'scrape_date_from_title': scrapeDateFromTitle,
 }
 
 _actions = {

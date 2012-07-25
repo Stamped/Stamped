@@ -19,8 +19,7 @@ from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
 from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException, TooManyFailedRequestsException
 import libs.ec2_utils
-from collections                import deque
-
+from collections import deque
 
 FAIL_LIMIT = 10
 FAIL_PERIOD = 60*3
@@ -201,6 +200,8 @@ class RateLimiterState(object):
         try:
             print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
+#        except rpyc.core.vinegar.GenericException as e:
+#            print('got generic exception')
         except DailyLimitException as e:
             print('hit daily limitexception')
             raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
