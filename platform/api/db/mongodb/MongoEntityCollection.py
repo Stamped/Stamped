@@ -63,7 +63,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self._collection.ensure_index('tracks.title')
 
         self._collection.ensure_index([('_id', pymongo.ASCENDING), ('sources.user_generated_id', pymongo.ASCENDING)])
-        self._collection.ensure_index('subcategory', pymongo.ASCENDING)
 
         self._cache = globalMemcache()
 
