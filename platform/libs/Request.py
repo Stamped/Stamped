@@ -176,16 +176,21 @@ class RateLimiterState(object):
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-        time.sleep(0)
+
         print('made it past sleep')
         if self.__conn is None:
             self.__conn = rpyc.connect(host, port)
 
+        time.sleep(0)
+        print('made it past connect')
         async_request = rpyc.async(self.__conn.root.request)
         try:
+            print('about to create asyncresult')
             asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
             asyncresult.set_expiry(timeout)
+            print('waiting for response in value')
             response, content = asyncresult.value
+            print('got value response')
         except RateException as e:
             logs.info('RateException occurred during third party request: %s' % e)
             raise e
