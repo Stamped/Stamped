@@ -186,7 +186,9 @@ class RateLimiterState(object):
         try:
             asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
             asyncresult.set_expiry(timeout)
+            print('waiting for response in value')
             response, content = asyncresult.value
+            print('got value response')
         except RateException as e:
             logs.info('RateException occurred during third party request: %s' % e)
             raise e
