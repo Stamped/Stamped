@@ -3762,7 +3762,7 @@ class StampedAPI(AStampedAPI):
             entityIds[item.entity_id] = None
             if item.stamps is not None:
                 for stampPreview in item.stamps:
-                    userIds[stampPreview.user.user_id] = None
+                    userIds[stampPreview.user_id] = None
             if item.todo_user_ids is not None:
                 for userId in item.todo_user_ids:
                     userIds[userId] = None
