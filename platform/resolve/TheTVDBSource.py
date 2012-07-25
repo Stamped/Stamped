@@ -177,7 +177,9 @@ class TheTVDBSource(GenericSource):
                                     constructor=TheTVDBShow)
     
     def __queryGen(self, **params):
-        results = self.__thetvdb.search(transform=True, detailed=True, timeout=None, **params)
+        if 'timeout' not in params:
+            params['timeout'] = None
+        results = self.__thetvdb.search(transform=True, detailed=True, **params)
         for result in results:
             yield result
 

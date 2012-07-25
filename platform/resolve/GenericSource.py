@@ -156,7 +156,7 @@ class GenericSource(BasicSource):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
-                results = self.resolve(query, self.matchSource(query))
+                results = self.resolve(query)
                 if len(results) != 0:
                     best = results[0]
                     if best[0]['resolved']:

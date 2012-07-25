@@ -146,7 +146,7 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
         tracks = {}
         
         def lookupTrack(key):
-            result = self.spotify.lookup(key, 'trackdetail', priority='low', timeout=MERGE_TIMOUT)
+            result = self.spotify.lookup(key, 'trackdetail', priority='low', timeout=MERGE_TIMEOUT)
             track_list = result['album']['tracks']
             
             for track in track_list:
