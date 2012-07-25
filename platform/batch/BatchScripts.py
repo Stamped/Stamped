@@ -132,10 +132,24 @@ def cleanTitles(**kwargs):
             return []
     processBatch(handler, query=query, **kwargs)
 
+def removeITunesReleaseDates(**kwargs):
+    query = {
+        'release_date_source': 'itunes'
+    }
+    query = kwargs.pop('query', query)
+    def handler(entity):
+        del entity.release_date_source
+        del entity.release_date_timestamp
+        del entity.release_date
+        return [entity]
+    processBatch(handler, query=query, **kwargs)
+
+
 _commands = {
     'track_previews': fixBadPlaylists,
     'rdio_urls': addRdioUrls,
     'clean_titles': cleanTitles,
+    'remove_itunes_release_dates': removeITunesReleaseDates,
 }
 
 _actions = {
