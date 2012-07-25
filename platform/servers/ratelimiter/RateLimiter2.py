@@ -38,27 +38,27 @@ class RLPriorityQueue(PriorityQueue):
 class RateException(Exception):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
-        print(msg)
+        logs.warning(msg)
 
 class TooManyFailedRequestsException(Exception):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
-        print(msg)
+        logs.warning(msg)
 
 class WaitTooLongException(Exception):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
-        print(msg)
+        logs.warning(msg)
 
 class DailyLimitException(Exception):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
-        print(msg)
+        logs.warning(msg)
 
 class TimeoutException(Exception):
     def __init__(self, msg=None):
         Exception.__init__(self, msg)
-        print(msg)
+        logs.warning(msg)
 
 class RequestLog():
     def __init__(self):
@@ -371,6 +371,7 @@ class RateLimiter(object):
     def doRequest(self, request, asyncresult):
         global events
         try:
+            logs.info("about to issue request for '%s'.  url: %s" % (self.__service_name, request.url))
             begin = time.time()
             http = httplib2.Http()
 
