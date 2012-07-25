@@ -152,7 +152,7 @@
                 len = 12;
             }
             
-            if (value.length !== len) {
+            if (value.length < len) {
                 return null;
             }
             

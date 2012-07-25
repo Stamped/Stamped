@@ -4901,7 +4901,7 @@ class StampedAPI(AStampedAPI):
     def _addWelcomeActivity(self, recipientId):
         objects = ActivityObjectIds()
         objects.user_ids = [ recipientId ]
-        body = "Welcome to Stamped! We've given you 100 stamps to start, so go ahead, try using one now!"
+        body = "We've given you 100 stamps to start, and you earn more if your friends like what you stamp. Try using one now!"
         self._activityDB.addActivity(verb           = 'notification_welcome', 
                                      recipientIds   = [ recipientId ], 
                                      objects        = objects, 

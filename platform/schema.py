@@ -184,17 +184,17 @@ class Schema(object):
             object.__delattr__(self, name)
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            for k, v in self.__properties.items():
-                if k in other.__properties:
-                    v2 = other.__properties[k]
-                    if v2 != v:
-                        return False
-                else:
-                    return False
-                return True
-        else:
+        if self.__class__ != other.__class__:
             return False
+
+        if set(self.__properties.keys()) != set(other.__properties.keys()):
+            return False
+
+        for k, v in self.__properties.iteritems():
+            if v != other.__properties[k]:
+                return False
+
+        return True
 
     def __ne__(self, other):
         return not self.__eq__(other)

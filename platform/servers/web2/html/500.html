@@ -1,0 +1,24 @@
+{% extends "404.html" %}
+{% load stamped_tags %}
+
+{% block styles %}
+    {{ block.super }}
+    
+    <style>
+        .ribbon-wrapper { background: #d54042 !important; }
+    </style>
+{% endblock styles %}
+
+
+{% block pane-body %}
+    <div class="title">Internal Error</div>
+    
+    <div class="desc">
+        Whoops! Looks like we're having troubles loading your request on our end. Our engineers have been notified of the problem and the broken link will hopefully be fixed soon.
+    </div>
+    
+    <div class="desc">
+        Sorry for the inconvenience!
+    </div>
+{% endblock pane-body %}
+

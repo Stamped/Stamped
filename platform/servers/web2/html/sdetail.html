@@ -221,37 +221,7 @@
                                         {% else %}{% if stamp.entity.subcategory == "artist" %}
                                         {% endif %}{% endif %}{% endif %}
                                     {% else %}{% if source.source == "rdio" %}
-                                        {% if stamp.entity.subcategory == "song" %}
-                                            <a class='action-link' href="">
-                                                <div class="action action-{{action.type}} stopped clearfix">
-                                                    <div class='lhs'>
-                                                        <div class='stopped'>
-                                                            <div class='action-icon action-icon-{{action.type}}'></div>
-                                                            <div class='action-name'>Play preview via Rdio</div>
-                                                        </div>
-                                                        
-                                                        <div class='media-loading'>
-                                                            <div class='action-icon action-icon-media-loading'></div>
-                                                            <div class='action-name'>Loading...</div>
-                                                        </div>
-                                                        
-                                                        <div class='playing'>
-                                                            <div class='action-icon action-icon-playing'></div>
-                                                            <div class='action-name'>Pause Rdio preview</div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="rhs">
-                                                        <div class="source source-{{source.source}}" {% if source.completion_data.source_id %} data-source-id="{{source.completion_data.source_id}}" {% endif %} {% if source.source_data.preview_url %} data-source-preview-url="{{source.source_data.preview_url}}" {% endif %}>
-                                                        </div>
-                                                        
-                                                        <div id="rdio-api"></div>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        {% else %}{% if stamp.entity.subcategory == "album" %}
-                                        {% else %}{% if stamp.entity.subcategory == "artist" %}
-                                        {% endif %}{% endif %}{% endif %}
+                                        <!-- TODO: support proper Rdio playback and linking -->
                                     {% endif %}{% endif %}{% endif %}
                                 {% endfor %}
                             {% else %}

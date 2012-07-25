@@ -171,9 +171,6 @@
         var index  = Math.floor(Math.random() * $texts.length);
         $texts.eq(index).addClass(active_text);
         
-        var fit_text_compression_factor = 0.5;
-        $(".line").fitText(fit_text_compression_factor);
-        
         var hide_intro = function(autoplay) {
             // start the main page content animation
             init_main(autoplay);
@@ -803,6 +800,9 @@
         
         $window.bind("load", function() {
             if ($body.hasClass("intro")) {
+                var fit_text_compression_factor = 0.5;
+                $(".line").fitText(fit_text_compression_factor);
+                
                 // start the intro animation sequence
                 intro_animation.start();
             } else {

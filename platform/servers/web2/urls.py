@@ -19,20 +19,6 @@ urlpatterns = patterns('',
     # --------------------------------------------------------------------------
     
     
-    # ------------------------------ ERRORS ------------------------------------
-    # e.g., stamped.com/mobile/404, stamped.com/mobile/404.html
-    url(r'^mobile/404/?$',                              'error.views.error_404'), 
-    url(r'^mobile/404.html?$',                          'error.views.error_404'), 
-    
-    # e.g., stamped.com/mobile/503, stamped.com/mobile/503.html
-    url(r'^mobile/503/?$',                              'error.views.error_503'), 
-    url(r'^mobile/503.html?$',                          'error.views.error_503'), 
-    
-    # e.g., stamped.com/mobile/500, stamped.com/mobile/500.html
-    url(r'^mobile/500/?$',                              'error.views.error_500'), 
-    url(r'^mobile/500.html?$',                          'error.views.error_500'), 
-    
-    
     # ----------------------------- SETTINGS -----------------------------------
     # e.g., stamped.com/mobile/pw/screen_name
     url(R'^mobile/pw/(?P<token>[\w-]{36})$',            'mobile.views.password_reset'),
@@ -106,20 +92,6 @@ urlpatterns = patterns('',
     # --------------------------------------------------------------------------
     # ---------------------------- NON-MOBILE ----------------------------------
     # --------------------------------------------------------------------------
-    
-    
-    # ------------------------------ ERRORS ------------------------------------
-    # e.g., stamped.com/404, stamped.com/404.html
-    url(r'^404/?$',                             'error.views.error_404'), 
-    url(r'^404.html?$',                         'error.views.error_404'), 
-    
-    # e.g., stamped.com/503, stamped.com/503.html
-    url(r'^503/?$',                             'error.views.error_503'), 
-    url(r'^503.html?$',                         'error.views.error_503'), 
-    
-    # e.g., stamped.com/500, stamped.com/500.html
-    url(r'^500/?$',                             'error.views.error_500'), 
-    url(r'^500.html?$',                         'error.views.error_500'), 
     
     
     # ----------------------------- SETTINGS -----------------------------------
@@ -235,4 +207,7 @@ def custom_static(prefix, view='django.views.static.serve', **kwargs):
 
 # static assets
 urlpatterns += custom_static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
+
+handler404 = 'error.views.error_404'
+handler500 = 'error.views.error_500'
 

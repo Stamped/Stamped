@@ -647,7 +647,7 @@ class EntitySources(Schema):
         cls.addProperty('netflix_is_instant_available',     bool)
         cls.addProperty('netflix_instant_available_until',  datetime)
         cls.addProperty('netflix_available_source',         basestring)
-        cls.addProperty('netflix_available_timetsamp',      datetime)
+        cls.addProperty('netflix_available_timestamp',      datetime)
 
         cls.addProperty('singleplatform_id',                basestring)
         cls.addProperty('singleplatform_url',               basestring)

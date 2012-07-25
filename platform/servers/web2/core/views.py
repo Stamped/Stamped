@@ -242,6 +242,7 @@ def handle_map(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):
+    raise Exception("")
     body_classes = get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax
     
@@ -409,10 +410,10 @@ def index(request, schema, **kwargs):
             'color_secondary'   : 'FFEA00', 
         }, 
         {
-            'screen_name'       : 'rebeccaminkoff', 
-            'image_url'         : 'http://static.stamped.com/users/rebeccaminkoff-60x60.jpg', 
-            'color_primary'     : '04004F', 
-            'color_secondary'   : '46008C', 
+            'screen_name'       : 'urbandaddy', 
+            'image_url'         : 'http://static.stamped.com/users/urbandaddy-60x60.jpg', 
+            'color_primary'     : '9A0004', 
+            'color_secondary'   : '000130', 
         }, 
         {
             'screen_name'       : 'nymag', 
@@ -456,7 +457,7 @@ def about(request, **kwargs):
             'screen_name'       : 'robby', 
             'color_primary'     : '00119F', 
             'color_secondary'   : '6C7DFF', 
-            'desc'              : 'Robby worked at Google for 4 years, on Gmail launches and most recently as Product Manager for the Ad Exchange team. He built the first Stamped prototype in his tiny NYC apartment. He graduated from Northwestern, and though he may share brotherly love with Bart Stein, the two founders are not related.', 
+            'desc'              : "Robby worked at Google for 4 years, on Gmail launches and most recently as Product Manager for the Ad Exchange. He built the first Stamped prototype in his tiny NYC apartment. He graduated from Northwestern and is not Bart's brother.", 
             'twitter'           : 'rmstein', 
             'inner'             : range(2), 
         }, 
@@ -466,7 +467,7 @@ def about(request, **kwargs):
             'screen_name'       : 'kevin', 
             'color_primary'     : '070067', 
             'color_secondary'   : '005B9A', 
-            'desc'              : 'Kevin previously led development of risk analytics technology at a hedge fund in New York. He and Robby also built a social calendering app together at Northwestern; a movie about it, "The Social Calender," has not yet been made.', 
+            'desc'              : 'Kevin previously led development of risk analytics technology at a hedge fund in New York. He and Robby also built a social calendering app together at Northwestern; a movie about it, "The Social Calendar," has not yet been made.', 
             'twitter'           : 'kevinpalms', 
             'inner'             : range(2), 
         }, 

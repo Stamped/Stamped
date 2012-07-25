@@ -88,6 +88,17 @@
     {% include "opengraph.html" %}
 {% endblock opengraph %}
 
+{% block post_header %}
+    {{ block.super }}
+    
+    {% block error %}
+        <div id="error">
+            <p>Oops, we're having troubles.</p>
+            <p>Our bad.</p>
+        </div>
+    {% endblock error %}
+{% endblock %}
+
 {% block main %}
     {{ block.super }}
     

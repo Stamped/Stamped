@@ -1789,7 +1789,7 @@ class HTTPEntity(Schema):
                             sources.append(source)
 
                             if item.entity_id is None:
-                                item.entity_id = 'T_ITUNES_%s' % song.itunes_id
+                                item.entity_id = 'T_ITUNES_%s' % song.sources.itunes_id
 
                         if getattr(song.sources, 'rdio_id', None) is not None:
                             source                      = HTTPActionSource()
@@ -1800,7 +1800,7 @@ class HTTPEntity(Schema):
                             sources.append(source)
 
                             if item.entity_id is None:
-                                item.entity_id = 'T_RDIO_%s' % song.rdio_id
+                                item.entity_id = 'T_RDIO_%s' % song.sources.rdio_id
 
                         if getattr(song.sources, 'spotify_id', None) is not None:
                             source                      = HTTPActionSource()
@@ -1811,7 +1811,7 @@ class HTTPEntity(Schema):
                             sources.append(source)
 
                             if item.entity_id is None:
-                                item.entity_id = 'T_SPOTIFY_%s' % song.spotify_id
+                                item.entity_id = 'T_SPOTIFY_%s' % song.sources.spotify_id
 
                         if len(sources) > 0:
                             action = HTTPAction()
@@ -2099,6 +2099,8 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('singleplatform_url',               basestring)
         cls.addProperty('spotify_id',                       basestring)
         cls.addProperty('opentable_url',                    basestring)
+
+        cls.addProperty('purge_tracks',                     basestring)
 
         # place
         cls.addProperty('address_street',                   basestring)

@@ -18,7 +18,7 @@ from libs.Memcache              import globalMemcache, generateKeyFromDictionary
 
 from servers.web2               import settings
 
-from django.http                import HttpResponse
+from django.http                import HttpResponse, Http404
 from django.shortcuts           import render_to_response
 from django.template            import RequestContext
 from django.utils.functional    import wraps
@@ -351,6 +351,8 @@ def stamped_view(schema=None,
         
         @wraps(fn)
         def _wrapper(request, *args, **kwargs):
+            import servers.web2.error.views as web_error
+            
             try:
                 logs.begin(saveLog=stampedAPIProxy.api._logsDB.saveLog,
                            saveStat=stampedAPIProxy.api._statsDB.addStat,
@@ -389,17 +391,24 @@ def stamped_view(schema=None,
                 logs.warning("%s Error: %s" % (e.code, e))
                 logs.warning(utils.getFormattedException())
                 
-                response = HttpResponse("%s" % e, status=e.code)
-                logs.error(response.status_code)
-                return response
+                if e.code == 404:
+                    return web_error.error_404(request)
+                elif e.code >= 500:
+                    return web_error.error_500(request)
+                
+                raise # invoke django's default 500 handler
+                #response = HttpResponse("%s" % e, status=e.code)
+                #logs.error(response.status_code)
+                #return response
             
             except StampedHTTPError as e:
                 logs.warning("%s Error: %s" % (e.code, e.msg))
                 logs.warning(utils.getFormattedException())
                 
-                response = HttpResponse(e.msg, status=e.code)
-                logs.error(response.status_code)
-                return response
+                raise # invoke django's default 500 handler
+                #response = HttpResponse(e.msg, status=e.code)
+                #logs.error(response.status_code)
+                #return response
             
             except StampedAuthError as e:
                 logs.warning("401 Error: %s" % (e.msg))
@@ -445,18 +454,21 @@ def stamped_view(schema=None,
                 logs.warning("404 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
                 
-                response = HttpResponse("not_found", status=404)
-                logs.error(response.status_code)
-                return response
+                return web_error.error_404(request)
+                
+                #response = HttpResponse("not_found", status=404)
+                #logs.error(response.status_code)
+                #return response
             
             except Exception as e:
                 logs.warning("500 Error: %s" % e)
                 logs.warning(utils.getFormattedException())
                 utils.printException()
                 
-                response = HttpResponse("internal server error", status=500)
-                logs.error(response.status_code)
-                return response
+                logs.error(500)
+                raise # invoke django's default 500 handler
+                #response = HttpResponse("internal server error", status=500)
+                #return response
             
             finally:
                 try:
