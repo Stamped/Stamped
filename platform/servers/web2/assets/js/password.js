@@ -17,8 +17,8 @@
         var $body = $("body");
         
         var message_default  = "email address";
-        var message_success  = "Email sent..";
-        var message_error    = "Error sending email (your account password may not be managed by Stamped).";
+        var message_success  = "email sent!";
+        var message_error    = "error sending email";
         var input_selector   = ".email";
         var $views           = $("#views");
         
