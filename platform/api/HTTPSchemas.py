@@ -3339,6 +3339,7 @@ class HTTPActivity(Schema):
                     'news_fandango_group',
                     'news_itunes_group',
                     'news_listen_group',
+                    'news_menu_group',
                     'news_netflix_group',
                     'news_opentable_group',
                     'news_playlist_group',
