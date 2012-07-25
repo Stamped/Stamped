@@ -214,7 +214,7 @@ class EntityStats(Schema):
             if t in self.types:
                 return True
         except TypeError:
-            logs.warning("Type field in stamp stat set to None")
+            logs.warning("Type field in entity stat set to None")
         return False
 
 
