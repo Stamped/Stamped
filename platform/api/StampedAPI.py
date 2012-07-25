@@ -4074,17 +4074,17 @@ class StampedAPI(AStampedAPI):
                 if t < 10:
                     stampScore += 1 - (.05 / 10 * t)
                 elif t < 90:
-                    stampScore += 1.03125 - (.65 / 80 * t)
+                    stampScore += 1.04375 - (.75 / 80 * t)
                 elif t < 290:
-                    stampScore += .435 - (.3 / 200 * t) 
+                    stampScore += 0.29 - (.2 / 200 * t) 
             
 
             if section in ['book', 'app']:
                 slope = 0
             elif section is 'film':
-                slope = 0.6 / 60
+                slope = 0.55 / 60
             else:
-                slope = 0.6 / 100
+                slope = 0.55 / 120
 
             #Personal stamp multiplier
             personalStampMultiplier = 1
@@ -4092,19 +4092,19 @@ class StampedAPI(AStampedAPI):
                 if personalStampAge < 60:
                     personalStampMultiplier = 0.2 + (slope * personalStampAge)
                 else:
-                    personalStampMultiplier = min(0.8, slope * personalStampAge)
+                    personalStampMultiplier = min(0.75, slope * personalStampAge)
                 
             ### PERSONAL TODO LIST
             personalTodoScore = 0
-            if entityId in todos:
+            if user.user_id in todosMap[entityId]:
                 personalTodoScore = 1
 
-            result = (((2 * stampScore) 
-                    + (3 * personalTodoScore) 
-                    + (1 * avgStampQuality) 
-                    + (0.5 * avgStampPopularity))
+            result = (((2 * stampScore)  
+                    + (0.2 * avgStampPopularity))
+                    * (avgStampQuality)
                     * (entityQuality)
-                    * (personalStampMultiplier))
+                    * (personalStampMultiplier)
+                    + (2.5 * personalTodoScore))
             
             return result
 
@@ -4116,6 +4116,7 @@ class StampedAPI(AStampedAPI):
         stampStatsMap = {}
 
         for stat in stampStats:
+
             # Build stampStatsMap
             if stat.entity_id not in stampStatsMap:
                 stampStatsMap[stat.entity_id] = []
@@ -4147,9 +4148,8 @@ class StampedAPI(AStampedAPI):
                 if stat.entity_id not in todosMap:
                     todosMap[stat.entity_id] = set()
                 for userId in stat.preview_todos:
-                    if userId in friendIds:
-                        todosMap[stat.entity_id].add(userId)
-                    
+                    if userId in friendIds or userId == user.user_id:
+                        todosMap[stat.entity_id].add(userId)       
 
         guide = GuideCache()
         guide.user_id = user.user_id
@@ -4172,8 +4172,8 @@ class StampedAPI(AStampedAPI):
                 if entity.quality is not None:
                     entityQuality = entity.quality
 
-                score = entityScore(section=section, avgQuality=avgQuality,
-                                    avgPopularity=avgPopularity, stampTimestamps=stampTimestamps[entity.entity_id],
+                score = entityScore(section=section, avgStampQuality=avgQuality,
+                                    avgStampPopularity=avgPopularity, stampTimestamps=stampTimestamps[entity.entity_id],
                                     entityQuality=entityQuality, entityId=entity.entity_id)
                 
                 coordinates = None
