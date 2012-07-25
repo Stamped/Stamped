@@ -34,6 +34,13 @@
         <div class="view view-default">
             <p class="desc">We like to keep you posted on what's happening on Stamped, but feel free to adjust when and how often we should contact you.</p>
             
+            <div class="clearfix">
+                <div class="header">
+                    <div class="option-icon option-email-icon"></div>
+                    <div class="option-icon option-phone-icon"></div>
+                </div>
+            </div>
+            
             <form class="alert-settings-form clearfix">
                 {% for option in settings %}
                     <div class="option clearfix option-{{option.name}}">
@@ -53,7 +60,10 @@
                     </div>
                 {% endfor %}
                 
-                <button type="submit" class="submit-button" action="/settings/" method="POST"></button>
+                <div class="button-wrapper">
+                    <button type="submit" class="save-button" action="/settings/" method="POST"></button>
+                    <div id="status">Changes saved!</div>
+                </div>
             </form>
         </div>
     </div>
