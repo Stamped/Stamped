@@ -242,6 +242,7 @@ def handle_map(request, schema, **kwargs):
 
 @stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):
+    raise Exception("")
     body_classes = get_body_classes('sdetail collapsed-header', schema)
     ajax         = schema.ajax
     
