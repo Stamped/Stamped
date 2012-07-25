@@ -56,7 +56,8 @@ class StampedRateLimiterService():
             self.__rllog = MongoRateLimiterLogCollection()
             self.loadDbLog()
         except:
-            logs.error('Error connecting to db')
+            import traceback
+            traceback.print_exc()
         self.loadLimiterConfig()
         self.__config_loader_thread = None
         self.__update_log_thread = None
