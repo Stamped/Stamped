@@ -81,6 +81,17 @@ def extraInfo(entity):
                     """ % (image_url, image_url, album.title))
             except Exception as e:
                 print e
+        itunes_id = entity.sources.itunes_id
+        if itunes_id is not None:
+            extra.append('<h1>From iTunes:</h1><br/>')
+            itunes_results = _itunes().method('lookup', id=itunes_id, entity='album')
+            for result in itunes_results['results']:
+                if 'artworkUrl100' in result:
+                    art_url = _cleanImageURL(result['artworkUrl100'])
+                    extra.append("""
+<img src="%s"/>
+<a href="%s">%s</a><br/>
+                    """ % (art_url, art_url, result.pop('collectionName','<unknown>')))
 
     return ''.join(extra)
 
