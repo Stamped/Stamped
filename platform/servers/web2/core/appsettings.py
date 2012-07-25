@@ -32,6 +32,15 @@ def password_reset(request, schema, **kwargs):
     if user_id is None:
         raise StampedInputError("invalid token")
     
+    account = stampedAPIProxy.getAccount(user_id)
+    
+    if account is None:
+        raise StampedInputError("invalid account")
+    
+    auth_service = acount['auth_service']
+    if auth_service != 'stamped':
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account['screen_name'], auth_service))
+    
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 
         'page'              : 'password_reset', 
@@ -88,8 +97,6 @@ def alert_settings(request, schema, **kwargs):
     else:
         user_id  = g_stamped_auth.verifyEmailAlertToken(token)
         account  = stampedAPIProxy.getAccount(user_id)
-        logs.info("user_id: %s" % user_id)
-        logs.info("account: %s" % account)
         user     = account.dataExport()
         settings = user['alert_settings']
     
