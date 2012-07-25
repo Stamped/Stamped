@@ -13,7 +13,7 @@ try:
     import logs
     import random
     from abc                    import ABCMeta, abstractmethod, abstractproperty
-    from pymongo                import json_util
+    # from pymongo                import json_util
     import json
     from pprint                 import pformat, pprint
     from gevent.pool            import Pool
@@ -112,21 +112,22 @@ def createSparseOutputToConsole(keypaths, sparse=False):
                 _sparsePrint(entity, keys, keypath)
     return sparseOutputToConsole
 
-def createOutputToFile(f):
-    """
-    Creates an output function that writes JSON to the given file.
+# Breaks on prod because json_util isn't available
+# def createOutputToFile(f):
+#     """
+#     Creates an output function that writes JSON to the given file.
 
-    This function is intended to be used as the 'output' argument of processBatch().
-    """
-    db = _entityDB()
-    def outputToFile(entity_id, result_entities):
-        for entity in result_entities:
-            bson = db._convertToMongo(entity)
-            # converts bson to json using pymongo's built in support for handling datetime, ObjectID, etc.
-            string = json.dumps(bson, default=json_util.default)
-            # delimit objects with newlines to match mongoexport format
-            f.write('%s\n' % string)
-    return outputToFile
+#     This function is intended to be used as the 'output' argument of processBatch().
+#     """
+#     db = _entityDB()
+#     def outputToFile(entity_id, result_entities):
+#         for entity in result_entities:
+#             bson = db._convertToMongo(entity)
+#             # converts bson to json using pymongo's built in support for handling datetime, ObjectID, etc.
+#             string = json.dumps(bson, default=json_util.default)
+#             # delimit objects with newlines to match mongoexport format
+#             f.write('%s\n' % string)
+#     return outputToFile
 
 def processBatch(handler, query=None, output=None, offset=0, limit=None, thread_count=None, shuffle=False):
     """
