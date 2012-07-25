@@ -24,7 +24,6 @@ from libs.ec2_utils     import is_ec2, get_stack
 REQUEST_DUR_LOG_SIZE    = 10    # the size of the request duration log, which is used to determine the avg request duration
 REQUEST_DUR_CAP         = 10.0   # the cap for an individual request duration when determining the avg request duration
 
-
 class RLPriorityQueue(PriorityQueue):
     def qsize_priority(self, priority):
         """ Return the number of entries in the queue of equal or higher priority.  Assumes the entries are a sequence
@@ -32,7 +31,7 @@ class RLPriorityQueue(PriorityQueue):
         """
         count = 0
         for item in self.queue:
-            if item[0] <= priority:
+            if item[0][0] <= priority:
                 count += 1
         return count
 
@@ -128,6 +127,7 @@ class RateLimiter(object):
         self.__just_finished = 0
 
         self.__semaphore = Semaphore()
+        self.__queue_sem = Semaphore()
 
         if self.limit is not None and self.period is not None:
             self.__worker = gevent.spawn(workerProcess, self)
@@ -313,11 +313,10 @@ class RateLimiter(object):
         num_pending_requests = self.__requests.qsize_priority(priority)
         queue_wait = (num_pending_requests / self.limit) * self.period
 
-        print('rate_wait: %s queue_wait: %s' % (rate_wait, queue_wait))
-
         return rate_wait + queue_wait
 
     def addRequest(self, request, priority):
+        global events
         try:
             now = time.time()
 
@@ -327,7 +326,6 @@ class RateLimiter(object):
             request.log.expected_wait_time = expected_wait_time
             request.log.expected_request_time = expected_request_time
             request.log.expected_dur = expected_total_time
-            request.log.items_in_queue = self.__requests.qsize_priority(priority)
 
             if priority == 0 and self.__requests.qsize() > 0 and \
                (expected_wait_time + expected_request_time) > request.timeout:
@@ -349,8 +347,7 @@ class RateLimiter(object):
                 self.call()
                 self.doRequest(request, asyncresult)
             else:
-                self.__requests.put((priority, request, asyncresult))
-                print('queue_size: %s' % self.__requests.qsize())
+                self.__requests.put(((priority, request.created), request, asyncresult))
 
             return asyncresult
         except Exception as e:
@@ -359,26 +356,33 @@ class RateLimiter(object):
             raise e
 
     def handleTimestep(self):
+        global events
         self.__calls = 0
         now = time.time()
         while (self.__curr_timeblock_start + self.period < now):
             self.__curr_timeblock_start += self.period  # TODO convert seconds to timedelta
         requests = []
+
         while self.__calls < self.limit:
             try:
                 requests.append(self.__requests.get(block=False))
                 self.call()
             except gevent.queue.Empty:
                 break
+
         for priority, request, asyncresult in requests:
             gevent.spawn(self.doRequest, request, asyncresult)
 
     def doRequest(self, request, asyncresult):
+        global events
         try:
             begin = time.time()
             http = httplib2.Http()
 
             if (begin - request.created) > request.timeout:
+#                events.append('Service: %s  Request %s:   Throwing TimeoutException.  realized wait: %s  '
+#                              'expected dur: %s  items originally in queue: %s' %
+#                              (self.__service_name, request.log.count, begin - request.created, request.log.expected_dur, request.log.items_in_queue))
                 raise TimeoutException('The request timed out while waiting in the rate limiter queue.'
                                        'Expected time: %s  Items in queue: %s  Realized time: %s  Service: %s' %
                                         (request.log.expected_dur, request.log.items_in_queue, begin - request.created,
@@ -396,9 +400,13 @@ class RateLimiter(object):
             end = time.time()
             elapsed = end - begin
             realized_dur = end - request.created
-            print("service: %s  realized dur: %s  expected dur: %s  expected wait: %s  expected request time: %s  queue size: %s" %
-                  (self.__service_name, realized_dur, request.log.expected_dur, request.log.expected_wait_time,
-                   request.log.expected_request_time, request.log.items_in_queue), )
+
+
+            logs.info('Service: %s  Request %s:   Request finished.  Request time: %s  Realized total time: %s  '
+                          'Expected Total Time: %s  Expected wait time: %s  Expected request time: %s  Items originally in Queue: %s' %
+                          (self.__service_name, request.log.count, elapsed, realized_dur,
+                           request.log.expected_dur, request.log.expected_wait_time, request.log.expected_request_time,
+                              request.log.items_in_queue))
 
             self._addDurationLog(elapsed)
 
