@@ -17,7 +17,7 @@ import pickle
 import time
 from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
-from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException
+from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException, TooManyFailedRequestsException
 import libs.ec2_utils
 from collections                import deque
 
@@ -200,9 +200,11 @@ class RateLimiterState(object):
         except DailyLimitException as e:
             raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
         except WaitTooLongException as e:
-            raise StampedThirdPartyRequestFailError("'%s' service request estimated wait time longer than timeout" % service)
+            raise StampedThirdPartyRequestFailError("'%s' request estimated wait time longer than timeout" % service)
         except TimeoutException as e:
             raise StampedThirdPartyRequestFailError("'%s' request timed out." % service)
+        except TooManyFailedRequestsException as e:
+            raise StampedThirdPartyRequestFailError("%s" % e)
         except Exception as e:
             logs.error("RPC Service Request fail."
                         "service: %s  method: %s  url: %s  body: %s  header: %s"
