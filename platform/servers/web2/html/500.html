@@ -1,6 +1,15 @@
 {% extends "404.html" %}
 {% load stamped_tags %}
 
+{% block styles %}
+    {{ block.super }}
+    
+    <style>
+        .ribbon-wrapper { background: #d54042 !important; }
+    </style>
+{% endblock styles %}
+
+
 {% block pane-body %}
     <div class="title">Internal Error</div>
     
