@@ -212,11 +212,12 @@ class RateLimiterState(object):
         except TooManyFailedRequestsException as e:
             raise StampedThirdPartyRequestFailError("%s" % e)
         except Exception as e:
+            import traceback
             print('### caught exception  type: %s  e: %s' % (type(e), e))
             logs.info("RPC Service Request fail."
                         "service: %s  method: %s  url: %s  body: %s  header: %s"
-                        "priority: %s  timeout: %s  Exception: %s" %
-                        (service, method, url, body, header, priority, timeout, e))
+                        "priority: %s  timeout: %s  Exception: %s  Stack: %s" %
+                        (service, method, url, body, header, priority, timeout, e, traceback.format_exc()))
             self._fail(e)
         logs.info('### Falling back to local rate limiter request')
         return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
