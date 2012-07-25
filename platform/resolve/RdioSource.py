@@ -81,6 +81,20 @@ class _RdioObject(object):
     def url(self):
         return self.data['url']
 
+    @lazyProperty
+    def canStream(self):
+        try:
+            return self.data['canStream']
+        except Exception:
+            return False
+
+    @lazyProperty
+    def canSample(self):
+        try:
+            return self.data['canStream']
+        except Exception:
+            return False
+
     @property 
     def source(self):
         return "rdio"
@@ -247,6 +261,7 @@ class   RdioSource(GenericSource):
                 'albums',
                 'tracks',
                 'artists',
+                'rdio_available',
             ],
             kinds=[
                 'person',
