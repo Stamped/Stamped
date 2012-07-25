@@ -1,0 +1,34 @@
+{% extends "about.html" %}
+{% load stamped_tags %}
+
+<!-- CSS Dependencies => assets/generated/css/legal.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+    
+    Core stamped dependencies:
+        stylesheet: legal.css
+-->
+
+{% block styles %}
+    {{ block.super }}
+    
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/legal.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/legal.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
+{% endblock styles %}
+
+{% block pane-body %}
+    <p class="title">Legal Stuff</p>
+    
+    <div>
+        
+    </div>
+{% endblock pane-body %}
+
+{% block post-main %}
+    <div class="made-in-nyc-logo"></div>
+{% endblock post-main %}
+
