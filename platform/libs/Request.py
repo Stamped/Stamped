@@ -198,6 +198,7 @@ class RateLimiterState(object):
             print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
         except DailyLimitException as e:
+            print('hit daily limitexception')
             raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
         except WaitTooLongException as e:
             raise StampedThirdPartyRequestFailError("'%s' request estimated wait time longer than timeout" % service)
@@ -206,6 +207,7 @@ class RateLimiterState(object):
         except TooManyFailedRequestsException as e:
             raise StampedThirdPartyRequestFailError("%s" % e)
         except Exception as e:
+            print('### caught exception  type: %s  e: %s' % (type(e), e))
             logs.error("RPC Service Request fail."
                         "service: %s  method: %s  url: %s  body: %s  header: %s"
                         "priority: %s  timeout: %s  Exception: %s" %
