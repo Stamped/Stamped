@@ -1,8 +1,9 @@
 # Model classes taken from https://github.com/Instagram/python-instagram/blob/master/instagram/models.py
 
+import Globals
 from utils              import lazyProperty
 from libs.Instagram     import globalInstagram
-from resolve.GenericSource      import GenericSource
+from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT
 from resolve.Resolver           import *
 from resolve.ResolverObject     import ResolverPlace
 from resolve.TitleUtils         import *
