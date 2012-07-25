@@ -68,6 +68,18 @@ def _cleanImageURL(url):
 
     return url
 
+def _buildOpenTableURL(opentable_id=None, opentable_nickname=None, client=None):
+    if opentable_id is not None:
+        if client is not None and isinstance(client, Client) and client.is_mobile == True:
+            return 'http://m.opentable.com/Restaurant/Referral?RestID=%s&Ref=9166' % opentable_id
+        else:
+            return 'http://www.opentable.com/single.aspx?rid=%s&ref=9166' % opentable_id
+
+    if opentable_nickname is not None:
+        return 'http://www.opentable.com/reserve/%s&ref=9166' % opentable_nickname
+
+    return None
+
 # Paul, add your extra output here
 def extraInfo(entity):
     extra = []
@@ -129,6 +141,12 @@ def formForEntity(entity_id, **hidden_params):
         if singleplatform_id is not None:
             singleplatform_url = "http://www.singlepage.com/%s/menu" % singleplatform_id
         fields['singleplatform_url'] = singleplatform_url
+
+        opentable_url = ''
+        opentable_id = entity.sources.opentable_id
+        if opentable_id is not None:
+            opentable_url = _buildOpenTableURL(opentable_id)
+        fields['opentable_url'] = opentable_url
     else:
         itunes_id = entity.sources.itunes_id
         itunes_url = ''
@@ -370,6 +388,27 @@ def update(updates):
         entity.sources.fandango_url = 'http://www.qksrv.net/click-5348839-10576760?url=http%3a%2f%2fmobile.fandango.com%3fa%3d%26m%3d' + fandango_raw_id
         entity.sources.fandango_timestamp = now
         entity.sources.fandango_source = 'seed'
+    opentable_url = updates.opentable_url
+    if opentable_url is not None and opentable_url not in bad_versions:
+        match = re.match(r'http://www.opentable.com/(.+)?\?(.+)?rid=(\d+)(.+)', opentable_url)
+        opentable_nickname = None
+        opentable_id = None
+        if match is not None:
+            opentable_nickname = match.group(1)
+            opentable_id = match.group(3)
+        else:
+            match = re.match(r'http://www.opentable.com/single.aspx\?rid=(\d+)&ref=9166', opentable_url)
+            if match is not None:
+                opentable_id = match.group(1)
+            else:
+                match = re.match(r'http://www.opentable.com/(.+)\?rid=(\d+)&ref=9166', opentable_url)
+                opentable_id = match.group(2)
+                opentable_nickname = match.group(1)
+
+        entity.sources.opentable_id = opentable_id
+        entity.sources.opentable_nickname = opentable_nickname
+        entity.sources.opentable_source = 'seed'
+        entity.sources.opentable_timestamp = now
     image_url = updates.image_url
     if image_url is not None and image_url not in bad_versions:
         img = ImageSchema()
