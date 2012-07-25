@@ -407,8 +407,8 @@ class RateLimiter(object):
                 break
 
         for priority, request, asyncresult in requests:
-            events.append('Service: %s  Request %s:   Spawning doRequest thread' %
-                          (self.__service_name, request.log.count))
+            events.append('Service: %s  Request %s  QueueSize: %s   Spawning doRequest thread' %
+                          (self.__service_name, request.log.count, self.__requests.qsize()))
             gevent.spawn(self.doRequest, request, asyncresult)
 
     def doRequest(self, request, asyncresult):
