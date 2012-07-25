@@ -198,12 +198,9 @@ class RateLimiterState(object):
         if not self.__is_ec2 or self._isBlackout():
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
-            print('### attempting rpc service request')
+            logs.info('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
-#        except rpyc.core.vinegar.GenericException as e:
-#            print('got generic exception')
         except DailyLimitException as e:
-            print('hit daily limitexception')
             raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
         except WaitTooLongException as e:
             raise StampedThirdPartyRequestFailError("'%s' request estimated wait time longer than timeout" % service)
@@ -218,6 +215,7 @@ class RateLimiterState(object):
                         "priority: %s  timeout: %s  Exception: %s" %
                         (service, method, url, body, header, priority, timeout, e))
             self._fail(e)
+        logs.info('### Falling back to local rate limiter request')
         return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 
 
