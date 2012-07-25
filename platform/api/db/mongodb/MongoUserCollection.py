@@ -40,6 +40,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         self._collection.ensure_index('linked.twitter.linked_user_id')
         self._collection.ensure_index('linked.facebook.linked_user_id')
         self._collection.ensure_index([('screen_name_lower', pymongo.ASCENDING), ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('name_lower', pymongo.ASCENDING), ('_id', pymongo.ASCENDING)])
 
         self._cache = globalMemcache()
 
