@@ -19,4 +19,4 @@ except ImportError:
         curr_dir = next_dir
     sys.path.insert(0, next_dir)
 
-import stamped
+#import stamped
