@@ -198,18 +198,18 @@ class RateLimiterState(object):
             print('### attempting rpc service request')
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
         except DailyLimitException as e:
-            logs.warning("Hit daily rate limit for service: '%s'" % service)
+            raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
         except WaitTooLongException as e:
-            logs.warning("'%s' service request estimated wait time longer than timeout" % service)
+            raise StampedThirdPartyRequestFailError("'%s' service request estimated wait time longer than timeout" % service)
         except TimeoutException as e:
-            logs.warning("'%s' request timed out." % service)
+            raise StampedThirdPartyRequestFailError("'%s' request timed out." % service)
         except Exception as e:
             logs.error("RPC Service Request fail."
                         "service: %s  method: %s  url: %s  body: %s  header: %s"
                         "priority: %s  timeout: %s  Exception: %s" %
                         (service, method, url, body, header, priority, timeout, e))
             self._fail(e)
-            return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
+        return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
 
 
 __rl_state = None
