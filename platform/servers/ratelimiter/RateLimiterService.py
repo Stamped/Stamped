@@ -16,7 +16,7 @@ from time               import sleep
 import logs
 from datetime           import datetime
 import RateLimiter2
-from RateLimiter2       import RateLimiter, Request, RateException
+from RateLimiter2       import RateLimiter, Request
 from libs.ec2_utils     import get_stack
 
 from db.mongodb.MongoRateLimiterLogCollection import MongoRateLimiterLogCollection
