@@ -37,9 +37,19 @@
                 url         : "/settings/alerts/update", 
                 data        : settings
             }).done(function () {
-                alert("success");
+                $("#status")
+                    .text("Changes saved!")
+                    .removeClass("error")
+                    .show()
+                    .delay(5000)
+                    .fadeOut(500);
             }).fail(function() {
-                alert("Error updating settings. We've been notified of the error; please try again later. And sorry about that!!");
+                $("#status")
+                    .text("Error saving changes (Please try again later)")
+                    .addClass("error")
+                    .show()
+                    .delay(5000)
+                    .fadeOut(500);
             });
             
             return false;
