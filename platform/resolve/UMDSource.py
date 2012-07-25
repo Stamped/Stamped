@@ -51,7 +51,7 @@ class UMDTrack(ResolverMediaItem):
 
 class UMDAlbum(ResolverMediaCollection):
     def __init__(self, data):
-        ResolverMediaItem.__init__(self, types=['album'])
+        ResolverMediaCollection.__init__(self, types=['album'])
         self.__data = data
 
     @lazyProperty

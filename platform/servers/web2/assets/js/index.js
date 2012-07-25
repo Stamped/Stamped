@@ -540,47 +540,45 @@
             return false;
         });*/
         
-        $main.on("click", ".lightbox-video", function(event) {
-            event.preventDefault();
-            
-            if (!!$.browser.msie) {
-                // Sadly, Fancybox Youtube videos and IE are not friends...
-                return true;
-            }
-            
-            $.fancybox({
-                'padding'       : 0,
-                'autoScale'     : false, 
+        // Sadly, Fancybox Youtube videos and IE are not friends...
+        if (!$.browser.msie) {
+            $main.on("click", ".lightbox-video", function(event) {
+                event.preventDefault();
                 
-                'transitionIn'  : 'none', 
-                'transitionOut' : 'none', 
+                $.fancybox({
+                    'padding'       : 0,
+                    'autoScale'     : false, 
+                    
+                    'transitionIn'  : 'none', 
+                    'transitionOut' : 'none', 
+                    
+                    'openEffect'    : 'elastic', 
+                    'openEasing'    : 'easeOutBack', 
+                    'openSpeed'     : 300, 
+                    
+                    'closeEffect'   : 'elastic', 
+                    'closeEasing'   : 'easeInBack', 
+                    'closeSpeed'    : 300, 
+                    
+                    'tpl'           : {
+                        'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                        'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
+                    }, 
+                    
+                    'title'         : this.title, 
+                    'width'         : 800, // 680
+                    'height'        : 340 + 32, // 495
+                    'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
+                    'type'          : 'swf',
+                    'swf'           : {
+                        'wmode'             : 'transparent',
+                        'allowfullscreen'   : 'true'
+                    }
+                });
                 
-                'openEffect'    : 'elastic', 
-                'openEasing'    : 'easeOutBack', 
-                'openSpeed'     : 300, 
-                
-                'closeEffect'   : 'elastic', 
-                'closeEasing'   : 'easeInBack', 
-                'closeSpeed'    : 300, 
-                
-                'tpl'           : {
-                    'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
-                    'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
-                }, 
-                
-                'title'         : this.title, 
-                'width'         : 752, // 680
-                'height'        : 320, // 495
-                'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
-                'type'          : 'swf',
-                'swf'           : {
-                    'wmode'             : wmode,
-                    'allowfullscreen'   : 'true'
-                }
+                return false;
             });
-            
-            return false;
-        });
+        }
         
         $main.on("click", ".tastemaker", function(event) {
             event.preventDefault();
