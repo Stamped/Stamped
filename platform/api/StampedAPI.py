@@ -3762,7 +3762,7 @@ class StampedAPI(AStampedAPI):
             entityIds[item.entity_id] = None
             if item.stamps is not None:
                 for stampPreview in item.stamps:
-                    userIds[stampPreview.user_id] = None
+                    userIds[stampPreview.user.user_id] = None
             if item.todo_user_ids is not None:
                 for userId in item.todo_user_ids:
                     userIds[userId] = None
@@ -4412,7 +4412,7 @@ class StampedAPI(AStampedAPI):
                         stampPreview = StampPreview()
                         stampPreview.stamp_id = stamp.stamp_id
                         userPreview = UserMini()
-                        userPreview.user_id = stamp.user_id
+                        userPreview.user_id = stamp.user.user_id
                         stampPreview.user = userPreview
                         preview.append(stampPreview)
                     if len(preview) > 0:
