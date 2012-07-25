@@ -1772,83 +1772,87 @@ class StampedAPI(AStampedAPI):
 
         if category == 'book':
             entityIds = [
-                '4edfa29154533e754e00102e', # Steve Jobs
-                '4e57aca741ad85147e00153f', # A Game of Thrones
-                '4e57ac5841ad85147e000425', # The Hunger Games
-                '4fff6529967d717a14000041', # Bared to You
-                '4ecaf331fc905f14cc000005', # Fifty Shades of Grey
-                '4fe3342e9713961a5e000b5b', # Gone Girl
-                '4fff652b967d717a14000047', # Wild
-                '4fff652b967d717a1300006c', # Amateur
-                '4fff6554967d717a1400013b', # Criminal
+                '4edfa29154533e754e00102e', # Steve Jobs 
+                '4e57aca741ad85147e00153f', # A Game of Thrones 
+                '4e57ac5841ad85147e000425', # The Hunger Games 
+                '4fff6529967d717a14000041', # Bared to You 
+                '4ecaf331fc905f14cc000005', # Fifty Shades of Grey 
+                '4fe3342e9713961a5e000b5b', # Gone Girl 
+                '4fff652b967d717a14000047', # Wild 
+                '4fff652b967d717a1300006c', # Amateur 
+                '4fff6554967d717a1400013b', # Criminal 
                 '4fff6555967d717a14000143', # The Next Best Thing 
             ]
             groups.append(('Suggestions', entityIds))
 
         elif category == 'film':
             entityIds = [
-                '4e9cbd8cfe4a1d7bd2000070', # Game of Thrones
-                '4ffa194a64c7940d380005f5', # Ted
+
+                '500dd5fe7b81571916b7b258', # Dark Knight Rises 
+                '4e9cbd8cfe4a1d7bd2000070', # Game of Thrones 
+                '4ffa194a64c7940d380005f5', # Ted 
                 '4f835f34d56d835c6e000572', # 21 Jump Street 
                 '4e9fb96dfe4a1d1cbe0000f5', # Breaking Bad 
-                '4fff6510967d717a13000029', # Magic Mike
                 '4fff6507967d717a13000018', # The Amazing Spider Man 
                 '4f60dd2cd56d836764000ad6', # Moonrise Kingdom 
-                '4fff6519967d717a1300003a', # To Rome With Love
-                '4fff650c967d717a13000022', # Brave
-                '4eb1c60941ad8531d2000f0b', # Dexter
-                '4eb2159b41ad8531d2004a3e', # The Big Bang Theory
+                '4fff6519967d717a1300003a', # To Rome With Love 
+                '4fff650c967d717a13000022', # Brave 
+                '4eb1c60941ad8531d2000f0b', # Dexter 
+                '4eb2159b41ad8531d2004a3e', # The Big Bang Theory 
             ]
             groups.append(('Suggestions', entityIds))
 
         elif category == 'music':
             # Songs
             entityIds = [
-                '50009a5f64c7945730000556', # wide awake - katy perry
-                '4fe47ec964c79459850002ad', # call me maybe - carly rae jepsen
-                '50009aac64c794572c0000ac', # whistle - flo rida
-                '4f9f0b3c591fa478c30006ac', # Starships - Nikki minaj
+                '50009a5f64c7945730000556', # wide awake - katy perry 
+                '4fe47ec964c79459850002ad', # call me maybe - carly rae jepsen 
+                '50009aac64c794572c0000ac', # whistle - flo rida 
+                '500c08c653b48c17c1a8598c', # boyfriend - justin bieber 
+                '4f9f0b3c591fa478c30006ac', # Starships - Nikki minaj 
+                '4f16c9316e334372cf000f25', # Somebody that I used to know - gotye 
             ]
             groups.append(('Songs', entityIds))
 
             # Albums
             entityIds = [
-                '4faa7152591fa4535a0009c2', # Some nights - Fun
-                '4fb4fe40591fa462ec0000c5', # Believe - Justin Bieber
-                '4eb8716041ad850b9a000009', # Teenage Dream - Katy Perry
-                '4fe30253591fa41b4e0008f8', # Overexposed - Maroon 5
-                '4ed5418d4820c5450400079a', # Bon Iver - Bon Iver
+                '4faa7152591fa4535a0009c2', # Some nights - Fun 
+                '4fb4fe40591fa462ec0000c5', # Believe - Justin Bieber 
+                '500f52c47b815738449589ec', # Gossamer - Passion Pit 
+                '4fe30253591fa41b4e0008f8', # Overexposed - Maroon 5 
+                '4ed5418d4820c5450400079a', # Bon Iver - Bon Iver 
             ]
             groups.append(('Albums', entityIds))
 
             # Artists
             entityIds = [
-                '4eb3001b41ad855d53000ac8', # Katy Perry
-                '4ecb6893fc905f1561000f96', # Bon Iver
-                '4eb8700441ad850b6200004f', # Maroon 5
-                '4ee0233c54533e75460010e1', # Justin Bieber
-                '4eb300e941ad855d53000c36', # Kanye West
-                '4f593804d56d835b3e000543', # Fun
+                '4eb3001b41ad855d53000ac8', # Katy Perry 
+                '4ecb6893fc905f1561000f96', # Bon Iver 
+                '4eb8700441ad850b6200004f', # Maroon 5 
+                '4ee0233c54533e75460010e1', # Justin Bieber 
+                '4eb300e941ad855d53000c36', # Kanye West 
+                '4f593804d56d835b3e000543', # Fun 
             ]
             groups.append(('Artists', entityIds))
 
         elif category == 'app':
             # Free
             entityIds = [
-                '4edac94056f8685d87000bec', # Angry Birds
-                '4efa2c666e33431b71000cf2', # Instagram
-                '4edac5d1e32a3a08d400000b', # Temple Run
-                '4ed44c9482750f30b70002fd', # Pinterest
-                '4ed44c3f82750f30b7000196', # Spoitfy
-                '4f45e36c591fa43214000195', # Clear
+                '4edac94056f8685d87000bec', # Angry Birds 
+                '4efa2c666e33431b71000cf2', # Instagram 
+                '4edac5d1e32a3a08d400000b', # Temple Run 
+                '4ed44c9482750f30b70002fd', # Pinterest 
+                '4ed44c3f82750f30b7000196', # Spotify 
+                '4f45e36c591fa43214000195', # Clear 
             ]
             groups.append(('Free', entityIds))
 
             # Paid
             entityIds = [
-                '4ed480e456f86859c20023bd', # Words with Friends
-                '4fea8b5b64c794370b000222', # Temple Run: Brave
-                '4edad3d7e32a3a08d4000048', # The Sims 3
+                '4ed480e456f86859c20023bd', # Words with Friends 
+                '4fea8b5b64c794370b000222', # Temple Run: Brave 
+                '4f13f96f54533e5c89001a5c', # Instapaper 
+                '4edad3d7e32a3a08d4000048', # The Sims 3 
             ]
             groups.append(('Paid', entityIds))
 
