@@ -170,7 +170,6 @@ def formForEntity(entity_id, **hidden_params):
             except IndexError:
                 raise
         fields['itunes_url'] = itunes_url
-
     if entity.isType('artist') or entity.isType('album') or entity.isType('track'):
         rdio_url = ''
         rdio_id = entity.sources.rdio_id
@@ -239,6 +238,7 @@ def formForEntity(entity_id, **hidden_params):
 title:<input type="text" name="title" value="%s"/><br/>
 desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
  """ % (entity.title, entity.title, desc))
+    if entity.isType('artist') or entity.isType('album')
     for k,v in hidden_params.items():
         html.append("""
 <input type="hidden" name="%s" value="%s"/>
