@@ -541,7 +541,7 @@
         });*/
         
         // Sadly, Fancybox Youtube videos and IE are not friends...
-        if (!!$.browser.msie) {
+        if (!$.browser.msie) {
             $main.on("click", ".lightbox-video", function(event) {
                 event.preventDefault();
                 
