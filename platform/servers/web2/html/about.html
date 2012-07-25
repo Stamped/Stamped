@@ -40,7 +40,10 @@
 
 {% block main %}
     <div id="main" class="main-content">
+        {% block vertically_centered_pre %}
         <div class="vertically-centered">
+            {% endblock vertically_centered_pre %}
+            
             <div id="main-header" class="hidden-main-animating clearfix">
                 {% block main-header %}
                     <div class="contact">
@@ -104,7 +107,9 @@
                     </div>
                 {% endblock main-body %}
             </div>
+        {% block vertically_centered_post %}
         </div>
+        {% endblock vertically_centered_post %}
         
         <div class="post-main hidden-main-animating clearfix">
             {% block post-main %}

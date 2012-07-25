@@ -13,6 +13,8 @@
         // initialize globals and utils
         // ---------------------------------------------------------------------
         
+        // preloaded JS constants
+        var g_page                  = STAMPED_PRELOAD.page;
         
         // high-level containers
         var $window                 = $(window);
@@ -280,13 +282,15 @@
             var height = $vertically_centered.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
+            if (g_page === "legal") {
+                offset = 180;
+            }
             //console.log("height: " + height + "; offset: " + offset);
             
             if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
                 
                 update_stamped_logo_layout();
-                
             }
             
             return {

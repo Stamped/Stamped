@@ -616,5 +616,5 @@ def legal(request, **kwargs):
         'page'              : 'legal', 
         'title'             : 'Stamped - Legal', 
         'mobile'            : mobile, 
-    })
+    }, preload=[ 'page' ])
 
