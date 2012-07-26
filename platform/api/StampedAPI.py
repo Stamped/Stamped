@@ -2815,7 +2815,8 @@ class StampedAPI(AStampedAPI):
             }
 
         retry_count = 0
-        while retry_count < 5:
+        max_retries = 5
+        while True:
             try:
                 # Get stamp using stampId
                 stamp = self._stampDB.getStamp(stampId)
@@ -2834,7 +2835,13 @@ class StampedAPI(AStampedAPI):
                 break
             except (StampedInputError, StampedDocumentNotFoundError, urllib2.HTTPError):
                 pass
+
             retry_count += 1
+            if retry_count > max_retries:
+                msg = "Unable to connect to add stamp image after %d retries (url=%s, stamp=%s)" % \
+                    (max_retries, imageUrl, stampId)
+                logs.warning(msg)
+                raise 
             time.sleep(5)
 
 
