@@ -15,6 +15,7 @@ from utils                  import AttributeDict, getPythonConfigFile, Singleton
 from datetime               import datetime
 from pymongo.errors         import AutoReconnect, DuplicateKeyError
 from api.db.mongodb.MongoCollectionProxy   import MongoCollectionProxy
+from threading              import Lock
 
 
 LOG_COLLECTION_SIZE         = 1024*1024*1024    # 1 gb
@@ -25,13 +26,15 @@ class MongoDBConfig(Singleton):
         self.config = AttributeDict()
         self.database_name = 'stamped'
         self._connection = None
+        self._connection_lock = Lock()
         self._init()
-        
+
         def disconnect():
             ### TODO: Add disconnect from MongoDB
-            if self._connection is not None:
-                self._connection.disconnect()
-                self._connection = None
+            with self._connection_lock:
+                if self._connection is not None:
+                    self._connection.disconnect()
+                    self._connection = None
         
         atexit.register(disconnect)
     
@@ -77,45 +80,49 @@ class MongoDBConfig(Singleton):
     def connection(self):
         if self._connection:
             return self._connection
-        
-        reinitialized = False
-        max_delay = 16
-        delay = 1
-        
-        if utils.is_ec2():
-            replicaset = 'stamped-dev-01'
-        else:
-            replicaset = None
-        
-        while True:            
-            try:
-                hosts = ','.join(map(lambda x: "%s:%s" % (x[0], x[1]), self.hosts))
-                logs.info("Connecting to MongoDB: %s" % hosts)
-                
-                if replicaset:
-                    self._connection = pymongo.ReplicaSetConnection(hosts,
-                                                                    read_preference=pymongo.ReadPreference.SECONDARY, 
-                                                                    replicaset=replicaset,
-                                                                    use_greenlets=True)
-                else:
-                    self._connection = pymongo.Connection(hosts,
-                                                          read_preference=pymongo.ReadPreference.SECONDARY,
-                                                          use_greenlets=True)
-                
+
+        with self._connection_lock:
+            if self._connection:
                 return self._connection
-            except AutoReconnect as e:
-                if delay > max_delay:
-                    if reinitialized:
-                        raise
-                    
-                    # attempt to reinitialize our MongoDB configuration and retry
-                    self._init()
-                    delay = 1
-                    reinitialized = True
-                
-                logs.warning("Retrying to connect to host: %s (delay %d)" % (str(e), delay))
-                time.sleep(delay)
-                delay *= 2
+
+            reinitialized = False
+            max_delay = 16
+            delay = 1
+
+            if utils.is_ec2():
+                replicaset = 'stamped-dev-01'
+            else:
+                replicaset = None
+
+            while True:
+                try:
+                    hosts = ','.join(map(lambda x: "%s:%s" % (x[0], x[1]), self.hosts))
+                    logs.info("Connecting to MongoDB: %s" % hosts)
+
+                    if replicaset:
+                        self._connection = pymongo.ReplicaSetConnection(hosts,
+                                                                        read_preference=pymongo.ReadPreference.SECONDARY,
+                                                                        replicaset=replicaset,
+                                                                        use_greenlets=True)
+                    else:
+                        self._connection = pymongo.Connection(hosts,
+                                                              read_preference=pymongo.ReadPreference.SECONDARY,
+                                                              use_greenlets=True)
+
+                    return self._connection
+                except AutoReconnect as e:
+                    if delay > max_delay:
+                        if reinitialized:
+                            raise
+
+                        # attempt to reinitialize our MongoDB configuration and retry
+                        self._init()
+                        delay = 1
+                        reinitialized = True
+
+                    logs.warning("Retrying to connect to host: %s (delay %d)" % (str(e), delay))
+                    time.sleep(delay)
+                    delay *= 2
     
     def __str__(self):
         return self.__class__.__name__
@@ -127,13 +134,15 @@ class MongoLogDBConfig(Singleton):
         self.config = AttributeDict()
         self.database_name = 'stamped'
         self._connection = None
+        self._connection_lock = Lock()
         self._init()
         
         def disconnect():
             ### TODO: Add disconnect from MongoDB
-            if self._connection is not None:
-                self._connection.disconnect()
-                self._connection = None
+            with self._connection_lock:
+                if self._connection is not None:
+                    self._connection.disconnect()
+                    self._connection = None
         
         atexit.register(disconnect)
     
@@ -179,45 +188,49 @@ class MongoLogDBConfig(Singleton):
     def connection(self):
         if self._connection:
             return self._connection
-        
-        reinitialized = False
-        max_delay = 16
-        delay = 1
-        
-        if utils.is_ec2():
-            replicaset = 'stamped-dev-01'
-        else:
-            replicaset = None
-        
-        while True:            
-            try:
-                hosts = ','.join(map(lambda x: "%s:%s" % (x[0], x[1]), self.hosts))
-                logs.info("Connecting to MongoDB: %s" % hosts)
-                
-                if replicaset:
-                    self._connection = pymongo.ReplicaSetConnection(hosts,
-                                                                    read_preference=pymongo.ReadPreference.SECONDARY, 
-                                                                    replicaset=replicaset,
-                                                                    use_greenlets=True)
-                else:
-                    self._connection = pymongo.Connection(hosts,
-                                                          read_preference=pymongo.ReadPreference.SECONDARY,
-                                                          use_greenlets=True)
-                
+
+        with self._connection_lock:
+            if self.__connection:
                 return self._connection
-            except AutoReconnect as e:
-                if delay > max_delay:
-                    if reinitialized:
-                        raise
-                    
-                    # attempt to reinitialize our MongoDB configuration and retry
-                    self._init()
-                    delay = 1
-                    reinitialized = True
-                
-                logs.warning("Retrying to connect to host: %s (delay %d)" % (str(e), delay))
-                time.sleep(delay)
-                delay *= 2
+
+            reinitialized = False
+            max_delay = 16
+            delay = 1
+
+            if utils.is_ec2():
+                replicaset = 'stamped-dev-01'
+            else:
+                replicaset = None
+
+            while True:
+                try:
+                    hosts = ','.join(map(lambda x: "%s:%s" % (x[0], x[1]), self.hosts))
+                    logs.info("Connecting to MongoDB: %s" % hosts)
+
+                    if replicaset:
+                        self._connection = pymongo.ReplicaSetConnection(hosts,
+                                                                        read_preference=pymongo.ReadPreference.SECONDARY,
+                                                                        replicaset=replicaset,
+                                                                        use_greenlets=True)
+                    else:
+                        self._connection = pymongo.Connection(hosts,
+                                                              read_preference=pymongo.ReadPreference.SECONDARY,
+                                                              use_greenlets=True)
+
+                    return self._connection
+                except AutoReconnect as e:
+                    if delay > max_delay:
+                        if reinitialized:
+                            raise
+
+                        # attempt to reinitialize our MongoDB configuration and retry
+                        self._init()
+                        delay = 1
+                        reinitialized = True
+
+                    logs.warning("Retrying to connect to host: %s (delay %d)" % (str(e), delay))
+                    time.sleep(delay)
+                    delay *= 2
 
 
 class AMongoCollection(object):
