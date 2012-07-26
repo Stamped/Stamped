@@ -190,7 +190,7 @@ class MongoLogDBConfig(Singleton):
             return self._connection
 
         with self._connection_lock:
-            if self.__connection:
+            if self._connection:
                 return self._connection
 
             reinitialized = False
