@@ -47,7 +47,7 @@ def timestep():
     p90 = differences[int(len(differences) * 0.9)]
     p99 = differences[int(len(differences) * 0.99)]
     message = ('over period of %f seconds, mean difference was %f, median was %f, 90th %ile is %f, 99th %ile is %f' % (
-      times[-1]-times[0], median, p90, p99
+      times[-1]-times[0], mean_difference, median, p90, p99
     ))
     times[:] = []
     logs.warning(message)
