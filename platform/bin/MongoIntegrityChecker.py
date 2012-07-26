@@ -47,8 +47,8 @@ collections = [
     MongoTodoCollection,
 
     # Stats
-    MongoEntityStatsCollection,
     MongoStampStatsCollection, 
+    MongoEntityStatsCollection,
     MongoGuideCollection, 
 ]
 
