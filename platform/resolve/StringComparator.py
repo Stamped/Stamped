@@ -204,9 +204,6 @@ def titleComparison(title1, title2, simplificationFn, comparator=StringComparato
     return max(score1, score2)
 
 
-
-
-
 if __name__ == '__main__':
     import sys
     print StringComparator.get_ratio(sys.argv[1], sys.argv[2])

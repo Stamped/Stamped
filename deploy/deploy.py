@@ -67,8 +67,8 @@ def parseCommandLine():
 def main():
     # parse commandline
     (options, args) = parseCommandLine()
-    if 'mario' in args:
-        print('you are dealing with MARIO!!!!!!!!\n\nAre you sure? (yes or no)')
+    if 'bowser' in args:
+        print('you are dealing with BOWSER!!!!!!!!\n\nAre you sure? (yes or no)')
         line = sys.stdin.readline().strip()
         if line != 'yes':
             print("aborting!!!")

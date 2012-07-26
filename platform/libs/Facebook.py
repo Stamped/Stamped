@@ -26,8 +26,8 @@ ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvq
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
 
-USER_ID = '100004058552668'
-ACCESS_TOKEN = 'BAAEOIZBBUXisBAJCZANNyyFjiHvqFoa703ve6ZAkkoxSTX1L9Wy7WSQhd0VlIUbrXZBasGA7IxfrZBXm9ZCYHZB8sV9Vj9GoOLm3IXy5rBiCKEtDP5PBCSEZB3ZAXDnpTCoUtHVdJEThpQwZDZD'
+USER_ID = '100000717937121'
+ACCESS_TOKEN = 'BAAEOIZBBUXisBAJSM0MtiZCEZB1SB9vKxfDmg3XC0gOq82tHWTXtEq3UZBuuRouZBykcp6vLUQ05OmYcQDVy8QHsPZCtayky4ZC6lGG07l9Bw0ZCniWGjZCgiT8cIrutLXmdwdJGLoZBRGeJyx5L5OvkMM'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -80,7 +80,7 @@ class Facebook(object):
 
             logs.info('Facebook API Error: code: %s  message: %s' % (response.status, msg))
 
-            raise StampedThirdPartyError('Facebook API Error')
+            raise StampedThirdPartyError('Facebook API Error: %s' % msg)
 
             #logs.info("Retrying (%s)" % (num_retries))
             #time.sleep(0.5)
@@ -330,7 +330,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToOpenGraph'
+    methods = 'getUserPermissions'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
