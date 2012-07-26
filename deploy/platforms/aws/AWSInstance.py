@@ -263,7 +263,7 @@ class AWSInstance(AInstance):
             if 'db' in self.roles:
                 self._block_mongo()
             elif 'webServer' in self.roles:
-                self._validate_port(80, desc="server", timeout=100)
+                self._validate_port(80, desc="server", timeout=1000)
             elif 'apiServer' in self.roles:
                 self._validate_port(5000, desc="server", timeout=100)
             elif 'analytics' in self.roles:
