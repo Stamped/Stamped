@@ -501,6 +501,8 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                 'user.user_id': userId, 
                 'stats.stamp_num': stampNum,
             })
+            if document is None:
+                raise StampedDocumentNotFoundError("Unable to find document for user %s and stamp num %s" % (userId, stampNum))
             return self._convertFromMongo(document)
         except Exception:
             return None
