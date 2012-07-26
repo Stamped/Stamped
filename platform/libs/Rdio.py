@@ -43,6 +43,7 @@ try:
     from django.utils.encoding  import iri_to_uri
     from libs.Request           import service_request
     from APIKeys                import get_api_key
+    from errors                 import *
 
     try:
         import json
