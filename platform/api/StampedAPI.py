@@ -1767,16 +1767,16 @@ class StampedAPI(AStampedAPI):
 
         if category == 'book':
             entityIds = [
-                '4edfa29154533e754e00102e', # Steve Jobs 
+                '4e57b45941ad8514cb00013b', # Steve Jobs 
                 '4e57aca741ad85147e00153f', # A Game of Thrones 
                 '4e57ac5841ad85147e000425', # The Hunger Games 
                 '4fff6529967d717a14000041', # Bared to You 
                 '4ecaf331fc905f14cc000005', # Fifty Shades of Grey 
                 '4fe3342e9713961a5e000b5b', # Gone Girl 
-                '4fff652b967d717a14000047', # Wild 
-                '4fff652b967d717a1300006c', # Amateur 
-                '4fff6554967d717a1400013b', # Criminal 
-                '4fff6555967d717a14000143', # The Next Best Thing 
+                '5010b4a67b815764dee6d0b1', # Wild 
+                '5010b4cd7b815764e0e6d0b3', # Amateur 
+                '50103a4353b48c49b7d380e0', # Criminal 
+                '5010b4fd7b815764dee6d0ba', # The Next Best Thing 
             ]
             groups.append(('Suggestions', entityIds))
 
@@ -1800,10 +1800,11 @@ class StampedAPI(AStampedAPI):
         elif category == 'music':
             # Songs
             entityIds = [
-                '50009a5f64c7945730000556', # wide awake - katy perry 
-                '4fe47ec964c79459850002ad', # call me maybe - carly rae jepsen 
-                '50009aac64c794572c0000ac', # whistle - flo rida 
-                '500c08c653b48c17c1a8598c', # boyfriend - justin bieber 
+                '5002b96bd56d83100d00089b', # wide awake - katy perry 
+                '501046af7b8157477c65e488', # call me maybe - carly rae jepsen 
+                '5010466c7b8157477c65e47b', # whistle - flo rida 
+                '501041a253b48c49b7d38263', # sweet life - frank ocean
+                '501036e37b815745eabbd6d9', # boyfriend - justin bieber 
                 '4f9f0b3c591fa478c30006ac', # Starships - Nikki minaj 
                 '4f16c9316e334372cf000f25', # Somebody that I used to know - gotye 
             ]
