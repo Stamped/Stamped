@@ -45,8 +45,12 @@ class Twitter(object):
         logs.debug(url)
 
         # Send the http request
-        response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
-        result = json.loads(content)
+        try:
+            response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
+            result = json.loads(content)
+        except Exception:
+            logs.warning('Error connecting to Twitter')
+            raise StampedThirdPartyError('There was an error connecting to Twitter')
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
         return result
