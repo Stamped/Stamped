@@ -513,7 +513,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         logs.debug("Parsed request data")
         return schema
     except Exception as e:
-        msg = "Unable to parse form (%s)" % e
+        msg = u"Unable to parse form (%s)" % e
         logs.warning(msg)
         utils.printException()
         raise e

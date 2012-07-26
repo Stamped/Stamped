@@ -88,8 +88,29 @@ class S3ImageDB(AImageDB):
     def addResizedProfileImages(self, screen_name, image_url):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
-        
-        image    = utils.getWebImage(image_url, "profile")
+
+        # Retry getting web image multiple times in case of bad connection
+        num_retries = 0
+        max_retries = 5
+
+        while True:
+            try:
+                image = utils.getWebImage(image_url, "profile")
+            except urllib2.HTTPError as e:
+                logs.warning('Get web image exception: %s' % e)
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "Unable to connect to get web image after %d retries (%s)" % (max_retries, image_url)
+                    logs.warning(msg)
+                    raise 
+                
+                logs.info("Retrying (%s)" % (num_retries))
+                time.sleep(30)
+
+        if image.format not in ('JPEG', 'PNG'):
+            logs.warning("Cannot add a profile image of format '%s', only JPEG or PNG")
+            return
+
         sizes    = self.profileImageSizes
         max_size = self.profileImageMaxSize
 
@@ -135,6 +156,10 @@ class S3ImageDB(AImageDB):
     
     def addEntityImage(self, entityId, image):
         assert isinstance(image, Image.Image)
+
+        if image.format not in ('JPEG', 'PNG'):
+            logs.warning("Cannot add a entity image of format '%s', only JPEG or PNG" % image.format)
+            return
         
         prefix   = 'entities/%s' % entityId
         max_size = (960, 960)
@@ -259,9 +284,9 @@ class S3ImageDB(AImageDB):
         prefix, suffix = os.path.splitext(name)
         suffix = suffix.lower()
         
-        if suffix == '.jpg' or suffix == '.jpeg':
+        if image.format == 'JPG':
             return self._addJPG(prefix, image, optimize=jpeg_optimize, quality=jpeg_quality)
-        elif suffix == '.png':
+        elif image.format == 'PNG':
             return self._addPNG(prefix, image)
         else:
             raise Exception("unsupported image type: '" + suffix + "'")
@@ -269,7 +294,7 @@ class S3ImageDB(AImageDB):
     def _addJPG(self, name, image, optimize=True, quality=90):
         name    = "%s.jpg" % name
         out     = StringIO()
-        
+
         try:
             image.save(out, 'jpeg', optimize=optimize, quality=quality)
         except IOError as e:
@@ -277,7 +302,7 @@ class S3ImageDB(AImageDB):
             prev_max_block     = ImageFile.MAXBLOCK
             ImageFile.MAXBLOCK = (image.size[0] * image.size[1]) + 1
             out = StringIO()
-            
+
             image.save(out, 'jpeg', optimize=False)
             ImageFile.MAXBLOCK = prev_max_block
         

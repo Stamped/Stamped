@@ -120,50 +120,50 @@ def main():
             node = ''
             if 'node' in logs[i]:
                 node = '(%s)' % logs[i]['node']
-            print '%-10s %s %s %s' % (i+1, logs[i]['method'], logs[i]['path'], node)
+            print u'%-10s %s %s %s' % (i+1, logs[i]['method'], logs[i]['path'], node)
         else:
             print i+1
         
         if 'result' in logs[i] and logs[i]['result'] != '200':
-            print '%-10s %s ERROR' % ('', logs[i]['result'])
+            print u'%-10s %s ERROR' % ('', logs[i]['result'])
         print '-' * 40
         
         if 'request_id' in logs[i]:
-            print '%-10s %s' % ('ID:', logs[i]['request_id'])
+            print u'%-10s %s' % ('ID:', logs[i]['request_id'])
         
         if 'begin' in logs[i]:
             begin_utc = logs[i]['begin']
             begin_est = begin_utc - timedelta(hours=4)
-            print '%-10s %s' % ('Begin:', begin_est.strftime("%a %b %d %H:%M:%S.%f"))
+            print u'%-10s %s' % ('Begin:', begin_est.strftime("%a %b %d %H:%M:%S.%f"))
             
             if 'finish' in logs[i]:
                 duration = logs[i]['finish'] - begin_utc
-                print '%-10s %s' % ('Duration:', duration)
+                print u'%-10s %s' % ('Duration:', duration)
         
         if 'token' in logs[i]:
-            print '%-10s %s' % ('Token:', logs[i]['token'])
+            print u'%-10s %s' % ('Token:', logs[i]['token'])
         
         if 'client_id' in logs[i]:
-            print '%-10s %s' % ('Client:', logs[i]['client_id'])
+            print u'%-10s %s' % ('Client:', logs[i]['client_id'])
         
         if 'user_id' in logs[i]:
-            print '%-10s %s' % ('User:', logs[i]['user_id'])
+            print u'%-10s %s' % ('User:', logs[i]['user_id'])
         
         if 'headers' in logs[i] and options['show_headers']:
-            print '%-10s %s' % ('Headers:', logs[i]['headers'])
+            print u'%-10s %s' % ('Headers:', logs[i]['headers'])
         
         if 'form' in logs[i] and options['show_form']:
             j = json.dumps(logs[i]['form'], indent=4)
             prefix = 'Form:'
             for line in j.splitlines():
-                print '%-10s %s' % (prefix, line)
+                print u'%-10s %s' % (prefix, line)
                 prefix = ''
         
         if 'output' in logs[i] and options['show_output']:
             j = json.dumps(json.loads(logs[i]['output']), indent=4)
             prefix = 'Output:'
             for line in j.splitlines():
-                print '%-10s %s' % (prefix, line)
+                print u'%-10s %s' % (prefix, line)
                 prefix = ''
         
         if 'log' in logs[i]:
@@ -174,11 +174,11 @@ def main():
                         # TODO: eventually get rid of the if condition and always assume len() == 6.  Must wait for
                         # old logs to flush out
                         if len(log) == 6:
-                            print "{0:10} {1} | {2:25}:{3:>5} | {4:25} | {5}".format(prefix, log[0].strftime('%H:%M:%S'), log[2], int(log[3]), log[4], log[5])
+                            print u"{0:10} {1} | {2:25}:{3:>5} | {4:25} | {5}".format(prefix, log[0].strftime('%H:%M:%S'), log[2], int(log[3]), log[4], log[5])
                         elif len(log) == 5:
-                            print '%-10s %s | %-30s | %-5s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3], log[4])
+                            print u'%-10s %s | %-30s | %-5s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3], log[4])
                         else:
-                            print '%-10s %s | %-30s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3])
+                            print u'%-10s %s | %-30s | %s' % (prefix, log[0].strftime('%H:%M:%S'), log[2], log[3])
 
                     except:
                         utils.printException()

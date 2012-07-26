@@ -3176,11 +3176,6 @@ class StampedAPI(AStampedAPI):
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
 
-        # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
-            logs.warning('### Skipping Open Graph post because user not on whitelist')
-            return
-
         token = account.linked.facebook.token
         fb_user_id = account.linked.facebook.linked_user_id
         action = None
@@ -4778,7 +4773,7 @@ class StampedAPI(AStampedAPI):
         try:
             RawTodo = self._todoDB.getTodo(authUserId, entityId)
         except StampedUnavailableError:
-            raise StampedTodoNotFoundError('Invalid todo: %s' % RawTodo)
+            raise StampedTodoNotFoundError('Invalid todo: %s' % entityId)
 
         self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 

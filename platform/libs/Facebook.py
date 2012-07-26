@@ -80,7 +80,7 @@ class Facebook(object):
 
             logs.info('Facebook API Error: code: %s  message: %s' % (response.status, msg))
 
-            raise StampedThirdPartyError('Facebook API Error')
+            raise StampedThirdPartyError('Facebook API Error: %s' % msg)
 
             #logs.info("Retrying (%s)" % (num_retries))
             #time.sleep(0.5)
