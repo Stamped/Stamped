@@ -25,7 +25,7 @@ FAIL_LIMIT = 10
 FAIL_PERIOD = 60*3
 BLACKOUT_WAIT = 60*5
 EMAIL_WAIT = 60*5
-DEFAULT_TIMEOUT = 3
+DEFAULT_TIMEOUT = 5
 RL_HOST = 'localhost'
 RL_PORT = 18861
 
@@ -175,7 +175,8 @@ class RateLimiterState(object):
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-        if self.__conn is None:
+#        if self.__conn is None:
+        if True:
             config = {
                 'allow_pickle' : True,
                 'allow_all_attrs' : True,
@@ -185,9 +186,7 @@ class RateLimiterState(object):
             self.__conn = rpyc.connect(host, port, config=config)
 
         time.sleep(0)
-        logs.info('about to create async object')
         async_request = rpyc.async(self.__conn.root.request)
-        logs.info('about to make async request')
         asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
         logs.info('made async request, about to wait for return')
         asyncresult.set_expiry(timeout)
