@@ -53,6 +53,7 @@ def timestep():
     logs.warning(message)
 
 def start_timer():
+    import gevent
     def keep_time():
         while True:
             timestep()
