@@ -63,7 +63,7 @@ def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
     token        = schema.token
     
-    if True: # testing
+    if False: # testing
         user = travis_test.user
         
         settings = {

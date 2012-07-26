@@ -1767,16 +1767,16 @@ class StampedAPI(AStampedAPI):
 
         if category == 'book':
             entityIds = [
-                '4edfa29154533e754e00102e', # Steve Jobs 
+                '4e57b45941ad8514cb00013b', # Steve Jobs 
                 '4e57aca741ad85147e00153f', # A Game of Thrones 
                 '4e57ac5841ad85147e000425', # The Hunger Games 
                 '4fff6529967d717a14000041', # Bared to You 
                 '4ecaf331fc905f14cc000005', # Fifty Shades of Grey 
                 '4fe3342e9713961a5e000b5b', # Gone Girl 
-                '4fff652b967d717a14000047', # Wild 
-                '4fff652b967d717a1300006c', # Amateur 
-                '4fff6554967d717a1400013b', # Criminal 
-                '4fff6555967d717a14000143', # The Next Best Thing 
+                '5010b4a67b815764dee6d0b1', # Wild 
+                '5010b4cd7b815764e0e6d0b3', # Amateur 
+                '50103a4353b48c49b7d380e0', # Criminal 
+                '5010b4fd7b815764dee6d0ba', # The Next Best Thing 
             ]
             groups.append(('Suggestions', entityIds))
 
@@ -1800,10 +1800,11 @@ class StampedAPI(AStampedAPI):
         elif category == 'music':
             # Songs
             entityIds = [
-                '50009a5f64c7945730000556', # wide awake - katy perry 
-                '4fe47ec964c79459850002ad', # call me maybe - carly rae jepsen 
-                '50009aac64c794572c0000ac', # whistle - flo rida 
-                '500c08c653b48c17c1a8598c', # boyfriend - justin bieber 
+                '5002b96bd56d83100d00089b', # wide awake - katy perry 
+                '501046af7b8157477c65e488', # call me maybe - carly rae jepsen 
+                '5010466c7b8157477c65e47b', # whistle - flo rida 
+                '501041a253b48c49b7d38263', # sweet life - frank ocean
+                '501036e37b815745eabbd6d9', # boyfriend - justin bieber 
                 '4f9f0b3c591fa478c30006ac', # Starships - Nikki minaj 
                 '4f16c9316e334372cf000f25', # Somebody that I used to know - gotye 
             ]
@@ -2676,8 +2677,18 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addStampAsync(self, authUserId, stampId, imageUrl, stampExists=False):
-        stamp   = self._stampDB.getStamp(stampId)
-        entity  = self._entityDB.getEntity(stamp.entity.entity_id)
+        # TODO(geoff): refactor retry logic to a common place.
+        delay = 1
+        while True:
+            try:
+                stamp   = self._stampDB.getStamp(stampId)
+                entity  = self._entityDB.getEntity(stamp.entity.entity_id)
+                break
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
         if not stampExists:
             # Add references to the stamp in all relevant inboxes
@@ -3114,10 +3125,9 @@ class StampedAPI(AStampedAPI):
         #TODO: fill this with something other than the dummy url
         if stamp is not None:
             url = generateStampUrl(stamp)
-            #HACK for testing purposes
-            return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
+            return url
         if user is not None:
-            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
+            return "http://www.stamped.com/%s" % user.screen_name
 
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
         account = self.getAccount(authUserId)
@@ -3129,6 +3139,11 @@ class StampedAPI(AStampedAPI):
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
+
+        # for now, only post to open graph for mike and kevin
+        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
+            logs.warning('### Skipping Open Graph post because user not on whitelist')
+            return
 
         token = account.linked.facebook.token
         fb_user_id = account.linked.facebook.linked_user_id
@@ -4563,7 +4578,7 @@ class StampedAPI(AStampedAPI):
 
                 # Stamp
                 stamp = None 
-                if todo.stamp_id is not None:
+                if todo.stamp_id is not None and todo.stamp_id in stampIds:
                     stamp = stampIds[todo.stamp_id]
                     if stamp is None:
                         logs.warning("%s: Stamp not found (%s)" % (todo.todo_id, todo.stamp_id))
@@ -4573,7 +4588,7 @@ class StampedAPI(AStampedAPI):
                 if todo.todo_id in friendTodos and len(friendTodos[todo.todo_id]) > 0:
                     friends = []
                     for friendId in friendTodos[todo.todo_id]:
-                        if userIds[friendId] is None:
+                        if friendId not in userIds or userIds[friendId] is None:
                             logs.warning("%s: Friend preview not found (%s)" % (todo.todo_id, friendId))
                             continue
                         friends.append(userIds[friendId])
@@ -4684,35 +4699,27 @@ class StampedAPI(AStampedAPI):
         # Friends
         friendIds = self._friendshipDB.getFriends(authUserId)
 
-        # Stamp
-        if stampId is not None:
-            stamp = self._stampDB.getStamp(stampId)
-            stampOwner = stamp.user.user_id
-
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
 
         # Add activity to all of your friends who stamped the entity
-        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
-        recipientIds = [stamp.user.user_id for stamp in friendStamps]
-        if authUserId in recipientIds:
-            recipientIds.remove(authUserId)
+        stamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
 
+        # Stamp
         if stampId is not None:
-            if stampOwner != authUserId:
-                recipientIds.append(stampOwner)
-        # get rid of duplicate entries
-        recipientIds = list(set(recipientIds))
+            try:
+                stamps.append(self._stampDB.getStamp(stampId))
+            except StampedUnavailableError:
+                logs.warning("Could not find stamp %s" % stampId)
 
-        ### TODO: Verify user isn't being blocked
-        if not previouslyTodoed and len(recipientIds) > 0:
-            self._addTodoActivity(authUserId, recipientIds, entityId)
+        for stamp in stamps:
 
-        # Update stamp stats
-        if stampId is not None:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
-        for friendStamp in friendStamps:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
+            # Send activity
+            if authUserId != stamp.user.user_id and not previouslyTodoed:
+                self._addTodoActivity(authUserId, [stamp.user.user_id], entityId, stamp.stamp_id)
+
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
         # for now, we only post to OpenGraph if the todo was created off of a stamp
@@ -4825,12 +4832,13 @@ class StampedAPI(AStampedAPI):
                                           groupRange = timedelta(days=1),
                                           benefit = benefit)
 
-    def _addTodoActivity(self, userId, recipientIds, entityId):
+    def _addTodoActivity(self, userId, recipientIds, entityId, stampId):
         objects = ActivityObjectIds()
         objects.entity_ids = [ entityId ]
+        objects.stamp_ids = [ stampId ]
         self._addActivity('todo', userId, objects,
-                                          recipientIds = recipientIds,
-                                          requireRecipient = True,
+                                          recipientIds=recipientIds,
+                                          requireRecipient=True,
                                           group=True,
                                           groupRange=timedelta(days=1))
 

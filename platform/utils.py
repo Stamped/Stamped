@@ -593,7 +593,7 @@ def is_ec2():
 def getDomain():
     if is_ec2():
         if libs.ec2_utils.is_prod_stack():
-            return "https://api.stamped.com/v1/"
+            return "https://api1.stamped.com/v1/"
         return "https://dev.stamped.com/v1/"
     return "localhost:18000/v1/"
 
@@ -1095,16 +1095,19 @@ def getImage(data):
 
 def getWebImage(url, desc=None):
     try:
-        memcached = libs.Memcache.globalMemcache()
+        memcached = None
         
         try:
+            memcached = libs.Memcache.globalMemcache()
             data = memcached.get(str(url))
-        except KeyError:
+        except Exception as e:
+            logs.warning("Unable to get data from cache: %s" % e)
             data = None 
         
         if data is None:
             data = getFile(url)
-            memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
+            if memcached is not None:
+                memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
     except urllib2.HTTPError:
         desc = ("%s " % desc if desc is not None else "")
         logs.warning("unable to download %simage from '%s'" % (url, desc))
