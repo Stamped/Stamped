@@ -49,11 +49,15 @@ class TitleUtilsTest(AStampedTestCase):
     def test_clean_track_title(self):
         self.assertEqual(cleanTrackTitle("Call Me Maybe - single"), "Call Me Maybe")
         self.assertEqual(cleanTrackTitle("Call Me Maybe: digital remastered"), "Call Me Maybe")
+        self.assertEqual(cleanTrackTitle("Blah -- Featuring Geoff Liu"), "Blah")
+        self.assertEqual(cleanTrackTitle("Blah Featuring Geoff Liu"), "Blah Featuring Geoff Liu")
 
     def __check_quality_tests_applied(self, title, query, testFn, score):
         mockResolver = Mock()
         mockResolver.name = title
         mockResolver.raw_name = title
+        mockResolver.artists = []
+        mockResolver.authors = []
         mockResult = Mock()
         mockResult.resolverObject = mockResolver
         mockResult.dataQuality = 1.0
