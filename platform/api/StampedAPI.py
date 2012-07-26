@@ -4778,7 +4778,7 @@ class StampedAPI(AStampedAPI):
         try:
             RawTodo = self._todoDB.getTodo(authUserId, entityId)
         except StampedUnavailableError:
-            raise StampedTodoNotFoundError('Invalid todo: %s' % RawTodo)
+            raise StampedTodoNotFoundError('Invalid todo: %s' % entityId)
 
         self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
