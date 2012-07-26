@@ -4699,35 +4699,27 @@ class StampedAPI(AStampedAPI):
         # Friends
         friendIds = self._friendshipDB.getFriends(authUserId)
 
-        # Stamp
-        if stampId is not None:
-            stamp = self._stampDB.getStamp(stampId)
-            stampOwner = stamp.user.user_id
-
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
 
         # Add activity to all of your friends who stamped the entity
-        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
-        recipientIds = [stamp.user.user_id for stamp in friendStamps]
-        if authUserId in recipientIds:
-            recipientIds.remove(authUserId)
+        stamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
 
+        # Stamp
         if stampId is not None:
-            if stampOwner != authUserId:
-                recipientIds.append(stampOwner)
-        # get rid of duplicate entries
-        recipientIds = list(set(recipientIds))
+            try:
+                stamps.append(self._stampDB.getStamp(stampId))
+            except StampedUnavailableError:
+                logs.warning("Could not find stamp %s" % stampId)
 
-        ### TODO: Verify user isn't being blocked
-        if not previouslyTodoed and len(recipientIds) > 0:
-            self._addTodoActivity(authUserId, recipientIds, entityId)
+        for stamp in stamps:
 
-        # Update stamp stats
-        if stampId is not None:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
-        for friendStamp in friendStamps:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
+            # Send activity
+            if authUserId != stamp.user.user_id and not previouslyTodoed:
+                self._addTodoActivity(authUserId, [stamp.user.user_id], entityId, stamp.stamp_id)
+
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
         # for now, we only post to OpenGraph if the todo was created off of a stamp
@@ -4840,12 +4832,13 @@ class StampedAPI(AStampedAPI):
                                           groupRange = timedelta(days=1),
                                           benefit = benefit)
 
-    def _addTodoActivity(self, userId, recipientIds, entityId):
+    def _addTodoActivity(self, userId, recipientIds, entityId, stampId):
         objects = ActivityObjectIds()
         objects.entity_ids = [ entityId ]
+        objects.stamp_ids = [ stampId ]
         self._addActivity('todo', userId, objects,
-                                          recipientIds = recipientIds,
-                                          requireRecipient = True,
+                                          recipientIds=recipientIds,
+                                          requireRecipient=True,
                                           group=True,
                                           groupRange=timedelta(days=1))
 
