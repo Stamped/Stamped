@@ -399,7 +399,7 @@ def download_app(request, schema, **kwargs):
 def download(request, **kwargs):
     return HttpResponseRedirect(settings.STAMPED_DOWNLOAD_APP_LINK)
 
-@stamped_view(schema=HTTPIndexSchema)
+@stamped_view(schema=HTTPIndexSchema, ignore_extra_params=True)
 def index(request, schema, **kwargs):
     tastemakers = [
         {
