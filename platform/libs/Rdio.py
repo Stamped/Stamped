@@ -104,6 +104,8 @@ class Rdio(object):
         }
         response, content = service_request('rdio', 'POST', 'http://api.rdio.com/1/',
                                             header=headers, body=body, priority=priority, timeout=timeout)
+        if response.status >= 400:
+            raise StampedThirdPartyError('Rdio API Error:  Status: %s  Content: %s' % (response.status, content))
         return json.loads(content)
 
     def userMethod(self, token, token_secret, method, **kwargs):
