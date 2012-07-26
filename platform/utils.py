@@ -593,7 +593,7 @@ def is_ec2():
 def getDomain():
     if is_ec2():
         if libs.ec2_utils.is_prod_stack():
-            return "https://api.stamped.com/v1/"
+            return "https://api1.stamped.com/v1/"
         return "https://dev.stamped.com/v1/"
     return "localhost:18000/v1/"
 
