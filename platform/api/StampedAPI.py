@@ -950,11 +950,6 @@ class StampedAPI(AStampedAPI):
     def _getOpenGraphShareSettings(self, authUserId):
         account = self.getAccount(authUserId)
 
-        # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
-            logs.warning('### Skipping Open Graph post because user not on whitelist')
-            return
-
         if account.linked is None or\
            account.linked.facebook is None or\
            account.linked.facebook.share_settings is None or\
