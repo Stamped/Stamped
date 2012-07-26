@@ -37,7 +37,7 @@ logs.info('BROKER_URL: %s' % BROKER_URL)
 CELERYD_POOL = 'gevent'
 
 if utils.is_ec2():
-    CELERYD_CONCURRENCY  = multiprocessing.cpu_count() * 2 + 1
+    CELERYD_CONCURRENCY  = 15
 
 # use default concurrency; uncomment to use a single celeryd worker
 # (can be useful for debugging)
