@@ -412,6 +412,7 @@ body.app {
         position: relative;
         float: left;
         left: -8px;
+        top:  -5px;
         
         .desc {
             margin-left: .5em;
@@ -1849,5 +1850,18 @@ a.map-profile-link {
 
 .todo .user-preview-icon {
     background-position: -19px 0;
+}
+
+
+/* **************************************************************************
+                            WEBKIT-SPECIFIC RULES
+   ************************************************************************** */
+
+    
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+	.subtitle-line {
+		top: 5px;
+		margin-bottom: 8px;
+	}
 }
 

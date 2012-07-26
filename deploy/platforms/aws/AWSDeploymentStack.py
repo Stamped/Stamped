@@ -141,10 +141,10 @@ class AWSDeploymentStack(ADeploymentStack):
     def update(self, *args, **kwargs):
         force = (len(args) >= 1 and args[0] == 'force')
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
-
+        
         branch = kwargs.get('branch', None)
-
-        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s'" %\
+        
+        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s && cd /stamped/stamped/platform/servers/web2 && bin/restart.sh'" % \
               (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
         pp  = []
         separator = "-" * 80
