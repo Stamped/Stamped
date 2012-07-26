@@ -89,7 +89,10 @@ class Memcache(object):
 
     def __delitem__(self, key):
         if self._client is not None:
-            del(self._client[key])
+            try:
+                del(self._client[key])
+            except Exception:
+                pass
     
     def __contains__(self, key):
         if self._client is not None:
