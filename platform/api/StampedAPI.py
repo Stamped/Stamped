@@ -513,7 +513,16 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addAccountAsync(self, userId):
-        account = self._accountDB.getAccount(userId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                account = self._accountDB.getAccount(userId)
+                break
+            except StampedAccountNotFoundError:
+                pass
+            retry_count += 1
+            time.sleep(5)
+
 
         self._addWelcomeActivity(userId)
 
@@ -973,11 +982,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
-        account   = self._accountDB.getAccount(authUserId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                account   = self._accountDB.getAccount(authUserId)
 
-        # Only send alert once (when the user initially connects to Twitter)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
-            return False
+                # Only send alert once (when the user initially connects to Twitter)
+                if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
+                    return False
+                break
+            except AttributeError:
+                pass
+            retry_count += 1
+            time.sleep(5)
+
 
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
 #            return False
@@ -1002,12 +1020,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
-        account   = self._accountDB.getAccount(authUserId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                account   = self._accountDB.getAccount(authUserId)
 
-        # Only send alert once (when the user initially connects to Facebook)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
-            logs.info("Facebook alerts already sent")
-            return False
+                # Only send alert once (when the user initially connects to Facebook)
+                if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
+                    logs.info("Facebook alerts already sent")
+                    return False
+                break
+            except AttributeError:
+                pass
+            retry_count += 1
+            time.sleep(5)
 
         # Grab friend list from Facebook API
         fb_friends = self._getFacebookFriends(facebookToken)
@@ -2788,20 +2814,30 @@ class StampedAPI(AStampedAPI):
             'mobile' : (572, None),
             }
 
-        # Get stamp using stampId
-        stamp = self._stampDB.getStamp(stampId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                # Get stamp using stampId
+                stamp = self._stampDB.getStamp(stampId)
 
-        # Find the blurb using the contentId to generate an imageId
-        for i, c in enumerate(stamp.contents):
-            if c.content_id == contentId:
-                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
-                contentsKey = i
+                # Find the blurb using the contentId to generate an imageId
+                for i, c in enumerate(stamp.contents):
+                    if c.content_id == contentId:
+                        imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
+                        contentsKey = i
+                        break
+                else:
+                    raise StampedInputError('Could not find stamp blurb for image resizing')
+
+                # Generate image
+                sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
                 break
-        else:
-            raise StampedInputError('Could not find stamp blurb for image resizing')
+            except (StampedInputError, StampedDocumentNotFoundError, urllib2.HTTPError):
+                pass
+            retry_count += 1
+            time.sleep(5)
 
-        # Generate image
-        sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
+
         sizes.sort(key=lambda x: x.height, reverse=True)
         image = ImageSchema()
         image.sizes = sizes
@@ -3252,9 +3288,17 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addCommentAsync(self, authUserId, stampId, commentId):
-        comment = self._commentDB.getComment(commentId)
-        stamp   = self._stampDB.getStamp(stampId)
-        stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                comment = self._commentDB.getComment(commentId)
+                stamp   = self._stampDB.getStamp(stampId)
+                stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
+                break
+            except StampedDocumentNotFoundError:
+                pass
+            retry_count += 1
+            time.sleep(5)
 
         # Add activity for mentioned users
         mentionedUserIds = set()
