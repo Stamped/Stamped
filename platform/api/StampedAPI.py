@@ -4579,12 +4579,10 @@ class StampedAPI(AStampedAPI):
                 # Stamp
                 stamp = None 
                 if todo.stamp_id is not None:
-                    if todo.stamp_id not in stampIds:
+                    if todo.stamp_id not in stampIds or stampIds[todo.stamp_id] is None:
                         logs.warning("%s: Stamp not found (%s)" % (todo.todo_id, todo.stamp_id))
                     else:
                         stamp = stampIds[todo.stamp_id]
-                        if stamp is None:
-                            logs.warning("%s: Stamp not found (%s)" % (todo.todo_id, todo.stamp_id))
 
                 # Also to-do'd by
                 previews = None 
