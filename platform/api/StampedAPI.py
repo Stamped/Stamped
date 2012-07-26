@@ -2687,7 +2687,7 @@ class StampedAPI(AStampedAPI):
             except StampedDocumentNotFoundError:
                 if delay > 60:
                     raise
-                sleep(delay)
+                time.sleep(delay)
                 delay *= 2
 
         if not stampExists:
@@ -3139,6 +3139,11 @@ class StampedAPI(AStampedAPI):
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
+
+        # for now, only post to open graph for mike and kevin
+        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
+            logs.warning('### Skipping Open Graph post because user not on whitelist')
+            return
 
         token = account.linked.facebook.token
         fb_user_id = account.linked.facebook.linked_user_id
