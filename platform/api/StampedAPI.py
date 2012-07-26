@@ -4578,7 +4578,7 @@ class StampedAPI(AStampedAPI):
 
                 # Stamp
                 stamp = None 
-                if todo.stamp_id is not None:
+                if todo.stamp_id is not None and todo.stamp_id in stampIds:
                     stamp = stampIds[todo.stamp_id]
                     if stamp is None:
                         logs.warning("%s: Stamp not found (%s)" % (todo.todo_id, todo.stamp_id))
@@ -4588,7 +4588,7 @@ class StampedAPI(AStampedAPI):
                 if todo.todo_id in friendTodos and len(friendTodos[todo.todo_id]) > 0:
                     friends = []
                     for friendId in friendTodos[todo.todo_id]:
-                        if userIds[friendId] is None:
+                        if friendId not in userIds or userIds[friendId] is None:
                             logs.warning("%s: Friend preview not found (%s)" % (todo.todo_id, friendId))
                             continue
                         friends.append(userIds[friendId])

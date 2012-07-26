@@ -223,7 +223,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
     def getTodos(self, userId, timeSlice):
         query = { 'user_id' : userId }
 
-        return self._getTimeSlice(query, timeSlice)
+        return self._getTimeSlice(query, timeSlice, objType='todo')
 
     def getTodosFromStampId(self, stampId):
         documents = self._collection.find({ '$or': [{'source_stamp_ids' : stampId}, {'stamp.stamp_id': stampId}] }, fields=['user_id'])
