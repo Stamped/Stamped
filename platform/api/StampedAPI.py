@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -950,11 +950,6 @@ class StampedAPI(AStampedAPI):
     def _getOpenGraphShareSettings(self, authUserId):
         account = self.getAccount(authUserId)
 
-        # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
-            logs.warning('### Skipping Open Graph post because user not on whitelist')
-            return
-
         if account.linked is None or\
            account.linked.facebook is None or\
            account.linked.facebook.share_settings is None or\
@@ -1772,16 +1767,16 @@ class StampedAPI(AStampedAPI):
 
         if category == 'book':
             entityIds = [
-                '4edfa29154533e754e00102e', # Steve Jobs 
+                '4e57b45941ad8514cb00013b', # Steve Jobs 
                 '4e57aca741ad85147e00153f', # A Game of Thrones 
                 '4e57ac5841ad85147e000425', # The Hunger Games 
                 '4fff6529967d717a14000041', # Bared to You 
                 '4ecaf331fc905f14cc000005', # Fifty Shades of Grey 
                 '4fe3342e9713961a5e000b5b', # Gone Girl 
-                '4fff652b967d717a14000047', # Wild 
-                '4fff652b967d717a1300006c', # Amateur 
-                '4fff6554967d717a1400013b', # Criminal 
-                '4fff6555967d717a14000143', # The Next Best Thing 
+                '5010b4a67b815764dee6d0b1', # Wild 
+                '5010b4cd7b815764e0e6d0b3', # Amateur 
+                '50103a4353b48c49b7d380e0', # Criminal 
+                '5010b4fd7b815764dee6d0ba', # The Next Best Thing 
             ]
             groups.append(('Suggestions', entityIds))
 
@@ -1805,10 +1800,11 @@ class StampedAPI(AStampedAPI):
         elif category == 'music':
             # Songs
             entityIds = [
-                '50009a5f64c7945730000556', # wide awake - katy perry 
-                '4fe47ec964c79459850002ad', # call me maybe - carly rae jepsen 
-                '50009aac64c794572c0000ac', # whistle - flo rida 
-                '500c08c653b48c17c1a8598c', # boyfriend - justin bieber 
+                '5002b96bd56d83100d00089b', # wide awake - katy perry 
+                '501046af7b8157477c65e488', # call me maybe - carly rae jepsen 
+                '5010466c7b8157477c65e47b', # whistle - flo rida 
+                '501041a253b48c49b7d38263', # sweet life - frank ocean
+                '501036e37b815745eabbd6d9', # boyfriend - justin bieber 
                 '4f9f0b3c591fa478c30006ac', # Starships - Nikki minaj 
                 '4f16c9316e334372cf000f25', # Somebody that I used to know - gotye 
             ]
@@ -3129,10 +3125,9 @@ class StampedAPI(AStampedAPI):
         #TODO: fill this with something other than the dummy url
         if stamp is not None:
             url = generateStampUrl(stamp)
-            #HACK for testing purposes
-            return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
+            return url
         if user is not None:
-            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
+            return "http://www.stamped.com/%s" % user.screen_name
 
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
         account = self.getAccount(authUserId)
@@ -4037,6 +4032,7 @@ class StampedAPI(AStampedAPI):
 
         stampIds = self._collectionDB.getInboxStampIds(user.user_id)
         stampStats = self._stampStatsDB.getStatsForStamps(stampIds)
+        stampStats = filter(lambda x: x.entity_id is not None and x.user_id is not None, stampStats)
         entityIds = list(set(map(lambda x: x.entity_id, stampStats)))
         entityStats = self._entityStatsDB.getStatsForEntities(entityIds)
         todos = set(self._todoDB.getTodoEntityIds(user.user_id))

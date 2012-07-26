@@ -422,6 +422,7 @@ class StampedAuth(AStampedAuth):
         max_attempts = 5
         expire = 3920   # 1 hour
         expire = 86720  # 24 hours
+        expire = 607040  # 1 week
             
         while True:
             try:
