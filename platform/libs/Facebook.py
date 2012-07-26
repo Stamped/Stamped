@@ -26,7 +26,8 @@ ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvq
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
 
-ACCESS_TOKEN = 'BAAEOIZBBUXisBALGb3zgVTQZBc36bowtY1PXjnZClzDDxyXpLdFtZCEQXShkDX2bY3vHkf7WmJu3vIznZAfqJ3M3jUl7cO3Q1o3VJ9A1NXTES17GzqBFGmDEG2ZAsMtAOeMP8sQN8W2wZDZD'
+USER_ID = '100004058552668'
+ACCESS_TOKEN = 'BAAEOIZBBUXisBAJCZANNyyFjiHvqFoa703ve6ZAkkoxSTX1L9Wy7WSQhd0VlIUbrXZBasGA7IxfrZBXm9ZCYHZB8sV9Vj9GoOLm3IXy5rBiCKEtDP5PBCSEZB3ZAXDnpTCoUtHVdJEThpQwZDZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -106,6 +107,11 @@ class Facebook(object):
     def getUserInfo(self, access_token):
         path = 'me'
         return self._get(access_token, path)
+
+    def getUserPermissions(self, user_id, access_token):
+        path = '%s/permissions' % user_id
+        return self._get(access_token, path)
+
 
     def getFriendIds(self, access_token):
         path = 'me/friends'
@@ -307,6 +313,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     facebook = Facebook()
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
+    if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(user_id, access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
     if 'getFriendIds' in methods:           pprint(facebook.getFriendIds(access_token))
     if 'getFriendData' in methods:          pprint(facebook.getFriendData(access_token))
