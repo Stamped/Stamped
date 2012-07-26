@@ -142,7 +142,7 @@ class S3ImageDB(AImageDB):
         assert isinstance(image, Image.Image)
 
         if image.format not in ('JPEG', 'PNG'):
-            logs.warning("Cannot add a entity image of format '%s', only JPEG or PNG")
+            logs.warning("Cannot add a entity image of format '%s', only JPEG or PNG" % image.format)
             return
         
         prefix   = 'entities/%s' % entityId
