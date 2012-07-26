@@ -450,13 +450,13 @@ def parseRequest(schema, request, **kwargs):
         return schema
     
     except (KeyError, AttributeError) as e:
-        msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
+        msg = u"Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
         raise StampedHTTPError(400, "invalid_request")
         
     except Exception as e:
-        msg = "Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
+        msg = u"Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
         logs.warning(msg)
         logs.warning(utils.getFormattedException())
         raise e

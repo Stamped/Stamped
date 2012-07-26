@@ -1964,7 +1964,7 @@ class HTTPEntity(Schema):
                     stampPreviews.append(HTTPStampPreview().importStampPreview(item))
                 previews.stamps = stampPreviews
 
-            self.previews = previews 
+            self.previews = previews
 
         return self
 
@@ -2023,7 +2023,7 @@ class HTTPEntityNew(Schema):
                 try:
                     if entityMini is not None:
                         item = entityMini()
-                        entityMini.title = value
+                        item.title = value
                     else:
                         item = value
                     getattr(entity, field).append(item)

@@ -17,10 +17,13 @@ from api.Entity             import *
 
 class AMongoCollectionView(AMongoCollection):
     
-    def _getTimeSlice(self, query, timeSlice):
+    def _getTimeSlice(self, query, timeSlice, objType=None):
         # initialize params
         # -----------------
-        sort = [('timestamp.stamped', pymongo.DESCENDING)] 
+        if objType == 'todo':
+            sort = [('timestamp.created', pymongo.DESCENDING)]
+        else:
+            sort = [('timestamp.stamped', pymongo.DESCENDING)] 
         
         if timeSlice.limit is None:
             timeSlice.limit = 0
@@ -43,7 +46,10 @@ class AMongoCollectionView(AMongoCollection):
         # handle before / since filters
         # -----------------------------
         if timeSlice.before is not None:
-            query['timestamp.stamped'] = { '$lt': timeSlice.before }
+            if objType == 'todo':
+                query['timestamp.created'] = { '$lt': timeSlice.before }
+            else:
+                query['timestamp.stamped'] = { '$lt': timeSlice.before }
 
         # handle category / subcategory filters
         # -------------------------------------
@@ -66,10 +72,15 @@ class AMongoCollectionView(AMongoCollection):
 
         return map(self._convertFromMongo, results)
     
-    def _getSearchSlice(self, query, searchSlice):
+    def _getSearchSlice(self, query, searchSlice, objType=None):
         # initialize params
         # -----------------
         viewport    = (searchSlice.viewport and searchSlice.viewport.lower_right is not None)
+
+        if objType == 'todo':
+            sort = [('timestamp.created', pymongo.DESCENDING)]
+        else:
+            sort = [('timestamp.stamped', pymongo.DESCENDING)] 
         
         if searchSlice.limit is None:
             searchSlice.limit = 0
@@ -138,9 +149,7 @@ class AMongoCollectionView(AMongoCollection):
         
         # find, sort, and truncate results
         ### TODO: Change ranking
-        results = self._collection.find(query) \
-                      .sort([('timestamp.stamped', pymongo.DESCENDING)]) \
-                      .limit(searchSlice.limit)
+        results = self._collection.find(query).sort(sort).limit(searchSlice.limit)
 
         return map(self._convertFromMongo, results)
 
