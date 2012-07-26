@@ -12,17 +12,6 @@ __all__ = [
     'Resolver',
     'ResolverProxy',
     'demo',
-    'regexRemoval',
-    'simplify',
-    'format',
-    'trackSimplify',
-    'albumSimplify',
-    'artistSimplify',
-    'movieSimplify',
-    'bookSimplify',
-    'nameSimplify',
-    'videoGameSimplify', 
-    'stringComparison',
 ]
 
 import Globals
@@ -32,7 +21,6 @@ try:
     import utils, re, string, sys, traceback
     import logs, sys, math
     import unicodedata
-    # from EntityProxyContainer import EntityProxyContainer
     
     from resolve.BasicSource                import BasicSource
     from utils                      import lazyProperty
@@ -42,7 +30,6 @@ try:
     from libs.LibUtils              import parseDateString
     from datetime                   import datetime
     from difflib                    import SequenceMatcher
-    from time                       import time
     from resolve.ResolverObject             import *
     from resolve.EntityProxyComparator      import *
 
@@ -159,7 +146,7 @@ class Resolver(object):
             applyMovieTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
         elif subcat == 'book':
             augmentBookDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
-            applyBookTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
+            applyBookDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
         elif subcat == 'place':
             augmentPlaceDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
             applyPlaceTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
@@ -420,10 +407,6 @@ def demo(generic_source, default_title, subcategory=None):
             else:
                 print("Inversion failed! (low asymetric comparison?)")
 
-            # entityProxy = EntityProxyContainer(new_query)
-            # blank = entityProxy.buildEntity()
-
-            # pprint(blank)
             return results[0]
         print('\nFound results, but none are resolved')
     else:

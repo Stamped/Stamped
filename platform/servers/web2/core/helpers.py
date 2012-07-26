@@ -14,10 +14,11 @@ from errors                     import *
 
 from api.HTTPSchemas            import *
 from api.MongoStampedAPI        import globalMongoStampedAPI
+from libs.Memcache              import globalMemcache, generateKeyFromDictionary
 
 from servers.web2               import settings
 
-from django.http                import HttpResponse
+from django.http                import HttpResponse, Http404
 from django.shortcuts           import render_to_response
 from django.template            import RequestContext
 from django.utils.functional    import wraps
@@ -31,6 +32,9 @@ _baseurl = "https://dev.stamped.com/v1"
 STAMPED_SETTINGS = filter(lambda s: s.startswith('STAMPED_'), dir(settings))
 STAMPED_SETTINGS = dict(map(lambda s: (s, eval('settings.%s' % s)), STAMPED_SETTINGS))
 
+CLIENT_ID        = 'web-1.0.0'
+CLIENT_SECRET    = '9lm4520o4m3718m3nmpn10h71nlbmui5'
+
 # TODO (travis): move StampedAPIProxy to its own file!
 class StampedAPIProxy(object):
     
@@ -38,13 +42,51 @@ class StampedAPIProxy(object):
         self._prod = IS_PROD
         self._ec2  = utils.is_ec2()
         
-        self.api   = globalMongoStampedAPI()
+        self.api    = globalMongoStampedAPI()
+        self._cache = globalMemcache()
+    
+    def checkAccount(self, email):
+        if self._ec2:
+            user = self.api.checkAccount(email)
+            
+            return HTTPUser().importUser(user).dataExport()
+        else:
+            return self._handle_post("account/check.json", {
+                'login'         : email, 
+                'client_id'     : CLIENT_ID, 
+                'client_secret' : CLIENT_SECRET, 
+            })
+    
+    def getAccount(self, user_id):
+        if self._ec2:
+            return self.api.getAccount(user_id)
+        else:
+            raise NotImplementedError
+    
+    def updateAlerts(self, user_id, on, off):
+        if self._ec2:
+            return self.api.updateAlerts(user_id, on, off)
+        else:
+            raise NotImplementedError
     
     def getUser(self, params):
         if self._ec2:
-            user = self.api.getUser(HTTPUserId().dataImport(params), None)
+            key = str("web::getUser::%s" % generateKeyFromDictionary(params))
             
-            return HTTPUser().importUser(user).dataExport()
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            user   = self.api.getUser(HTTPUserId().dataImport(params), None)
+            result = HTTPUser().importUser(user).dataExport()
+            
+            try:
+                self._cache.set(key, result, time=600*3)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             return self._handle_get("users/show.json", params)
     
@@ -52,9 +94,22 @@ class StampedAPIProxy(object):
         params['scope'] = 'user'
         
         if self._ec2:
-            ts = HTTPTimeSlice.exportTimeSlice(HTTPTimeSlice().dataImport(params))
+            key = str("web::getUserStamps::%s" % generateKeyFromDictionary(params))
             
-            return self._transform_stamps(self.api.getStampCollection(ts, None))
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            ts     = HTTPTimeSlice.exportTimeSlice(HTTPTimeSlice().dataImport(params))
+            result = self._transform_stamps(self.api.getStampCollection(ts, None))
+            
+            try:
+                self._cache.set(key, result, time=600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             return self._handle_get("stamps/collection.json", params)
     
@@ -82,7 +137,23 @@ class StampedAPIProxy(object):
     
     def getFriends(self, user_id, limit=None):
         if self._ec2:
-            return self._transform_users(self.api.getEnrichedFriends(user_id, limit))
+            key = str("web::getFriends::user_id=%s" % user_id)
+            if limit is not None:
+                key = str("%s,%s" % (key, limit))
+            
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            result = self._transform_users(self.api.getEnrichedFriends(user_id, limit))
+            
+            try:
+                self._cache.set(key, result, time=600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             params = { 'user_id' : user_id }
             
@@ -90,7 +161,23 @@ class StampedAPIProxy(object):
     
     def getFollowers(self, user_id, limit=None):
         if self._ec2:
-            return self._transform_users(self.api.getEnrichedFollowers(user_id, limit))
+            key = str("web::getFollowers::user_id=%s" % user_id)
+            if limit is not None:
+                key = str("%s,%s" % (key, limit))
+            
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            result = self._transform_users(self.api.getEnrichedFollowers(user_id, limit))
+            
+            try:
+                self._cache.set(key, result, time=600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             params = { 'user_id' : user_id }
             
@@ -98,9 +185,24 @@ class StampedAPIProxy(object):
     
     def getLikes(self, stamp_id, limit=None):
         if self._ec2:
-            user_ids = self.api.getLikes(None, stamp_id)
+            key = str("web::getLikes::stamp_id=%s" % stamp_id)
+            if limit is not None:
+                key = str("%s,%s" % (key, limit))
             
-            return self._transform_users(self.api.getUsers(user_ids, None, None))
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            user_ids = self.api.getLikes(None, stamp_id)
+            result   = self._transform_users(self.api.getUsers(user_ids, None, None))
+            
+            try:
+                self._cache.set(key, result, time=600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             params = { 'stamp_id' : stamp_id }
             
@@ -108,9 +210,24 @@ class StampedAPIProxy(object):
     
     def getTodos(self, stamp_id, limit=None):
         if self._ec2:
-            user_ids = self.api.getStampTodos(None, stamp_id)
+            key = str("web::getTodos::stamp_id=%s" % stamp_id)
+            if limit is not None:
+                key = str("%s,%s" % (key, limit))
             
-            return self._transform_users(self.api.getUsers(user_ids, None, None))
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            user_ids = self.api.getStampTodos(None, stamp_id)
+            result   = self._transform_users(self.api.getUsers(user_ids, None, None))
+            
+            try:
+                self._cache.set(key, result, time=600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             params = { 'stamp_id' : stamp_id }
             
@@ -132,9 +249,22 @@ class StampedAPIProxy(object):
     
     def getStampFromUser(self, user_id, stamp_num):
         if self._ec2:
-            stamp = self.api.getStampFromUser(userId=user_id, stampNumber=stamp_num)
+            key = str("web::getStampFromUser::user_id=%s,stamp_num=%s" % (user_id, stamp_num))
             
-            return HTTPStamp().importStamp(stamp).dataExport()
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            stamp  = self.api.getStampFromUser(userId=user_id, stampNumber=stamp_num)
+            result = HTTPStamp().importStamp(stamp).dataExport()
+            
+            try:
+                self._cache.set(key, result, time=600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             return self._handle_get("stamps/show.json", {
                 'user_id'   : user_id, 
@@ -143,9 +273,22 @@ class StampedAPIProxy(object):
     
     def getEntity(self, entity_id):
         if self._ec2:
-            entity = self.api.getEntity(HTTPEntityIdSearchId().dataImport({'entity_id' : entity_id}), None)
+            key = str("web::getEntity::entity_id=%s" % entity_id)
             
-            return HTTPEntity().importEntity(entity, None).dataExport()
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            entity = self.api.getEntity(HTTPEntityIdSearchId().dataImport({'entity_id' : entity_id}), None)
+            result = HTTPEntity().importEntity(entity, None).dataExport()
+            
+            try:
+                self._cache.set(key, result, time=600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             return self._handle_get("entities/show.json", {
                 'entity_id' : entity_id
@@ -153,9 +296,22 @@ class StampedAPIProxy(object):
     
     def getEntityMenu(self, entity_id):
         if self._ec2:
-            menu = self.api.getMenu(entity_id)
+            key = str("web::getEntityMenu::entity_id=%s" % entity_id)
             
-            return HTTPMenu().importMenu(menu).dataExport()
+            try:
+                return self._cache[key]
+            except KeyError:
+                pass
+            
+            menu   = self.api.getMenu(entity_id)
+            result = HTTPMenu().importMenu(menu).dataExport()
+            
+            try:
+                self._cache.set(key, result, time=3600)
+            except Exception as e:
+                logs.warning("Unable to set cache: %s" % e)
+            
+            return result
         else:
             return self._handle_get("entities/menu.json", {
                 'entity_id' : entity_id
@@ -195,6 +351,8 @@ def stamped_view(schema=None,
         
         @wraps(fn)
         def _wrapper(request, *args, **kwargs):
+            import servers.web2.error.views as web_error
+            
             try:
                 logs.begin(saveLog=stampedAPIProxy.api._logsDB.saveLog,
                            saveStat=stampedAPIProxy.api._statsDB.addStat,
@@ -219,7 +377,7 @@ def stamped_view(schema=None,
                 logs.info("End request: Success")
                 
                 if utils.is_ec2():
-                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=10)).ctime()
+                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
                     response['Cache-Control'] = 'max-age=600'
                 else:
                     # disable caching for local development / debugging
@@ -232,17 +390,24 @@ def stamped_view(schema=None,
                 logs.warning("%s Error: %s" % (e.code, e))
                 logs.warning(utils.getFormattedException())
                 
-                response = HttpResponse("%s" % e, status=e.code)
-                logs.error(response.status_code)
-                return response
+                if e.code == 404:
+                    return web_error.error_404(request)
+                elif e.code >= 500:
+                    return web_error.error_500(request)
+                
+                raise # invoke django's default 500 handler
+                #response = HttpResponse("%s" % e, status=e.code)
+                #logs.error(response.status_code)
+                #return response
             
             except StampedHTTPError as e:
                 logs.warning("%s Error: %s" % (e.code, e.msg))
                 logs.warning(utils.getFormattedException())
                 
-                response = HttpResponse(e.msg, status=e.code)
-                logs.error(response.status_code)
-                return response
+                raise # invoke django's default 500 handler
+                #response = HttpResponse(e.msg, status=e.code)
+                #logs.error(response.status_code)
+                #return response
             
             except StampedAuthError as e:
                 logs.warning("401 Error: %s" % (e.msg))
@@ -288,18 +453,21 @@ def stamped_view(schema=None,
                 logs.warning("404 Error: %s" % (e.msg))
                 logs.warning(utils.getFormattedException())
                 
-                response = HttpResponse("not_found", status=404)
-                logs.error(response.status_code)
-                return response
+                return web_error.error_404(request)
+                
+                #response = HttpResponse("not_found", status=404)
+                #logs.error(response.status_code)
+                #return response
             
             except Exception as e:
                 logs.warning("500 Error: %s" % e)
                 logs.warning(utils.getFormattedException())
                 utils.printException()
                 
-                response = HttpResponse("internal server error", status=500)
-                logs.error(response.status_code)
-                return response
+                logs.error(500)
+                raise # invoke django's default 500 handler
+                #response = HttpResponse("internal server error", status=500)
+                #return response
             
             finally:
                 try:
@@ -487,4 +655,41 @@ def transform_output(value, **kwargs):
     
     logs.output(output_json)
     return output
+
+def convert_stamp(stamp):
+    for i in xrange(len(stamp['contents'])):
+        content = stamp['contents'][i]
+        if 'blurb_references' in content and 'blurb' in content:
+            content['blurb'] = convert_blurb(content['blurb'], content['blurb_references'])
+    
+    return stamp
+
+def convert_blurb(blurb, references=None):
+    prevIndex = 0
+    result = []
+    
+    if references is not None:
+        for reference in references:
+            bgn = reference['indices'][0]
+            end = reference['indices'][1]
+            
+            # Append previous section
+            result.append(blurb[prevIndex:bgn]) 
+            
+            # Build this section
+            if reference['action']['type'] == 'link':
+                result.append("<a href='%s'>%s</a>" % (reference['action']['sources'][0]['link'], blurb[bgn:end]))
+            elif reference['action']['type'] == 'stamped_view_screen_name':
+                result.append("<class='mention'>%s</class>" % (blurb[bgn:end]))
+            
+            prevIndex = end
+    
+    if len(blurb) > prevIndex:
+        result.append(blurb[prevIndex:])
+    
+    result = ''.join(result)
+    result = result.replace('\n', '<br>')
+    result = result.replace('  ', '&nbsp;&nbsp;')
+    
+    return result
 

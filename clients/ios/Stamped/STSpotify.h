@@ -8,10 +8,11 @@
 
 #import <Foundation/Foundation.h>
 #import "STCancellation.h"
+#import "STActionDelegate.h"
 
 extern NSString* const STSpotifyTrackEndedNotification;
 
-@interface STSpotify : NSObject
+@interface STSpotify : NSObject <STActionDelegate>
 
 + (STSpotify*)sharedInstance;
 
@@ -20,6 +21,8 @@ extern NSString* const STSpotifyTrackEndedNotification;
 - (STCancellation*)loginWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
 
 - (STCancellation*)logoutWithCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block;
+
+- (void)addToPlaylistWithTrackURI:(NSString*)trackURI;
 
 @property (nonatomic, readonly, assign) BOOL loggedIn;
 

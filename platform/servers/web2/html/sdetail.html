@@ -49,7 +49,7 @@
                             
                             {% for content in stamp.contents %}
                                 {% if content.blurb and content.blurb|length > 0 %}
-                                    <p class="normal_blurb">{{content.blurb}}</p>
+                                    <p class="normal_blurb">{{content.blurb|safe}}</p>
                                 {% endif %}
                             {% endfor %}
                             
@@ -79,7 +79,7 @@
                             </div>
                         </div>
                         
-                        {% with credits=stamp.previews.credits %}
+                        {% with credits=stamp.credits %}
                             {% if credits and credits|length > 0 %}
                                 <p class="credits">
                                     <img class="stamp_0" src="http://static.stamped.com/logos/{{ credits.0.user.color_primary }}-{{ credits.0.user.color_secondary }}-credit-18x18.png" /><img class="stamp_1" src="http://static.stamped.com/logos/{{ stamp.user.color_primary }}-{{ stamp.user.color_secondary }}-credit-18x18.png" />
@@ -156,7 +156,9 @@
             {% handlebars_template "close-button" %}
         </div>
         
-        {% handlebars_template "stamp-image-sdetail" stamp %}
+        <div class="stamp-image-sdetail">
+            {% handlebars_template "stamp-image-sdetail" stamp %}
+        </div>
         
         <div class='entity-data'>
             <div class='entity-data-header'>
@@ -173,7 +175,56 @@
                 {% for a in entity.actions %}
                     {% with action=a.action %}
                         {% if action.type != "playlist" %}
-                            {% if action.type != "listen" or action.sources|length > 1 or action.sources.0.source != "rdio" %}
+                            {% if action.type == "queue" %}
+                                <!-- TODO: support Netflix add to instant queue -->
+                            {% else %}{% if action.type == "listen" %}
+                                {% for source in action.sources %}
+                                    {% if source.source == "spotify" %}
+                                        <a class='action-link' href="{{source.completion_data.source_id}}">
+                                            <div class="action action-{{action.type}} clearfix">
+                                                <div class='lhs'>
+                                                    <div class='action-icon action-icon-{{action.type}}'></div>
+                                                    <div class='action-name'>Open in Spotify</div>
+                                                </div>
+                                                
+                                                <div class="rhs">
+                                                    <div class="source source-{{source.source}}" {% if source.completion_data.source_id %} data-source-id="{{source.completion_data.source_id}}" {% endif %} {% if source.source_data.preview_url %} data-source-preview-url="{{source.source_data.preview_url}}" {% endif %}>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {% else %}{% if source.source == "itunes" %}
+                                        {% if stamp.entity.subcategory == "song" %}
+                                            <a class='action-link' {% if source.source_data.preview_url %} href="{{source.source_data.preview_url}}"{% else %}href=""{% endif %}>
+                                                <div class="action action-{{action.type}} stopped clearfix">
+                                                    <div class='lhs'>
+                                                        <div class='stopped'>
+                                                            <div class='action-icon action-icon-{{action.type}}'></div>
+                                                            <div class='action-name'>Play preview via iTunes</div>
+                                                        </div>
+                                                        
+                                                        <div class='playing'>
+                                                            <div class='action-icon action-icon-playing'></div>
+                                                            <div class='action-name'>Pause iTunes preview</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="rhs">
+                                                        <div class="source source-{{source.source}}" {% if source.completion_data.source_id %} data-source-id="{{source.completion_data.source_id}}" {% endif %} {% if source.source_data.preview_url %} data-source-preview-url="{{source.source_data.preview_url}}" {% endif %}>
+                                                        </div>
+                                                        
+                                                        <audio id="itunes-preview" src="{{source.source_data.preview_url}}" preload="auto" />
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        {% else %}{% if stamp.entity.subcategory == "album" %}
+                                        {% else %}{% if stamp.entity.subcategory == "artist" %}
+                                        {% endif %}{% endif %}{% endif %}
+                                    {% else %}{% if source.source == "rdio" %}
+                                        <!-- TODO: support proper Rdio playback and linking -->
+                                    {% endif %}{% endif %}{% endif %}
+                                {% endfor %}
+                            {% else %}
                                 {% if action.sources.0.link and action.sources|length == 1 %}
                                     <a class='action-link' href="{{action.sources.0.link}}">
                                 {% else %}
@@ -212,7 +263,7 @@
                                         {% endif %}
                                     </div>
                                 </a>
-                            {% endif %}
+                            {% endif %}{% endif %}
                         {% endif %}
                     {% endwith %}
                 {% endfor %}
@@ -250,9 +301,11 @@
                                     <a href="{{item.action.sources.0.link}}">
                                 {% endif %}
                                 
-                                {% if item.icon %}
+                                {% if item.name|lower == "category" %}
+                                    <span class="stamp-category-{{entity.category}}"><span class="stamp-subcategory-{{entity.subcategory}}"><span class="icon"></span></span></span>
+                                {% else %}{% if item.icon %}
                                     <img class='metadata-icon' src="{{item.icon}}" alt="{{item.value}}" />
-                                {% endif %}
+                                {% endif %}{% endif %}
                                 
                                 {{item.value}}
                                 
@@ -268,7 +321,25 @@
     </div>
     
     <div class="section section-social">
-        {% handlebars_template "social-sharing" %}
+        <div class='social-sharing'>
+            <p class='share'>
+                Share this stamp:
+            </p>
+            
+            <div class='share-buttons clearfix'>
+                <div class='share-button facebook'>
+                    <div class="fb-like" data-layout="button_count" data-href="{{stamp.url}}"></div>
+                </div>
+                
+                <div class='share-button twitter'>
+                    <a href="https://twitter.com/share" class="twitter-share-button" data-via="stampedapp" data-url="{{stamp.url}}" data-text='Check out this stamp of "{{entity.title}}." {{stamp.url}}'>Tweet</a>
+                </div>
+                
+                <div class='share-button google'>
+                    <g:plusone size="medium" href="{{stamp.url}}"></g:plusone>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

@@ -29,11 +29,24 @@ facebookUserExceptions = [
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPUserId,
                    exceptions=userExceptions)
-def show(request, authUserId, http_schema, **kwargs):
+def show(request, authUserId, http_schema, uri, **kwargs):
+    if authUserId is None:
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     user = stampedAPI.getUser(http_schema, authUserId)
     user = HTTPUser().importUser(user)
     
-    return transformOutput(user.dataExport())
+    result = transformOutput(user.dataExport())
+
+    if authUserId is None:
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 @require_http_methods(["POST"])
@@ -85,7 +98,7 @@ def search(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPSuggestedUserRequest,
                    exceptions=userExceptions)
-def suggested(request, authUserId, http_schema, **kwargs):
+def suggested(request, authUserId, http_schema, uri, **kwargs):
     users = stampedAPI.getSuggestedUsers(authUserId, limit=http_schema.limit, offset=http_schema.offset)
     output  = []
 
@@ -93,7 +106,9 @@ def suggested(request, authUserId, http_schema, **kwargs):
         suggested = HTTPSuggestedUser().importUser(user).dataExport()
         output.append(suggested)
 
-    return transformOutput(output)
+    result = transformOutput(output)
+
+    return result
 
 
 @require_http_methods(["GET"])

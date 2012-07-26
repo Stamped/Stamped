@@ -31,6 +31,8 @@
         var stamps_  = {};
         var markers  = [];
         var def_zoom = 12;
+        var map      = null;
+        var init_marker_clusterer = null;
         
         // build dict of stamp_id => stamp for fast lookups
         $.each(stamps, function(i, stamp) {
@@ -46,7 +48,7 @@
         };
         
         if (!lite) {
-            options = {
+            var options = {
                 mapTypeId           : google.maps.MapTypeId.ROADMAP, 
                 center              : center, 
                 zoom                : 8, 
@@ -66,7 +68,7 @@
                 }
             };
             
-            var map = new google.maps.Map(canvas, options);
+            map = new google.maps.Map(canvas, options);
             
             var update_map_center = function(pos) {
                 // TODO: only use user_pos or update center on resize if we're still at the default center
@@ -109,7 +111,7 @@
                 alignBottom: true
             });
             
-            var init_marker_clusterer = function() {
+            init_marker_clusterer = function() {
                 if (!!marker_clusterer) {
                     return;
                 }
@@ -154,7 +156,7 @@
             };
             
             if (stamps.length > 0) {
-                var coords0     = (stamps[0]['entity']['coordinates']).split(",");
+                var coords0     = (stamps[0].entity.coordinates).split(",");
                 var lat0        = parseFloat(coords0[0]);
                 var lng0        = parseFloat(coords0[1]);
                 var pos0        = new google.maps.LatLng(lat0, lng0);
@@ -172,7 +174,7 @@
                 google.maps.event.addListener(map, 'click',         close_popup);
                 google.maps.event.addListener(map, 'zoom_changed',  close_popup);
                 
-                var partial_templates = {}
+                var partial_templates = {};
                 
                 $(".handlebars-template").each(function (i) {
                     var $this = $(this);
@@ -199,7 +201,7 @@
                     }
                     
                     if (!!multires_image) {
-                        for (image in multires_image.sizes) {
+                        for (var image in multires_image.sizes) {
                             if (image.width === size) {
                                 url  = image.url;
                                 okay = true;
@@ -208,8 +210,8 @@
                         }
                         
                         if (!okay) {
-                            for (image in multires_image.sizes) {
-                                url  = image.url;
+                            for (var image2 in multires_image.sizes) {
+                                url  = image2.url;
                                 okay = true;
                                 break;
                             }
@@ -217,7 +219,7 @@
                     }
                     
                     if (!okay) {
-                        console.debug("no image of size '" + size + "' for user '" + screen_name + "'");
+                        //console.debug("no image of size '" + size + "' for user '" + screen_name + "'");
                     }
                     
                     return new Handlebars.SafeString('<img alt="' + alt + '" src="' + url + '" />');
@@ -228,11 +230,11 @@
                 
                 // for each stamp, initialize a marker and add it to the map
                 $.each(stamps, function(i, stamp) {
-                    var coords  = (stamp['entity']['coordinates']).split(",");
+                    var coords  = (stamp.entity.coordinates).split(",");
                     var lat     = parseFloat(coords[0]);
                     var lng     = parseFloat(coords[1]);
                     var pos     = new google.maps.LatLng(lat, lng);
-                    var title   = stamp['entity']['title'];
+                    var title   = stamp.entity.title;
                     
                     var marker  = new google.maps.Marker({
                         position    : pos, 
@@ -282,18 +284,45 @@
                                 setTimeout(function() {
                                     var $s = $('.stamp-map-item');
                                     
-                                    if (!lite) {
-                                        $s.click(function(event) {
-                                            g_open_sdetail_click(event);
-                                        });
-                                    }
-                                    
-                                    $s.find('.stamp-map-item-close-button').click(function(event) {
+                                    $s.find('.close').click(function(event) {
                                         event.preventDefault();
                                         close_popup();
                                         
                                         return false;
                                     });
+                                    
+                                    if (!lite) {
+                                        $s.click(function(event) {
+                                            if ($(event.target).is("a.close")) {
+                                                return true;
+                                            }
+                                            
+                                            return g_open_sdetail_click(event);
+                                        });
+                                        
+                                        if (!!$.browser.msie) {
+                                            // fix for IE stamp-map-item clickability
+                                            $s.find(".sdetail").click(function(event) {
+                                                return g_open_sdetail_click(event);
+                                            });
+                                            
+                                            $s.find(".entity-header").click(function(event) {
+                                                return g_open_sdetail_click(event);
+                                            });
+                                            
+                                            $s.find(".content").click(function(event) {
+                                                event.target = $(this).parents(".stamp-map-item");
+                                                
+                                                return g_open_sdetail_click(event);
+                                            });
+                                            
+                                            $s.find("p").click(function(event) {
+                                                event.target = $(this).parents(".stamp-map-item");
+                                                
+                                                return g_open_sdetail_click(event);
+                                            });
+                                        }
+                                    }
                                     
                                     g_update_stamps($s);
                                 }, 150);
@@ -305,7 +334,7 @@
                         if (!!e) {
                             e.stop();
                         }
-                    }
+                    };
                     
                     stamp_map_popups[stamp.stamp_id] = open_popup;
                     google.maps.event.addListener(marker, 'click', open_popup);
@@ -313,10 +342,10 @@
             }
             
             var open_stamp_map_popup = function(stamp_id) {
-                console.debug("open_stamp_map_popup: " + stamp_id);
+                //console.debug("open_stamp_map_popup: " + stamp_id);
                 
                 if (!stamp_map_popups.hasOwnProperty(stamp_id)) {
-                    console.debug("ERROR: couldn't find stamp-list-view-item for stamp_id " + stamp_id);
+                    //console.debug("ERROR: couldn't find stamp-list-view-item for stamp_id " + stamp_id);
                     // TODO: better error reporting!
                     
                     return;
@@ -332,6 +361,7 @@
         // ---------------------------------------------------------------------
         
         
+        var $stamp_map_nav_layout   = $('.stamp-map-nav-layout');
         var $stamp_map_nav_wrapper  = $('.stamp-map-nav-wrapper');
         var $list                   = $stamp_map_nav_wrapper.find('.stamp-list-view');
         
@@ -423,7 +453,7 @@
                             }
                         });
                         
-                        if (max_pos !== null && max_size >= 4 && (depth == 0 || max_size > 10)) {
+                        if (max_pos !== null && max_size >= 4 && (depth === 0 || max_size > 10)) {
                             var max_cluster_bounds = new google.maps.LatLngBounds();
                             var total_dist  = 0.0;
                             var total_dist2 = 0.0;
@@ -454,7 +484,7 @@
                                 }
                             });
                             
-                            if (pts.length == 1) {
+                            if (pts.length === 1) {
                                 map.setCenter(pts[0]);
                             } else {
                                 //console.debug(pts.length + " vs " + max_size);
@@ -481,7 +511,7 @@
                                 
                                 init_clusterer(depth + 1);
                             }
-                        } else if (depth == 0 && max_size > 0) {
+                        } else if (depth === 0 && max_size > 0) {
                             set_temp_max_zoom(13);
                         }
                     };
@@ -505,6 +535,13 @@
                 });
                 
                 update_stamp_list_scrollbars();
+            }
+            
+            var layout_clamped = "layout-clamped";
+            
+            $stamp_map_nav_layout.removeClass(layout_clamped);
+            if ($stamp_map_nav_layout.offset().left < 0) {
+                $stamp_map_nav_layout.addClass(layout_clamped);
             }
         };
         
@@ -537,7 +574,7 @@
             
             if ($nav.hasClass(min_cls)) { // collapsing animation
                 $nav.parent().css({
-                    'pointer-events' : 'none', 
+                    'pointer-events' : 'none'
                 });
                 
                 $canvas.addClass("blur-none").removeClass("blur-nohover");
@@ -565,7 +602,7 @@
                     complete : function() {
                         update_stamp_list_scrollbars();
                     }
-                })
+                });
             }
             
             return false;
@@ -577,7 +614,7 @@
             var stamp_id = g_extract_data($elem, 'stamp-id-', null);
             
             if (stamp_id === null) {
-                console.debug("ERROR: no stamp_id for stamp-list-view-item: " + $elem);
+                //console.debug("ERROR: no stamp_id for stamp-list-view-item: " + $elem);
             }
             
             return stamp_id;
@@ -593,6 +630,7 @@
             if (stamp_id !== null) {
                 if (lite) {
                     var stamp = get_stamp(stamp_id);
+                    
                     if (!!stamp && !!stamp.url && parent.frames.length > 0) {
                         var url = stamp.url.replace('http://www.stamped.com', '');
                         
@@ -676,6 +714,23 @@
                     queue    : false
                 });
             };
+        } else {
+            var handle_lite_link = function(event) {
+                var url = $(this).attr("href");
+                
+                if (!!url && parent.frames.length > 0) {
+                    event.preventDefault();
+                    
+                    top.location = url;
+                    return false;
+                } else {
+                    return true;
+                }
+            };
+            
+            $(".profile-image-medium-ish").click(handle_lite_link);
+            $(".screen-name").click(handle_lite_link);
+            $(".user-logo-large").click(handle_lite_link);
         }
         
         
@@ -706,13 +761,13 @@
                                 var lng  = position.coords.longitude;
                                 user_pos = new google.maps.LatLng(lat, lng);
                                 
-                                console.debug("user_pos: " + user_pos);
+                                //console.debug("user_pos: " + user_pos);
                                 update_map_center(user_pos);
                             }
                             
                             finally_func();
                         }, function() {
-                            console.debug("ERROR: navigator.geolocation.getCurrentPosition failed!");
+                            //console.debug("ERROR: navigator.geolocation.getCurrentPosition failed!");
                             
                             finally_func();
                         });

@@ -17,13 +17,13 @@ try:
     import logs
     from libs.Spotify               import globalSpotify
     from copy                       import copy
-    from resolve.GenericSource              import GenericSource, multipleSource, listSource
+    from resolve.GenericSource      import GenericSource, multipleSource, listSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from pprint                     import pformat
     from gevent.pool                import Pool
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
     from search.ScoringUtils        import *
 except:
     report()
@@ -124,7 +124,7 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
         return cleanArtistTitle(rawName)
 
     def lookup_data(self):
-        return self.spotify.lookup(self.key, "albumdetail")['artist']
+        return self.spotify.lookup(self.key, "albumdetail", priority='low', timeout=MERGE_TIMEOUT)['artist']
 
     @lazyProperty
     def albums(self):
@@ -146,7 +146,7 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
         tracks = {}
         
         def lookupTrack(key):
-            result = self.spotify.lookup(key, 'trackdetail')
+            result = self.spotify.lookup(key, 'trackdetail', priority='low', timeout=MERGE_TIMEOUT)
             track_list = result['album']['tracks']
             
             for track in track_list:
@@ -190,7 +190,7 @@ class SpotifyAlbum(_SpotifyObject, ResolverMediaCollection):
         return cleanAlbumTitle(rawName)
 
     def lookup_data(self):
-        return self.spotify.lookup(self.key, 'trackdetail')['album']
+        return self.spotify.lookup(self.key, 'trackdetail', priority='low', timeout=MERGE_TIMEOUT)['album']
 
     @lazyProperty
     def artists(self):
@@ -235,7 +235,7 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
         return cleanTrackTitle(rawName)
 
     def lookup_data(self):
-        return self.spotify.lookup(self.key)['track']
+        return self.spotify.lookup(self.key, priority='low', timeout=MERGE_TIMEOUT)['track']
 
     @lazyProperty
     def artists(self):
@@ -306,7 +306,7 @@ class SpotifySource(GenericSource):
 
     def entityProxyFromKey(self, key, **kwargs):
         try:
-            item = self.__spotify.lookup(key)
+            item = self.__spotify.lookup(key, priority='low', timeout=MERGE_TIMEOUT)
             
             if item['info']['type'] == 'artist':
                 return SpotifyArtist(key)
@@ -342,7 +342,7 @@ class SpotifySource(GenericSource):
         else:
             raise ValueError("query and query_string cannot both be None")
         
-        tracks = self.__spotify.search('track',q=q)['tracks']
+        tracks = self.__spotify.search('track', q=q, timeout=MERGE_TIMEOUT)['tracks']
         return listSource(tracks, constructor=lambda x: SpotifyTrack(x['href'], data=x))
 
     def albumSource(self, query=None, query_string=None):
@@ -353,7 +353,7 @@ class SpotifySource(GenericSource):
         else:
             raise ValueError("query and query_string cannot both be None")
         
-        albums = self.__spotify.search('album',q=q)['albums']
+        albums = self.__spotify.search('album',q=q, timeout=MERGE_TIMEOUT)['albums']
         albums = [ entry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
         return listSource(albums, constructor=lambda x: SpotifyAlbum(x['href'], data=x))
 
@@ -366,7 +366,7 @@ class SpotifySource(GenericSource):
         else:
             raise ValueError("query and query_string cannot both be None")
         
-        artists = self.__spotify.search('artist',q=q)['artists']
+        artists = self.__spotify.search('artist', q=q, timeout=MERGE_TIMEOUT)['artists']
         return listSource(artists, constructor=lambda x: SpotifyArtist(x['href'], data=x))
 
     def searchAllSource(self, query, timeout=None):
@@ -426,7 +426,7 @@ class SpotifySource(GenericSource):
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=None):
         tracks, albums, artists = [], [], []
         def conductTypeSearch((target, proxyClass, typeString, resultsKey)):
-            rawResults = self.__spotify.search(typeString, priority='high', q=queryText)[resultsKey]
+            rawResults = self.__spotify.search(typeString, q=queryText, priority='high', timeout=SEARCH_TIMEOUT)[resultsKey]
             target.extend([proxyClass(rawResult['href'], data=rawResult, maxLookupCalls=0) for rawResult in rawResults])
         typeSearches = (
             (tracks, SpotifyTrack, 'track', 'tracks'),
@@ -454,16 +454,19 @@ class SpotifySource(GenericSource):
         for track in tracks:
             applyTrackTitleDataQualityTests(track, queryText)
             adjustTrackRelevanceByQueryMatch(track, queryText)
+            augmentTrackDataQualityOnBasicAttributePresence(track)
 
         albums  = scoreResultsWithBasicDropoffScoring(albums, sourceScore=0.7)
         for album in albums:
             applyAlbumTitleDataQualityTests(album, queryText)
             adjustAlbumRelevanceByQueryMatch(album, queryText)
+            augmentAlbumDataQualityOnBasicAttributePresence(album)
 
         artists = scoreResultsWithBasicDropoffScoring(artists, sourceScore=0.6)
         for artist in artists:
             applyArtistTitleDataQualityTests(artist, queryText)
             adjustArtistRelevanceByQueryMatch(artist, queryText)
+            augmentArtistDataQualityOnBasicAttributePresence(artist)
 
         self.__augmentArtistsAndAlbumsWithTracks(artists, albums, tracks)
         smoothRelevanceScores(tracks), smoothRelevanceScores(albums), smoothRelevanceScores(artists)

@@ -23,7 +23,6 @@
 #import "STDebugViewController.h"
 #import "AboutUsViewController.h"
 #import "WebViewController.h"
-#import "TOSViewController.h"
 #import <MessageUI/MFMailComposeViewController.h>
 
 @interface STSettingsViewController () <MFMailComposeViewControllerDelegate>
@@ -334,7 +333,7 @@
         [vc setToRecipients:[NSArray arrayWithObject:@"feedback@stamped.com"]];
         [self presentModalViewController:vc animated:YES];
         [vc release];
-        
+//        
         //[tableView deselectRowAtIndexPath:indexPath animated:YES];
 //        [Util pushController:[[[STDebugViewController alloc] init] autorelease] modal:NO animated:YES];
 

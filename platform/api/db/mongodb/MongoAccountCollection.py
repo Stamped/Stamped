@@ -16,7 +16,10 @@ from pymongo.errors             import DuplicateKeyError
 from api.db.mongodb.AMongoCollection           import AMongoCollection
 from api.db.mongodb.MongoAlertAPNSCollection   import MongoAlertAPNSCollection
 from api.db.mongodb.MongoUserLinkedAlertsHistoryCollection import MongoUserLinkedAlertsHistoryCollection
+from api.db.mongodb.MongoGuideCollection        import MongoGuideCollection
 from api.AAccountDB                 import AAccountDB
+
+from libs.Memcache                              import globalMemcache
 
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     
@@ -28,10 +31,14 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         self._collection.ensure_index('screen_name_lower', unique=True)
         self._collection.ensure_index('email', unique=True)
         self._collection.ensure_index('name_lower')
-        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING), \
+        self._collection.ensure_index([('linked.facebook.linked_user_id', pymongo.ASCENDING),
                                         ('_id', pymongo.ASCENDING)])
-        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING), \
+        self._collection.ensure_index([('linked.twitter.linked_user_id', pymongo.ASCENDING),
                                         ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index('linked.netflix.linked_user_id')
+
+        self._cache = globalMemcache()
+
 
     @lazyProperty
     def alert_apns_collection(self):
@@ -40,6 +47,10 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     @lazyProperty
     def user_linked_alerts_history_collection(self):
         return MongoUserLinkedAlertsHistoryCollection()
+
+    @lazyProperty
+    def guide_collection(self):
+        return MongoGuideCollection()
     
     def _convertToMongo(self, account):
         document = AMongoCollection._convertToMongo(self, account)
@@ -60,50 +71,50 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
 
         if 'linked' not in document:
             document['linked'] = {}
-            if 'twitter' in linkedAccounts:
-                twitterAcct = {
-                    'service_name'          : 'twitter',
-                    'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
-                    'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
-                    'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
-                    }
-                twitterAcctSparse = {}
-                for k,v in twitterAcct.iteritems():
-                    if v is not None:
-                        twitterAcctSparse[k] = v
-                document['linked']['twitter'] = twitterAcctSparse
+        if 'twitter' in linkedAccounts:
+            twitterAcct = {
+                'service_name'          : 'twitter',
+                'linked_user_id'        : linkedAccounts['twitter'].pop('twitter_id', None),
+                'linked_name'           : linkedAccounts['twitter'].pop('twitter_name', None),
+                'linked_screen_name'    : linkedAccounts['twitter'].pop('twitter_screen_name', None),
+                }
+            twitterAcctSparse = {}
+            for k,v in twitterAcct.iteritems():
+                if v is not None:
+                    twitterAcctSparse[k] = v
+            document['linked']['twitter'] = twitterAcctSparse
 
-                if linkedAccounts['twitter'].pop('twitter_alerts_sent', False) and twitterAcct['linked_user_id'] is not None:
-                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'twitter', twitterAcct['linked_user_id'])
+            if linkedAccounts['twitter'].pop('twitter_alerts_sent', False) and twitterAcct['linked_user_id'] is not None:
+                self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'twitter', twitterAcct['linked_user_id'])
 
-            if 'facebook' in linkedAccounts:
-                facebookAcct = {
-                    'service_name'          : 'facebook',
-                    'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
-                    'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
-                    'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
-                    }
-                facebookAcctSparse = {}
-                for k,v in facebookAcct.iteritems():
-                    if v is not None:
-                        facebookAcctSparse[k] = v
-                document['linked']['facebook'] = facebookAcctSparse
+        if 'facebook' in linkedAccounts:
+            facebookAcct = {
+                'service_name'          : 'facebook',
+                'linked_user_id'        : linkedAccounts['facebook'].pop('facebook_id', None),
+                'linked_name'           : linkedAccounts['facebook'].pop('facebook_name', None),
+                'linked_screen_name'    : linkedAccounts['facebook'].pop('facebook_screen_name', None),
+                }
+            facebookAcctSparse = {}
+            for k,v in facebookAcct.iteritems():
+                if v is not None:
+                    facebookAcctSparse[k] = v
+            document['linked']['facebook'] = facebookAcctSparse
 
-                if linkedAccounts['facebook'].pop('facebook_alerts_sent', False) and facebookAcct['linked_user_id'] is not None:
-                    self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'facebook', facebookAcct['linked_user_id'])
+            if linkedAccounts['facebook'].pop('facebook_alerts_sent', False) and facebookAcct['linked_user_id'] is not None:
+                self.user_linked_alerts_history_collection.addLinkedAlert(document['user_id'], 'facebook', facebookAcct['linked_user_id'])
 
-            if 'netflix' in linkedAccounts:
-                netflixAcct = {
-                    'service_name'          : 'netflix',
-                    'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
-                    'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
-                    'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
-                    }
-                netflixAcctSparse = {}
-                for k,v in netflixAcct.iteritems():
-                    if v is not None:
-                        netflixAcctSparse[k] = v
-                document['linked']['netflix'] = netflixAcctSparse
+        if 'netflix' in linkedAccounts:
+            netflixAcct = {
+                'service_name'          : 'netflix',
+                'linked_user_id'        : linkedAccounts['netflix'].pop('netflix_user_id', None),
+                'token'                 : linkedAccounts['netflix'].pop('netflix_token', None),
+                'secret'                : linkedAccounts['netflix'].pop('netflix_secret', None),
+                }
+            netflixAcctSparse = {}
+            for k,v in netflixAcct.iteritems():
+                if v is not None:
+                    netflixAcctSparse[k] = v
+            document['linked']['netflix'] = netflixAcctSparse
 
         return document
 
@@ -169,6 +180,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             return self._obj().dataImport(document, overflow=self._overflow)
         else:
             return document
+
+    def _delCachedUserMini(self, userId):
+        key = str("obj::usermini::%s" % userId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
 
     ### INTEGRITY
 
@@ -236,6 +254,9 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(account))
 
+        # Check integrity for guide
+        self.guide_collection.checkIntegrity(key, repair=repair, api=api)
+
         return True
     
     ### PUBLIC
@@ -247,7 +268,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             logs.warning("Unable to add account: %s" % e)
             if self._collection.find_one({"email": user.email}) is not None:
                 raise StampedDuplicateEmailError("An account already exists with email '%s'" % user.email)
-            elif self._collection.find_one({"screen_name": user.screen_name.lower()}) is not None:
+            elif self._collection.find_one({"screen_name_lower": user.screen_name.lower()}) is not None:
                 raise StampedDuplicateScreenNameError("An account already exists with screen name '%s'" % user.screen_name)
             else:
                 raise StampedDuplicationError("Account information already exists: %s" % e)
@@ -255,7 +276,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def getAccount(self, userId):
         try:
             documentId = self._getObjectIdFromString(userId)
-            document = self._getMongoDocumentFromId(documentId)
+            document = self._getMongoDocumentFromId(documentId, forcePrimary=True)
         except Exception:
             raise StampedAccountNotFoundError("Account not found in database")
         return self._convertFromMongo(document)
@@ -276,11 +297,13 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
     def updateAccount(self, user):
         ### TODO: Only update certain fields (i.e. remove race conditions if 
         ###     user gets credit while modifying account)
+        self._delCachedUserMini(user.user_id)
         document = self._convertToMongo(user)
         document = self._updateMongoDocument(document)
         return self._convertFromMongo(document)
     
     def removeAccount(self, userId):
+        self._delCachedUserMini(userId)
         documentId = self._getObjectIdFromString(userId)
         return self._removeMongoDocument(documentId)
     
@@ -303,24 +326,18 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         return self._convertFromMongo(document)
 
     def getAccountsByFacebookId(self, facebookId):
-        documents = self._collection.find({"linked_accounts.facebook.facebook_id" : facebookId})
-        accounts = [self._convertFromMongo(doc) for doc in documents]
         documents = self._collection.find({"linked.facebook.linked_user_id" : facebookId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        accounts = [self._convertFromMongo(doc) for doc in documents]
         return accounts
 
     def getAccountsByTwitterId(self, twitterId):
-        documents = self._collection.find({"linked_accounts.twitter.twitter_id" : twitterId})
-        accounts = [self._convertFromMongo(doc) for doc in documents]
         documents = self._collection.find({"linked.twitter.linked_user_id" : twitterId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        accounts = [self._convertFromMongo(doc) for doc in documents]
         return accounts
 
     def getAccountsByNetflixId(self, netflixId):
-        documents = self._collection.find({"linked_accounts.twitter.netflix_user_id" : netflixId})
-        accounts = [self._convertFromMongo(doc) for doc in documents]
         documents = self._collection.find({"linked.netflix.linked_user_id" : netflixId })
-        accounts.extend([self._convertFromMongo(doc) for doc in documents])
+        accounts = [self._convertFromMongo(doc) for doc in documents]
         return accounts
 
     def addLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
@@ -418,9 +435,17 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if linkedAccount.service_name not in ['twitter', 'facebook', 'netflix', 'rdio'] :
             raise StampedInputError("Linked account name '%s' is not among the valid field names: %s" % validFields)
 
+        userObjectId = self._getObjectIdFromString(userId)
+
         self._collection.update(
-            {'_id': self._getObjectIdFromString(userId)},
+            {'_id': userObjectId},
             {'$set': { 'linked.%s' % linkedAccount.service_name : linkedAccount.dataExport() } }
+        )
+
+        # remove old style linked account if it exists
+        self._collection.update(
+                {'_id': userObjectId},
+                {'$unset': { 'linked_accounts.%s' % linkedAccount.service_name : 1 } }
         )
 
 

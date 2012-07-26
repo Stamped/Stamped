@@ -20,10 +20,12 @@ try:
     from search.DataQualityUtils import *
     from resolve.StringNormalizationUtils import *
     from search import ScoringUtils
+    from resolve.StringComparator   import *
 except:
     report()
     raise
 
+logComparisonLogic = False
 
 class CompareResult(object):
     """
@@ -61,6 +63,14 @@ class CompareResult(object):
     def definitely_not_match(cls):
         return cls(cls.DEFINITELY_NOT_MATCH)
 
+    def __repr__(self):
+        if self.is_match():
+            return 'CompareResult.match(%f)' % self.score
+        elif self.is_definitely_not_match():
+            return 'CompareResult.not_a_fucking_match()'
+        else:
+            return 'CompareResult.unknown()'
+
 
 class AEntityProxyComparator(object):
     @classmethod
@@ -71,40 +81,46 @@ class AEntityProxyComparator(object):
 class ArtistEntityProxyComparator(AEntityProxyComparator):
     @classmethod
     def compare_proxies(cls, artist1, artist2):
+        sim_score = titleComparison(artist1.name, artist2.name, artistSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(artist1.raw_name), artist1.source, artist1.key,
+                repr(artist2.raw_name), artist2.source, artist2.key,
+                )
+            print 'sim score after title', sim_score
+
+        # Check for any warning signs that exist in one title but not the other.
+        title_penalties = (runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist1.raw_name, artist2.raw_name) +
+                           runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist2.raw_name, artist1.raw_name))
+        for penalty in title_penalties:
+            modifiedPenalty = penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, penalty.description
+                )
+            sim_score *= 1.0 - modifiedPenalty
+
         # TODO: It might be worth it here to get the songs that have been linked to these sources at the
         # ____Source.searchLite() level and compare names.
         if (hasattr(artist1, 'amgId') and
             hasattr(artist2, 'amgId') and
             artist1.amgId != artist2.amgId):
-            return CompareResult.definitely_not_match()
+            sim_score *= 0.3
+            if logComparisonLogic:
+                print 'sim score after penalty for different AMG IDs', sim_score
+
         if type(artist1) == type(artist2) and artist1.source != 'stamped':
-            # If they're from the same source, we are extremely conservative about assuming that they might be the
-            # same artist. If iTunes tells us that Foxes is not the same band as Foxes!, we believe them. On the other
-            # hand, dupes in our database can definitely happen.
-            # TODO: This all-or-nothing logic is probably not the way to go in the long run. We'd like to have a
-            # weight-of-the-evidence approach, but that takes a lot of tweaking. For instance, in this case, if we
-            # happened to see that artists with both of these names are cited on other sources as having albums with
-            # the same names, we would want to override this and merge.
-            if artist1.name != artist2.name:
-                return CompareResult.definitely_not_match()
-            else:
-                return CompareResult.unknown()
-        else:
-            name1 = artist1.name
-            name2 = artist2.name
-            if name1 == name2:
-                return CompareResult.match(1.0)
-            if stringComparison(name1, name2, strict=True) > 0.9:
-                return CompareResult.match(stringComparison(name1, name2, strict=True))
+            sim_score *= 0.85
+            if logComparisonLogic:
+                print 'sim score after penalty for being from same source', sim_score
 
-            name1_simple = artistSimplify(name1)
-            name2_simple = artistSimplify(name2)
 
-            if name1_simple == name2_simple:
-                return CompareResult.match(0.9)
-            if stringComparison(name1_simple, name2_simple, strict=True) > 0.9:
-                return CompareResult(stringComparison(name1_simple, name2_simple, strict=True) - 0.1)
-            return CompareResult.unknown()
+        if sim_score > 0.95:
+            return CompareResult.match(sim_score)
+        if sim_score < 0.5:
+            return CompareResult.definitely_not_match()
+        return CompareResult.unknown()
+
 
 
 class AlbumEntityProxyComparator(AEntityProxyComparator):
@@ -113,32 +129,56 @@ class AlbumEntityProxyComparator(AEntityProxyComparator):
         """
         Album comparison is easy -- just album name and artist name.
         """
-        raw_name_similarity = stringComparison(album1.name, album2.name, strict=True)
-        simple_name_similarity = stringComparison(albumSimplify(album1.name),
-            albumSimplify(album2.name), strict=True)
-        album_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
-        if album_name_sim <= 0.8:
-            return CompareResult.unknown()
-            # TODO: Handle case with multiple artists? Does this come up?
+        album_sim_score = titleComparison(album1.name, album2.name, albumSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(album1.raw_name), album1.source, album1.key,
+                repr(album2.raw_name), album2.source, album2.key,
+                )
+            print 'album title sim score', album_sim_score
+
+        # Check for any warning signs that exist in one title but not the other.
+        title_penalties = (runTokenTests(ALBUM_BAD_ENTITY_TOKENS, album1.raw_name, album2.raw_name) +
+                           runTokenTests(ALBUM_BAD_ENTITY_TOKENS, album2.raw_name, album1.raw_name))
+        for penalty in title_penalties:
+            modifiedPenalty = penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, penalty.description
+                )
+            album_sim_score *= 1.0 - modifiedPenalty
 
         try:
             artist1_name = album1.artists[0]['name']
             artist2_name = album2.artists[0]['name']
-            raw_artist_similarity = stringComparison(artist1_name, artist2_name, strict=True)
-            simple_artist_similarity = stringComparison(artistSimplify(artist1_name),
-                artistSimplify(artist2_name), strict=True)
-            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
-            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
-                artist_name_sim = max(artist_name_sim, 0.9)
+
+            artist_sim_score = titleComparison(artist1_name, artist2_name, artistSimplify, comparator=ArtistTitleComparator)
+            if logComparisonLogic:
+                print 'artist title sim score', artist_sim_score
+
+            artist_penalties = (runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist1_name, artist2_name) +
+                                runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist2_name, artist1_name))
+            for penalty in artist_penalties:
+                artist_sim_score *= 1.0 - (penalty.score ** 1.5)
+
         except IndexError:
-            # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
-            # 'Various Artists' or whatever.
+            try:
+                album1_has_artist = album1.artists and album1.artists[0] and 'name' in album1.artists[0]
+                album2_has_artist = album2.artists and album2.artists[0] and 'name' in album2.artists[0]
+                if not album1_has_artist and not album2_has_artist and album_sim_score >= 1:
+                    return CompareResult.match(album_sim_score)
+
+            except Exception:
+                pass
+
             return CompareResult.unknown()
 
-        if artist_name_sim <= 0.8:
-            return CompareResult.unknown()
-        score = album_name_sim * album_name_sim * artist_name_sim
-        return CompareResult.match(score)
+        total_sim_score = album_sim_score * (artist_sim_score ** 0.5)
+        if album_sim_score < 0.7 or artist_sim_score < 0.7 or total_sim_score < 0.6:
+            return CompareResult.definitely_not_match()
+        if album_sim_score > 0.875 and artist_sim_score > 0.875 and total_sim_score > 0.85:
+            return CompareResult.match(total_sim_score)
+        return CompareResult.unknown()
 
 
 class TrackEntityProxyComparator(AEntityProxyComparator):
@@ -147,33 +187,57 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
         """
         Track comparison is easy -- just track name and artist name.
         """
-        raw_name_similarity = stringComparison(track1.name, track2.name, strict=True)
-        simple_name_similarity = stringComparison(trackSimplify(track1.name),
-            trackSimplify(track2.name), strict=True)
-        track_name_sim = max(raw_name_similarity, simple_name_similarity - 0.1)
-        if track_name_sim <= 0.8:
-            return CompareResult.unknown()
-            # TODO: Handle case with multiple artists? Does this come up?
+        track_sim_score = titleComparison(track1.name, track2.name, trackSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(track1.raw_name), track1.source, track1.key,
+                repr(track2.raw_name), track2.source, track2.key,
+                )
+            print 'track title sim score', track_sim_score
+
+        title_penalties = ((runTitleTests(TRACK_BAD_ENTITY_TITLE_TESTS, track1.raw_name, track2.raw_name) or
+                            runTokenTests(TRACK_BAD_ENTITY_TOKENS, track1.raw_name, track2.raw_name)) +
+                           (runTitleTests(TRACK_BAD_ENTITY_TITLE_TESTS, track2.raw_name, track1.raw_name) or
+                            runTokenTests(TRACK_BAD_ENTITY_TOKENS, track2.raw_name, track1.raw_name)))
+        for title_penalty in title_penalties:
+            modifiedPenalty = title_penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, title_penalty.description
+                )
+            track_sim_score *= 1.0 - modifiedPenalty
 
         try:
             artist1_name = track1.artists[0]['name']
             artist2_name = track2.artists[0]['name']
-            raw_artist_similarity = stringComparison(artist1_name, artist2_name, strict=True)
-            simple_artist_similarity = stringComparison(artistSimplify(artist1_name),
-                artistSimplify(artist2_name), strict=True)
-            artist_name_sim = max(raw_artist_similarity, simple_artist_similarity - 0.1)
-            if artist1_name.startswith(artist2_name) or artist2_name.startswith(artist1_name):
-                artist_name_sim = max(artist_name_sim, 0.9)
+
+            artist_sim_score = titleComparison(artist1_name, artist2_name, artistSimplify, comparator=ArtistTitleComparator)
+            if logComparisonLogic:
+                print 'artist title sim score', artist_sim_score
+
+            artist_penalties = (runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist1_name, artist2_name) +
+                                runTokenTests(ARTIST_BAD_ENTITY_TOKENS, artist2_name, artist1_name))
+            for penalty in artist_penalties:
+                artist_sim_score *= 1.0 - (penalty.score ** 1.5)
+
         except IndexError:
-            # TODO: Better handling here. Maybe pare out the artist-less album. Maybe check to see if both are by
-            # 'Various Artists' or whatever.
+            try:
+                track1_has_artist = track1.artists and track1.artists[0] and 'name' in track1.artists[0]
+                track2_has_artist = track2.artists and track2.artists[0] and 'name' in track2.artists[0]
+                if not track1_has_artist and not track2_has_artist and track_sim_score >= 1:
+                    return CompareResult.match(track_sim_score)
+
+            except Exception:
+                pass
+
             return CompareResult.unknown()
 
-        if artist_name_sim <= 0.8:
-            return CompareResult.unknown()
-        score = track_name_sim * artist_name_sim
-        return CompareResult.match(score)
-
+        total_sim_score = track_sim_score * (artist_sim_score ** 0.5)
+        if track_sim_score < 0.7 or artist_sim_score < 0.7 or total_sim_score < 0.6:
+            return CompareResult.definitely_not_match()
+        if track_sim_score > 0.875 and artist_sim_score > 0.875 and total_sim_score > 0.85:
+            return CompareResult.match(total_sim_score)
+        return CompareResult.unknown()
 
 
 class MovieEntityProxyComparator(AEntityProxyComparator):
@@ -184,94 +248,87 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
         title2 = convertRomanNumerals(title2)
         match1 = cls.ENDING_NUMBER_RE.search(title1)
         match2 = cls.ENDING_NUMBER_RE.search(title2)
-        return match1 and match2 and match1.group(1) != match2.group(1)
+        if match1 and match2 and match1.group(1) != match2.group(1):
+            return True
+        if match1 and not match2 and int(match1.group(1)) != 1:
+            return True
+        if match2 and not match1 and int(match2.group(1)) != 1:
+            return True
+        return False
 
     @classmethod
-    def compare_proxies(cls, movie1, movie2):
-        # Our task here is a bit harder than normal. There are often remakes, so name is not decisive. There are often
-        # digital re-masterings and re-releases, so dates are not decisive. Cast data is spotty.
-        # We get reliable release dates from TMDB and TheTVDB, but not from iTunes, so those are generally unhelpful.
+    def compare_proxies(self, movie1, movie2):
+        sim_score = titleComparison(movie1.name, movie2.name, movieSimplify)        
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(movie1.raw_name), movie1.source, movie1.key,
+                repr(movie2.raw_name), movie2.source, movie2.key,
+            )
+            print 'sim score after title', sim_score
 
-        raw_name_similarity = stringComparison(movie1.name, movie2.name, strict=True)
-        simple_name_similarity = stringComparison(movieSimplify(movie1.name),
-            movieSimplify(movie2.name), strict=True)
-        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
+        title_penalties = ((runTitleTests(MOVIE_BAD_ENTITY_TITLE_TESTS, movie1.raw_name, movie2.raw_name) or
+                            runTokenTests(MOVIE_BAD_ENTITY_TOKENS, movie1.raw_name, movie2.raw_name)) +
+                           (runTitleTests(MOVIE_BAD_ENTITY_TITLE_TESTS, movie2.raw_name, movie1.raw_name) or
+                            runTokenTests(MOVIE_BAD_ENTITY_TOKENS, movie2.raw_name, movie1.raw_name)))
+        for title_penalty in title_penalties:
+            modifiedPenalty = title_penalty.score ** 1.5
+            if logComparisonLogic:
+                print 'Applying penalty of %f for only one of the two hitting token penalty "%s"' % (
+                    modifiedPenalty, title_penalty.description
+                    )
+            sim_score *= 1.0 - modifiedPenalty
 
-        if cls._endsInDifferentNumbers(movie1.name, movie2.name):
-            sim_score -= 0.3
+        if movie1.source == 'tmdb' and movie2.source == 'tmdb' and movie1.key != movie2.key:
+            sim_score *= 0.7
+            if logComparisonLogic:
+                print 'demoting to', sim_score, 'for double tmdb IDs'
+
+        if self._endsInDifferentNumbers(movie1.name, movie2.name):
+            sim_score *= 0.4
+            if logComparisonLogic:
+                print 'demoting to', sim_score, 'for ending numbers'
 
         if movie1.release_date and movie2.release_date:
             time_difference = abs(movie1.release_date - movie2.release_date)
-            if time_difference > timedelta(750):
-                sim_score -= 0.2
+            # TODO: Smooth this.
+            if time_difference < timedelta(30):
+                release_date_odds = 2.5
             elif time_difference < timedelta(365):
-                sim_score += 0.05
-            elif time_difference < timedelta(30):
-                sim_score += 0.1
+                release_date_odds = 1.8
+            elif time_difference < timedelta(750):
+                release_date_odds = 1.4
+            elif movie1.source != 'stamped' and movie2.source != 'stamped' and time_difference > timedelta(365*5):
+                release_date_odds = 0.3
+            else:
+                release_date_odds = 0.7
+
+            sim_score *= release_date_odds
+            if logComparisonLogic:
+                print 'changing to', sim_score, 'for release dates'
+
 
         if movie1.length and movie2.length:
-            if movie1.length == movie2.length:
-                sim_score += 0.1
-            if abs(movie1.length - movie2.length) < 60:
-                # Here, it might be really nice to actually check if one of them has been rounded to minutes and
-                # then converted back.
-                sim_score += 0.05
-
-        try:
-            movie1_director = simplify(movie1.directors[0]['name'])
-            movie2_director = simplify(movie2.directors[0]['name'])
-            if movie1_director == movie2_director:
-                sim_score += 0.2
+            movie_length_odds = None
+            if movie1.length == movie2.length and movie1.length % 60 != 0:
+                movie_length_odds = 2.0
+            elif movie1.length == movie2.length:
+                movie_length_odds = 1.5
+            elif abs(movie1.length - movie2.length) <= 120:
+                movie_length_odds = 1.25
             else:
-                sim_score -= 0.2
-        except IndexError:
-            pass
+                movie_length_odds = 0.9
+            sim_score *= movie_length_odds
+            if logComparisonLogic:
+                print 'changing to', sim_score, 'for movie lengths'
 
-        if simple_name_similarity > 0.9 and sim_score > 0.95:
+        if logComparisonLogic:
+            print 'final score:', sim_score, '\n'
+        if sim_score > 0.99:
             return CompareResult.match(sim_score)
-        elif simple_name_similarity < 0.8 or sim_score < 0.6:
+        elif sim_score < 0.5:
             return CompareResult.definitely_not_match()
-        return CompareResult.unknown()
-
-        """
-        cast1_names = set([simplify(actor['name']) for actor in movie1.cast])
-        cast2_names = set([simplify(actor['name']) for actor in movie2.cast])
-        if cast1_names and cast2_names:
-            overlap_fraction = float(len(cast1_names.intersection(cast2_names))) / min(len(cast1_names), len(cast2_names))
-            # So the midpoint here is at 20% matching. If less than that matches, it's a bad sign. If more than that
-            # matches, it's a good sign.
-            # TODO: This is totally not the best way to do this.
-            score += (overlap_fraction / 2) - 0.1
-
-        try:
-            movie1_director = simplify(movie1.directors[0]['name'])
-            movie2_director = simplify(movie2.directors[0]['name'])
-            if movie1_director == movie2_director:
-                score += 0.2
-            else:
-                score -= 0.2
-        except IndexError:
-            pass
-
-        # TODO: Pull out helper function here!
-        # TODO: Publisher?
-        # TODO: Genre, only as a potential gain?
-        try:
-            movie1_studio = simplify(movie1.studios[0]['name'])
-            movie2_studio = simplify(movie2.studios[0]['name'])
-            if movie1_studio == movie2_studio:
-                score += 0.2
-            # Don't subtract otherwise because sometimes it gets billed differently.
-        except IndexError:
-            pass
-
-        # TODO: MPAA rating (can we get this from TMDB?)
-        # TODO: Genres
-        if score >= 0.3:
-            return CompareResult.match(score)
         else:
             return CompareResult.unknown()
-        """
 
 
 class TvEntityProxyComparator(AEntityProxyComparator):
@@ -282,27 +339,38 @@ class TvEntityProxyComparator(AEntityProxyComparator):
         and we want to cluster those together, so things like runtime and release date don't work. Title is really
         the meat of the comparison.
         """
-        raw_name_similarity = stringComparison(tv_show1.name, tv_show2.name, strict=True)
-        simple_name_similarity = stringComparison(movieSimplify(tv_show1.name),
-            movieSimplify(tv_show2.name), strict=True)
-        sim_score = max(raw_name_similarity, simple_name_similarity - 0.15)
+        sim_score = titleComparison(tv_show1.name, tv_show2.name, movieSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(tv_show1.raw_name), tv_show1.source, tv_show1.key,
+                repr(tv_show2.raw_name), tv_show2.source, tv_show2.key,
+                )
+            print 'sim score after title', sim_score
 
         if tv_show1.release_date and tv_show2.release_date:
             time_difference = abs(tv_show1.release_date - tv_show2.release_date)
-            if time_difference > timedelta(365 * 10):
-                sim_score -= 0.2
-            elif time_difference < timedelta(365 * 5):
-                sim_score += 0.075
+            if time_difference > timedelta(365 * 5):
+                sim_score *= 0.5
             elif time_difference < timedelta(365 * 2):
-                sim_score += 0.1
+                sim_score *= 1.1
             elif time_difference < timedelta(365 * 1):
-                sim_score += 0.15
+                sim_score *= 1.3
+            if logComparisonLogic:
+                print 'After release date, sim score is:', sim_score
 
-        if simple_name_similarity > 0.85 and sim_score >= 0.9:
+        if tv_show1.source == 'thetvdb' and tv_show2.source == 'thetvdb' and tv_show1.key != tv_show2.key:
+            sim_score *= 0.7
+            if logComparisonLogic:
+                print 'After penalty for different thetvdb IDs, sim score is:', sim_score
+
+        if logComparisonLogic:
+            print 'Final sim score is:', sim_score
+        if sim_score > 1:
             return CompareResult.match(sim_score)
-        elif simple_name_similarity < 0.8 or sim_score < 0.6:
+        elif sim_score < 0.5:
             return CompareResult.definitely_not_match()
-        return CompareResult.unknown()
+        else:
+            return CompareResult.unknown()
 
 
 class AppEntityProxyComparator(AEntityProxyComparator):
@@ -338,7 +406,7 @@ class BookEntityProxyComparator(AEntityProxyComparator):
         if book1_name_simple == book2_name_simple:
             return 1
 
-        similarity = stringComparison(book1_name_simple, book2_name_simple, strict=True)
+        similarity = StringComparator.get_ratio(book1_name_simple, book2_name_simple)
         title1_without_subtitle = cls._strip_subtitle(book1_name_simple)
         title2_without_subtitle = cls._strip_subtitle(book2_name_simple)
         if book1_name_simple == title2_without_subtitle or book2_name_simple == title1_without_subtitle:
@@ -348,7 +416,9 @@ class BookEntityProxyComparator(AEntityProxyComparator):
         elif isSuspiciousPrefixBookTitle(book1_name_simple, book2_name_simple):
             similarity = max(similarity, 0.9)
         else:
-            subtitle_similarity = stringComparison(title1_without_subtitle, title2_without_subtitle, strict=True)
+            subtitle_similarity = StringComparator.get_ratio(title1_without_subtitle, title2_without_subtitle)
+            if logComparisonLogic:
+                print 'Comparing titles', title1_without_subtitle, title2_without_subtitle
             similarity = max(similarity, subtitle_similarity - 0.1)
         return similarity
 
@@ -363,13 +433,15 @@ class BookEntityProxyComparator(AEntityProxyComparator):
             # This makes "Todd Gardner" and "Todd Manci Gardner" match.
         if author1_tokens > author2_tokens or author2_tokens > author1_tokens:
             return 0.9
-        return stringComparison(author1_name_simple, author2_name_simple, strict=True)
+        return StringComparator.get_ratio(author1_name_simple, author2_name_simple)
 
     @classmethod
     def compare_proxies(cls, book1, book2):
         """
         """
         title_similarity = cls._compare_titles(book1.name, book2.name)
+        if logComparisonLogic:
+            print 'Title similarity:', title_similarity
         if book1.isbn and book1.isbn == book2.isbn and title_similarity > 0.5:
             return CompareResult.match(title_similarity + 1)
         if title_similarity < 0.75:
@@ -378,6 +450,8 @@ class BookEntityProxyComparator(AEntityProxyComparator):
         try:
             # TODO: Look for multiple authors, try to match intelligently.
             author_similarity = cls._compare_authors(book1.authors[0]['name'], book2.authors[0]['name'])
+            if logComparisonLogic:
+                print 'Author similarity:', author_similarity
             if title_similarity + author_similarity > 1.7:
                 return CompareResult.match(title_similarity + author_similarity)
         except KeyError:
@@ -416,19 +490,19 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
 
     @classmethod
     def compare_proxies(cls, place1, place2):
-        #print "COMPARING PLACES:", place1.name, "--", tryToGetStreetAddressFromPlace(place1), "--", place1.key, \
-        #      "       AND    ", place2.name, "--", tryToGetStreetAddressFromPlace(place2), "--", place2.key
-
-        raw_name_similarity = stringComparison(place1.name, place2.name, strict=True)
-        simple_name_similarity = stringComparison(simplify(place1.name),
-            simplify(place2.name), strict=True)
-        name_similarity = max(raw_name_similarity, simple_name_similarity - 0.15)
-        if place1.name.startswith(place2.name) or place2.name.startswith(place1.name):
-            name_similarity = max(name_similarity, 0.9)
+        sim_score = titleComparison(place1.name, place2.name, movieSimplify)
+        if logComparisonLogic:
+            print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
+                repr(place1.raw_name), place1.source, place1.key,
+                repr(place2.raw_name), place2.source, place2.key,
+                )
+            print 'sim score after title', sim_score
 
         #print "NAME SIM IS", name_similarity
 
-        if name_similarity < 0.5:
+        if sim_score < 0.5:
+            if logComparisonLogic:
+                print 'Exiting early due to obviously unfit match\n'
             return CompareResult.definitely_not_match()
 
         compared_locations = False
@@ -436,8 +510,13 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
 
         if place1.coordinates and place2.coordinates:
             distance_in_km = ScoringUtils.geoDistance(place1.coordinates, place2.coordinates)
+            if distance_in_km > 50:
+                if logComparisonLogic:
+                    print '> 50km apart; returning definitely_not_match'
+                return CompareResult.definitely_not_match()
             if distance_in_km > 10:
-                #print "CRAPPING OUT"
+                if logComparisonLogic:
+                    print '10-50km apart; returning unknown'
                 return CompareResult.unknown()
 
             # Min of 0.01m away.
@@ -445,7 +524,6 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
 
             # 0 if 1km apart, .27 if 0.1km, 0.54 if 0.01km.
             location_similarity = math.log(1.0 / distance_in_km, 5000)
-            #print "COORD-BASED LOCATION SIM IS", location_similarity
             compared_locations = True
 
         state1 = tryToGetStateFromPlace(place1)
@@ -465,14 +543,13 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
             elif zip1 == zip2:
                 location_similarity += 0.1
 
-        if compared_locations and name_similarity + location_similarity > 0.9:
-            #print "HOT DAMN! QUITTIN EARLY."
+        if compared_locations and sim_score + location_similarity > 1.0:
             # If we think these two businesses are extremely likely to be the same based on name and latlng, exit early.
             # The reason for this is that sometimes a business will have two addresses if it's on a corner or has two
             # entrances. We'll tank it in the address comparison. Exiting early makes sure that, when the latlngs and
             # names are close enough, we don't second-guess it because of an address issue.
             # #print "Matching after lat-lng with sim score", similarity_score
-            return CompareResult.match(name_similarity + location_similarity)
+            return CompareResult.match(sim_score + location_similarity)
 
         # TODO: Should really just get parsed-out map in one call since it's repeating same regexp matches over and
         # over again.
@@ -480,7 +557,7 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
         locality2 = tryToGetLocalityFromPlace(place2)
         if locality1 and locality2:
             compared_locations = True
-            if stringComparison(simplify(locality1), simplify(locality2), strict=True) != 1:
+            if StringComparator.get_ratio(simplify(locality1), simplify(locality2)) != 1:
                 #print "DROPPING 0.3 for LOCALITY"
                 location_similarity -= 0.3
 
@@ -516,7 +593,7 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
                     # case, though.
 
             #print "COMPARING", street_address1, "TO", street_address2
-            street_address_similarity = stringComparison(street_address1, street_address2, strict=True)
+            street_address_similarity = StringComparator.get_ratio(street_address1, street_address2)
             if ((street_address1 in street_address2 and set(street_address1.split()) < set(street_address2.split())) or
                 (street_address2 in street_address1 and set(street_address2.split()) < set(street_address1.split()))):
                 street_address_similarity = max(street_address_similarity, 0.9)
@@ -533,7 +610,7 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
             address_string1 = cls._simplify_address(place1.address_string)
             address_string2 = cls._simplify_address(place2.address_string)
 
-            address_string_similarity = stringComparison(address_string1, address_string2, strict=True)
+            address_string_similarity = StringComparator.get_ratio(address_string1, address_string2)
 
             # Completely tanks similarity for different address strings, max boost of 0.6 for identical. TODO: I might
             # want to be even stricter here.
@@ -543,9 +620,9 @@ class PlaceEntityProxyComparator(AEntityProxyComparator):
         # other just knows the city. This isn't always feasible because half of Google results lack structured address
         # data but might be worth doing for the other half.
 
-        similarity_score = location_similarity + name_similarity
+        similarity_score = location_similarity + sim_score
         #print "FINAL TOTAL SIM IS", similarity_score
-        if similarity_score > 0.9:
+        if similarity_score > 1.1:
             #print "MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED MATCHED WITH SCORE", similarity_score
             return CompareResult.match(similarity_score)
         elif similarity_score < 0.3:

@@ -1,0 +1,323 @@
+{'author': 'Jules Verne', 'title': '20,000 Leagues Under the Sea'}
+{'author': 'V. S. Naipaul', 'title': 'A Bend in the River'}
+{'author': 'Charles Dickens', 'title': 'A Christmas Carol'}
+{'author': 'Mark Twain', 'title': "A Connecticut Yankee in King Arthur's Court"}
+{'author': 'Richard Peck', 'title': 'A Day No Pigs Would Die'}
+{'author': 'James Agee', 'title': 'A Death in the Family'}
+{'author': 'Henrik Ibsen', 'title': 'A Doll\xe2\x80\x99s House'}
+{'author': 'Conrad Richter', 'title': 'A Light in the Forest'}
+{'author': 'William Shakespeare', 'title': "A Midsummer Night's Dream"}
+{'author': 'E. M. Forster', 'title': 'A Passage to India'}
+{'author': 'James Joyce', 'title': 'A Portrait of the Artist as a Young Man'}
+{'author': 'Lorraine Hansberry', 'title': 'A Raisin in the Sun'}
+{'author': 'John Knowles', 'title': 'A Separate Peace'}
+{'author': 'Charles Dickens', 'title': 'A Tale of Two Cities'}
+{'author': 'Nathaniel Hawthorne', 'title': 'A Wonder-Book for Girls and Boys'}
+{'author': 'George Eliot', 'title': 'Adam Bede'}
+{'author': 'Mark Twain', 'title': 'Adventures of Huckleberry Finn'}
+{'author': 'Arthur Conan Doyle', 'title': 'Adventures of Sherlock Holmes'}
+{'author': 'Mark Twain', 'title': 'Adventures of Tom Sawyer'}
+{'author': 'Anne Bronte', 'title': 'Agnes Grey'}
+{'author': 'Lewis Carroll', 'title': "Alice's Adventures in Wonderland"}
+{'author': 'James Herriot', 'title': 'All Creatures Great and Small'}
+{'author': 'Erich Maria Remarque', 'title': 'All Quiet on the Western Front'}
+{'author': 'William Shakespeare', 'title': "All's Well That Ends Well"}
+{'author': 'Henry Rider Haggard', 'title': 'Allan Quatermain'}
+{'author': 'Philip Roth', 'title': 'American Pastoral'}
+{'author': 'Kazuo Ishiguro', 'title': 'An Artist of the Floating World'}
+{'author': 'George Orwell', 'title': 'Animal Farm'}
+{'author': 'Leo Tolstoy', 'title': 'Anna Karenina'}
+{'author': 'William Shakespeare', 'title': 'Anthony and Cleopatra'}
+{'author': 'Sophocles', 'title': 'Antigone'}
+{'author': 'Howard Fast', 'title': 'April Morning'}
+{'author': 'Jules Verne', 'title': 'Around the World in Eighty Days'}
+{'author': 'William Faulkner', 'title': 'As I Lay Dying'}
+{'author': 'William Shakespeare', 'title': 'As You Like It'}
+{'author': 'Ian McEwan', 'title': 'Atonement'}
+{'author': 'W. G. Sebald', 'title': 'Austerlitz'}
+{'author': 'Anthony Trollope', 'title': 'Barchester Towers'}
+{'author': 'Charles Dickens', 'title': 'Barnaby Rudge'}
+{'author': 'Anna Sewell', 'title': 'Black Beauty'}
+{'author': 'Charles Dickens', 'title': 'Bleak House'}
+{'author': 'Rudolfo Anaya', 'title': 'Bless Me, Ultima'}
+{'author': 'Aldous Huxley', 'title': 'Brave New World'}
+{'author': 'Katherine Paterson', 'title': 'Bridge to Terabithia'}
+{'author': 'Jack London', 'title': 'Call of the Wild'}
+{'author': 'Joseph Heller', 'title': 'Catch-22'}
+{'author': 'J.D. Salinger', 'title': 'Catcher in the Rye'}
+{'author': 'E. B. White', 'title': "Charlotte's Web"}
+{'author': 'Samuel Richardson', 'title': 'Clarissa'}
+{'author': 'Olive Ann Barnes', 'title': 'Cold Sassy Tree'}
+{'author': 'Elizabeth Gaskell', 'title': 'Cranford'}
+{'author': 'Fyodor Dostoyevsky', 'title': 'Crime and Punishment'}
+{'author': 'Alan Paton', 'title': 'Cry, the Beloved Country'}
+{'author': 'Edmond Rosmond', 'title': 'Cyrano de Bergerac'}
+{'author': 'Ray Bradbury', 'title': 'Dandelion Wine'}
+{'author': 'Pierre Choderlos De Laclos', 'title': 'Dangerous Liaisons'}
+{'author': 'George Eliot', 'title': 'Daniel Deronda'}
+{'author': 'Charles Dickens', 'title': 'David Copperfield'}
+{'author': 'John Gunther', 'title': 'Death be not Proud'}
+{'author': 'Arthur Miller', 'title': 'Death of a Salesman'}
+{'author': 'Anne Frank', 'title': 'Diary of a Young Girl'}
+{'author': 'Cynthia Volght', 'title': "Dicey's Song"}
+{'author': 'Charles Dickens', 'title': 'Dombey and Son'}
+{'author': 'Miguel De Cervantes', 'title': 'Don Quixote'}
+{'author': 'Robert Louis Stevenson', 'title': 'Dr Jekyll and Mr Hyde'}
+{'author': 'Bram Stoker', 'title': 'Dracula'}
+{'author': 'John Steinbeck', 'title': 'East of Eden'}
+{'author': 'Jane Austen', 'title': 'Emma'}
+{'author': 'Edith Wharton', 'title': 'Ethan Frome'}
+{'author': 'Ray Bradbury', 'title': 'Fahrenheit 451'}
+{'author': 'Walter Dean Myers', 'title': 'Fallen Angels'}
+{'author': 'Thomas Hardy', 'title': 'Far From The Madding Crowd'}
+{'author': 'Ernest Hemingway', 'title': 'Farewell to Arms'}
+{'author': 'Daniel Keyes', 'title': 'Flowers for Algernon'}
+{'author': 'Mary Shelley', 'title': 'Frankenstein'}
+{'author': 'M.E. Kerr', 'title': 'Gentlehands'}
+{'author': 'Charles Dickens', 'title': 'Great Expectations'}
+{'author': 'Jonathan Swift', 'title': "Gulliver's Travels"}
+{'author': 'William Shakespeare', 'title': 'Hamlet'}
+{'author': 'Charles Dickens', 'title': 'Hard Times'}
+{'author': 'Gary Paulsen', 'title': 'Hatchet'}
+{'author': 'Joseph Conrad', 'title': 'Heart of Darkness'}
+{'author': 'William Shakespeare', 'title': 'Henry V'}
+{'author': 'Saul Bellow', 'title': 'Herzog'}
+{'author': 'Sue Ellen Bridger', 'title': 'Home Before Dark'}
+{'author': 'Marilynne Robinson', 'title': 'Housekeeping'}
+{'author': 'Margaret Craven', 'title': 'I Heard the Owl Call my Name'}
+{'author': 'Maya Angelou', 'title': 'I Know Why the Caged Bird Sings'}
+{'author': 'Italo Calvino', 'title': "If on a Winter's Night a Traveller"}
+{'author': 'Marcel Proust', 'title': 'In Search of Lost Time'}
+{'author': 'Ralph Ellison', 'title': 'Invisible Man'}
+{'author': "Scott O'Dell", 'title': 'Island of the Blue Dolphins'}
+{'author': 'Sir Walter Scott', 'title': 'Ivanhoe'}
+{'author': 'Katherine Paterson', 'title': 'Jacob Have I Loved'}
+{'author': 'Charlotte Bronte', 'title': 'Jane Eyre'}
+{'author': 'Esther Forbes', 'title': 'Johnny Tremaine'}
+{'author': 'Jules Verne', 'title': 'Journey to the Center of the Earth'}
+{'author': 'Louis-Ferdinand Celine', 'title': 'Journey to the End of the Night'}
+{'author': 'Thomas Hardy', 'title': 'Jude the Obscure'}
+{'author': 'Jean C. George', 'title': 'Julie of the Wolves'}
+{'author': 'William Shakespeare', 'title': 'Julius Caesar'}
+{'author': 'Rudyard Kipling', 'title': 'Just So Stories'}
+{'author': 'Robert Louis Stevenson', 'title': 'Kidnapped'}
+{'author': 'Rudyard Kipling', 'title': 'Kim'}
+{'author': 'William Shakespeare', 'title': 'King Lear'}
+{'author': 'Rider Haggard', 'title': "King Solomon's Mines"}
+{'author': 'James Ellroy', 'title': 'La Confidential'}
+{'author': 'Alasdair Gray', 'title': 'Lanark'}
+{'author': 'James Fenimore Cooper', 'title': 'Last of the Mohicans'}
+{'author': 'Victor Hugo', 'title': 'Les Mis\xc3\xa9rables'}
+{'author': 'B. Balter', 'title': 'Light a Single Candle'}
+{'author': 'Laura Ingalls Wilder', 'title': 'Little House in the Big Woods'}
+{'author': 'Frances Hodgson Burnett', 'title': 'Little Lord Fauntleroy'}
+{'author': 'Louisa May Alcott', 'title': 'Little Women'}
+{'author': 'Vladimir Nabokov', 'title': 'Lolita'}
+{'author': 'Joseph Conrad', 'title': 'Lord Jim'}
+{'author': 'William Golding', 'title': 'Lord of the Flies'}
+{'author': 'R. D. Blackmore', 'title': 'Lorna Doone'}
+{'author': 'William Shakespeare', 'title': "Love's Labours Lost"}
+{'author': 'Kingsley Amis', 'title': 'Lucky Jim'}
+{'author': 'Virginia Hamilton', 'title': 'M.C. Higgins the Great'}
+{'author': 'William Shakespeare', 'title': 'Macbeth'}
+{'author': 'Gustave Flaubert', 'title': 'Madame Bovary'}
+{'author': 'Sinclair Lewis', 'title': 'Main Street'}
+{'author': 'Samuel Beckett', 'title': 'Malone Dies'}
+{'author': 'Jane Austen', 'title': 'Mansfield Park'}
+{'author': 'Charles Dickens', 'title': 'Martin Chuzzlewit'}
+{'author': 'Ernest Hemingway', 'title': 'Men Without Women'}
+{'author': 'George Eliot', 'title': 'Middlemarch'}
+{'author': 'Herman Melville', 'title': 'Moby Dick'}
+{'author': 'Barbara Cohen', 'title': 'Molly\xe2\x80\x99s Pilgrim'}
+{'author': 'Martin Amis', 'title': 'Money'}
+{'author': 'Virginia Woolf', 'title': 'Mrs Dalloway'}
+{'author': 'Elizabeth Taylor', 'title': 'Mrs Palfrey at the Claremont'}
+{'author': 'William Shakespeare', 'title': 'Much Ado About Nothing'}
+{'author': 'Willa Cather', 'title': 'My Antonia'}
+{'author': 'Richard Wright', 'title': 'Native Son'}
+{'author': 'Charles Dickens', 'title': 'Nicholas Nickleby'}
+{'author': 'Thomas Love Peacock', 'title': 'Nightmare Abbey'}
+{'author': 'George Orwell', 'title': 'Nineteen Eighty-Four'}
+{'author': 'Jane Austen', 'title': 'Northanger Abbey'}
+{'author': 'Philip Pullman', 'title': 'Northern Lights'}
+{'author': 'Joseph Conrad', 'title': 'Nostromo'}
+{'author': 'Sue Ellen Bridger', 'title': 'Notes for Another Life'}
+{'author': 'John Steinbeck', 'title': 'Of Mice and Men'}
+{'author': 'Fred Gipson', 'title': 'Old Yeller'}
+{'author': 'Charles Dickens', 'title': 'Oliver Twist'}
+{'author': 'Jack Kerouac', 'title': 'On the Road'}
+{'author': 'T.H. White', 'title': 'Once and Future King'}
+{'author': 'Alexander Solzhenitsyn', 'title': 'One Day in the Life of Ivan Denisovich'}
+{'author': 'Gabriel Garcia Marquez', 'title': 'One Hundred Years of Solitude'}
+{'author': 'Peter Carey', 'title': 'Oscar And Lucinda'}
+{'author': 'William Shakespeare', 'title': 'Othello'}
+{'author': 'Thornton Wilder', 'title': 'Our Town'}
+{'author': 'S.E. Hinton', 'title': 'Outsiders'}
+{'author': 'P. McKissack', 'title': 'Paul Laurence Dunbar, a Poet to Remember'}
+{'author': 'Jane Austen', 'title': 'Persuasion'}
+{'author': 'John Bunyan', 'title': "Pilgrim's Progress"}
+{'author': 'Jane Austen', 'title': 'Pride and Prejudice'}
+{'author': 'George Bernard Shaw', 'title': 'Pygmalion'}
+{'author': 'John Updyke', 'title': 'Rabbit, Run'}
+{'author': 'E.L. Doctorow', 'title': 'Ragtime'}
+{'author': 'Stephen Crane', 'title': 'Red Badge of Courage'}
+{'author': 'William Shakespeare', 'title': 'Richard III'}
+{'author': 'Thomas Paine', 'title': 'Rights of Man'}
+{'author': 'Sir Walter Scott', 'title': 'Rob Roy'}
+{'author': 'Daniel Defoe', 'title': 'Robinson Crusoe'}
+{'author': 'Mildred Taylor', 'title': 'Roll of Thunder, Hear My Cry'}
+{'author': 'William Shakespeare', 'title': 'Romeo and Juliet'}
+{'author': 'Evelyn Waugh', 'title': 'Scoop'}
+{'author': 'Walter Dean Myers', 'title': 'Scorpions'}
+{'author': 'Jane Austen', 'title': 'Sense and Sensibility'}
+{'author': 'Charlotte Bronte', 'title': 'Shirley'}
+{'author': 'Elizabeth George Speare', 'title': 'Sign of the Beaver'}
+{'author': 'George Eliot', 'title': 'Silas Marner'}
+{'author': 'Toni Morrison', 'title': 'Song of Solomon'}
+{'author': 'D.H. Lawrence', 'title': 'Sons and Lovers'}
+{'author': 'Martin Luther King Jr.', 'title': 'Stride toward Freedom'}
+{'author': 'Bette Greene', 'title': 'Summer of my German Soldier'}
+{'author': 'Katherine Paterson', 'title': 'Summer of the Swans'}
+{'author': 'Benjamin Disraeli', 'title': 'Sybil'}
+{'author': 'Richard Francis Burton', 'title': 'Tales from the Arabian Nights'}
+{'author': 'Edgar Allan Poe', 'title': 'Tales of Mystery and Imagination'}
+{'author': 'Nathaniel Hawthorne', 'title': 'Tanglewood Tales for Girls and Boys'}
+{'author': 'Agatha Christie', 'title': 'Ten Little Indians'}
+{'author': 'Thomas Hardy', 'title': "Tess of the d'Urbervilles"}
+{'author': 'S. E. Hinton', 'title': 'Tex'}
+{'author': 'Carlo Collodi', 'title': 'The Adventures of Pinocchio'}
+{'author': 'Edith Wharton', 'title': 'The Age of Innocence'}
+{'author': 'Henry James', 'title': 'The Aspern Papers'}
+{'author': 'Ernest J. Gaines', 'title': 'The Autobiography of Miss Jane Pittman'}
+{'author': 'Kate Chopin', 'title': 'The Awakening'}
+{'author': 'Roald Dahl', 'title': 'The BFG'}
+{'author': 'Raymond Chandler', 'title': 'The Big Sleep'}
+{'author': 'Pearl Buck', 'title': 'The Big Wave'}
+{'author': 'Robert Louis Stevenson', 'title': 'The Black Arrow'}
+{'author': 'Honore De Balzac', 'title': 'The Black Sheep'}
+{'author': 'Milan Kundera', 'title': 'The Book of Laughter and Forgetting'}
+{'author': 'Beryl Bainbridge', 'title': 'The Bottle Factory Outing'}
+{'author': 'Thornton Wilder', 'title': 'The Bridge of San Luis Rey'}
+{'author': 'Fyodor Dostoyevsky', 'title': 'The Brothers Karamazov'}
+{'author': 'Jack London', 'title': 'The Call of the Wild'}
+{'author': 'Anton Chekhov', 'title': 'The Cherry Orchard'}
+{'author': 'Robert Cormier', 'title': 'The Chocolate War'}
+{'author': 'Chaim Potok', 'title': 'The Chosen'}
+{'author': 'William Shakespeare', 'title': 'The Comedy of Errors'}
+{'author': 'Alexandre Dumas', 'title': 'The Count of Monte Cristo'}
+{'author': 'Arthur Miller', 'title': 'The Crucible'}
+{'author': 'James Fenimore Cooper', 'title': 'The Deerslayer'}
+{'author': 'George Grossmith and Weedon Grossmith', 'title': 'The Diary of a Nobody'}
+{'author': 'Norman Mailer', 'title': "The Executioner's Song"}
+{'author': 'Isaac Asimov', 'title': 'The Fantastic Voyage'}
+{'author': 'Daniel Defoe', 'title': 'The Fortunes and Misfortunes of the Famous Moll Flanders'}
+{'author': 'O. Henry', 'title': 'The Four Million'}
+{'author': 'Tennessee Williams', 'title': 'The Glass Menagerie'}
+{'author': 'Pearl Buck', 'title': 'The Good Earth'}
+{'author': 'Ford Madox Ford', 'title': 'The Good Soldier'}
+{'author': 'John Steinbeck', 'title': 'The Grapes of Wrath'}
+{'author': 'F. Scott Fitzgerald', 'title': 'The Great Gatsby'}
+{'author': 'Carson McCullers', 'title': 'The Heart is a Lonely Hunter'}
+{'author': 'J.R.R. Tolkein', 'title': 'The Hobbit'}
+{'author': 'Arthur Conan Doyle', 'title': 'The Hound of the Baskervilles'}
+{'author': 'Virginia Hamilton', 'title': 'The House of Dies Drear'}
+{'author': 'Victor Hugo', 'title': 'The Hunchback of Notre-Dame'}
+{'author': 'Oscar Wilde', 'title': 'The Importance of Being Earnest'}
+{'author': 'Rudyard Kipling', 'title': 'The Jungle Book'}
+{'author': 'Mary Renault', 'title': 'The King Must Die'}
+{'author': 'Laurence Sterne', 'title': 'The Life and Opinions of Tristram Shandy, Gentleman'}
+{'author': 'C.S. Lewis', 'title': 'The Lion, the Witch, and the Wardrobe'}
+{'author': 'J.R.R. Tolkein', 'title': 'The Lord of the Rings'}
+{'author': 'G.K. Chesterton', 'title': 'The Man Who Was Thursday'}
+{'author': 'Rudyard Kipling', 'title': 'The Man Who Would Be King'}
+{'author': 'Alexandre Dumas', 'title': 'The Man in the Iron Mask'}
+{'author': 'Thornton Wilder', 'title': 'The Matchmaker'}
+{'author': 'Carson McCullers', 'title': 'The Member of the Wedding'}
+{'author': 'William Shakespeare', 'title': 'The Merchant of Venice'}
+{'author': 'William Shakespeare', 'title': 'The Merry Wives of Windsor'}
+{'author': 'George Eliot', 'title': 'The Mill on the Floss'}
+{'author': 'Wilkie Collins', 'title': 'The Moonstone'}
+{'author': 'G.K. Chesterton', 'title': 'The Napoleon of Notting Hill'}
+{'author': 'Homer', 'title': 'The Odyssey'}
+{'author': 'Charles Dickens', 'title': 'The Old Curiosity Shop'}
+{'author': 'Ernest Hemingway', 'title': 'The Old Man and the Sea'}
+{'author': 'John Steinbeck', 'title': 'The Pearl'}
+{'author': 'Primo Levi', 'title': 'The Periodic Table'}
+{'author': 'Gaston Leroux', 'title': 'The Phantom of the Opera'}
+{'author': 'Charles Dickens', 'title': 'The Pickwick Papers'}
+{'author': 'Oscar Wilde', 'title': 'The Picture of Dorian Gray'}
+{'author': 'Albert Camus', 'title': 'The Plague'}
+{'author': 'Henry James', 'title': 'The Portrait of a Lady'}
+{'author': 'Muriel Spark', 'title': 'The Prime of Miss Jean Brodie'}
+{'author': 'Niccol\xc3\xb2 Machiavelli', 'title': 'The Prince'}
+{'author': 'Mark Twain', 'title': 'The Prince and the Pauper'}
+{'author': 'George MacDonald', 'title': 'The Princess and Curdie'}
+{'author': 'George MacDonald', 'title': 'The Princess and the Goblin'}
+{'author': 'Anthony Hope', 'title': 'The Prisoner of Zenda'}
+{'author': 'Charlotte Bronte', 'title': 'The Professor'}
+{'author': 'Nancy Mitford', 'title': 'The Pursuit Of Love'}
+{'author': 'Graham Greene', 'title': 'The Quiet American'}
+{'author': 'D. H. Lawrence', 'title': 'The Rainbow'}
+{'author': 'John Steinbeck', 'title': 'The Red Pony'}
+{'author': 'Thomas Hardy', 'title': 'The Return of the Native'}
+{'author': 'Erskine Childers', 'title': 'The Riddle of the Sands'}
+{'author': 'Richard B. Sheridan', 'title': 'The Rivals'}
+{'author': 'Nathaniel Hawthorne', 'title': 'The Scarlet Letter'}
+{'author': 'Joseph Conrad', 'title': 'The Secret Agent'}
+{'author': 'Frances Hodgson Burnett', 'title': 'The Secret Garden'}
+{'author': 'Washington Irving', 'title': 'The Sketch Book of Geoffrey Crayon'}
+{'author': 'Paula Fox', 'title': 'The Slave Dancer'}
+{'author': 'Helen Keller', 'title': 'The Story of my Life'}
+{'author': 'Robert Louis Stevenson', 'title': 'The Strange Case of Dr Jekyll and Mr Hyde'}
+{'author': 'Albert Camus', 'title': 'The Stranger'}
+{'author': 'William Shakespeare', 'title': 'The Taming of the Shrew'}
+{'author': 'William Shakespeare', 'title': 'The Tempest'}
+{'author': 'Anne Bronte', 'title': 'The Tenant of Wildfell Hall'}
+{'author': 'John Buchan', 'title': 'The Thirty-Nine Steps'}
+{'author': 'Alexandre Dumas', 'title': 'The Three Musketeers'}
+{'author': 'H.G. Wells', 'title': 'The Time Machine'}
+{'author': 'Gunter Grass', 'title': 'The Tin Drum'}
+{'author': 'Franz Kafka', 'title': 'The Trial'}
+{'author': 'Henry James', 'title': 'The Turn of the Screw'}
+{'author': 'Charles Kingsley', 'title': 'The Water Babies'}
+{'author': 'Anthony Trollope', 'title': 'The Way We Live Now'}
+{'author': 'Kenneth Grahame', 'title': 'The Wind in the Willows'}
+{'author': 'William Shakespeare', 'title': "The Winter's Tale"}
+{'author': 'Elizabeth George Speare', 'title': 'The Witch of Black Bird Pond'}
+{'author': 'Wilkie Collins', 'title': 'The Woman in White'}
+{'author': 'L. Frank Baum', 'title': 'The Wonderful Wizard of Oz'}
+{'author': 'Marjorie Kinnan Rawlings', 'title': 'The Yearling'}
+{'author': 'Chinua Achebe', 'title': 'Things Fall Apart'}
+{'author': 'Jerome K. Jerome', 'title': 'Three Men in a Boat'}
+{'author': 'Lewis Carroll', 'title': 'Through The Looking Glass'}
+{'author': 'William Shakespeare', 'title': 'Timon of Athens'}
+{'author': 'John Le Carre', 'title': 'Tinker Tailor Soldier Spy'}
+{'author': 'Harper Lee', 'title': 'To Kill a Mockingbird'}
+{'author': 'E.R. Braithwaite', 'title': 'To Sir with Love'}
+{'author': 'Henry Fielding', 'title': 'Tom Jones'}
+{'author': 'Robert Louis Stevenson', 'title': 'Treasure Island'}
+{'author': 'Laurence Sterne', 'title': 'Tristram Shandy'}
+{'author': 'William Shakespeare', 'title': 'Twelfth Night'}
+{'author': 'John Dos Passos', 'title': 'USA'}
+{'author': 'James Joyce', 'title': 'Ulysses'}
+{'author': 'Harriet Beecher Stowe', 'title': "Uncle Tom's Cabin"}
+{'author': 'Thomas Hardy', 'title': 'Under the Greenwood Tree'}
+{'author': 'Thomas More', 'title': 'Utopia'}
+{'author': 'William Makepeace Thackeray', 'title': 'Vanity Fair'}
+{'author': 'Charlotte Bronte', 'title': 'Villette'}
+{'author': 'J.M. Coetzee', 'title': 'Waiting for the Barbarians'}
+{'author': 'Henry David Thoreau', 'title': 'Walden'}
+{'author': 'J.H. Collier', 'title': 'War Comes to Willie Freeman'}
+{'author': 'Leo Tolstoy', 'title': 'War and Peace'}
+{'author': 'Sir Walter Scott', 'title': 'Waverley'}
+{'author': 'Charles Kingsley', 'title': 'Westward Ho!'}
+{'author': 'Susan Coolidge', 'title': 'What Katy Did'}
+{'author': 'Hal Borland', 'title': 'When the Legends Die'}
+{'author': 'Vera and Bill Cleaver', 'title': 'Where the Lilies Bloom'}
+{'author': 'Wilson Rawls', 'title': 'Where the Red Fern Grows'}
+{'author': 'Jack London', 'title': 'White Fang'}
+{'author': "Flannery O'Connor", 'title': 'Wise Blood'}
+{'author': 'Angela Carter', 'title': 'Wise Children'}
+{'author': 'Madeleine L\xe2\x80\x99Engle', 'title': 'Wrinkle in Time'}
+{'author': 'Emily Bronte', 'title': 'Wuthering Heights'}
+{'author': 'Virginia Hamilton', 'title': 'Zeely'}

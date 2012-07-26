@@ -6,18 +6,400 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import api.HTTPSchemas
-import os, pprint, utils
+import pprint, utils
 import libs.sms
+
+import servers.web2.settings as settings
 
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
+
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
 
 # TODO: stricter input schema validation
 
-@stamped_view(schema=HTTPIndexSchema)
+TRAVIS = False
+import travis_test
+
+@stamped_view()
+def blog(request):
+    return HttpResponseRedirect('http://blog.stamped.com/')
+
+@stamped_view(schema=HTTPWebTimeSlice, ignore_extra_params=True)
+def profile(request, schema, **kwargs):
+    return handle_profile(request, schema, **kwargs)
+
+@stamped_view(schema=HTTPWebTimeMapSlice, ignore_extra_params=True)
+def map(request, schema, **kwargs):
+    return handle_map(request, schema, **kwargs)
+
+def handle_profile(request, schema, **kwargs):
+    url_format = "/{screen_name}"
+    prev_url   = None
+    next_url   = None
+    
+    # TODO: enforce stricter validity checking on offset and limit
+    
+    schema.offset = schema.offset or 0
+    schema.limit  = schema.limit  or 25
+    screen_name   = schema.screen_name
+    ajax          = schema.ajax
+    mobile        = schema.mobile
+    
+    del schema.ajax
+    del schema.mobile
+    
+    friends       = []
+    followers     = []
+    
+    if ajax and schema.user_id is not None:
+        user        = None
+        user_id     = schema.user_id
+    else:
+        if TRAVIS:
+            user = travis_test.user
+        else:
+            user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
+        user_id     = user['user_id']
+    
+    # simple sanity check validation of user_id
+    if utils.tryGetObjectId(user_id) is None:
+        raise StampedInputError("invalid user_id")
+    
+    #utils.log(pprint.pformat(schema.dataExport()))
+    schema_data = schema.dataExport()
+    del schema_data['screen_name']
+    schema_data['user_id'] = user_id
+    
+    if TRAVIS:
+        stamps = travis_test.stamps
+    else:
+        stamps = stampedAPIProxy.getUserStamps(schema_data)
+    
+    if user is None:
+        user = {
+            'user_id' : user_id
+        }
+        
+        if len(stamps) > 0:
+            user2    = stamps[0]['user']
+            user2_id = user2['user_id']
+            
+            if user2_id is None or user2_id != user_id:
+                raise StampedInputError("mismatched user_id")
+            else:
+                user.update(user2)
+        else:
+            user = stampedAPIProxy.getUser(dict(user_id=user_id))
+            
+            if user['user_id'] is None or user['user_id'] != user_id:
+                raise StampedInputError("mismatched user_id")
+    
+    """
+    if not (ajax | mobile):
+        friends     = stampedAPIProxy.getFriends  (user_id, limit=3)
+        followers   = stampedAPIProxy.getFollowers(user_id, limit=3)
+        
+        friends   = shuffle_split_users(friends)
+        followers = shuffle_split_users(followers)
+    """
+    
+    #utils.log("USER:")
+    #utils.log(pprint.pformat(user))
+    
+    #utils.log("STAMPS:")
+    #utils.log(pprint.pformat(stamps))
+    
+    #utils.log("FRIENDS:")
+    #utils.log(pprint.pformat(friends))
+    
+    #utils.log("FOLLOWERS:")
+    #utils.log(pprint.pformat(followers))
+    
+    # modify schema for purposes of next / prev gallery nav links
+    schema.ajax    = True
+    schema.user_id = user['user_id']
+    
+    if schema.offset > 0:
+        prev_url = format_url(url_format, schema, {
+            'offset' : max(0, schema.offset - schema.limit), 
+        })
+    
+    if len(stamps) >= schema.limit:
+        next_url = format_url(url_format, schema, {
+            'offset' : schema.offset + len(stamps), 
+        })
+    
+    #utils.log("PREV: %s" % prev_url)
+    #utils.log("NEXT: %s" % next_url)
+    
+    title   = "Stamped - %s" % user['screen_name']
+    sdetail = kwargs.get('sdetail', None)
+    stamp   = kwargs.get('stamp',   None)
+    entity  = kwargs.get('entity',  None)
+    url     = request.build_absolute_uri(request.get_full_path())
+    
+    body_classes = get_body_classes('profile', schema)
+    if sdetail is not None:
+        body_classes += " sdetail_popup";
+    
+    #if not mobile:
+    #    body_classes += " wide-body";
+    
+    if sdetail is not None and entity is not None:
+        title = "%s - %s" % (title, stamp['entity']['title'])
+    
+    template = 'profile.html'
+    
+    return stamped_render(request, template, {
+        'user'                  : user, 
+        'stamps'                : stamps, 
+        
+        'friends'               : friends, 
+        'followers'             : followers, 
+        
+        'prev_url'              : prev_url, 
+        'next_url'              : next_url, 
+        
+        'body_classes'          : body_classes, 
+        'sdetail'               : sdetail, 
+        'stamp'                 : stamp, 
+        'entity'                : entity, 
+        'title'                 : title, 
+        'URL'                   : url, 
+        'mobile'                : mobile, 
+    }, preload=[ 'user', 'sdetail', 'mobile' ])
+
+def handle_map(request, schema, **kwargs):
+    screen_name     = schema.screen_name
+    stamp_id        = schema.stamp_id
+    ajax            = schema.ajax
+    lite            = schema.lite
+    mobile          = schema.mobile
+    schema.offset   = schema.offset or 0
+    schema.limit    = 25 if lite else 1000 # TODO: customize this
+    
+    uri             = request.get_full_path()
+    url             = request.build_absolute_uri(uri)
+    
+    if mobile:
+        redirect_uri = "/%s?category=place" % screen_name
+        redirect_url = request.build_absolute_uri(redirect_uri)
+        logs.info("redirecting mobile map from '%s' to: '%s'" % (uri, redirect_uri))
+        
+        return HttpResponseRedirect(redirect_url)
+    
+    del schema.stamp_id
+    del schema.ajax
+    del schema.lite
+    del schema.mobile
+    
+    user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+    user_id     = user['user_id']
+    
+    # simple sanity check validation of user_id
+    if utils.tryGetObjectId(user_id) is None:
+        raise StampedInputError("invalid user_id")
+    
+    s = schema.dataExport()
+    del s['screen_name']
+    
+    s['user_id']  = user_id
+    s['category'] = 'place'
+    
+    stamps = stampedAPIProxy.getUserStamps(s)
+    stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
+    
+    if len(stamps) <= 0:
+        redirect_uri = "/%s?category=place" % screen_name
+        redirect_url = request.build_absolute_uri(redirect_uri)
+        logs.info("redirecting empty map from '%s' to: '%s'" % (uri, redirect_uri))
+        
+        return HttpResponseRedirect(redirect_url)
+    
+    for stamp in stamps:
+        subcategory = stamp['entity']['subcategory']
+        
+        if '_' in subcategory:
+            stamp['entity']['subcategory'] = subcategory.replace('_', ' ')
+    
+    body_classes = get_body_classes('map collapsed-header', schema)
+    
+    title = "Stamped - %s map" % user['screen_name']
+    
+    return stamped_render(request, 'map.html', {
+        'user'          : user, 
+        'stamps'        : stamps, 
+        'lite'          : lite, 
+        
+        'stamp_id'      : stamp_id, 
+        'body_classes'  : body_classes, 
+        'title'         : title, 
+        'URL'           : url, 
+        'mobile'        : mobile, 
+    }, preload=[ 'user', 'stamps', 'stamp_id', 'lite' ])
+
+@stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
+def sdetail(request, schema, **kwargs):
+    body_classes = get_body_classes('sdetail collapsed-header', schema)
+    ajax         = schema.ajax
+    
+    del schema.ajax
+    
+    #import time
+    #time.sleep(2)
+    
+    logs.info('SDETAIL: %s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
+    
+    user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+    stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
+    
+    if stamp is None:
+        raise StampedUnavailableError("stamp does not exist")
+    
+    stamp    = convert_stamp(stamp)
+    previews = stamp['previews']
+    users    = []
+    
+    if 'likes' in previews and len(previews['likes']) > 0:
+        likes = previews['likes']
+        
+        for u in likes:
+            u['preview_type'] = 'like'
+        
+        likes = shuffle_split_users(likes)
+        users.extend(likes)
+    
+    if 'todos' in previews and len(previews['todos']) > 0:
+        todos = previews['todos']
+        
+        for u in todos:
+            u['preview_type'] = 'todo'
+        
+        todos = shuffle_split_users(todos)
+        users.extend(todos)
+    
+    template = 'sdetail.html'
+    
+    #users   = shuffle_split_users(users)
+    entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
+    sdetail = stamped_render(request, template, {
+        'user'               : user, 
+        'feedback_users'     : users, 
+        'stamp'              : stamp, 
+        'entity'             : entity
+    })
+    
+    if ajax:
+        return sdetail
+    else:
+        return handle_profile(request, HTTPWebTimeSlice().dataImport({
+            'screen_name'   : schema.screen_name
+        }), user=user, sdetail=sdetail.content, stamp=stamp, entity=entity)
+
+@stamped_view(schema=HTTPEntityId)
+def menu(request, schema, **kwargs):
+    entity  = stampedAPIProxy.getEntity(schema.entity_id)
+    menu    = stampedAPIProxy.getEntityMenu(schema.entity_id)
+    
+    #utils.getFile(menu['attribution_image_link'])
+    
+    return stamped_render(request, 'menu.html', {
+        'menu'   : menu, 
+        'entity' : entity, 
+    })
+
+@stamped_view(schema=HTTPStampId)
+def popup_sdetail_social(request, schema, **kwargs):
+    params = schema.dataExport()
+    likes  = stampedAPIProxy.getLikes(schema.stamp_id)
+    todos  = stampedAPIProxy.getTodos(schema.stamp_id)
+    users  = []
+    
+    for user in likes:
+        user['preview_type'] = 'like'
+    
+    for user in todos:
+        user['preview_type'] = 'todo'
+    
+    users.extend(likes)
+    users.extend(todos)
+    
+    users = shuffle_split_users(users)
+    num_users = len(users)
+    
+    title = ""
+    popup = "popup-sdetail-social"
+    like  = "Like%s" % ("s" if len(likes) != 1 else "")
+    todo  = "Todo%s" % ("s" if len(todos) != 1 else "")
+    
+    if len(likes) > 0:
+        if len(todos) > 0:
+            title = "%d %s and %d %s" % (len(likes), like, len(todos), todo)
+        else:
+            title = "%d %s" % (len(likes), like)
+    elif len(todos) > 0:
+        title = "%d %s" % (len(todos), todo)
+        popup = "%s popup-todos" % popup
+    
+    return stamped_render(request, 'popup.html', {
+        'popup_title' : title, 
+        'popup_class' : popup, 
+        'users'       : users, 
+    })
+
+@stamped_view(schema=HTTPUserId)
+def popup_followers(request, schema, **kwargs):
+    users = stampedAPIProxy.getFollowers(schema.user_id)
+    num_users = len(users)
+    
+    return stamped_render(request, 'popup.html', {
+        'popup_title' : "%d Followers" % num_users, 
+        'popup_class' : 'popup-followers', 
+        'users'       : users, 
+    })
+
+@stamped_view(schema=HTTPUserId)
+def popup_following(request, schema, **kwargs):
+    users = stampedAPIProxy.getFriends(schema.user_id)
+    num_users = len(users)
+    
+    return stamped_render(request, 'popup.html', {
+        'popup_title' : "Following %d" % num_users, 
+        'popup_class' : 'popup-following', 
+        'users'       : users, 
+    })
+
+@stamped_view()
+def test_view(request, **kwargs):
+    user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
+    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
+    
+    return stamped_render(request, 'test.html', {
+        'user'  : user, 
+        'stamp' : stamp
+    })
+
+@stamped_view()
+def temp_view(request, **kwargs):
+    return stamped_render(request, 'temp.html', {
+        'N' : range(10)
+    })
+
+@stamped_view(schema=HTTPDownloadAppSchema)
+@require_http_methods(["GET", "POST"])
+def download_app(request, schema, **kwargs):
+    sms_client = libs.sms.globalSMSClient()
+    result = sms_client.send_sms(schema.phone_number)
+    
+    return transform_output(True)
+
+@stamped_view()
+def download(request, **kwargs):
+    return HttpResponseRedirect(settings.STAMPED_DOWNLOAD_APP_LINK)
+
+@stamped_view(schema=HTTPIndexSchema, ignore_extra_params=True)
 def index(request, schema, **kwargs):
     tastemakers = [
         {
@@ -27,10 +409,10 @@ def index(request, schema, **kwargs):
             'color_secondary'   : 'FFEA00', 
         }, 
         {
-            'screen_name'       : 'rebeccaminkoff', 
-            'image_url'         : 'http://static.stamped.com/users/rebeccaminkoff-60x60.jpg', 
-            'color_primary'     : '04004F', 
-            'color_secondary'   : '46008C', 
+            'screen_name'       : 'urbandaddy', 
+            'image_url'         : 'http://static.stamped.com/users/urbandaddy-60x60.jpg', 
+            'color_primary'     : '9A0004', 
+            'color_secondary'   : '000130', 
         }, 
         {
             'screen_name'       : 'nymag', 
@@ -58,11 +440,14 @@ def index(request, schema, **kwargs):
         'body_classes'      : body_classes, 
         'tastemakers'       : tastemakers, 
         'page'              : 'index', 
+        'title'             : 'Stamped', 
+        'mobile'            : schema.mobile
     })
 
 @stamped_view()
 def about(request, **kwargs):
-    body_classes = "about main"
+    body_classes = "about main main-animating"
+    mobile   = kwargs.get('mobile', False)
     
     founders = [
         {
@@ -71,7 +456,7 @@ def about(request, **kwargs):
             'screen_name'       : 'robby', 
             'color_primary'     : '00119F', 
             'color_secondary'   : '6C7DFF', 
-            'desc'              : 'Robby worked at Google for 4 years, on Gmail launches and most recently as Product Manager for the Ad Exchange team. He built the first Stamped prototype in his tiny NYC apartment. He graduated from Northwestern, and though he may share brotherly love with Bart Stein, the two founders are not related.', 
+            'desc'              : "Robby worked at Google for 4 years, on Gmail launches and most recently as Product Manager for the Ad Exchange. He built the first Stamped prototype in his tiny NYC apartment. He graduated from Northwestern and is not Bart's brother.", 
             'twitter'           : 'rmstein', 
             'inner'             : range(2), 
         }, 
@@ -81,7 +466,7 @@ def about(request, **kwargs):
             'screen_name'       : 'kevin', 
             'color_primary'     : '070067', 
             'color_secondary'   : '005B9A', 
-            'desc'              : 'Kevin previously led development of risk analytics technology at a hedge fund in New York. He and Robby also built a social calendering app together at Northwestern; a movie about it, "The Social Calender," has not yet been made.', 
+            'desc'              : 'Kevin previously led development of risk analytics technology at a hedge fund in New York. He and Robby also built a social calendering app together at Northwestern; a movie about it, "The Social Calendar," has not yet been made.', 
             'twitter'           : 'kevinpalms', 
             'inner'             : range(2), 
         }, 
@@ -205,358 +590,31 @@ def about(request, **kwargs):
         'founders'          : founders, 
         'team'              : team, 
         'advisors'          : advisors, 
+        'title'             : 'Stamped - About Us', 
+        'mobile'            : mobile, 
     })
 
 @stamped_view()
-def blog(request):
-    return HttpResponseRedirect('http://blog.stamped.com/')
-
-@stamped_view(schema=HTTPWebTimeSlice, ignore_extra_params=True)
-def profile(request, schema, **kwargs):
-    return handle_profile(request, schema, **kwargs)
-
-@stamped_view(schema=HTTPWebTimeMapSlice, ignore_extra_params=True)
-def map(request, schema, **kwargs):
-    return handle_map(request, schema, **kwargs)
-
-def handle_profile(request, schema, **kwargs):
-    url_format = "/{screen_name}"
-    prev_url   = None
-    next_url   = None
+def jobs(request, **kwargs):
+    body_classes = "jobs main main-animating"
+    mobile       = schema.mobile
     
-    # TODO: enforce stricter validity checking on offset and limit
-    
-    schema.offset = schema.offset or 0
-    schema.limit  = schema.limit  or 25
-    screen_name   = schema.screen_name
-    ajax          = schema.ajax
-    mobile        = schema.mobile
-    
-    del schema.ajax
-    del schema.mobile
-    
-    friends       = []
-    followers     = []
-    
-    if ajax and schema.user_id is not None:
-        user        = None
-        user_id     = schema.user_id
-    else:
-        user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
-        user_id     = user['user_id']
-    
-    # simple sanity check validation of user_id
-    if utils.tryGetObjectId(user_id) is None:
-        raise StampedInputError("invalid user_id")
-    
-    #utils.log(pprint.pformat(schema.dataExport()))
-    schema_data = schema.dataExport()
-    del schema_data['screen_name']
-    schema_data['user_id'] = user_id
-    
-    stamps = stampedAPIProxy.getUserStamps(schema_data)
-    
-    if user is None:
-        user = {
-            'user_id' : user_id
-        }
-        
-        if len(stamps) > 0:
-            user2    = stamps[0]['user']
-            user2_id = user2['user_id']
-            
-            if user2_id is None or user2_id != user_id:
-                raise StampedInputError("mismatched user_id")
-            else:
-                user.update(user2)
-        else:
-            user = stampedAPIProxy.getUser(dict(user_id=user_id))
-            
-            if user['user_id'] is None or user['user_id'] != user_id:
-                raise StampedInputError("mismatched user_id")
-    
-    if not (ajax | mobile):
-        friends     = stampedAPIProxy.getFriends  (user_id, limit=3)
-        followers   = stampedAPIProxy.getFollowers(user_id, limit=3)
-        
-        friends   = shuffle_split_users(friends)
-        followers = shuffle_split_users(followers)
-    
-    #utils.log("USER:")
-    #utils.log(pprint.pformat(user))
-    
-    #utils.log("STAMPS:")
-    #utils.log(pprint.pformat(stamps))
-    
-    #utils.log("FRIENDS:")
-    #utils.log(pprint.pformat(friends))
-    
-    #utils.log("FOLLOWERS:")
-    #utils.log(pprint.pformat(followers))
-    
-    # modify schema for purposes of next / prev gallery nav links
-    schema.ajax    = True
-    schema.user_id = user['user_id']
-    
-    if schema.offset > 0:
-        prev_url = format_url(url_format, schema, {
-            'offset' : max(0, schema.offset - schema.limit), 
-        })
-    
-    if len(stamps) >= schema.limit:
-        next_url = format_url(url_format, schema, {
-            'offset' : schema.offset + len(stamps), 
-        })
-    
-    #utils.log("PREV: %s" % prev_url)
-    #utils.log("NEXT: %s" % next_url)
-    
-    title   = "Stamped - %s" % user['screen_name']
-    sdetail = kwargs.get('sdetail', None)
-    stamp   = kwargs.get('stamp',   None)
-    entity  = kwargs.get('entity',  None)
-    url     = request.build_absolute_uri(request.get_full_path())
-    
-    body_classes = get_body_classes('profile', schema)
-    if sdetail is not None:
-        body_classes += " sdetail_popup";
-    
-    if sdetail is not None and entity is not None:
-        title = "%s - %s" % (title, stamp['entity']['title'])
-    
-    template = 'profile.html'
-    
-    return stamped_render(request, template, {
-        'user'                  : user, 
-        'stamps'                : stamps, 
-        
-        'friends'               : friends, 
-        'followers'             : followers, 
-        
-        'prev_url'              : prev_url, 
-        'next_url'              : next_url, 
-        
-        'body_classes'          : body_classes, 
-        'sdetail'               : sdetail, 
-        'stamp'                 : stamp, 
-        'entity'                : entity, 
-        'title'                 : title, 
-        'URL'                   : url, 
-        'mobile'                : mobile, 
-    }, preload=[ 'user', 'sdetail', 'mobile' ])
-
-def handle_map(request, schema, **kwargs):
-    screen_name     = schema.screen_name
-    stamp_id        = schema.stamp_id
-    ajax            = schema.ajax
-    lite            = schema.lite
-    mobile          = schema.mobile
-    schema.offset   = schema.offset or 0
-    schema.limit    = 25 if lite else 1000 # TODO: customize this
-    
-    uri             = request.get_full_path()
-    url             = request.build_absolute_uri(uri)
-    
-    if mobile:
-        redirect_uri = "/%s?category=place" % screen_name
-        redirect_url = request.build_absolute_uri(redirect_uri)
-        logs.info("redirecting mobile map from '%s' to: '%s'" % (uri, redirect_uri))
-        
-        return HttpResponseRedirect(redirect_url)
-    
-    del schema.stamp_id
-    del schema.ajax
-    del schema.lite
-    del schema.mobile
-    
-    user        = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-    user_id     = user['user_id']
-    
-    # simple sanity check validation of user_id
-    if utils.tryGetObjectId(user_id) is None:
-        raise StampedInputError("invalid user_id")
-    
-    s = schema.dataExport()
-    del s['screen_name']
-    
-    s['user_id']  = user_id
-    s['category'] = 'place'
-    
-    stamps = stampedAPIProxy.getUserStamps(s)
-    stamps = filter(lambda s: s['entity'].get('coordinates', None) is not None, stamps)
-    
-    for stamp in stamps:
-        subcategory = stamp['entity']['subcategory']
-        
-        if '_' in subcategory:
-            stamp['entity']['subcategory'] = subcategory.replace('_', ' ')
-    
-    body_classes = get_body_classes('map collapsed-header', schema)
-    
-    title = "Stamped - %s map" % user['screen_name']
-    
-    return stamped_render(request, 'map.html', {
-        'user'          : user, 
-        'stamps'        : stamps, 
-        'lite'          : lite, 
-        
-        'stamp_id'      : stamp_id, 
-        'body_classes'  : body_classes, 
-        'title'         : title, 
-        'URL'           : url, 
-    }, preload=[ 'user', 'stamps', 'stamp_id', 'lite' ])
-
-@stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
-def sdetail(request, schema, **kwargs):
-    body_classes = get_body_classes('sdetail collapsed-header', schema)
-    ajax         = schema.ajax
-    
-    del schema.ajax
-    
-    #import time
-    #time.sleep(2)
-    
-    logs.info('SDETAIL: %s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
-    
-    user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
-    stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
-    
-    if stamp is None:
-        raise StampedUnavailableError("stamp does not exist")
-    
-    previews = stamp['previews']
-    users    = []
-    
-    if 'likes' in previews and len(previews['likes']) > 0:
-        likes = previews['likes']
-        
-        for u in likes:
-            u['preview_type'] = 'like'
-        
-        likes = shuffle_split_users(likes)
-        users.extend(likes)
-    
-    if 'todos' in previews and len(previews['todos']) > 0:
-        todos = previews['todos']
-        
-        for u in todos:
-            u['preview_type'] = 'todo'
-        
-        todos = shuffle_split_users(todos)
-        users.extend(todos)
-    
-    template = 'sdetail.html'
-    
-    #users   = shuffle_split_users(users)
-    entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
-    sdetail = stamped_render(request, template, {
-        'user'               : user, 
-        'feedback_users'     : users, 
-        'stamp'              : stamp, 
-        'entity'             : entity, 
-    })
-    
-    if ajax:
-        return sdetail
-    else:
-        return handle_profile(request, HTTPWebTimeSlice().dataImport({
-            'screen_name'   : schema.screen_name
-        }), user=user, sdetail=sdetail.content, stamp=stamp, entity=entity)
-
-@stamped_view(schema=HTTPEntityId)
-def menu(request, schema, **kwargs):
-    entity  = stampedAPIProxy.getEntity(schema.entity_id)
-    menu    = stampedAPIProxy.getEntityMenu(schema.entity_id)
-    
-    #utils.getFile(menu['attribution_image_link'])
-    
-    return stamped_render(request, 'menu.html', {
-        'menu'   : menu, 
-        'entity' : entity, 
-    })
-
-@stamped_view(schema=HTTPStampId)
-def popup_sdetail_social(request, schema, **kwargs):
-    params = schema.dataExport()
-    likes  = stampedAPIProxy.getLikes(schema.stamp_id)
-    todos  = stampedAPIProxy.getTodos(schema.stamp_id)
-    users  = []
-    
-    for user in likes:
-        user['preview_type'] = 'like'
-    
-    for user in todos:
-        user['preview_type'] = 'todo'
-    
-    users.extend(likes)
-    users.extend(todos)
-    
-    users = shuffle_split_users(users)
-    num_users = len(users)
-    
-    title = ""
-    popup = "popup-sdetail-social"
-    like  = "Like%s" % ("s" if len(likes) != 1 else "")
-    todo  = "Todo%s" % ("s" if len(todos) != 1 else "")
-    
-    if len(likes) > 0:
-        if len(todos) > 0:
-            title = "%d %s and %d %s" % (len(likes), like, len(todos), todo)
-        else:
-            title = "%d %s" % (len(likes), like)
-    elif len(todos) > 0:
-        title = "%d %s" % (len(todos), todo)
-        popup = "%s popup-todos" % popup
-    
-    return stamped_render(request, 'popup.html', {
-        'popup_title' : title, 
-        'popup_class' : popup, 
-        'users'       : users, 
-    })
-
-@stamped_view(schema=HTTPUserId)
-def popup_followers(request, schema, **kwargs):
-    users = stampedAPIProxy.getFollowers(schema.user_id)
-    num_users = len(users)
-    
-    return stamped_render(request, 'popup.html', {
-        'popup_title' : "%d Followers" % num_users, 
-        'popup_class' : 'popup-followers', 
-        'users'       : users, 
-    })
-
-@stamped_view(schema=HTTPUserId)
-def popup_following(request, schema, **kwargs):
-    users = stampedAPIProxy.getFriends(schema.user_id)
-    num_users = len(users)
-    
-    return stamped_render(request, 'popup.html', {
-        'popup_title' : "Following %d" % num_users, 
-        'popup_class' : 'popup-following', 
-        'users'       : users, 
+    return stamped_render(request, 'jobs.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'jobs', 
+        'title'             : 'Stamped - Jobs', 
+        'mobile'            : mobile, 
     })
 
 @stamped_view()
-def test_view(request, **kwargs):
-    user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
-    stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
+def legal(request, **kwargs):
+    body_classes = "legal main"
+    mobile       = kwargs.get('mobile', False)
     
-    return stamped_render(request, 'test.html', {
-        'user'  : user, 
-        'stamp' : stamp
-    })
-
-@stamped_view()
-def temp_view(request, **kwargs):
-    return stamped_render(request, 'temp.html', {
-        'N' : range(10)
-    })
-
-@stamped_view(schema=HTTPDownloadAppSchema)
-@require_http_methods(["POST"])
-def download_app(request, schema, **kwargs):
-    sms_client = libs.sms.globalSMSClient()
-    result = sms_client.send_sms(schema.phone_number)
-    
-    return transform_output(True)
+    return stamped_render(request, 'legal.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'legal', 
+        'title'             : 'Stamped - Legal', 
+        'mobile'            : mobile, 
+    }, preload=[ 'page' ])
 

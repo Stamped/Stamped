@@ -1,0 +1,553 @@
+/*! retina.less - Stamped.com retina-screen-specific styles
+ * 
+ * NOTE: the css version of this file is auto-generated, so only edit the original 
+ * less version if you don't want your changes to be overwritten.
+ * 
+ * NOTE: this file will only be included if we're on a retina display after all other 
+ * core stylesheets have been imported (e.g., except for IE-hack stylesheets).
+ * 
+ * Copyright (c) 2011-2012 Stamped Inc.
+ */
+
+/*#stamped-logo, .stamped-logo {
+    background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
+    width:  368px;
+    height: 368px;
+    
+    // TODO: test retina offsets
+    top:   -130px;
+    left:  -90px;
+}*/
+
+.popup-large {
+    .popup-body {
+        .sms {
+            line-height: 62px;
+        }
+    }
+    
+    .app-store-button {
+        margin-left: -120px;
+    }
+}
+
+
+/* **************************************************************************
+                                    INDEX
+   ************************************************************************** */
+
+/*#main {
+    .pane-body {
+        width: 470px * 2;
+    }
+}
+
+.speech-bubble {
+    width: 190px * 2;
+}
+
+.user-video-preview {
+    width: 108px * 2;
+    
+    .user-video-preview-image {
+        height: 64px * 2;
+    }
+}
+
+#pane-4 {
+    .title, .desc {
+        max-width: 270px * 2;
+    }
+}
+
+#hero-video-preview {
+    left: 290px * 2;
+    margin-top: -129px * 2;
+    width: 470px * 2;
+    
+    .user-video-preview-image {
+        background: url(/assets/img/index/user_video_preview_bieber@2x.jpg) no-repeat;
+        height: 270px * 2;
+    }
+}*/
+
+/*
+.active-pane-0 #pane-nav-0, 
+.active-pane-1 #pane-nav-1, 
+.active-pane-2 #pane-nav-2, 
+.active-pane-3 #pane-nav-3, 
+.active-pane-4 #pane-nav-4 {
+    background-position: -70px 0;
+    
+    &:hover {
+        background-position: -70px 0;
+    }
+}*/
+
+/*
+.iphone-body-shadow {
+    background: url(/assets/img/index/iphone_main_shadow_sprite@2x.png) no-repeat;
+}
+
+#main-iphone {
+    margin: -530px 0 0 120px;
+    width:  377px * 2;
+    height: 564px * 2;
+}
+
+#iphone-hero {
+    position: absolute;
+    width:  370px * 2;
+    height: 614px * 2;
+}
+
+.iphone-body-shadow-0 {
+    top:   20px * 2;
+    left: -40px * 2;
+}
+
+.iphone-body-shadow-1 {
+    top:  70px * 2;
+    left: 60px * 2;
+}
+
+.iphone-body {
+    width:  289px * 2;
+    height: 564px * 2;
+}
+
+.iphone-body-lighting {
+    background: url(/assets/img/index/iphone_shine@2x.png) no-repeat;
+    
+    width:  288px * 2;
+    height: 564px * 2;
+}
+
+.iphone-body-overlay {
+    margin-left: -134px * 2;
+    
+    background: url(/assets/img/index/iphone_sprite@2x.png) no-repeat;
+    background-position: -600px 0;
+    
+    width:  289px * 2;
+    height: 564px * 2;
+}
+
+.iphone-screen {
+    width:  244px * 2;
+    height: 366px * 2;
+}
+
+.iphone-screen-inbox {
+    .iphone-inbox-header {
+        background: url(/assets/img/index/iphone_main_inbox_header@2x.png) no-repeat;
+        height: 51px * 2;
+    }
+    
+    .iphone-inbox-body {
+        background: url(/assets/img/index/iphone_main_inbox_body@2x.jpg) no-repeat;
+        height: 365px * 2;
+        
+        top:  51px * 2;
+    }
+    
+    .iphone-inbox-footer {
+        background: url(/assets/img/index/iphone_main_inbox_footer@2x.png) no-repeat;
+        height: 42px * 2;
+    }
+}
+
+.iphone-screen-sdetail {
+    .iphone-screen-sdetail-0 {
+        background: url(/assets/img/index/iphone_main_sdetail_0@2x.jpg) no-repeat;
+        height: 100%;
+        
+        display: none;
+    }
+}
+
+.iphone-screen-guide {
+    .iphone-screen-guide-0 {
+        background: url(/assets/img/index/iphone_main_guide_0@2x.jpg) no-repeat;
+    }
+}
+
+.iphone-screen-back-button {
+    left: 4px * 2;
+    top:  20px * 2;
+    
+    width:  52px * 2;
+    height: 25px * 2;
+}
+
+.iphone-screen-active-inbox {
+    .iphone-screen-inbox {
+        left: 0 !important;
+        opacity: 1;
+    }
+    
+    .iphone-screen-sdetail {
+        left: (244px * 2) !important;
+        opacity: 0;
+    }
+    
+    .iphone-screen-guide {
+        left: (244px * 2) !important;
+        opacity: 0;
+    }
+}
+
+.iphone-screen-active-sdetail {
+    .iphone-screen-inbox {
+        left: (-244px * 2) !important;
+        opacity: 0;
+    }
+    
+    .iphone-screen-sdetail {
+        left: 0 !important;
+        opacity: 1;
+    }
+    
+    .iphone-screen-guide {
+        left: (244px * 2) !important;
+        opacity: 0;
+    }
+}
+
+.iphone-screen-active-guide {
+    .iphone-screen-inbox {
+        left: (-244px * 2) !important;
+        opacity: 0;
+    }
+    
+    .iphone-screen-sdetail {
+        left: (-244px * 2) !important;
+        opacity: 0;
+    }
+    
+    .iphone-screen-guide {
+        left: 0 !important;
+        opacity: 1;
+    }
+}*/
+
+/*
+footer .app-store-button {
+    margin-top: -36px;
+}
+
+.pane-nav-button {
+    background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
+    width:  31px;
+    height: 31px;
+    
+    &:hover {
+        background-position: -35px 0;
+    }
+    
+    &:active {
+        background-position: -70px 0;
+    }
+}
+
+.active-pane-nav-button {
+    background-position: -70px 0;
+    
+    &:hover {
+        background-position: -70px 0;
+    }
+}
+
+.pane-nav-arrow {
+    background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
+    
+    width:  36px;
+    height: 36px;
+    background-position: -105px 0;
+    
+    &:hover {
+        background-position: -145px 0;
+    }
+    
+    &:active {
+        background-position: -185px 0;
+    }
+}
+
+.pane-nav-arrow-down {
+    background-position: -225px 0;
+    
+    &:hover  { background-position: -265px 0; }
+    &:active { background-position: -305px 0; }
+}
+
+.social-button {
+    background: url(/assets/img/index/social_sprite@2x.png) no-repeat;
+    width:  40px;
+    height: 40px;
+}
+
+.social-button-template(@x, @offset) {
+    @x2: (@x * @offset);
+    background-position: @x2 0;
+    
+    &:hover, &:active {
+        background-position: @x2 -22px;
+    }
+}
+
+.social-button-twitter {
+    .social-button-template(0, -44px);
+}
+
+.social-button-facebook {
+    .social-button-template(1, -44px);
+}
+
+.social-button-google {
+    .social-button-template(2, -44px);
+}
+
+.launcher-icon-button {
+    background: url(/assets/img/index/launchericon_sprite@2x.png) no-repeat;
+    width:  128px;
+    height: 128px;
+    
+    &:hover, &:active {
+        background-position: -132px 0;
+    }
+}
+
+.play-video-button-small {
+    background: url(/assets/img/index/playbutton_small_sprite@2x.png) no-repeat;
+    display: block;
+    
+    width:  80px;
+    height: 80px;
+    
+    &:hover, &:active {
+        background-position: -84px 0;
+    }
+}
+
+.play-video-button-large {
+    background: url(/assets/img/index/playbutton_large_sprite@2x.png) no-repeat;
+    display: block;
+    
+    width:  128px;
+    height: 128px;
+    
+    &:hover, &:active {
+        background-position: -132px 0;
+    }
+}
+
+.bieber-video-preview-icon {
+    background: url(/assets/img/index/bieberlittle@2x.gif) no-repeat;
+    width:  90px;
+    height: 90px;
+}
+
+.overview-video-preview-icon {
+    background: url(/assets/img/index/overviewvideo@2x.png) no-repeat;
+    
+    width:  90px;
+    height: 90px;
+}
+
+#category-illustration {
+    background: url(/assets/img/index/illustration@2x.png) no-repeat;
+    width:  746px;
+    height: 168px;
+}
+
+.third-party-logo {
+    background: url(/assets/img/index/thirdparties_sprite@2x.png) no-repeat;
+    display: block;
+    
+    width:  108px;
+    height: 48px;
+}
+
+.third-party-logo-template(@x, @offset) {
+    @x2: (2 * @x * @offset);
+    background-position: @x2 0;
+    
+    &:hover, &:active {
+        background-position: (@x2 + @offset) 0;
+    }
+}
+
+.third-party-logo-spotify {
+    .third-party-logo-template(0, -112px);
+}
+
+.third-party-logo-rdio {
+    .third-party-logo-template(1, -112px);
+}
+
+.third-party-logo-netflix {
+    .third-party-logo-template(2, -112px);
+}
+
+.third-party-logo-fandango {
+    .third-party-logo-template(3, -112px);
+}
+
+.third-party-logo-opentable {
+    .third-party-logo-template(4, -112px);
+}*/
+
+
+/* **************************************************************************
+                                    ABOUT
+   ************************************************************************** */
+
+
+.stamp-badge, .twitter-badge {
+    background: url(/assets/img/about/stamped_twitter_sprite@2x.png) no-repeat;
+    
+    width:  32px;
+    height: 32px;
+}
+
+.twitter-badge {
+    background-position: -36px 0;
+}
+
+.made-in-nyc-logo {
+    background: url(/assets/img/about/nyctoken.1@2x.png) no-repeat;
+    width:  210px;
+    height: 210px;
+}
+
+
+/* **************************************************************************
+                                    PROFILE
+   ************************************************************************** */
+
+
+.empty-stamps {
+    background: url(/assets/img/nostamps@2x.png) no-repeat;
+    
+    width:  230px;
+    height: 230px;
+}
+
+
+/* **************************************************************************
+                            RETINA DISPLAY BUTTONS
+   ************************************************************************** */
+
+
+.download-the-app-button {
+    background: url(/assets/img/index/downloadbtn_sprite@2x.png) no-repeat;
+    width:  400px;
+    height: 64px;
+    
+    &:hover {
+        background-position: -404px 0;
+    }
+    
+    &:active {
+        background-position: -808px 0;
+    }
+}
+
+.app-store-button {
+    background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
+    width:  224px;
+    height: 80px;
+    
+    &:hover, &:active {
+        background-position: -228px 0;
+    }
+}
+
+.send-button {
+    background: url(/assets/img/submitbtn_sprite@2x.png) no-repeat;
+    
+    width:  137px;
+    height: 62px;
+    
+    &:hover  { background-position: -141px 0; }
+    &:active { background-position: -282px 0; }
+}
+
+.submit-button {
+    background: url(/assets/img/sendbtn_sprite@2x.png) no-repeat;
+    
+    width:  137px;
+    height: 62px;
+    
+    &:hover  { background-position: -141px 0; }
+    &:active { background-position: -282px 0; }
+}
+
+.save-button {
+    background: url(/assets/img/savechangesbtn_sprite@2x.png) no-repeat;
+    
+    width:  222px;
+    height: 62px;
+    
+    &:hover  { background-position: -226px 0; }
+    &:active { background-position: -452px 0; }
+}
+
+/*.download-the-free-app-button {
+    background: url(/assets/img/downloadthefreeapp_btn_sprite@2x.png) no-repeat;
+    
+    width:  396px;
+    height: 84px;
+    
+    &:hover  { background-position: -400px 0; }
+    &:active { background-position: -800px 0; }
+}*/
+
+.option-likes {
+    background: url(/assets/img/notificationicons@2x.png) no-repeat;
+    
+    width:  92px;
+    height: 92px;
+}
+
+.option-phone-icon {
+    background-position: -96px * 0;
+}
+
+.option-email-icon {
+    background-position: -96px * 1;
+}
+
+.option-credits .option-icon {
+    background-position: -96px * 2;
+}
+
+.option-likes .option-icon {
+    background-position: -96px * 3;
+}
+
+.option-todos .option-icon {
+    background-position: -96px * 4;
+}
+
+.option-mentions .option-icon {
+    background-position: -96px * 5;
+}
+
+.option-replies .option-icon {
+    background-position: -96px * 6;
+}
+
+.option-followers .option-icon {
+    background-position: -96px * 7;
+}
+
+.option-friends .option-icon {
+    background-position: -96px * 8;
+}
+
+.option-actions .option-icon {
+    background-position: -96px * 9;
+}
+

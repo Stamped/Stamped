@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% load stamped_tags %}
 
-<!-- Javascript Dependencies => index.generated.js
+<!-- Javascript Dependencies => assets/generated/js/index.generated.js
      - - - - - - - - - - - - - - - - - - - - - - - -
     
     jQuery plugin dependencies:
         script: libs/jquery-easing.js
         script: libs/jquery.fancybox.js
-        script: libs/helpers/jquery.fancybox-thumbs.js
         script: libs/jquery.fittext.js
         script: libs/jquery.event.drag.js
     
@@ -15,17 +14,15 @@
     
     Core stamped dependencies:
         script: utils.js
+        script: signup.js
         script: index.js
 -->
 
-<!-- CSS Dependencies => index.generated.css
+<!-- CSS Dependencies => assets/generated/css/index.generated.css
      - - - - - - - - - - - - - - - - - - - - -
     
-    Third-party library dependencies:
-        stylesheet: libs/jquery.fancybox.css?v=2.0.6
-    
     Core stamped dependencies:
-        stylesheet: index.less
+        stylesheet: index.css
 -->
 
 <!-- HTML Template Dependencies => profile.generated.html
@@ -33,17 +30,17 @@
 -->
 
 {% block viewport %}
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=0.36">
 {% endblock viewport %}
 
 {% block styles %}
     {{ block.super }}
     
-    <!--<link rel="stylesheet" href="{{ STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">-->
-    
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/libs/helpers/jquery.fancybox-thumbs.css" type="text/css" media="screen" />
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/index.css">
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/index.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/index.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
     
     <style>
         {% for user in tastemakers %}
@@ -52,15 +49,15 @@
     </style>
     
     <!--[if lte IE 9]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.9.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.9.css">
     <![endif]-->
     
     <!--[if lte IE 8]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.8.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.8.css">
     <![endif]-->
     
     <!--[if lte IE 7]>
-    <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/index.lte.ie.7.css">
+    <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/index.lte.ie.7.css">
     <![endif]-->
 {% endblock styles %}
 
@@ -77,24 +74,24 @@
     <div id="intro">
         <div id="intro-hero">
             <div class="text">
-                <div class="line active-line"><span class="blurred">FUCK</span><span class="unblurred">SCREW</span> MEDIOCRITY</div>
-                <div class="line">DOWNLOAD STAMPED</div>
-            </div>
-            
-            <div class="text">
                 <div class="line active-line">WHY SO SERIOUS?</div>
                 <div class="line">START STAMPING</div>
             </div>
             
             <div class="text">
-                <div class="line active-line">LIKES  ARE CHEAP</div>
-                <div class="line">STARS  ARE PASSÉ</div>
+                <div class="line active-line">LIKES ARE CHEAP</div>
+                <div class="line">STARS ARE PASSÉ</div>
                 <div class="line">STAMPS ARE <span class="italic">YOU</span></div>
             </div>
             
             <div class="text">
                 <div class="line active-line">SHARE YOUR PERSONALITY</div>
                 <div class="line">FIND COOL STUFF</div>
+                <div class="line">DOWNLOAD STAMPED</div>
+            </div>
+            
+            <div class="text">
+                <div class="line active-line">SCREW MEDIOCRITY</div>
                 <div class="line">DOWNLOAD STAMPED</div>
             </div>
             
@@ -152,12 +149,12 @@
         <div class="vertically-centered">
             <div id="main-header" class="hidden-main-animating clearfix">
                 <div class="floatright">
-                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button"></a>
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="launcher-icon-button download-stamped-popup"></a>
                 </div>
                 
                 <div id="available" class="floatright">
-                    <div class="desc">Available on the App Store</div>
-                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button"></a>
+                    <div class="desc">Available on the App Store&#8480;</div>
+                    <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app-button download-stamped-popup"></a>
                 </div>
             </div>
             
@@ -166,11 +163,13 @@
                 
                 <div id="pane-nav">
                     <ol>
+                        <li><a class="pane-nav-arrow pane-nav-arrow-up"></a></li>
                         <li><a href="#pane-0" id="pane-nav-0" class="pane-nav-button"></a></li>
                         <li><a href="#pane-1" id="pane-nav-1" class="pane-nav-button"></a></li>
                         <li><a href="#pane-2" id="pane-nav-2" class="pane-nav-button"></a></li>
                         <li><a href="#pane-3" id="pane-nav-3" class="pane-nav-button"></a></li>
                         <li><a href="#pane-4" id="pane-nav-4" class="pane-nav-button"></a></li>
+                        <li><a class="pane-nav-arrow pane-nav-arrow-down"></a></li>
                     </ol>
                 </div>
                 
@@ -191,7 +190,7 @@
                                 </p>
                                 
                                 <p>
-                                    Everyone gets a limited number of stamps to start, so you’ll discover only the best recommendations from people you trust. Try it out, it’s free!
+                                    Everyone gets a limited number of stamps to start, so you’ll discover only the best. Try it out, it’s free!
                                 </p>
                             </div>
                             
@@ -280,23 +279,15 @@
                                 
                                 <div id="user-video-gallery">
                                     <div id="tristanlisa-video-preview" class="user-video-preview">
-                                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
+                                        <a href="http://www.youtube.com/watch?v=BeqC5bduyOA&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
                                         
                                         <div class="user-video-desc">
                                             <div class="screen-names"><a href="/tristan">@tristan</a> and <a href="/lisa">@lisa</a></div>
                                         </div>
                                     </div>
                                     
-                                    <div id="maggie-video-preview" class="user-video-preview">
-                                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-small"></div></a>
-                                        
-                                        <div class="user-video-desc">
-                                            <div class="screen-names"><a href="/maggie">@maggie</a></div>
-                                        </div>
-                                    </div>
-                                    
                                     <div id="hero-video-preview" class="user-video-preview">
-                                        <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
+                                        <a href="http://www.youtube.com/watch?v=PTquTxfD34I&autoplay=1" class="user-video-preview-image lightbox-video"><div class="play-video-button-large"></div></a>
                                         
                                         <div class="user-video-desc">
                                             <div class="screen-names"><a href="/justinbieber">@justinbieber</a></div>
@@ -314,22 +305,21 @@
             </div>
             
             <div id="main-footer" class="hidden-main-animating clearfix">
-                <div class="watch-video">
+                <div class="watch-video clearfix">
                     <div class="speech-bubble clearfix">
                         <div class="default-video">
-                            <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
+                            <a href="http://www.youtube.com/watch?v=PTquTxfD34I&autoplay=1" class="play-video-button-small lightbox-video"></a>
                             
-                            <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the video with <a href="/justinbieber" class="bolded">@justinbieber</a></p>
-                        </div>
-                        
-                        <div class="overview-video">
+                            <p class="desc"><a href="http://www.youtube.com/watch?v=PTquTxfD34I&autoplay=1" class="watch lightbox-video">Watch</a> the video with <a href="/justinbieber" class="bolded">@justinbieber</a></p>
+                        </div><div class="overview-video">
                             <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="play-video-button-small lightbox-video"></a>
                             
                             <p class="desc"><a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" class="watch lightbox-video">Watch</a> the overview video to learn more.</p>
                         </div>
                     </div>
                     
-                    <a class="bieber-video-preview-icon"></a>
+                    <a href="http://www.youtube.com/watch?v=PTquTxfD34I&autoplay=1" title="Watch the video with Justin Bieber to learn more." class="bieber-video-preview-icon"></a>
+                    <a href="http://www.youtube.com/watch?v=ZL_Q4jBTh_8&autoplay=1" title="Watch the overview video to learn more." class="overview-video-preview-icon"></a>
                 </div>
                 
                 <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button replaced">Available on the App Store</a>
@@ -341,7 +331,9 @@
         <div id="iphone-hero">
             <div class="iphone-body-shadow iphone-body-shadow-0"></div>
             <div class="iphone-body-shadow iphone-body-shadow-1"></div>
-            <div class="iphone-body"></div>
+            <div class="iphone-body">
+                <div class="iphone-body-lighting iphone-body-lighting-0"></div>
+            </div>
             
             <div class="iphone-screens iphone-screen-active-inbox">
                 <div class="iphone-screen iphone-screen-inbox">
@@ -354,20 +346,16 @@
                 <div class="iphone-screen iphone-screen-sdetail iphone-screen-sdetail-active-0">
                     <div class="iphone-screen-back-button"></div>
                     <div class="iphone-screen-sdetail-0"></div>
-                    <div class="iphone-screen-sdetail-1"></div>
                 </div>
                 
                 <div class="iphone-screen iphone-screen-guide iphone-screen-guide-active-0">
                     <div class="iphone-screen-guide-0"></div>
                 </div>
             </div>
-            
-            <!--<div class="iphone-body-lighting iphone-body-lighting-0"></div>
-            <div class="iphone-body-lighting iphone-body-lighting-1"></div>
-            <div class="iphone-body-overlay"></div>-->
         </div>
     </div>
     
+    {% if not mobile %}
     <div id="tastemaker-map-window" class="main-content forward-button-active refresh-button-active">
         <div id="back-button"    class="chrome-button"></div>
         <div id="forward-button" class="chrome-button"></div>
@@ -379,31 +367,7 @@
             <div id="tastemaker-map-window-loading"></div>
         </div>
     </div>
-    
-    <!--
-    <form id="main-iphone-dev" class="main-content">
-        <ol>
-            <br />
-            
-            <li><span class="desc">Perspective: </span><input title="perspective" type="text" maxlength=10 value="600"></li>
-            
-            <br />
-            
-            <li><span class="desc">x-axis: </span><input title="x-axis" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">y-axis: </span><input title="y-axis" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">z-axis: </span><input title="z-axis" type="text" maxlength=10 value="1.0"></li>
-            
-            <br />
-            
-            <li><span class="desc">angle:  </span><input title="angle" type="range" value=0 min=0 max=360></li>
-            
-            <br />
-            
-            <li><span class="desc">scale-x: </span><input title="scale-x" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">scale-y: </span><input title="scale-y" type="text" maxlength=10 value="1.0"></li>
-            <li><span class="desc">scale-z: </span><input title="scale-z" type="text" maxlength=10 value="1.0"></li>
-        </ol>
-    </form>-->
+    {% endif %}
 {% endblock main %}
 
 {% block pre_footer %}
@@ -422,6 +386,10 @@
             </div>
         </div>
         
+        <div id="apple-legal">
+            iPhone is a trademark of Apple Inc., registered in the U.S. and other countries. App Store is a service mark of Apple Inc.
+        </div>
+        
         <div id="social">
             <a href="https://twitter.com/stampedapp" title="Follow @stampedapp on Twitter" class="social-button social-button-twitter"></a>
             <a href="http://www.facebook.com/stampedapp" title="Like @stampedapp on Facebook!" class="social-button social-button-facebook"></a>
@@ -434,16 +402,16 @@
     {{ block.super }}
     
     {% if STAMPED_DEBUG %}
-        <script src="{{ STATIC_URL }}js/libs/jquery-easing.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fancybox.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/helpers/jquery.fancybox-thumbs.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.fittext.js"></script>
-        <script src="{{ STATIC_URL }}js/libs/jquery.event.drag.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fittext.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.event.drag.js"></script>
         
-        <script src="{{ STATIC_URL }}js/utils.js"></script>
-        <script src="{{ STATIC_URL }}js/index.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/signup.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/index.js"></script>
     {% else %}
-        <script src="{{ STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
     {% endif %}
 {% endblock scripts %}
 

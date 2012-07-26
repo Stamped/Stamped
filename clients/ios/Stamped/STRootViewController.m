@@ -50,6 +50,9 @@
     
 }
 
+- (void)didReceiveMemoryWarning {
+}
+
 - (void)toggleGrid:(id)nothing {
     STAppDelegate* app = (STAppDelegate*) [UIApplication sharedApplication].delegate;
     app.grid.hidden = !app.grid.hidden;

@@ -1,4 +1,4 @@
-/* about.less
+/*! about.less
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
  * less version if you don't want your changes to be overwritten.
@@ -23,7 +23,7 @@
 
 html {
     overflow: scroll !important;
-    overflow-x: hidden !important;
+    overflow-x: auto !important;
 }
 
 p {
@@ -56,14 +56,15 @@ footer {
     top: -100%;
     
     width:     50%;
-    min-width: 640px;
+    min-width: 700px;
     
     margin: -10% 0 24px -25%;
     z-index: 10;
-    font-size: 90%;
+    font-size: 85%;
     
     #main-header {
-        color: #888;
+        color: #999;
+        margin-bottom: 24px;
         
         .address {
             float: right;
@@ -88,7 +89,6 @@ footer {
     
     .pane-body {
         width: 100%;
-        
         margin:  0 0 18px 0;
         padding-bottom: 15px;
         
@@ -119,6 +119,8 @@ footer {
                     
                     .jobs {
                         font-weight: 700;
+                        font-size: 85%;
+                        color: #999;
                     }
                     
                     .bg-images {
@@ -140,11 +142,6 @@ footer {
                     
                     .bg-image-active-0 .bg-image-0 {
                         opacity: 1;
-                    }
-                    
-                    .bg-image-0 {
-                        background: url(/assets/img/about/teamphotobooth.jpg) no-repeat;
-                        background-size: 100% 100%;
                     }
                 }
             }
@@ -191,14 +188,14 @@ footer {
             font-family: helvetica, sans-serif;
             display: inline-block;
             
-            font-size: 1.2em;
+            font-size: 85%;
             color: #999;
             
             margin: 24px 0;
         }
         
         .team-member {
-            margin-bottom: 24px;
+            margin-bottom: 36px;
             
             .headshot {
                 position: relative;
@@ -242,12 +239,12 @@ footer {
             
             .content {
                 float: left;
-                width: 70%;
+                width: 65%;
                 margin-top: -10px;
                 
                 .subtitle {
                     font-weight: 700;
-                    font-size: 105%;
+                    font-size: 85%;
                     margin: 0;
                 }
             }
@@ -271,7 +268,7 @@ footer {
         }
         
         .desc, .links {
-            font-size: 90%;
+            font-size: 85%;
         }
         
         .desc {
@@ -283,6 +280,7 @@ footer {
         
         .links {
             margin-top: .5em;
+            margin-bottom: .5em;
             
             a {
                 display: block;
@@ -304,40 +302,53 @@ footer {
             
             .press-links {
                 .press-link {
+                    background: url(/assets/img/about/press_sprite.png) no-repeat;
                     display: block;
                     float: left;
                     
-                    height: 32px;
-                    margin: 0 24px 24px 0;
+                    width:  184px;
+                    height: 84px;
+                    
+                    margin: 0 12px 12px 0;
+                    opacity: 0.75;
+                    
+                    .transition(opacity, 0.4s, ease-out);
                     
                     &:hover {
-                        background-position: 0 -32px;
+                        opacity: 1.0;
                     }
                 }
                 
-                .press-link-techcrunch {
-                    background: url(/assets/img/about/press/press-techcrunch-sprite.png) no-repeat;
-                    width:  198px;
+                .press-link-tl {
+                    background-position: (-186px * 0) 0;
                 }
                 
-                .press-link-wsj {
-                    background: url(/assets/img/about/press/press-wsj-sprite.png) no-repeat;
-                    width:  279px;
+                .press-link-time-startups {
+                    background-position: (-186px * 1) 0;
                 }
                 
-                .press-link-daringfireball {
-                    background: url(/assets/img/about/press/press-daringfireball-sprite.png) no-repeat;
-                    width:  194px;
+                .press-link-sxsw {
+                    background-position: (-186px * 2) 0;
                 }
                 
                 .press-link-mashable {
-                    background: url(/assets/img/about/press/press-mashable-sprite.png) no-repeat;
-                    width:  130px;
+                    background-position: (-186px * 3) 0;
                 }
                 
-                .press-link-gigaom {
-                    background: url(/assets/img/about/press/press-gigaom-sprite.png) no-repeat;
-                    width:  157px;
+                .press-link-webby {
+                    background-position: (-186px * 4) 0;
+                }
+                
+                .press-link-techcrunch {
+                    background-position: (-186px * 5) 0;
+                }
+                
+                .press-link-business-insider {
+                    background-position: (-186px * 6) 0;
+                }
+                
+                .press-link-wsj {
+                    background-position: (-186px * 7) 0;
                 }
             }
         }
@@ -346,6 +357,11 @@ footer {
             margin: 24px auto 0;
         }
     }
+}
+
+.bg-image-0 {
+    background: url(/assets/img/about/teamphotobooth.jpg) no-repeat;
+    background-size: 100% 100%;
 }
 
 .post-main-overlay {
@@ -374,15 +390,13 @@ footer {
 .social {
     white-space: nowrap;
     
-    .social-button-twitter {
+    .stamp-badge {
         position: relative;
         display:  inline-block;
         top: 4px;
-        
-        background-position: 0 -22px !important;
     }
     
-    .social-button-stamped {
+    .twitter-badge {
         position: relative;
         display:  inline-block;
         top: 4px;
@@ -393,22 +407,22 @@ footer {
     &:hover {
         color: #4099FF !important;
     }
-    
 }
 
-#retina {
-    #main .pane-body #pane-wrapper .pane .lhs .social-button-twitter {
-        background-position: 0 -44px;
-    }
-}
-
-.social-button-stamped {
+.stamp-badge, .twitter-badge {
+    background: url(/assets/img/about/stamped_twitter_sprite.png) no-repeat;
     display: block;
-    background: url(/assets/img/about/stampbadge.png) no-repeat;
     
-    margin: 1px 0;
-    width:  20px;
-    height: 20px;
+    width:  16px;
+    height: 16px;
+}
+
+.twitter-badge {
+    background-position: -18px 0;
+}
+
+#apple-legal {
+    display: none;
 }
 
 .robby .headshot {
@@ -544,18 +558,10 @@ footer {
 }
 
 .made-in-nyc-logo {
-    background: url(/assets/img/about/nyctoken.png) no-repeat;
+    background: url(/assets/img/about/nyctoken.1.png) no-repeat;
     
     display: block;
-    width:  204px;
-    height: 205px;
-}
-
-#retina {
-    .made-in-nyc-logo {
-        background: url(/assets/img/about/nyctoken@2x.png) no-repeat;
-        width:  408px;
-        height: 410px;
-    }
+    width:  105px;
+    height: 105px;
 }
 

@@ -65,11 +65,20 @@ static STRdio* _sharedInstance;
 - (id)init {
     self = [super init];
     if (self) {
+    }
+    return self;
+}
+
+
+- (Rdio *)rdio {
+    if (!_rdio) {
+        //[self testinagafsd];
+        NSLog(@"Initializing Rdio");
         _rdio = [[Rdio alloc] initWithConsumerKey:@"vrhd4yxa4eu99jbysjqzebym"
                                         andSecret:@"paYxS8rPVE" 
                                          delegate:self];
     }
-    return self;
+    return _rdio;
 }
 
 - (void)dealloc

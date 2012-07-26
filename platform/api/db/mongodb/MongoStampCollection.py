@@ -11,7 +11,7 @@ import bson, logs, pprint, pymongo, re
 from datetime                           import datetime, timedelta
 from utils                              import lazyProperty
 from api.Schemas                        import *
-from api.Entity                             import buildEntity
+from api.Entity                             import buildEntity, getSimplifiedTitle
 from pprint                             import pprint
 
 from api.AStampDB                       import AStampDB
@@ -20,11 +20,12 @@ from api.db.mongodb.AMongoCollectionView               import AMongoCollectionVi
 from api.db.mongodb.MongoUserLikesCollection           import MongoUserLikesCollection
 from api.db.mongodb.MongoUserLikesHistoryCollection    import MongoUserLikesHistoryCollection
 from api.db.mongodb.MongoStampLikesCollection          import MongoStampLikesCollection
-from api.db.mongodb.MongoStampViewsCollection          import MongoStampViewsCollection
 from api.db.mongodb.MongoUserStampsCollection          import MongoUserStampsCollection
 from api.db.mongodb.MongoInboxStampsCollection         import MongoInboxStampsCollection
 from api.db.mongodb.MongoCreditGiversCollection        import MongoCreditGiversCollection
 from api.db.mongodb.MongoCreditReceivedCollection      import MongoCreditReceivedCollection
+
+from libs.Memcache                                      import globalMemcache, generateKeyFromDictionary
 
 class MongoStampCollection(AMongoCollectionView, AStampDB):
     
@@ -33,12 +34,35 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
-        self._collection.ensure_index([('timestamp.created', pymongo.ASCENDING)])
+        self._collection.ensure_index([('timestamp.created', pymongo.DESCENDING)])
         self._collection.ensure_index([('timestamp.stamped', pymongo.ASCENDING)])
-        self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), ('entity.entity_id', pymongo.ASCENDING)])
         self._collection.ensure_index([('user.user_id', pymongo.ASCENDING), ('stats.stamp_num', pymongo.ASCENDING)])
         self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING), ('credits.user.user_id', pymongo.ASCENDING)])
+        
+        # Indices for _getTimeSlice within AMongoCollectionView
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+
+        # Indices for _getSearchSlice
+        self._collection.ensure_index([ ('_id', pymongo.ASCENDING), 
+                                        ('entity.types', pymongo.ASCENDING), 
+                                        ('search_blurb', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lng', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lat', pymongo.ASCENDING), 
+                                        ('timestamp.stamped', pymongo.DESCENDING) ])
+        
+        self._collection.ensure_index([ ('_id', pymongo.ASCENDING), 
+                                        ('entity.types', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lng', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lat', pymongo.ASCENDING), 
+                                        ('timestamp.stamped', pymongo.DESCENDING) ])
+
+        self._collection.ensure_index([ ('entity.types', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lng', pymongo.ASCENDING), 
+                                        ('entity.coordinates.lat', pymongo.ASCENDING), 
+                                        ('timestamp.stamped', pymongo.DESCENDING) ])
 
 
     def _upgradeDocument(self, document):
@@ -102,10 +126,24 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             document['credits'] = credit
 
         return document
+
+    def _convertToMongo(self, stamp):
+        document = AMongoCollectionView._convertToMongo(self, stamp)
+
+        searchBlurb = getSimplifiedTitle(stamp.entity.title)
+        for content in stamp.contents:
+            if content.blurb is not None:
+                searchBlurb = "%s %s" % (searchBlurb, getSimplifiedTitle(content.blurb))
+        
+        document['search_blurb'] = searchBlurb
+        return document
     
     def _convertFromMongo(self, document):
         if document is None:
             return None
+
+        if 'search_blurb' in document:
+            del(document['search_blurb'])
 
         document = self._upgradeDocument(document)
         
@@ -126,6 +164,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
 
         return stamp 
 
+
     ### INTEGRITY
 
     def checkIntegrity(self, key, repair=False, api=None):
@@ -136,7 +175,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         modified = False
 
         # Check if old schema version
-        if 'contents' not in document or 'credit' in document:
+        if 'contents' not in document or 'credit' in document or 'search_blurb' not in document:
             msg = "%s: Old schema" % key
             if repair:
                 logs.info(msg)
@@ -259,10 +298,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         return MongoStampLikesCollection()
     
     @lazyProperty
-    def stamp_views_collection(self):
-        return MongoStampViewsCollection()
-    
-    @lazyProperty
     def user_likes_collection(self):
         return MongoUserLikesCollection()
     
@@ -273,6 +308,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     @lazyProperty
     def stamp_stats(self):
         return MongoStampStatsCollection()
+
+    @lazyProperty
+    def whitelisted_tastemaker_stamps(self):
+        return MongoWhitelistedTastemakerStampIdsCollection()
     
     def addStamp(self, stamp):
         return self._addObject(stamp)
@@ -323,10 +362,10 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     
     def getStamps(self, stampIds, **kwargs):
         sort = kwargs.pop('sort', None)
-        if sort in ['modified', 'created']:
+        if sort in ['modified', 'created', 'stamped']:
             sort = 'timestamp.%s' % sort
         else:
-            sort = 'timestamp.created'
+            sort = 'timestamp.stamped'
         
         params = {
             'since':    kwargs.pop('since', None),
@@ -457,12 +496,13 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
     
     def getStampFromUserStampNum(self, userId, stampNum):
         try:
-            ### TODO: Index
             stampNum = int(stampNum)
             document = self._collection.find_one({
                 'user.user_id': userId, 
                 'stats.stamp_num': stampNum,
             })
+            if document is None:
+                raise StampedDocumentNotFoundError("Unable to find document for user %s and stamp num %s" % (userId, stampNum))
             return self._convertFromMongo(document)
         except Exception:
             return None
@@ -561,13 +601,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         except Exception:
             return False
     
-    def addView(self, userId, stampId):
-        self.stamp_views_collection.addStampView(stampId, userId)
-    
-    def getStampViews(self, stampId):
-        # Returns user ids that have viewed the stamp
-        return self.stamp_views_collection.getStampViews(stampId) 
-    
     def removeStamps(self, stampIds):
         if stampIds is None or len(stampIds) == 0:
             raise Exception("Must pass stampIds to delete!")
@@ -578,18 +611,18 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         
         return result
 
+    def getWhitelistedTastemakerStampIds(self):
+        return self.whitelisted_tastemaker_stamps.getStampIds()
+
 
 class MongoStampStatsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='stampstats', primary_key='stamp_id', obj=StampStats)
-    
-        self._collection.ensure_index([ ('score', pymongo.DESCENDING) ])
-        self._collection.ensure_index([ ('last_stamped', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('lat', pymongo.ASCENDING), ('lng', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING) ])
+        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING), ('last_stamped', pymongo.ASCENDING), ('score', pymongo.DESCENDING) ])
+        self._collection.ensure_index([ ('last_stamped', pymongo.ASCENDING), ('score', pymongo.DESCENDING) ])
+        self._collection.ensure_index([ ('entity_id', pymongo.ASCENDING), ('score', pymongo.DESCENDING) ])
+        self._cache = globalMemcache()
 
     ### INTEGRITY
 
@@ -656,6 +689,29 @@ class MongoStampStatsCollection(AMongoCollection):
 
         return True
 
+
+    ### CACHING
+
+    def _getCachedStat(self, stampId):
+        key = str("obj::stampstat::%s" % stampId)
+        return self._cache[key]
+
+    def _setCachedStat(self, stat):
+        key = str("obj::stampstat::%s" % stat.stamp_id)
+        cacheLength = 60 * 60 # 1 hour
+        try:
+            self._cache.set(key, stat, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (stat.stamp_id, e))
+
+    def _delCachedStat(self, stampId):
+        key = str("obj::stampstat::%s" % stampId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
+
     ### PUBLIC
     
     def addStampStats(self, stats):
@@ -663,74 +719,77 @@ class MongoStampStatsCollection(AMongoCollection):
             stats.timestamp = StatTimestamp()
         stats.timestamp.generated = datetime.utcnow()
 
-        return self._addObject(stats)
+        result = self._addObject(stats)
+
+        self._setCachedStat(result)
+
+        return result
     
     def getStampStats(self, stampId):
+        try:
+            return self._getCachedStat(stampId)
+        except KeyError:
+            pass
+
         documentId = self._getObjectIdFromString(stampId)
         document = self._getMongoDocumentFromId(documentId)
-        return self._convertFromMongo(document)
+        result = self._convertFromMongo(document)
+        self._setCachedStat(result)
+
+        return result
 
     def getStatsForStamps(self, stampIds):
-        documentIds = map(self._getObjectIdFromString, stampIds)
+        result = []
+
+        documentIds = []
+        for stampId in stampIds:
+            try:
+                result.append(self._getCachedStat(stampId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(stampId))
         documents = self._getMongoDocumentsFromIds(documentIds)
-        return map(self._convertFromMongo, documents)
+
+        for document in documents:
+            stat = self._convertFromMongo(document)
+            self._setCachedStat(stat)
+            result.append(stat)
+
+        return result
     
     def updateStampStats(self, stats):
         if stats.timestamp is None:
             stats.timestamp = StatTimestamp()
         stats.timestamp.generated = datetime.utcnow()
 
-        return self.update(stats)
+        result = self.update(stats)
+
+        self._setCachedStat(result)
+
+        return result
     
     def removeStampStats(self, stampId):
         documentId = self._getObjectIdFromString(stampId)
-        return self._removeMongoDocument(stampId)
+        result = self._removeMongoDocument(stampId)
+        self._delCachedStat(stampId)
+
+        return result
     
     def removeStatsForStamps(self, stampIds):
         documentIds = map(self._getObjectIdFromString, stampIds)
-        return self._removeMongoDocuments(documentIds)
+        result = self._removeMongoDocuments(documentIds)
+        
+        for stampId in stampIds:
+            self._delCachedStat(stampId)
+
+        return result
 
     def _buildPopularQuery(self, **kwargs):
-        kinds       = kwargs.pop('kinds', None)
-        types       = kwargs.pop('types', None)
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
-        viewport    = kwargs.pop('viewport', None)
         entityId    = kwargs.pop('entityId', None)
         minScore    = kwargs.pop('minScore', None)
 
         query = {}
-
-        if kinds is not None:
-            query['kinds'] = {'$in': list(kinds)}
-
-        if types is not None:
-            query['types'] = {'$in': list(types)}
-
-        if viewport is not None:
-            query["lat"] = {
-                "$gte" : viewport.lower_right.lat, 
-                "$lte" : viewport.upper_left.lat, 
-            }
-            
-            if viewport.upper_left.lng <= viewport.lower_right.lng:
-                query["lng"] = { 
-                    "$gte" : viewport.upper_left.lng, 
-                    "$lte" : viewport.lower_right.lng, 
-                }
-            else:
-                # handle special case where the viewport crosses the +180 / -180 mark
-                query["$or"] = [{
-                        "lng" : {
-                            "$gte" : viewport.upper_left.lng, 
-                        }, 
-                    }, 
-                    {
-                        "lng" : {
-                            "$lte" : viewport.lower_right.lng, 
-                        }, 
-                    }, 
-                ]
 
         if entityId is not None:
             query['entity_id'] = entityId
@@ -748,6 +807,12 @@ class MongoStampStatsCollection(AMongoCollection):
         return query
 
     def getPopularStampIds(self, **kwargs):
+        key = str("fn::MongoStampCollection.getPopularStampIds::%s" % generateKeyFromDictionary(kwargs))
+        try:
+            return self._cache[key]
+        except KeyError:
+            pass
+
         limit = kwargs.pop('limit', 0)
         
         query = self._buildPopularQuery(**kwargs)
@@ -756,7 +821,15 @@ class MongoStampStatsCollection(AMongoCollection):
                         .sort([('score', pymongo.DESCENDING)]) \
                         .limit(limit)
 
-        return map(lambda x: self._getStringFromObjectId(x['_id']), documents)
+        result = map(lambda x: self._getStringFromObjectId(x['_id']), documents)
+
+        cacheLength = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, result, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for key '%s': %s" % (key, e))
+
+        return result
 
     def getPopularStampStats(self, **kwargs):
         limit = kwargs.pop('limit', 0)
@@ -768,4 +841,17 @@ class MongoStampStatsCollection(AMongoCollection):
                         .limit(limit)
 
         return map(self._convertFromMongo, documents)
+
+
+
+class MongoWhitelistedTastemakerStampIdsCollection(AMongoCollection):
+    
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='tastemaker_whitelist', overflow=True)
+
+    ### PUBLIC
+    
+    def getStampIds(self):
+        documents = self._collection.find()
+        return map(lambda x: x['stamp_id'], documents)
 

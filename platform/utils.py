@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 """
     Assorted utility commands and classes
@@ -25,8 +26,6 @@ from StringIO            import StringIO
 from threading           import Lock
 from gevent.pool         import Pool
 from greenlet            import GreenletExit
-
-
 
 class LoggingThreadPool(object):
     """
@@ -220,7 +219,7 @@ class AttributeDict(object):
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__[name]
-        #elif name == "_dict":
+            #elif name == "_dict":
         #   return object.__getattribute__(self, name)
 
         try:
@@ -371,7 +370,7 @@ class OrderedDict(dict, MutableMapping):
             return all(p==q for p, q in  _zip_longest(self.items(), other.items()))
         return dict.__eq__(self, other)
 
-def getFile(url, request=None, params=None, logging=False):
+def getFile(url, request=None, params=None, logging=False, maxDelay=64, delay=0.5):
     """
         Wrapper around urllib2.urlopen(url).read(), which attempts to increase
         the success rate by sidestepping server-side issues and usage limits by
@@ -379,9 +378,7 @@ def getFile(url, request=None, params=None, logging=False):
         capped at a maximum possibly delay, after which the request will simply
         fail and propagate any exceptions normally.
     """
-
-    maxDelay = 64
-    delay    = 0.5
+    
     data     = None
     request  = None
 
@@ -582,8 +579,8 @@ def getInstance(name):
                 stackName = instance.tags['stack']
 
                 if stackName is None or stackName.lower() == inputStackName:
-                    if not inputNodeName or \
-                        ('name' in instance.tags and instance.tags['name'].lower() == inputNodeName):
+                    if not inputNodeName or\
+                       ('name' in instance.tags and instance.tags['name'].lower() == inputNodeName):
                         return instance
 
     return None
@@ -596,9 +593,9 @@ def is_ec2():
 def getDomain():
     if is_ec2():
         if libs.ec2_utils.is_prod_stack():
-            return "https://api.stamped.com/v0/"
-        return "https://dev.stamped.com/v0/"
-    return "localhost:18000/v0/"
+            return "https://api1.stamped.com/v1/"
+        return "https://dev.stamped.com/v1/"
+    return "localhost:18000/v1/"
 
 
 
@@ -631,7 +628,7 @@ def init_db_config(config_desc):
     config = {
         'mongodb' : {
             'hosts' : [(host, port)],
-        }
+            }
     }
 
     # TODO: there is a Python oddity that needs some investigation, where, depending on
@@ -644,6 +641,28 @@ def init_db_config(config_desc):
 
     from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
     cfg2 = MongoDBConfig2.getInstance()
+    cfg2.config = AttributeDict(config)
+
+def init_log_db_config(config_desc):
+    """ initializes MongoDB with proper host configuration """
+
+    host, port = get_db_config(config_desc)
+    config = {
+        'mongodb' : {
+            'hosts' : [(host, port)],
+            }
+    }
+
+    # TODO: there is a Python oddity that needs some investigation, where, depending on
+    # where and when the MongoDBConfig Singleton is imported, it'll register as the same
+    # instance that AMongoCollection knows about or not. For now, as a workaround, just
+    # import it multiple ways and initialize the config with both possible import paths.
+    from api.db.mongodb.AMongoCollection import MongoLogDBConfig
+    cfg = MongoLogDBConfig.getInstance()
+    cfg.config = AttributeDict(config)
+
+    from api.db.mongodb.AMongoCollection import MongoLogDBConfig as MongoLogDBConfig2
+    cfg2 = MongoLogDBConfig2.getInstance()
     cfg2.config = AttributeDict(config)
 
     return config
@@ -687,27 +706,27 @@ def validate_email(email):
     # Source: http://data.iana.org/TLD/tlds-alpha-by-domain.txt
     # Version 2012012600, Last Updated Thu Jan 26 15:07:01 2012 UTC
     valid_suffixes = set(["AC", "AD", "AE", "AERO", "AF", "AG", "AI", "AL", "AM", "AN", "AO", "AQ", "AR", "ARPA", "AS",
-        "ASIA", "AT", "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BIZ", "BJ", "BM", "BN",
-        "BO", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CAT", "CC", "CD", "CF", "CG", "CH", "CI", "CK", "CL",
-        "CM", "CN", "CO", "COM", "COOP", "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ",
-        "EC", "EDU", "EE", "EG", "ER", "ES", "ET", "EU", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB", "GD", "GE",
-        "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GOV", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HM",
-        "HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN", "INFO", "INT", "IO", "IQ", "IR", "IS", "IT", "JE", "JM",
-        "JO", "JOBS", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI",
-        "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MG", "MH", "MIL", "MK", "ML", "MM", "MN",
-        "MO", "MOBI", "MP", "MQ", "MR", "MS", "MT", "MU", "MUSEUM", "MV", "MW", "MX", "MY", "MZ", "NA", "NAME", "NC",
-        "NE", "NET", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "ORG", "PA", "PE", "PF", "PG", "PH",
-        "PK", "PL", "PM", "PN", "PR", "PRO", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU", "RW", "SA", "SB",
-        "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "ST", "SU", "SV", "SX", "SY",
-        "SZ", "TC", "TD", "TEL", "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TP", "TR", "TRAVEL", "TT",
-        "TV", "TW", "TZ", "UA", "UG", "UK", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS",
-        "XN--0ZWM56D", "XN--11B5BS3A9AJ6G", "XN--3E0B707E", "XN--45BRJ9C", "XN--80AKHBYKNJ4F", "XN--90A3AC",
-        "XN--9T4B11YI5A", "XN--CLCHC0EA0B2G2A9GCD", "XN--DEBA0AD", "XN--FIQS8S", "XN--FIQZ9S", "XN--FPCRJ9C3D",
-        "XN--FZC2C9E2C", "XN--G6W251D", "XN--GECRJ9C", "XN--H2BRJ9C", "XN--HGBK6AJ7F53BBA", "XN--HLCJ6AYA9ESC7A",
-        "XN--J6W193G", "XN--JXALPDLP", "XN--KGBECHTV", "XN--KPRW13D", "XN--KPRY57D", "XN--LGBBAT1AD8J", "XN--MGBAAM7A8H",
-        "XN--MGBAYH7GPA", "XN--MGBBH1A71E", "XN--MGBC0A9AZCG", "XN--MGBERP4A5D4AR", "XN--O3CW4H", "XN--OGBPF8FL",
-        "XN--P1AI", "XN--PGBS0DH", "XN--S9BRJ9C", "XN--WGBH1C", "XN--WGBL6A", "XN--XKC2AL3HYE2A", "XN--XKC2DL3A5EE0H",
-        "XN--YFRO4I67O", "XN--YGBI2AMMX", "XN--ZCKZAH", "XXX", "YE", "YT", "ZA", "ZM", "ZW"])
+                          "ASIA", "AT", "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BIZ", "BJ", "BM", "BN",
+                          "BO", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CAT", "CC", "CD", "CF", "CG", "CH", "CI", "CK", "CL",
+                          "CM", "CN", "CO", "COM", "COOP", "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ",
+                          "EC", "EDU", "EE", "EG", "ER", "ES", "ET", "EU", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB", "GD", "GE",
+                          "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GOV", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HM",
+                          "HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN", "INFO", "INT", "IO", "IQ", "IR", "IS", "IT", "JE", "JM",
+                          "JO", "JOBS", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI",
+                          "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MG", "MH", "MIL", "MK", "ML", "MM", "MN",
+                          "MO", "MOBI", "MP", "MQ", "MR", "MS", "MT", "MU", "MUSEUM", "MV", "MW", "MX", "MY", "MZ", "NA", "NAME", "NC",
+                          "NE", "NET", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "ORG", "PA", "PE", "PF", "PG", "PH",
+                          "PK", "PL", "PM", "PN", "PR", "PRO", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU", "RW", "SA", "SB",
+                          "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "ST", "SU", "SV", "SX", "SY",
+                          "SZ", "TC", "TD", "TEL", "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TP", "TR", "TRAVEL", "TT",
+                          "TV", "TW", "TZ", "UA", "UG", "UK", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS",
+                          "XN--0ZWM56D", "XN--11B5BS3A9AJ6G", "XN--3E0B707E", "XN--45BRJ9C", "XN--80AKHBYKNJ4F", "XN--90A3AC",
+                          "XN--9T4B11YI5A", "XN--CLCHC0EA0B2G2A9GCD", "XN--DEBA0AD", "XN--FIQS8S", "XN--FIQZ9S", "XN--FPCRJ9C3D",
+                          "XN--FZC2C9E2C", "XN--G6W251D", "XN--GECRJ9C", "XN--H2BRJ9C", "XN--HGBK6AJ7F53BBA", "XN--HLCJ6AYA9ESC7A",
+                          "XN--J6W193G", "XN--JXALPDLP", "XN--KGBECHTV", "XN--KPRW13D", "XN--KPRY57D", "XN--LGBBAT1AD8J", "XN--MGBAAM7A8H",
+                          "XN--MGBAYH7GPA", "XN--MGBBH1A71E", "XN--MGBC0A9AZCG", "XN--MGBERP4A5D4AR", "XN--O3CW4H", "XN--OGBPF8FL",
+                          "XN--P1AI", "XN--PGBS0DH", "XN--S9BRJ9C", "XN--WGBH1C", "XN--WGBL6A", "XN--XKC2AL3HYE2A", "XN--XKC2DL3A5EE0H",
+                          "XN--YFRO4I67O", "XN--YGBI2AMMX", "XN--ZCKZAH", "XXX", "YE", "YT", "ZA", "ZM", "ZW"])
     try:
         if __email_re.match(email):
             if email.split('.')[-1].upper() in valid_suffixes:
@@ -900,7 +919,7 @@ def get_basic_stats(collection, key):
         'std' : round_float(std, 4),
         'min' : round_float(min_value, 4),
         'max' : round_float(max_value, 4),
-    }
+        }
 
 def round_float(f, n):
     """ Truncates/pads a float f to n decimal places without rounding """
@@ -1076,7 +1095,19 @@ def getImage(data):
 
 def getWebImage(url, desc=None):
     try:
-        data = getFile(url)
+        memcached = None
+        
+        try:
+            memcached = libs.Memcache.globalMemcache()
+            data = memcached.get(str(url))
+        except Exception as e:
+            logs.warning("Unable to get data from cache: %s" % e)
+            data = None 
+        
+        if data is None:
+            data = getFile(url)
+            if memcached is not None:
+                memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
     except urllib2.HTTPError:
         desc = ("%s " % desc if desc is not None else "")
         logs.warning("unable to download %simage from '%s'" % (url, desc))
@@ -1090,7 +1121,56 @@ def getWebImageSize(url):
     except urllib2.HTTPError:
         logs.warning("Unable to download image: %s" % url)
         raise
-
+    
     img = getImage(data)
-
+    
     return img.size[0], img.size[1]
+
+
+#Regexes for counting number of mentions and urls in a blurb or piece of text
+
+mention_re = re.compile(r'(?<![a-zA-Z0-9_])@([a-zA-Z0-9+_]{1,20})(?![a-zA-Z0-9_])', re.IGNORECASE)
+# URL regex taken from http://daringfireball.net/2010/07/improved_regex_for_matching_urls (via http://stackoverflow.com/questions/520031/whats-the-cleanest-way-to-extract-urls-from-a-string-using-python)
+url_re          = re.compile(r"""((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.‌​][a-z]{2,4}/)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(‌​([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))""", re.DOTALL)
+
+def findMentions(text):
+    return mention_re.finditer(text)
+
+
+def findUrls(text):
+    return url_re.finditer(text)
+
+
+# Weighted lottery function for ordering items by their scores. 
+# INPUT: A list of tuples in the form (float_score, item)
+# OUTPUT: A list of tuples of the same form, ordered probabilistically
+def weightedLottery(items):
+
+    aggScore = reduce(lambda x, y: x + y[0], items, 0.0)
+
+    if aggScore > 0:
+        unselected = []
+        selected = []
+        cutoff = 0
+        for item in items:
+            cutoff += item[0]
+            unselected.append((cutoff, item))
+
+        while len(selected) < len(items):
+            r = random.random() * aggScore
+            index = 0
+            for cutoff, item in unselected:
+                if r < cutoff:
+                    unselected.pop(index)
+                    selected.append(item)
+                    aggScore -= item[0]
+                    unselected = map(lambda (x, y): (((x - item[0]) if x > cutoff else x), y), unselected)
+                    break
+                else:
+                    index += 1
+
+        return selected
+
+    return items
+
+

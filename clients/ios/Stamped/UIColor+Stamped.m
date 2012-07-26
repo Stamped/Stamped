@@ -69,7 +69,6 @@
     NSInteger r = MIN(color[0] * 255. * alpha + whiteComp , 255.);
     NSInteger g = MIN(color[1] * 255. * alpha + whiteComp , 255.);
     NSInteger b = MIN(color[2] * 255. * alpha + whiteComp , 255.);
-    //NSLog(@"comps;%ld, %d, %d, %d, %f, %f, %f", CGColorGetNumberOfComponents([self CGColor]), r, g, b, color[0], color[1], color[2]);
     
     return [NSString stringWithFormat:@"%02x%02x%02x", r, g, b];
 }
@@ -81,7 +80,6 @@
     NSInteger r = color[0] * 255.;
     NSInteger g = color[1] * 255.;
     NSInteger b = color[2] * 255.;
-//    NSLog(@"comps;%ld, %d, %d, %d, %f, %f, %f", CGColorGetNumberOfComponents([self CGColor]), r, g, b, color[0], color[1], color[2]);
     
     return [NSString stringWithFormat:@"%02x%02x%02x", r, g, b];
     

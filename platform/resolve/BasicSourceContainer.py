@@ -14,6 +14,7 @@ try:
     import sys, traceback, string
     from resolve.ASourceContainer       import ASourceContainer
     from resolve.ASourceController      import ASourceController
+    from resolve.EntityGroups           import *
     from datetime               import datetime
     from datetime               import timedelta
     from copy                   import deepcopy
@@ -50,6 +51,11 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.failedCutoff    = 40
         self.failedCooldown  = 1
         self.failedPunishment = 20
+
+        for group in allGroups:
+            self.addGroup(group())
+        self.setGlobalPriority('seed', 100)
+        self.setGlobalPriority('derived',-100)
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):
         """

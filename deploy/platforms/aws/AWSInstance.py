@@ -263,7 +263,7 @@ class AWSInstance(AInstance):
             if 'db' in self.roles:
                 self._block_mongo()
             elif 'webServer' in self.roles:
-                self._validate_port(80, desc="server", timeout=100)
+                self._validate_port(80, desc="server", timeout=1000)
             elif 'apiServer' in self.roles:
                 self._validate_port(5000, desc="server", timeout=100)
             elif 'analytics' in self.roles:
@@ -334,10 +334,10 @@ class AWSInstance(AInstance):
         for role in self.roles:
             security_groups.add(role.lower().split('-')[0])
         
-        utils.log("IS_PROD: %s" % self.stack.is_prod)
-        
-        if not self.stack.is_prod:
-            security_groups.add('dev')
+#        utils.log("IS_PROD: %s" % self.stack.is_prod)
+#
+#        if not self.stack.is_prod:
+#            security_groups.add('dev')
         
         return list(security_groups)
     
@@ -353,7 +353,7 @@ class AWSInstance(AInstance):
             # TODO: look at replacement of quotes
             'init_params' : json.dumps(config)
         }
-        
+
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "userdata.sh")
         f = open(path, 'r')
         user_data = convert.parse_file(f, params)

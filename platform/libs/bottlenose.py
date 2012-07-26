@@ -44,8 +44,8 @@ class AmazonError(Exception):
     pass
 
 class AmazonCall(object):
-    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None, \
-            AssociateTag=None, Operation=None, Style=None, Version=None, \
+    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
+            AssociateTag=None, Operation=None, Style=None, Version=None,
             Region=None):
         self.AWSAccessKeyId = AWSAccessKeyId
         self.AWSSecretAccessKey = AWSSecretAccessKey
@@ -62,11 +62,11 @@ class AmazonCall(object):
         try:
             return object.__getattr__(self, k)
         except:
-            return AmazonCall(self.AWSAccessKeyId, self.AWSSecretAccessKey, \
+            return AmazonCall(self.AWSAccessKeyId, self.AWSSecretAccessKey,
                     self.AssociateTag, Operation=k, Version=self.Version,
                     Style=self.Style, Region=self.Region)
 
-    def __call__(self, **kwargs):
+    def __call__(self, timeout=None, **kwargs):
         kwargs['Timestamp'] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         kwargs['Operation'] = self.Operation
         kwargs['Version'] = self.Version
@@ -98,7 +98,7 @@ class AmazonCall(object):
 
         priority = kwargs.get('priority', 'low')
         header={"Accept-Encoding": "gzip"}
-        response, content = service_request('amazon', 'GET', api_string, header=header, priority=priority)
+        response, content = service_request('amazon', 'GET', api_string, header=header, priority=priority, timeout=timeout)
 
         if response.get('Content-Encoding', None) == 'gzip':
             gzipped_file  = gzip.GzipFile(fileobj=StringIO.StringIO(content))
@@ -108,10 +108,10 @@ class AmazonCall(object):
         return response_text
 
 class Amazon(AmazonCall):
-    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None, \
-            AssociateTag=None, Operation=None, Style=None, \
+    def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
+            AssociateTag=None, Operation=None, Style=None,
             Version="2011-08-01", Region="US"):
-        AmazonCall.__init__(self, AWSAccessKeyId, AWSSecretAccessKey, \
+        AmazonCall.__init__(self, AWSAccessKeyId, AWSSecretAccessKey,
             AssociateTag, Operation, Version=Version, Region=Region, Style=Style)
 
 __all__ = ["Amazon", "AmazonError"]

@@ -35,6 +35,7 @@ static const CGFloat _batchSize = 100;
 @property (nonatomic, readwrite, retain) NSMutableArray<STUserDetail>* matchUsers;
 
 @property (nonatomic, readwrite, retain) STCancellation* friendsCancellation;
+@property (nonatomic, readwrite, retain) STCancellation* sendCancellation;
 
 @property (nonatomic, readonly, retain) NSMutableArray* unresolvedContacts;
 @property (nonatomic, readonly, retain) NSMutableSet* resolvedIDs;
@@ -57,6 +58,7 @@ static const CGFloat _batchSize = 100;
 @synthesize matchUsers = _matchUsers;
 
 @synthesize friendsCancellation = _friendsCancellation;
+@synthesize sendCancellation = _sendCancellation;
 
 @synthesize unresolvedContacts = _unresolvedContacts;
 @synthesize resolvedIDs = _resolvedIDs;
@@ -164,16 +166,8 @@ static const CGFloat _batchSize = 100;
     }
 }
 
-- (void)sendTweet:(NSString*)tweet {
-    [[STTwitter sharedInstance] sendTweet:tweet withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
-        if (!success) {
-            [Util warnWithAPIError:error andBlock:nil];
-            [self updateSendButton];
-        }
-    }];
-}
-
 - (void)sendButtonClicked:(id)notImportant {
+    if (self.sendCancellation) return;
     NSString* message;
     NSMutableArray* contacts = [NSMutableArray array];
     for (NSNumber* index in self.inviteIndices) {
@@ -200,17 +194,19 @@ static const CGFloat _batchSize = 100;
             for (STContact* contact in contacts) {
                 [tweets addObject:[NSString stringWithFormat:@"@%@ I’m using @stampedapp to record and share my favorite things. Join me! www.stamped.com", contact.twitterUsername]];
             }
-            [[STTwitter sharedInstance] sendTweets:tweets withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+            self.loadingLocked = YES;
+            self.sendCancellation = [[STTwitter sharedInstance] sendTweets:tweets withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                self.loadingLocked = NO;
+                self.sendCancellation = nil;
                 if (!success) {
                     [Util warnWithAPIError:error andBlock:nil];
                     [self updateSendButton];
                 }
+                else {
+                    [self.inviteIndices removeAllObjects];
+                    [self updateSendButton];
+                }
             }];
-            for (STContact* contact in contacts) {
-                [self sendTweet:[NSString stringWithFormat:@"@%@ I’m using @stampedapp to record and share my favorite things. Join me! www.stamped.com", contact.twitterUsername]];
-            }
-            [self.inviteIndices removeAllObjects];
-            [self updateSendButton];
         }
     }];
 }
@@ -251,6 +247,8 @@ static const CGFloat _batchSize = 100;
 }
 
 - (void)clearAll {
+    [self.sendCancellation cancel];
+    self.sendCancellation = nil;
     self.offset = 0;
     self.consumedAllContacts = NO;
     [self.unresolvedContacts removeAllObjects];

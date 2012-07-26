@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import datetime, copy
-import Globals, utils, logs
+import Globals, utils, logs, pymongo
 
 from errors import *
 from api.Schemas import *
@@ -19,6 +19,8 @@ class MongoAuthPasswordResetCollection(AMongoCollection, AAuthPasswordResetDB):
     def __init__(self):
         AMongoCollection.__init__(self, collection='passwordreset')
         AAuthPasswordResetDB.__init__(self)
+
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING)])
     
     def _convertToMongo(self, token):
         document = token.dataExport()
@@ -53,4 +55,4 @@ class MongoAuthPasswordResetCollection(AMongoCollection, AAuthPasswordResetDB):
 
     def removeResetTokensForUser(self, userId):
         return self._collection.remove({'user_id': userId})
-        
+

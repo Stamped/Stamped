@@ -5,7 +5,7 @@ __version__   = '1.0'
 __copyright__ = 'Copyright (c) 2011-2012 Stamped.com'
 __license__   = 'TODO'
 
-import Globals
+import Globals, pymongo
 
 from api.db.mongodb.AMongoCollection import AMongoCollection
 
@@ -14,21 +14,20 @@ class MongoCreditReceivedCollection(AMongoCollection):
     def __init__(self):
         AMongoCollection.__init__(self, collection='creditreceived')
 
+        self._collection.ensure_index([('credits.user.user_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('ref_ids', pymongo.ASCENDING)])
+
     """
     Credited User Id -> Stamp Ids 
     """
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True):
+    def checkIntegrity(self, key, repair=True, api=None):
 
         def regenerate(key):
             stampIds = set()
             stamps = self._collection._database['stamps'].find({'credits.user.user_id': key}, fields=['_id'])
-            for stamp in stamps:
-                stampIds.add(str(stamp['_id']))
-            # Support for deprecated structure
-            stamps = self._collection._database['stamps'].find({'credit.user_id': key}, fields=['_id'])
             for stamp in stamps:
                 stampIds.add(str(stamp['_id']))
 

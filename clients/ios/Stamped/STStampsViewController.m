@@ -194,7 +194,7 @@
 #pragma mark - STStampCellDelegate
 
 - (void)stStampCellAvatarTapped:(STStampCell*)cell {
-    UITableView *tableview = [self isSearching] ? _searchResultsTableView : self.tableView;
+    UITableView *tableview = [self isSearching] ? self.searchResultsTableView : self.tableView;
     NSIndexPath *indexPath = [tableview indexPathForCell:cell];
     id<STStamp> stamp = [self stampForTableView:tableview atIndexPath:indexPath];
     STUserViewController *controller = [[STUserViewController alloc] initWithUser:stamp.user];

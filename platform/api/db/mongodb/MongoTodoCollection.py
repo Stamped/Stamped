@@ -29,6 +29,13 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         self._collection.ensure_index([('user_id', pymongo.ASCENDING),\
             ('timestamp.created', pymongo.DESCENDING)])
 
+        # Indices for _getTimeSlice within AMongoCollectionView
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
+        self._collection.ensure_index([('source_stamp_ids', pymongo.ASCENDING)])
+        self._collection.ensure_index([('stamp.stamp_id', pymongo.ASCENDING)])
+
     def _convertFromMongo(self, document):
         """
         Keep in mind this is returning a RawTodo, which is less-enriched than a Todo
@@ -192,22 +199,19 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         self.user_todos_history_collection.addUserTodo(todo.user_id, todo.todo_id)
 
         # Add links to todo
-        self.user_todo_entities_collection.addUserTodosEntity(\
-            todo.user_id, todo.entity.entity_id)
+        self.user_todo_entities_collection.addUserTodosEntity(todo.user_id, todo.entity.entity_id)
 
         return todo
 
     def removeTodo(self, userId, entityId):
         try:
-            self._collection.remove({'entity.entity_id': entityId,\
-                                     'user_id': userId})
+            self._collection.remove({'entity.entity_id': entityId, 'user_id': userId})
 
             # Remove links to todo
-            self.user_todo_entities_collection.removeUserTodosEntity(\
-                userId, entityId)
+            self.user_todo_entities_collection.removeUserTodosEntity(userId, entityId)
         except:
             logs.warning("Cannot remove document")
-            raise Exception
+            raise
 
     def getTodo(self, userId, entityId):
         document = self._collection.find_one({'entity.entity_id': entityId, 'user_id': userId})
@@ -219,7 +223,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
     def getTodos(self, userId, timeSlice):
         query = { 'user_id' : userId }
 
-        return self._getTimeSlice(query, timeSlice)
+        return self._getTimeSlice(query, timeSlice, objType='todo')
 
     def getTodosFromStampId(self, stampId):
         documents = self._collection.find({ '$or': [{'source_stamp_ids' : stampId}, {'stamp.stamp_id': stampId}] }, fields=['user_id'])

@@ -8,33 +8,45 @@
 
 #import "STSearchView.h"
 
+@interface STSearchView ()
+
+@property (nonatomic, readonly, retain) UIButton* cancelButton;
+@property (nonatomic, readonly, retain) UIImageView* topLeftCorner;
+@property (nonatomic, readonly, retain) UIImageView* topRightCorner;
+@property (nonatomic, readonly, retain) UITapGestureRecognizer* tap;
+@property (nonatomic, readonly, retain) UITextField* textField;
+
+@end
+
 @implementation STSearchView
 
 @synthesize showCancelButton=_showCancelButton;
 @synthesize loading=_loading;
 @synthesize delegate;
+@synthesize cancelButton = _cancelButton;
+@synthesize topLeftCorner = _topLeftCorner;
+@synthesize topRightCorner = _topRightCorner;
+@synthesize tap = _tap;
+@synthesize textField = _textField;
 
 
 - (id)initWithFrame:(CGRect)frame {
     if ((self = [super initWithFrame:frame])) {
-
         
-        UIImageView *background = [[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"search_header_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]];
+        UIImageView *background = [[[UIImageView alloc] initWithImage:[[UIImage imageNamed:@"search_header_bg.png"] stretchableImageWithLeftCapWidth:1 topCapHeight:0]] autorelease];
         background.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         [self addSubview:background];
-        [background release];
         
         frame = background.frame;
         frame.size.width = self.bounds.size.width;
         background.frame = frame;
 
-        UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)];
+        UITapGestureRecognizer *gesture = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapped:)] autorelease];
         gesture.delegate = (id<UIGestureRecognizerDelegate>)self;
         [self addGestureRecognizer:gesture];
         _tap = [gesture retain];
-        [gesture release];
         
-        STSearchField *textField = [[STSearchField alloc] initWithFrame:CGRectMake(10, floorf((self.bounds.size.height-30.0f)/2), self.bounds.size.width-20.0f, 30)];
+        STSearchField *textField = [[[STSearchField alloc] initWithFrame:CGRectMake(10, floorf((self.bounds.size.height-30.0f)/2), self.bounds.size.width-20.0f, 30)] autorelease];
         [textField addTarget:self action:@selector(textFieldTextDidChange:) forControlEvents:UIControlEventEditingChanged];
         textField.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
         textField.placeholder = @"Search";
@@ -42,8 +54,7 @@
         textField.enablesReturnKeyAutomatically = YES;
         textField.keyboardAppearance = UIKeyboardAppearanceDefault;
         [self addSubview:textField];
-        _textField = textField;
-        [textField release];
+        _textField = [textField retain];
         
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
@@ -57,21 +68,19 @@
         [button setTitle:NSLocalizedString(@"Cancel", @"Cancel") forState:UIControlStateNormal];
         [self addSubview:button];
         button.hidden = YES;
-        _cancelButton = button;
+        _cancelButton = [button retain];
         
-        UIImageView *corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]];
+        UIImageView *corner = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_left.png"]] autorelease];
         [self addSubview:corner];
-        [corner release];
-        _topLeftCorner = corner;
+        _topLeftCorner = [corner retain];
         
-        corner = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_right.png"]];
+        corner = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"corner_top_right.png"]] autorelease];
         [self addSubview:corner];
-        [corner release];
         
         frame = corner.frame;
         frame.origin.x = (self.bounds.size.width - corner.frame.size.width);
         corner.frame = frame;
-        _topRightCorner = corner;
+        _topRightCorner = [corner retain];
         
         _topRightCorner.alpha = 0.0f;
         _topLeftCorner.alpha = 0.0f;
@@ -82,6 +91,10 @@
 
 - (void)dealloc {
     [_tap release], _tap=nil;
+    [_textField release];
+    [_cancelButton release];
+    [_topLeftCorner release];
+    [_topRightCorner release];
     [super dealloc];
 }
 

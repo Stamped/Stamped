@@ -8,6 +8,7 @@ __license__   = "TODO"
 import stamped
 import utils, logs
 import libs.ec2_utils
+import multiprocessing, os, sys
 
 from datetime import timedelta
 from celery.schedules import crontab
@@ -32,6 +33,11 @@ if utils.is_ec2():
 ## Broker settings.
 BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
 logs.info('BROKER_URL: %s' % BROKER_URL)
+
+CELERYD_POOL = 'gevent'
+
+if utils.is_ec2():
+    CELERYD_CONCURRENCY  = 15
 
 # use default concurrency; uncomment to use a single celeryd worker
 # (can be useful for debugging)
@@ -91,7 +97,7 @@ CELERYBEAT_SCHEDULE = {
     },
     'make-new-autocomplete-index' : {
         'task' : 'tasks.APITasks.updateAutoCompleteIndex',
-        'schedule' : crontab(hour=4),
+        'schedule' : crontab(hour=4, minute=0),
     },
 }
 

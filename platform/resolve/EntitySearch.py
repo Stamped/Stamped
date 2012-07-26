@@ -21,7 +21,7 @@ import Globals
 from logs import report
 
 try:
-    import logs, sys, utils
+    import logs, sys, utils, time
     import libs.worldcities
     from api import Entity
     
@@ -46,7 +46,6 @@ try:
     from resolve.SpotifySource              import SpotifySource
     from resolve.GooglePlacesSource         import GooglePlacesSource
     from resolve.AmazonSource               import AmazonSource
-    from time                       import time
     from api.Entity                     import mapCategoryToKinds, mapCategoryToTypes, mapSubcategoryToTypes, mapSubcategoryToKinds
 except:
     report()
@@ -180,7 +179,7 @@ class EntitySearch(object):
                offset   = 0, 
                limit    = 10):
         
-        before  = time()
+        before  = time.time()
         query   = QuerySearchAll(query, coords, kinds, types, local)
         pool    = Pool(len(self._sources))
         results = []
@@ -218,10 +217,10 @@ class EntitySearch(object):
             all_results[source_name] = sortedResults(source_results)
         
         print("\n\n\nGenerated %d results in %f seconds from: %s\n\n\n" % (
-            total, time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.iteritems()])
+            total, time.time() - before, ' '.join([ '%s:%s' % (k, len(v)) for k,v in all_results.iteritems()])
         ))
         
-        before2 = time()
+        before2 = time.time()
         chosen  = []
         limit   = max(0, min(total, limit if limit else total))
         
@@ -276,7 +275,7 @@ class EntitySearch(object):
                 break
         
         if _verbose:
-            print("\n\n\nDeduped %d results in %f seconds\n\n\n" % (total - len(chosen), time() - before2))
+            print("\n\n\nDeduped %d results in %f seconds\n\n\n" % (total - len(chosen), time.time() - before2))
         
         return chosen
     
@@ -317,8 +316,7 @@ class EntitySearch(object):
             if source not in self._sources_map:
                 source = 'stamped'
 
-            entityProxy = EntityProxyContainer(item[1].target)
-            entity = entityProxy.buildEntity()
+            entity = EntityProxyContainer().addProxy(item[1].target).buildEntity()
 
             # Hack to make sure entity_id is set (since it's not a part of a group)
             if source == 'stamped':

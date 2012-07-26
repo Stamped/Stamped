@@ -7,18 +7,24 @@ __license__   = "TODO"
 
 import datetime, copy
 import Globals, utils, logs
+import pymongo
 
 from errors import *
 from api.Schemas import *
 
 from api.db.mongodb.AMongoCollection import AMongoCollection
 from api.AAuthAccessTokenDB import AAuthAccessTokenDB
+from libs.Memcache                              import globalMemcache
 
 class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='accesstokens')
         AAuthAccessTokenDB.__init__(self)
+
+        self._cache = globalMemcache()
+
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING)])
     
     def _convertToMongo(self, token):
         document = token.dataExport()
@@ -34,6 +40,29 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
                 del(document['_id'])
         return AccessToken().dataImport(document)
 
+
+    ### CACHING
+
+    def _getCachedToken(self, tokenId):
+        key = str("obj::accesstoken::%s" % tokenId)
+        return self._cache[key]
+
+    def _setCachedToken(self, token):
+        key = str("obj::accesstoken::%s" % token.token_id)
+        cacheLength = 60 * 60 # One hour
+        try:
+            self._cache.set(key, token, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (token.token_id, e))
+
+    def _delCachedToken(self, tokenId):
+        key = str("obj::accesstoken::%s" % tokenId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
+
     ### PUBLIC
 
     def addAccessToken(self, token):
@@ -42,16 +71,28 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
         document = self._convertToMongo(token)
         document = self._addMongoDocument(document)
         token = self._convertFromMongo(document)
+        self._setCachedToken(token)
 
         return token
 
     def getAccessToken(self, tokenId):
-        document = self._getMongoDocumentFromId(tokenId)
+        try:
+            return self._getCachedToken(tokenId)
+        except KeyError:
+            pass
+
+        document = self._getMongoDocumentFromId(tokenId, forcePrimary=True)
         return self._convertFromMongo(document)
     
     def removeAccessToken(self, tokenId):
-        return self._removeMongoDocument(tokenId)
+        result = self._removeMongoDocument(tokenId)
+        self._delCachedToken(tokenId)
+        return result
 
     def removeAccessTokensForUser(self, userId):
-        return self._collection.remove({'user_id': userId})
+        tokens = self._collection.find({'user_id': userId}, fields=['_id'])
+        for token in tokens:
+            self._delCachedToken(str(token['_id']))
 
+        result = self._collection.remove({'user_id': userId})
+        return result

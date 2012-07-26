@@ -16,21 +16,17 @@ from logs import report
 try:
     import logs
     from libs.Netflix               import globalNetflix
-    from resolve.GenericSource              import GenericSource
+    from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from gevent.pool                import Pool
     from pprint                     import pformat
     from datetime                   import datetime
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
 except:
     report()
     raise
-
-
-# TODO: this class is unfinished!
-
 
 class _NetflixObject(object):
     """
@@ -202,13 +198,6 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
         except KeyError:
             return None
 
-#    @lazyProperty
-#    def directors(self):
-#        try:
-#            return [ { 'name' : self._titleObj['']}]
-#        except:
-#            return
-
 
 class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
     """
@@ -227,16 +216,7 @@ class NetflixTVShow(_NetflixObject, ResolverMediaCollection):
             return None
 
 
-
-class NetflixSearchAll(ResolverProxy, ResolverSearchAll):
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
 class NetflixSource(GenericSource):
-    """
-
-    """
     def __init__(self):
         GenericSource.__init__(self, 'netflix',
             groups=[
@@ -250,6 +230,7 @@ class NetflixSource(GenericSource):
                 'images',
                 'length',
                 'url',
+                'netflix_available',
             ],
             kinds=[
                 'media_item',
@@ -276,7 +257,7 @@ class NetflixSource(GenericSource):
 
     def entityProxyFromKey(self, netflix_id, **kwargs):
         try:
-            titleObj = self.__netflix.getTitleDetails(netflix_id)
+            titleObj = self.__netflix.getTitleDetails(netflix_id, timeout=MERGE_TIMEOUT)
             if titleObj['id'].find('/movies/') != -1:
                 return NetflixMovie(titleObj)
             elif titleObj['id'].find('/series/') != -1:
@@ -289,13 +270,11 @@ class NetflixSource(GenericSource):
             return self.movieSource(query)
         if query.isType('tv'):
             return self.tvSource(query)
-        #if query.kind == 'search':
-        #    return self.searchAllSource(query)
 
     def __genericSourceGen(self, query, filter):
         def gen():
             try:
-                results = self.__netflix.searchTitles(query.name)
+                results = self.__netflix.searchTitles(query.name, timeout=MERGE_TIMEOUT)
 
                 for title in results['catalog_title']:
                     if (filter(title)):
@@ -306,7 +285,7 @@ class NetflixSource(GenericSource):
 
                 # return all remaining results through separate page calls to the api
                 while result_counter < num_results:
-                    results = self.__netflix.searchTitles(query.name, start=result_counter)
+                    results = self.__netflix.searchTitles(query.name, start=result_counter, timeout=MERGE_TIMEOUT)
                     result_counter += results['results_per_page']
 
                     # ['catalog_title'] contains the actual dict of values for a given result.  It's a weird structure.
@@ -330,13 +309,6 @@ class NetflixSource(GenericSource):
         gen = self.__genericSourceGen(query, filter)
         return self.generatorSource(gen, constructor=NetflixTVShow)
 
-
-#    def searchAllSource(self, query):
-#        def gen():
-#            try:
-#                results = self.__netflix.movie_search
-#            except GeneratorExit:
-#                    pass
 
 if __name__ == '__main__':
     demo(NetflixSource(), 'arrested development')

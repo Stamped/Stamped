@@ -105,6 +105,7 @@ NSString* const DDMenuControllerWillShowLeftMenuNotification = @"DDMenuControlle
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
+    if (!_root) return [super shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
     return [_root shouldAutorotateToInterfaceOrientation:toInterfaceOrientation];
 }
 

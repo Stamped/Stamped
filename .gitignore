@@ -5,6 +5,7 @@
 *.pyo
 *.o
 *.old
+*.so
 out
 out.xml
 internal/projects/ios-fonts-test/FontTest/FontTest/FontTestAppDelegate.m
@@ -21,3 +22,7 @@ xcuserdata/
 
 Breakpoints.xcbkptlist
 
+platform/libs/.*
+
+
+.project

@@ -9,7 +9,7 @@ __license__   = "TODO"
 from servers.httpapi.v0.helpers import *
 
 try:
-    from resolve        import ManualEdit
+    pass
 except:
     raise
 
@@ -47,11 +47,22 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPEntityIdSearchId,
                    exceptions=entityExceptions)
-def show(request, authUserId, authClientId, http_schema, **kwargs):
+def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
+    try:
+        return getCache(uri, http_schema)
+    except KeyError:
+        pass
+    except Exception as e:
+        logs.warning("Failed to get cache: %s" % e)
+            
     entity      = stampedAPI.getEntity(http_schema, authUserId)
     entity      = _convertHTTPEntity(entity, authClientId)
+
+    result = transformOutput(entity.dataExport())
+
+    # setCache(uri, http_schema, result, ttl=1800)
     
-    return transformOutput(entity.dataExport())
+    return result
 
 
 @require_http_methods(["POST"])
@@ -171,6 +182,7 @@ _secret = 'supersmash'
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPEntityEdit, requires_auth=False)
 def edit(request, authUserId, http_schema, **kwargs):
+    from resolve        import ManualEdit
     if _secret != http_schema.secret:
         raise StampedHTTPError(403, 'Not authorized')
     form = ManualEdit.formForEntity(http_schema.entity_id, secret=http_schema.secret)
@@ -185,6 +197,7 @@ def edit(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPEntityUpdate, requires_auth=False)
 def update(request, authUserId, http_schema, **kwargs):
+    from resolve        import ManualEdit
     if _secret != http_schema.secret:
         raise StampedHTTPError(403, 'Not authorized')
     # try:

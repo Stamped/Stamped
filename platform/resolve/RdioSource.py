@@ -15,18 +15,17 @@ from logs import report
 
 try:
     import logs
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
     from libs.Rdio                  import Rdio, globalRdio
-    from resolve.GenericSource              import GenericSource
+    from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from pprint                     import pformat
     from search.ScoringUtils        import *
 except:
     report()
     raise
-
 
 class _RdioObject(object):
     """
@@ -42,7 +41,7 @@ class _RdioObject(object):
     rdio - an instance of Rdio (API proxy)
     """
 
-    def __init__(self, data=None, rdio_id=None, rdio=None, extras=''):
+    def __init__(self, data=None, rdio_id=None, rdio=None, extras='', timeout=None):
         if rdio is None:
             rdio = globalRdio()
         if data == None:
@@ -53,7 +52,7 @@ class _RdioObject(object):
                 # __init__ means that all subclassers must first init ResolverObject or a subclass before initing
                 # _RdioObject.
                 self.countLookupCall('main data')
-                data = rdio.method('get',keys=rdio_id,extras=extras)['result'][rdio_id]
+                data = rdio.method('get', keys=rdio_id, extras=extras, timeout=timeout)['result'][rdio_id]
             except KeyError:
                 raise ValueError('bad rdio_id')
         elif rdio_id is not None:
@@ -80,7 +79,21 @@ class _RdioObject(object):
 
     @lazyProperty
     def url(self):
-        return self.data['url']
+        return 'http://www.rdio.com%s' % self.data['url']
+
+    @lazyProperty
+    def canStream(self):
+        try:
+            return self.data['canStream']
+        except Exception:
+            return False
+
+    @lazyProperty
+    def canSample(self):
+        try:
+            return self.data['canStream']
+        except Exception:
+            return False
 
     @property 
     def source(self):
@@ -115,7 +128,7 @@ class RdioArtist(_RdioObject, ResolverPerson):
     def albums(self):
         try:
             self.countLookupCall('albums')
-            album_list = self.rdio.method('getAlbumsForArtist',artist=self.key,count=100)['result']
+            album_list = self.rdio.method('getAlbumsForArtist', artist=self.key, count=100, timeout=MERGE_TIMEOUT)['result']
         except LookupRequiredError:
             return []
         return [ 
@@ -131,7 +144,7 @@ class RdioArtist(_RdioObject, ResolverPerson):
     def tracks(self):
         try:
             self.countLookupCall('tracks')
-            track_list = self.rdio.method('getTracksForArtist',artist=self.key,count=100)['result']
+            track_list = self.rdio.method('getTracksForArtist', artist=self.key, count=100, timeout=MERGE_TIMEOUT)['result']
         except LookupRequiredError:
             return []
         return [ 
@@ -170,7 +183,7 @@ class RdioAlbum(_RdioObject, ResolverMediaCollection):
         try:
             keys = ','.join(self.data['trackKeys'])
             self.countLookupCall('tracks')
-            track_dict = self.rdio.method('get',keys=keys)['result']
+            track_dict = self.rdio.method('get', keys=keys, timeout=MERGE_TIMEOUT)['result']
         except LookupRequiredError:
             return []
         return [ 
@@ -248,6 +261,7 @@ class   RdioSource(GenericSource):
                 'albums',
                 'tracks',
                 'artists',
+                'rdio_available',
             ],
             kinds=[
                 'person',
@@ -312,6 +326,7 @@ class   RdioSource(GenericSource):
                 query=search,
                 types='Track',
                 extras='',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioTrack)
     
@@ -326,6 +341,7 @@ class   RdioSource(GenericSource):
                 query=search,
                 types='Album',
                 extras='label,isCompilation',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioAlbum)
 
@@ -334,6 +350,7 @@ class   RdioSource(GenericSource):
                 query=query.name,
                 types='Artist',
                 extras='albumCount',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioArtist)
 
@@ -352,16 +369,18 @@ class   RdioSource(GenericSource):
                 query=query.query_string,
                 types='Artist,Album,Track',
                 extras='albumCount,label,isCompilation',
+                timeout=MERGE_TIMEOUT,
             ),
             constructor=RdioSearchAll)
     
-    def __queryGen(self, batches=(100,), **params):
+    def __queryGen(self, batches=(100,), timeout=None, **params):
         offset  = 0
         
         for batch in batches:
             response = self.__rdio.method('search',
                 start=offset,
                 count=batch,
+                timeout=timeout,
                 **params
             )
             if response['status'] == 'ok':
@@ -378,8 +397,13 @@ class   RdioSource(GenericSource):
     def searchLite(self, queryCategory, queryText, pool=None, timeout=None, coords=None, logRawResults=None):
         if queryCategory != 'music':
             raise Exception('Rdio only supports music!')
-        response = self.__rdio.method('search', query=queryText, count=25, types='Artist,Album,Track',
-            extras='albumCount,label,isCompilation', priority='high')
+        response = self.__rdio.method('search',
+                                      query=queryText,
+                                      count=25,
+                                      types='Artist,Album,Track',
+                                      extras='albumCount,label,isCompilation', 
+                                      priority='high',
+                                      timeout=SEARCH_TIMEOUT)
         if response['status'] != 'ok':
             # TODO: Proper error handling here. Tracking of how often this happens.
             print "Rdio error; see response:"
@@ -399,12 +423,15 @@ class   RdioSource(GenericSource):
             if isinstance(searchResult.resolverObject, RdioTrack):
                 applyTrackTitleDataQualityTests(searchResult, queryText)
                 adjustTrackRelevanceByQueryMatch(searchResult, queryText)
+                augmentTrackDataQualityOnBasicAttributePresence(searchResult)
             elif isinstance(searchResult.resolverObject, RdioAlbum):
                 applyAlbumTitleDataQualityTests(searchResult, queryText)
                 adjustAlbumRelevanceByQueryMatch(searchResult, queryText)
+                augmentAlbumDataQualityOnBasicAttributePresence(searchResult)
             elif isinstance(searchResult.resolverObject, RdioArtist):
                 applyArtistTitleDataQualityTests(searchResult, queryText)
                 adjustArtistRelevanceByQueryMatch(searchResult, queryText)
+                augmentArtistDataQualityOnBasicAttributePresence(searchResult)
         sortByRelevance(searchResults)
         return searchResults
 

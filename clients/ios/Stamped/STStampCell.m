@@ -69,11 +69,11 @@
         [Util reframeView:_userImageView withDeltas:CGRectMake(11, originY, 0, 0)];
         [self addSubview:_userImageView];
         
-        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
-        longPress.minimumPressDuration = 1.5f;
-        [self addGestureRecognizer:longPress];
-        [longPress release];
-        
+//        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+//        longPress.minimumPressDuration = 1.5f;
+//        [self addGestureRecognizer:longPress];
+//        [longPress release];
+//        
         // cell text
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, 0, self.bounds.size.width - 88.0f, 70.0f + originY)];
         view.backgroundColor = [UIColor whiteColor];

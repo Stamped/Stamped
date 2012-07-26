@@ -10,7 +10,6 @@
 #import "LeftMenuTableCell.h"
 
 @interface LeftMenuLargeCell : UITableViewCell {
-    STBlockUIView *_badgeView;
     STBlockUIView *_iconView;
     UIImageView *_selectedView;
     UIView *_highlightedView;
@@ -22,11 +21,9 @@
 
 @property(nonatomic,retain) UIImage *icon;
 @property(nonatomic,retain) UILabel *titleLabel;
-@property(nonatomic,assign) NSInteger badgeCount;
 @property(nonatomic,assign) BOOL border;
 @property(nonatomic,assign) id delegate;
 
 - (void)setTop:(BOOL)top bottom:(BOOL)bottom;
-- (void)countUpdated:(id)notImportant;
 
 @end

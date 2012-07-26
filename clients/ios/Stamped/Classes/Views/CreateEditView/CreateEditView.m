@@ -70,7 +70,7 @@
         
         //textView.layer.borderColor = [UIColor redColor].CGColor;
         //textView.layer.borderWidth = 1.0f;
-
+        
         
         STUploadingImageView *imageView = [[STUploadingImageView alloc] initWithFrame:CGRectMake((self.bounds.size.width-200.0f)/2, 100.0f, 200.0f, 200.0f)];
         imageView.delegate = (id<STUploadingImageViewDelegate>)self;
@@ -82,20 +82,28 @@
         
         id <STUser> user = [[STStampedAPI sharedInstance] currentUser];
         STAvatarView *avatar = [[STAvatarView alloc] initWithFrame:CGRectMake(10.0f, 10.0f, 48.0f, 48.0f)];
-        avatar.imageURL = [NSURL URLWithString:user.imageURL];
+        UIImage* currentUserImage = [STStampedAPI sharedInstance].currentUserImage;
+        if (currentUserImage) {
+            avatar.imageView.image = currentUserImage;
+        }
+        else {
+            avatar.imageURL = [NSURL URLWithString:user.imageURL];
+        }
         [self.scrollView addSubview:avatar];
         self.avatarView = avatar;
         self.avatarView.alpha = 0.0f;
         [avatar release];
-    
+        
+        
+        CGFloat offsetY = -10;
         UIImage *image = [UIImage imageNamed:@"button_addcomment"];
         UIImage *imageHi = [UIImage imageNamed:@"button_addcomment_down"];
         UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
         button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
-//        [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
-//        [button setTitle:@"Add a comment" forState:UIControlStateNormal];
+        //        [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
+        //        [button setTitle:@"Add a comment" forState:UIControlStateNormal];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 60.0f, 200.0f, image.size.height);
+        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 60.0f+ offsetY, 200.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
         [self.scrollView addSubview:button];
@@ -109,8 +117,8 @@
         [button setTitleColor:[UIColor colorWithWhite:0.349f alpha:1.0f] forState:UIControlStateNormal];
         //[button setImage:[UIImage imageNamed:@"camera_icon_small.png"] forState:UIControlStateNormal];
         button.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
-        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 11.0f, 200.0f, image.size.height);
-//        button.frame = CGRectMake((self.bounds.size.width-85.0f)/2, 110.0f, 85.0f, image.size.height);
+        button.frame = CGRectMake((self.bounds.size.width-200.0f)/2, 11.0f + offsetY, 200.0f, image.size.height);
+        //        button.frame = CGRectMake((self.bounds.size.width-85.0f)/2, 110.0f, 85.0f, image.size.height);
         [button setBackgroundImage:[image stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateNormal];
         [button setBackgroundImage:[imageHi stretchableImageWithLeftCapWidth:(image.size.width/2) topCapHeight:0] forState:UIControlStateHighlighted];
         [self.scrollView addSubview:button];
@@ -159,12 +167,14 @@
 }
 
 - (void)layoutScrollView {
+    //TODO move up 10 pt
+    CGFloat offsetY = -10;
     CGSize size = self.scrollView.contentSize;
     size.width = self.scrollView.frame.size.width;
     if (self.imageView.image) {
         
         CGRect frame = self.imageView.frame;
-        frame.origin.y = MAX(50.0f, CGRectGetMaxY(self.textView.frame));
+        frame.origin.y = MAX(50.0f + offsetY, CGRectGetMaxY(self.textView.frame));
         if (!_commentButton.hidden) {
             frame.origin.y = MAX(frame.origin.y, CGRectGetMaxY(_commentButton.frame));
         }
@@ -175,7 +185,7 @@
     } else if (!_captureButton.hidden){
         
         size.height = CGRectGetMaxY(_captureButton.frame) + 10.0f;
-
+        
     } else {
         
         size.height = CGRectGetMaxY(self.textView.frame) + 10.0f;
@@ -210,9 +220,9 @@
 
 - (void)updateState {
     
-
+    
     if (_editing) {
-
+        
         self.textView.hidden = NO;
         _captureButton.hidden = YES;
         _commentButton.hidden = YES;
@@ -227,7 +237,7 @@
     self.avatarView.alpha = self.textView.hidden ? 0.0f : 1.0f;
     self.textView.editable = _editing;
     [self layoutScrollView];
-
+    
 }
 
 
@@ -240,10 +250,10 @@
     
     self.scrollView.contentInset = UIEdgeInsetsMake(0.0f, 0.0f, _editing ? 20.0f : 50.0f, 0.0f);
     self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
-
+    
     
     UIView *expandView = [self.dataSource createEditViewSuperview:self];
-        
+    
     if (_editing) {
         
         self.creditToolbar.frame = [self convertRect:self.creditToolbar.frame toView:self.superview];
@@ -282,7 +292,7 @@
             _menuView.frame = frame;
             
             [self updateState];
-
+            
         } completion:^(BOOL finished) {
             
             self.scrollView.clipsToBounds = !_editing;
@@ -295,7 +305,7 @@
         
         [self.textView resignFirstResponder];
         self.scrollView.clipsToBounds = !_editing;
-
+        
         __block CGRect frame = [expandView.superview convertRect:expandView.frame toView:self];
         self.backgroundColor = [UIColor clearColor];
         
@@ -304,7 +314,7 @@
         [self bringSubviewToFront:self.menuView];
         
         [UIView animateWithDuration:0.25f animations:^{
-           
+            
             self.scrollView.frame = CGRectInset(frame, 5, 10.0f);
             
             CGRect frame = _toolbar.frame;
@@ -316,7 +326,7 @@
             _menuView.frame = frame;
             
             [self updateState];
-
+            
         } completion:^(BOOL finished) {
             
             [expandView addSubview:self];
@@ -327,13 +337,13 @@
             self.toolbar.hidden = YES;
             self.menuView.hidden = YES;
             self.backgroundColor = [UIColor whiteColor];
-
+            
             self.creditToolbar.frame = [self.creditToolbar.superview convertRect:self.creditToolbar.frame toView:self];
             [self addSubview:self.creditToolbar];
             
-
+            
         }];
-
+        
         
     }
     
@@ -374,14 +384,14 @@
     
     [self setEditing:YES];
     self.keyboardType = CreateEditKeyboardTypeText;
-
+    
 }
 
 - (void)capture:(id)sender {
     
     self.keyboardType = CreateEditKeyboardTypePhoto;
     [self setEditing:YES];
-
+    
 }
 
 - (void)done:(id)sender {
@@ -393,7 +403,7 @@
 - (void)photo:(UIButton*)sender {
     
     [sender setSelected:![sender isSelected]];
-
+    
     BOOL _enabled = [UIView areAnimationsEnabled];
     [UIView setAnimationsEnabled:NO];
     self.keyboardType = [sender isSelected] ? CreateEditKeyboardTypePhoto : CreateEditKeyboardTypeText;
@@ -414,7 +424,7 @@
     if ([(id)delegate respondsToSelector:@selector(createEditView:addPhotoWithSourceType:)]) {
         [self.delegate createEditView:self addPhotoWithSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
     }
-
+    
 }
 
 - (void)tapped:(UITapGestureRecognizer*)gesture {
@@ -423,7 +433,7 @@
         
         [self setEditing:YES];
         self.keyboardType = CreateEditKeyboardTypeText;
-
+        
     } else {
         
         BOOL _enabled = [UIView areAnimationsEnabled];
@@ -432,7 +442,7 @@
         [UIView setAnimationsEnabled:_enabled];
         
     }
-
+    
 }
 
 
@@ -459,14 +469,14 @@
             if (CGRectContainsPoint(_commentButton.frame, point) && ![_textView hasText]) {
                 return NO;
             }
-
+            
         }
         
         return YES;
         
     }
     
-
+    
     return (self.keyboardType==CreateEditKeyboardTypePhoto);
     
 }
@@ -528,7 +538,7 @@
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
-        
+    
     CGRect frame = textView.frame;
     if(frame.size.height != textView.contentSize.height) {
         frame.size.height = textView.contentSize.height;
@@ -694,7 +704,7 @@
         frame.origin.y = -shadow.size.height;
         imageView.frame = frame;
         [imageView release];
-
+        
         UIFont *font = [UIFont systemFontOfSize:12];
         UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(40.0f, floorf((self.bounds.size.height-font.lineHeight)/2), 0.0f, font.lineHeight)];
         label.font = font;
@@ -710,13 +720,13 @@
         [self.layer addSublayer:textLayer];
         _detailTitleLayer = textLayer;
         _detailTitleLayer.contentsScale = [[UIScreen mainScreen] scale];
-
+        
         imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"create_credit_stamps.png"]];
         [self addSubview:imageView];
         _stampsImageView = imageView;
         [imageView release];
         _stampsImageView.hidden = YES;
-
+        
     }
     return self;
     

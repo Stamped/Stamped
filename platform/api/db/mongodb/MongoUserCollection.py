@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals, utils
 import logs, re, bson
+import pymongo
 
 from logs                       import report
 from datetime                   import datetime
@@ -20,6 +21,7 @@ from api.db.mongodb.AMongoCollection           import AMongoCollection
 from api.db.mongodb.MongoFollowersCollection   import MongoFollowersCollection
 from api.db.mongodb.MongoFriendsCollection     import MongoFriendsCollection
 from api.AUserDB                import AUserDB
+from libs.Memcache                              import globalMemcache
 
 try:
     from pyes.filters           import *
@@ -37,6 +39,10 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         self._collection.ensure_index('phone')
         self._collection.ensure_index('linked.twitter.linked_user_id')
         self._collection.ensure_index('linked.facebook.linked_user_id')
+        self._collection.ensure_index([('screen_name_lower', pymongo.ASCENDING), ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('name_lower', pymongo.ASCENDING), ('_id', pymongo.ASCENDING)])
+
+        self._cache = globalMemcache()
 
     ### Note that overflow=True
     def _convertFromMongo(self, document):
@@ -59,6 +65,26 @@ class MongoUserCollection(AMongoCollection, AUserDB):
             if 'screen_name_lower' in document:
                 screenNames.append(document['screen_name_lower'])
         return screenNames
+
+
+    def _getCachedUserMini(self, userId):
+        key = str("obj::usermini::%s" % userId)
+        return self._cache[key]
+
+    def _setCachedUserMini(self, user):
+        key = str("obj::usermini::%s" % user.user_id)
+        ttl = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, user, time=ttl)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (user.user_id, e))
+
+    def _delCachedUserMini(self, userId):
+        key = str("obj::usermini::%s" % userId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
     
     ### PUBLIC
     
@@ -108,6 +134,24 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         
         return map(self._convertFromMongo, results)
     
+    def getUserMinis(self, userIds):
+        result = []
+
+        documentIds = []
+        for userId in userIds:
+            try:
+                result.append(self._getCachedUserMini(userId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(userId))
+        documents = self._getMongoDocumentsFromIds(documentIds)
+
+        for document in documents:
+            user = self._convertFromMongo(document).minimize()
+            self._setCachedUserMini(user)
+            result.append(user)
+
+        return result
+
     @lazyProperty
     def _valid_re(self):
         return re.compile("[^\s\w-]+", re.IGNORECASE)
@@ -356,16 +400,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def findUsersByTwitter(self, twitterIds, limit=0):
         twitterIds = map(str, twitterIds)
 
-        # old format find
-        data = self._collection.find(
-            {"linked_accounts.twitter.twitter_id": {"$in": twitterIds}}
-        ).limit(limit)
-
         result = []
-        for item in data:
-            user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked_accounts']['twitter']['twitter_id']
-            result.append(user)
 
         # new format find
         data = self._collection.find(
@@ -381,15 +416,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     def findUsersByFacebook(self, facebookIds, limit=0):
         facebookIds = map(str, facebookIds)
         
-        data = self._collection.find(
-            {"linked_accounts.facebook.facebook_id": {"$in": facebookIds}}
-        ).limit(limit)
-
         result = []
-        for item in data:
-            user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked_accounts']['facebook']['facebook_id']
-            result.append(user)
 
         # new format find
         data = self._collection.find(

@@ -31,6 +31,7 @@
 #import "STHoverToolbar.h"
 #import "STNavigationItem.h"
 #import <MessageUI/MFMailComposeViewController.h>
+#import "STSpotify.h"
 
 static NSString* const kEntityLookupPath = @"/entities/show.json";
 
@@ -84,15 +85,21 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
     //STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
     //_toolbar = toolbar;
     [super viewDidLoad];
+    self.loadingView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
+    self.loadingView.frame = [Util originRectWithRect:self.view.frame];
+    self.loadingView.hidesWhenStopped = YES;
+    [self.view addSubview:self.loadingView];
     [self reloadStampedData];
     self.navigationItem.rightBarButtonItem = [[[STNavigationItem alloc] initWithTitle:@"Debug" style:UIBarButtonItemStyleDone target:self action:@selector(debug:)] autorelease];
     
 }
 
 - (void)debug:(id)notImportant {
+    //    [[STSpotify sharedInstance] addToPlaylistWithTrackURI:@"spotify:track:1Va8BTRqBHYue8xrSwqT6k"];
     MFMailComposeViewController* vc = [[MFMailComposeViewController alloc] init];
     vc.mailComposeDelegate = self;
-    [vc setMessageBody:[NSString stringWithFormat:@"%@\n%@", self.entityDetail.title, self.entityID] isHTML:NO];
+    [vc setToRecipients:[NSArray arrayWithObject:@"liz@stamped.com"]];
+    [vc setMessageBody:[NSString stringWithFormat:@"%@\nhttps://api1.stamped.com/v1/entities/edit.html?secret=supersmash&entity_id=%@", self.entityDetail.title, self.entityID] isHTML:NO];
     [self presentModalViewController:vc animated:YES];
     [vc release];
 }
@@ -165,24 +172,24 @@ static BOOL _addedStampButton = NO;
 
 - (void)reloadStampedData {
     if (!self.entityDetailCancellation) {
-    if (self.synchronousWrapper) {
-        [self.scrollView removeChildView:self.synchronousWrapper withAnimation:YES];
-        self.synchronousWrapper = nil;
-    }
-    if (self.entityID) {
-        [self.loadingView startAnimating];
-        self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.entityID 
-                                                   forceUpdate:self.entityDetail ? YES : NO
-                                                   andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
-                                                       self.entityDetail = detail;
-                                                   }];
-    }
-    else if (self.searchID) {
-        [self.loadingView startAnimating];
-        self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForSearchID:self.searchID andCallback:^(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation) {
-            self.entityDetail = detail;
-        }];
-    }
+        if (self.synchronousWrapper) {
+            [self.scrollView removeChildView:self.synchronousWrapper withAnimation:YES];
+            self.synchronousWrapper = nil;
+        }
+        if (self.entityID) {
+            [self.loadingView startAnimating];
+            self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForEntityID:self.entityID 
+                                                                                       forceUpdate:self.entityDetail ? YES : NO
+                                                                                       andCallback:^(id<STEntityDetail> detail, NSError *error, STCancellation *cancellation) {
+                                                                                           self.entityDetail = detail;
+                                                                                       }];
+        }
+        else if (self.searchID) {
+            [self.loadingView startAnimating];
+            self.entityDetailCancellation = [[STStampedAPI sharedInstance] entityDetailForSearchID:self.searchID andCallback:^(id<STEntityDetail> detail, NSError* error, STCancellation* cancellation) {
+                self.entityDetail = detail;
+            }];
+        }
     }
 }
 

@@ -8,44 +8,57 @@ __license__   = "TODO"
 __all__ = [ 'EntityProxyContainer' ]
 
 import Globals
-from logs import report
 
-try:
-    from api import Entity
-    from resolve.BasicSourceContainer   import BasicSourceContainer
-    from resolve.EntityGroups           import *
-    from resolve.EntityProxySource      import EntityProxySource
-except:
-    report()
-    raise
+from api import Entity
+from resolve.BasicSourceContainer import BasicSourceContainer
+from resolve.EntityProxySource import EntityProxySource
 
-seedPriority = 100
+class EntityProxyContainer(object):
+    def __init__(self):
+        self.__proxies = []
 
-class EntityProxyContainer(BasicSourceContainer):
-    """
-    """
+    def addProxy(self, proxy):
+        self.__proxies.append(proxy)
+        return self
 
-    def __init__(self, proxy):
-        BasicSourceContainer.__init__(self)
-
-        self.__proxy = proxy
-
-        for group in allGroups:
-            self.addGroup(group())
-
-        self.addSource(EntityProxySource(self.__proxy))
+    def addAllProxies(self, proxies):
+        self.__proxies.extend(proxies)
+        return self
         
-        self.setGlobalPriority('seed', seedPriority)
-
     def buildEntity(self):
-        entity              = Entity.buildEntity(kind=self.__proxy.kind)
-        entity.title        = self.__proxy.name
-        entity.kind         = self.__proxy.kind 
-        entity.types        = self.__proxy.types
+        if not self.__proxies:
+            raise Exception('No proxies added so far, cannot build entity')
         
-        decorations = {}
-        
-        modified = self.enrichEntity(entity, decorations, max_iterations=None, timestamp=None)
+        primaryProxy = self.__proxies[0]
+        entity = Entity.buildEntity(kind=primaryProxy.kind)
+        entity.kind = primaryProxy.kind 
+        entity.types = primaryProxy.types
+
+        if entity.isType('book'):
+            entity.title = self.__chooseBookTitle()
+        else:
+            entity.title = self.__chooseBestTitle()
+
+        sourceContainer = BasicSourceContainer()
+        for proxy in self.__proxies:
+            sourceContainer.addSource(EntityProxySource(proxy))
+
+        sourceContainer.enrichEntity(entity, {})
         
         return entity
+
+    def __chooseBestTitle(self):
+        def penaltyChar(c):
+            return not (c.isalpha() or c.isspace())
+        def titleScore(title):
+            return -len(title) - len(filter(penaltyChar, title)) * 2
+        return max((proxy.name for proxy in self.__proxies), key=titleScore)
+
+    def __chooseBookTitle(self):
+        # If we have a title from iTunes, always use that. iTunes has much much better titles than
+        # Amazon.
+        for proxy in self.__proxies:
+            if proxy.source == 'itunes':
+                return proxy.name
+        return self.__chooseBestTitle()
 

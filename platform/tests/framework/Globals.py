@@ -18,3 +18,5 @@ except ImportError:
             raise Exception('Unable to find platform directory to import!')
         curr_dir = next_dir
     sys.path.insert(0, next_dir)
+
+import stamped

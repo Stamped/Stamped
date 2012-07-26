@@ -13,6 +13,8 @@
         // initialize globals and utils
         // ---------------------------------------------------------------------
         
+        // preloaded JS constants
+        var g_page                  = STAMPED_PRELOAD.page;
         
         // high-level containers
         var $window                 = $(window);
@@ -169,9 +171,6 @@
         var index  = Math.floor(Math.random() * $texts.length);
         $texts.eq(index).addClass(active_text);
         
-        var fit_text_compression_factor = 0.5;
-        $(".line").fitText(fit_text_compression_factor);
-        
         var hide_intro = function(autoplay) {
             // start the main page content animation
             init_main(autoplay);
@@ -218,15 +217,30 @@
         // ---------------------------------------------------------------------
         
         
+        var get_active_pane_index = function(offset) {
+            var index  = parseInt($main_body.get(0).className.replace("active-pane-", ""));
+            
+            if (typeof(offset) !== 'undefined') {
+                index += offset;
+                
+                if (index < 0) {
+                    index += 5;
+                }
+                
+                index %= 5;
+            }
+            
+            return index;
+        };
+        
         // auto-cycles the active pane until the user stops the animation by 
         // clicking one of the pane nav buttons
         var main_pane_cycle_animation = new Animation({
             duration    : 5000, 
             complete    : function() {
-                var active  = parseInt($main_body.get(0).className.replace("active-pane-", ""));
-                var next    = ((active + 1) % 5);
+                var index = get_active_pane_index(1);
                 
-                set_active_pane(next);
+                set_active_pane(index);
                 main_pane_cycle_animation.restart();
             }
         });
@@ -265,13 +279,15 @@
             var height = $vertically_centered.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
+            if (g_page === "legal") {
+                offset = 180;
+            }
             //console.log("height: " + height + "; offset: " + offset);
             
             if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
                 
                 update_stamped_logo_layout();
-                
             }
             
             return {
@@ -315,8 +331,8 @@
             
             // load the main content with a spiffy animation, translating in from beneath 
             // the bottom of the page
+            $body.addClass("main-animating");
             $main
-                .addClass("main-animating")
                 .css('top', start + "px")
                 .animate({
                     'top'       : result.offset + "px"
@@ -327,7 +343,7 @@
                         var percent = (value - result.offset) / (start - result.offset);
                         
                         if (percent < 0.1) {
-                            $main.removeClass("main-animating");
+                            $body.removeClass("main-animating");
                         }
                     }, 
                     complete    : function() {
@@ -335,7 +351,7 @@
                             update_main_layout();
                         }
                         
-                        $main.removeClass("main-animating");
+                        $body.removeClass("main-animating");
                         
                         if (!!autoplay) {
                             main_pane_cycle_animation.start();
@@ -358,6 +374,10 @@
         
         // reveals the embedded map window via a translation from the right-hand-side of the window onto the page
         var map_window_show = function() {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             $social.hide(800);
             
             $map_window
@@ -373,6 +393,10 @@
         
         // hides the embedded map window via a translation off the right-hand-side of the window
         var map_window_hide = function() {
+            if ($map_window.length <= 0) {
+                return;
+            }
+            
             $map_window
                 .stop(true, false)
                 .animate({
@@ -413,7 +437,7 @@
                     $map_window.append(iframe);
                     $map_window_iframe = $("#tastemaker-map-window-iframe");
                 } else {
-                    $map_window_iframe.attr("src", iframe_src)
+                    $map_window_iframe.attr("src", iframe_src);
                     
                     $map_window_overlay
                         .stop(true, false)
@@ -485,6 +509,25 @@
             return false;
         });
         
+        $main.on("click", ".pane-nav-arrow", function(event) {
+            event.preventDefault();
+            main_pane_cycle_animation.stop();
+            
+            var $this  = $(this);
+            var offset = 0;
+            
+            if ($this.hasClass("pane-nav-arrow-up")) {
+                offset = -1;
+            } else {
+                offset = 1;
+            }
+            
+            var index = get_active_pane_index(offset);
+            set_active_pane(index);
+            
+            return false;
+        });
+        
         // cycle active pane on continue button click
         /*$main.on("click", ".continue-button", function(event) {
             event.preventDefault();
@@ -498,42 +541,45 @@
             return false;
         });*/
         
-        $main.on("click", ".lightbox-video", function(event) {
-            event.preventDefault();
-            
-            $.fancybox({
-                'padding'       : 0,
-                'autoScale'     : false, 
+        // Sadly, Fancybox Youtube videos and IE are not friends...
+        if (!$.browser.msie) {
+            $main.on("click", ".lightbox-video", function(event) {
+                event.preventDefault();
                 
-                'transitionIn'  : 'none', 
-                'transitionOut' : 'none', 
+                $.fancybox({
+                    'padding'       : 0,
+                    'autoScale'     : false, 
+                    
+                    'transitionIn'  : 'none', 
+                    'transitionOut' : 'none', 
+                    
+                    'openEffect'    : 'elastic', 
+                    'openEasing'    : 'easeOutBack', 
+                    'openSpeed'     : 300, 
+                    
+                    'closeEffect'   : 'elastic', 
+                    'closeEasing'   : 'easeInBack', 
+                    'closeSpeed'    : 300, 
+                    
+                    'tpl'           : {
+                        'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                        'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
+                    }, 
+                    
+                    'title'         : this.title, 
+                    'width'         : 800, // 680
+                    'height'        : 340 + 32, // 495
+                    'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
+                    'type'          : 'swf',
+                    'swf'           : {
+                        'wmode'             : 'transparent',
+                        'allowfullscreen'   : 'true'
+                    }
+                });
                 
-                'openEffect'    : 'elastic', 
-                'openEasing'    : 'easeOutBack', 
-                'openSpeed'     : 300, 
-                
-                'closeEffect'   : 'elastic', 
-                'closeEasing'   : 'easeInBack', 
-                'closeSpeed'    : 300, 
-                
-                'tpl'           : {
-				    'error'     : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
-                    'closeBtn'  : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
-                }, 
-                
-                'title'         : this.title, 
-                'width'         : 680, 
-                'height'        : 495,
-                'href'          : this.href.replace(new RegExp("watch\\?v=", "i"), 'v/'),
-                'type'          : 'swf',
-                'swf'           : {
-                    'wmode'             : 'transparent',
-                    'allowfullscreen'   : 'true'
-                }, 
+                return false;
             });
-            
-            return false;
-        });
+        }
         
         $main.on("click", ".tastemaker", function(event) {
             event.preventDefault();
@@ -580,7 +626,7 @@
         // ---------------------------------------------------------------------
         
         
-        iphone_inbox_stamps = [
+        /*iphone_inbox_stamps = [
             {
                 id : "Son of a Gun Restaurant", 
                 y0 : 49, 
@@ -708,7 +754,7 @@
             return false;
         });
         
-        $body.on("mouseup", iphone_inbox_selection_hide);
+        $body.on("mouseup", iphone_inbox_selection_hide);*/
         
         $iphone_back_button.click(function(event) {
             event.preventDefault();
@@ -719,19 +765,32 @@
             return false;
         });
         
+        var disable_main_pane_cycle_animation = function(event) {
+            main_pane_cycle_animation.stop();
+            
+            return true;
+        };
+        
+        // stop main cycling animation whenever the user hovers over the main 
+        // stamp card, iphone, or navigation-pane
+        $main_body.hover(disable_main_pane_cycle_animation);
+        $main_iphone.hover(disable_main_pane_cycle_animation);
+        $("#pane-nav").hover(disable_main_pane_cycle_animation);
+        
         
         // ---------------------------------------------------------------------
         // setup misc bindings and start initial animations
         // ---------------------------------------------------------------------
         
-        
         $(document).bind('keydown', function(e) {
-            if (e.which == 27) { // ESC
+            if (e.which === 27) { // ESC
                 // skip the intro animation if the user presses escape
                 if (intro_animation.is_running()) {
                     intro_animation.stop(true, true);
                     
                     hide_intro(false);
+                } else {
+                    main_pane_cycle_animation.stop();
                 }
             }
         });
@@ -741,6 +800,9 @@
         
         $window.bind("load", function() {
             if ($body.hasClass("intro")) {
+                var fit_text_compression_factor = 0.5;
+                $(".line").fitText(fit_text_compression_factor);
+                
                 // start the intro animation sequence
                 intro_animation.start();
             } else {

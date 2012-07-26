@@ -138,12 +138,16 @@ class AWSDeploymentStack(ADeploymentStack):
                 with cd("/stamped"):
                     sudo('. bin/activate && python /stamped/bootstrap/bin/ebs_backup.py', pty=False)
     
-    def update(self, *args):
+    def update(self, *args, **kwargs):
         force = (len(args) >= 1 and args[0] == 'force')
         utils.log("[%s] updating %d instances" % (self, len(self.instances)))
         
-        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s'" % \
-               (" --force" if force else "")
+        branch = kwargs.get('branch', None)
+        
+        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s'" % \
+              (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
+        #cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s && cd /stamped/stamped/platform/servers/web2 && bin/restart.sh'" % \
+        #      (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
         pp  = []
         separator = "-" * 80
         
@@ -745,6 +749,7 @@ class AWSDeploymentStack(ADeploymentStack):
     def delete(self):
         utils.log("[%s] deleting %d instances" % (self, len(self.instances)))
         pool = Pool(8)
+        
         for instance in self.instances:
             pool.spawn(instance.terminate)
         
@@ -780,7 +785,7 @@ class AWSDeploymentStack(ADeploymentStack):
         return None
     
     def add(self, *args):
-        types = [ 'db', 'api', 'web', 'work', 'mem', 'mon', 'stat', 'work-api', 'work-enrich' ]
+        types = [ 'db', 'api', 'web', 'work', 'mem', 'mon', 'stat', 'work-api', 'work-enrich', 'ratelimiter' ]
         if 0 == len(args) or args[0] not in types:
             raise Fail("must specify what type of instance to add (e.g., %s)" % types)
         

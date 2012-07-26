@@ -47,8 +47,12 @@ class Memcache(object):
                 memcached_nodes.append('127.0.0.1')
             
             self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
+            
+            # Verify it works
+            self._client.set('test', 'test', time=0)
+
         except Exception, e:
-            logs.error("[%s] unable to initialize memcached (%s)" % (self, e))
+            logs.warning("[%s] unable to initialize memcached (%s)" % (self, e))
             self._client = None
             return False
 
@@ -59,38 +63,45 @@ class Memcache(object):
             self._client.flush_all()
     
     def set(self, key, value, *args, **kwargs):
-        try:
-            self._client.set(key, value, *args, **kwargs)
-        except Exception, e:
-            logs.warn(str(e))
+        if self._client is not None:
+            try:
+                self._client.set(key, value, *args, **kwargs)
+            except Exception, e:
+                logs.warn(str(e))
     
     def __getattr__(self, key):
         # proxy any attribute lookups to the underlying pylibmc client
-        if self._client:
+        if self._client is not None:
             return self._client.__getattribute__(key)
     
     def __setitem__(self, key, value):
-        if self._client:
+        if self._client is not None:
             self._client[key] = value
     
     def __getitem__(self, key):
-        if self._client:
-            return self._client[key]
-
+        if self._client is not None:
+            try:
+                return self._client[key]
+            except Exception:
+                pass
+        
         raise KeyError(key)
 
     def __delitem__(self, key):
-        if self._client:
-            del(self._client[key])
+        if self._client is not None:
+            try:
+                del(self._client[key])
+            except Exception:
+                pass
     
     def __contains__(self, key):
-        if self._client:
+        if self._client is not None:
             return key in self._client
         
         return False
     
     def __str__(self):
-        if self._client:
+        if self._client is not None:
             return "%s(%s)" % (str(self._client), self.__class__.__name__)
         else:
             return "%s" % self.__class__.__name__
@@ -122,6 +133,11 @@ def globalMemcache():
     return __globalMemcache
 
 
+def generateKeyFromDictionary(dictionary):
+    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
+    return json.dumps(dictionary, sort_keys=True, separators=(',',':'), default=dthandler)
+
+
 def memcached_function(time=0, min_compress_len=0):
     
     def decorating_function(user_function):
@@ -137,13 +153,12 @@ def memcached_function(time=0, min_compress_len=0):
             mark  = ';'
             
             # Cache key records both positional and keyword args
-            key   = "%s::%s(" % (self, key_prefix)
+            key   = "wrapper::%s::%s(" % (self, key_prefix)
             
             def encode_arg(arg):
                 if isinstance(arg, Schema):
                     # Convert to JSON to efficiently convert to string / sort by keys
-                    dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else obj
-                    return json.dumps(arg.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
+                    return generateKeyFromDictionary(arg.dataExport())
                 else:
                     # Convert any unicode characters to string representation
                     return unicode(arg).encode('utf8')

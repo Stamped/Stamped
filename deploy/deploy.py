@@ -47,7 +47,10 @@ def parseCommandLine():
     
     parser.add_option("-d", "--dbStack", dest="db_stack", default=None, type="string",
                       help="Denote an external stack to use for the database")
-    
+
+    parser.add_option("-b", "--branch", action="store", default='master', type="string",
+                      help="git branch to deploy, if not master")
+
     (options, args) = parser.parse_args()
     args = map(lambda arg: arg.lower(), args)
     
@@ -70,14 +73,14 @@ def main():
         if line != 'yes':
             print("aborting!!!")
             return
-    
+
     deploymentSystem = AWSDeploymentPlatform(options)
     command = args[0]
-    
+
     func = getattr(deploymentSystem, command, None)
     if func is None:
         raise Fail("'%s' does not support command '%s'" % (deploymentSystem, command))
-    
+
     try:
         func(*args[1:])
     except Exception:

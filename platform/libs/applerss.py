@@ -145,10 +145,8 @@ class AppleRSS(object):
 
         # TODO: Why can't we parse the proxies directly from the feed results?
         proxy = self._source.entityProxyFromKey(aid)
-        proxy = EntityProxyContainer.EntityProxyContainer(proxy)
+        return EntityProxyContainer.EntityProxyContainer().addProxy(proxy).buildEntity()
         
-        return proxy.buildEntity()
-    
     def _get_id(self, s):
         match = self._id_re.match(s)
         if match is not None:

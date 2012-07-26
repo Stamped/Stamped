@@ -46,6 +46,8 @@ static const uint8_t g_appkey[] = {
 static const size_t g_appkey_size = sizeof(g_appkey);
 
 static NSString* const _spotifyKeychainItemID = @"SpotifyCredentials";
+static NSString* const _spotifyPlaylistUserDefaultsKey = @"STSpotifyPlaylistUserDefaultsKey";
+static CGFloat const _spotifyTimeout = 20;
 
 @interface STSpotify () <SPSessionDelegate, SPLoginViewControllerDelegate>
 
@@ -203,10 +205,10 @@ static id _sharedInstance;
 
 -(void)session:(SPSession *)aSession recievedMessageForUser:(NSString *)aMessage {
 	UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Message from Spotify"
-													message:aMessage
-												   delegate:nil
-										  cancelButtonTitle:@"OK"
-										  otherButtonTitles:nil] autorelease];
+                                                     message:aMessage
+                                                    delegate:nil
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
 	[alert show];
 }
 
@@ -223,6 +225,71 @@ static id _sharedInstance;
         self.cancellation = nil;
         self.block = nil;
     }
+}
+
+- (void)addToPlaylistWithPlaylist:(SPPlaylist*)playlist andTrackURI:(NSString*)trackURI{
+    [SPTrack trackForTrackURL:[NSURL URLWithString:trackURI]
+                    inSession:[SPSession sharedSession]
+                     callback:^(SPTrack *track) {
+                         [SPAsyncLoading waitUntilLoaded:track timeout:_spotifyTimeout then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
+                             [playlist addItem:track atIndex:0 callback:^(NSError *error) {
+                                 NSLog(@"added track:%@", error);
+                             }];
+                         }];
+                     }];
+}
+
+- (void)addToPlaylistWithTrackURI:(NSString*)trackURI {
+    [self loginWithCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+        [SPAsyncLoading waitUntilLoaded:[SPSession sharedSession] timeout:_spotifyTimeout then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
+            NSString* playlistURI = [[NSUserDefaults standardUserDefaults] objectForKey:_spotifyPlaylistUserDefaultsKey];
+            if (playlistURI) {
+                [SPPlaylist playlistWithPlaylistURL:[NSURL URLWithString:playlistURI] inSession:[SPSession sharedSession] callback:^(SPPlaylist *playlist) {
+                    if (playlist) {
+                        [SPAsyncLoading waitUntilLoaded:playlist timeout:_spotifyTimeout then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
+                            [self addToPlaylistWithPlaylist:playlist andTrackURI:trackURI];
+                        }];
+                    }
+                    else {
+                        [[NSUserDefaults standardUserDefaults] removeObjectForKey:_spotifyPlaylistUserDefaultsKey];
+                        [self addToPlaylistWithTrackURI:trackURI];
+                    }
+                }];
+            }
+            else {
+                [SPAsyncLoading waitUntilLoaded:[SPSession sharedSession].userPlaylists timeout:_spotifyTimeout then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
+                    [[SPSession sharedSession].userPlaylists createPlaylistWithName:@"Stamped" callback:^(SPPlaylist *createdPlaylist) {
+                        [SPAsyncLoading waitUntilLoaded:createdPlaylist timeout:_spotifyTimeout then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
+                            [[NSUserDefaults standardUserDefaults] setObject:createdPlaylist.spotifyURL.absoluteString forKey:_spotifyPlaylistUserDefaultsKey];
+                            [self addToPlaylistWithPlaylist:createdPlaylist andTrackURI:trackURI];
+                        }];
+                    }]; 
+                }];
+            }
+        }];
+    }];
+}
+
+
+- (BOOL)canHandleSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
+    return [self didChooseSource:source forAction:action withContext:context shouldExecute:NO];
+}
+
+- (void)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext *)context {
+    [self didChooseSource:source forAction:action withContext:context shouldExecute:YES];
+}
+
+- (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
+    BOOL handled = NO;
+    if ([source.source isEqualToString:@"spotify"]) {
+        if ([action isEqualToString:@"playlist"] && source.sourceID != nil) {
+            handled = TRUE;
+            if (flag) {
+                [self addToPlaylistWithTrackURI:source.sourceID];
+            }
+        }
+    }
+    return handled;
 }
 
 @end

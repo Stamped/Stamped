@@ -22,6 +22,7 @@ try:
     from api.db.mongodb.AMongoCollection            import AMongoCollection
     from api.db.mongodb.MongoMenuCollection         import MongoMenuCollection
     from api.AEntityDB                              import AEntityDB
+    from libs.Memcache                              import globalMemcache
     from difflib                                    import SequenceMatcher
     from api.ADecorationDB                          import ADecorationDB
     from errors                                     import StampedUnavailableError
@@ -43,7 +44,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 'sources.opentable_id', 'sources.tmdb_id', 'sources.factual_id',
                 'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
                 'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
-                'sources.netflix_id', 'sources.thetvdb_id')
+                'sources.netflix_id', 'sources.thetvdb_id', 'sources.nytimes_id', 'sources.umdmusic_id')
+
+        self._collection.ensure_index([
+                                    ('search_tokens',               pymongo.ASCENDING),
+                                    ('sources.user_generated_id',   pymongo.ASCENDING),
+                                    ('sources.tombstone_id',        pymongo.ASCENDING),
+                                ])
+
+
         for field in fast_resolve_fields:
             self._collection.ensure_index(field)
         self._collection.ensure_index('search_tokens')
@@ -52,6 +61,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         self._collection.ensure_index('artists.title')
         self._collection.ensure_index('authors.title')
         self._collection.ensure_index('tracks.title')
+
+        self._collection.ensure_index([('_id', pymongo.ASCENDING), ('sources.user_generated_id', pymongo.ASCENDING)])
+
+        self._cache = globalMemcache()
 
     @lazyProperty
     def seed_collection(self):
@@ -105,6 +118,49 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             document['titlel'] = getSimplifiedTitle(document['title'])
 
         return document
+
+
+    ### CACHING
+
+    def _getCachedEntity(self, entityId):
+        key = str("obj::entity::%s" % entityId)
+        return self._cache[key]
+
+    def _setCachedEntity(self, entity):
+        key = str("obj::entity::%s" % entity.entity_id)
+        cacheLength = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, entity, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (entity.entity_id, e))
+
+    def _delCachedEntity(self, entityId):
+        key = str("obj::entity::%s" % entityId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
+
+    def _getCachedEntityMini(self, entityId):
+        key = str("obj::entitymini::%s" % entityId)
+        return self._cache[key]
+
+    def _setCachedEntityMini(self, entity):
+        key = str("obj::entitymini::%s" % entity.entity_id)
+        cacheLength = 60 * 10 # 10 minutes
+        try:
+            self._cache.set(key, entity, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (entity.entity_id, e))
+
+    def _delCachedEntityMini(self, entityId):
+        key = str("obj::entitymini::%s" % entityId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
 
     ### INTEGRITY
 
@@ -246,6 +302,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 if repair:
                     logs.info(msg)
                     del(entity.images)
+                    del(entity.images_timestamp)
+                    del(entity.images_source)
                     modified = True
                 else:
                     raise StampedDataError(msg)
@@ -294,6 +352,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 else:
                     del(entity.images)
 
+            if entity.images_source == 'seed':
+                msg = "%s: Image source set as seed" % key
+                if repair:
+                    logs.info(msg)
+                    del(entity.images_source)
+                    modified = True
+                else:
+                    raise StampedDataError(msg)
+
         # Check that any existing links are valid
         def _checkLink(field):
             if hasattr(entity, field) and getattr(entity, field) is not None:
@@ -336,11 +403,21 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     ### PUBLIC
 
     def addEntity(self, entity):
+        if entity.timestamp is None:
+            entity.timestamp = BasicTimestamp()
+        entity.timestamp.created = datetime.utcnow()
+        
         entity = self._addObject(entity)
         self.seed_collection.addEntity(entity)
+        self._setCachedEntity(entity)
         return entity
 
     def getEntityMini(self, entityId):
+        try:
+            return self._getCachedEntityMini(entityId)
+        except KeyError:
+            pass 
+
         documentId  = self._getObjectIdFromString(entityId)
         params = {'_id' : documentId}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
@@ -351,41 +428,61 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         entity = self._convertFromMongo(documents[0])
         entity = entity.minimize()
 
+        self._setCachedEntityMini(entity)
+
         return entity
 
-    def getEntity(self, entityId):
+    def getEntity(self, entityId, forcePrimary=False):
+        if not forcePrimary:
+            try:
+                return self._getCachedEntity(entityId)
+            except KeyError:
+                pass 
+
         documentId  = self._getObjectIdFromString(entityId)
-        document    = self._getMongoDocumentFromId(documentId)
+        document    = self._getMongoDocumentFromId(documentId, forcePrimary=forcePrimary)
         entity      = self._convertFromMongo(document)
+
+        self._setCachedEntity(entity)
 
         return entity
 
     def getEntityMinis(self, entityIds):
+        result = []
+
         documentIds = []
         for entityId in entityIds:
-            documentIds.append(self._getObjectIdFromString(entityId))
+            try:
+                result.append(self._getCachedEntityMini(entityId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
         params = {'_id': {'$in': documentIds}}
         fields = {'details.artist' : 0, 'tracks' : 0, 'albums' : 0, 'cast' : 0, 'desc' : 0  }
 
         documents = self._collection.find(params, fields)
 
-        result = []
-        for doc in documents:
-            entity = self._convertFromMongo(doc, mini=False)
+        for document in documents:
+            entity = self._convertFromMongo(document, mini=False)
             entity = entity.minimize()
+            self._setCachedEntityMini(entity)
             result.append(entity)
 
         return result
 
     def getEntities(self, entityIds):
+        result = []
+
         documentIds = []
         for entityId in entityIds:
-            documentIds.append(self._getObjectIdFromString(entityId))
-        data = self._getMongoDocumentsFromIds(documentIds)
+            try:
+                result.append(self._getCachedEntity(entityId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
+        documents = self._getMongoDocumentsFromIds(documentIds)
 
-        result = []
-        for item in data:
-            entity = self._convertFromMongo(item)
+        for document in documents:
+            entity = self._convertFromMongo(document)
+            self._setCachedEntity(entity)
             result.append(entity)
 
         return result
@@ -393,20 +490,15 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def getEntitiesByQuery(self, queryDict):
         return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
 
-    def getEntitiesByTypes(self, types, limit=None):
-        entityList = self._collection.find({'types': {'$in': types}})
-        if limit is not None:
-            entityList = entityList[:limit]
-        return map(lambda x: self._convertFromMongo(x), entityList)
-
-
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)
         document = self._updateMongoDocument(document)
-
-        return self._convertFromMongo(document)
+        entity = self._convertFromMongo(document)
+        self._setCachedEntity(entity)
+        return entity
 
     def removeEntity(self, entityId):
+        self._delCachedEntity(entityId)
         documentId = self._getObjectIdFromString(entityId)
         return self._removeMongoDocument(documentId)
 
@@ -414,15 +506,17 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         try:
             query = {'_id': self._getObjectIdFromString(entityId), 'sources.user_generated_id': userId}
             self._collection.remove(query)
-            query = {'_id': self._getObjectIdFromString(entityId), 'sources.userGenerated.user_id': userId} # Deprecated version
-            self._collection.remove(query)
+            self._delCachedEntity(entityId)
             return True
         except Exception:
             logs.warning("Cannot remove custom entity")
             raise
 
     def addEntities(self, entities):
-        return self._addObjects(entities)
+        entities = self._addObjects(entities)
+        for entity in entities:
+            self._setCachedEntity(entity)
+        return entities
 
     def updateDecoration(self, name, value):
         if name == 'menu':
@@ -434,11 +528,19 @@ class MongoEntityStatsCollection(AMongoCollection):
     
     def __init__(self):
         AMongoCollection.__init__(self, collection='entitystats', primary_key='entity_id', obj=EntityStats)
-        self._collection.ensure_index([ ('score', pymongo.DESCENDING) ])
-        self._collection.ensure_index([ ('kinds', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('types', pymongo.ASCENDING) ])
-        self._collection.ensure_index([ ('lat', pymongo.ASCENDING), \
-                                        ('lng', pymongo.ASCENDING) ])
+        
+        self._collection.ensure_index([ 
+            ('types', pymongo.ASCENDING),
+            ('score', pymongo.DESCENDING),
+        ])
+        self._collection.ensure_index([ 
+            ('types', pymongo.ASCENDING),
+            ('lat', pymongo.ASCENDING), 
+            ('lng', pymongo.ASCENDING), 
+            ('score', pymongo.DESCENDING),
+        ])
+
+        self._cache = globalMemcache()
 
     ### INTEGRITY
 
@@ -515,6 +617,29 @@ class MongoEntityStatsCollection(AMongoCollection):
                 raise Exception("%s: API required to regenerate stats" % key)
 
         return True
+
+
+    ### CACHING
+
+    def _getCachedStat(self, entityId):
+        key = str("obj::entitystat::%s" % entityId)
+        return self._cache[key]
+
+    def _setCachedStat(self, stat):
+        key = str("obj::entitystat::%s" % stat.entity_id)
+        cacheLength = 60 * 60 # 1 hour
+        try:
+            self._cache.set(key, stat, time=cacheLength)
+        except Exception as e:
+            logs.warning("Unable to set cache for %s: %s" % (stat.entity_id, e))
+
+    def _delCachedStat(self, entityId):
+        key = str("obj::entitystat::%s" % entityId)
+        try:
+            del(self._cache[key])
+        except KeyError:
+            pass
+
     
     ### PUBLIC
     
@@ -523,53 +648,66 @@ class MongoEntityStatsCollection(AMongoCollection):
             stats.timestamp = StatTimestamp()
         stats.timestamp.generated = datetime.utcnow()
 
-        return self._addObject(stats)
+        result = self._addObject(stats)
+
+        self._setCachedStat(result)
+
+        return result
     
     def getEntityStats(self, entityId):
+        try:
+            return self._getCachedStat(entityId)
+        except KeyError:
+            pass
+
         documentId = self._getObjectIdFromString(entityId)
         document = self._getMongoDocumentFromId(documentId)
-        return self._convertFromMongo(document)
+        result = self._convertFromMongo(document)
+        self._setCachedStat(result)
 
+        return result
+        
     def getStatsForEntities(self, entityIds):
-        documentIds = map(self._getObjectIdFromString, entityIds)
+        result = []
+
+        documentIds = []
+        for entityId in entityIds:
+            try:
+                result.append(self._getCachedStat(entityId))
+            except KeyError:
+                documentIds.append(self._getObjectIdFromString(entityId))
         documents = self._getMongoDocumentsFromIds(documentIds)
-        return map(self._convertFromMongo, documents)
+
+        for document in documents:
+            stat = self._convertFromMongo(document)
+            self._setCachedStat(stat)
+            result.append(stat)
+
+        return result
     
     def saveEntityStats(self, stats):
         if stats.timestamp is None:
             stats.timestamp = StatTimestamp()
         stats.timestamp.generated = datetime.utcnow()
 
-        return self.update(stats)
+        result = self.update(stats)
+
+        self._setCachedStat(result)
+
+        return result
     
     def removeEntityStats(self, entityId):
         documentId = self._getObjectIdFromString(entityId)
-        return self._removeMongoDocument(documentId)
+        result = self._removeMongoDocument(documentId)
+        self._delCachedStat(entityId)
 
-    def updateNumStamps(self, entityId, numStamps):
-        self._collection.update(
-            { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$set' : { 'num_stamps' : numStamps } }
-        )
-        return True
-
-    def setPopular(self, entityId, userIds, stampIds):
-        self._collection.update(
-            { '_id' : self._getObjectIdFromString(entityId) }, 
-            { '$set' : { 'popular_users' : userIds, 'popular_stamps' : stampIds } }
-        )
-        return True
+        return result
     
     def _buildPopularQuery(self, **kwargs):
-        kinds = kwargs.pop('kinds', None)
         types = kwargs.pop('types', None)
         viewport = kwargs.pop('viewport', None)
-        minScore = kwargs.pop('minScore', None)
 
         query = {}
-
-        if kinds is not None:
-            query['kinds'] = {'$in': list(kinds)}
 
         if types is not None:
             query['types'] = {'$in': list(types)}
@@ -599,9 +737,6 @@ class MongoEntityStatsCollection(AMongoCollection):
                     }, 
                 ]
 
-        if minScore is not None:
-            query['score'] = {'$gte' : minScore}
-
         return query
     
     def getPopularEntityStats(self, **kwargs):
@@ -613,8 +748,11 @@ class MongoEntityStatsCollection(AMongoCollection):
                         .sort([('score', pymongo.DESCENDING)]) \
                         .limit(limit)
 
-        return map(self._convertFromMongo, documents)
-
+        try:
+            return map(self._convertFromMongo, documents)
+        except Exception:
+            logs.warning("Failed for query %s" % query)
+            raise
 
 class MongoEntitySeedCollection(AMongoCollection, AEntityDB):
     

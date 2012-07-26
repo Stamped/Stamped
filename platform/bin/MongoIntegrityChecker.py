@@ -33,12 +33,12 @@ from gevent.queue import Queue, Empty
 
 collections = [
     # Indexes 
-    # MongoInboxStampsCollection, 
-    # MongoCreditReceivedCollection, 
-    # MongoStampCommentsCollection, 
-    # MongoUserLikesCollection, 
-    # MongoUserStampsCollection, 
-    # MongoUserTodosEntitiesCollection, 
+    MongoInboxStampsCollection, 
+    MongoCreditReceivedCollection, 
+    MongoStampCommentsCollection, 
+    MongoUserLikesCollection, 
+    MongoUserStampsCollection, 
+    MongoUserTodosEntitiesCollection, 
 
     # Documents
     MongoAccountCollection,
@@ -47,8 +47,8 @@ collections = [
     MongoTodoCollection,
 
     # Stats
-    MongoEntityStatsCollection,
     MongoStampStatsCollection, 
+    MongoEntityStatsCollection,
     MongoGuideCollection, 
 ]
 

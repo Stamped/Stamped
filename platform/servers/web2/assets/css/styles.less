@@ -1,4 +1,4 @@
-/* styles.less - Main Stamped.com Stylesheet
+/*! styles.less - Main Stamped.com Stylesheet
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
  * less version if you don't want your changes to be overwritten.
@@ -12,8 +12,6 @@
    ************************************************************************** */
 
 
-@import "libs/h5bp.min.css";
-@import "fonts.less";
 @import "common.less";
 
 
@@ -71,6 +69,42 @@ ol, ul {
     color: #438FED !important;
 }
 
+.replaced {
+    display: block;
+    text-indent: -9999em;
+    overflow: hidden;
+}
+
+.fullwidth {
+    position: relative;
+    width: 100%;
+}
+
+.fullsize {
+    position: relative;
+    width:  100%;
+    height: 100%;
+}
+
+.floatleft {
+    float: left;
+}
+
+.floatright {
+    float: right;
+}
+
+.fixedwidth {
+    position: relative;
+    display: block;
+    
+    min-width: @min-fixed-width;
+    width: @fixed-width;
+    
+    margin:  0 auto;
+    padding: 0 82px;
+}
+
 
 /* **************************************************************************
                               GENERIC FIXED HEADER
@@ -86,25 +120,27 @@ header {
      
     .header-body {
         position: relative;
-        height: 48px;
+        height: 76px;
         
         p {
             position: absolute;
-            line-height: 32px;
+            line-height: 42px;
+            white-space: nowrap;
             
+            color: #888;
             margin: 0;
-            top:   0;
-            right: 12px;
+            top:    8px; // -2px
+            right:  12px;
             
             .desc {
-                font-size: 90%;
+                font-size: 85%;
                 margin-right: 12px;
             }
             
-            .get-the-app-button {
+            .download-the-free-app-button {
                 position: relative;
                 display:  inline-block;
-                top: 12px;
+                top: 15px;
             }
         }
     }
@@ -134,7 +170,7 @@ header {
 .user-logo-large {
     position: absolute;
     top:  -60px;
-    left: -110px;
+    left: -20px;
     
     display: block;
     width:  210px;
@@ -179,17 +215,13 @@ header {
 
 #main-page-content {
     position: relative;
-    top:  83px;
+    top:  70px;
     left: 0;
-}
-
-#popup-signup {
-    display: none;
 }
 
 #stamped-logo, .stamped-logo {
     position: absolute;
-    z-index: 10000;
+    z-index: 1000;
     
     background: url(/assets/img/index/stamped-logo.png) no-repeat;
     
@@ -201,27 +233,15 @@ header {
     left:  -90px;
     
     opacity: 1;
-    .transform(translateZ(0));
+    .transform(translate3D(0, 0, 0));
     .transition-transform(.3s, ease);
-}
-
-#retina {
-    #stamped-logo, .stamped-logo {
-        background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
-        width:  368px;
-        height: 368px;
-        
-        // TODO: test retina offsets
-        top:   -130px;
-        left:  -90px;
-    }
 }
 
 .stamped-logo-fixed {
     position: fixed !important;
 }
 
-.fancybox-inner {
+.fancybox-wrap, .fancybox-inner {
     overflow: visible !important;
 }
 
@@ -555,7 +575,7 @@ header {
 
 .share-widget {
     background-color: #fff;
-    padding: 7px 17px 4px 17px;
+    padding: 7px 17px 4px;
     
     .rounded(1em);
     .box-shadow(0, 0, 18px, 0, @shadow);
@@ -568,8 +588,8 @@ header {
     .transition-rounded(0.3s, ease-out);
     
     .desc {
-        font-size: 80%;
-        font-weight: 700;
+        font-size: 85%;
+        font-weight: 400;
         white-space: nowrap;
         color: #333;
     }
@@ -578,7 +598,7 @@ header {
         display: none;
         white-space: nowrap;
         
-        margin: 7px 0 5px;
+        margin: 7px auto 5px;
         
         .share-button {
             display:  inline-block;
@@ -615,7 +635,18 @@ a.sdetail, .pronounced-title a {
 
 .screen-name {
     text-transform: lowercase;
+    
+    color: #333;
+    
+    &:hover {
+        color: #0855C0;
+    }
+    
+    &:active {
+        color: lighten(#0855C0, 10%);
+    }
 }
+
 
 .pronounced-title a, a.pronounced-title {
     color: #262626;
@@ -627,6 +658,7 @@ a.sdetail, .pronounced-title a {
     .stamped-font();
     
     font-size: 2.8em;
+    font-weight: 200;
     letter-spacing: .05em;
     color: #262626;
 }
@@ -639,7 +671,7 @@ a.sdetail, .pronounced-title a {
     top:  -32px;
     left: -16px;
     
-    font: bold .9em;
+    font: bold 85%;
     padding: 8px;
     line-height: 100%;
     white-space: nowrap;
@@ -647,7 +679,7 @@ a.sdetail, .pronounced-title a {
     background: rgba(10, 10, 10, 0.75);
     color: #fff;
     
-    .rounded(4px);
+    .rounded(2px);
 }
 
 .close-button {
@@ -706,60 +738,205 @@ a.sdetail, .pronounced-title a {
     height: 18px;
 }
 
-.dark-icon {
-    background: url('/assets/img/categoryicons18px-dark.png') no-repeat;
+.stamp-category-book .icon                  { background-position: -180px -20px; }
+.stamp-category-book .dark-icon             { background-position: -180px 0; }
+
+.stamp-category-film .icon                  { background-position: -140px -20px; }
+.stamp-category-film .dark-icon             { background-position: -140px 0; }
+
+.stamp-category-place .icon                 { background-position: -60px -20px; }
+.stamp-category-place .dark-icon            { background-position: -60px 0; }
+
+.stamp-category-food .icon                  { background-position: 0 -20px; }
+.stamp-category-food .dark-icon             { background-position: 0 0; }
+
+.stamp-category-music .icon                 { background-position: -80px -20px; }
+.stamp-category-music .dark-icon            { background-position: -80px 0; }
+
+.stamp-category-other .icon, 
+.stamp-category- .icon                      { background-position: -220px -20px; }
+.stamp-category-other .dark-icon, 
+.stamp-category- .dark-icon                 { background-position: -220px 0; }
+
+.stamp-subcategory-restaurant .icon         { background-position: 0 -20px; }
+.stamp-subcategory-restaurant .dark-icon    { background-position: 0 0; }
+
+.stamp-subcategory-bar .icon                { background-position: -20px -20px; }
+.stamp-subcategory-bar .dark-icon           { background-position: -20px 0; }
+
+.stamp-subcategory-cafe .icon               { background-position: -40px -20px; }
+.stamp-subcategory-cafe .dark-icon          { background-position: -40px 0; }
+
+.stamp-subcategory-tv .icon                 { background-position: -160px -20px; }
+.stamp-subcategory-tv .dark-icon            { background-position: -160px 0; }
+
+.stamp-subcategory-song .icon               { background-position: -100px -20px; }
+.stamp-subcategory-song .dark-icon          { background-position: -100px 0; }
+
+.stamp-subcategory-artist .icon             { background-position: -120px -20px; }
+.stamp-subcategory-artist .dark-icon        { background-position: -120px 0; }
+
+.stamp-subcategory-app .icon                { background-position: -200px -20px; }
+.stamp-subcategory-app .dark-icon           { background-position: -200px 0; }
+
+
+/* **************************************************************************
+                                POPUP VIEWS
+   ************************************************************************** */
+
+
+@popup-padding:  24px;
+
+#popup-signup {
+    display: none;
 }
 
-.stamp-category-book .icon {
-    background-position: -40px -20px;
+.popup {
+    position: relative;
+    background-color: #fff;
+    
+    .popup-header {
+        padding: (@popup-padding / 4) @popup-padding;
+        white-space: nowrap;
+    }
+    
+    .popup-body {
+        &:focus {
+            outline: none;
+        }
+    }
 }
 
-.stamp-category-film .icon {
-    background-position: 0 -20px;
-}
-
-.stamp-category-place .icon {
-    background-position: -60px 0;
-}
-
-.stamp-category-food .icon {
-    background-position: 0 0;
-}
-
-.stamp-category-music .icon {
-    background-position: -80px 0;
-}
-
-.stamp-category-other .icon, .stamp-category- .icon {
-    background-position: -80px -20px;
-}
-
-.stamp-subcategory-restaurant .icon {
-    background-position: 0 0;
-}
-
-.stamp-subcategory-bar .icon {
-    background-position: -20px 0;
-}
-
-.stamp-subcategory-cafe .icon {
-    background-position: -40px 0;
-}
-
-.stamp-subcategory-tv .icon {
-    background-position: -20px -20px;
-}
-
-.stamp-subcategory-song .icon {
-    background-position: -100px 0;
-}
-
-.stamp-subcategory-artist .icon {
-    background-position: -120px 0;
-}
-
-.stamp-subcategory-app .icon {
-    background-position: -60px -20px;
+.popup-large {
+    text-align: center;
+    width: 100%;
+    
+    .stamped-logo {
+        top:  -160px;
+        left: 50%;
+        
+        margin-left: -92px;
+    }
+    
+    .popup-header {
+        .pronounced-title {
+            line-height: 100%;
+            margin-bottom: 0;
+            padding-top: 15px;
+            padding-bottom: 0;
+        }
+    }
+    
+    .popup-body {
+        padding: 0 @popup-padding;
+        font-size: 85%;
+        color: #999;
+        margin-bottom: 15px;
+        
+        p {
+            margin: .5em 0;
+        }
+        
+        .learn-more {
+            margin: .2em 0 .5em;
+        }
+        
+        .download-desc {
+            margin: 1.5em 0 .5em;
+            font-weight: 700;
+        }
+        
+        .sms {
+            position: relative;
+            border: 1px solid #bfbfbf;
+            margin: 0 auto;
+            width: 70%;
+            line-height: 31px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+            white-space: nowrap;
+            
+            padding: 6px 12px;
+            .rounded(4px);
+            
+            input {
+                text-align: center;
+                font-weight: 200;
+                font-size: 140%;
+                
+                margin-left: 0;
+                margin-top: 8px;
+                
+                border: 0 none;
+                outline: none;
+                
+                &:focus {
+                    border: 0 none;
+                    outline: none;
+                    color: #498ff2;
+                }
+            }
+            
+            .send-button {
+                position: relative;
+                top: 4px;
+                
+                float: right;
+                opacity: .3;
+                
+                border: 0 none;
+                outline: none;
+                
+                .transition(opacity, .3s, linear);
+            }
+            
+            .active { opacity: 1.0; }
+        }
+        
+        .active {
+            border-color: #498ff2;
+        }
+        
+        .error {
+            border-color: #d54042;
+            color: #d54042;
+        }
+        
+        .or {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            
+            .dotted-left, .dotted-right {
+                position: relative;
+                top: 4px;
+                
+                display: inline-block;
+                width: 125px;
+                height: 1em;
+            }
+            
+            .dotted-left {
+                background: url(/assets/img/dottedline.png) repeat-x top right;
+                margin-right: 1em;
+            }
+            
+            .dotted-right {
+                background: url(/assets/img/dottedline.png) repeat-x top left;
+                margin-left: 1em;
+            }
+        }
+        
+        .active-link {
+            font-family: sans-serif !important;
+            font-size: 14pt !important;
+        }
+    }
+    
+    .app-store-button {
+        position: absolute;
+        left: 50%;
+        bottom: -60px;
+        margin-left: -68px;
+    }
 }
 
 
@@ -788,11 +965,11 @@ a.sdetail, .pronounced-title a {
     background: url(/assets/img/index/appstore_sprite.png) no-repeat;
     display: block;
     
-    width:  120px;
+    width:  112px;
     height: 40px;
     
     &:hover, &:active {
-        background-position: -122px 0;
+        background-position: -114px 0;
     }
 }
 
@@ -803,9 +980,8 @@ a.sdetail, .pronounced-title a {
     width:  68px;
     height: 31px;
     
-    &:hover, &:active {
-        background-position: -70px 0;
-    }
+    &:hover  { background-position: -70px  0; }
+    &:active { background-position: -140px 0; }
 }
 
 .get-the-app-button {
@@ -824,46 +1000,41 @@ a.sdetail, .pronounced-title a {
     }
 }
 
-
-/* **************************************************************************
-                            RETINA DISPLAY BUTTONS
-   ************************************************************************** */
-
-
-#retina {
-    .download-the-app-button {
-        background: url(/assets/img/index/downloadbtn_sprite@2x.png) no-repeat;
-        width:  400px;
-        height: 64px;
-        
-        &:hover {
-            background-position: -404px 0;
-        }
-        
-        &:active {
-            background-position: -808px 0;
-        }
+.download-the-free-app-button {
+    background: url(/assets/img/downloadthefreeapp_btn_sprite.png) no-repeat;
+    
+    display: block;
+    width:  198px;
+    height: 42px;
+    
+    &:hover {
+        background-position: -200px 0;
     }
     
-    .app-store-button {
-        background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
-        width:  240px;
-        height: 80px;
-        
-        &:hover, &:active {
-            background-position: -244px 0;
-        }
+    &:active {
+        background-position: -400px 0;
     }
+}
+
+.submit-button {
+    background: url(/assets/img/submitbtn_sprite.png) no-repeat;
+    display: block;
     
-    .send-button {
-        background: url(/assets/img/sendbtn_sprite@2x.png) no-repeat;
-        
-        width:  137px;
-        height: 62px;
-        
-        &:hover, &:active {
-            background-position: -141px 0;
-        }
-    }
+    width:  68px;
+    height: 31px;
+    
+    &:hover  { background-position: -70px  0; cursor: pointer; }
+    &:active { background-position: -140px 0; cursor: pointer; }
+}
+
+.save-button {
+    background: url(/assets/img/savechangesbtn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  121px;
+    height: 31px;
+    
+    &:hover  { background-position: -123px 0; cursor: pointer; }
+    &:active { background-position: -246px 0; cursor: pointer; }
 }
 

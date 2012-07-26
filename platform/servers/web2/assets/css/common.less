@@ -1,4 +1,4 @@
-/* common.less - styles shared across multiple stamped stylesheets
+/*! common.less - styles shared across multiple stamped stylesheets
  * 
  * NOTE: the css version of this file is auto-generated, so only edit the original 
  * less version if you don't want your changes to be overwritten.
@@ -20,7 +20,11 @@
    ************************************************************************** */
 
 
+//@fixed-width: 85%;
+//@min-fixed-width: 280px + 48px;
+
 @fixed-width: 1000px;
+@min-fixed-width: 680px;
 
 @stamped-base-color: #3b84eb;
 @outer: #E5E5E5;
@@ -33,42 +37,6 @@
    ************************************************************************** */
 
 
-.replaced {
-    display: block;
-    text-indent: -9999em;
-    overflow: hidden;
-}
-
-.fullwidth {
-    position: relative;
-    width: 100%;
-}
-
-.fullsize {
-    position: relative;
-    width:  100%;
-    height: 100%;
-}
-
-.floatleft {
-    float: left;
-}
-
-.floatright {
-    float: right;
-}
-
-.fixedwidth {
-    position: relative;
-    display: block;
-    
-    max-width: @fixed-width;
-    min-width: 360px;
-    width: @fixed-width;
-    
-    margin: 0 auto;
-}
-
 .profile-image-border(@size) {
     border: @size solid #fff;
     .box-shadow(0px, 1px, 3px, 0, rgba(0, 0, 0, 0.15));
@@ -78,19 +46,13 @@
     }
 }
 
-@font-face {
-    font-family: StampedFallbackFont;
-    src: local("☺"), url("/assets/fonts/TitlingGothicFB.otf") format("opentype");
-    font-style: normal;
-}
-
 .stamped-font() {
-    font-family: "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+    font-family: "TitlingGothicFB LightComp", "StampedFallbackFont", helvetica, sans-serif;
     font-style: normal;
 }
 
 .stamped-thin-font() {
-    font-family: "Titling Gothic FB Thin Skyline", "TitlingGothicFB LightComp", StampedFallbackFont, helvetica, sans-serif;
+    font-family: "Titling Gothic FB Thin Skyline", "TitlingGothicFB LightComp", "StampedFallbackFont", helvetica, sans-serif;
     font-style: normal;
     letter-spacing: 0.008em;
 }

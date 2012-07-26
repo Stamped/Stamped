@@ -306,4 +306,8 @@ typedef enum STGradientStyle {
 
 + (BOOL)oncePerUserWithID:(NSString*)unique;
 
++ (CGRect)originRectWithRect:(CGRect)rect;
+
++ (void)showTweetComposerFromController:(UIViewController*)controller withInitialText:(NSString*)text;
+
 @end

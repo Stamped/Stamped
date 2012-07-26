@@ -1369,7 +1369,7 @@ static STPopUpView* volatile _currentPopUp = nil;
 }
 
 + (void)launchFirstRun {
-    //TODO
+    NSLog(@"showing first run");
     STAppDelegate* appDelegate = (id)[UIApplication sharedApplication].delegate;
     [appDelegate.menuController showWelcome:NO];
 }
@@ -1612,12 +1612,32 @@ static STPopUpView* volatile _currentPopUp = nil;
             return @"";
         }
     }
+    else {
+        NSSet* others = [NSSet setWithObjects:
+                         @"restaurant",
+                         @"bar",
+                         @"cafe",
+                         @"bakery",
+                         @"music",
+                         @"song",
+                         @"book",
+                         @"movie",
+                         @"film",
+                         nil];
+        if (![others containsObject:string] && withArticle) {
+            return @"";
+        }
+    }
     if (withArticle) {
         return [NSString stringWithFormat:@"%@ %@", article, noun];
     }
     else {
         return noun;
     }
+}
+
++ (CGRect)originRectWithRect:(CGRect)rect {
+    return CGRectMake(0, 0, rect.size.width, rect.size.height);
 }
 
 + (id<STImage>)bestImageFromImages:(NSArray<STImage>*)images forSize:(CGSize)size {
@@ -1745,6 +1765,10 @@ static STPopUpView* volatile _currentPopUp = nil;
 
 + (BOOL)showingFullscreenPopUp {
     return _currentPopUp != nil;
+}
+
++ (void)showTweetComposerFromController:(UIViewController*)controller withInitialText:(NSString*)text {
+    
 }
 
 @end

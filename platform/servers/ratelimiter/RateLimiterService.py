@@ -13,15 +13,16 @@ from gevent.hub         import GreenletExit
 
 import os
 from time               import sleep
+import logs
 from datetime           import datetime
-import RateLimiter2
-from RateLimiter2       import RateLimiter, Request
+import servers.ratelimiter.RateLimiter2
+from servers.ratelimiter.RateLimiter2       import RateLimiter, Request
 from libs.ec2_utils     import get_stack
 
 from db.mongodb.MongoRateLimiterLogCollection import MongoRateLimiterLogCollection
 
 
-LIMITS_DIR = os.path.dirname(RateLimiter2.__file__)
+LIMITS_DIR = os.path.dirname(servers.ratelimiter.RateLimiter2.__file__)
 CONFIG_LOAD_INTERVAL = 60*3
 UPDATE_LOG_INTERVAL  = 60*3 # seconds to wait between updating the db with log of daily calls to each service
 
@@ -51,44 +52,35 @@ class StampedRateLimiterService():
         self.__throttle = throttle
         self.__limiters = {}
         self.__stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
-        self.__rllog = MongoRateLimiterLogCollection()
-        self.loadDbLog()
         self.loadLimiterConfig()
         self.__config_loader_thread = None
         self.__update_log_thread = None
         self.__config_loader_thread = gevent.spawn(configLoaderLoop, self, CONFIG_LOAD_INTERVAL)
-        if not self.__throttle:
-            self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
-            #self.startThreads()
 
-    def updateDbLog(self):
-        print('#### CALLING UPDATEDBLOG')
-        callmap = dict()
-        for k,v in self.__limiters:
-            callmap[k] = v.day_calls
-        self.__rllog.updateLog(callmap)
+#        try:
+#            self.__rllog = MongoRateLimiterLogCollection()
+#            self.loadDbLog()
+#        except:
+#            import traceback
+#            traceback.print_exc()
 
-    def loadDbLog(self):
-        callmap = self.__rllog.getLog()
-        if callmap is None:
-            return
-        for k,v in callmap.iteritems():
-            if k in self.__limiters:
-                self.__limiters[k].day_calls = v
+        # If we're throttling, we're running locally and don't want to update the db log
+#        if not self.__throttle:
+#            self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
 
-    def startThreads(self):
-        if self.__config_loader_thread is None:
-            self.__config_loader_thread = gevent.spawn(configLoaderLoop, self, CONFIG_LOAD_INTERVAL)
-        if self.__update_log_thread is None:
-            self.__update_log_thread    = gevent.spawn(updateLogLoop, self, UPDATE_LOG_INTERVAL)
-
-    def stopThreads(self):
-        if self.__config_loader_thread is not None:
-            self.__config_loader_thread.kill()
-            self.__config_loader_thread = None
-        if self.__update_log_thread is not None:
-            self.__update_log_thread.kill()
-            self.__update_log_thread = None
+#    def updateDbLog(self):
+#        callmap = dict()
+#        for k,v in self.__limiters:
+#            callmap[k] = v.day_calls
+#        self.__rllog.updateLog(callmap)
+#
+#    def loadDbLog(self):
+#        callmap = self.__rllog.getLog()
+#        if callmap is None:
+#            return
+#        for k,v in callmap.iteritems():
+#            if k in self.__limiters:
+#                self.__limiters[k].day_calls = v
 
 
     def loadLimiterConfig(self):
@@ -108,13 +100,13 @@ class StampedRateLimiterService():
                 print("### Could not find '%s': no limits defined" % filename)
                 return
         except Exception as e:
-            print("Exception while trying to execute '%s' file: %s" % (filename, e))
+            logs.error("Exception while trying to execute '%s' file: %s" % (filename, e))
             return
 
         try:
             limits = meta['limits']
         except:
-            print('limits var is not being set in config file.  skipping load step')
+            logs.error('limits var is not being set in config file.  skipping load step')
             return
 
         for k,v in limits.iteritems():
@@ -129,16 +121,18 @@ class StampedRateLimiterService():
                 blackout_wait   = v.get('blackout_wait', None)
                 if self.__throttle:
                     # throttle qps to 1/10 the rate, and cpd to allow 1/10th the remaining calls in quota
-                    limit = max(1, limit / 10)
-                    day_calls = 0
-                    if service_name in self.__limiters:
-                        day_calls = self.__limiters[service_name].day_calls
-                    cpd = min(cpd, day_calls + (cpd-day_calls) / 10)
+                    if limit is not None:
+                        limit = max(1, limit / 10)
+                    if cpd is not None:
+                        day_calls = 0
+                        if service_name in self.__limiters:
+                            day_calls = self.__limiters[service_name].day_calls
+                        cpd = min(cpd, day_calls + (cpd-day_calls) / 10)
             except Exception as e:
                 if service_name is not None:
-                    print ("Exception while reading limiter for service '%s' in limits.conf, skipping" % service_name)
+                    logs.error ("Exception while reading limiter for service '%s' in limits config, skipping: %s" % (service_name, e))
                 else:
-                    print ('Exception while reading limiter in limits.conf, skipping')
+                    logs.error ('Exception while reading limiter in limits config, skipping')
                 continue
 
             try:
@@ -146,14 +140,13 @@ class StampedRateLimiterService():
                 if limiter is not None:
                     limiter.update_limits(limit, period, cpd, fail_limit, fail_period, blackout_wait)
                 else:
-                    print("adding rate limiter for service '%s'" % service_name)
+                    logs.info("adding rate limiter for service '%s'" % service_name)
                     self.__limiters[service_name] = RateLimiter(service_name, limit, period, cpd, fail_limit, fail_period, blackout_wait)
             except:
-                print ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
+                logs.error ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
                 return
 
-    def handleRequest(self, service, priority, timeout, verb, url, body = {}, headers = {}):
-        print ('calling exposed_request')
+    def handleRequest(self, service, priority, timeout, verb, url, body = None, headers = None):
         if timeout is None:
             raise StampedInputError("Timeout period must be provided")
         request = Request(timeout, verb, url, body, headers)

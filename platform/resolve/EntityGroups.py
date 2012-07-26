@@ -34,6 +34,8 @@ def importEntityMinisFromProxyField(field, entityClass, entityType):
                     setattr(entityMini.sources, '%s_source' % proxy.source, proxy.source)
                 if 'url' in subfield:
                     setattr(entityMini.sources, '%s_url' % proxy.source, subfield['url'])
+                if 'previewUrl' in subfield:
+                    setattr(entityMini.sources, '%s_preview' % proxy.source, subfield['previewUrl'])
                 results.append(entityMini)
             except Exception:
                 report()
@@ -191,13 +193,29 @@ class NetflixGroup(AKindTypeGroup):
 
         self.addField(['sources', 'netflix_id'])
         self.addField(['sources', 'netflix_url'])
-        self.addField(['sources', 'netflix_is_instant_available'])
-        self.addField(['sources', 'netflix_instant_available_until'])
+        # self.addField(['sources', 'netflix_is_instant_available'])
+        # self.addField(['sources', 'netflix_instant_available_until'])
 
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.netflix_is_instant_available = proxy.is_instant_available
         entity.sources.netflix_instant_available_until = proxy.instant_available_until
 
+
+class NetflixAvailableGroup(AKindTypeGroup):
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'netflix_available',
+            source_path=['sources', 'netflix_available_source'], 
+            timestamp_path=['sources', 'netflix_available_timestamp']
+        )
+        self.addKind('media_item')
+        self.addKind('media_collection')
+        self.addType('movie')
+        self.addType('tv')
+
+        self.addField(['sources', 'netflix_is_instant_available'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.netflix_is_instant_available = proxy.is_instant_available
 
 class RdioGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
@@ -217,6 +235,26 @@ class RdioGroup(AKindTypeGroup):
 
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.rdio_id = proxy.key
+        if hasattr(proxy, 'url'):
+            entity.sources.rdio_url = proxy.url
+
+class RdioAvailableGroup(AKindTypeGroup):
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'rdio_available',
+            source_path=['sources', 'rdio_available_source'], 
+            timestamp_path=['sources', 'rdio_available_timestamp']
+        )
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addKind('media_item')
+        self.addType('track')
+
+        self.addField(['sources', 'rdio_available_stream'])
+        self.addField(['sources', 'rdio_available_sample'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.rdio_available_stream = proxy.canStream
+        entity.sources.rdio_available_sample = proxy.canSample
     
 
 class TheTVDBGroup(AKindTypeGroup):
@@ -252,6 +290,7 @@ class SpotifyGroup(AKindTypeGroup):
 
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.spotify_id = proxy.key
+
 
 class iTunesGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
@@ -294,6 +333,26 @@ class NYTimesGroup(AKindTypeGroup):
         self.addKind('media_item')
         self.addType('book')
         self.addField(['sources', 'nytimes_id'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.nytimes_id = proxy.key
+
+
+class UMDGroup(AKindTypeGroup):
+    def __init__(self, *args, **kwargs):
+        AKindTypeGroup.__init__(self, 'umdmusic',
+            source_path=['sources', 'umdmusic_source'], 
+            timestamp_path=['sources', 'umdmusic_timestamp']
+        )
+        self.addKind('media_collection')
+        self.addType('album')
+        self.addKind('media_item')
+        self.addType('track')
+
+        self.addField(['sources', 'umdmusic_id'])
+
+    def enrichEntityWithEntityProxy(self, entity, proxy):
+        entity.sources.umdmusic_id = proxy.key
 
 
 class FormattedAddressGroup(APlaceGroup):
@@ -537,6 +596,7 @@ class LastPopularGroup(BasicFieldGroup):
         BasicFieldGroup.__init__(self, 'last_popular')
         self.addNameField()
         self.addField(['last_popular_info'])
+        self.addField(['total_popularity_measure'])
 
     def eligible(self, entity):
         return True
@@ -545,6 +605,10 @@ class LastPopularGroup(BasicFieldGroup):
         if proxy.last_popular:
             if entity.last_popular is None or proxy.last_popular > entity.last_popular:
                 entity.last_popular = proxy.last_popular
+
+        if proxy.popularity_score:
+            if entity.total_popularity_measure is None or proxy.popularity_score > entity.total_popularity_measure:
+                entity.total_popularity_measure = proxy.popularity_score
 
 
 class ImagesGroup(BasicFieldGroup):

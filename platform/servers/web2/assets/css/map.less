@@ -21,8 +21,6 @@
 
 
 html, body {
-    overflow-y: hidden;
-    
     /* TODO: the following only exists here as an attempt to remove the occasional 
        white lines that appear inbetween google map tiles */
     height:  100%;
@@ -39,6 +37,20 @@ footer {
 #main-content {
     visibility: visible;
 }
+
+.fixedwidth {
+    min-width: @min-fixed-width;
+    width: @fixed-width;
+    
+    //.transition(width, 0.5s, ease);
+}
+
+/*
+body.sdetail_popup_animation, body.sdetail_popup {
+    .fixedwidth {
+        width: @fixed-width;
+    }
+}*/
 
 
 /* **************************************************************************
@@ -145,20 +157,36 @@ footer {
                 pointer-events: none;
             }
             
-            .stamp-map-item-close-button {
-                background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+            a.close {
                 position: relative;
                 display:  block;
+                float:    right;
+                z-index: 1000;
+                
+                pointer-events: auto;
+                left: 8px;
+                
+                width:  18px;
+                height: 18px;
+                
+                &:hover {
+                    .stamp-map-item-close-button {
+                        background-position: -48px 0;
+                    }
+                    
+                    cursor: pointer;
+                }
+            }
+            
+            .stamp-map-item-close-button {
+                background: url(/assets/img/x_close_sprite.png) no-repeat -32px 0;
+                position: absolute;
+                
+                left: 2px;
+                top:  2px;
                 
                 width:  14px;
                 height: 14px;
-                float: right;
-                left: 8px;
-                
-                &:hover {
-                    background-position: -48px 0;
-                    cursor: pointer;
-                }
             }
             
             .profile-image-small {
@@ -228,7 +256,7 @@ footer {
     @map_nav_width: 280px;
     @map_nav_space: 24px;
     
-    .fixedwidth {
+    .stamp-map-nav-layout {
         position: absolute;
         top:  0;
         left: 50%;
@@ -418,6 +446,11 @@ footer {
                 }
             }
         }
+    }
+    
+    .layout-clamped {
+        left: 0;
+        margin-left: 0;
     }
     
     

@@ -6,15 +6,24 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, ast, pymongo
+import libs.ec2_utils
 
 from bson.objectid import ObjectId
 from api.db.mongodb.AMongoCollection import AMongoCollection
 
 class MongoLogsCollection(AMongoCollection):
     
-    def __init__(self):
-        AMongoCollection.__init__(self, collection='logs')
-    
+    def __init__(self, stack_name=None):
+        # Change collection name to stack if on EC2
+        collection = 'logs'
+        if stack_name is not None:
+            collection = "logs_%s" % stack_name
+        elif libs.ec2_utils.is_ec2():
+            stack_info = libs.ec2_utils.get_stack()
+            collection = "logs_%s" % stack_info.instance.stack
+
+        AMongoCollection.__init__(self, collection=collection, logger=True)
+
     ### PUBLIC
     
     def addLog(self, logData):
@@ -53,6 +62,7 @@ class MongoLogsCollection(AMongoCollection):
         requestId   = kwargs.pop('requestId', None)
         method      = kwargs.pop('method', None)
         code        = kwargs.pop('code', None)
+        slow        = kwargs.pop('slow', None)
 
         query = {}
 
@@ -70,6 +80,8 @@ class MongoLogsCollection(AMongoCollection):
             query['method'] = str(method).upper()
         if code is not None:
             query['result'] = code
+        if slow is not None:
+            query['duration'] = {'$gt': (slow * 1000000) }
 
         docs = self._collection.find(query).limit(limit).sort('begin', pymongo.DESCENDING)
         

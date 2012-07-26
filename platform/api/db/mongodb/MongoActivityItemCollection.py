@@ -18,6 +18,15 @@ class MongoActivityItemCollection(AMongoCollection):
                                         primary_key='activity_id', 
                                         obj=Activity, 
                                         overflow=True)
+
+        self._collection.ensure_index('timestamp.modified')
+        self._collection.ensure_index([('subjects', pymongo.ASCENDING), ('_id', pymongo.ASCENDING)])
+        self._collection.ensure_index([('verb', pymongo.ASCENDING), ('subjects', pymongo.ASCENDING), ('timestamp.modified', pymongo.DESCENDING)])
+        self._collection.ensure_index([('verb', pymongo.ASCENDING), ('objects.stamp_ids', pymongo.ASCENDING), ('timestamp.created', pymongo.DESCENDING)])
+        self._collection.ensure_index([('verb', pymongo.ASCENDING), ('objects.user_ids', pymongo.ASCENDING), ('timestamp.created', pymongo.DESCENDING)])
+        self._collection.ensure_index([('verb', pymongo.ASCENDING), ('objects.entity_ids', pymongo.ASCENDING), ('timestamp.created', pymongo.DESCENDING)])
+
+
     
     ### PUBLIC
     

@@ -25,6 +25,9 @@ from api.Schemas                import *
 from resolve.EntityGroups               import *
 from api.Entity                     import buildEntity
 
+MERGE_TIMEOUT   = 60*60*5 # 5 hour timeout
+SEARCH_TIMEOUT  = 10
+
 def generatorSource(generator, constructor=None, unique=False, tolerant=False):
     if constructor is None:
         constructor = lambda x: x
@@ -153,7 +156,7 @@ class GenericSource(BasicSource):
             try:
                 query = self.stamped.proxyFromEntity(entity)
                 timestamps[self.idName] = controller.now
-                results = self.resolver.resolve(query, self.matchSource(query))
+                results = self.resolve(query)
                 if len(results) != 0:
                     best = results[0]
                     if best[0]['resolved']:

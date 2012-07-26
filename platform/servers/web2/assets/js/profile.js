@@ -37,14 +37,14 @@ var g_update_stamps = null;
         var close_sdetail_func      = null;
         
         var is_blacklisted_image    = function(url) {
-            return (url.indexOf(static_prefix) != -1);
+            return (url.indexOf(static_prefix) !== -1);
         };
         
         var extract_data = function($target, prefix, default_value) {
             var classes = $target.get(0).className.split(/\s+/);
             var value   = default_value;
             
-            for (i = 0; i < classes.length; ++i) {
+            for (var i = 0; i < classes.length; ++i) {
                 var c = classes[i];
                 
                 if (c.indexOf(prefix) === 0) {
@@ -60,6 +60,20 @@ var g_update_stamps = null;
             return value;
         };
         window.g_extract_data = extract_data;
+        
+        
+        // ---------------------------------------------------------------------
+        // initialize basic error handling
+        // ---------------------------------------------------------------------
+        
+        
+        var show_error = function() {
+            var $error = $("#error");
+            
+            if ($error.length > 0) {
+                $error.show().delay(3000).fadeOut(1000);
+            }
+        };
         
         
         // ---------------------------------------------------------------------
@@ -98,10 +112,10 @@ var g_update_stamps = null;
                 var width0  = $elem.width();
                 var height0 = $elem.height();
                 
-                $elem.css('display', 'block');
+                $elem.css('display',  'block');
                 $share.show();
                 
-                var width1  = $elem.width();
+                var width1  = $elem.width() + 55;
                 var height1 = $elem.height();
                 
                 $share.hide();
@@ -143,82 +157,7 @@ var g_update_stamps = null;
             });
         };
         
-        $("#subnav").on("click", ".subnav_button", function(event) {
-            event.preventDefault();
-            
-            var $this    = $(this);
-            var $parent  = $this.parents('.profile-header-subnav');
-            var bargraph = false;
-            
-            $parent.removeClass('subnav-active-0 subnav-active-1 subnav-active-2');
-            
-            if ($this.hasClass('subnav_button-0')) {
-                $parent.find('.header-subsection-0').show();
-                $parent.addClass('subnav-active-0');
-            } else if ($this.hasClass('subnav_button-1')) {
-                $parent.find('.header-subsection-1').show();
-                $parent.addClass('subnav-active-1');
-            } else if ($this.hasClass('subnav_button-2')) {
-                bargraph = true;
-                $parent.find('.header-subsection-2').show();
-                $parent.addClass('subnav-active-2');
-            }
-            
-            // TODO: better approach here than setTimeout
-            setTimeout(function() {
-                var $elem   = $parent.find('.header-subsection-1');
-                var opacity = parseFloat($elem.css('opacity'));
-                
-                if (opacity <= 0.05) {
-                    $elem.hide();
-                }
-                
-                $elem   = $parent.find('.header-subsection-2');
-                opacity = parseFloat($elem.css('opacity'));
-                
-                if (opacity <= 0.05) {
-                    $elem.hide();
-                }
-            }, 200);
-            
-            // update the user's stamp category distribution bargraph via a spiffy animation
-            $('.bargraph-row-value').each(function(i, elem) {
-                var percentage  = 0;
-                var opacity     = 1.0;
-                var $this       = $(this);
-                
-                if (bargraph) {
-                    var count   = $this.data('count') || 0;
-                    
-                    if (count > 0) {
-                        percentage = 100.0 * Math.min(1.0, (.5 - (1.0 / Math.pow(count + 6, .4))) * 80.0 / 33.0);
-                    } else {
-                        percentage = 0.0;
-                        opacity    = 0.0;
-                    }
-                }
-                
-                $this.stop(true, false).delay(50).animate({
-                    width   : percentage + "%", 
-                    opacity : opacity
-                }, {
-                    duration : 1000, 
-                    specialEasing : { 
-                        width  : 'easeInOutBack'
-                    }, 
-                    complete : function() {
-                        $this.css({
-                            'width'     : percentage + "%", 
-                            'opacity'   : opacity
-                        });
-                    }
-                });
-            });
-            
-            return false;
-        });
-        
-        $(".friends-wrapper").on("click", ".expand-friends", function(event) {
+        $("a.expand-friends").click(function(event) {
             event.preventDefault();
             
             var $this = $(this);
@@ -231,29 +170,6 @@ var g_update_stamps = null;
             $.fancybox.open(popup_options);
             return false;
         });
-        
-        var init_header_subsections = function() {
-            var header_subsection_height = 0;
-            var $header_subsections  = $('.header-subsection');
-            var $header_subsection_0 = null;
-            
-            $header_subsections.each(function(i, elem) {
-                var $elem = $(elem);
-                
-                if ($elem.hasClass('header-subsection-0')) {
-                    $header_subsection_0 = $elem;
-                }
-                
-                header_subsection_height = Math.max($elem.height(), header_subsection_height);
-            });
-            
-            if (!!$header_subsection_0 && header_subsection_height > 0) {
-                $header_subsection_0.css({
-                    'height'     : header_subsection_height, 
-                    'min-height' : header_subsection_height
-                });
-            }
-        };
         
         
         // ---------------------------------------------------------------------
@@ -298,9 +214,20 @@ var g_update_stamps = null;
             }
         };
         
+        var update_empty_stamps = function() {
+            if ($(".stamp-gallery-item").length === 0) {
+                $(".empty-stamps").show();
+                $(".stamp-gallery-view-map").hide();
+            } else {
+                $(".empty-stamps").hide();
+                $(".stamp-gallery-view-map").show();
+            }
+        };
+        
         var update_gallery = function(callback) {
             if ($gallery !== null) {
                 $gallery = $(".stamp-gallery").find(".stamps");
+                update_empty_stamps();
                 
                 $gallery.isotope('reLayout', callback);
             }
@@ -314,10 +241,10 @@ var g_update_stamps = null;
             }
             
             $scope.find('.timestamp_raw').each(function(i, elem) {
+                var $elem = $(elem);
                 var expl  = "";
                 
                 try {
-                    var $elem = $(elem);
                     var ts    = moment.utc($elem.text(), "YYYY-MM-DD HH:mm:ss.SSSS");
                     var now   = moment();
                     
@@ -345,7 +272,7 @@ var g_update_stamps = null;
             is_visible = (typeof(is_visible) === 'undefined' ? false : is_visible);
             recur      = (typeof(recur)      === 'undefined' ? false : recur);
             
-            gallery_is_visible |= is_visible;
+            gallery_is_visible = gallery_is_visible || is_visible;
             
             var handle_recur = function() {
                 if (recur) {
@@ -397,7 +324,7 @@ var g_update_stamps = null;
                 closeSpeed      : 300, 
                 
                 tpl             : {
-				    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
+                    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
                     closeBtn    : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
                 }, 
                 
@@ -426,7 +353,7 @@ var g_update_stamps = null;
             }
             
             if (!!options) {
-                for (var key in options) {
+                for (key in options) {
                     if (options.hasOwnProperty(key)) {
                         output[key] = options[key];
                     }
@@ -458,24 +385,6 @@ var g_update_stamps = null;
                     // reenaable page scroll before fancybox closes
                     $("html").css('overflow-y', 'scroll');
                 }
-            });
-            
-            if (!!options) {
-                for (var key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        output[key] = options[key];
-                    }
-                }
-            }
-            
-            return output;
-        };
-        
-        var get_fancybox_popup_large_options = function(options) {
-            var output = get_fancybox_options({
-                scrolling   : 'no', // we prefer our own, custom jScrollPane scrolling
-                wrapCSS     : '', 
-                padding     : 0
             });
             
             if (!!options) {
@@ -575,20 +484,23 @@ var g_update_stamps = null;
                     
                     // TODO: experiment w/ initial scale at .25 scale and tween to this transform
                     // TODO: move these transformations into CSS!!
-                    var width = "200px";
-                    var angle = "20deg";
-                    var t = "perspective(600) rotateZ(" + angle + ") rotateX(" + angle + ") rotateY(-" + angle + ")";
+                    var angle_x = "20deg";
+                    var angle_y = "-20deg";
+                    var angle_z = "10deg";
+                    var perspective = 400;
+                    
+                    var t = "perspective(" + perspective + ") translateY(-15px) rotateZ(" + angle_z + ") rotateX(" + angle_x + ") rotateY(" + angle_y + ")";
                     
                     $preview.css({
-                        'width'     : width, 
-                        'max-width' : width, 
                         '-webkit-transform' : t, 
                         '-moz-transform'    : t, 
                         '-ms-transform'     : t, 
                         '-o-transform'      : t, 
                         'transform'         : t
-                    }).hover(function() {
-                        var t2 = "perspective(600)";
+                    });
+                    
+                    $preview.parents(".stamp-image-sdetail").hover(function() {
+                        var t2 = "perspective(" + perspective + ")";
                         
                         // TODO: remove duplication of CSS here
                         $preview.css({
@@ -676,19 +588,17 @@ var g_update_stamps = null;
                 //var offset = $window.scrollTop()  + "px";
                 //var hidden = ($window.scrollTop() + window.innerHeight - (cur_header_height + 15));
                 
-                console.log(offset);
-                
                 if (sdetail_status === 'opening') {
                     $body.addClass('sdetail_popup_animation').removeClass('sdetail_popup');
                     
                     $sdetail_wrapper
                         .stop(true, false)
                         .css({
-                            'top' : hidden, 
+                            'top' : hidden
                         })
                         .addClass('animating')
                         .animate({
-                            top : offset, 
+                            top : offset
                         }, {
                             duration : anim_duration, 
                             specialEasing : { 
@@ -704,15 +614,15 @@ var g_update_stamps = null;
                                 }
                             }
                         });
-                } else if (sdetail_status == 'closing') {
+                } else if (sdetail_status === 'closing') {
                     $sdetail_wrapper
                         .stop(true, false)
                         .css({
-                            'top' : offset, 
+                            'top' : offset
                         })
                         .addClass('animating')
                         .animate({
-                            top : hidden, 
+                            top : hidden
                         }, {
                             duration : anim_duration, 
                             specialEasing : { 
@@ -731,7 +641,7 @@ var g_update_stamps = null;
                     $body.addClass('sdetail_popup').removeClass('sdetail_popup_animation');
                     
                     $sdetail_wrapper.css({
-                        'top' : offset, 
+                        'top' : offset
                     });
                 }
                 
@@ -770,9 +680,11 @@ var g_update_stamps = null;
                 
                 if (init) {
                     // TODO: customize loading image
+                    var bufferPx = window.innerHeight * 0.2;
+                    
                     infinite_scroll = $gallery.infinitescroll({
-                        bufferPx        : window.innerHeight * .2, 
-                        debug           : STAMPED_PRELOAD.DEBUG, 
+                        bufferPx        : bufferPx, 
+                        debug           : false, 
                         
                         navSelector     : "div.stamp-gallery-nav", 
                         nextSelector    : infinite_scroll_next_selector, 
@@ -780,10 +692,18 @@ var g_update_stamps = null;
                         
                         pathParse       : function(path, page) {
                             var offset_re = /([?&])offset=([\d]+)/;
+                            var limit_re  = /([?&])limit=[\d]+/;
+                            
                             var match = path.match(offset_re);
+                            var limit = "limit=" + STAMP_GALLERY_PAGE_SIZE;
+                            
+                            if (path.match(limit_re)) {
+                                path = path.replace(limit_re, "$1" + limit);
+                            }
                             
                             if (!!match) {
-                                offset = parseInt(match[2]);
+                                var offset = parseInt(match[2]);
+                                //console.log("PATH 0: " + offset + "; bufferPx: " + bufferPx);
                                 
                                 // TODO: this is a hack..
                                 return {
@@ -795,11 +715,14 @@ var g_update_stamps = null;
                                     }
                                 };
                             } else {
+                                //console.log("PATH 1: " + path + "; bufferPx: " + bufferPx);
+                                
                                 return [ path ];
                             }
                         }, 
                         
                         dataType        : 'html', 
+                        pixelsFromNavToBottom : 48, 
                         
                         loading         : {
                             finishedMsg : "No more stamps to load.", 
@@ -826,6 +749,9 @@ var g_update_stamps = null;
             }
         };
         
+        var layout_mode_index  = 0;
+        var layout_modes = [ "fitRows", "masonry" ]; // "cellsByRow"
+        
         // initialize the stamp gallery's layout with isotope and infinite scroll
         var init_gallery = function() {
             $gallery = $(".stamp-gallery .stamps");
@@ -833,10 +759,14 @@ var g_update_stamps = null;
             if ($gallery.length <= 0) {
                 $gallery = null;
             } else {
+                update_empty_stamps();
+                
                 $gallery.isotope({
                     itemSelector        : '.stamp-gallery-item', 
-                    layoutMode          : "masonry"/*, 
-                    animationOptions    : {
+                    layoutMode          : layout_modes[layout_mode_index]
+                    //layoutMode          : "fitRows"
+                    //layoutMode          : "masonry"
+                    /*, animationOptions    : {
                         duration        : 800,
                         easing          : 'easeOut',
                         queue           : true
@@ -845,6 +775,17 @@ var g_update_stamps = null;
                 
                 $gallery.on("click", ".stamp-gallery-item", open_sdetail_click);
                 init_infinite_scroll();
+            }
+        };
+        
+        var toggle_gallery_layout_mode = function() {
+            if (!!$gallery) {
+                layout_mode_index = (layout_mode_index + 1) % layout_modes.length;
+                
+                $gallery.isotope({
+                    layoutMode          : layout_modes[layout_mode_index]
+                    //layoutMode          : "fitRows"
+                });
             }
         };
         
@@ -1083,17 +1024,12 @@ var g_update_stamps = null;
         var user_logo_height    = parseFloat($user_logo.css('height'));
         
         var $window             = $(window);
-        var $header             = $('header .header-body');
+        var $header             = $('.header-body');
         var $content            = $('#main-page-content');
         var header_height       = $header.height();
         var cur_header_height   = header_height || 0;
-        var min_height_ratio    = 1.0;
+        var min_height_ratio    = 0.6;
         var min_header_height   = header_height * min_height_ratio;
-        
-        // now that we have the static positions and sizes of the dynamic header  
-        // elements, initialize their new positioning /sizing to absolute and 
-        // non-auto, respectively.
-        $header.height(header_height);
         
         var last_ratio = null;
         
@@ -1130,6 +1066,13 @@ var g_update_stamps = null;
                     $header.height(cur_header_height);
                 }
                 
+                var r = (cur_height_ratio - min_height_ratio) / (1.0 - min_height_ratio);
+                var cur_header_top = r * 8 + (1.0 - r) * -10;
+                
+                $header.find("p").css({
+                    top : cur_header_top + "px"
+                });
+                
                 // ensure main body content's vertical offset respects the dynamic 
                 // header's height
                 $content.css({
@@ -1152,9 +1095,7 @@ var g_update_stamps = null;
                     'width'             : cur_logo_width, 
                     'height'            : cur_logo_width, 
                     'background-size'   : cur_logo_size, 
-                    '-webkit-mask-size' : cur_logo_size, 
-                    //top                 : cur_logo_top, 
-                    //left                : cur_logo_left
+                    '-webkit-mask-size' : cur_logo_size
                 });
                 
                 //console.debug("DYNAMIC HEADER: ratio=" + cur_ratio);
@@ -1237,21 +1178,23 @@ var g_update_stamps = null;
                             }
                         }
                         
-                        if (typeof(custom_params['category']) !== 'undefined') {
-                            category = custom_params['category'];
+                        if (typeof(custom_params.category) !== 'undefined') {
+                            category = custom_params.category;
+                        } else {
+                            category = 'default';
                         }
                         
                         var orig_category = category;
                         
                         if (category === 'default') {
                             category = null;
-                            custom_params['category'] = null;
+                            custom_params.category = null;
                         }
                         
                         if (orig_category !== g_category) {
                             var params    = get_custom_params(custom_params);
-                            var url       = get_custom_url(params);
                             var $items    = $('.stamp-gallery-item');
+                            url           = get_custom_url(params);
                             
                             $gallery.css({
                                 visibility : 'hidden', 
@@ -1273,13 +1216,15 @@ var g_update_stamps = null;
                             
                             // animated transition between category-specific headers
                             var sel = '.header-category-' + orig_category;
-                            var $elem = $(sel);
                             g_category = category;
                             
-                            console.debug("NEW CATEGORY: " + category);
+                            set_body_class(orig_category);
+                            g_init_social_sharing();
+                            
+                            //console.debug("NEW CATEGORY: " + category);
                             //History.log(state.data, state.title, state.url);
                             
-                            if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
+                            /*if ($elem.length == 1 && !$elem.hasClass('header-selected')) {
                                 var completion_func = function() {
                                     $('.header-selected').removeClass('header-animating header-selected');
                                     $elem.removeClass('header-animating').addClass('header-selected');
@@ -1303,7 +1248,7 @@ var g_update_stamps = null;
                                         complete : completion_func
                                     });
                                 }
-                            }
+                            }*/
                             
                             // scroll page back to top
                             $('body,html').stop(true, false).animate({
@@ -1317,17 +1262,18 @@ var g_update_stamps = null;
                             
                             // load in new content via AJAX
                             var $target = $("<div></div>");
+                            
+                            console.log("GET: " + url);
+                            
+                            //$target.load(url, params, function(data, stat));
                             $target.load(url + " .stamp-gallery", params, function(response, status, xhr) {
                                 if (category !== g_category) {
                                     return;
                                 }
                                 
-                                if (status == "error") {
-                                    console.debug("AJAX ERROR (stamps category=" + category + "): " + url);
-                                    console.debug(response);
-                                    console.debug(xhr);
+                                if (status === "error") {
+                                    show_error();
                                     
-                                    //alert("TODO: handle AJAX and backend errors gracefuly");
                                     return;
                                 }
                                 
@@ -1338,6 +1284,7 @@ var g_update_stamps = null;
                                 //$('.inset-stamp .number').html(stamps.length);
                                 var s = ".stamp-gallery-nav a";
                                 var href = $($target.find(s).get(0)).attr('href');
+                                
                                 if (typeof(href) === 'undefined') {
                                     href = "#";
                                 }
@@ -1362,7 +1309,7 @@ var g_update_stamps = null;
                                 });
                                 
                                 $gallery.isotope('appended', $elements, function() {
-                                    init_infinite_scroll();
+                                    setTimeout(init_infinite_scroll, 1000);
                                 });
                                 
                                 $gallery.stop(true, false).css({
@@ -1393,11 +1340,11 @@ var g_update_stamps = null;
                     var is_match = (i >= len - 1);
                     
                     if (!!is_match_func) {
-                        is_match |= is_match_func(state, url, relative_url);
+                        is_match = is_match || is_match_func(state, url, relative_url);
                     }
                     
                     if (is_match) {
-                        console.debug("History matched view '" + view.title + "'");
+                        //console.log("History matched view '" + view.title + "'");
                         
                         view.apply_func(state, url, relative_url);
                         break;
@@ -1449,8 +1396,8 @@ var g_update_stamps = null;
                     title += " - " + text;
                 }
                 
-                if (!params['category']) {
-                    delete params['category'];
+                if (!params.category) {
+                    delete params.category;
                 }
                 
                 History.pushState(params, title, params_str);
@@ -1467,7 +1414,10 @@ var g_update_stamps = null;
         var fixed_padding   = 80;
         var min_col_width   = 305;
         var last_nav_pos_x  = null;
-        var update_navbar_count = 0;
+        var $fixedwidth     = $(".fixedwidth");
+        
+        var update_navbar_count  = 0;
+        var wide_gallery_enabled = false;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {
@@ -1486,15 +1436,21 @@ var g_update_stamps = null;
             
             var gallery_x       = $stamp_gallery.offset().left;
             var gallery_width   = $stamp_gallery.width();
+            var wide_body       = 'wide-body';
             var wide_gallery    = 'wide-gallery';
-            var narrow_gallery  = 'wide-gallery';
-            var max_blurb_width = 125;
+            var narrow_gallery  = 'narrow-gallery';
+            
+            if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
+                gallery_width   = 280 * Math.floor(gallery_width / 280);
+            }
+            
+            var max_blurb_width = 280 - 48;
             var min_blurb_width = (gallery_width - (24 + 58 + 48 + 148));
             
             var width           = window.innerWidth;
-            var left            = gallery_x + gallery_width + fixed_padding;
+            var left            = gallery_x + gallery_width;
             var right           = (width - (gallery_x + fixed_width + nav_bar_width + 1.5 * fixed_padding));
-            var pos             = left;
+            var pos             = Math.min(width - nav_bar_width - 24, Math.max(left, (left + width) / 2.0 - nav_bar_width / 2.0));
             
             var force_no_update = false;
             var update          = false;
@@ -1507,15 +1463,15 @@ var g_update_stamps = null;
                     var desired_width_header_px;
                     
                     if (gallery) {
-                        desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        //desired_width_header_px = Math.max(min_col_width - (148 + 48 + 32), 200) + "px";
+                        desired_width_header_px = "232px";
                         desired_width_px = "auto";
                     } else {
                         //desired_width_header_px = (desired_width + 148) + "px";
-                        desired_width_header_px = Math.max(desired_width - 48, 200) + "px";
+                        desired_width_header_px = Math.max(desired_width - 68, 200) + "px";
                     }
                     
                     $elem.find('.content_1').css({
-                        'width'     : desired_width_px, 
                         'max-width' : desired_width_px
                     });
                     
@@ -1526,31 +1482,33 @@ var g_update_stamps = null;
                 });
             };
             
-            /*if (gallery_width <= min_col_width + 144) {
+            if (wide_gallery_enabled && width <= 780) {
                 if (!$stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery).addClass(narrow_gallery);
+                    $body.addClass(wide_body);
                     update = true;
                     
                     reset_stamp_gallery_items(max_blurb_width);
                 } else {
                     force_no_update = true;
                 }
-            } else */
-            if (right < fixed_padding / 2) {
-                //console.debug("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
+            } else if (!wide_gallery_enabled || width <= 280 * 3 + fixed_padding * 3) {
+                //console.log("STAMP LIST VIEW: width=" + width + ", pos=" + pos);
                 
                 if ($stamp_gallery.hasClass(wide_gallery) || $stamp_gallery.hasClass(narrow_gallery)) {
                     $stamp_gallery.removeClass(wide_gallery + " " + narrow_gallery);
+                    $body.removeClass(wide_body);
                     update = true;
                 }
                 
                 reset_stamp_gallery_items(min_blurb_width);
             } else {
-                //console.debug("STAMP GALLERY VIEW: width=" + width + ", pos=" + pos);
+                //console.log("STAMP GALLERY VIEW: width=" + width + ", pos=" + pos);
                 gallery = true;
                 
                 if (!$stamp_gallery.hasClass(wide_gallery)) {
                     $stamp_gallery.removeClass(narrow_gallery).addClass(wide_gallery);
+                    $body.addClass(wide_body);
                     update = true;
                     
                     reset_stamp_gallery_items(max_blurb_width);
@@ -1560,25 +1518,27 @@ var g_update_stamps = null;
             if (!force_no_update) {
                 if (update || last_nav_pos_x !== pos) {
                     if (!gallery) {
-                        var min_fixed_width = min_col_width + nav_bar_width + fixed_padding / 2;
-                        var new_fixed_width = Math.max((width - (fixed_padding + nav_bar_width)), min_fixed_width)
+                        var min_fixed_width = 680; //min_col_width + nav_bar_width + fixed_padding / 2;
+                        var new_fixed_width = Math.min(fixed_width, Math.max((width - (fixed_padding * 2 + nav_bar_width)), min_fixed_width));
                         
-                        $('.fixedwidth').width(new_fixed_width);
+                        $fixedwidth.width(new_fixed_width);
                         update = true;
                     } else {
                         //var cur_fixed_width_px = Math.Max(1000, 1 * width) + "px";
-                        var cur_fixed_width_px = fixed_width + "px";
+                        //var cur_fixed_width_px = fixed_width + "px";
+                        var cur_fixed_width_px = "80%";
                         
-                        $('.fixedwidth').width(cur_fixed_width_px);
+                        $fixedwidth.width(cur_fixed_width_px);
                     }
                 }
                 
                 if (should_update_gallery) {
-                    update_gallery_layout(update);
+                    update_gallery_layout(true, null, true);
                 }
             }
             
             var clamped = 'stamp-category-nav-bar-clamped';
+            // NOTE: nav_bar is ~400px tall
             
             // clamp the navbar's vertical offset to never overlap too far into the page's header
             if (window.innerHeight / 2 - 198 <= 250) {
@@ -1596,13 +1556,13 @@ var g_update_stamps = null;
                 };
                 
                 if (last_nav_pos_x === null) {
-                    style['right'] = 'auto';
+                    style.right = 'auto';
                 }
                 
                 ++update_navbar_count;
                 
-                if (gallery || update_navbar_count >= 2) {
-                    style['visibility'] = 'visible';
+                if (gallery || update_navbar_count >= 1) {
+                    style.visibility = 'visible';
                 }
                 
                 last_nav_pos_x = pos;
@@ -1631,7 +1591,7 @@ var g_update_stamps = null;
                     
                     if (!!g_category) {
                         if (!g_category || g_category === 'default') {
-                            delete options['category'];
+                            delete options.category;
                         } else {
                             options.category = g_category;
                         }
@@ -1688,6 +1648,7 @@ var g_update_stamps = null;
             var sdetail_initialized = false;
             var sdetail_anim_loaded = false;
             var sdetail_ajax_loaded = false;
+            var sdetail_ajax_error  = false;
             var scroll_top = 0;
             var $target, $target2;
             
@@ -1703,7 +1664,7 @@ var g_update_stamps = null;
                 
                 scroll_top  = $window.scrollTop();
                 
-                console.debug("AJAX: " + href);
+                //console.debug("AJAX: " + href);
             } else {
                 $target     = $("<div class='" + sdetail_wrapper + "'></div>").html(html);
                 $target2    = $target;
@@ -1720,12 +1681,17 @@ var g_update_stamps = null;
                     sdetail_initialized = true;
                     
                     setTimeout(function() {
-                        $target.replaceWith($target2);
-                        init_sdetail($target2);
-                        
-                        // TODO: which order should these two statements appear in?
-                        resize_sdetail_wrapper($target2);
-                        $target2.removeClass('sdetail-loading');
+                        if (sdetail_ajax_error) {
+                            show_error();
+                            close_sdetail();
+                        } else {
+                            $target.replaceWith($target2);
+                            init_sdetail($target2);
+                            
+                            // TODO: which order should these two statements appear in?
+                            resize_sdetail_wrapper($target2);
+                            $target2.removeClass('sdetail-loading');
+                        }
                     }, 150);
                 }
             };
@@ -1763,9 +1729,9 @@ var g_update_stamps = null;
                 enable_gallery_animations(true);
                 update_gallery_layout(true);
                 
-                if (!href) {
+                /*if (!href) {
                     init_header_subsections();
-                }
+                }*/
                 
                 resize_sdetail_wrapper($target2, 'closing', function() {
                     $(sdetail_wrapper_sel).removeClass('animating').hide().remove();
@@ -1781,15 +1747,12 @@ var g_update_stamps = null;
             if (!!href) {
                 // initialize sDetail popup after AJAX load
                 $target2.load(href, { 'ajax' : true }, function(response, status, xhr) {
-                    if (status == "error") {
-                        console.debug("AJAX ERROR (sdetail): " + url);
-                        console.debug(response);
-                        console.debug(xhr);
+                    if (status === "error") {
+                        //console.debug("AJAX ERROR (sdetail): " + url);
+                        //console.debug(response);
+                        //console.debug(xhr);
                         
-                        alert("TODO: handle AJAX errors gracefully\n" + url + "\n\n" + response.toString() + "\n\n" + xhr.toString());
-                        
-                        close_sdetail();
-                        return;
+                        sdetail_ajax_error = true;
                     }
                     
                     sdetail_ajax_loaded = true;
@@ -1897,11 +1860,11 @@ var g_update_stamps = null;
             // initialize menu action
             var $action_menu = $sdetail.find('.action-menu');
             
-            if ($action_menu.length == 1) {
+            if ($action_menu.length === 1) {
                 var $temp = $action_menu.parents('.entity-id');
                 var $link = $action_menu.parent('a.action-link');
                 
-                if ($temp.length == 1 && $link.length == 1) {
+                if ($temp.length === 1 && $link.length === 1) {
                     $link.each(function(i, link) {
                         var $link        = $(link);
                         var entity_id    = extract_data($temp, 'entity-id-', null);
@@ -1982,36 +1945,169 @@ var g_update_stamps = null;
             // initialize listen action
             var $action_listen = $sdetail.find('.action-listen');
             
-            if ($action_listen.length == 1) {
-                var $link = $action_listen.parent('a.action-link');
-                var $source_spotify = $action_listen.find(".source-spotify");
-                var $source_spotify = $action_listen.find(".source-itunes");
+            $.each($action_listen, function(i, elem) {
+                var $elem = $(elem);
+                var $source_rdio    = $elem.find(".source-rdio");
+                var $source_itunes  = $elem.find(".source-itunes");
                 
-                if ($source_spotify.length === 1) {
-                    // TODO
-                }
-                
-                //var href  = "https://embed.spotify.com/?uri={{source.completion_data.source_id}}";
-                
-                /*$link.click(function(event) {
-                    event.preventDefault();
+                if ($source_rdio.length === 1) {
+                    var source_id   = $source_rdio.data("source-id");
+                    var $rdio       = $("#rdio-api");
+                    var duration    = 1;
                     
-                    var popup_options = get_fancybox_popup_options({
-                        href  : "http://www.stamped.com"
+                    var rdio_initialized = false;
+                    var rdio_initialized_callback = null;
+                    
+                    // initialize rdio preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $elem.removeClass("stopped playing").addClass("media-loading");
+                            $rdio.rdio().play(source_id);
+                        };
+                        
+                        var stop_action = function() {
+                            rdio_initialized_callback = null;
+                            
+                            $rdio.rdio().pause();
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!rdio_initialized) {
+                            $elem.removeClass("stopped playing").addClass("media-loading");
+                            
+                            rdio_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
                     });
                     
-                    $.fancybox.open(popup_options);
-                    return false;
-                });
-                
-                var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
-                    m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
-                }, {
-                    cssSelectorAncestor: "#cp_container_1"
-                });*/
-                
-                // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
-            }
+                    $rdio.bind('ready.rdio', function() {
+                        rdio_initialized = true;
+                        
+                        if (!!rdio_initialized_callback) {
+                            rdio_initialized_callback();
+                        }
+                    });
+                    
+                    $rdio.bind('playingTrackChanged.rdio', function(e, playingTrack, sourcePosition) {
+                        if (playingTrack) {
+                            duration = playingTrack.duration;
+                            
+                            /*$('#art').attr('src', playingTrack.icon);
+                            $('#track').text(playingTrack.name);
+                            $('#album').text(playingTrack.album);
+                            $('#artist').text(playingTrack.artist);*/
+                        }
+                    });
+                    
+                    $rdio.bind('positionChanged.rdio', function(e, position) {
+                        /*$('#position').css('width', Math.floor(100*position/duration)+'%');*/
+                    });
+                    
+                    $rdio.bind('playStateChanged.rdio', function(e, playState) {
+                        if (playState === 0) { // paused
+                            $elem.removeClass("media-loading playing").addClass("stopped");
+                        } else {
+                            // note: empirically, rdio adds an ease-in, so we show the loading 
+                            // indicator for slightly longer than when the audio actually 
+                            // starts "playing" to adjust for the pause until the user actually 
+                            // hears audio
+                            setTimeout(function() {
+                                $elem.removeClass("media-loading stopped").addClass("playing");
+                            }, 2500);
+                        }
+                    });
+                    
+                    // this is a valid playback token for localhost.
+                    // but you should go get your own for your own domain.
+                    $rdio.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
+                } else if ($source_itunes.length === 1) {
+                    var itunes_initialized = false;
+                    var itunes_initialized_callback = null;
+                    
+                    var $itunes = $("#itunes-preview");
+                    var itunes_url = $itunes.attr("src");
+                    
+                    // initialize itunes preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("stopped").addClass("playing");
+                            
+                            $itunes.jPlayer("play");
+                        };
+                        
+                        var stop_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("playing").addClass("stopped");
+                            
+                            $itunes.jPlayer("pause");
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!itunes_initialized) {
+                            itunes_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
+                    });
+                    
+                    itunes_initialized = true;
+                    $itunes.jPlayer({
+                        ready: function () {
+                            $itunes.jPlayer("setMedia", {
+                                m4a : itunes_url
+                            });
+                            
+                            itunes_initialized = true;
+                            
+                            if (!!itunes_initialized_callback) {
+                                itunes_initialized_callback();
+                            }
+                        }, 
+                        
+                        supplied: "m4a", 
+                        swfPath: "/assets/js/libs/jplayer", 
+                        solution: "html,flash"
+                    });
+                }
+            });
+            
+            /*
+            var myCirclePlayer = new CirclePlayer("#jquery_jplayer_1", {
+                m4a: "http://www.jplayer.org/audio/m4a/Miaow-07-Bubble.m4a"
+            }, {
+                cssSelectorAncestor: "#cp_container_1"
+            });
+            
+            // <iframe src="https://embed.spotify.com/?uri={{source.completion_data.source_id}}" width="300" height="80" frameborder="0" allowtransparency="true"></iframe>
+            */
             
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
@@ -2078,7 +2174,6 @@ var g_update_stamps = null;
                 var $this = $(this);
                 var href  = $this.attr('href');
                 
-                console.log(href);
                 var popup_options = get_fancybox_popup_options({
                     href  : href
                 });
@@ -2119,117 +2214,39 @@ var g_update_stamps = null;
         
         
         // ---------------------------------------------------------------------
-        // initialize signup functionality
-        // ---------------------------------------------------------------------
-        
-        
-        $body.on("click", ".get-the-app-button", function(event) {
-            event.preventDefault();
-            
-            var popup_options = get_fancybox_popup_large_options({
-                content     : $("#popup-signup").html(), 
-                type        : "html", 
-                width       : 480, 
-                minWidth    : 480
-            });
-            
-            console.debug(popup_options);
-            $.fancybox.open(popup_options);
-            return false;
-        });
-        
-        var default_phone_number = "555-555-5555";
-        var sms_message_success  = "SMS Sent!";
-        var sms_message_error    = "SMS Error!";
-        
-        $body.on("focus", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value");
-            
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error) {
-                $this.attr("value", "");
-            }
-            
-            $sms.removeClass("error").addClass("active");
-            
-            return true;
-        });
-        
-        $body.on("focusout", ".phone-number", function(event) {
-            var $this = $(this);
-            var $sms  = $this.parent();
-            var value = $this.attr("value").trim();
-            
-            if (value.length <= 0) {
-                $this.attr("value", default_phone_number);
-            }
-            
-            $sms.removeClass("active error");
-            
-            return true;
-        });
-        
-        $(".phone-number").live("keyup change", function(event) {
-            var $this   = $(this);
-            var value   = $this.attr("value").trim();
-            var prefix  = "active-";
-            var classes = "active-0 active-1 active-2 active-3 active-4 active-5 active-6 active-7 active-8 active-9 active-10";
-            
-            if (value.length >= 0) {
-                var length = value.length;
-                
-                if (length > 10) {
-                    length = 10;
-                }
-                
-                var $button = $this.parent().find(".send-button");
-                $button.removeClass(classes).addClass(prefix + length);
-            }
-            
-            return true;
-        });
-        
-        $body.on("submit", ".sms-form", function(event) {
-            event.preventDefault();
-            
-            var $this  = $(this);
-            var $input = $this.find(".phone-number");
-            var value  = $input.attr("value").trim();
-            
-            if (value == default_phone_number || value == sms_message_success || value == sms_message_error || value.length <= 3) {
-                return false;
-            }
-            
-            value = value.replace(/-/g, "");
-            
-            var max_len = 11;
-            if (value[0] == "+") {
-                max_len = 12;
-            }
-            
-            if (value.length > max_len) {
-                return false;
-            }
-            
-            var ajaxP  = $.ajax({
-                type        : "POST", 
-                url         : "/download-app", 
-                data        : { "phone_number" : value }
-            }).done(function () {
-                $input.attr("value", sms_message_success);
-            }).fail(function() {
-                $input.attr("value", sms_message_error).parent().addClass("error");
-            });
-            
-            return false;
-        });
-        
-        
-        // ---------------------------------------------------------------------
         // setup misc bindings
         // ---------------------------------------------------------------------
         
+        
+        $(document).bind('keydown', 'ctrl+l', function(event) {
+            event.preventDefault();
+            toggle_gallery_layout_mode();
+            return false;
+        });
+        
+        $(document).bind('keydown', 'ctrl+g', function(event) {
+            if (!wide_gallery_enabled) {
+                event.preventDefault();
+                wide_gallery_enabled = true;
+                
+                update_navbar_layout(true);
+                update_gallery_layout(true, null, true);
+                
+                return false;
+            }
+        });
+        
+        $(document).bind('keydown', 'ctrl+j', function(event) {
+            if (wide_gallery_enabled) {
+                event.preventDefault();
+                wide_gallery_enabled = false;
+                
+                update_navbar_layout(true);
+                update_gallery_layout(true, null, true);
+                
+                return false;
+            }
+        });
         
         // whenever the window scrolls, check if the header's layout needs to be updated
         $window.bind("scroll", update_dynamic_header);
@@ -2239,7 +2256,7 @@ var g_update_stamps = null;
         
         $(document).bind('keydown', function(e) {
             // close lightboxes, sDetail, and/or map popups when the user presses ESC
-            if (e.which == 27) { // ESC
+            if (e.which === 27) { // ESC
                 if ($('.fancybox-opened').length <= 0) {
                     close_sdetail();
                 }
@@ -2261,7 +2278,7 @@ var g_update_stamps = null;
         }
         
         update_dynamic_header();
-        init_header_subsections();
+        //init_header_subsections();
         
         init_gallery();
         update_stamps();

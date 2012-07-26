@@ -7,23 +7,24 @@ __license__   = "TODO"
 
 import Globals
 import sys, datetime, logs, gevent, utils, math
-from api                        import Constants
+from api import Constants
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
-from resolve.iTunesSource       import iTunesSource
-from resolve.AmazonSource       import AmazonSource
-from resolve.RdioSource         import RdioSource
-from resolve.SpotifySource      import SpotifySource
-from resolve.TMDBSource         import TMDBSource
-from resolve.TheTVDBSource      import TheTVDBSource
+from resolve.AmazonSource import AmazonSource
+from resolve.EntityProxyContainer import EntityProxyContainer
+from resolve.EntityProxySource import EntityProxySource
+from resolve.FactualSource import FactualSource
 from resolve.GooglePlacesSource import GooglePlacesSource
-from resolve.FactualSource      import FactualSource
-from resolve.StampedSource      import StampedSource
-from resolve.EntityProxyContainer   import EntityProxyContainer
-from resolve.EntityProxySource  import EntityProxySource
-from api.Schemas                import PlaceEntity
-from search.SearchResultDeduper        import SearchResultDeduper
-from search.DataQualityUtils           import *
-from greenlet                   import GreenletExit
+from resolve.RdioSource import RdioSource
+from resolve.SpotifySource import SpotifySource
+from resolve.StampedSource import StampedSource
+from resolve.TMDBSource import TMDBSource
+from resolve.TheTVDBSource import TheTVDBSource
+from resolve.iTunesSource import iTunesSource
+from resolve.GenericSource import SEARCH_TIMEOUT
+from api.Schemas import PlaceEntity
+from search.SearchResultDeduper import SearchResultDeduper
+from search.DataQualityUtils import *
+from greenlet import GreenletExit
 
 def total_seconds(timedelta):
     return timedelta.seconds + (timedelta.microseconds / 1000000.0)
@@ -68,18 +69,18 @@ class EntitySearch(object):
         for category in allCategories:
             self.__categories_to_sources_and_priorities[category] = []
 
-        self.__registerSource(StampedSource(), music=10, film=10, book=10, app=10, place=10)
+        self.__registerSource(StampedSource(), music=3, film=3, book=3, app=3, place=3)
         self.__registerSource(iTunesSource(), music=10, film=10, book=3, app=10)
         # TODO: Enable film for Amazon. Amazon film results blend TV and movies and have better retrieval than
         # iTunes. On the other hand, they're pretty dreadful -- no clear distinction between TV and movies, no
         # clear distinction between individual movies and box sets, etc.
         self.__registerSource(AmazonSource(), music=5, book=10)
-        self.__registerSource(GooglePlacesSource(), place=8)
         self.__registerSource(FactualSource(), place=8)
-        self.__registerSource(TMDBSource(), film=8)
-        self.__registerSource(TheTVDBSource(), film=8)
+        self.__registerSource(GooglePlacesSource(), place=8)
         self.__registerSource(RdioSource(), music=8)
         self.__registerSource(SpotifySource(), music=8)
+        self.__registerSource(TMDBSource(), film=8)
+        self.__registerSource(TheTVDBSource(), film=8)
 
     def __terminateWaiting(self, pool, start_time, category, resultsDict):
         logTimingData('IN TERMINATE WAITING')
@@ -91,8 +92,8 @@ class EntitySearch(object):
             try:
                 elapsed_seconds = total_seconds(datetime.datetime.now() - start_time)
 
-                if elapsed_seconds >= 20:
-                    logs.warning('Search completely timed out at 20s!')
+                if elapsed_seconds >= 7:
+                    logs.warning('Search completely timed out at 7s!')
                     pool.kill()
                     return
 
@@ -171,7 +172,7 @@ class EntitySearch(object):
             logs.report()
             resultsDict[source] = []
 
-    def search(self, category, text, timeout=None, limit=10, coords=None):
+    def search(self, category, text, timeout=SEARCH_TIMEOUT, limit=10, coords=None):
         if not isinstance(text, unicode):
             text = text.decode('utf-8')
         if category not in Constants.categories:
@@ -201,7 +202,7 @@ class EntitySearch(object):
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
             # more gracefully.
-            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=None, coords=coords)
+            pool.spawn(self.__searchSource, source, category, text, results, times, timeout=timeout, coords=coords)
 
 
         logTimingData("TIME CHECK ISSUED ALL QUERIES AT " + str(datetime.datetime.now()))
@@ -262,12 +263,9 @@ class EntitySearch(object):
         filteredResults = [r for r in cluster.results if r.dataQuality >= MIN_RESULT_DATA_QUALITY_TO_INCLUDE]
         # So this is ugly, but it's pretty common for two listings to have the same or virtually the same data quality
         # and using relevance as a tie-breaker is really helpful.
-        filteredResults.sort(key=lambda r: r.dataQuality + (r.relevance / 10.0), reverse=True)
-        entityBuilder = EntityProxyContainer(filteredResults[0].resolverObject)
-        for result in filteredResults[1:]:
-            # TODO PRELAUNCH: Only use the best result from each source.
-            entityBuilder.addSource(EntityProxySource(result.resolverObject))
-        entity = entityBuilder.buildEntity()
+        filteredResults.sort(key=lambda r: (r.dataQuality + (r.relevance / 10.0), r.resolverObject.source, r.resolverObject.key), reverse=True)
+        # TODO PRELAUNCH: Only use the best result from each source.
+        entity = EntityProxyContainer().addAllProxies(result.resolverObject for result in filteredResults).buildEntity()
         for result in filteredResults:
             entity.addThirdPartyId(result.resolverObject.source, result.resolverObject.key)
         return entity
@@ -308,7 +306,7 @@ class EntitySearch(object):
         entityAndClusterList.sort(key=scoreEntityAndCluster, reverse=True)
 
 
-    def searchEntitiesAndClusters(self, category, text, timeout=3, limit=10, coords=None):
+    def searchEntitiesAndClusters(self, category, text, timeout=SEARCH_TIMEOUT, limit=10, coords=None):
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
         searchDoneTime = datetime.datetime.now()
         entityResults = []

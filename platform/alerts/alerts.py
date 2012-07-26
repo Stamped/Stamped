@@ -9,6 +9,8 @@ __license__   = "TODO"
 import Globals, utils, logs
 import os, sys, pymongo, json, struct
 import binascii, boto, keys.aws, libs.ec2_utils
+
+from alerts.trunc import trunc
  
 from optparse               import OptionParser
 from errors                 import *
@@ -27,8 +29,8 @@ from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackW
 
 base = os.path.dirname(os.path.abspath(__file__))
 
-IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-ether-prod.pem')
-IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether-prod.pem')
+IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-prod-2013-07-02.pem')
+IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod-2013-07-02.pem')
 
 IS_PROD = libs.ec2_utils.is_prod_stack()
 
@@ -113,7 +115,7 @@ class AlertEmail(Email):
             msg = u'Your friend %s (@%s) joined Stamped' % (self._subject.name, self._subject.screen_name)
 
         elif self._verb.startswith('action'):
-            msg = u'%s (@%s) did something to your stamp' % (self._subject.name, self._subject.screen_name)
+            msg = u'%s (@%s) checked out your stamp' % (self._subject.name, self._subject.screen_name)
 
         else:
             logs.warning("Invalid verb for title: %s" % self.verb)
@@ -127,7 +129,10 @@ class AlertEmail(Email):
     @lazyProperty 
     def body(self):
         try:
-            path = os.path.join(base, 'templates', 'email_%s.html.j2' % self._verb.split('_')[0])
+            templateVerb = self._verb.split('_')[0]
+            if templateVerb in ['mention', 'reply']:
+                templateVerb = 'comment'
+            path = os.path.join(base, 'new-templates', 'email_%s.html' % templateVerb)
             template = open(path, 'r')
         except Exception as e:
             logs.warning("Unable to get email template: %s" % self._verb)
@@ -173,6 +178,15 @@ class AlertEmail(Email):
             for replacement in replacements:
                 params['bio'].replace(replacement[0], replacement[1])
 
+        if 'title' in params:
+            title = trunc(params['title'], max_pos=80, ellipsis=False)
+            if len(title) < len(params['title']):
+                title = "%s..." % title
+            params['title'] = title
+
+        if 'blurb' in params and params['blurb'] is None:
+            params['blurb'] = ''
+
         params['image_url_96'] = params['image_url'].replace('.jpg', '-96x96.jpg')
 
         # Add settings url
@@ -207,7 +221,7 @@ class InviteEmail(Email):
     @lazyProperty 
     def body(self):
         try:
-            path = os.path.join(base, 'templates', 'email_invite.html.j2')
+            path = os.path.join(base, 'new-templates', 'email_invite.html')
             template = open(path, 'r')
         except Exception as e:
             logs.warning("Unable to get email template: %s" % self._verb)
@@ -269,7 +283,7 @@ class PushNotification(object):
             msg = 'Your friend %s joined Stamped' % (self._subject.screen_name)
 
         elif self._verb.startswith('action_'):
-            msg = '%s interacted with your stamp' % (self._subject.screen_name)
+            msg = '%s checked out your stamp' % (self._subject.screen_name)
 
         else:
             raise Exception("Unrecognized verb: %s" % verb)
@@ -643,8 +657,6 @@ class NotificationQueue(object):
             nodeName=stampedAPI.node_name
         )
         logs.async_request('alerts')
-
-        logs.warning('WARNING: USING PUSH NOTIFICATION CERTS FOR "ETHER" APP')
 
         lock = os.path.join(base, 'alerts.lock')
         if os.path.exists(lock):

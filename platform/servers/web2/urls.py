@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 __author__    = "Stamped (dev@stamped.com)"
@@ -13,22 +12,39 @@ from django.conf.urls.defaults  import patterns, include, url
 from django.core.exceptions     import ImproperlyConfigured
 
 urlpatterns = patterns('',
+    url(r'^test$',                                      'core.views.test_view'), 
+    
     # --------------------------------------------------------------------------
     # ------------------------------ MOBILE ------------------------------------
     # --------------------------------------------------------------------------
     
-    # ------------------------------ ERRORS ------------------------------------
-    # e.g., stamped.com/mobile/404, stamped.com/mobile/404.html
-    url(r'^mobile/404/?$',                              'error.views.error_404'), 
-    url(r'^mobile/404.html?$',                          'error.views.error_404'), 
+    url(r'^/?mobile/download$',                 'core.views.download'), 
     
-    # e.g., stamped.com/mobile/503, stamped.com/mobile/503.html
-    url(r'^mobile/503/?$',                              'error.views.error_503'), 
-    url(r'^mobile/503.html?$',                          'error.views.error_503'), 
+    # ----------------------------- SETTINGS -----------------------------------
+    # e.g., stamped.com/mobile/pw/screen_name
+    url(R'^mobile/pw/(?P<token>[\w-]{36})$',            'mobile.views.password_reset'),
     
-    # e.g., stamped.com/mobile/500, stamped.com/mobile/500.html
-    url(r'^mobile/500/?$',                              'error.views.error_500'), 
-    url(r'^mobile/500.html?$',                          'error.views.error_500'), 
+    # e.g., stamped.com/mobile/settings/password/forgot
+    url(R'^mobile/settings/password/forgot/?$',         'mobile.views.password_forgot'),
+    
+    # e.g., stamped.com/mobile/settings/password/sent
+    url(R'^mobile/settings/password/sent/?$',           'mobile.views.password_sent'),
+    
+    # e.g., stamped.com/mobile/settings/password/success
+    url(R'^mobile/settings/password/success/?$',        'mobile.views.password_success'),
+    
+    # e.g., stamped.com/mobile/settings/alerts
+    url(R'^mobile/settings/alerts/?$',                  'mobile.views.alert_settings'),
+    
+    # e.g., stamped.com/mobile/settings/alerts/update.json
+    url(R'^mobile/settings/alerts/update.json$',        'mobile.views.alert_settings_update'),
+    
+    url(r'^/?mobile/settings/password/send-reset-email$',   'core.appsettings.send_reset_email'), 
+    url(r'^/?settings/password/send-reset-email$',          'core.appsettings.send_reset_email'), 
+    
+    url(r'^/?mobile/settings/password/reset-password$',     'core.appsettings.reset_password'), 
+    url(r'^/?settings/password/reset-password$',            'core.appsettings.reset_password'), 
+    
     
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com/mobile, stamped.com/mobile/index, stamped.com/mobile/index.html
@@ -36,23 +52,39 @@ urlpatterns = patterns('',
     url(r'^mobile/index\.html?$',                       'mobile.views.index'), 
     url(r'^mobile/?$',                                  'mobile.views.index'), 
     
+    
     # ------------------------------ ABOUT -------------------------------------
     # e.g., stamped.com/mobile/about, stamped.com/mobile/about.html
     url(r'^mobile/about$',                              'mobile.views.about'), 
     url(r'^mobile/about\.html?$',                       'mobile.views.about'), 
     
+    
+    # ------------------------------ JOBS --------------------------------------
+    # e.g., stamped.com/mobile/jobs, stamped.com/mobile/jobs.html
+    url(r'^mobile/jobs$',                               'mobile.views.jobs'), 
+    url(r'^mobile/jobs\.html?$',                        'mobile.views.jobs'), 
+    
+    # ----------------------------- LEGAL --------------------------------------
+    # e.g., stamped.com/mobile/legal, stamped.com/mobile/legal.html
+    url(r'^mobile/legal$',                              'mobile.views.legal'), 
+    url(r'^mobile/legal\.html?$',                       'mobile.views.legal'), 
+    
+    
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
     url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',    'mobile.views.profile'), 
+    
     
     # ------------------------------- MAP --------------------------------------
     # e.g., stamped.com/mobile/travis/map
     url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/map$',  'mobile.views.map'), 
     
+    
     # ----------------------------- SDETAIL ------------------------------------
     # e.g., stamped.com/travis/1/nobu
     url(r'^mobile/(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
                                                         'mobile.views.sdetail'), 
+    
     # e.g., stamped.com/travis/1
     url(r'^mobile/(?P<screen_name>[\w-]{1,20})/s/(?P<stamp_num>\d+)', 
                                                         'mobile.views.sdetail'), 
@@ -63,18 +95,17 @@ urlpatterns = patterns('',
     # --------------------------------------------------------------------------
     
     
-    # ------------------------------ ERRORS ------------------------------------
-    # e.g., stamped.com/404, stamped.com/404.html
-    url(r'^404/?$',                             'error.views.error_404'), 
-    url(r'^404.html?$',                         'error.views.error_404'), 
+    # ----------------------------- SETTINGS -----------------------------------
+    url(R'^pw/(?P<token>[\w-]{36})$',           'core.appsettings.password_reset'),
+    url(R'^settings/password/forgot/?$',        'core.appsettings.password_forgot'),
+    url(R'^settings/password/reset/?$',         'core.appsettings.password_reset'),
     
-    # e.g., stamped.com/503, stamped.com/503.html
-    url(r'^503/?$',                             'error.views.error_503'), 
-    url(r'^503.html?$',                         'error.views.error_503'), 
+    url(r'^/?mobile/settings/password/send-reset-email$',   'core.appssettings.reset_email'), 
+    url(r'^/?settings/password/send-reset-email$',          'core.appsettings.reset_email'), 
     
-    # e.g., stamped.com/500, stamped.com/500.html
-    url(r'^500/?$',                             'error.views.error_500'), 
-    url(r'^500.html?$',                         'error.views.error_500'), 
+    url(R'^settings/alerts/?$',                 'core.appsettings.alert_settings'),
+    url(R'^settings/alerts/update$',            'core.appsettings.update_alert_settings'),
+    
     
     # ------------------------------- BLOG -------------------------------------
     # e.g., stamped.com/blog
@@ -104,12 +135,33 @@ urlpatterns = patterns('',
     url(r'^index$',                             'core.views.index'), 
     url(r'^index\.html?$',                      'core.views.index'), 
     url(r'^/?$',                                'core.views.index'), 
+    
+    
+    # ------------------------ APP STORE DOWNLOAD ------------------------------
+    url(r'^/?download$',                        'core.views.download'), 
+    
+    
+    # --------------------------- SMS DOWNLOAD ---------------------------------
+    url(r'^/?mobile/download-app$',             'core.views.download_app'), 
     url(r'^/?download-app$',                    'core.views.download_app'), 
+    
     
     # ------------------------------ ABOUT -------------------------------------
     # e.g., stamped.com/about, stamped.com/about.html
     url(r'^about$',                             'core.views.about'), 
     url(r'^about\.html?$',                      'core.views.about'), 
+    
+    
+    # ------------------------------ JOBS --------------------------------------
+    # e.g., stamped.com/jobs, stamped.com/jobs.html
+    url(r'^jobs$',                              'core.views.jobs'), 
+    url(r'^jobs\.html?$',                       'core.views.jobs'), 
+    
+    # ----------------------------- LEGAL --------------------------------------
+    # e.g., stamped.com/legal, stamped.com/legal.html
+    url(r'^legal$',                             'core.views.legal'), 
+    url(r'^legal\.html?$',                      'core.views.legal'), 
+   
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/travis
@@ -125,6 +177,7 @@ urlpatterns = patterns('',
     # e.g., stamped.com/travis/1/nobu
     url(r'^(?P<screen_name>[\w-]{1,20})/stamps/(?P<stamp_num>\d+)/(?P<stamp_title>[\w-]+)', 
                                                 'core.views.sdetail'), 
+    
     # e.g., stamped.com/travis/1
     url(r'^(?P<screen_name>[\w-]{1,20})/s/(?P<stamp_num>\d+)', 
                                                 'core.views.sdetail'), 
@@ -154,4 +207,7 @@ def custom_static(prefix, view='django.views.static.serve', **kwargs):
 
 # static assets
 urlpatterns += custom_static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
+
+handler404 = 'error.views.error_404'
+handler500 = 'error.views.error_500'
 

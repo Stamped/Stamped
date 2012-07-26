@@ -1,8 +1,9 @@
 # Model classes taken from https://github.com/Instagram/python-instagram/blob/master/instagram/models.py
 
+import Globals
 from utils              import lazyProperty
 from libs.Instagram     import globalInstagram
-from resolve.GenericSource      import GenericSource
+from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT
 from resolve.Resolver           import *
 from resolve.ResolverObject     import ResolverPlace
 from resolve.TitleUtils         import *
@@ -45,7 +46,7 @@ class InstagramPlace(ResolverPlace):
 
     @lazyProperty
     def gallery(self):
-        media = self.__instagram.place_recent_media(self.__instagram_id)
+        media = self.__instagram.place_recent_media(self.__instagram_id, priority='low', timeout=MERGE_TIMEOUT)
         gallery = []
         for item in [x for x in media['data'] if x['type'] == 'image']:
             gallery_item = dict()
@@ -104,7 +105,7 @@ class InstagramSource(GenericSource):
         return globalInstagram()
 
     def entityProxyFromKey(self, key):
-        response = self.__instagram.place_lookup(key)
+        response = self.__instagram.place_lookup(key, priority='low', timeout=MERGE_TIMEOUT)
         if response:
             return InstagramPlace(response['data'])
 
@@ -120,7 +121,7 @@ class InstagramSource(GenericSource):
             try:
                 if query.entity.sources.foursquare_id is None:
                     return
-                places = self.__instagram.place_search(query.entity.sources.foursquare_id)
+                places = self.__instagram.place_search(query.entity.sources.foursquare_id, priority='low', timeout=MERGE_TIMEOUT)
                 if places is not None:
                     for place in places['data']:
                         yield InstagramPlace(place)

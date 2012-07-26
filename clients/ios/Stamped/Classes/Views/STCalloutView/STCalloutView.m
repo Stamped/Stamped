@@ -125,7 +125,8 @@ static NSString* const _fadeDelayKey = @"PopUp-ToolTip.fadeDelay";
                      animations:^{
                          self.alpha = 0; 
                      } completion:^(BOOL finished) {
-                         [self removeFromSuperview];
+                         self.alpha = 1;
+                         self.hidden = YES;
                      }];
 }
 

@@ -166,12 +166,14 @@ class StampStatsSchema(Schema):
         cls.addProperty('quality',                          float)
         cls.addProperty('popularity',                       float)
         cls.addProperty('score',                            float)
+        cls.addProperty('user_id',                          basestring)
 
 class StampStats(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('stamp_id',                         basestring, required=True)
         cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('user_id',                          basestring)
         cls.addProperty('kind',                             basestring)
         cls.addPropertyList('types',                        basestring)
         cls.addProperty('lat',                              float)
@@ -206,6 +208,14 @@ class EntityStats(Schema):
         cls.addPropertyList('popular_users',                basestring)
         cls.addPropertyList('popular_stamps',               basestring)
         cls.addNestedProperty('timestamp',                  StatTimestamp)
+
+    def isType(self, t):
+        try:
+            if t in self.types:
+                return True
+        except TypeError:
+            logs.warning("Type field in entity stat set to None")
+        return False
 
 
 # #### #
@@ -599,6 +609,11 @@ class EntitySources(Schema):
         cls.addProperty('rdio_source',                      basestring)
         cls.addProperty('rdio_timestamp',                   datetime)
 
+        cls.addProperty('rdio_available_stream',            bool)
+        cls.addProperty('rdio_available_sample',            bool)
+        cls.addProperty('rdio_available_source',            basestring)
+        cls.addProperty('rdio_available_timestamp',         datetime)
+
         cls.addProperty('amazon_id',                        basestring)
         cls.addProperty('amazon_url',                       basestring)
         cls.addProperty('amazon_underlying',                basestring)
@@ -608,6 +623,10 @@ class EntitySources(Schema):
         cls.addProperty('nytimes_id',                        basestring)
         cls.addProperty('nytimes_source',                    basestring)
         cls.addProperty('nytimes_timestamp',                 datetime)
+
+        cls.addProperty('umdmusic_id',                        basestring)
+        cls.addProperty('umdmusic_source',                    basestring)
+        cls.addProperty('umdmusic_timestamp',                 datetime)
 
         cls.addProperty('opentable_id',                     basestring)
         cls.addProperty('opentable_url',                    basestring)
@@ -623,9 +642,12 @@ class EntitySources(Schema):
         cls.addProperty('netflix_id',                       basestring)
         cls.addProperty('netflix_url',                      basestring)
         cls.addProperty('netflix_source',                   basestring)
+        cls.addProperty('netflix_timestamp',                datetime)
+
         cls.addProperty('netflix_is_instant_available',     bool)
         cls.addProperty('netflix_instant_available_until',  datetime)
-        cls.addProperty('netflix_timestamp',                datetime)
+        cls.addProperty('netflix_available_source',         basestring)
+        cls.addProperty('netflix_available_timestamp',      datetime)
 
         cls.addProperty('singleplatform_id',                basestring)
         cls.addProperty('singleplatform_url',               basestring)
@@ -845,6 +867,26 @@ class BasicEntity(BasicEntityMini):
 
         # The last date/time we got some input indicating that this is currently popular.
         cls.addProperty('last_popular',                     datetime)
+        # Float indicating just how fucking popular this was. Rough guidelines:
+        #
+        #  MUSIC
+        #  - In top 10 on the charts charts for three weeks ~ 100
+        #  - Charted at spot 30 for a week ~ 10
+        #  - Topped charts for two months straight ~ 500
+        #
+        #  FILM
+        #  - Typical big-budget film with average performance ~100
+        #  - Some crapass indie film ~10
+        #  - Huge iconic hit (Star Wars, Jaws, etc.) ~ 500
+        #
+        #  BOOKS
+        #  - Typical NYT best-seller ~100
+        #  - Book that published but never made it anywhere ~10
+        #  - Harry Potter ~500
+        #  - Hamlet ~1000
+        #
+        #  Etc.
+        cls.addProperty('total_popularity_measure',         float)
         cls.addProperty('last_popular_source',              basestring)
         cls.addProperty('last_popular_timestamp',           datetime)
         # Not to be exposed to users -- just some internal data letting us know what sort
@@ -922,7 +964,7 @@ class BasicEntity(BasicEntityMini):
                 self.addThirdPartyId(sourceName, sourceId)
 
     def _genericSubtitle(self):
-        if self.sources.user_generated_subtitle is not None:
+        if self.sources.user_generated_subtitle is not None and self.sources.user_generated_subtitle != '':
             return self.sources.user_generated_subtitle
         return unicode(self.subcategory).replace('_', ' ').title()
 

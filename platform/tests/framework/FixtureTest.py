@@ -107,7 +107,7 @@ def fixtureTest(useLocalDb=False,
                 MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
                 MongoCache.disableStaleness = True
                 MongoCache.cacheTableName = 'cache_fixture'
-                
+
             db = getattr(MongoDBConfig.getInstance().connection, MongoDBConfig.getInstance().database_name)
             dbDict = {}
 

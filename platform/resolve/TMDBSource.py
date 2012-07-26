@@ -15,11 +15,11 @@ from logs import report
 
 try:
     import re, logs
-    from resolve.Resolver                   import *
-    from resolve.ResolverObject             import *
-    from resolve.TitleUtils                 import *
+    from resolve.Resolver           import *
+    from resolve.ResolverObject     import *
+    from resolve.TitleUtils         import *
     from libs.TMDB                  import globalTMDB
-    from resolve.GenericSource              import GenericSource
+    from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from abc                        import ABCMeta, abstractproperty
     from urllib2                    import HTTPError
@@ -27,6 +27,7 @@ try:
     from pprint                     import pformat, pprint
     from libs.LibUtils              import parseDateString
     from search.ScoringUtils        import *
+    from search.DataQualityUtils    import *
 except:
     report()
     raise
@@ -118,13 +119,13 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
             return False
 
     def lookup_data(self):
-        return self.tmdb.movie_info(self.key)
+        return self.tmdb.movie_info(self.key, priority='low', timeout=MERGE_TIMEOUT)
 
     @lazyProperty
     def _castsRaw(self):
         try:
             self.countLookupCall('cast')
-            return self.tmdb.movie_casts(self.key)
+            return self.tmdb.movie_casts(self.key, priority='low', timeout=MERGE_TIMEOUT)
         except LookupRequiredError:
             return []
 
@@ -266,7 +267,7 @@ class TMDBSource(GenericSource):
     def movieSource(self, query):
         def gen():
             try:
-                results = self.__tmdb.movie_search(query.name)
+                results = self.__tmdb.movie_search(query.name, priority='low', timeout=MERGE_TIMEOUT)
                 if results is None:
                     return
                 for movie in results['results']:
@@ -275,7 +276,7 @@ class TMDBSource(GenericSource):
 
                 if pages > 1:
                     for p in range(1,pages):
-                        results = self.__tmdb.movie_search(query.name, page=p+1)
+                        results = self.__tmdb.movie_search(query.name, page=p+1, priority='low', timeout=MERGE_TIMEOUT)
                         for movie in results['results']:
                             yield movie
             except GeneratorExit:
@@ -297,7 +298,7 @@ class TMDBSource(GenericSource):
         return [resolverObject for resolverObject in resolverObjects if not isFarInFuture(resolverObject)]
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=False):
-        raw_results = self.__tmdb.movie_search(queryText, priority='high')['results']
+        raw_results = self.__tmdb.movie_search(queryText, priority='high', timeout=SEARCH_TIMEOUT)['results']
         if logRawResults:
             logComponents = ['\n\n\nTMDB RAW RESULTS\nTMDB RAW RESULTS\nTMDB RAW RESULTS\n\n\n']
             for result in raw_results:
@@ -312,6 +313,7 @@ class TMDBSource(GenericSource):
         for search_result in search_results:
             applyMovieTitleDataQualityTests(search_result, queryText)
             adjustMovieRelevanceByQueryMatch(search_result, queryText)
+            augmentMovieDataQualityOnBasicAttributePresence(search_result)
         # TODO: We could incorporate release date recency or popularity into our ranking, but for now will assume that
         # TMDB is clever enough to handle that for us.
         return search_results
@@ -329,7 +331,7 @@ class TMDBSource(GenericSource):
             
         def gen():
             try:    
-                results = self.__tmdb.movie_search(query.query_string)
+                results = self.__tmdb.movie_search(query.query_string, priority='high', timeout=SEARCH_TIMEOUT)
                 if results is None:
                     return 
                 for movie in results['results']:
@@ -338,7 +340,7 @@ class TMDBSource(GenericSource):
 
                 if pages > 1:
                     for p in range(1,pages):
-                        results = self.__tmdb.movie_search(query.query_string, page=p+1)
+                        results = self.__tmdb.movie_search(query.query_string, page=p+1, priority='high', timeout=SEARCH_TIMEOUT)
                         for movie in results['results']:
                             yield movie
             except GeneratorExit:

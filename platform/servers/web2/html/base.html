@@ -1,5 +1,16 @@
 <!doctype html>
 
+<!-- CSS Dependencies => assets/generated/css/base.generated.X.Y.Z.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        stylesheet: libs/h5bp.css
+        stylesheet: libs/jquery.fancybox.css
+    
+    Core stamped dependencies:
+        stylesheet: styles.css
+-->
+
 <!--[if lte IE 9]>
 <html class="ie" lang="en">
 <![endif]-->
@@ -13,7 +24,7 @@
         
         {% block head %}
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=8" />
         
         <title>{% if title %}{{title}}{% else %}Stamped{% endif %}</title>
         
@@ -28,8 +39,8 @@
         <meta name="application-name"   content="Stamped">
         
         <!-- icons -->
-        <link rel="shortcut icon"       href="{{ STATIC_URL }}img/favicon.ico"/>
-        <link rel="apple-touch-icon"    href="{{ STATIC_URL }}img/apple-touch-icon.png"/>
+        <link rel="shortcut icon"       href="{{ STAMPED_STATIC_URL }}img/favicon.ico"/>
+        <link rel="apple-touch-icon"    href="{{ STAMPED_STATIC_URL }}img/apple-touch-icon.png"/>
         {% endblock head %}
         
         {% block opengraph %}
@@ -40,22 +51,42 @@
         {% endblock opengraph %}
         
         {% block styles %}
-        <!-- styles -->
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/styles.css">
+        
+        {% if STAMPED_DEBUG %}
+            <link rel="stylesheet"      href="/assets/css/fonts.css">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/libs/h5bp.min.css">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/styles.css">
+        {% else %}
+            <link rel="stylesheet"      href="/assets/css/fonts.css">
+            <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/base.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        {% endif %}
         
         <!--[if lte IE 9]>
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.9.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/{{ STAMPED_ASSET_VERSION }}/styles.lte.ie.9.css">
         <![endif]-->
         
         <!--[if lte IE 8]>
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.8.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/{{ STAMPED_ASSET_VERSION }}/styles.lte.ie.8.css">
         <![endif]-->
         
         <!--[if lte IE 7]>
-        <link rel="stylesheet"          href="{{ STATIC_URL }}css/ie/styles.lte.ie.7.css">
+        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/ie/{{ STAMPED_ASSET_VERSION }}/styles.lte.ie.7.css">
         <![endif]-->
         
         {% endblock styles %}
+        
+        {% block post_styles %}
+        
+        {% if STAMPED_DEBUG %}
+            <link rel="stylesheet"          href="{{STAMPED_STATIC_URL}}css/retina.css" 
+                                            media="only screen and (-webkit-min-device-pixel-ratio: 2)" />
+        {% else %}
+            <link rel="stylesheet"          href="{{STAMPED_STATIC_URL}}css/retina.generated.{{ STAMPED_ASSET_VERSION}}.css" 
+                                            media="only screen and (-webkit-min-device-pixel-ratio: 2)" />
+        {% endif %}
+        
+        {% endblock post_styles %}
         
         {% block post_head %}
     </head>
@@ -73,10 +104,10 @@
             {% block header %}
             <div class="header-body fixedwidth clearfix">
                 <p>
-                    <span class='desc'>Put your stamp of approval on the world.</span> <a class='get-the-app-button' href='{{ STAMPED_DOWNLOAD_APP_LINK }}'></a>
+                    <span class='desc'>{% if user %}<a href="/{{user.screen_name}}" class="screen-name">{{user.screen_name}}</a> is using <a href="/">Stamped</a>, a new way to record and share your favorite things.{% else %}Put your stamp of approval on the world.{% endif %}</span> <a class='download-the-free-app-button download-stamped-popup' href='{{ STAMPED_DOWNLOAD_APP_LINK }}'></a>
                 </p>
                 
-                <a href="/{{user.screen_name}}" class="user-logo-large"></a>
+                <a href="/" class="user-logo-large"></a>
             </div>
             {% endblock header %}
             
@@ -91,13 +122,13 @@
         {% block pre_main %}
         <div id="main-page-content" class="main">
             <div id='main-page-content-body' class='main-page-content-body'>
-                {% endblock pre_main %}
-                
                 {% block popup-signup %}
                 <div id="popup-signup">
                     {% include "popup-signup.html" %}
                 </div>
                 {% endblock popup-signup %}
+                
+                {% endblock pre_main %}
                 
                 {% block main %}
                 {% endblock main %}
@@ -125,8 +156,8 @@
             
             {% block scripts %}
             <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
-            <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
-            <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="/assets/js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
             
             <script>
                 var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];

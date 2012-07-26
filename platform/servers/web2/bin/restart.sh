@@ -3,13 +3,13 @@
 
 git pull
 
-stop web
 stop nginx_web
+stop gunicorn_web
 
 rm -rf /stamped/www/cache
 
 cd /stamped/stamped/platform/servers/web2 && make clean all
 
-start web
+start gunicorn_web
 start nginx_web
 

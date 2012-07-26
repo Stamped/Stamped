@@ -60,7 +60,7 @@ static id _sharedInstance;
 }
 
 - (CGFloat)loadingCellHeightForTableView:(UITableView*)tableView andStyle:(NSString*)style {
-  return tableView.rowHeight > 10 ? tableView.rowHeight : 90;
+  return tableView.frame.size.height;
 }
 
 - (STCancellation*)prepareForData:(id)data 

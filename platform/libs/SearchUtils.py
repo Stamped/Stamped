@@ -42,7 +42,7 @@ def generateSearchTokens(entity):
             for subdoc in subfield:
                 if getattr(subdoc, 'title', None) is not None:
                     components.append(subdoc.title)
-    subfields = ('authors', 'albums', 'artists', 'tracks', 'directors', 'cast', 'publishers')
+    subfields = ('authors', 'albums', 'artists', 'tracks', 'directors', 'cast')
     for field in subfields:
         addSubfieldTitles(field)
         

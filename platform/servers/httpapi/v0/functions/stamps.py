@@ -90,7 +90,15 @@ def remove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(requires_auth=False,
                   http_schema=HTTPStampRef,
                   exceptions=stampExceptions)
-def show(request, authUserId, http_schema, **kwargs):
+def show(request, authUserId, http_schema, uri, **kwargs):
+    if authUserId is None:
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     if http_schema.stamp_id is not None:
         stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
     else:
@@ -99,7 +107,12 @@ def show(request, authUserId, http_schema, **kwargs):
     
     stamp = HTTPStamp().importStamp(stamp)
     
-    return transformOutput(stamp.dataExport())
+    result = transformOutput(stamp.dataExport())
+
+    if authUserId is None:
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 # Collection
@@ -108,9 +121,23 @@ def show(request, authUserId, http_schema, **kwargs):
                    http_schema=HTTPTimeSlice,
                    conversion=HTTPTimeSlice.exportTimeSlice,
                    exceptions=stampExceptions)
-def collection(request, authUserId, schema, **kwargs):
+def collection(request, authUserId, http_schema, schema, uri, **kwargs):
+    if authUserId is None:
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     stamps = stampedAPI.getStampCollection(schema, authUserId)
-    return transformStamps(stamps)
+
+    result = transformStamps(stamps)
+
+    if authUserId is None:
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 # Search
@@ -118,9 +145,23 @@ def collection(request, authUserId, schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPSearchSlice,
                   conversion=HTTPSearchSlice.exportSearchSlice,
                   exceptions=stampExceptions)
-def search(request, authUserId, schema, **kwargs):
+def search(request, authUserId, http_schema, schema, uri, **kwargs):
+    if authUserId is None or http_schema.scope == 'popular':
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+
     stamps = stampedAPI.searchStampCollection(schema, authUserId)
-    return transformStamps(stamps)
+
+    result = transformStamps(stamps)
+
+    if authUserId is None or http_schema.scope == 'popular':
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 # Guide
@@ -129,8 +170,20 @@ def search(request, authUserId, schema, **kwargs):
                    http_schema=HTTPGuideRequest,
                    conversion=HTTPGuideRequest.exportGuideRequest,
                    exceptions=stampExceptions)
-def guide(request, authUserId, schema, **kwargs):
-    entities = stampedAPI.getGuide(schema, authUserId)
+def guide(request, authUserId, http_schema, schema, uri, **kwargs):
+    if http_schema.scope == 'popular':
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+    # TODO: Remove this try/catch and address underlying issue that arises when entitystats and stampstats are out of sync
+    try:
+        entities = stampedAPI.getGuide(schema, authUserId)
+    except Exception as e:
+        logs.warning('Failed to build guide: %s' % e)
+        entities = []
     result = []
 
     for entity in entities:
@@ -140,7 +193,12 @@ def guide(request, authUserId, schema, **kwargs):
             logs.warning(utils.getFormattedException())
             raise
 
-    return transformOutput(result)
+    result = transformOutput(result)
+
+    if http_schema.scope == 'popular':
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 # Search Guide
@@ -149,7 +207,15 @@ def guide(request, authUserId, schema, **kwargs):
                    http_schema=HTTPGuideSearchRequest,
                    conversion=HTTPGuideSearchRequest.exportGuideSearchRequest,
                    exceptions=stampExceptions)
-def searchGuide(request, authUserId, schema, **kwargs):
+def searchGuide(request, authUserId, http_schema, schema, uri, **kwargs):
+    if http_schema.scope == 'popular':
+        try:
+            return getCache(uri, http_schema)
+        except KeyError:
+            pass
+        except Exception as e:
+            logs.warning("Failed to get cache: %s" % e)
+            
     entities = stampedAPI.searchGuide(schema, authUserId)
     result = []
 
@@ -160,7 +226,12 @@ def searchGuide(request, authUserId, schema, **kwargs):
             logs.warning(utils.getFormattedException())
             raise
 
-    return transformOutput(result)
+    result = transformOutput(result)
+
+    if http_schema.scope == 'popular':
+        setCache(uri, http_schema, result, ttl=600)
+
+    return result
 
 
 @require_http_methods(["POST"])

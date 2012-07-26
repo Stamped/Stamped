@@ -23,6 +23,7 @@ from servers.analytics.core.Enrichment      import getEnrichmentStats
 from servers.analytics.core.logsQuery       import logsQuery
 from servers.analytics.core.weeklyScore     import weeklyScore
 from servers.analytics.core.analytics_utils import *
+from libs.ec2_utils                         import get_stack
 
 from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
@@ -38,6 +39,11 @@ todo_collection = api._todoDB._collection
 
 conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 dash = Dashboard(api)
+
+if get_stack() is not None:
+    stack_name = str(get_stack()['instance']['stack'])
+else:
+    stack_name = None
 
 def index(request):
     
@@ -74,6 +80,7 @@ def index(request):
     c = Context({
         'hour': est().hour,
         'minute': est().minute,
+        'stack': stack_name,
         'todayStamps': todayStamps,
         'yestStamps': yestStamps,
         'weekStamps': '%.2f' % weekStamps,
@@ -125,6 +132,7 @@ def enrichment(request):
     c = Context({
                  'form': form,
                  'hour': est().hour,
+                 'stack': stack_name,
                  'minute': est().minute,
                  'unattempted': unattempted,
                  'attempted': attempted,
@@ -136,7 +144,7 @@ def enrichment(request):
 
 def latency(request):
     
-    query = logsQuery()
+    query = logsQuery(stack_name)
     
     class latencyForm(forms.Form):
         uri = forms.CharField(max_length=30)
@@ -179,12 +187,13 @@ def latency(request):
     is_blacklist = len(blacklist) > 0
     is_whitelist = len(whitelist) > 0
     
-    report = query.latencyReport(weekAgo(today()),now(),None,blacklist,whitelist)
+    report = query.latencyReport(dayAgo(today()),now(),None,blacklist,whitelist)
         
     t = loader.get_template('../html/latency.html')
     c = Context({
                  'hour': est().hour,
                  'minute': est().minute,
+                 'stack': stack_name,
                  'report': report,
                  'blacklist': blacklist,
                  'whitelist': whitelist,
@@ -192,6 +201,50 @@ def latency(request):
                  'is_blacklist': is_blacklist,
                  'form': form,
                  'customResults': customResults
+    })
+    return HttpResponse(t.render(c))
+
+def stress(request):
+    
+    query = logsQuery(stack_name)
+    
+    class qpsForm(forms.Form):
+        intervals =[("5","5 seconds"),("10","10 seconds"),("30","30 Seconds"),("60","60 Seconds"),("300","5 Minutes"),("600","10 Minutes")]
+        windows = [("30","30 seconds"),("60","60 Seconds"),("300","5 Minutes"),("600","10 Minutes"),("1800","30 Minutes"),("3600","1 Hour")]
+        window = forms.CharField(max_length=30,
+                                 widget=forms.Select(choices=windows))
+        interval = forms.CharField(max_length=30,
+                                   widget=forms.Select(choices=intervals))
+
+    count_report = {}
+    mean_report = {}
+    headers = []
+    window = 0
+    interval = 1
+    if request.method == 'POST': 
+        form = qpsForm(request.POST)
+        if form.is_valid():
+            window = int(form.cleaned_data['window'])
+            interval = int(form.cleaned_data['interval'])
+            
+            count_report,mean_report = query.qpsReport(now(),interval,window)
+            
+            headers = map(lambda x: (now() - timedelta(seconds=(interval * x))), range(window / interval))
+            
+    else: form = qpsForm()
+    
+        
+    t = loader.get_template('../html/stress.html')
+    c = Context({
+                 'hour': est().hour,
+                 'minute': est().minute,
+                 'stack': stack_name,
+                 'form': form,
+                 'count_results': count_report.iteritems(),
+                 'mean_results': mean_report.iteritems(),
+                 'n': range(0, window, interval),
+                 'interval': interval,
+                 'headers': headers,
     })
     return HttpResponse(t.render(c))
 
@@ -224,6 +277,7 @@ def segmentation(request):
     c = Context({
                  'hour': est().hour,
                  'minute': est().minute,
+                 'stack': stack_name,
                  'monthAgo': monthAgo(today()),
                  'weekAgo': weekAgo(today()),
                  'usersM': '%s' % usersM,
@@ -302,6 +356,7 @@ def trending(request):
     c = Context({
                  'hour': now().hour,
                  'minute': now().minute,
+                 'stack': stack_name,
                  'monthAgo': monthAgo,
                  'weekAgo': weekAgo(today()),
                  'results': results,
@@ -359,6 +414,7 @@ def custom(request):
     c = Context({
                  'hour': now().hour,
                  'minute': now().minute,
+                 'stack': stack_name,
                  'form': form,
                  'bgns': bgns,
                  'ends': ends,

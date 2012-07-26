@@ -27,6 +27,7 @@ from search.DataQualityUtils import MIN_RESULT_DATA_QUALITY_TO_INCLUDE
 import datetime
 import search.SearchResultCluster
 from api.Schemas import PlaceEntity
+from resolve.ResolverObject import *
 
 def loadSearchResultsFromFile(filename):
     returnDict = {}
@@ -92,7 +93,16 @@ def writeComparisons(oldResults, newResults, outputDir, diffThreshold):
 
 
 def getProxySummary(proxy):
-    return ('%s, %s:%s' % (proxy.name, proxy.source, str(proxy.key)[:15]))
+    title = repr(proxy.raw_name)
+    if isBook(proxy) and proxy.authors:
+        title = '%s by %s' % (proxy.raw_name, proxy.authors[0]['name'])
+    elif isAlbum(proxy) and proxy.artists:
+        title = '%s by %s' % (proxy.raw_name, proxy.artists[0]['name'])
+    elif isTrack(proxy) and proxy.artists:
+        title = '%s by %s' % (proxy.raw_name, proxy.artists[0]['name'])
+    elif isTvShow(proxy) and proxy.release_date:
+        title = '%s (%d)' % (proxy.raw_name, proxy.release_date.year)
+    return ('%s, %s:%s' % (title, proxy.source, str(proxy.key)[:15]))
 
 
 def getClusteringDifference(cellId, oldCluster, newCluster):
@@ -102,6 +112,13 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
             proxy = result.resolverObject
             proxyDict[proxy.source, proxy.key] = proxy, result.dataQuality
         return proxyDict
+
+    def makeListItem(text, dataQualityScore):
+        openTag, closeTag = '<li>', '</li>'
+        if dataQualityScore < MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
+            openTag, closeTag = '<li><font color="grey">', '</font></li>'
+        return '%s%s%s' % (openTag, text, closeTag)
+
     oldProxies = makeProxyDict(oldCluster)
     newProxies = makeProxyDict(newCluster)
     dropped = oldProxies.viewkeys() - newProxies.viewkeys()
@@ -111,15 +128,15 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
     if same:
         summary += '<h3>Elements stayed the same</h3><ul>'
         for source in same:
-            proxy, _ = oldProxies[source]
-            summary += '<li>%s</li>' % getProxySummary(proxy)
+            proxy, score = oldProxies[source]
+            summary += makeListItem(getProxySummary(proxy), score)
         summary += '</ul>'
     majorChange = False
     if dropped:
         summary += '<h3>Elements dropped from cluster</h3><ul>'
         for source in dropped:
             proxy, score = oldProxies[source]
-            summary += '<li>%s</li>' % getProxySummary(proxy)
+            summary += makeListItem(getProxySummary(proxy), score)
             if score > MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
                 majorChange = True
         summary += '</ul>'
@@ -127,7 +144,7 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
         summary += '<h3>Elements added to cluster</h3><ul>'
         for source in added:
             proxy, score = newProxies[source]
-            summary += '<li>%s</li>' % getProxySummary(proxy)
+            summary += makeListItem(getProxySummary(proxy), score)
             if score > MIN_RESULT_DATA_QUALITY_TO_INCLUDE:
                 majorChange = True
         summary += '</ul>'

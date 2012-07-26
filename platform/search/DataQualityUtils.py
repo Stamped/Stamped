@@ -11,6 +11,8 @@ import Globals
 import math
 import re
 
+from resolve.StringComparator import *
+
 # Results with lower data quality than this are summarily dropped pre-clustering.
 MIN_RESULT_DATA_QUALITY_TO_CLUSTER = 0.3
 # Results with lower data quality than this are allowed to cluster for the purposes of boosting the cluster's final
@@ -32,8 +34,13 @@ def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
         movieSearchResult.dataQuality *= 1 - penalty
         movieSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
 
-    if movieSearchResult.resolverObject.directors:
+    if movieSearchResult.resolverObject.source == 'tmdb':
         boost = 0.1
+        movieSearchResult.dataQuality *= 1 + boost
+        movieSearchResult.addDataQualityComponentDebugInfo('boost for IMDB', boost)
+
+    if movieSearchResult.resolverObject.directors:
+        boost = 0.05
         movieSearchResult.dataQuality *= 1 + boost
         movieSearchResult.addDataQualityComponentDebugInfo("boost for director", boost)
 
@@ -43,19 +50,55 @@ def augmentMovieDataQualityOnBasicAttributePresence(movieSearchResult):
         movieSearchResult.addDataQualityComponentDebugInfo(
                 "boost for cast of size %d" % len(movieSearchResult.resolverObject.cast), boost)
 
+    titleUncommonness = complexUncommonness(movieSearchResult.resolverObject.name)
+    if titleUncommonness < 6:
+        penalty = ((6 - titleUncommonness) / 6.0) ** 0.4
+        movieSearchResult.dataQuality *= 1 - penalty
+        movieSearchResult.addDataQualityComponentDebugInfo(
+            'penalty for common shitty title of uncommonness %f' % titleUncommonness, penalty)
+
 
 def augmentTvDataQualityOnBasicAttributePresence(tvSearchResult):
-    pass
+    if tvSearchResult.resolverObject.release_date is None:
+        penalty = 0.15
+        tvSearchResult.dataQuality *= 1 - penalty
+        tvSearchResult.addDataQualityComponentDebugInfo("penalty for missing release date", penalty)
+
+    if tvSearchResult.resolverObject.source == 'thetvdb':
+        boost = 0.1
+        tvSearchResult.dataQuality *= 1 + boost
+        tvSearchResult.addDataQualityComponentDebugInfo('boost for thetvdb', boost)
+
+    if not tvSearchResult.resolverObject.description:
+        penalty = 0.1
+        tvSearchResult.dataQuality *= 1 - penalty
+        tvSearchResult.addDataQualityComponentDebugInfo("penalty for missing description", penalty)
+
+    titleUncommonness = complexUncommonness(tvSearchResult.resolverObject.name)
+    if titleUncommonness < 6:
+        penalty = ((6 - titleUncommonness) / 6.0) ** 0.4
+        tvSearchResult.dataQuality *= 1 - penalty
+        tvSearchResult.addDataQualityComponentDebugInfo(
+            'penalty for common shitty title of uncommonness %f' % titleUncommonness, penalty)
+
 
 ############################################################################################################
 ################################################   MUSIC    ################################################
 ############################################################################################################
 
 def augmentTrackDataQualityOnBasicAttributePresence(trackSearchResult):
-    pass
+    if (not trackSearchResult.resolverObject.artists or
+        'name' not in trackSearchResult.resolverObject.artists[0]):
+        penalty = 0.3
+        trackSearchResult.dataQuality *= 1 - penalty
+        trackSearchResult.addDataQualityComponentDebugInfo('penalty for missing artist', penalty)
 
 def augmentAlbumDataQualityOnBasicAttributePresence(albumSearchResult):
-    pass
+    if (not albumSearchResult.resolverObject.artists or
+        'name' not in albumSearchResult.resolverObject.artists[0]):
+        penalty = 0.3
+        albumSearchResult.dataQuality *= 1 - penalty
+        albumSearchResult.addDataQualityComponentDebugInfo('penalty for missing artist', penalty)
 
 def augmentArtistDataQualityOnBasicAttributePresence(artistSearchResult):
     pass
@@ -65,7 +108,11 @@ def augmentArtistDataQualityOnBasicAttributePresence(artistSearchResult):
 ############################################################################################################
 
 def augmentBookDataQualityOnBasicAttributePresence(bookSearchResult):
-    pass
+    if (not bookSearchResult.resolverObject.authors or
+        'name' not in bookSearchResult.resolverObject.authors[0]):
+        penalty = 0.3
+        bookSearchResult.dataQuality *= 1 - penalty
+        bookSearchResult.addDataQualityComponentDebugInfo('penalty for missing author', penalty)
 
 
 ############################################################################################################

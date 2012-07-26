@@ -107,3 +107,52 @@ class HTTPDownloadAppSchema(Schema):
     def setSchema(cls):
         cls.addProperty('phone_number',                     basestring, required=True)
 
+class HTTPResetEmailSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('email',                            basestring, required=True)
+
+class HTTPResetPasswordViewSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('token',                            basestring, required=True)
+
+class HTTPResetPasswordSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('token',                            basestring, required=True)
+        cls.addProperty('password',                         basestring, required=True)
+
+class HTTPSettingsSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('token',                            basestring, required=True)
+
+class HTTPUpdateSettingsSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('token',                            basestring, required=True)
+        cls.addProperty('alerts_credits_apns',              bool)
+        cls.addProperty('alerts_credits_email',             bool)
+        cls.addProperty('alerts_likes_apns',                bool)
+        cls.addProperty('alerts_likes_email',               bool)
+        cls.addProperty('alerts_todos_apns',                bool)
+        cls.addProperty('alerts_todos_email',               bool)
+        cls.addProperty('alerts_mentions_apns',             bool)
+        cls.addProperty('alerts_mentions_email',            bool)
+        cls.addProperty('alerts_comments_apns',             bool)
+        cls.addProperty('alerts_comments_email',            bool)
+        cls.addProperty('alerts_replies_apns',              bool)
+        cls.addProperty('alerts_replies_email',             bool)
+        cls.addProperty('alerts_followers_apns',            bool)
+        cls.addProperty('alerts_followers_email',           bool)
+        cls.addProperty('alerts_friends_apns',              bool)
+        cls.addProperty('alerts_friends_email',             bool)
+        cls.addProperty('alerts_actions_apns',              bool)
+        cls.addProperty('alerts_actions_email',             bool)
+

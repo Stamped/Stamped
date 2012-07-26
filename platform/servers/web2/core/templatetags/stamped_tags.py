@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import logs, os, pystache, utils, pybars
+import logs, os, pystache, threading, utils, pybars
 
 from servers.web2.core.templatetags.handlebars_template_helpers import *
 
@@ -199,10 +199,10 @@ class CustomCSSTemplateLibrary(object):
     
     def render(self, template_name, context):
         less    = self._renderer.render(self.templates[template_name][1], context)
-        proxy   = ".%s.less" % template_name
+        proxy   = ".%s.%s.less" % (template_name, threading.currentThread().getName())
         
         if utils.is_ec2():
-            prog = "/stamped/node/node_modules/less/bin/lessc"
+            prog = "/stamped/node_modules/less/bin/lessc"
         else:
             prog = "lessc"
         

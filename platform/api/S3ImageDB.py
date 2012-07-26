@@ -17,7 +17,7 @@ except:
     utils.printException()
     pass
 
-from api.AImageDB           import AImageDB
+from api.AImageDB       import AImageDB
 from StringIO           import StringIO
 from errors             import *
 from api.Schemas        import ImageSizeSchema
@@ -25,7 +25,6 @@ from api.Schemas        import ImageSizeSchema
 from boto.cloudfront    import CloudFrontConnection
 from boto.s3.connection import S3Connection
 from boto.s3.key        import Key
-# from boto.s3.bucket     import Bucket
 
 from libs.ec2_utils     import is_prod_stack
 
@@ -283,7 +282,7 @@ class S3ImageDB(AImageDB):
             ImageFile.MAXBLOCK = prev_max_block
         
         logs.info('[%s] adding image %s (%dx%d)' % (self, name, image.size[0], image.size[1]))
-        return self._addDataToS3(name, out, 'image/jpeg')
+        return self.addDataToS3(name, out, 'image/jpeg')
     
     def _addPNG(self, name, image):
         name    = "%s.png" % name
@@ -292,9 +291,9 @@ class S3ImageDB(AImageDB):
         image.save(out, 'png')
         
         logs.info('[%s] adding image %s (%dx%d)' % (self, name, image.size[0], image.size[1]))
-        return self._addDataToS3(name, out, 'image/png')
+        return self.addDataToS3(name, out, 'image/png')
     
-    def _addDataToS3(self, name, data, contentType):
+    def addDataToS3(self, name, data, contentType):
         num_retries = 0
         max_retries = 5
 

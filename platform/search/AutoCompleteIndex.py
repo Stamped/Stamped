@@ -18,32 +18,67 @@ from whoosh.support.charset import accent_map
 
 import keys.aws
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
+from errors import StampedDocumentNotFoundError
 from search.AutoCompleteTrie import AutoCompleteTrie
 
-EntityTuple = namedtuple('EntityTuple', ['entity_id', 'title', 'last_popular', 'types'])
+EntityTuple = namedtuple('EntityTuple', ['entity_id', 'title', 'last_popular', 'types', 'num_stamps'])
 
 # The tokenizer breaks input text into tokens by spaces and common punctuations. The CharsetFilter
 # removes any accent marks on letters, and the LowercaseFilter puts all letters to lowercase.
 TOKENIZER = RegexTokenizer() | CharsetFilter(accent_map) | LowercaseFilter()
 
+def buildAutoCompleteIndex():
+    entityDb = MongoEntityCollection()
+    query = {
+        'sources.tombstone_id' : { '$exists':False },
+        'sources.user_generated_id' : { '$exists':False }
+    }
+    allEntities = (convertEntity(entity, entityDb) for entity in entityDb._collection.find(
+        query, fields=['title', 'last_popular', 'types']))
+    categoryMapping = emptyIndex()
+    for entity in allEntities:
+        category = categorizeEntity(entity)
+        if not category:
+            continue
+        tokens = tokenizeTitleAndNormalize(entity.title)
+        trie = categoryMapping[category]
+        while tokens:
+            trie.addBinding(' '.join(tokens), entity)
+            if tokens[0] in STOP_WORDS:
+                tokens = tokens[1:]
+            else:
+                break
+    for trie in categoryMapping.itervalues():
+        trie.pruneAndCompress(entityScoringFn, lambda x: x.title.strip(), 5, 50)
+    return categoryMapping
+
+
+def convertEntity(entityDict, entityDb):
+    entityId = str(entityDict.pop('_id'))
+    if 'last_popular' not in entityDict:
+        entityDict['last_popular'] = datetime(1, 1, 1)
+    entityDict['entity_id'] = entityId
+    entityDict['types'] = tuple(entityDict['types'])
+    try:
+        entityDict['num_stamps'] = entityDb.entity_stats.getEntityStats(entityId).num_stamps
+    except (StampedDocumentNotFoundError, KeyError):
+        entityDict['num_stamps'] = 0
+    return EntityTuple(**entityDict)
+
+
 def normalizeTitle(title):
     return ' '.join(tokenizeTitleAndNormalize(title))
+
 
 def tokenizeTitleAndNormalize(title):
     # Remove apostrophes, so contractions don't get broken into two separate words.
     title = ''.join(c for c in title if c != "'")
     return [token.text for token in TOKENIZER(title)]
 
-def entityScoringFn(entity, prefix):
-    # TODO(geoff): factor in how many stamps are on the entity
-    return entity.last_popular
 
-def convertEntity(entityDict):
-    if 'last_popular' not in entityDict:
-        entityDict['last_popular'] = datetime(1, 1, 1)
-    entityDict['entity_id'] = str(entityDict.pop('_id'))
-    entityDict['types'] = tuple(entityDict['types'])
-    return EntityTuple(**entityDict)
+def entityScoringFn(entity):
+    # TODO(geoff): factor in how many stamps are on the entity
+    return entity.last_popular, entity.num_stamps
 
 
 def categorizeEntity(entity):
@@ -59,29 +94,6 @@ def categorizeEntity(entity):
 
 def emptyIndex():
     return dict([(category, AutoCompleteTrie()) for category in ('music', 'book', 'film', 'app')])
-
-
-def buildAutoCompleteIndex():
-    entityDb = MongoEntityCollection()
-    allEntities = (convertEntity(entity) for entity in entityDb._collection.find(
-        fields=['title', 'last_popular', 'types']))
-    categoryMapping = emptyIndex()
-    for entity in allEntities:
-        category = categorizeEntity(entity)
-        if not category:
-            continue
-        tokens = tokenizeTitleAndNormalize(entity.title)
-        trie = categoryMapping[category]
-        while tokens:
-            trie.addBinding(' '.join(tokens), entity)
-            if tokens[0] in STOP_WORDS:
-                tokens = tokens[1:]
-            else:
-                break
-    for trie in categoryMapping.itervalues():
-        trie.pruneAndCompress(entityScoringFn, 5, 50)
-        trie.modify(lambda x: x.title)
-    return categoryMapping
 
 
 def getS3Key():
