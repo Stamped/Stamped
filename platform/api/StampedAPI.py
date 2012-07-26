@@ -513,7 +513,16 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addAccountAsync(self, userId):
-        account = self._accountDB.getAccount(userId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                account = self._accountDB.getAccount(userId)
+                break
+            except StampedAccountNotFoundError:
+                pass
+            retry_count += 1
+            time.sleep(5)
+
 
         self._addWelcomeActivity(userId)
 
@@ -973,11 +982,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
-        account   = self._accountDB.getAccount(authUserId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                account   = self._accountDB.getAccount(authUserId)
 
-        # Only send alert once (when the user initially connects to Twitter)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
-            return False
+                # Only send alert once (when the user initially connects to Twitter)
+                if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
+                    return False
+                break
+            except AttributeError:
+                pass
+            retry_count += 1
+            time.sleep(5)
+
 
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
 #            return False
@@ -1002,12 +1020,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
-        account   = self._accountDB.getAccount(authUserId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                account   = self._accountDB.getAccount(authUserId)
 
-        # Only send alert once (when the user initially connects to Facebook)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
-            logs.info("Facebook alerts already sent")
-            return False
+                # Only send alert once (when the user initially connects to Facebook)
+                if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
+                    logs.info("Facebook alerts already sent")
+                    return False
+                break
+            except AttributeError:
+                pass
+            retry_count += 1
+            time.sleep(5)
 
         # Grab friend list from Facebook API
         fb_friends = self._getFacebookFriends(facebookToken)
@@ -2788,20 +2814,30 @@ class StampedAPI(AStampedAPI):
             'mobile' : (572, None),
             }
 
-        # Get stamp using stampId
-        stamp = self._stampDB.getStamp(stampId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                # Get stamp using stampId
+                stamp = self._stampDB.getStamp(stampId)
 
-        # Find the blurb using the contentId to generate an imageId
-        for i, c in enumerate(stamp.contents):
-            if c.content_id == contentId:
-                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
-                contentsKey = i
+                # Find the blurb using the contentId to generate an imageId
+                for i, c in enumerate(stamp.contents):
+                    if c.content_id == contentId:
+                        imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
+                        contentsKey = i
+                        break
+                else:
+                    raise StampedInputError('Could not find stamp blurb for image resizing')
+
+                # Generate image
+                sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
                 break
-        else:
-            raise StampedInputError('Could not find stamp blurb for image resizing')
+            except (StampedInputError, StampedDocumentNotFoundError, urllib2.HTTPError):
+                pass
+            retry_count += 1
+            time.sleep(5)
 
-        # Generate image
-        sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
+
         sizes.sort(key=lambda x: x.height, reverse=True)
         image = ImageSchema()
         image.sizes = sizes
@@ -3252,9 +3288,17 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addCommentAsync(self, authUserId, stampId, commentId):
-        comment = self._commentDB.getComment(commentId)
-        stamp   = self._stampDB.getStamp(stampId)
-        stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
+        retry_count = 0
+        while retry_count < 5:
+            try:
+                comment = self._commentDB.getComment(commentId)
+                stamp   = self._stampDB.getStamp(stampId)
+                stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
+                break
+            except StampedDocumentNotFoundError:
+                pass
+            retry_count += 1
+            time.sleep(5)
 
         # Add activity for mentioned users
         mentionedUserIds = set()
@@ -4571,7 +4615,7 @@ class StampedAPI(AStampedAPI):
                 sourceStamps = []
                 if todo.source_stamp_ids is not None:
                     for stampId in todo.source_stamp_ids:
-                        if stampIds[stampId] is None:
+                        if stampId not in stampIds or stampIds[stampId] is None:
                             logs.warning("%s: Source stamp not found (%s)" % (todo.todo_id, stampId))
                             continue
                         sourceStamps.append(stampIds[stampId])
@@ -4579,16 +4623,17 @@ class StampedAPI(AStampedAPI):
                 # Stamp
                 stamp = None 
                 if todo.stamp_id is not None:
-                    stamp = stampIds[todo.stamp_id]
-                    if stamp is None:
+                    if todo.stamp_id not in stampIds or stampIds[todo.stamp_id] is None:
                         logs.warning("%s: Stamp not found (%s)" % (todo.todo_id, todo.stamp_id))
+                    else:
+                        stamp = stampIds[todo.stamp_id]
 
                 # Also to-do'd by
                 previews = None 
                 if todo.todo_id in friendTodos and len(friendTodos[todo.todo_id]) > 0:
                     friends = []
                     for friendId in friendTodos[todo.todo_id]:
-                        if userIds[friendId] is None:
+                        if friendId not in userIds or userIds[friendId] is None:
                             logs.warning("%s: Friend preview not found (%s)" % (todo.todo_id, friendId))
                             continue
                         friends.append(userIds[friendId])
@@ -4699,35 +4744,27 @@ class StampedAPI(AStampedAPI):
         # Friends
         friendIds = self._friendshipDB.getFriends(authUserId)
 
-        # Stamp
-        if stampId is not None:
-            stamp = self._stampDB.getStamp(stampId)
-            stampOwner = stamp.user.user_id
-
         # Increment user stats by one
         self._userDB.updateUserStats(authUserId, 'num_todos', increment=1)
 
         # Add activity to all of your friends who stamped the entity
-        friendStamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
-        recipientIds = [stamp.user.user_id for stamp in friendStamps]
-        if authUserId in recipientIds:
-            recipientIds.remove(authUserId)
+        stamps = self._stampDB.getStampsFromUsersForEntity(friendIds, entityId)
 
+        # Stamp
         if stampId is not None:
-            if stampOwner != authUserId:
-                recipientIds.append(stampOwner)
-        # get rid of duplicate entries
-        recipientIds = list(set(recipientIds))
+            try:
+                stamps.append(self._stampDB.getStamp(stampId))
+            except StampedUnavailableError:
+                logs.warning("Could not find stamp %s" % stampId)
 
-        ### TODO: Verify user isn't being blocked
-        if not previouslyTodoed and len(recipientIds) > 0:
-            self._addTodoActivity(authUserId, recipientIds, entityId)
+        for stamp in stamps:
 
-        # Update stamp stats
-        if stampId is not None:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[stampId])
-        for friendStamp in friendStamps:
-            tasks.invoke(tasks.APITasks.updateStampStats, args=[friendStamp.stamp_id])
+            # Send activity
+            if authUserId != stamp.user.user_id and not previouslyTodoed:
+                self._addTodoActivity(authUserId, [stamp.user.user_id], entityId, stamp.stamp_id)
+
+            # Update stamp stats
+            tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
         # Post to Facebook Open Graph if enabled
         # for now, we only post to OpenGraph if the todo was created off of a stamp
@@ -4840,12 +4877,13 @@ class StampedAPI(AStampedAPI):
                                           groupRange = timedelta(days=1),
                                           benefit = benefit)
 
-    def _addTodoActivity(self, userId, recipientIds, entityId):
+    def _addTodoActivity(self, userId, recipientIds, entityId, stampId):
         objects = ActivityObjectIds()
         objects.entity_ids = [ entityId ]
+        objects.stamp_ids = [ stampId ]
         self._addActivity('todo', userId, objects,
-                                          recipientIds = recipientIds,
-                                          requireRecipient = True,
+                                          recipientIds=recipientIds,
+                                          requireRecipient=True,
                                           group=True,
                                           groupRange=timedelta(days=1))
 
@@ -5192,14 +5230,14 @@ class StampedAPI(AStampedAPI):
     
     def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()], fallback=False)
 
     def mergeEntityAsync(self, entityDict):
         self._mergeEntity(Entity.buildEntity(entityDict))
 
     def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
-        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
+        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId], fallback=False)
 
     def mergeEntityIdAsync(self, entityId):
         try:

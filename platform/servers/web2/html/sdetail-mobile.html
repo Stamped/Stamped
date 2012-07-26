@@ -31,7 +31,7 @@
      - - - - - - - - - - - - - - - - - - - - -
     
     Third-party library dependencies:
-        stylesheet: libs/jquery.fancybox.css?v=2.0.6
+        stylesheet: libs/jquery.fancybox.css
         stylesheet: libs/jquery.jscrollpane.css
     
     Core stamped dependencies:
@@ -51,6 +51,7 @@
         <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/mobile/sdetail.css">
     {% else %}
         <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/profile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.css">
     {% endif %}
     
     <style>

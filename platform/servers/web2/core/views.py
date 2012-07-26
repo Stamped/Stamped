@@ -399,7 +399,7 @@ def download_app(request, schema, **kwargs):
 def download(request, **kwargs):
     return HttpResponseRedirect(settings.STAMPED_DOWNLOAD_APP_LINK)
 
-@stamped_view(schema=HTTPIndexSchema)
+@stamped_view(schema=HTTPIndexSchema, ignore_extra_params=True)
 def index(request, schema, **kwargs):
     tastemakers = [
         {
@@ -556,7 +556,7 @@ def about(request, **kwargs):
         {
             'name'              : 'Joey Staehle', 
             'subtitle'          : 'Software Engineering Intern', 
-            'screen_name'       : 'joeystaehle', 
+            'screen_name'       : 'jstaehle', 
             'color_primary'     : 'E00058', 
             'color_secondary'   : 'FFD494', 
             'desc'              : 'Joey is Stamped\'s first intern and has spent the summer honing his engineering and video game skills. He is currently enrolled at Cornell and plans to graduate with a B.S. in Computer Science in 2013.', 

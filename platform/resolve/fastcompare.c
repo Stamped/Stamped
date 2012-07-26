@@ -117,6 +117,7 @@ static PyObject* GetDifference(PyObject* cls, PyObject* args)
         return NULL;
     nrows = strlen(s1) + 1;
     ncols = strlen(s2) + 1;
+    
     starts1 = ConvertListToArray(starts1_list);
     ends1 = ConvertListToArray(ends1_list);
     starts2 = ConvertListToArray(starts2_list);
