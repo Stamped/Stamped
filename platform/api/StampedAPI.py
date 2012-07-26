@@ -4571,10 +4571,7 @@ class StampedAPI(AStampedAPI):
                 sourceStamps = []
                 if todo.source_stamp_ids is not None:
                     for stampId in todo.source_stamp_ids:
-                        if stampId not in stampIds:
-                            logs.warning("%s: Source stamp not found (%s)" % (todo.todo_id, stampId))
-                            continue 
-                        if stampIds[stampId] is None:
+                        if stampId not in stampIds or stampIds[stampId] is None:
                             logs.warning("%s: Source stamp not found (%s)" % (todo.todo_id, stampId))
                             continue
                         sourceStamps.append(stampIds[stampId])
