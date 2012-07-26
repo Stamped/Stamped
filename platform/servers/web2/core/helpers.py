@@ -354,11 +354,11 @@ def stamped_view(schema=None,
             import servers.web2.error.views as web_error
             
             try:
-                logs.begin(saveLog=stampedAPIProxy.api._logsDB.saveLog,
-                           saveStat=stampedAPIProxy.api._statsDB.addStat,
-                           requestData=request,
-                           nodeName=stampedAPIProxy.api.node_name)
-                logs.info("%s %s" % (request.method, request.path))
+                #logs.begin(saveLog=stampedAPIProxy.api._logsDB.saveLog,
+                #           saveStat=stampedAPIProxy.api._statsDB.addStat,
+                #           requestData=request,
+                #           nodeName=stampedAPIProxy.api.node_name)
+                #logs.info("%s %s" % (request.method, request.path))
                 
                 subkwargs = kwargs
                 
@@ -374,7 +374,7 @@ def stamped_view(schema=None,
                     subkwargs['schema'] = result
                 
                 response = fn(request, *args, **subkwargs)
-                logs.info("End request: Success")
+                #logs.info("End request: Success")
                 
                 # TODO: audit cache headers!!
                 if utils.is_ec2():
@@ -472,7 +472,7 @@ def stamped_view(schema=None,
             
             finally:
                 try:
-                    logs.save()
+                    #logs.save()
                 except:
                     pass
 
