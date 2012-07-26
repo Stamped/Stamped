@@ -39,7 +39,7 @@ CELERYD_POOL = 'gevent'
 if utils.is_ec2():
     CELERYD_CONCURRENCY  = 5
 
-logs.start_timer()
+#logs.start_timer()
 
 # use default concurrency; uncomment to use a single celeryd worker
 # (can be useful for debugging)
