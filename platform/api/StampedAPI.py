@@ -2687,7 +2687,7 @@ class StampedAPI(AStampedAPI):
             except StampedDocumentNotFoundError:
                 if delay > 60:
                     raise
-                sleep(delay)
+                time.sleep(delay)
                 delay *= 2
 
         if not stampExists:
