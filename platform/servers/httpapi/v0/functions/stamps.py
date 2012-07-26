@@ -178,8 +178,12 @@ def guide(request, authUserId, http_schema, schema, uri, **kwargs):
             pass
         except Exception as e:
             logs.warning("Failed to get cache: %s" % e)
-
-    entities = stampedAPI.getGuide(schema, authUserId)
+    # TODO: Remove this try/catch and address underlying issue that arises when entitystats and stampstats are out of sync
+    try:
+        entities = stampedAPI.getGuide(schema, authUserId)
+    except Exception as e:
+        logs.warning('Failed to build guide: %s' % e)
+        entities = []
     result = []
 
     for entity in entities:
