@@ -88,8 +88,25 @@ class S3ImageDB(AImageDB):
     def addResizedProfileImages(self, screen_name, image_url):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
-        
-        image    = utils.getWebImage(image_url, "profile")
+
+        # Retry getting web image multiple times in case of bad connection
+        num_retries = 0
+        max_retries = 5
+
+        while True:
+            try:
+                image = utils.getWebImage(image_url, "profile")
+                break
+            except urllib2.HTTPError as e:
+                logs.warning('Get web image exception: %s' % e)
+                num_retries += 1
+                if num_retries > max_retries:
+                    msg = "Unable to connect to get web image after %d retries (%s)" % (max_retries, image_url)
+                    logs.warning(msg)
+                    raise 
+                
+                logs.info("Retrying (%s)" % (num_retries))
+                time.sleep(30)
 
         if image.format not in ('JPEG', 'PNG'):
             logs.warning("Cannot add a profile image of format '%s', only JPEG or PNG")
