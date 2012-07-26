@@ -46,7 +46,10 @@ class AMongoCollectionView(AMongoCollection):
         # handle before / since filters
         # -----------------------------
         if timeSlice.before is not None:
-            query['timestamp.stamped'] = { '$lt': timeSlice.before }
+            if objType == 'todo':
+                query['timestamp.created'] = { '$lt': timeSlice.before }
+            else:
+                query['timestamp.stamped'] = { '$lt': timeSlice.before }
 
         # handle category / subcategory filters
         # -------------------------------------
