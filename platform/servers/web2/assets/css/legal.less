@@ -29,7 +29,8 @@
 }
 
 .active-view-privacy-policy   .view-privacy-policy, 
-.active-view-terms-of-service .view-terms-of-service {
+.active-view-terms-of-service .view-terms-of-service, 
+.active-view-licenses         .view-licenses {
     display: block;
 }
 
@@ -45,13 +46,14 @@
         .rounded(8px);
     }
     
-    .active-view-privacy-policy {
+    .active-view-privacy-policy, .active-view-terms-of-service {
         margin-right: 48px;
     }
 }
 
-.active-view-privacy-policy .active-view-privacy-policy, 
-.active-view-terms-of-service .active-view-terms-of-service {
+.active-view-privacy-policy   .active-view-privacy-policy, 
+.active-view-terms-of-service .active-view-terms-of-service, 
+.active-view-licenses         .active-view-licenses {
     color: #498ff2;
     .box-shadow(0, 0, 10px, 0, @shadow);
 }
