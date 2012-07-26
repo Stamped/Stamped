@@ -95,10 +95,12 @@ class MongoDBConfig(Singleton):
                 if replicaset:
                     self._connection = pymongo.ReplicaSetConnection(hosts,
                                                                     read_preference=pymongo.ReadPreference.SECONDARY, 
-                                                                    replicaset=replicaset)
+                                                                    replicaset=replicaset,
+                                                                    use_greenlets=True)
                 else:
                     self._connection = pymongo.Connection(hosts,
-                                                          read_preference=pymongo.ReadPreference.SECONDARY)
+                                                          read_preference=pymongo.ReadPreference.SECONDARY,
+                                                          use_greenlets=True)
                 
                 return self._connection
             except AutoReconnect as e:
@@ -195,10 +197,12 @@ class MongoLogDBConfig(Singleton):
                 if replicaset:
                     self._connection = pymongo.ReplicaSetConnection(hosts,
                                                                     read_preference=pymongo.ReadPreference.SECONDARY, 
-                                                                    replicaset=replicaset)
+                                                                    replicaset=replicaset,
+                                                                    use_greenlets=True)
                 else:
                     self._connection = pymongo.Connection(hosts,
-                                                          read_preference=pymongo.ReadPreference.SECONDARY)
+                                                          read_preference=pymongo.ReadPreference.SECONDARY,
+                                                          use_greenlets=True)
                 
                 return self._connection
             except AutoReconnect as e:
