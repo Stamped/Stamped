@@ -79,7 +79,9 @@ def outputToConsole(entity_id, result_entities):
     print(''.join(accum))
 
 def _sparsePrint(schema, keys, keypath):
-    if len(keys) == 0:
+    if schema is None:
+        print('%s: %s' % (keypath, schema))
+    elif len(keys) == 0:
         if isinstance(schema, Schema):
             schema = schema.dataExport()
         print("%s: %s" % (keypath, pformat(schema)))

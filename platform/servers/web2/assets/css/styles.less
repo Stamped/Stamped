@@ -170,7 +170,7 @@ header {
 .user-logo-large {
     position: absolute;
     top:  -60px;
-    left: 0;
+    left: -20px;
     
     display: block;
     width:  210px;
@@ -837,6 +837,15 @@ a.sdetail, .pronounced-title a {
             margin: .5em 0;
         }
         
+        .learn-more {
+            margin: .2em 0 .5em;
+        }
+        
+        .download-desc {
+            margin: 1.5em 0 .5em;
+            font-weight: 700;
+        }
+        
         .sms {
             position: relative;
             border: 1px solid #bfbfbf;
@@ -844,6 +853,7 @@ a.sdetail, .pronounced-title a {
             width: 70%;
             line-height: 31px;
             box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+            white-space: nowrap;
             
             padding: 6px 12px;
             .rounded(4px);
@@ -851,8 +861,7 @@ a.sdetail, .pronounced-title a {
             input {
                 text-align: center;
                 font-weight: 200;
-                font-family: sans-serif;
-                font-size: 14pt;
+                font-size: 140%;
                 
                 margin-left: 0;
                 margin-top: 8px;
@@ -888,8 +897,8 @@ a.sdetail, .pronounced-title a {
         }
         
         .error {
-            border-color: red;
-            color: red;
+            border-color: #d54042;
+            color: #d54042;
         }
         
         .or {
@@ -926,12 +935,8 @@ a.sdetail, .pronounced-title a {
         position: absolute;
         left: 50%;
         bottom: -60px;
-        margin-left: -60px;
+        margin-left: -68px;
     }
-}
-
-.index .learn-more {
-    display: none;
 }
 
 
@@ -960,11 +965,11 @@ a.sdetail, .pronounced-title a {
     background: url(/assets/img/index/appstore_sprite.png) no-repeat;
     display: block;
     
-    width:  112px;
+    width:  116px;
     height: 40px;
     
     &:hover, &:active {
-        background-position: -114px 0;
+        background-position: -118px 0;
     }
 }
 

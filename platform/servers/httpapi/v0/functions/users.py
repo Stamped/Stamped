@@ -99,13 +99,6 @@ def search(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPSuggestedUserRequest,
                    exceptions=userExceptions)
 def suggested(request, authUserId, http_schema, uri, **kwargs):
-    try:
-        return getCache(uri, http_schema)
-    except KeyError:
-        pass
-    except Exception as e:
-        logs.warning("Failed to get cache: %s" % e)
-
     users = stampedAPI.getSuggestedUsers(authUserId, limit=http_schema.limit, offset=http_schema.offset)
     output  = []
 
@@ -114,8 +107,6 @@ def suggested(request, authUserId, http_schema, uri, **kwargs):
         output.append(suggested)
 
     result = transformOutput(output)
-
-    setCache(uri, http_schema, result, ttl=3600)
 
     return result
 
