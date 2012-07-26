@@ -4024,6 +4024,7 @@ class StampedAPI(AStampedAPI):
 
         stampIds = self._collectionDB.getInboxStampIds(user.user_id)
         stampStats = self._stampStatsDB.getStatsForStamps(stampIds)
+        stampStats = filter(lambda x: x.entity_id is not None and x.user_id is not None, stampStats)
         entityIds = list(set(map(lambda x: x.entity_id, stampStats)))
         entityStats = self._entityStatsDB.getStatsForEntities(entityIds)
         todos = set(self._todoDB.getTodoEntityIds(user.user_id))
