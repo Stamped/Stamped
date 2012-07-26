@@ -177,6 +177,8 @@ class RateLimiterState(object):
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
         if self.__conn is None:
             config = {
+                'allow_pickle' : True,
+                'allow_all_attrs' : True,
                 'instantiate_custom_exceptions' : True,
                 'import_custom_exceptions' : True,
             }
