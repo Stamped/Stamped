@@ -2101,6 +2101,7 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('opentable_url',                    basestring)
 
         cls.addProperty('purge_tracks',                     basestring)
+        cls.addProperty('purge_image',                      basestring)
 
         # place
         cls.addProperty('address_street',                   basestring)

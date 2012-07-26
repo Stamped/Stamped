@@ -246,6 +246,10 @@ desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
         html.append("""
 <input type="checkbox" name="purge_tracks"/> Purge Tracks<br/>
             """)
+
+    html.append("""
+<input type="checkbox" name="purge_image"/>Purge Image<br/>
+            """)
     for k,v in hidden_params.items():
         html.append("""
 <input type="hidden" name="%s" value="%s"/>
@@ -278,6 +282,10 @@ def update(updates):
     db = _entityDB()
     now = datetime.utcnow()
     entity = db.getEntity(updates.entity_id)
+    if updates.purge_image == 'on':
+        del entity.images
+        del entity.images_timestamp
+        del entity.images_source
     if updates.title:
         entity.title = updates.title
     if updates.desc:
@@ -431,7 +439,6 @@ def update(updates):
         del entity.tracks
         del entity.tracks_timestamp
         del entity.tracks_source
-        print("hererererere")
     for k in simple_fields:
         v = getattr(updates, k)
         if v == '':
