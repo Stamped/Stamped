@@ -52,7 +52,7 @@ def timestep():
     times[:] = []
     logs.warning(message)
 
-def start_timer(self):
+def start_timer():
     def keep_time():
         while True:
             timestep()
