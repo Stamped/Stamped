@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+    Small utility for warming the web server caches for the pages which we anticipate 
+    will receive the most traffic and are therefore the most important.
+"""
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -34,7 +39,7 @@ def handle_request(url, stats, count=8):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('-u', '--url', action='store', default="www.stamped.com")
+    parser.add_argument('-u', '--url', action='store', default="http://www.stamped.com")
     parser.add_argument('-c', '--count', action='store', type=int, default=8)
     parser.add_argument('-s', '--stamps', action='store', type=int, default=64)
     
@@ -108,6 +113,17 @@ if __name__ == '__main__':
         }, 
         {
             'name'  : 'map', 
+        }, 
+        {
+            'name'  : 'map-lite', 
+            'paths' : [
+                'justinbieber/map?lite=true', 
+                'mariobatali/map?lite=true', 
+                'urbandaddy/map?lite=true', 
+                'nymag/map?lite=true', 
+                'michaelkors/map?lite=true', 
+                'parislemon/map?lite=true', 
+            ]
         }, 
     ]
     
