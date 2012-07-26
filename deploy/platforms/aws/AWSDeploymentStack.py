@@ -147,6 +147,7 @@ class AWSDeploymentStack(ADeploymentStack):
         #cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s && cd /stamped/stamped/platform/servers/web2 && bin/restart.sh'" % \
         #      (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
         cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s'" % \
+              (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
         pp  = []
         separator = "-" * 80
         
