@@ -32,7 +32,9 @@ def invoke(task, args=None, kwargs=None, **options):
     
     #msg = "INVOKE: %s" % task
     #logs.debug(msg)
-
+    
+    fallback = options.pop('fallback', True)
+    
     if not utils.is_ec2():
         global local_worker_pool
         if local_worker_pool is None:
@@ -116,7 +118,12 @@ def invoke(task, args=None, kwargs=None, **options):
                         
                         handler.email(subject, body)
     
-    # broker is not responding so attempt to invoke the task synchronously / locally
-    logs.warn("running async task locally '%s'" % task)
-    return task.apply(args, kwargs, **options)
+    if fallback:
+        # broker is not responding so attempt to invoke the task synchronously / locally
+        logs.warn("running async task locally '%s'" % task)
+        return task.apply(args, kwargs, **options)
+    else:
+        # broker is not responding so attempt to invoke the task synchronously / locally
+        logs.warn("discarding async task (unable to connect to broker) '%s'" % task)
+        return None
 

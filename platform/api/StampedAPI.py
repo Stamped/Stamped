@@ -5230,14 +5230,14 @@ class StampedAPI(AStampedAPI):
     
     def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()], fallback=False)
 
     def mergeEntityAsync(self, entityDict):
         self._mergeEntity(Entity.buildEntity(entityDict))
 
     def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
-        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
+        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId], fallback=False)
 
     def mergeEntityIdAsync(self, entityId):
         try:
