@@ -351,6 +351,9 @@ class RateLimiter(object):
             raise e
 
     def handleTimestep(self):
+        logs.debug('In last timestep for service %s, issued %d of %d requests' % (
+            self.__service_name, self.__calls, self.limit
+        ))
         global events
         self.__calls = 0
         now = time.time()
