@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     # ------------------------------ MOBILE ------------------------------------
     # --------------------------------------------------------------------------
     
+    url(r'^/?mobile/download$',                 'core.views.download'), 
     
     # ----------------------------- SETTINGS -----------------------------------
     # e.g., stamped.com/mobile/pw/screen_name
@@ -137,7 +138,6 @@ urlpatterns = patterns('',
     
     
     # ------------------------ APP STORE DOWNLOAD ------------------------------
-    url(r'^/?mobile/download$',                 'core.views.download'), 
     url(r'^/?download$',                        'core.views.download'), 
     
     
