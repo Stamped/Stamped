@@ -211,7 +211,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             self.user_todo_entities_collection.removeUserTodosEntity(userId, entityId)
         except:
             logs.warning("Cannot remove document")
-            raise Exception
+            raise
 
     def getTodo(self, userId, entityId):
         document = self._collection.find_one({'entity.entity_id': entityId, 'user_id': userId})
