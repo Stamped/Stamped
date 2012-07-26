@@ -172,7 +172,7 @@ class Facebook(object):
 
     def getUserAccessToken(self, code, client_id=APP_ID, client_secret=APP_SECRET):
         logs.info('### getUserAccessToken called # client_id: %s, client_secret: %s, code: %s' % (client_id, client_secret, code))
-        redirect_uri = 'https://dev.stamped.com/v0/account/linked/facebook/login_callback.json'
+        redirect_uri = 'https://dev.stamped.com/v1/account/linked/facebook/login_callback.json'
         path = "oauth/access_token"
         result = self._get(
             None,
