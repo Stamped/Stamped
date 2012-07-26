@@ -38,7 +38,8 @@ entity_collection = api._entityDB._collection
 todo_collection = api._todoDB._collection
 
 conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-dash = Dashboard(api)
+logsQuery = logsQuery('bowser')
+dash = Dashboard(api,logsQuery)
 
 if get_stack() is not None:
     stack_name = str(get_stack()['instance']['stack'])
