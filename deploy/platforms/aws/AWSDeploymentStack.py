@@ -144,7 +144,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         branch = kwargs.get('branch', None)
         
-        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s && cd /stamped/stamped/platform/servers/web2 && bin/restart.sh'" % \
+        cmd = "sudo /bin/bash -c '. /stamped/bin/activate && python /stamped/bootstrap/bin/update.py%s%s && cd /stamped/stamped/platform/servers/web2'" % \
               (" --force" if force else "", " --branch %s" % branch if branch is not None else "")
         pp  = []
         separator = "-" * 80
@@ -747,6 +747,7 @@ class AWSDeploymentStack(ADeploymentStack):
     def delete(self):
         utils.log("[%s] deleting %d instances" % (self, len(self.instances)))
         pool = Pool(8)
+        
         for instance in self.instances:
             pool.spawn(instance.terminate)
         
