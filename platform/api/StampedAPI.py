@@ -3115,10 +3115,9 @@ class StampedAPI(AStampedAPI):
         #TODO: fill this with something other than the dummy url
         if stamp is not None:
             url = generateStampUrl(stamp)
-            #HACK for testing purposes
-            return url.replace('http://www.stamped.com/', 'http://ec2-23-22-98-51.compute-1.amazonaws.com/')
+            return url
         if user is not None:
-            return "http://ec2-23-22-98-51.compute-1.amazonaws.com/%s" % user.screen_name
+            return "http://www.stamped.com/%s" % user.screen_name
 
     def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
         account = self.getAccount(authUserId)

@@ -38,7 +38,6 @@ VALID_ORIGINS = [
     'http://api.stamped.com', 
     'http://www.stamped.com', 
     'http://dev.stamped.com', 
-    'http://ec2-23-22-98-51.compute-1.amazonaws.com', # peach.api0 as of 5/20/2012 (travis - testing web)
 ]
 
 if not IS_PROD:
