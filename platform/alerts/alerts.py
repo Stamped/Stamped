@@ -29,8 +29,8 @@ from APNSWrapper import APNSNotificationWrapper, APNSNotification, APNSFeedbackW
 
 base = os.path.dirname(os.path.abspath(__file__))
 
-IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-ether-prod.pem')
-IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-ether-prod.pem')
+IPHONE_APN_PUSH_CERT_DEV  = os.path.join(base, 'apns-prod-2013-07-02.pem')
+IPHONE_APN_PUSH_CERT_PROD = os.path.join(base, 'apns-prod-2013-07-02.pem')
 
 IS_PROD = libs.ec2_utils.is_prod_stack()
 
@@ -657,8 +657,6 @@ class NotificationQueue(object):
             nodeName=stampedAPI.node_name
         )
         logs.async_request('alerts')
-
-        logs.warning('WARNING: USING PUSH NOTIFICATION CERTS FOR "ETHER" APP')
 
         lock = os.path.join(base, 'alerts.lock')
         if os.path.exists(lock):
