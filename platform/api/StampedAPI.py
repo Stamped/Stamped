@@ -2677,8 +2677,18 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addStampAsync(self, authUserId, stampId, imageUrl, stampExists=False):
-        stamp   = self._stampDB.getStamp(stampId)
-        entity  = self._entityDB.getEntity(stamp.entity.entity_id)
+        # TODO(geoff): refactor retry logic to a common place.
+        delay = 1
+        while True:
+            try:
+                stamp   = self._stampDB.getStamp(stampId)
+                entity  = self._entityDB.getEntity(stamp.entity.entity_id)
+                break
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                sleep(delay)
+                delay *= 2
 
         if not stampExists:
             # Add references to the stamp in all relevant inboxes
