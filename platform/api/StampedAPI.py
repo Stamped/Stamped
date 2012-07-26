@@ -3177,7 +3177,7 @@ class StampedAPI(AStampedAPI):
         account = self.getAccount(authUserId)
 
         # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
+        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann', 'moobert']:
             logs.warning('### Skipping Open Graph post because user not on whitelist')
             return
 
