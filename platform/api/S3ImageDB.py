@@ -96,6 +96,7 @@ class S3ImageDB(AImageDB):
         while True:
             try:
                 image = utils.getWebImage(image_url, "profile")
+                break
             except urllib2.HTTPError as e:
                 logs.warning('Get web image exception: %s' % e)
                 num_retries += 1
