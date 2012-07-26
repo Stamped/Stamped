@@ -209,12 +209,12 @@ class MongoLogDBConfig(Singleton):
 
                     if replicaset:
                         self._connection = pymongo.ReplicaSetConnection(hosts,
-                                                                        read_preference=pymongo.ReadPreference.SECONDARY,
+                                                                        read_preference=pymongo.ReadPreference.PRIMARY,
                                                                         replicaset=replicaset,
                                                                         use_greenlets=True)
                     else:
                         self._connection = pymongo.Connection(hosts,
-                                                              read_preference=pymongo.ReadPreference.SECONDARY,
+                                                              read_preference=pymongo.ReadPreference.PRIMARY,
                                                               use_greenlets=True)
 
                     return self._connection

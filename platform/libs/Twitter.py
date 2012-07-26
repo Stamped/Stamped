@@ -115,14 +115,19 @@ class Twitter(object):
         idset = ','.join(ids[offset:offset+limit])
         results = self.__get(url, user_token, user_secret, user_id=idset)
         for result in results:
-            friends.append(
-                {
-                    'user_id'   : result['id'],
-                    'name'      : result['name'],
-                    'screen_name' : result['screen_name'],
-                    'image_url' : result['profile_image_url'],
-                }
-            )
+            try:
+                friends.append(
+                    {
+                        'user_id'   : result['id'],
+                        'name'      : result['name'],
+                        'screen_name' : result['screen_name'],
+                        'image_url' : result['profile_image_url'],
+                    }
+                )
+            except TypeError as e:
+                logs.warning("Unable to get twitter friends! Error: %s" % e)
+                logs.info("Results: %s" % results)
+                raise
         return friends
 
 
