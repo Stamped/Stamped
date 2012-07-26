@@ -41,10 +41,7 @@ conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 logsQuery = logsQuery('bowser')
 dash = Dashboard(api,logsQuery)
 
-if get_stack() is not None:
-    stack_name = str(get_stack()['instance']['stack'])
-else:
-    stack_name = None
+stack_name = 'bowser'
 
 def index(request):
     
