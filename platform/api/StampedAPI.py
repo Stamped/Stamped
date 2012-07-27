@@ -1351,7 +1351,7 @@ class StampedAPI(AStampedAPI):
     def addFriendshipAsync(self, authUserId, userId):
         if self._activity:
             # Add activity for followed user
-            self._addFollowActivity(authUserId, userId)`
+            self._addFollowActivity(authUserId, userId)
 
             # Remove 'friend' activity item
             self._activityDB.removeFriendActivity(authUserId, userId)
