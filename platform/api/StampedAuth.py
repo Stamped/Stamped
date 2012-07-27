@@ -269,15 +269,17 @@ class StampedAuth(AStampedAuth):
                     raise 
                 attempt += 1
 
+        # TODO: switch this back to https after resolving the issue where assets 
+        # aren't loaded over SSL
         url = 'http://www.stamped.com/pw/%s' % resetToken.token_id
         prettyurl = 'http://stamped.com/pw/%s' % resetToken.token_id
-
+        
         # Email user
         msg = {}
         msg['to'] = email
         msg['from'] = 'Stamped <noreply@stamped.com>'
         msg['subject'] = 'Stamped: Forgot Password'
-
+        
         try:
             base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             path = os.path.join(base, 'alerts', 'templates', 'email_password_forgot.html.j2')
@@ -418,12 +420,12 @@ class StampedAuth(AStampedAuth):
     # ############# #
     
     def addAccessToken(self, clientId, authUserId, refreshToken):
-        attempt = 1
         max_attempts = 5
-        expire = 3920   # 1 hour
-        expire = 86720  # 24 hours
-        expire = 607040  # 1 week
-            
+        attempt = 1
+        expire  = 3920   # 1 hour
+        expire  = 86720  # 24 hours
+        expire  = 607040  # 1 week
+        
         while True:
             try:
                 rightNow = datetime.utcnow()

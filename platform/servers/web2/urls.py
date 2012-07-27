@@ -233,6 +233,7 @@ def custom_static(prefix, view='django.views.static.serve', **kwargs):
 # static assets
 urlpatterns += custom_static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
 
+# setup error handler views
 handler404 = 'error.views.error_404'
 handler500 = 'error.views.error_500'
 
