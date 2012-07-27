@@ -25,9 +25,9 @@ from django.utils.functional    import wraps
 
 # initialize several useful globals
 IS_PROD  = libs.ec2_utils.is_prod_stack()
-#_baseurl = "https://api.stamped.com/v1"
+_baseurl = "https://api.stamped.com/v1"
 #_baseurl = "https://ec2-50-19-40-37.compute-1.amazonaws.com/v1"
-_baseurl = "https://ec2-107-21-83-72.compute-1.amazonaws.com/v1"
+#_baseurl = "https://ec2-107-21-83-72.compute-1.amazonaws.com/v1"
 
 # extract all of the settings from django's settings.py which begin with STAMPED_
 # note that these settings will be included in the context of every rendered template.
