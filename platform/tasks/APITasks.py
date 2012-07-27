@@ -223,12 +223,12 @@ def writeTimestampToS3(s3_filename, request_id):
         key.set_acl('private')
 
 @task(queue='enrich', **default_params)
-def enrichQueueWriteTimeStampToS3(s3_filename):
-    writeTimestampToS3(s3_filename, enrichQueueWriteTimeStampToS3.request.id)
+def enrichQueueWriteTimestampToS3(s3_filename):
+    writeTimestampToS3(s3_filename, enrichQueueWriteTimestampToS3.request.id)
 
 @task(queue='api', **default_params)
-def apiQueueWriteTimeStampToS3(s3_filename):
-    writeTimestampToS3(s3_filename, apiQueueWriteTimeStampToS3.request.id)
+def apiQueueWriteTimestampToS3(s3_filename):
+    writeTimestampToS3(s3_filename, apiQueueWriteTimestampToS3.request.id)
 
 
 def parseCommandLine():
