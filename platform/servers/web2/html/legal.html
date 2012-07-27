@@ -36,19 +36,33 @@
 {% block pane-body %}
     <p class="title">Legal</p>
     
-    <div id="views" class="active-view-privacy-policy">
-        <div id="view-switcher">
-            <a class="view-switcher active-view-privacy-policy"   href="#privacy-policy">Privacy Policy</a>
-            <a class="view-switcher active-view-terms-of-service" href="#terms-of-service">Terms of Service</a>
-        </div>
+    <div id="views" {% if page == "legal" %} class="active-view-privacy-policy" {% else %} class="active-view-{{ page }}" {% endif %}>
         
-        <div id="privacy-policy" class="view view-privacy-policy">
-            {% include "privacy-policy.html" %}
-        </div>
+        {% if page == "legal" %}
+            <div id="view-switcher">
+                <a class="view-switcher active-view-privacy-policy"   href="#privacy-policy">Privacy Policy</a>
+                <a class="view-switcher active-view-terms-of-service" href="#terms-of-service">Terms of Service</a>
+                <a class="view-switcher active-view-licenses"         href="#licenses">Licenses</a>
+            </div>
+        {% endif %}
         
-        <div id="terms-of-service" class="view view-terms-of-service">
-            {% include "terms-of-service.html" %}
-        </div>
+        {% if page == "legal" or page == "privacy-policy" %}
+            <div id="privacy-policy" class="view view-privacy-policy">
+                {% include "privacy-policy.html" %}
+            </div>
+        {% endif %}
+        
+        {% if page == "legal" or page == "terms-of-service" %}
+            <div id="terms-of-service" class="view view-terms-of-service">
+                {% include "terms-of-service.html" %}
+            </div>
+        {% endif %}
+        
+        {% if page == "legal" or page == "licenses" %}
+            <div id="licenses" class="view view-licenses">
+                {% include "licenses.html" %}
+            </div>
+        {% endif %}
     </div>
 {% endblock pane-body %}
 

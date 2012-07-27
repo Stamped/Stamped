@@ -513,16 +513,16 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addAccountAsync(self, userId):
-        retry_count = 0
-        while retry_count < 5:
+        delay = 1
+        while True:
             try:
                 account = self._accountDB.getAccount(userId)
                 break
-            except StampedAccountNotFoundError:
-                pass
-            retry_count += 1
-            time.sleep(5)
-
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
         self._addWelcomeActivity(userId)
 
@@ -982,19 +982,19 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
-        retry_count = 0
-        while retry_count < 5:
+        delay = 1
+        while True:
             try:
                 account   = self._accountDB.getAccount(authUserId)
-
                 # Only send alert once (when the user initially connects to Twitter)
                 if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
                     return False
                 break
-            except AttributeError:
-                pass
-            retry_count += 1
-            time.sleep(5)
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
 
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
@@ -1020,20 +1020,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
-        retry_count = 0
-        while retry_count < 5:
+        delay = 1
+        while True:
             try:
                 account   = self._accountDB.getAccount(authUserId)
-
                 # Only send alert once (when the user initially connects to Facebook)
                 if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
                     logs.info("Facebook alerts already sent")
                     return False
                 break
-            except AttributeError:
-                pass
-            retry_count += 1
-            time.sleep(5)
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
         # Grab friend list from Facebook API
         fb_friends = self._getFacebookFriends(facebookToken)
@@ -1368,9 +1368,11 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         # Post to Facebook Open Graph if enabled
-        share_settings = self._getOpenGraphShareSettings(authUserId)
-        if share_settings is not None and share_settings.share_follows:
-            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+        
+        ### TEMP: Disable for now
+        # share_settings = self._getOpenGraphShareSettings(authUserId)
+        # if share_settings is not None and share_settings.share_follows:
+        #     tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -2815,7 +2817,8 @@ class StampedAPI(AStampedAPI):
             }
 
         retry_count = 0
-        while retry_count < 5:
+        max_retries = 5
+        while True:
             try:
                 # Get stamp using stampId
                 stamp = self._stampDB.getStamp(stampId)
@@ -2834,7 +2837,13 @@ class StampedAPI(AStampedAPI):
                 break
             except (StampedInputError, StampedDocumentNotFoundError, urllib2.HTTPError):
                 pass
+
             retry_count += 1
+            if retry_count > max_retries:
+                msg = "Unable to connect to add stamp image after %d retries (url=%s, stamp=%s)" % \
+                    (max_retries, imageUrl, stampId)
+                logs.warning(msg)
+                raise 
             time.sleep(5)
 
 
@@ -3283,17 +3292,18 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addCommentAsync(self, authUserId, stampId, commentId):
-        retry_count = 0
-        while retry_count < 5:
+        delay = 1
+        while True:
             try:
                 comment = self._commentDB.getComment(commentId)
                 stamp   = self._stampDB.getStamp(stampId)
                 stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
                 break
             except StampedDocumentNotFoundError:
-                pass
-            retry_count += 1
-            time.sleep(5)
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
         # Add activity for mentioned users
         mentionedUserIds = set()
