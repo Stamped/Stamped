@@ -203,6 +203,7 @@ class RateLimiterState(object):
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
             logs.info('### attempting rpc service request')
+            self._fail(e)
             return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
         except DailyLimitException as e:
             raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
