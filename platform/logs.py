@@ -50,7 +50,7 @@ def timestep():
       (times[-1]-times[0]), mean_difference, median, p90, p99
     )
     times[:] = []
-    logs.warning(message)
+    warning(message)
 
 def start_timer():
     import gevent
