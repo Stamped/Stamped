@@ -5363,7 +5363,6 @@ class StampedAPI(AStampedAPI):
 
             if entity.isType('artist'):
                 # Do a quick dedupe of songs in case the same song appears in different albums.
-                # TODO(geoff): this should be more robust...
                 seenTitles = set()
                 dedupedList = []
                 for resolved in resolvedList:
@@ -5408,7 +5407,16 @@ class StampedAPI(AStampedAPI):
                     mergedEntities.append(mergedEntity)
                     visitedStubs.append(mergedEntity.minimize())
                     modified = modified or (visitedStubs[-1] != stub)
-            setattr(entity, attr, visitedStubs)
+
+            seenLinks = set()
+            dedupedList = []
+            for resolved in visitedStubs:
+                if not resolved.entity_id:
+                    dedupedList.append(resolved)
+                elif resolved.entity_id not in seenLinks:
+                    dedupedList.append(resolved)
+                    seenLinks.add(resolved.entity_id)
+            setattr(entity, attr, dedupedList)
             if modified:
                 self._entityDB.updateEntity(entity)
 
