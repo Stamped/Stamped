@@ -222,11 +222,11 @@ def writeTimestampToS3(s3_filename, request_id):
         key.set_contents_from_string(file_content)
         key.set_acl('private')
 
-@task(queue='enrich', **default_params)
+@task(queue='enrich', **retry_params)
 def enrichQueueWriteTimestampToS3(s3_filename):
     writeTimestampToS3(s3_filename, enrichQueueWriteTimestampToS3.request.id)
 
-@task(queue='api', **default_params)
+@task(queue='api', **retry_params)
 def apiQueueWriteTimestampToS3(s3_filename):
     writeTimestampToS3(s3_filename, apiQueueWriteTimestampToS3.request.id)
 
