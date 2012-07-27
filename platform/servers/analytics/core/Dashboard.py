@@ -55,6 +55,9 @@ class Dashboard(object):
 
             self.writer.write({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
         
+        else: 
+            total_today = fun(today(),now())
+        
         # Yesterday's Stats
         total_yest = 0
         yest_hourly = [0]
