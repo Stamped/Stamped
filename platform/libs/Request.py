@@ -172,8 +172,8 @@ class RateLimiterState(object):
         else:
             self.__blackout_start = None
             self.__request_fails = 0
-            self.__local_rlservice.shutdown()
-            self.__local_rlservice = None
+#            self.__local_rlservice.shutdown()
+#            self.__local_rlservice = None
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
