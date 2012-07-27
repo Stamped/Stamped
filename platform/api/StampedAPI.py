@@ -1351,7 +1351,7 @@ class StampedAPI(AStampedAPI):
     def addFriendshipAsync(self, authUserId, userId):
         if self._activity:
             # Add activity for followed user
-            self._addFollowActivity(authUserId, userId)
+            self._addFollowActivity(authUserId, userId)`
 
             # Remove 'friend' activity item
             self._activityDB.removeFriendActivity(authUserId, userId)
@@ -1377,7 +1377,7 @@ class StampedAPI(AStampedAPI):
             if friendAcct.linked is not None and friendAcct.linked.facebook is not None and \
                friendAcct.linked.facebook.linked_user_id is not None:
                 # If the friend has an FB linked account but we don't have the third_party_id, get it
-                if friendAcct.linked.faceook.third_party_id is None:
+                if friendAcct.linked.facebook.third_party_id is None:
                     friend_fb_id = friendAcct.linked.facebook.linked_user_id
                     acct = self.getAccount(authUserId)
                     token = acct.linked.facebook.token
