@@ -68,7 +68,7 @@ class Dashboard(object):
                 except:
                     pass
         
-        if len(yest_hourly) == 0:
+        if len(yest_hourly) == 1:
             for hour in range (0,24):
                 if unique:
                     bgn = dayAgo(today())
