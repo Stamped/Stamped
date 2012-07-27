@@ -215,7 +215,7 @@ def getS3Key(filename):
         key = bucket.new_key(filename)
     return key
 
-def writeTimeStampToS3(s3_filename, request_id):
+def writeTimestampToS3(s3_filename, request_id):
     logs.debug('Writing timestamp to S3 file %s' % s3_filename)
     file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
     with closing(getS3Key(s3_filename)) as key:
