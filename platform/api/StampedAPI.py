@@ -3199,6 +3199,8 @@ class StampedAPI(AStampedAPI):
         account = self.getAccount(authUserId)
 
         token = account.linked.facebook.token
+        if token is None:
+            return
         fb_user_id = account.linked.facebook.linked_user_id
         action = None
         ogType = None
