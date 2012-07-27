@@ -1368,9 +1368,11 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         # Post to Facebook Open Graph if enabled
-        share_settings = self._getOpenGraphShareSettings(authUserId)
-        if share_settings is not None and share_settings.share_follows:
-            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+        
+        ### TEMP: Disable for now
+        # share_settings = self._getOpenGraphShareSettings(authUserId)
+        # if share_settings is not None and share_settings.share_follows:
+        #     tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
