@@ -91,7 +91,6 @@ static id __instance;
 #pragma mark - Twitter Authentication
 
 - (NSDictionary*)paramsForString:(NSString*)string {
-    
     NSMutableDictionary *foundParameters = [[NSMutableDictionary alloc] initWithCapacity:10];
 	if (string) {
         
@@ -107,9 +106,9 @@ static id __instance;
 			[parameterScanner scanString:@"=" intoString:NULL];
 			[parameterScanner scanUpToString:@"&" intoString:&value];
 			[parameterScanner scanString:@"&" intoString:NULL];		
-			
+			value = [value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 			if (name && value) {
-				[foundParameters setObject:[value stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] forKey:name];
+				[foundParameters setObject:value forKey:name];
 			}
 		}
 		
