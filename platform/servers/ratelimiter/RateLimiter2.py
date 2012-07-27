@@ -124,8 +124,19 @@ class RateLimiter(object):
         self.__semaphore = Semaphore()
         self.__queue_sem = Semaphore()
 
+        self.__is_ratelimiter_node = False
+        stack_info = get_stack()
+        if stack_info is not None:
+            self.__is_ratelimiter_node = 'ratelimiter' in stack_info.instance.roles
+        print('is rate limiter: %s' % self.__is_ratelimiter_node)
+
         if self.limit is not None and self.period is not None:
             self.__worker = gevent.spawn(workerProcess, self)
+
+    def shutdown(self):
+        if self.__worker is not None:
+            self.__worker.kill()
+            self.__worker = None
 
     def update_limits(self, limit, period, cpd, fail_limit, fail_period, blackout_wait):
         if self.limit != limit:
@@ -351,10 +362,9 @@ class RateLimiter(object):
             raise e
 
     def handleTimestep(self):
-        logs.debug('In last timestep for service %s, issued %d of %d requests' % (
-            self.__service_name, self.__calls, self.limit
-        ))
-        global events
+        #logs.debug('In last timestep for service %s, issued %d of %d requests' % (
+        #    self.__service_name, self.__calls, self.limit
+        #))
         self.__calls = 0
         now = time.time()
         while (self.__curr_timeblock_start + self.period < now):
@@ -372,16 +382,13 @@ class RateLimiter(object):
             gevent.spawn(self.doRequest, request, asyncresult)
 
     def doRequest(self, request, asyncresult):
-        global events
         try:
-            logs.info("about to issue request for '%s'.  url: %s" % (self.__service_name, request.url))
+            if self.__is_ratelimiter_node:
+                logs.info("issuing request for '%s'.  url: %s" % (self.__service_name, request.url))
             begin = time.time()
             http = httplib2.Http()
 
             if (begin - request.created) > request.timeout:
-#                events.append('Service: %s  Request %s:   Throwing TimeoutException.  realized wait: %s  '
-#                              'expected dur: %s  items originally in queue: %s' %
-#                              (self.__service_name, request.log.count, begin - request.created, request.log.expected_dur, request.log.items_in_queue))
                 raise TimeoutException('The request timed out while waiting in the rate limiter queue.'
                                        'Expected time: %s  Items in queue: %s  Realized time: %s  Service: %s' %
                                         (request.log.expected_dur, request.log.items_in_queue, begin - request.created,
@@ -401,7 +408,8 @@ class RateLimiter(object):
             realized_dur = end - request.created
 
 
-            logs.info('Service: %s :   Request finished.  Request time: %s  Realized total time: %s  '
+            if self.__is_ratelimiter_node:
+                logs.info('Service: %s :   Request finished.  Request time: %s  Realized total time: %s  '
                           'Expected Total Time: %s  Expected wait time: %s  Expected request time: %s  Items originally in Queue: %s' %
                           (self.__service_name, elapsed, realized_dur,
                            request.log.expected_dur, request.log.expected_wait_time, request.log.expected_request_time,

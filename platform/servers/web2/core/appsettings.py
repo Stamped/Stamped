@@ -20,7 +20,6 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-
 @stamped_view(schema=HTTPResetPasswordViewSchema)
 def password_reset(request, schema, **kwargs):
     body_classes = "password_reset main"

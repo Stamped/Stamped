@@ -308,11 +308,17 @@ def split(s, delimiter):
 
 @register.filter
 def split0(s, delimiter):
-    return s.split(delimiter)[0]
+    if s is None or not isinstance(s, basestring):
+        return ""
+    else:
+        return s.split(delimiter)[0]
 
 @register.filter
 def split1(s, delimiter):
-    return s.split(delimiter)[1]
+    if s is None or not isinstance(s, basestring):
+        return ""
+    else:
+        return s.split(delimiter)[1]
 
 class AStampedNode(template.Node):
     
