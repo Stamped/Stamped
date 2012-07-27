@@ -881,6 +881,10 @@ class StampedAPI(AStampedAPI):
             self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
+
+            # Kick off an async task to query FB and determine if user granted us sharing permissions
+            tasks.invoke(tasks.APITasks.updateFBPermissions, args=[authUserId, linkedAccount.token])
+
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
             # Enable Open Graph sharing by default
@@ -962,10 +966,23 @@ class StampedAPI(AStampedAPI):
         if account.linked is None or\
            account.linked.facebook is None or\
            account.linked.facebook.share_settings is None or\
-           account.linked.facebook.token is None:
+           account.linked.facebook.token is None or \
+           not account.linked.facebook.have_share_permissions:
             return None
 
         return account.linked.facebook.share_settings
+
+    @API_CALL
+    def updateFBPermissionsAsync(self, authUserId, token):
+        acct = self.getAccount(authUserId)
+        if acct.linked is None or acct.linked.facebook is None:
+            return False
+        linked = acct.linked.facebook
+        permissions = self.facebook.getUserPermissions(token)
+        linked.facebook.have_share_permissions = \
+            ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
+        self._accountDB.updateLinkedAccount(linked.facebook)
+        return True
 
 
     @API_CALL
@@ -3243,7 +3260,12 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
+        try:
+            result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
+        except StampedFacebookPermissionsError as e:
+            account.linked.facebook.have_share_permissions = False
+            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            return
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)

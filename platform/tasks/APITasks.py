@@ -160,6 +160,10 @@ def addTodo(*args, **kwargs):
     invoke(addTodo.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
+def updateFBPermissions(*args, **kwargs):
+    invoke(updateFBPermissions.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
 def postToOpenGraph(*args, **kwargs):
     invoke(postToOpenGraph.request, *args, **kwargs)
 
