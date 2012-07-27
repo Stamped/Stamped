@@ -5,7 +5,7 @@ import logs
 from errors import *
 import oauth as oauth
 
-from libs.Request       import *
+from libs.Request       import service_request
 from APIKeys            import get_api_key
 
 TWITTER_CONSUMER_KEY    = get_api_key('twitter', 'consumer_key')

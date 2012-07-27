@@ -259,7 +259,7 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
     @lazyProperty
     def url(self):
         try:
-            return self.data['albumViewUrl']
+            return self.data['collectionViewUrl']
         except Exception:
             return None
 
