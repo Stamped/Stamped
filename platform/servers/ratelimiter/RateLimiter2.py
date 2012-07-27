@@ -128,7 +128,6 @@ class RateLimiter(object):
         stack_info = get_stack()
         if stack_info is not None:
             self.__is_ratelimiter_node = 'ratelimiter' in stack_info.instance.roles
-        print('is rate limiter: %s' % self.__is_ratelimiter_node)
 
         if self.limit is not None and self.period is not None:
             self.__worker = gevent.spawn(workerProcess, self)

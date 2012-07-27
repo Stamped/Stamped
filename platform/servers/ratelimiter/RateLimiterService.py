@@ -90,7 +90,7 @@ class StampedRateLimiterService():
             self.__config_loader_thread = None
 
         # Kill all rate limiters' threads
-        for limit in self.__limiters:
+        for k, limit in self.__limiters.iteritems():
             limit.shutdown()
 
     def loadLimiterConfig(self):
