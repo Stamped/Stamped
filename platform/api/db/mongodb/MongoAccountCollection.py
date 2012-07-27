@@ -370,6 +370,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             'token'                 : True,
             'token_expiration'      : False,
             'share_settings'        : False,
+            'third_party_id'        : False,
         }
 
         valid_netflix = {

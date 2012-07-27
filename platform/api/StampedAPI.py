@@ -1351,7 +1351,7 @@ class StampedAPI(AStampedAPI):
     def addFriendshipAsync(self, authUserId, userId):
         if self._activity:
             # Add activity for followed user
-            self._addFollowActivity(authUserId, userId)
+            self._addFollowActivity(authUserId, userId)`
 
             # Remove 'friend' activity item
             self._activityDB.removeFriendActivity(authUserId, userId)
@@ -1368,11 +1368,24 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         # Post to Facebook Open Graph if enabled
-        
-        ### TEMP: Disable for now
-        # share_settings = self._getOpenGraphShareSettings(authUserId)
-        # if share_settings is not None and share_settings.share_follows:
-        #     tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+        share_settings = self._getOpenGraphShareSettings(authUserId)
+        if share_settings is not None and share_settings.share_follows:
+            friendAcct = self.getAccount(userId)
+
+            # We need to check two things: 1) The friend has a linked FB account
+            #                              2) We have the friend's FB 'third_party_id'.  If not, we'll get it
+            if friendAcct.linked is not None and friendAcct.linked.facebook is not None and \
+               friendAcct.linked.facebook.linked_user_id is not None:
+                # If the friend has an FB linked account but we don't have the third_party_id, get it
+                if friendAcct.linked.facebook.third_party_id is None:
+                    friend_fb_id = friendAcct.linked.facebook.linked_user_id
+                    acct = self.getAccount(authUserId)
+                    token = acct.linked.facebook.token
+                    friend_info = self._facebook.getUserInfo(token, friend_fb_id)
+                    friend_linked = friendAcct.linked.facebook
+                    friend_linked.third_party_id = friend_info['third_party_id']
+                    self._accountDB.updateLinkedAccount(userId, friend_linked)
+                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -3186,6 +3199,8 @@ class StampedAPI(AStampedAPI):
         account = self.getAccount(authUserId)
 
         token = account.linked.facebook.token
+        if token is None:
+            return
         fb_user_id = account.linked.facebook.linked_user_id
         action = None
         ogType = None
@@ -3221,7 +3236,7 @@ class StampedAPI(AStampedAPI):
         elif followUserId is not None:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
-            ogType = 'user'
+            ogType = 'profile'
             url = self._getOpenGraphUrl(user = user)
 
         if action is None or ogType is None or url is None:
@@ -5348,7 +5363,6 @@ class StampedAPI(AStampedAPI):
 
             if entity.isType('artist'):
                 # Do a quick dedupe of songs in case the same song appears in different albums.
-                # TODO(geoff): this should be more robust...
                 seenTitles = set()
                 dedupedList = []
                 for resolved in resolvedList:
@@ -5393,7 +5407,16 @@ class StampedAPI(AStampedAPI):
                     mergedEntities.append(mergedEntity)
                     visitedStubs.append(mergedEntity.minimize())
                     modified = modified or (visitedStubs[-1] != stub)
-            setattr(entity, attr, visitedStubs)
+
+            seenLinks = set()
+            dedupedList = []
+            for resolved in visitedStubs:
+                if not resolved.entity_id:
+                    dedupedList.append(resolved)
+                elif resolved.entity_id not in seenLinks:
+                    dedupedList.append(resolved)
+                    seenLinks.add(resolved.entity_id)
+            setattr(entity, attr, dedupedList)
             if modified:
                 self._entityDB.updateEntity(entity)
 
