@@ -754,6 +754,15 @@ class HTTPNetflixAuthResponse(Schema):
         cls.addProperty('secret',                           basestring)
         cls.addProperty('oauth_verifier',                   basestring)
 
+class HTTPFacebookAuthResponse(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('state',                            basestring)
+        cls.addProperty('code',                             basestring)
+        cls.addProperty('error',                            basestring)
+        cls.addProperty('error_reason',                     basestring)
+        cls.addProperty('error_description',                basestring)
+
 class HTTPCategoryDistribution(Schema):
     @classmethod
     def setSchema(cls):

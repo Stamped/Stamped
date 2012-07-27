@@ -19,8 +19,8 @@ from api.AAuthAccessTokenDB     import AAuthAccessTokenDB
 from api.AAuthRefreshTokenDB    import AAuthRefreshTokenDB
 from api.AAuthEmailAlertsDB     import AAuthEmailAlertsDB
 
-from libs.Facebook          import *
-from libs.Twitter           import *
+from libs.Facebook              import globalFacebook
+from libs.Twitter               import globalTwitter
 
 class StampedAuth(AStampedAuth):
     """

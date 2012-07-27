@@ -8,6 +8,7 @@ __license__   = "TODO"
 import Globals
 import utils
 import logs
+import datetime
 
 from optparse    import OptionParser
 from celery.task import task
@@ -198,6 +199,36 @@ def updateAutoCompleteIndex(*args, **kwargs):
 def updateUserImageCollage(*args, **kwargs):
     invoke(updateUserImageCollage.request, *args, **kwargs)
 
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+import keys.aws
+from contextlib import closing
+
+# TODO PULL OUT TO SOMEWHERE COMMON (copied from AutoCompleteIndex)
+def getS3Key(filename):
+    BUCKET_NAME = 'stamped.com.static.images'
+
+    conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+    bucket = conn.create_bucket(BUCKET_NAME)
+    key = bucket.get_key(filename)
+    if key is None:
+        key = bucket.new_key(filename)
+    return key
+
+def writeTimestampToS3(s3_filename, request_id):
+    logs.debug('Writing timestamp to S3 file %s' % s3_filename)
+    file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
+    with closing(getS3Key(s3_filename)) as key:
+        key.set_contents_from_string(file_content)
+        key.set_acl('private')
+
+@task(queue='enrich', **retry_params)
+def enrichQueueWriteTimestampToS3(s3_filename):
+    writeTimestampToS3(s3_filename, enrichQueueWriteTimestampToS3.request.id)
+
+@task(queue='api', **retry_params)
+def apiQueueWriteTimestampToS3(s3_filename):
+    writeTimestampToS3(s3_filename, apiQueueWriteTimestampToS3.request.id)
 
 
 def parseCommandLine():

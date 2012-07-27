@@ -12,6 +12,7 @@ monkey.patch_all()
 from gevent.hub         import GreenletExit
 
 import os
+import traceback
 from time               import sleep
 import logs
 from datetime           import datetime
@@ -82,6 +83,15 @@ class StampedRateLimiterService():
 #            if k in self.__limiters:
 #                self.__limiters[k].day_calls = v
 
+    def shutdown(self):
+        # Kill the limits config loader thread
+        if self.__config_loader_thread is not None:
+            self.__config_loader_thread.kill()
+            self.__config_loader_thread = None
+
+        # Kill all rate limiters' threads
+        for k, limit in self.__limiters.iteritems():
+            limit.shutdown()
 
     def loadLimiterConfig(self):
         filename = 'limits-%s.conf' % self.__stack_name
@@ -142,8 +152,9 @@ class StampedRateLimiterService():
                 else:
                     logs.info("adding rate limiter for service '%s'" % service_name)
                     self.__limiters[service_name] = RateLimiter(service_name, limit, period, cpd, fail_limit, fail_period, blackout_wait)
-            except:
-                logs.error ("Exception thrown while attempting to update or create RateLimiter '%s'. Skipping" % service_name)
+            except Exception as e:
+                logs.error ("Exception thrown while attempting to update or create RateLimiter '%s' Skipping.\nException: %s\nStack Trace:\n%s" \
+                            % (service_name, e, traceback.format_exc()))
                 return
 
     def handleRequest(self, service, priority, timeout, verb, url, body = None, headers = None):
