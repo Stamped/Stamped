@@ -69,6 +69,31 @@ urlpatterns = patterns('',
     url(r'^mobile/legal$',                              'mobile.views.legal'), 
     url(r'^mobile/legal\.html?$',                       'mobile.views.legal'), 
     
+    # ---------------------------- V1 Links ------------------------------------
+    # e.g., stamped.com/mobile/licenses-mobile.html, stamped.com/licenses-mobile.html
+    url(r'^mobile/licenses-mobile.html/?$',             'mobile.views.licenses'), 
+    url(r'^mobile/licenses-mobile/?$',                  'mobile.views.licenses'), 
+    url(r'^licenses-mobile.html/?$',                    'core.views.licenses'), 
+    url(r'^licenses-mobile/?$',                         'core.views.licenses'), 
+    
+    # e.g., stamped.com/mobile/privacy-mobile.html, stamped.com/privacy-mobile.html
+    url(r'^mobile/privacy-mobile.html/?$',              'mobile.views.privacy_policy'), 
+    url(r'^mobile/privacy-mobile/?$',                   'mobile.views.privacy_policy'), 
+    url(r'^privacy-mobile.html/?$',                     'core.views.privacy_policy'), 
+    url(r'^privacy-mobile/?$',                          'core.views.privacy_policy'), 
+    
+    # e.g., stamped.com/mobile/terms-mobile.html, stamped.com/terms-mobile.html
+    url(r'^mobile/terms-mobile.html/?$',                'mobile.views.terms_of_service'), 
+    url(r'^mobile/terms-mobile/?$',                     'mobile.views.terms_of_service'), 
+    url(r'^terms-mobile.html/?$',                       'core.views.terms_of_service'), 
+    url(r'^terms-mobile/?$',                            'core.views.terms_of_service'), 
+    
+    # e.g., stamped.com/mobile/faq-mobile.html, stamped.com/faq-mobile.html
+    url(r'^mobile/faq-mobile.html/?$',                  'mobile.views.faq'), 
+    url(r'^mobile/faq-mobile/?$',                       'mobile.views.faq'), 
+    url(r'^faq-mobile.html/?$',                         'core.views.faq'), 
+    url(r'^faq-mobile/?$',                              'core.views.faq'), 
+    
     
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
@@ -208,6 +233,7 @@ def custom_static(prefix, view='django.views.static.serve', **kwargs):
 # static assets
 urlpatterns += custom_static(settings.STATIC_URL, document_root=settings.STATIC_DOC_ROOT)
 
+# setup error handler views
 handler404 = 'error.views.error_404'
 handler500 = 'error.views.error_500'
 

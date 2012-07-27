@@ -322,6 +322,7 @@ class RateLimiter(object):
         return rate_wait + queue_wait
 
     def addRequest(self, request, priority):
+        global events
         try:
             now = time.time()
 
@@ -361,6 +362,9 @@ class RateLimiter(object):
             raise e
 
     def handleTimestep(self):
+        #logs.debug('In last timestep for service %s, issued %d of %d requests' % (
+        #    self.__service_name, self.__calls, self.limit
+        #))
         self.__calls = 0
         now = time.time()
         while (self.__curr_timeblock_start + self.period < now):
@@ -393,9 +397,6 @@ class RateLimiter(object):
             body = None
             if request.body is not None:
                 body = urllib.urlencode(request.body, True)
-
-            print('url: %s  verb: %s  headers: %s  body: %s' % (request.url, request.verb, request.headers, body))
-
             response, content = http.request(request.url, request.verb, headers=request.headers, body=body)
             if response.status >= 400:
                 self.fail(request, response, content)

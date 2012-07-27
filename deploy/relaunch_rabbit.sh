@@ -1,5 +1,5 @@
 
-stack=$1
+stack="bowser"
 
 node="$stack.mon0"
 echo "Relaunching rabbitmq on node: $node"

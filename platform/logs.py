@@ -33,6 +33,34 @@ try:
 except:
     pass
 
+import time
+times = []
+
+def timestep():
+    times.append(time.time())
+    if len(times) < 1000:
+        return
+    differences = [after - before for before, after in zip(times[:-1], times[1:])]
+    differences.sort()
+    mean_difference = float(sum(differences)) / len(differences)
+    median = differences[len(differences) / 2]
+    p90 = differences[int(len(differences) * 0.9)]
+    p99 = differences[int(len(differences) * 0.99)]
+    message = 'over period of %f seconds, mean difference was %f, median was %f, 90th percentile is %f, 99th percentile is %f' % (
+      (times[-1]-times[0]), mean_difference, median, p90, p99
+    )
+    times[:] = []
+    warning(message)
+
+def start_timer():
+    import gevent
+    def keep_time():
+        while True:
+            timestep()
+            time.sleep(0.01)
+    gevent.spawn(keep_time)
+
+
 
 class LoggingContext(object):
     def __init__(self, format=None):

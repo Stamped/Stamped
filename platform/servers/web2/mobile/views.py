@@ -73,36 +73,41 @@ def sdetail(request, schema, **kwargs):
 
 def index(*args, **kwargs):
     kwargs['mobile'] = True
-    
     return views.index(*args, **kwargs)
 
 def about(*args, **kwargs):
     kwargs['mobile'] = True
-    
     return views.about(*args, **kwargs)
 
 def jobs(*args, **kwargs):
     kwargs['mobile'] = True
-    
     return views.jobs(*args, **kwargs)
 
 def legal(*args, **kwargs):
     kwargs['mobile'] = True
-    
     return views.legal(*args, **kwargs)
+
+def licenses(*args, **kwargs):
+    kwargs['mobile'] = True
+    return views.licenses(*args, **kwargs)
+
+def privacy_policy(*args, **kwargs):
+    kwargs['mobile'] = True
+    return views.privacy_policy(*args, **kwargs)
+
+def faq(*args, **kwargs):
+    kwargs['mobile'] = True
+    return views.faq(*args, **kwargs)
 
 def password_reset(*args, **kwargs):
     kwargs['mobile'] = True
-    
     return appsettings.password_reset(*args, **kwargs)
 
 def password_forgot(*args, **kwargs):
     kwargs['mobile'] = True
-    
     return appsettings.password_forgot(*args, **kwargs)
 
 def alert_settings(*args, **kwargs):
     kwargs['mobile'] = True
-    
     return appsettings.alert_settings(*args, **kwargs)
 

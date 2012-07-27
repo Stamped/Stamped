@@ -20,7 +20,6 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-
 @stamped_view(schema=HTTPResetPasswordViewSchema)
 def password_reset(request, schema, **kwargs):
     body_classes = "password_reset main"
@@ -37,7 +36,7 @@ def password_reset(request, schema, **kwargs):
     if account is None:
         raise StampedInputError("invalid account")
     
-    auth_service = acount.auth_service
+    auth_service = account.auth_service
     if auth_service != 'stamped':
         raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (accountscreen_name, auth_service))
     
