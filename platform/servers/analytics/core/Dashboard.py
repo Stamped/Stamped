@@ -8,7 +8,7 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import keys.aws, logs, utils, math
+import keys.aws, logs, utils, math, time
 
 from boto.sdb.connection                            import SDBConnection
 from api.MongoStampedAPI                            import MongoStampedAPI
@@ -28,24 +28,36 @@ class Dashboard(object):
         self.domain = conn.get_domain('dashboard')
         
     def getStats(self,stat,fun,unique=False):
-        total_today = 0
-        today_hourly = []
-        for hour in range (0,int(math.floor(est().hour))+1):
-            if unique:
-                bgn = today()
-            else:
-                bgn = today() + timedelta(hours=hour)
-            end = today() + timedelta(hours=hour+1)
-            num = fun(bgn,end)
-            if not unique:
-                total_today += num
-            else:
-                total_today = num
-            today_hourly.append(total_today)
-            
         
+        # Today's Stats
+        total_today = 0
+        today_hourly = [0]
+        
+        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,today().date().isoformat()))
+
+        for result in query:
+            for i in result['hours'].replace('[','').replace(']','').split(','):
+                today_hourly.append(int(i))
+        
+        if len(today_hourly) < est().hour:
+            for hour in range (len(today_hourly), est().hour+1):
+                if unique:
+                    bgn = today()
+                else:
+                    bgn = today() + timedelta(hours=hour)
+                end = today() + timedelta(hours=hour+1)
+                num = fun(bgn,end)
+                if not unique:
+                    total_today += num
+                else:
+                    total_today = num
+                today_hourly.append(total_today)
+
+            self.writer.write({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
+        
+        # Yesterday's Stats
         total_yest = 0
-        yest_hourly = []
+        yest_hourly = [0]
         
         query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,dayAgo(today()).date().isoformat()))
 
@@ -55,6 +67,7 @@ class Dashboard(object):
                     yest_hourly.append(int(i))
                 except:
                     pass
+        
         if len(yest_hourly) == 0:
             for hour in range (0,24):
                 if unique:
@@ -68,12 +81,12 @@ class Dashboard(object):
                 else:
                     total_yest = num
                 yest_hourly.append(total_yest)
-            print yest_hourly
+
             self.writer.write({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
         
         
-        
-        weeklyAgg = []
+        # Weekly Avg Stats
+        weeklyAgg = [0]
         weeklyAvg = []
         bgn = weekAgo(today())
         end = bgn + timedelta(hours=1)
@@ -84,6 +97,7 @@ class Dashboard(object):
                     weeklyAvg.append(float(i))
                 except:
                     pass
+        
         if len(weeklyAvg) == 0: 
             for day in range (0,6):
                 daily = 0

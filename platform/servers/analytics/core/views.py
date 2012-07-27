@@ -1,9 +1,9 @@
 # Create your views here.
 
 import Globals
-import keys.aws, logs, utils
+import keys.aws, logs, utils, time
 
-from datetime                               import *
+from datetime                               import datetime,timedelta
 
 from boto.sdb.connection                    import SDBConnection
 from boto.exception                         import SDBResponseError
@@ -22,14 +22,12 @@ from servers.analytics.core.topStamped      import getTopStamped
 from servers.analytics.core.Enrichment      import getEnrichmentStats
 from servers.analytics.core.logsQuery       import logsQuery
 from servers.analytics.core.weeklyScore     import weeklyScore
+from servers.analytics.core.mongoQuery      import mongoQuery
 from servers.analytics.core.analytics_utils import *
 from libs.ec2_utils                         import get_stack
 
 from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
-
-
-# utils.init_db_config('peach.db3')
 
 api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
@@ -44,12 +42,12 @@ dash = Dashboard(api,logsQuery)
 stack_name = 'bowser'
 
 def index(request):
-    
     today_stamps_hourly,todayStamps,yest_stamps_hourly,yestStamps,week_stamps_hourly,weekStamps,deltaStampsDay,deltaStampsWeek = dash.newStamps()
 
     today_accts_hourly,todayAccts,yest_accts_hourly,yestAccts,week_accts_hourly,weekAccts,deltaAcctsDay,deltaAcctsWeek = dash.newAccounts()
-    
+
     today_users_hourly,todayUsers,yest_users_hourly,yestUsers,week_users_hourly,weekUsers,deltaUsersDay,deltaUsersWeek = dash.todaysUsers()
+
     
     stamp_graph = [today_stamps_hourly,yest_stamps_hourly,week_stamps_hourly]
     acct_graph = [today_accts_hourly,yest_accts_hourly,week_accts_hourly]
@@ -309,8 +307,6 @@ def trending(request):
         vertical = forms.CharField(max_length=30,
                 widget=forms.Select(choices=verticals))
  
- 
-
     
     bgn = today().isoformat()  
     kinds=None
@@ -343,12 +339,15 @@ def trending(request):
             bgn = bgns[scope]
             results = getTopStamped(kinds,bgn,collection)
             results = results[0:quant]
-            
     
     else: 
         form = trendForm()
         results = getTopStamped(kinds,today().isoformat(),stamp_collection)
         results = results[0:quant]
+        
+    mongo = mongoQuery(api)
+    
+    topUsers = mongo.topUsers(limit=50)
     
     t = loader.get_template('../html/trending.html')
     c = Context({
@@ -362,7 +361,8 @@ def trending(request):
                  'bgn': bgn.split('T')[0],
                  'quantity': quant,
                  'scope': scope,
-                 'stat': stat
+                 'stat': stat,
+                 'topUsers': topUsers
 
     })
     return HttpResponse(t.render(c))

@@ -51,6 +51,7 @@ def getTopStamped(kinds,date,collection):
     sortedResult = sorted(result, key=lambda k: k['value'],reverse=True) 
     
     return sortedResult
+    
 
         
 
