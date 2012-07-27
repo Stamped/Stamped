@@ -34,7 +34,8 @@ if utils.is_ec2():
     CELERYD_CONCURRENCY  = 5
 
 ## Broker settings.
-BROKER_URL = "amqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
+BROKER_URL = "pyamqp://%s:%s@%s:%s/%s" % (user, password, host, port, vhost)
+BROKER_HEARTBEAT = 10
 logs.info('BROKER_URL: %s' % BROKER_URL)
 
 CELERYD_POOL = 'gevent'

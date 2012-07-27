@@ -389,6 +389,9 @@ class StampedFacebookTokenError(StampedAuthError):
     def __init__(self, msg=None):
         StampedAuthError.__init__(self,msg)
 
+class StampedFacebookPermissionsError(StampedAuthError):
+    pass
+
 class StampedThirdPartyRequestFailError(StampedInputError):
     pass
 
