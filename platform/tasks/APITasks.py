@@ -219,20 +219,20 @@ def getS3Key(filename):
         key = bucket.new_key(filename)
     return key
 
-def writeTimeStampToS3(s3_filename, request_id):
+def writeTimestampToS3(s3_filename, request_id):
     logs.debug('Writing timestamp to S3 file %s' % s3_filename)
     file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
     with closing(getS3Key(s3_filename)) as key:
         key.set_contents_from_string(file_content)
         key.set_acl('private')
 
-@task(queue='enrich', **default_params)
-def enrichQueueWriteTimeStampToS3(s3_filename):
-    writeTimestampToS3(s3_filename, enrichQueueWriteTimeStampToS3.request.id)
+@task(queue='enrich', **retry_params)
+def enrichQueueWriteTimestampToS3(s3_filename):
+    writeTimestampToS3(s3_filename, enrichQueueWriteTimestampToS3.request.id)
 
-@task(queue='api', **default_params)
-def apiQueueWriteTimeStampToS3(s3_filename):
-    writeTimestampToS3(s3_filename, apiQueueWriteTimeStampToS3.request.id)
+@task(queue='api', **retry_params)
+def apiQueueWriteTimestampToS3(s3_filename):
+    writeTimestampToS3(s3_filename, apiQueueWriteTimestampToS3.request.id)
 
 
 def parseCommandLine():

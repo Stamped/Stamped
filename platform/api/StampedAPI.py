@@ -2461,10 +2461,14 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credits is not None:
                     for credit in stamp.credits:
-                        item                    = StampPreview()
-                        item.user               = userIds[str(credit.user.user_id)]
-                        item.stamp_id           = credit.stamp_id
-                        credits.append(item)
+                        try:
+                            item = StampPreview()
+                            item.user = userIds[str(credit.user.user_id)]
+                            item.stamp_id = credit.stamp_id
+                            credits.append(item)
+                        except KeyError:
+                            logs.warning("Key error for credit (stamp_id=%s, credit_id=%s)" % \
+                                (stamp.stamp_id, credit.stamp_id))
                     stamp.credits = credits
 
                 # Previews
