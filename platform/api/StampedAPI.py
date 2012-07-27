@@ -881,6 +881,7 @@ class StampedAPI(AStampedAPI):
             self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
+            linkedAccount.third_party_id = userInfo['third_party_id']
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
             # Enable Open Graph sharing by default
@@ -1370,7 +1371,22 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         share_settings = self._getOpenGraphShareSettings(authUserId)
         if share_settings is not None and share_settings.share_follows:
-            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+            friendAcct = self.getAccount(userId)
+
+            # We need to check two things: 1) The friend has a linked FB account
+            #                              2) We have the friend's FB 'third_party_id'.  If not, we'll get it
+            if friendAcct.linked is not None and friendAcct.linked.facebook is not None and \
+               friendAcct.linked.facebook.linked_user_id is not None:
+                # If the friend has an FB linked account but we don't have the third_party_id, get it
+                if friendAcct.linked.faceook.third_party_id is None:
+                    friend_fb_id = friendAcct.linked.facebook.linked_user_id
+                    acct = self.getAccount(authUserId)
+                    token = acct.linked.facebook.token
+                    friend_info = self._facebook.getUserInfo(token, friend_fb_id)
+                    friend_linked = friendAcct.linked.facebook
+                    friend_linked.third_party_id = friend_info['third_party_id']
+                    self._accountDB.updateLinkedAccount(userId, friend_linked)
+                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -3212,7 +3228,7 @@ class StampedAPI(AStampedAPI):
         elif followUserId is not None:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
-            ogType = 'user'
+            ogType = 'profile'
             url = self._getOpenGraphUrl(user = user)
 
         if action is None or ogType is None or url is None:

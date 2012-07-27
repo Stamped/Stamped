@@ -172,6 +172,8 @@ class RateLimiterState(object):
         else:
             self.__blackout_start = None
             self.__request_fails = 0
+            self.__local_rlservice.shutdown()
+            self.__local_rlservice = None
             return False
 
     def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
@@ -187,7 +189,6 @@ class RateLimiterState(object):
         time.sleep(0)
         async_request = rpyc.async(self.__conn.root.request)
         asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
-        logs.info('made async request, about to wait for return')
         asyncresult.set_expiry(timeout)
         response, content = asyncresult.value
 
