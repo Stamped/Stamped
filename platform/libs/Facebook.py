@@ -29,8 +29,8 @@ ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvq
 
 AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
-#USER_ID = '100000717937121'
-#ACCESS_TOKEN = 'BAAEOIZBBUXisBAJSM0MtiZCEZB1SB9vKxfDmg3XC0gOq82tHWTXtEq3UZBuuRouZBykcp6vLUQ05OmYcQDVy8QHsPZCtayky4ZC6lGG07l9Bw0ZCniWGjZCgiT8cIrutLXmdwdJGLoZBRGeJyx5L5OvkMM'
+USER_ID = '1337040065'
+#ACCESS_TOKEN = 'BAAEOIZBBUXisBANy6asZCGAtivmNHrXR1IqxU6FKAv7ZCz4kPEEdUFmHubEy2wL4BPFcCWlo2qDsDSZAWQhR93I7lYZBn3DZBYZCFCZAPvpyt5NR6aC88VyzuZCoNnSZAQOKAZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -72,17 +72,20 @@ class Facebook(object):
             logs.info('result: %s' % result)
 
             msg = None
+            code = None
             if 'error' in result:
+                msg = result['error']['message']
                 if 'code' in result['error']:
                     code = result['error']['code']
                     if code == 190:
                         raise StampedFacebookTokenError('Invalid Facebook token')
+                    elif code == 200:
+                        raise StampedFacebookPermissionsError(msg)
                 if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
                     # OAuth exception
                     pass
-                msg = result['error']['message']
 
-            logs.info('Facebook API Error: code: %s  message: %s' % (response.status, msg))
+            logs.info('Facebook API Error: status: %s  code: %s  message: %s' % (response.status, code, msg))
 
             raise StampedThirdPartyError('Facebook API Error: %s' % msg)
 
@@ -117,10 +120,10 @@ class Facebook(object):
             fields=fields
         )
 
-    def getUserPermissions(self, user_id, access_token):
+    def getUserPermissions(self, access_token, user_id='me'):
         path = '%s/permissions' % user_id
-        return self._get(access_token, path)
-
+        result = self._get(access_token, path)
+        return result['data'][0]
 
     def getFriendIds(self, access_token):
         path = 'me/friends'
@@ -351,15 +354,15 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl(AUTH_USER_ID))
     if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
-    if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(user_id, access_token))
+    if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
     if 'getFriendIds' in methods:           pprint(facebook.getFriendIds(access_token))
     if 'getFriendData' in methods:          pprint(facebook.getFriendData(access_token))
     if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
-    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('100003940534060', 'stamp', access_token,
-                                                   'restaurant', 'http://www.stamped.com/ml/s/2',
+    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('12345', 'todo', access_token,
+                                                   'app', 'http://stamped.com/JSinatra/s/37',
                                                    message="Test message", imageUrl='http://static.stamped.com/users/ml.jpg'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())
@@ -368,7 +371,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getLoginUrl'
+    methods = 'postToOpenGraph'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

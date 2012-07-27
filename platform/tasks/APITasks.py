@@ -160,6 +160,10 @@ def addTodo(*args, **kwargs):
     invoke(addTodo.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
+def updateFBPermissions(*args, **kwargs):
+    invoke(updateFBPermissions.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
 def postToOpenGraph(*args, **kwargs):
     invoke(postToOpenGraph.request, *args, **kwargs)
 
@@ -218,9 +222,19 @@ def getS3Key(filename):
 def writeTimestampToS3(s3_filename, request_id):
     logs.debug('Writing timestamp to S3 file %s' % s3_filename)
     file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
-    with closing(getS3Key(s3_filename)) as key:
-        key.set_contents_from_string(file_content)
-        key.set_acl('private')
+    delay = 0.1
+    max_delay = 3
+    max_tries = 40
+    for i in range(max_tries):
+        try:
+            with closing(getS3Key(s3_filename)) as key:
+                key.set_contents_from_string(file_content)
+                key.set_acl('private')
+                return
+        except:
+            time.sleep(delay)
+            delay = min(max_delay, delay*1.5)
+    raise Exception('Failed 40 fucking times. How does that even happen.')
 
 @task(queue='enrich', **retry_params)
 def enrichQueueWriteTimestampToS3(s3_filename):
