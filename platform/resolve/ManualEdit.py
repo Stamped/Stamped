@@ -290,7 +290,7 @@ def update(updates):
         entity.title = updates.title
     if updates.desc:
         entity.desc = updates.desc
-        entity.desc_source = 'seed'
+        entity.desc_source = 'manual'
         entity.desc_timestamp = now
     simple_fields = []
     if entity.kind == 'place':
@@ -300,7 +300,7 @@ def update(updates):
         singleplatform_id = re.match(r'http://www.singlepage.com/(.+)/menu(\?.*)?', singleplatform_url).group(1)
         entity.sources.singleplatform_url = singleplatform_url
         entity.sources.singleplatform_id = singleplatform_id
-        entity.sources.singleplatform_source = 'seed'
+        entity.sources.singleplatform_source = 'manual'
         entity.sources.singleplatform_timestamp = now
     rdio_url = updates.rdio_url
     if rdio_url is not None and rdio_url not in bad_versions:
@@ -308,37 +308,37 @@ def update(updates):
         rdio_id = rdio_data['result']['key']
         entity.sources.rdio_id = rdio_id
         entity.sources.rdio_url = rdio_url
-        entity.sources.rdio_source = 'seed'
+        entity.sources.rdio_source = 'manual'
         entity.sources.rdio_timestamp = now
     imdb_url = updates.imdb_url
     if imdb_url is not None and imdb_url not in bad_versions:
         imdb_id = imdb_url.replace('http://www.imdb.com/title/','').replace('/','')
         entity.sources.imdb_id = imdb_id
         entity.sources.imdb_timestamp = now
-        entity.sources.imdb_source = 'seed'
+        entity.sources.imdb_source = 'manual'
         if entity.isType('movie'):
             tmdb_data = _tmdb().movie_info(imdb_id)
             entity.sources.tmdb_id = tmdb_data['id']
-            entity.sources.tmdb_source = 'seed'
+            entity.sources.tmdb_source = 'manual'
             entity.sources.tmdb_timestamp = now
         elif entity.isType('tv'):
             tvdb_raw_data = _thetvdb().lookupIMDBRaw(imdb_id)
             match = re.match(r'.*<id>(\d+)</id>.*', tvdb_raw_data.replace('\n',''))
             tvdb_id = match.group(1)
             entity.sources.thetvdb_id = tvdb_id
-            entity.sources.thetvdb_source = 'seed'
+            entity.sources.thetvdb_source = 'manual'
             entity.sources.thetvdb_timestamp = now 
     spotify_id = updates.spotify_id
     if spotify_id is not None and spotify_id not in bad_versions:
         entity.sources.spotify_id = spotify_id
-        entity.sources.spotify_source = 'seed'
+        entity.sources.spotify_source = 'manual'
         entity.sources.spotify_timestamp = now
     amazon_url = updates.amazon_url
     if amazon_url is not None and amazon_url not in bad_versions:
         amazon_id = re.match(r'http://www.amazon.com(/.+)+/dp/([A-Za-z0-9]+)(/.+)?(\?.+)?', amazon_url).group(2)
         entity.sources.amazon_id = amazon_id
         entity.sources.amazon_url = amazon_url
-        entity.sources.amazon_source = 'seed'
+        entity.sources.amazon_source = 'manual'
         entity.sources.amazon_underlying = amazon_id
         entity.sources.amazon_timestamp = now
     netflix_url = updates.netflix_url
@@ -352,7 +352,7 @@ def update(updates):
             netflix_id = 'http://api.netflix.com/catalog/titles/series/%s' % netflix_number
         if netflix_id is not None:
             entity.sources.netflix_id = netflix_id
-            entity.sources.netflix_source = 'seed'
+            entity.sources.netflix_source = 'manual'
             entity.sources.netflix_timestamp = now
     itunes_url = updates.itunes_url
     if itunes_url is not None and itunes_url not in bad_versions:
@@ -394,7 +394,7 @@ def update(updates):
                 except KeyError:
                     entity.sources.itunes_url = itunes_data['artistLinkUrl']
             entity.sources.itunes_id = itunes_id
-            entity.sources.itunes_source = 'seed'
+            entity.sources.itunes_source = 'manual'
             entity.sources.itunes_timestamp = now
     fandango_url = updates.fandango_url
     if fandango_url is not None and fandango_url not in bad_versions and not fandango_url.startswith('http://www.qksrv.net/'):
@@ -404,7 +404,7 @@ def update(updates):
         entity.sources.fandango_id = 'http://www.fandango.com/rss/%s' % fandango_raw_id
         entity.sources.fandango_url = 'http://www.qksrv.net/click-5348839-10576760?url=http%3a%2f%2fmobile.fandango.com%3fa%3d%26m%3d' + fandango_raw_id
         entity.sources.fandango_timestamp = now
-        entity.sources.fandango_source = 'seed'
+        entity.sources.fandango_source = 'manual'
     opentable_url = updates.opentable_url
     if opentable_url is not None and opentable_url not in bad_versions:
         match = re.match(r'http://www.opentable.com/(.+)?\?(.+)?rid=(\d+)(.+)', opentable_url)
@@ -424,7 +424,7 @@ def update(updates):
 
         entity.sources.opentable_id = opentable_id
         entity.sources.opentable_nickname = opentable_nickname
-        entity.sources.opentable_source = 'seed'
+        entity.sources.opentable_source = 'manual'
         entity.sources.opentable_timestamp = now
     image_url = updates.image_url
     if image_url is not None and image_url not in bad_versions:
@@ -433,7 +433,7 @@ def update(updates):
         size.url = image_url
         img.sizes = [size]
         entity.images = [img]
-        entity.images_source = 'seed'
+        entity.images_source = 'manual'
         entity.images_timestamp = now
     if updates.purge_tracks == 'on':
         del entity.tracks
