@@ -981,7 +981,7 @@ class StampedAPI(AStampedAPI):
         permissions = self.facebook.getUserPermissions(token)
         linked.facebook.have_share_permissions = \
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
-        self._accountDB.updateLinkedAccount(linked.facebook)
+        self._accountDB.updateLinkedAccount(authUserId, linked.facebook)
         return True
 
 
@@ -3265,11 +3265,11 @@ class StampedAPI(AStampedAPI):
             result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
         except StampedFacebookPermissionsError as e:
             account.linked.facebook.have_share_permissions = False
-            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
             return
         except StampedFacebookTokenError as e:
             account.linked.facebook.token = None
-            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
             return
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
