@@ -2739,6 +2739,7 @@ class StampedAPI(AStampedAPI):
     
     @API_CALL
     def addStampAsync(self, authUserId, stampId, imageUrl, stampExists=False):
+        logs.info('here')
         # TODO(geoff): refactor retry logic to a common place.
         delay = 1
         while True:
