@@ -2818,6 +2818,7 @@ class StampedAPI(AStampedAPI):
         # Update stamp stats
         tasks.invoke(tasks.APITasks.updateStampStats, args=[stamp.stamp_id])
 
+        logs.info('### about to post to open graph')
         # Post to Facebook Open Graph if enabled
         if not stampExists:
             share_settings = self._getOpenGraphShareSettings(authUserId)
