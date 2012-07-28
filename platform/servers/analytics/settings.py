@@ -69,7 +69,7 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = ':5000/assets/'
+STATIC_URL = '/assets/'
 
 # utilize static.stamped.com CDN gateway on prod; otherwise, fallback to using 
 # less efficient but more accessible / productive local assets for development.

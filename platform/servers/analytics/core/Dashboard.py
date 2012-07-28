@@ -31,12 +31,11 @@ class Dashboard(object):
         
         # Today's Stats
         total_today = 0
-        today_hourly = [0]
+        today_hourly = []
         
         query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,today().date().isoformat()))
         
         for result in query:
-            print "Fetching"
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
             
@@ -47,6 +46,7 @@ class Dashboard(object):
                 bgn = today() + timedelta(hours=hour)
             end = today() + timedelta(hours=hour+1)
             num = fun(bgn,end)
+            print bgn,end,num
             if not unique:
                 total_today += num
             else:
@@ -57,10 +57,10 @@ class Dashboard(object):
             else:
                 today_hourly.append(total_today)
             
-            if hour == est().hour:
-                self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
+        self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
             
-        
+        # Leading zero for graphing purposes
+        today_hourly.insert(0,0)
         total_today = today_hourly[-1]
         
         
