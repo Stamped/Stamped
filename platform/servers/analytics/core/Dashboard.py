@@ -33,13 +33,14 @@ class Dashboard(object):
         total_today = 0
         today_hourly = [0]
         
-        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,today().date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,today().date().isoformat()))
         
         for result in query:
+            print "Fetching"
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
-        
-
+                total_today += int(i)
+            
         for hour in range (len(today_hourly)-1, est().hour+1):
             if unique:
                 bgn = today()
@@ -51,28 +52,28 @@ class Dashboard(object):
                 total_today += num
             else:
                 total_today = num
-            today_hourly.append(total_today)
             
-            if hour == est.hour():
-                self.writer.write({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
+            if len(today_hourly) == est().hour+1:
+                today_hourly[-1] = total_today
+            else:
+                today_hourly.append(total_today)
             
-        total_today = today_hourly[-1]
-        
-        
+            if hour == est().hour:
+                self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
+            
+        today_hourly.insert(0, 0)
+
         # Yesterday's Stats
         total_yest = 0
-        yest_hourly = [0]
+        yest_hourly = []
         
-        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,dayAgo(today()).date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,dayAgo(today()).date().isoformat()))
 
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
-                try:
-                    yest_hourly.append(int(i))
-                except:
-                    pass
+                yest_hourly.append(int(i))
         
-        if len(yest_hourly) == 1:
+        if len(yest_hourly) == 0:
             for hour in range (0,24):
                 if unique:
                     bgn = dayAgo(today())
@@ -86,15 +87,16 @@ class Dashboard(object):
                     total_yest = num
                 yest_hourly.append(total_yest)
 
-            self.writer.write({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
+            self.writer.writeHours({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
+        
         
         
         # Weekly Avg Stats
-        weeklyAgg = [0]
+        weeklyAgg = []
         weeklyAvg = []
         bgn = weekAgo(today())
         end = bgn + timedelta(hours=1)
-        query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "week" and bgn = "%s"' % (stat,weekAgo(today()).date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,weekAgo(today()).date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 try:
@@ -122,7 +124,7 @@ class Dashboard(object):
                 
             for hour in range (0,len(weeklyAgg)):
                 weeklyAvg.append(weeklyAgg[hour] / 6.0)
-            self.writer.write({'stat': stat,'time':'week','bgn':weekAgo(today()).date().isoformat(),'hours':str(weeklyAvg)})
+            self.writer.writeHours({'stat': stat,'time':'week','bgn':weekAgo(today()).date().isoformat(),'hours':str(weeklyAvg)})
         
         
         try:
@@ -137,6 +139,8 @@ class Dashboard(object):
         
         return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(est().hour))],weeklyAvg,weeklyAvg[int(math.floor(est().hour))],deltaDay,deltaWeek
     
+    
+    
     def newStamps(self):
         fun = (lambda bgn,end: self.stamp_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
         return self.getStats('stamps',fun)
@@ -144,7 +148,7 @@ class Dashboard(object):
     def newAccounts(self):
         fun = (lambda bgn,end: self.acct_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
         return self.getStats('accts',fun)
-    
+
     def todaysUsers(self):
         fun = (lambda bgn,end: self.query.activeUsers(bgn, end))
         return self.getStats('users',fun,True)

@@ -34,8 +34,6 @@ stamp_collection = api._stampDB._collection
 acct_collection = api._userDB._collection
 entity_collection = api._entityDB._collection
 todo_collection = api._todoDB._collection
-
-conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 dash = Dashboard(api,logsQuery('bowser'))
 
 stack_name = 'bowser'
