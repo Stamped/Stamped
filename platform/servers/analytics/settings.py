@@ -69,14 +69,12 @@ STATIC_ROOT = ''
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/assets/'
+STATIC_URL = ':5000/assets/'
 
 # utilize static.stamped.com CDN gateway on prod; otherwise, fallback to using 
 # less efficient but more accessible / productive local assets for development.
-if IS_PROD:
-    SITE_ROOT   = "http://static.stamped.com/"
-else:
-    SITE_ROOT   = PROJ_ROOT
+
+SITE_ROOT   = PROJ_ROOT
 
 STATIC_DOC_ROOT = os.path.join(SITE_ROOT, 'assets')
 
