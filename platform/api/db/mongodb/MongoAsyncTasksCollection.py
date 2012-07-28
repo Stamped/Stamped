@@ -10,6 +10,7 @@ import libs.ec2_utils
 
 from bson.objectid import ObjectId
 from api.db.mongodb.AMongoCollection import AMongoCollection
+from datetime import datetime
 
 class MongoAsyncTasksCollection(AMongoCollection):
     
@@ -27,11 +28,23 @@ class MongoAsyncTasksCollection(AMongoCollection):
     ### PUBLIC
     
     def addTask(self, task):
-        if 'task_id' in task:
-            task['_id'] = ObjectId(task['task_id'])
-            del(task['task_id']) 
+        document = {}
 
-        return self._collection.insert_one(logData, log=False, safe=False)
+        if 'taskId' in task:
+            document['_id'] = ObjectId(task['taskId'])
+
+        if 'taskGenerated' in task:
+            document['generated'] = task['taskGenerated']
+        else:
+            document['generated'] = datetime.utcnow()
+
+        if 'args' in task:
+            document['args'] = unicode(task['args'])
+
+        if 'kwargs' in task:
+            document['kwargs'] = unicode(task['kwargs'])
+
+        return self._collection.insert_one(document, log=False, safe=False)
 
     def removeTask(self, taskId):
         documentId = ObjectId(taskId)
