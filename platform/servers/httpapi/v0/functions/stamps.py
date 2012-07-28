@@ -122,10 +122,6 @@ def show(request, authUserId, http_schema, uri, **kwargs):
                    conversion=HTTPTimeSlice.exportTimeSlice,
                    exceptions=stampExceptions)
 def collection(request, authUserId, http_schema, schema, uri, **kwargs):
-    import datetime
-    import time
-    logs.info('now: %s' % datetime.datetime.now())
-    time.sleep(4)
     if authUserId is None:
         try:
             return getCache(uri, http_schema)

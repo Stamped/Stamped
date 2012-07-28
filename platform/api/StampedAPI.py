@@ -967,7 +967,7 @@ class StampedAPI(AStampedAPI):
            account.linked.facebook is None or\
            account.linked.facebook.share_settings is None or\
            account.linked.facebook.token is None or \
-           not account.linked.facebook.have_share_permissions:
+           account.linked.facebook.have_share_permissions == False:
             return None
 
         return account.linked.facebook.share_settings
