@@ -52,7 +52,6 @@ TODO:
         * stamped.com
             * misc:
                 * polish speech bubble to point to bieber
-                * test play button box-shadow infinite animation
             * subpages
                 * basic 404 page
                     * cool 404 page w/ animation
@@ -251,6 +250,7 @@ OLD:
     * fix infinite scroll after returning to default category
     * clicking on header stamp logo should bring you back to your default profile page
     * reinitialize page params and infinite scroll on History page load s.t. link params and category nav are correct
+    * test play button box-shadow infinite animation
     * MOBILE
         * lookup best approach; options:
             * redirect to m.stamped.com

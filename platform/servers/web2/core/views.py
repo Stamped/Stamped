@@ -556,7 +556,7 @@ def about(request, **kwargs):
         {
             'name'              : 'Joey Staehle', 
             'subtitle'          : 'Software Engineering Intern', 
-            'screen_name'       : 'joeystaehle', 
+            'screen_name'       : 'jstaehle', 
             'color_primary'     : 'E00058', 
             'color_secondary'   : 'FFD494', 
             'desc'              : 'Joey is Stamped\'s first intern and has spent the summer honing his engineering and video game skills. He is currently enrolled at Cornell and plans to graduate with a B.S. in Computer Science in 2013.', 
@@ -615,6 +615,54 @@ def legal(request, **kwargs):
         'body_classes'      : body_classes, 
         'page'              : 'legal', 
         'title'             : 'Stamped - Legal', 
+        'mobile'            : mobile, 
+    }, preload=[ 'page' ])
+
+@stamped_view()
+def licenses(request, **kwargs):
+    body_classes = "legal main"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'legal.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'licenses', 
+        'title'             : 'Stamped - Licenses', 
+        'mobile'            : mobile, 
+    }, preload=[ 'page' ])
+
+@stamped_view()
+def privacy_policy(request, **kwargs):
+    body_classes = "legal main"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'legal.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'privacy-policy', 
+        'title'             : 'Stamped - Privacy Policy', 
+        'mobile'            : mobile, 
+    }, preload=[ 'page' ])
+
+@stamped_view()
+def terms_of_service(request, **kwargs):
+    body_classes = "legal main"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'legal.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'terms-of-service', 
+        'title'             : 'Stamped - Terms of Service', 
+        'mobile'            : mobile, 
+    }, preload=[ 'page' ])
+
+@stamped_view()
+def faq(request, **kwargs):
+    body_classes = "legal faq main"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'faq.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'faq', 
+        'title'             : 'Stamped - FAQ', 
         'mobile'            : mobile, 
     }, preload=[ 'page' ])
 

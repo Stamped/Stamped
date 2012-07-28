@@ -513,7 +513,16 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addAccountAsync(self, userId):
-        account = self._accountDB.getAccount(userId)
+        delay = 1
+        while True:
+            try:
+                account = self._accountDB.getAccount(userId)
+                break
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
         self._addWelcomeActivity(userId)
 
@@ -872,6 +881,10 @@ class StampedAPI(AStampedAPI):
             self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
+
+            # Kick off an async task to query FB and determine if user granted us sharing permissions
+            tasks.invoke(tasks.APITasks.updateFBPermissions, args=[authUserId, linkedAccount.token])
+
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
             # Enable Open Graph sharing by default
@@ -953,10 +966,23 @@ class StampedAPI(AStampedAPI):
         if account.linked is None or\
            account.linked.facebook is None or\
            account.linked.facebook.share_settings is None or\
-           account.linked.facebook.token is None:
+           account.linked.facebook.token is None or \
+           account.linked.facebook.have_share_permissions == False:
             return None
 
         return account.linked.facebook.share_settings
+
+    @API_CALL
+    def updateFBPermissionsAsync(self, authUserId, token):
+        acct = self.getAccount(authUserId)
+        if acct.linked is None or acct.linked.facebook is None:
+            return False
+        linked = acct.linked.facebook
+        permissions = self.facebook.getUserPermissions(token)
+        linked.facebook.have_share_permissions = \
+            ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
+        self._accountDB.updateLinkedAccount(linked.facebook)
+        return True
 
 
     @API_CALL
@@ -973,11 +999,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromTwitterAsync(self, authUserId, twitterKey, twitterSecret):
-        account   = self._accountDB.getAccount(authUserId)
+        delay = 1
+        while True:
+            try:
+                account   = self._accountDB.getAccount(authUserId)
+                # Only send alert once (when the user initially connects to Twitter)
+                if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
+                    return False
+                break
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
-        # Only send alert once (when the user initially connects to Twitter)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'twitter', account.linked.twitter.linked_user_id):
-            return False
 
 #        if account.linked.twitter.alerts_sent == True or not account.linked.twitter.user_screen_name:
 #            return False
@@ -1002,12 +1037,20 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def alertFollowersFromFacebookAsync(self, authUserId, facebookToken):
-        account   = self._accountDB.getAccount(authUserId)
-
-        # Only send alert once (when the user initially connects to Facebook)
-        if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
-            logs.info("Facebook alerts already sent")
-            return False
+        delay = 1
+        while True:
+            try:
+                account   = self._accountDB.getAccount(authUserId)
+                # Only send alert once (when the user initially connects to Facebook)
+                if self._accountDB.checkLinkedAccountAlertHistory(authUserId, 'facebook', account.linked.facebook.linked_user_id):
+                    logs.info("Facebook alerts already sent")
+                    return False
+                break
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
         # Grab friend list from Facebook API
         fb_friends = self._getFacebookFriends(facebookToken)
@@ -1344,7 +1387,22 @@ class StampedAPI(AStampedAPI):
         # Post to Facebook Open Graph if enabled
         share_settings = self._getOpenGraphShareSettings(authUserId)
         if share_settings is not None and share_settings.share_follows:
-            tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+            friendAcct = self.getAccount(userId)
+
+            # We need to check two things: 1) The friend has a linked FB account
+            #                              2) We have the friend's FB 'third_party_id'.  If not, we'll get it
+            if friendAcct.linked is not None and friendAcct.linked.facebook is not None and \
+               friendAcct.linked.facebook.linked_user_id is not None:
+                # If the friend has an FB linked account but we don't have the third_party_id, get it
+                if friendAcct.linked.facebook.third_party_id is None:
+                    friend_fb_id = friendAcct.linked.facebook.linked_user_id
+                    acct = self.getAccount(authUserId)
+                    token = acct.linked.facebook.token
+                    friend_info = self._facebook.getUserInfo(token, friend_fb_id)
+                    friend_linked = friendAcct.linked.facebook
+                    friend_linked.third_party_id = friend_info['third_party_id']
+                    self._accountDB.updateLinkedAccount(userId, friend_linked)
+                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -2403,10 +2461,14 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credits is not None:
                     for credit in stamp.credits:
-                        item                    = StampPreview()
-                        item.user               = userIds[str(credit.user.user_id)]
-                        item.stamp_id           = credit.stamp_id
-                        credits.append(item)
+                        try:
+                            item = StampPreview()
+                            item.user = userIds[str(credit.user.user_id)]
+                            item.stamp_id = credit.stamp_id
+                            credits.append(item)
+                        except KeyError:
+                            logs.warning("Key error for credit (stamp_id=%s, credit_id=%s)" % \
+                                (stamp.stamp_id, credit.stamp_id))
                     stamp.credits = credits
 
                 # Previews
@@ -2704,7 +2766,6 @@ class StampedAPI(AStampedAPI):
                 pass
         
         creditedUserIds = set()
-        
         # Give credit
         if stamp.credits is not None and len(stamp.credits) > 0:
             for item in stamp.credits:
@@ -2736,7 +2797,6 @@ class StampedAPI(AStampedAPI):
         # Add activity for credited users
         if len(creditedUserIds) > 0:
             self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
-
         # Add activity for mentioned users
         blurb = stamp.contents[-1].blurb
         if blurb is not None:
@@ -2749,7 +2809,6 @@ class StampedAPI(AStampedAPI):
                         mentionedUserIds.add(user.user_id)
             if len(mentionedUserIds) > 0:
                 self._addMentionActivity(authUserId, list(mentionedUserIds), stamp.stamp_id)
-
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
 
@@ -2788,20 +2847,37 @@ class StampedAPI(AStampedAPI):
             'mobile' : (572, None),
             }
 
-        # Get stamp using stampId
-        stamp = self._stampDB.getStamp(stampId)
+        retry_count = 0
+        max_retries = 5
+        while True:
+            try:
+                # Get stamp using stampId
+                stamp = self._stampDB.getStamp(stampId)
 
-        # Find the blurb using the contentId to generate an imageId
-        for i, c in enumerate(stamp.contents):
-            if c.content_id == contentId:
-                imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
-                contentsKey = i
+                # Find the blurb using the contentId to generate an imageId
+                for i, c in enumerate(stamp.contents):
+                    if c.content_id == contentId:
+                        imageId = "%s-%s" % (stamp.stamp_id, int(time.mktime(c.timestamp.created.timetuple())))
+                        contentsKey = i
+                        break
+                else:
+                    raise StampedInputError('Could not find stamp blurb for image resizing')
+
+                # Generate image
+                sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
                 break
-        else:
-            raise StampedInputError('Could not find stamp blurb for image resizing')
+            except (StampedInputError, StampedDocumentNotFoundError, urllib2.HTTPError):
+                pass
 
-        # Generate image
-        sizes = self._imageDB.addResizedStampImages(imageUrl, imageId, maxSize, supportedSizes)
+            retry_count += 1
+            if retry_count > max_retries:
+                msg = "Unable to connect to add stamp image after %d retries (url=%s, stamp=%s)" % \
+                    (max_retries, imageUrl, stampId)
+                logs.warning(msg)
+                raise 
+            time.sleep(5)
+
+
         sizes.sort(key=lambda x: x.height, reverse=True)
         image = ImageSchema()
         image.sizes = sizes
@@ -3140,12 +3216,9 @@ class StampedAPI(AStampedAPI):
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
         account = self.getAccount(authUserId)
 
-        # for now, only post to open graph for mike and kevin
-        if account.screen_name_lower not in ['ml', 'kevin', 'robby', 'chrisackermann']:
-            logs.warning('### Skipping Open Graph post because user not on whitelist')
-            return
-
         token = account.linked.facebook.token
+        if token is None:
+            return
         fb_user_id = account.linked.facebook.linked_user_id
         action = None
         ogType = None
@@ -3181,14 +3254,23 @@ class StampedAPI(AStampedAPI):
         elif followUserId is not None:
             action = 'follow'
             user = self.getUser({'user_id' : followUserId})
-            ogType = 'user'
+            ogType = 'profile'
             url = self._getOpenGraphUrl(user = user)
 
         if action is None or ogType is None or url is None:
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
+        try:
+            result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
+        except StampedFacebookPermissionsError as e:
+            account.linked.facebook.have_share_permissions = False
+            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            return
+        except StampedFacebookTokenError as e:
+            account.linked.facebook.token = None
+            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            return
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)
@@ -3252,9 +3334,18 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addCommentAsync(self, authUserId, stampId, commentId):
-        comment = self._commentDB.getComment(commentId)
-        stamp   = self._stampDB.getStamp(stampId)
-        stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
+        delay = 1
+        while True:
+            try:
+                comment = self._commentDB.getComment(commentId)
+                stamp   = self._stampDB.getStamp(stampId)
+                stamp   = self._enrichStampObjects(stamp, authUserId=authUserId)
+                break
+            except StampedDocumentNotFoundError:
+                if delay > 60:
+                    raise
+                time.sleep(delay)
+                delay *= 2
 
         # Add activity for mentioned users
         mentionedUserIds = set()
@@ -4571,17 +4662,18 @@ class StampedAPI(AStampedAPI):
                 sourceStamps = []
                 if todo.source_stamp_ids is not None:
                     for stampId in todo.source_stamp_ids:
-                        if stampIds[stampId] is None:
+                        if stampId not in stampIds or stampIds[stampId] is None:
                             logs.warning("%s: Source stamp not found (%s)" % (todo.todo_id, stampId))
                             continue
                         sourceStamps.append(stampIds[stampId])
 
                 # Stamp
                 stamp = None 
-                if todo.stamp_id is not None and todo.stamp_id in stampIds:
-                    stamp = stampIds[todo.stamp_id]
-                    if stamp is None:
+                if todo.stamp_id is not None:
+                    if todo.stamp_id not in stampIds or stampIds[todo.stamp_id] is None:
                         logs.warning("%s: Stamp not found (%s)" % (todo.todo_id, todo.stamp_id))
+                    else:
+                        stamp = stampIds[todo.stamp_id]
 
                 # Also to-do'd by
                 previews = None 
@@ -4733,7 +4825,7 @@ class StampedAPI(AStampedAPI):
         try:
             RawTodo = self._todoDB.getTodo(authUserId, entityId)
         except StampedUnavailableError:
-            raise StampedTodoNotFoundError('Invalid todo: %s' % RawTodo)
+            raise StampedTodoNotFoundError('Invalid todo: %s' % entityId)
 
         self._todoDB.completeTodo(entityId, authUserId, complete=complete)
 
@@ -5185,14 +5277,14 @@ class StampedAPI(AStampedAPI):
     
     def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()])
+        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()], fallback=False)
 
     def mergeEntityAsync(self, entityDict):
         self._mergeEntity(Entity.buildEntity(entityDict))
 
     def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
-        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId])
+        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId], fallback=False)
 
     def mergeEntityIdAsync(self, entityId):
         try:
@@ -5298,7 +5390,6 @@ class StampedAPI(AStampedAPI):
 
             if entity.isType('artist'):
                 # Do a quick dedupe of songs in case the same song appears in different albums.
-                # TODO(geoff): this should be more robust...
                 seenTitles = set()
                 dedupedList = []
                 for resolved in resolvedList:
@@ -5343,7 +5434,16 @@ class StampedAPI(AStampedAPI):
                     mergedEntities.append(mergedEntity)
                     visitedStubs.append(mergedEntity.minimize())
                     modified = modified or (visitedStubs[-1] != stub)
-            setattr(entity, attr, visitedStubs)
+
+            seenLinks = set()
+            dedupedList = []
+            for resolved in visitedStubs:
+                if not resolved.entity_id:
+                    dedupedList.append(resolved)
+                elif resolved.entity_id not in seenLinks:
+                    dedupedList.append(resolved)
+                    seenLinks.add(resolved.entity_id)
+            setattr(entity, attr, dedupedList)
             if modified:
                 self._entityDB.updateEntity(entity)
 

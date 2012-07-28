@@ -13,7 +13,7 @@ def convertPasswordForStorage(password):
     salt = ''.join(random.choice(chars) for i in range(6))
     h = hashlib.md5()
     h.update(salt)
-    h.update(password)
+    h.update(password.encode('ascii', 'xmlcharrefreplace'))
     ret = salt + h.hexdigest()
     return ret
 
@@ -22,7 +22,7 @@ def comparePasswordToStored(password, stored):
         salt = stored[:6]
         h = hashlib.md5()
         h.update(salt)
-        h.update(password)
+        h.update(password.encode('ascii', 'xmlcharrefreplace'))
         if salt + h.hexdigest() == stored:
             return True
         return False

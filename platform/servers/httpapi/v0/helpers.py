@@ -40,12 +40,11 @@ VALID_ORIGINS = [
     'http://dev.stamped.com', 
 ]
 
-if not IS_PROD:
-    VALID_ORIGINS.extend([
-        'http://localhost:19000', 
-        'http://localhost:18000', 
-        'http://localhost:8000', 
-    ])
+VALID_ORIGINS.extend([
+    'http://localhost:19000', 
+    'http://localhost:18000', 
+    'http://localhost:8000', 
+])
 
 t1 = time.time()
 
@@ -513,7 +512,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
         logs.debug("Parsed request data")
         return schema
     except Exception as e:
-        msg = "Unable to parse form (%s)" % e
+        msg = u"Unable to parse form (%s)" % e
         logs.warning(msg)
         utils.printException()
         raise e

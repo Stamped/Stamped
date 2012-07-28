@@ -7,11 +7,12 @@ __license__   = "TODO"
 
 import Globals
 import time
+import datetime
 import urllib, json, urlparse
 import logs, utils
 import re
 from errors import *
-from libs.Request import *
+from libs.Request import service_request
 from APIKeys import get_api_key
 
 
@@ -26,8 +27,10 @@ ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvq
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
 
-USER_ID = '100004058552668'
-ACCESS_TOKEN = 'BAAEOIZBBUXisBAJCZANNyyFjiHvqFoa703ve6ZAkkoxSTX1L9Wy7WSQhd0VlIUbrXZBasGA7IxfrZBXm9ZCYHZB8sV9Vj9GoOLm3IXy5rBiCKEtDP5PBCSEZB3ZAXDnpTCoUtHVdJEThpQwZDZD'
+AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
+
+USER_ID = '1337040065'
+#ACCESS_TOKEN = 'BAAEOIZBBUXisBANy6asZCGAtivmNHrXR1IqxU6FKAv7ZCz4kPEEdUFmHubEy2wL4BPFcCWlo2qDsDSZAWQhR93I7lYZBn3DZBYZCFCZAPvpyt5NR6aC88VyzuZCoNnSZAQOKAZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -57,6 +60,7 @@ class Facebook(object):
         if method == 'get':
             response, content = service_request('facebook', method, url, query_params=params, priority=priority)
         else:
+            print('body: %s  url: %s' % (params, url))
             response, content = service_request('facebook', method, url, body=params, priority=priority)
         if parse_json:
             result = json.loads(content)
@@ -68,19 +72,22 @@ class Facebook(object):
             logs.info('result: %s' % result)
 
             msg = None
+            code = None
             if 'error' in result:
+                msg = result['error']['message']
                 if 'code' in result['error']:
                     code = result['error']['code']
                     if code == 190:
                         raise StampedFacebookTokenError('Invalid Facebook token')
+                    elif code == 200:
+                        raise StampedFacebookPermissionsError(msg)
                 if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
                     # OAuth exception
                     pass
-                msg = result['error']['message']
 
-            logs.info('Facebook API Error: code: %s  message: %s' % (response.status, msg))
+            logs.info('Facebook API Error: status: %s  code: %s  message: %s' % (response.status, code, msg))
 
-            raise StampedThirdPartyError('Facebook API Error')
+            raise StampedThirdPartyError('Facebook API Error: %s' % msg)
 
             #logs.info("Retrying (%s)" % (num_retries))
             #time.sleep(0.5)
@@ -104,14 +111,19 @@ class Facebook(object):
             code            = code,
         )
 
-    def getUserInfo(self, access_token):
-        path = 'me'
-        return self._get(access_token, path)
+    def getUserInfo(self, access_token, user_id='me'):
+        path = user_id
+        fields = 'id,email,bio,name,username,third_party_id'
+        return self._get(
+            access_token,
+            path,
+            fields=fields
+        )
 
-    def getUserPermissions(self, user_id, access_token):
+    def getUserPermissions(self, access_token, user_id='me'):
         path = '%s/permissions' % user_id
-        return self._get(access_token, path)
-
+        result = self._get(access_token, path)
+        return result['data'][0]
 
     def getFriendIds(self, access_token):
         path = 'me/friends'
@@ -178,16 +190,19 @@ class Facebook(object):
 
     def getUserAccessToken(self, code, client_id=APP_ID, client_secret=APP_SECRET):
         logs.info('### getUserAccessToken called # client_id: %s, client_secret: %s, code: %s' % (client_id, client_secret, code))
-        redirect_uri = 'https://dev.stamped.com/v1/account/linked/facebook/login_callback.json'
+        redirect_uri = utils.getDomain() + 'account/linked/facebook/login_callback.json'
         path = "oauth/access_token"
         result = self._get(
             None,
             path,
+            parse_json      = False,
             client_id       = client_id,
             client_secret   = client_secret,
             code            = code,
             redirect_uri    = redirect_uri,
         )
+        r = re.search('access_token=([^&]*)', result)
+        return r.group(1)
 
     def createTestUser(self, name, access_token, permissions=None, installed=True, locale='en_US', app_id=APP_ID):
         path = '%s/accounts/test-users' % app_id
@@ -252,6 +267,9 @@ class Facebook(object):
         if action == 'like':
             path = "%s/og.likes" % fb_user_id
             args['object'] = object_url
+        elif action == 'follow':
+            path = "me/og.follows"
+            args['profile'] = object_url
         else:
             args[object_type] = object_url
             path = "me/stampedapp:%s" % action
@@ -296,6 +314,26 @@ class Facebook(object):
             **params
         )
 
+    def getLoginUrl(self, authUserId):
+#        callback_url = utils.getDomain() + ('account/linked/facebook/login_callback.json?secret=%s&stamped_oauth_token=%s' %
+#                                            (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
+        callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
+        permissions = 'user_about_me,user_location,email,publish_stream,publish_actions'
+        #unique = datetime.datetime.now().strftime("%H:%M:%S.%f")
+        path = "https://www.facebook.com/dialog/oauth?" \
+               "client_id=%s" \
+               "&redirect_uri=%s" \
+               "&scope=%s" \
+               "&state=%s" % \
+               (APP_ID, callback_url, permissions, authUserId)
+
+        print path
+        response, content = service_request('facebook', 'GET', path)
+        print(response)
+        print(content)
+        return content
+
+
 __globalFacebook = None
 
 def globalFacebook():
@@ -307,21 +345,24 @@ def globalFacebook():
     return __globalFacebook
 
 
+CODE = 'AQDoi-mCEKtNOJIDyAfNTn4TbH5pxlgqh10QaXcM187cHVZOMsMIbPQeE8-lXT-rptA3k5bQuQEvMscv5BFy32Oo_yWzIrIUflVYmvYBSrhit5labSqr7avEJqtlDi3_qbP6G-Y7UwE3icdhulhiwJYW9hbhNr3bwdxyUCH0koWDHgCIQtFylSywcgH4wN9TWwA'
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
     facebook = Facebook()
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
-    if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(user_id, access_token))
+    if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl(AUTH_USER_ID))
+    if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
+    if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
     if 'getFriendIds' in methods:           pprint(facebook.getFriendIds(access_token))
     if 'getFriendData' in methods:          pprint(facebook.getFriendData(access_token))
     if 'postToNewsFeed' in methods:         pprint(facebook.postToNewsFeed(user_id, access_token,
                                                    message="Test news feed item.",
                                                    picture="http://static.stamped.com/users/ml.jpg"))
-    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('100003940534060', 'stamp', access_token,
-                                                   'restaurant', 'http://www.stamped.com/ml/s/2',
+    if 'postToOpenGraph' in methods:        pprint(facebook.postToOpenGraph('12345', 'todo', access_token,
+                                                   'app', 'http://stamped.com/JSinatra/s/37',
                                                    message="Test message", imageUrl='http://static.stamped.com/users/ml.jpg'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())

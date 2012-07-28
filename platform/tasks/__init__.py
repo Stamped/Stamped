@@ -32,7 +32,20 @@ def invoke(task, args=None, kwargs=None, **options):
     
     #msg = "INVOKE: %s" % task
     #logs.debug(msg)
-
+    
+    fallback = options.pop('fallback', True)
+    """
+    options['retry'] = fallback
+    
+    if fallback:
+        options['retry_policy'] = {
+            'max_retries'    : 3, 
+            'interval_start' : 0, 
+            'interval_step'  : 0.2, 
+            'interval_max'   : 0.2, 
+        }
+    """
+    
     if not utils.is_ec2():
         global local_worker_pool
         if local_worker_pool is None:
@@ -43,7 +56,7 @@ def invoke(task, args=None, kwargs=None, **options):
         if kwargs is None:
             kwargs = {}
         return local_worker_pool.spawn(task.run, *args, **kwargs)
-
+    
     assert isinstance(task, BaseTask)
     global __broker_status__
     
@@ -54,7 +67,7 @@ def invoke(task, args=None, kwargs=None, **options):
     attempt_async = num_errors < max_errors or \
                     (__broker_status__.time is not None and \
                      datetime.utcnow() - timedelta(minutes=5) >= __broker_status__.time)
-
+    
     if attempt_async:
         error   = None
         retries = 0
@@ -62,7 +75,7 @@ def invoke(task, args=None, kwargs=None, **options):
         while True:
             try:
                 retval = task.apply_async(args, kwargs, **options)
-
+                
                 # clear built-up errors now that we've successfully reestablished 
                 # our connection with the message broker
                 __broker_status__['errors'] = []
@@ -80,7 +93,7 @@ def invoke(task, args=None, kwargs=None, **options):
                     break
 
                 time.sleep(0.1)
-
+        
         if error is not None:
             logs.warn("async failed: (%s) %s" % (type(error), error))
             
@@ -116,7 +129,12 @@ def invoke(task, args=None, kwargs=None, **options):
                         
                         handler.email(subject, body)
     
-    # broker is not responding so attempt to invoke the task synchronously / locally
-    logs.warn("running async task locally '%s'" % task)
-    return task.apply(args, kwargs, **options)
+    if fallback:
+        # broker is not responding so attempt to invoke the task synchronously / locally
+        logs.warn("running async task locally '%s'" % task)
+        return task.apply(args, kwargs, **options)
+    else:
+        # broker is not responding so attempt to invoke the task synchronously / locally
+        logs.warn("discarding async task (unable to connect to broker) '%s'" % task)
+        return None
 

@@ -55,6 +55,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         for group in allGroups:
             self.addGroup(group())
         self.setGlobalPriority('seed', 100)
+        self.setGlobalPriority('manual', 10000)
         self.setGlobalPriority('derived',-100)
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):

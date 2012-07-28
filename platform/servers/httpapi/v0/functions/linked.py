@@ -92,6 +92,9 @@ def _buildShareSettingsFromLinkedAccount(linked):
         ]
         return group
 
+    if linked.token is None:
+        return []
+
     result.append(buildGroup('stamps', 'Publish My Stamps'))
     result.append(buildGroup('likes', 'Publish Stamps That I Like'))
     result.append(buildGroup('todos', "Publish My Todo's"))
@@ -189,6 +192,44 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
             return HttpResponseRedirect("stamped://netflix/add/fail")
         return HttpResponseRedirect("stamped://netflix/add/success")
     return HttpResponseRedirect("stamped://netflix/link/success")
+
+
+
+@handleHTTPCallbackRequest(http_schema=HTTPFacebookAuthResponse,
+                           exceptions=exceptions)
+@require_http_methods(["GET"])
+def facebookLoginCallback(request, authUserId, http_schema, **kwargs):
+    facebook = globalFacebook()
+
+    logs.info('### http_schema: %s ' % http_schema)
+
+    # Acquire the user's FB access token
+    try:
+        access_token = facebook.getUserAccessToken(http_schema.oauth_token, http_schema.secret)
+    except Exception as e:
+        return HttpResponseRedirect("stamped://facebook/link/fail")
+
+    acct = stampedAPI.getAccount(authUserId)
+
+    # If the user already has a FB account, then update it with the new access_token
+    if acct.linked is not None and acct.linked.facebook is not None:
+        linked = acct.linked.facebook
+        linked.token = access_token
+        stampedAPI._accountDB.updateLinkedAccount(authUserId, linked)
+    # Otherwise, we'll get the User's info with the access token and create a new linked account
+    else:
+        userInfo = facebook.getUserInfo(access_token)
+        linked                          = LinkedAccount()
+        linked.service_name             = 'facebook'
+        linked.token                    = access_token
+        linked.linked_user_id           = userInfo['id']
+        linked.linked_screen_name       = userInfo.get('username', None)
+        linked.linked_name              = userInfo['name']
+        linked.third_party_id           = userInfo['third_party_id']
+        stampedAPI.addLinkedAccount(authUserId, linked)
+
+    return HttpResponseRedirect("stamped://facebook/link/success")
+
 
 @handleHTTPRequest(http_schema=HTTPNetflixId,
                    exceptions=exceptions)

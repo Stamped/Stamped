@@ -5,7 +5,7 @@ import logs
 from errors import *
 import oauth as oauth
 
-from libs.Request       import *
+from libs.Request       import service_request
 from APIKeys            import get_api_key
 
 TWITTER_CONSUMER_KEY    = get_api_key('twitter', 'consumer_key')
@@ -45,8 +45,12 @@ class Twitter(object):
         logs.debug(url)
 
         # Send the http request
-        response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
-        result = json.loads(content)
+        try:
+            response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
+            result = json.loads(content)
+        except Exception:
+            logs.warning('Error connecting to Twitter')
+            raise StampedThirdPartyError('There was an error connecting to Twitter')
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
         return result
@@ -111,14 +115,19 @@ class Twitter(object):
         idset = ','.join(ids[offset:offset+limit])
         results = self.__get(url, user_token, user_secret, user_id=idset)
         for result in results:
-            friends.append(
-                {
-                    'user_id'   : result['id'],
-                    'name'      : result['name'],
-                    'screen_name' : result['screen_name'],
-                    'image_url' : result['profile_image_url'],
-                }
-            )
+            try:
+                friends.append(
+                    {
+                        'user_id'   : result['id'],
+                        'name'      : result['name'],
+                        'screen_name' : result['screen_name'],
+                        'image_url' : result['profile_image_url'],
+                    }
+                )
+            except TypeError as e:
+                logs.warning("Unable to get twitter friends! Error: %s" % e)
+                logs.info("Results: %s" % results)
+                raise
         return friends
 
 

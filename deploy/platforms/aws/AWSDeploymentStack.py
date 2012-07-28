@@ -401,7 +401,7 @@ class AWSDeploymentStack(ADeploymentStack):
         
         return status
     
-    def _find_db_node(node):
+    def _find_db_node(self, node):
         for instance in self.db_instances:
             if instance.name == node or instance.instance_id == node:
                 return instance
