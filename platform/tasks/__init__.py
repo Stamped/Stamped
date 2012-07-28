@@ -14,6 +14,7 @@ from datetime           import datetime, timedelta
 from celery.task        import task
 from celery.task.base   import BaseTask
 from gevent.pool        import Pool
+from bson.objectid      import ObjectId
 
 __broker_status__   = utils.AttributeDict({
     'errors'  : [], 
@@ -59,6 +60,12 @@ def invoke(task, args=None, kwargs=None, **options):
     
     assert isinstance(task, BaseTask)
     global __broker_status__
+
+    if kwargs is None:
+        kwargs = {}
+
+    kwargs['taskGenerated'] = datetime.utcnow()
+    kwargs['taskId'] = str(ObjectId())
     
     max_retries = 5
     max_errors  = 5

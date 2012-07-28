@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
+
+import Globals, ast, pymongo
+import libs.ec2_utils
+
+from bson.objectid import ObjectId
+from api.db.mongodb.AMongoCollection import AMongoCollection
+
+class MongoAsyncTasksCollection(AMongoCollection):
+    
+    def __init__(self, stack_name=None):
+        # Change collection name to stack if on EC2
+        collection = 'asynctasks'
+        if stack_name is not None:
+            collection = "asynctasks_%s" % stack_name
+        elif libs.ec2_utils.is_ec2():
+            stack_info = libs.ec2_utils.get_stack()
+            collection = "asynctasks_%s" % stack_info.instance.stack
+
+        AMongoCollection.__init__(self, collection=collection, logger=True)
+
+    ### PUBLIC
+    
+    def addTask(self, task):
+        if 'task_id' in task:
+            task['_id'] = ObjectId(task['task_id'])
+            del(task['task_id']) 
+
+        return self._collection.insert_one(logData, log=False, safe=False)
+
+    def removeTask(self, taskId):
+        documentId = ObjectId(taskId)
+        return self._removeMongoDocument(documentId)
+
