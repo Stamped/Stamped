@@ -70,6 +70,7 @@ def invoke(task, args=None, kwargs=None, **options):
     try:
         api = APITasks.getStampedAPI()
         data = {
+            'fn': task.__class__.__name__,
             'taskId': taskId,
             'taskGenerated': taskGenerated,
             'args': args,

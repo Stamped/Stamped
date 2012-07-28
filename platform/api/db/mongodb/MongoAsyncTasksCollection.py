@@ -38,6 +38,9 @@ class MongoAsyncTasksCollection(AMongoCollection):
         else:
             document['generated'] = datetime.utcnow()
 
+        if 'fn' in task:
+            document['fn'] = unicode(task['fn'])
+
         if 'args' in task:
             document['args'] = unicode(task['args'])
 
