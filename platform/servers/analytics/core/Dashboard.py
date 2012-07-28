@@ -53,7 +53,7 @@ class Dashboard(object):
                 total_today = num
             
             if len(today_hourly) == est().hour+1:
-                today_hourly[-1] = total_today
+                total_today = today_hourly[-1]
             else:
                 today_hourly.append(total_today)
             
