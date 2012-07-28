@@ -235,7 +235,7 @@ class MongoLogDBConfig(Singleton):
 
 class AMongoCollection(object):
     
-    def __init__(self, collection, primary_key=None, obj=None, overflow=False, logger=False):
+    def __init__(self, collection, primary_key=None, obj=None, overflow=False, logger=False, isCapped=None):
         self._desc = self.__class__.__name__
 
         if logger:
@@ -251,6 +251,7 @@ class AMongoCollection(object):
         self._obj = obj
         self._overflow = overflow
         self._collection_name = collection
+        self._isCapped = isCapped
     
     def _init_collection(self, db, collection, cap_size=None):
         cfg = self._dbConfig
@@ -259,8 +260,10 @@ class AMongoCollection(object):
         
         logs.debug("Connected to MongoDB collection: %s" % collection)
 
-    @property
+    @lazyProperty
     def isCapped(self):
+        if self._isCapped is not None:
+            return self._isCapped
         options = self._collection.options()
         return 'capped' in options and options['capped'] == True
     

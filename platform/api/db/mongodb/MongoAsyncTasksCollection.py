@@ -23,7 +23,7 @@ class MongoAsyncTasksCollection(AMongoCollection):
             stack_info = libs.ec2_utils.get_stack()
             collection = "asynctasks_%s" % stack_info.instance.stack
 
-        AMongoCollection.__init__(self, collection=collection, logger=True)
+        AMongoCollection.__init__(self, collection=collection, logger=True, isCapped=False)
 
     ### PUBLIC
     
@@ -50,6 +50,6 @@ class MongoAsyncTasksCollection(AMongoCollection):
         return self._collection.insert_one(document, log=False, safe=False)
 
     def removeTask(self, taskId):
-        documentId = ObjectId(taskId)
+        documentId = ObjectId(str(taskId))
         return self._removeMongoDocument(documentId)
 
