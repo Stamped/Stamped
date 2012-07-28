@@ -34,13 +34,13 @@ class Dashboard(object):
         today_hourly = [0]
         
         query = self.domain.select('select hours from `dashboard` where stat = "%s" and time = "day" and bgn = "%s"' % (stat,today().date().isoformat()))
-
+        
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
         
 
-        for hour in range (len(today_hourly), est().hour+1):
+        for hour in range (len(today_hourly)-1, est().hour):
             if unique:
                 bgn = today()
             else:
