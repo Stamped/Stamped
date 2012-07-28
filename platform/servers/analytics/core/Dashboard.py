@@ -40,7 +40,7 @@ class Dashboard(object):
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
             
-        for hour in range (len(today_hourly)-1, est().hour+2):
+        for hour in range (len(today_hourly)-1, est().hour+1):
             if unique:
                 bgn = today()
             else:
@@ -60,6 +60,7 @@ class Dashboard(object):
             if hour == est().hour:
                 self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
             
+        
         total_today = today_hourly[-1]
         
         
