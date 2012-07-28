@@ -40,7 +40,7 @@ class Dashboard(object):
                 today_hourly.append(int(i))
         
 
-        for hour in range (len(today_hourly), est().hour+1):
+        for hour in range (len(today_hourly), est().hour+2):
             if unique:
                 bgn = today()
             else:
