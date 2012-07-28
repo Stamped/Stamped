@@ -3270,6 +3270,10 @@ class StampedAPI(AStampedAPI):
             account.linked.facebook.have_share_permissions = False
             self._accountDB.updateLinkedAccount(account.linked.facebook)
             return
+        except StampedFacebookTokenError as e:
+            account.linked.facebook.token = None
+            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            return
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)
