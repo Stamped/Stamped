@@ -6,16 +6,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, utils
-import os, sys, pymongo, json
 
 from optparse   import OptionParser
-from utils      import lazyProperty
 from datetime   import *
-from errors     import Fail
-from libs.ec2_utils import is_ec2, get_db_nodes, get_stack
+from libs.ec2_utils import is_ec2, get_db_nodes
 from servers.analytics.core.SimpleDBConnection import SimpleDBConnection
-
-from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
 
 
 def parseCommandLine():
@@ -132,7 +127,6 @@ def main():
 if __name__ == '__main__':
     main()
 
-        
-            
-            
-            
+
+
+

@@ -11,6 +11,7 @@ import sys
 import datetime
 import calendar
 import pprint
+import pymongo
 import keys.aws, logs, utils
 from api.MongoStampedAPI import MongoStampedAPI
 from boto.sdb.connection    import SDBConnection
@@ -23,9 +24,11 @@ from bson.code import Code
 
 class mongoQuery(object):
     
-    def __init__(self):
+    def __init__(self,api=None):
         # utils.init_db_config('peach.db3')
-        self.api = MongoStampedAPI()
+        self.api = api
+        if self.api is None:
+            self.api = MongoStampedAPI()
     
     def totalFriends(self):
         collection = self.api._userDB._collection
@@ -55,6 +58,13 @@ class mongoQuery(object):
         collection = self.api._userDB._collection
         field = "timestamp.created"
         return collection.find({field: {"$gte": t0,"$lte": t1 }}).count()
+    
+    def topUsers(self,limit):
+        top_followed = self.api._userDB._collection.find().sort('stats.num_followers', pymongo.DESCENDING).limit(limit)
+        results = []
+        for user in top_followed:
+            results.append((str(user['screen_name']), str(user['stats']['num_followers'])))
+        return results
     
     def customQuery(self,t0,t1,collection,field,types=None):
         if types is None:
