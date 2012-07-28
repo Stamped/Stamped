@@ -53,7 +53,7 @@ class Dashboard(object):
                 total_today = num
             
             if len(today_hourly) == est().hour+1:
-                total_today = today_hourly[-1]
+                today_hourly[-1] = total_today
             else:
                 today_hourly.append(total_today)
             
@@ -61,7 +61,9 @@ class Dashboard(object):
                 self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
             
         today_hourly.insert(0, 0)
-
+        total_today = today_hourly[-1]
+        
+        
         # Yesterday's Stats
         total_yest = 0
         yest_hourly = []
@@ -88,7 +90,7 @@ class Dashboard(object):
 
             self.writer.writeHours({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
         
-        
+        yest_hourly.insert(0, 0)
         
         # Weekly Avg Stats
         weeklyAgg = []
