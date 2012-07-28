@@ -23,7 +23,7 @@ class MongoAsyncTasksCollection(AMongoCollection):
             stack_info = libs.ec2_utils.get_stack()
             collection = "asynctasks_%s" % stack_info.instance.stack
 
-        AMongoCollection.__init__(self, collection=collection, logger=True, isCapped=False)
+        AMongoCollection.__init__(self, collection=collection, logger=True)
 
     ### PUBLIC
     
