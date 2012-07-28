@@ -15,7 +15,6 @@ from celery.task        import task
 from celery.task.base   import BaseTask
 from gevent.pool        import Pool
 from bson.objectid      import ObjectId
-from api.MongoStampedAPI import globalMongoStampedAPI
 
 __broker_status__   = utils.AttributeDict({
     'errors'  : [], 
@@ -69,7 +68,7 @@ def invoke(task, args=None, kwargs=None, **options):
     taskGenerated = datetime.utcnow()
 
     try:
-        api = globalMongoStampedAPI()
+        api = APITasks.getStampedAPI()
         data = {
             'taskId': taskId,
             'taskGenerated': taskGenerated,
