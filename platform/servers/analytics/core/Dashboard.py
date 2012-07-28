@@ -39,25 +39,22 @@ class Dashboard(object):
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
         
-        if len(today_hourly) < est().hour:
-            for hour in range (len(today_hourly), est().hour+1):
-                if unique:
-                    bgn = today()
-                else:
-                    bgn = today() + timedelta(hours=hour)
-                end = today() + timedelta(hours=hour+1)
-                num = fun(bgn,end)
-                if not unique:
-                    total_today += num
-                else:
-                    total_today = num
-                today_hourly.append(total_today)
+
+        for hour in range (len(today_hourly), est().hour+1):
+            if unique:
+                bgn = today()
+            else:
+                bgn = today() + timedelta(hours=hour)
+            end = today() + timedelta(hours=hour+1)
+            num = fun(bgn,end)
+            if not unique:
+                total_today += num
+            else:
+                total_today = num
+            today_hourly.append(total_today)
 
             self.writer.write({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
         
-        else: 
-            this_hour = datetime(now().year,now().month,now().day,now().hour)
-            total_today = today_hourly[len(today_hourly) - 1] + fun(this_hour,now())
         
         # Yesterday's Stats
         total_yest = 0
