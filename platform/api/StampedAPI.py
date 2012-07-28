@@ -1402,7 +1402,7 @@ class StampedAPI(AStampedAPI):
                     friend_linked = friendAcct.linked.facebook
                     friend_linked.third_party_id = friend_info['third_party_id']
                     self._accountDB.updateLinkedAccount(userId, friend_linked)
-                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+#                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
