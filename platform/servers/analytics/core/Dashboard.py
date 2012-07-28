@@ -39,7 +39,6 @@ class Dashboard(object):
             print "Fetching"
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
-                total_today += int(i)
             
         for hour in range (len(today_hourly)-1, est().hour+1):
             if unique:
