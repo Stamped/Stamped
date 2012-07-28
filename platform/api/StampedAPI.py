@@ -2752,6 +2752,7 @@ class StampedAPI(AStampedAPI):
                 time.sleep(delay)
                 delay *= 2
 
+        logs.info('here')
         if not stampExists:
             # Add references to the stamp in all relevant inboxes
             followers = self._friendshipDB.getFollowers(authUserId)
@@ -2766,7 +2767,7 @@ class StampedAPI(AStampedAPI):
                 pass
         
         creditedUserIds = set()
-        
+        logs.info('here2')
         # Give credit
         if stamp.credits is not None and len(stamp.credits) > 0:
             for item in stamp.credits:
@@ -2798,7 +2799,7 @@ class StampedAPI(AStampedAPI):
         # Add activity for credited users
         if len(creditedUserIds) > 0:
             self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
-
+        logs.info('here')
         # Add activity for mentioned users
         blurb = stamp.contents[-1].blurb
         if blurb is not None:
@@ -2811,7 +2812,7 @@ class StampedAPI(AStampedAPI):
                         mentionedUserIds.add(user.user_id)
             if len(mentionedUserIds) > 0:
                 self._addMentionActivity(authUserId, list(mentionedUserIds), stamp.stamp_id)
-
+        logs.info('here')
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
 
