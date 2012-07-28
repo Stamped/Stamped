@@ -96,13 +96,10 @@ class Dashboard(object):
         weeklyAvg = []
         bgn = weekAgo(today())
         end = bgn + timedelta(hours=1)
-        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,weekAgo(today()).date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-week-%s"' % (stat,weekAgo(today()).date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
-                try:
-                    weeklyAvg.append(float(i))
-                except:
-                    pass
+                weeklyAvg.append(float(i))
         
         if len(weeklyAvg) == 0: 
             for day in range (0,6):
