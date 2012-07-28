@@ -3274,7 +3274,9 @@ class StampedAPI(AStampedAPI):
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)
-
+        if account.linked.facebook.have_share_permissions is None:
+            account.linked.facebook.have_share_permissions = True
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
 
     """
      #####
