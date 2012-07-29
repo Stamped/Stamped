@@ -55,6 +55,8 @@ def getClient():
     return __client
 
 def call(job, payload, **options):
+    # Naming convention is "namespace::function"
+    assert '::' in job
 
     # Run synchronously if not on EC2
     if not utils.is_ec2():
@@ -63,22 +65,7 @@ def call(job, payload, **options):
     # Connect to broker
     client = getClient()
 
-    # Parse options
-    background = options.pop('background', True)
-
     # Submit job
-    client.submit_job(job, pickle.dumps(payload), background=background)
+    client.submit_job(job, pickle.dumps(payload), background=True)
 
     return True
-
-
-def callFunction(fn, payload, **options):
-    try:
-        return tasks.Tasks.call(fn.__name__, payload)
-    except Exception as e:
-        logs.warning()
-        fallback = options.pop('fallback', True)
-        if fallback:
-            return fn(**payload)
-
-        raise
