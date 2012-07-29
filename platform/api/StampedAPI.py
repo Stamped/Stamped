@@ -881,6 +881,10 @@ class StampedAPI(AStampedAPI):
             self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
+
+            # Kick off an async task to query FB and determine if user granted us sharing permissions
+            tasks.invoke(tasks.APITasks.updateFBPermissions, args=[authUserId, linkedAccount.token])
+
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
             # Enable Open Graph sharing by default
@@ -962,10 +966,23 @@ class StampedAPI(AStampedAPI):
         if account.linked is None or\
            account.linked.facebook is None or\
            account.linked.facebook.share_settings is None or\
-           account.linked.facebook.token is None:
+           account.linked.facebook.token is None or \
+           account.linked.facebook.have_share_permissions == False:
             return None
 
         return account.linked.facebook.share_settings
+
+    @API_CALL
+    def updateFBPermissionsAsync(self, authUserId, token):
+        acct = self.getAccount(authUserId)
+        if acct.linked is None or acct.linked.facebook is None:
+            return False
+        linked = acct.linked.facebook
+        permissions = self.facebook.getUserPermissions(token)
+        linked.facebook.have_share_permissions = \
+            ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
+        self._accountDB.updateLinkedAccount(authUserId, linked.facebook)
+        return True
 
 
     @API_CALL
@@ -1351,7 +1368,7 @@ class StampedAPI(AStampedAPI):
     def addFriendshipAsync(self, authUserId, userId):
         if self._activity:
             # Add activity for followed user
-            self._addFollowActivity(authUserId, userId)`
+            self._addFollowActivity(authUserId, userId)
 
             # Remove 'friend' activity item
             self._activityDB.removeFriendActivity(authUserId, userId)
@@ -1385,7 +1402,7 @@ class StampedAPI(AStampedAPI):
                     friend_linked = friendAcct.linked.facebook
                     friend_linked.third_party_id = friend_info['third_party_id']
                     self._accountDB.updateLinkedAccount(userId, friend_linked)
-                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+#                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -2444,10 +2461,14 @@ class StampedAPI(AStampedAPI):
                 credits = []
                 if stamp.credits is not None:
                     for credit in stamp.credits:
-                        item                    = StampPreview()
-                        item.user               = userIds[str(credit.user.user_id)]
-                        item.stamp_id           = credit.stamp_id
-                        credits.append(item)
+                        try:
+                            item = StampPreview()
+                            item.user = userIds[str(credit.user.user_id)]
+                            item.stamp_id = credit.stamp_id
+                            credits.append(item)
+                        except KeyError:
+                            logs.warning("Key error for credit (stamp_id=%s, credit_id=%s)" % \
+                                (stamp.stamp_id, credit.stamp_id))
                     stamp.credits = credits
 
                 # Previews
@@ -2745,7 +2766,6 @@ class StampedAPI(AStampedAPI):
                 pass
         
         creditedUserIds = set()
-        
         # Give credit
         if stamp.credits is not None and len(stamp.credits) > 0:
             for item in stamp.credits:
@@ -2777,7 +2797,6 @@ class StampedAPI(AStampedAPI):
         # Add activity for credited users
         if len(creditedUserIds) > 0:
             self._addCreditActivity(authUserId, list(creditedUserIds), stamp.stamp_id, CREDIT_BENEFIT)
-
         # Add activity for mentioned users
         blurb = stamp.contents[-1].blurb
         if blurb is not None:
@@ -2790,7 +2809,6 @@ class StampedAPI(AStampedAPI):
                         mentionedUserIds.add(user.user_id)
             if len(mentionedUserIds) > 0:
                 self._addMentionActivity(authUserId, list(mentionedUserIds), stamp.stamp_id)
-
         # Update entity stats
         tasks.invoke(tasks.APITasks.updateEntityStats, args=[stamp.entity.entity_id])
 
@@ -3243,11 +3261,22 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
+        try:
+            result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
+        except StampedFacebookPermissionsError as e:
+            account.linked.facebook.have_share_permissions = False
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+            return
+        except StampedFacebookTokenError as e:
+            account.linked.facebook.token = None
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+            return
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)
-
+        if account.linked.facebook.have_share_permissions is None:
+            account.linked.facebook.have_share_permissions = True
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
 
     """
      #####

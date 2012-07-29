@@ -23,7 +23,7 @@ class MongoCreditReceivedCollection(AMongoCollection):
 
     ### INTEGRITY
 
-    def checkIntegrity(self, key, repair=True, api=None):
+    def checkIntegrity(self, key, repair=False, api=None):
 
         def regenerate(key):
             stampIds = set()

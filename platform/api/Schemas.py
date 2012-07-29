@@ -140,17 +140,17 @@ class CategoryDistribution(Schema):
 class UserStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('num_stamps',                       int)
-        cls.addProperty('num_stamps_left',                  int)
-        cls.addProperty('num_stamps_total',                 int)
-        cls.addProperty('num_friends',                      int)
-        cls.addProperty('num_followers',                    int)
-        cls.addProperty('num_todos',                        int)
-        cls.addProperty('num_credits',                      int)
-        cls.addProperty('num_credits_given',                int)
-        cls.addProperty('num_likes',                        int)
-        cls.addProperty('num_likes_given',                  int)
-        cls.addProperty('num_unread_news',                  int)
+        cls.addProperty('num_stamps',                       int) # Recalc
+        cls.addProperty('num_stamps_left',                  int) 
+        cls.addProperty('num_stamps_total',                 int) 
+        cls.addProperty('num_friends',                      int) # Recalc
+        cls.addProperty('num_followers',                    int) # Recalc
+        cls.addProperty('num_todos',                        int) # Recalc
+        cls.addProperty('num_credits',                      int) # Recalc
+        cls.addProperty('num_credits_given',                int) 
+        cls.addProperty('num_likes',                        int) # Recalc
+        cls.addProperty('num_likes_given',                  int) 
+        cls.addProperty('num_unread_news',                  int) 
         cls.addNestedPropertyList('distribution',           CategoryDistribution)
 
 class StampStatsSchema(Schema):
@@ -346,6 +346,7 @@ class LinkedAccount(Schema):
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
         cls.addProperty('third_party_id',                   basestring)
+        cls.addProperty('have_share_permissions',           bool)
         cls.addNestedProperty('share_settings',             LinkedAccountShareSettings)
 
 class LinkedAccounts(Schema):

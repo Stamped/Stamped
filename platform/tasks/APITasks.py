@@ -8,6 +8,8 @@ __license__   = "TODO"
 import Globals
 import utils
 import logs
+import datetime
+import time
 
 from optparse    import OptionParser
 from celery.task import task
@@ -40,13 +42,14 @@ def invoke(request, *args, **kwargs):
         which adds logging and exception handling.
     """
     
+    taskId = kwargs.pop('taskId', None)
+
     try:
         stampedAPI = getStampedAPI()
         func = "%sAsync" % utils.getFuncName(1)
         
         if not request.is_eager:
             logs.begin(
-                #addLog=stampedAPI._logsDB.addLog, 
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
                 nodeName=stampedAPI.node_name,
@@ -56,13 +59,16 @@ def invoke(request, *args, **kwargs):
         
         logs.info("%s %s %s (is_eager=%s, hostname=%s, task_id=%s)" % 
                   (func, args, kwargs, request.is_eager, request.hostname, request.id))
-        
+
         getattr(stampedAPI, func)(*args, **kwargs)
+
     except Exception as e:
         logs.error(str(e))
         raise
     finally:
         try:
+            if taskId is not None:
+                stampedAPI._asyncTasksDB.removeTask(taskId)
             if not request.is_eager:
                 logs.save()
         except:
@@ -159,6 +165,10 @@ def addTodo(*args, **kwargs):
     invoke(addTodo.request, *args, **kwargs)
 
 @task(queue='api', **default_params)
+def updateFBPermissions(*args, **kwargs):
+    invoke(updateFBPermissions.request, *args, **kwargs)
+
+@task(queue='api', **default_params)
 def postToOpenGraph(*args, **kwargs):
     invoke(postToOpenGraph.request, *args, **kwargs)
 
@@ -198,6 +208,71 @@ def updateAutoCompleteIndex(*args, **kwargs):
 def updateUserImageCollage(*args, **kwargs):
     invoke(updateUserImageCollage.request, *args, **kwargs)
 
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+import keys.aws
+from contextlib import closing
+
+# TODO PULL OUT TO SOMEWHERE COMMON (copied from AutoCompleteIndex)
+def getS3Key(filename):
+    BUCKET_NAME = 'stamped.com.static.images'
+
+    conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+    bucket = conn.create_bucket(BUCKET_NAME)
+    key = bucket.get_key(filename)
+    if key is None:
+        key = bucket.new_key(filename)
+    return key
+
+def findAmicablePairsNaive(n):
+    def sumOfDivisors(i):
+        s = 0
+        for j in range(1, i):
+            if i % j == 0:
+                s += j
+        return s
+    results = []
+    for i in range(n):
+        for j in range(i):
+            if sumOfDivisors(i) == j and i == sumOfDivisors(j):
+                results.append((i, j))
+    print results
+
+
+@task(queue='enrich', **retry_params)
+def enrichQueueFindAmicablePairsNaive(n, **garbage):
+    findAmicablePairsNaive(n)
+
+
+@task(queue='api', **retry_params)
+def apiQueueFindAmicablePairsNaive(n, **garbage):
+    findAmicablePairsNaive(n)
+
+
+def writeTimestampToS3(s3_filename, request_id):
+    logs.debug('Writing timestamp to S3 file %s' % s3_filename)
+    file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
+    delay = 0.1
+    max_delay = 3
+    max_tries = 40
+    for i in range(max_tries):
+        try:
+            with closing(getS3Key(s3_filename)) as key:
+                key.set_contents_from_string(file_content)
+                key.set_acl('private')
+                return
+        except:
+            time.sleep(delay)
+            delay = min(max_delay, delay*1.5)
+    raise Exception('Failed 40 fucking times. How does that even happen.')
+
+@task(queue='enrich', **retry_params)
+def enrichQueueWriteTimestampToS3(s3_filename, **garbage):
+    writeTimestampToS3(s3_filename, enrichQueueWriteTimestampToS3.request.id)
+
+@task(queue='api', **retry_params)
+def apiQueueWriteTimestampToS3(s3_filename, **garbage):
+    writeTimestampToS3(s3_filename, apiQueueWriteTimestampToS3.request.id)
 
 
 def parseCommandLine():
