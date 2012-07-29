@@ -396,7 +396,8 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                 raise StampedDataError(msg)
 
         # Check integrity for stats
-        self.entity_stats.checkIntegrity(key, repair=repair, api=api)
+        if entity.sources.tombstone_id is None:
+            self.entity_stats.checkIntegrity(key, repair=repair, api=api)
 
         return True
 
