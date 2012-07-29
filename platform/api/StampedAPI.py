@@ -183,7 +183,7 @@ class StampedAPI(AStampedAPI):
 
     def callTask(self, fn, payload, **options):
         try:
-            job = 'api::%s' % fn.__name__
+            job = self.taskName(fn)
             return tasks.Tasks.call(job, payload)
 
         except Exception as e:
