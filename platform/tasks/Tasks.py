@@ -74,6 +74,7 @@ def call(job, payload, **options):
         raise Exception
 
     global __errors
+    global __cooldown
 
     maxErrors = 5
     numErrors = len(__errors)
