@@ -1612,6 +1612,9 @@
 		6333E70E154ED0850019B450 /* STCellStyles.m in Sources */ = {isa = PBXBuildFile; fileRef = 6333E70C154ED0840019B450 /* STCellStyles.m */; };
 		6333E712154ED1D20019B450 /* STConsumptionCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6333E711154ED1D20019B450 /* STConsumptionCell.m */; };
 		6333E713154ED1D20019B450 /* STConsumptionCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6333E711154ED1D20019B450 /* STConsumptionCell.m */; };
+		633476C615C314E100560EA3 /* UIImage+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 633476C515C314E100560EA3 /* UIImage+Stamped.m */; };
+		633476C715C314E100560EA3 /* UIImage+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 633476C515C314E100560EA3 /* UIImage+Stamped.m */; };
+		633476C815C314E100560EA3 /* UIImage+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 633476C515C314E100560EA3 /* UIImage+Stamped.m */; };
 		633CEF231535E2FB009E1C06 /* STSuggestedSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF221535E2FB009E1C06 /* STSuggestedSource.m */; };
 		633CEF241535E2FB009E1C06 /* STSuggestedSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF221535E2FB009E1C06 /* STSuggestedSource.m */; };
 		633CEF271535E371009E1C06 /* STFriendsOfFriendsSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF261535E371009E1C06 /* STFriendsOfFriendsSource.m */; };
@@ -2399,6 +2402,9 @@
 		6386EF391513E2D60019F1DC /* STSimpleActionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 6386EF371513E2D20019F1DC /* STSimpleActionItem.m */; };
 		63877B591520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
 		63877B5A1520C35700DE5A3A /* STSynchronousWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 63877B581520C35700DE5A3A /* STSynchronousWrapper.m */; };
+		6388E38615C34603005B8A93 /* STActivityIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6388E38515C34603005B8A93 /* STActivityIndicatorView.m */; };
+		6388E38715C34603005B8A93 /* STActivityIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6388E38515C34603005B8A93 /* STActivityIndicatorView.m */; };
+		6388E38815C34603005B8A93 /* STActivityIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6388E38515C34603005B8A93 /* STActivityIndicatorView.m */; };
 		638BF1C315A0952B00777A3C /* stamped_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1C215A0952B00777A3C /* stamped_logo@2x.png */; };
 		638BF1C415A0952B00777A3C /* stamped_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1C215A0952B00777A3C /* stamped_logo@2x.png */; };
 		638BF1C515A0952B00777A3C /* stamped_logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 638BF1C215A0952B00777A3C /* stamped_logo@2x.png */; };
@@ -2695,10 +2701,8 @@
 		63D5CB3515B3CC3D0062BF7B /* search_google@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63D5CB3215B3CC3D0062BF7B /* search_google@2x.png */; };
 		63DBEEBE15BC849100A694DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEEBC15BC849100A694DD /* Icon.png */; };
 		63DBEEBF15BC849100A694DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEEBC15BC849100A694DD /* Icon.png */; };
-		63DBEEC015BC849100A694DD /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEEBC15BC849100A694DD /* Icon.png */; };
 		63DBEEC115BC849100A694DD /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEEBD15BC849100A694DD /* Icon@2x.png */; };
 		63DBEEC215BC849100A694DD /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEEBD15BC849100A694DD /* Icon@2x.png */; };
-		63DBEEC315BC849100A694DD /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEEBD15BC849100A694DD /* Icon@2x.png */; };
 		63DBEEDA15BCD0BB00A694DD /* small_location_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEED915BCD0BB00A694DD /* small_location_icon@2x.png */; };
 		63DBEEDB15BCD0BB00A694DD /* small_location_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEED915BCD0BB00A694DD /* small_location_icon@2x.png */; };
 		63DBEEDC15BCD0BB00A694DD /* small_location_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63DBEED915BCD0BB00A694DD /* small_location_icon@2x.png */; };
@@ -3986,6 +3990,8 @@
 		6333E70C154ED0840019B450 /* STCellStyles.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCellStyles.m; sourceTree = "<group>"; };
 		6333E710154ED1D10019B450 /* STConsumptionCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConsumptionCell.h; sourceTree = "<group>"; };
 		6333E711154ED1D20019B450 /* STConsumptionCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConsumptionCell.m; sourceTree = "<group>"; };
+		633476C415C314E100560EA3 /* UIImage+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Stamped.h"; sourceTree = "<group>"; };
+		633476C515C314E100560EA3 /* UIImage+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Stamped.m"; sourceTree = "<group>"; };
 		633CEF211535E2FB009E1C06 /* STSuggestedSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSuggestedSource.h; sourceTree = "<group>"; };
 		633CEF221535E2FB009E1C06 /* STSuggestedSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSuggestedSource.m; sourceTree = "<group>"; };
 		633CEF251535E371009E1C06 /* STFriendsOfFriendsSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFriendsOfFriendsSource.h; sourceTree = "<group>"; };
@@ -4383,6 +4389,8 @@
 		6386EF371513E2D20019F1DC /* STSimpleActionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleActionItem.m; sourceTree = "<group>"; };
 		63877B571520C35700DE5A3A /* STSynchronousWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSynchronousWrapper.h; sourceTree = "<group>"; };
 		63877B581520C35700DE5A3A /* STSynchronousWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSynchronousWrapper.m; sourceTree = "<group>"; };
+		6388E38415C34603005B8A93 /* STActivityIndicatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityIndicatorView.h; sourceTree = "<group>"; };
+		6388E38515C34603005B8A93 /* STActivityIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActivityIndicatorView.m; sourceTree = "<group>"; };
 		638BF1C215A0952B00777A3C /* stamped_logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stamped_logo@2x.png"; sourceTree = "<group>"; };
 		638BF1CE15A0AD8500777A3C /* STButtonTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STButtonTableCell.h; sourceTree = "<group>"; };
 		638BF1CF15A0AD8500777A3C /* STButtonTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STButtonTableCell.m; sourceTree = "<group>"; };
@@ -6848,6 +6856,8 @@
 				63159A891544E959008E75DD /* STRightMenuViewController.m */,
 				63C9835015499F45000180DC /* STCancellation.h */,
 				63C9835115499F45000180DC /* STCancellation.m */,
+				633476C415C314E100560EA3 /* UIImage+Stamped.h */,
+				633476C515C314E100560EA3 /* UIImage+Stamped.m */,
 			);
 			name = Globals;
 			sourceTree = "<group>";
@@ -7253,6 +7263,8 @@
 				7E0A87B61416CBDB0013AC4D /* STImageView.m */,
 				7E5D9E9614B3C0DC00C340CA /* STScrollView.h */,
 				7E5D9E9714B3C0DD00C340CA /* STScrollView.m */,
+				6388E38415C34603005B8A93 /* STActivityIndicatorView.h */,
+				6388E38515C34603005B8A93 /* STActivityIndicatorView.m */,
 			);
 			name = Legacy;
 			sourceTree = "<group>";
@@ -9055,8 +9067,6 @@
 				6323439A15B9CF3100D3955C /* map_loading_overlay@2x.png in Resources */,
 				632343A415B9D58F00D3955C /* eSearch_location_button.png in Resources */,
 				632343A715B9D58F00D3955C /* eSearch_location_button@2x.png in Resources */,
-				63DBEEC015BC849100A694DD /* Icon.png in Resources */,
-				63DBEEC315BC849100A694DD /* Icon@2x.png in Resources */,
 				63DBEEDC15BCD0BB00A694DD /* small_location_icon@2x.png in Resources */,
 				63DBEEE015BCD0ED00A694DD /* small_location_icon_purple@2x.png in Resources */,
 			);
@@ -10847,6 +10857,8 @@
 				633FACEC15AF693A001F937F /* WebViewController.m in Sources */,
 				633FAEC115B1B014001F937F /* STGuidePopUp.m in Sources */,
 				6323439F15B9D08000D3955C /* STMapIndicatorView.m in Sources */,
+				633476C815C314E100560EA3 /* UIImage+Stamped.m in Sources */,
+				6388E38815C34603005B8A93 /* STActivityIndicatorView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11211,6 +11223,8 @@
 				633FACEB15AF693A001F937F /* WebViewController.m in Sources */,
 				633FAEC015B1B014001F937F /* STGuidePopUp.m in Sources */,
 				6323439E15B9D08000D3955C /* STMapIndicatorView.m in Sources */,
+				633476C715C314E100560EA3 /* UIImage+Stamped.m in Sources */,
+				6388E38715C34603005B8A93 /* STActivityIndicatorView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11586,6 +11600,8 @@
 				633FACEA15AF693A001F937F /* WebViewController.m in Sources */,
 				633FAEBF15B1B014001F937F /* STGuidePopUp.m in Sources */,
 				6323439D15B9D08000D3955C /* STMapIndicatorView.m in Sources */,
+				633476C615C314E100560EA3 /* UIImage+Stamped.m in Sources */,
+				6388E38615C34603005B8A93 /* STActivityIndicatorView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -11652,8 +11668,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -11685,8 +11701,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				PROVISIONING_PROFILE = "11334C94-3109-46DD-BDEA-FDC72419848A";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "11334C94-3109-46DD-BDEA-FDC72419848A";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -11702,8 +11718,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -11730,8 +11746,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				PROVISIONING_PROFILE = "11334C94-3109-46DD-BDEA-FDC72419848A";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "11334C94-3109-46DD-BDEA-FDC72419848A";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -11748,8 +11764,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"ARCHS[sdk=*]" = "$(ARCHS_STANDARD_32_BIT)";
-				CODE_SIGN_IDENTITY = "iPhone Distribution: Stamped, Inc.";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Stamped, Inc.";
+				CODE_SIGN_IDENTITY = "iPhone Distribution: Landon Judkins";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Landon Judkins";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -11776,8 +11792,8 @@
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "StampedEther copy";
-				PROVISIONING_PROFILE = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "239A93EE-5E9E-4C58-A9D3-A412F725CFD1";
+				PROVISIONING_PROFILE = "11334C94-3109-46DD-BDEA-FDC72419848A";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "11334C94-3109-46DD-BDEA-FDC72419848A";
 				SKIP_INSTALL = NO;
 				STRIP_INSTALLED_PRODUCT = YES;
 				TARGETED_DEVICE_FAMILY = 1;

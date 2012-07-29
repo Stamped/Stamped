@@ -20,6 +20,7 @@
 #import "STPreviewsView.h"
 #import "STSimplePreviews.h"
 #import "STSimpleStamp.h"
+#import "STActivityIndicatorView.h"
 
 @interface STConsumptionCell ()
 
@@ -49,7 +50,7 @@
         self.accessoryType = UITableViewCellAccessoryNone;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         activityView_ = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-        activityView_.frame = self.frame;
+        activityView_.frame = [Util centeredAndBounded:activityView_.frame.size inFrame:[Util originRectWithRect:self.frame]];
         [self addSubview:activityView_];
         [activityView_ startAnimating];
         

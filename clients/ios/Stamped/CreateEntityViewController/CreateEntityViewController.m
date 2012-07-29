@@ -187,7 +187,7 @@ typedef enum {
 //cls.addProperty('subcategory',                      basestring, required=True)
 - (NSArray*)descriptionDataSource {
     
-    return [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:@"decription", @"title", @"STTextViewTableCell", @"class", nil]];
+    return [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:@"description", @"title", @"STTextViewTableCell", @"class", nil]];
     
 }
 
@@ -218,7 +218,7 @@ typedef enum {
                 [dataSource addObject:[self descriptionDataSource]];
                 
                 self.segmentDataSource = [NSArray arrayWithObjects:@"Restaurant", @"Bar", @"Café", @"Other", nil];
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add location", @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add location", @"Add description", nil];
                 
             }
                 break;
@@ -243,7 +243,7 @@ typedef enum {
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"author", @"title", nil], nil]];
                 [dataSource addObject:[self descriptionDataSource]];
                 
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add description", nil];
                 
             }
                 break;
@@ -267,7 +267,7 @@ typedef enum {
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"creator", @"title", nil], nil]];
                 [dataSource addObject:[self descriptionDataSource]];
                 
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add description", nil];
                 
             }
                 break;
@@ -278,7 +278,7 @@ typedef enum {
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"what is it?", @"title", @"e.g. wine, electronics", @"placeholder", nil], nil]];
                 [dataSource addObject:[self descriptionDataSource]];
                 
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add description", nil];
                 
             }
                 break;

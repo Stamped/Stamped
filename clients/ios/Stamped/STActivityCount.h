@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "STAction.h"
 
 @protocol STActivityCount <NSObject>
 
 @property (nonatomic, readonly, copy) NSNumber* numberUnread;
+@property (nonatomic, readonly, retain) id<STAction> action;
 
 @end

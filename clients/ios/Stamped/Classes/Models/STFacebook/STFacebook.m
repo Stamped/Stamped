@@ -97,6 +97,9 @@ static id __instance;
     if (self.facebook.accessToken) {
         NSMutableDictionary* params = [NSMutableDictionary dictionary];
         [params setObject:self.facebook.accessToken forKey:@"token"];
+        if (self.facebook.expirationDate) {
+//            [params setObject:self.facebook.expirationDate forKey:@"token_expiration"];
+        }
         [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/facebook/add.json"
                                                      post:YES
                                             authenticated:YES
@@ -203,6 +206,10 @@ static id __instance;
 
 
 #pragma mark - Getters
+
+- (BOOL)connected {
+    return self.facebook.accessToken != nil;
+}
 
 - (BOOL)isSessionValid {
     return [self.facebook isSessionValid];

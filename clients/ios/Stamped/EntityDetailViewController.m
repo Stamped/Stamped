@@ -86,7 +86,7 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
     //_toolbar = toolbar;
     [super viewDidLoad];
     self.loadingView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
-    self.loadingView.frame = [Util originRectWithRect:self.view.frame];
+    self.loadingView.frame =  [Util centeredAndBounded:self.loadingView.frame.size inFrame:[Util originRectWithRect:self.view.frame]];
     self.loadingView.hidesWhenStopped = YES;
     [self.view addSubview:self.loadingView];
     [self reloadStampedData];

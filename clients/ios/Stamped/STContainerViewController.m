@@ -129,7 +129,7 @@ static const CGFloat kReloadHeight = 60.0;
     _lastUpdatedLabel.textAlignment = UITextAlignmentCenter;
     [_shelfView addSubview:_lastUpdatedLabel];
     
-    _scrollView = container;
+    _scrollView = [container retain];
     container.delegate = self;
     [container appendChildView:_shelfView];
     [container setScrollDelegate:self];

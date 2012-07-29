@@ -20,6 +20,9 @@
 #import <QuartzCore/QuartzCore.h>
 #import "QuartzUtils.h"
 #import "FindFriendsViewController.h"
+#import "STStampedActions.h"
+#import "STUsersViewController.h"
+#import "EntityDetailViewController.h"
 
 static NSString* const STUniversalNewWasUpdatedNotification = @"STUniversalNewsWasUpdatedNotification";
 
@@ -300,6 +303,40 @@ static BOOL _friendsHasMore = YES;
     id<STActivity> activity = [self.newsItems objectAtIndex:indexPath.row];
     if (activity.action) {
         [[STActionManager sharedActionManager] didChooseAction:activity.action withContext:[STActionContext context]];
+    }
+    else if (activity.subjects.count || activity.objects.users.count || activity.objects.stamps.count) {
+        NSMutableArray* users = [NSMutableArray array];
+        NSMutableDictionary* stamps = [NSMutableDictionary dictionary];
+        if (activity.subjects.count) {
+            [users addObjectsFromArray:activity.subjects];
+        }
+        else if (activity.objects.users.count) {
+            [users addObjectsFromArray:activity.objects.users];
+        }
+        else if (activity.objects.stamps.count) {
+            for (id<STStampPreview> preview in activity.objects.stamps) {
+                if (preview.user && preview.stampID && preview.user.userID) {
+                    [users addObject:preview.user];
+                    [stamps setObject:preview.stampID forKey:preview.user.userID];
+                }
+            }
+        }
+        NSMutableArray* userIDs = [NSMutableArray array];
+        for (id<STUser> user in users) {
+            if (user.userID) {
+                [userIDs addObject:user.userID];
+            }
+        }
+        STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
+        [controller setUserIDToStampID:stamps];
+        [Util compareAndPushOnto:self withController:controller modal:NO animated:YES];
+    }
+    else if (activity.objects.entities.count) {
+        id<STEntity> entity = [activity.objects.entities objectAtIndex:0];
+        if (entity.entityID) {
+            EntityDetailViewController* controller = [[[EntityDetailViewController alloc] initWithEntityID:entity.entityID] autorelease];
+            [Util compareAndPushOnto:self withController:controller modal:NO animated:YES];
+        }
     }
 }
 

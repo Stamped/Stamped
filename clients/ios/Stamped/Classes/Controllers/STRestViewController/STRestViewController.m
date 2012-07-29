@@ -89,13 +89,15 @@ static CGFloat _shelfOffset = 9;
         _loadingLocked = loadingLocked;
         if (loadingLocked) {
             self.loadingLockView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
-            self.loadingLockView.frame = [Util originRectWithRect:self.view.frame];
+            self.loadingLockView.frame = [Util centeredAndBounded:self.loadingLockView.frame.size inFrame:[Util originRectWithRect:self.view.frame]];
             [self.view addSubview:self.loadingLockView];
             [self.loadingLockView startAnimating];
+            self.view.userInteractionEnabled = NO;
         }
         else {
             [self.loadingLockView removeFromSuperview];
             self.loadingLockView = nil;
+            self.view.userInteractionEnabled = YES;
         }
     }
 }

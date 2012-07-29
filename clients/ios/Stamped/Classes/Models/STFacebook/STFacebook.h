@@ -28,6 +28,8 @@ typedef void(^FacebookMeRequestHandler)(NSDictionary *);
 + (STFacebook*)sharedInstance;
 
 - (void)auth;
+- (void)reauth;
+- (BOOL)connected;
 - (BOOL)isSessionValid;
 - (void)invalidate;
 
