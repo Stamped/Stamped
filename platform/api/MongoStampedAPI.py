@@ -42,6 +42,8 @@ from api.db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollec
 from api.db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
 from api.db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
+from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection 
+
 class MongoStampedAPI(StampedAPI):
     """
         Implementation of Stamped API atop MongoDB.
@@ -169,6 +171,10 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _suggestedEntities(self):
         return MongoSuggestedEntities()
+
+    @lazyProperty
+    def _asyncTasksDB(self):
+        return MongoAsyncTasksCollection()
     
     @lazyProperty
     def _elasticsearch(self):

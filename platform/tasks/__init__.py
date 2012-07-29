@@ -14,6 +14,7 @@ from datetime           import datetime, timedelta
 from celery.task        import task
 from celery.task.base   import BaseTask
 from gevent.pool        import Pool
+from bson.objectid      import ObjectId
 
 __broker_status__   = utils.AttributeDict({
     'errors'  : [], 
@@ -59,6 +60,26 @@ def invoke(task, args=None, kwargs=None, **options):
     
     assert isinstance(task, BaseTask)
     global __broker_status__
+
+    if kwargs is None:
+        kwargs = {}
+
+    taskId = str(ObjectId())
+    taskGenerated = datetime.utcnow()
+
+    try:
+        api = APITasks.getStampedAPI()
+        data = {
+            'fn': task.__class__.__name__,
+            'taskId': taskId,
+            'taskGenerated': taskGenerated,
+            'args': args,
+            'kwargs': kwargs,
+        }
+        api._asyncTasksDB.addTask(data)
+        kwargs['taskId'] = taskId
+    except Exception as e:
+        logs.warning("Failed to save async task log")
     
     max_retries = 5
     max_errors  = 5
