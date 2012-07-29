@@ -13,10 +13,10 @@ def addToApiQueue(key, data):
 
 def enterWorkLoop(functions):
     worker = gearman.GearmanWorker(['localhost:4730'])
-    print('asdfadsfasd')
     for k,v in functions.items():
         def wrapper(worker, job):
             data = pickle.loads(job.data)
+            print(k,v)
             v(k, data)
             return ''
         print "registering for %s" % k
@@ -24,9 +24,26 @@ def enterWorkLoop(functions):
     worker.work()
 
 def enrichTasks():
+    from MongoStampedAPI import globalMongoStampedAPI
+    api = globalMongoStampedAPI()
+    # tasks = [
+    #     api.mergeEntityAsync,
+    #     api.mergeEntityIdAsync,
+    # ]
     m = {}
-    
+    def mergeEntityAsyncHelper(key, data):
+        api.mergeEntityAsync(data['entityDict'])
+    m[api.taskName(api.mergeEntityAsync)] = mergeEntityAsyncHelper
+
+    def mergeEntityIdAsyncHelper(key, data):
+        api.mergeEntityIdAsync(data['entity_id'])
+    m[api.taskName(api.mergeEntityIdAsync)] = mergeEntityIdAsyncHelper
+
+    # for task in tasks:
+
+        # m[api.taskName(task)] = lambda task
+    return m
 
 if __name__ == '__main__':
-    enterWorkLoop({'test': addToApiQueue})
+    enterWorkLoop(enrichTasks())
 

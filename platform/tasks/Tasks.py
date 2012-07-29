@@ -6,22 +6,10 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import utils
-import gearman, pickle
+import utils, logs, gearman, pickle
 
 from errors import *
 
-"""
-StampedAPI calls invoke(name, kwargs=kwargs)
-This is intercepted and we check to see if the broker is available
-If broker is unavailable:
-    - Retry N times
-    - Fall back to running locally (if specified)
-If broker is available:
-    - Serialize payload
-    - pass payload to broker
-    - return
-"""
 
 class StampedTasksConnectionError(Exception):
     pass
@@ -41,50 +29,34 @@ def getClient():
             __client = gearman.GearmanClient(['localhost:4730'])
         
         except gearman.ConnectionError as e:
-            print 'CONNECTION ERROR: %s' % e
+            logs.warning("Connection error: %s" % e)
             raise StampedTasksConnectionError()
 
         except gearman.ServerUnavailable as e:
-            print 'SERVER UNAVAILABLE: %s' % e 
+            logs.warning("Server unavailable: %s" % e)
             raise StampedTasksServerUnavailable()
 
         except Exception as e:
-            print 'FAILED: %s' % e
+            logs.warning("An error occurred connecting to gearman: %s (%s)" % (type(e), e))
             raise 
 
     return __client
 
 def call(job, payload, **options):
+    # Naming convention is "namespace::function"
+    # assert '::' in job
 
     # Run synchronously if not on EC2
     # if not utils.is_ec2():
+    #     logs.warning("Local - Running synchronously")
     #     raise Exception
 
     # Connect to broker
     client = getClient()
 
-    # Parse options
-    background = options.pop('background', True)
-
     # Submit job
-    client.submit_job(job, pickle.dumps(payload), background=background)
+    client.submit_job(job, pickle.dumps(payload), background=True)
 
     return True
 
 
-def callFunction(fn, payload, **options):
-    try:
-        return tasks.Tasks.call(fn.__name__, payload)
-    except Exception as e:
-        logs.warning()
-        fallback = options.pop('fallback', True)
-        if fallback:
-            return fn(**payload)
-
-        raise
-
-
-
-
-
-        

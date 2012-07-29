@@ -18,6 +18,7 @@ try:
     import libs.ec2_utils
     import libs.Memcache
     import tasks.APITasks
+    import tasks.Tasks
     from api import Entity
     from api import SchemaValidation
 
@@ -177,6 +178,22 @@ class StampedAPI(AStampedAPI):
 
         return self._node_name
 
+    def taskName(self, fn):
+        return 'api::%s' % fn.__name__
+
+    def callTask(self, fn, payload, **options):
+        try:
+            job = 'api::%s' % fn.__name__
+            return tasks.Tasks.call(job, payload)
+
+        except Exception as e:
+            logs.warning("Failed to run task '%s': %s" % (fn.__name__, e))
+
+            if options.pop('fallback', True):
+                logs.info("Running locally")
+                return fn(**payload)
+
+            raise
 
     def API_CALL(f):
         @wraps(f)
@@ -274,16 +291,10 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = secondary
 
             # Asynchronously generate stamp file
+            self.callTask(self.customizeStampAsync, {'primary': primary, 'secondary': secondary})
 
-            tasks.Tasks.callFunction(self.customizeStampAsync, {'primary': primary, 'secondary': secondary})
-
-            # try:
-            #     payload = {'primary': primary, 'secondary': secondary}
-            #     tasks.Tasks.call('apiCustomizeStamp', payload)
-
-            # except Exception as e:
-            #     self.customizeStampAsync(primary, secondary)
-            #     logs.warning("Async task failed: %s" % e)
+            # DEPRECATED
+            tasks.invoke(tasks.APITasks.customizeStamp, args=[primary, secondary])
 
         else:
             account.color_primary   = '004AB2'
@@ -5290,14 +5301,22 @@ class StampedAPI(AStampedAPI):
     
     def mergeEntity(self, entity):
         logs.info('Merge Entity: "%s"' % entity.title)
-        tasks.invoke(tasks.APITasks.mergeEntity, args=[entity.dataExport()], fallback=False)
+
+        try:
+            self.callTask(self.mergeEntityAsync, {'entityDict': entity.dataExport()}, fallback=False)
+        except Exception as e:
+            pass
 
     def mergeEntityAsync(self, entityDict):
         self._mergeEntity(Entity.buildEntity(entityDict))
 
     def mergeEntityId(self, entityId):
         logs.info('Merge EntityId: %s' % entityId)
-        tasks.invoke(tasks.APITasks.mergeEntityId, args=[entityId], fallback=False)
+
+        try:
+            self.callTask(self.mergeEntityIdAsync, {'entityId': entityId}, fallback=False)
+        except Exception as e:
+            pass
 
     def mergeEntityIdAsync(self, entityId):
         try:
