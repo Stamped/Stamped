@@ -365,7 +365,10 @@ class NotificationQueue(object):
         accounts = self._accountDB.getAccounts(list(missingAccounts))
         
         for account in accounts:
-            self._users[account.user_id] = account
+            try:
+                self._users[account.user_id] = account
+            except Exception as e:
+                logs.warning("Unable to set account: %s" % (account))
 
         # Get email settings tokens
         tokens = self._auth.ensureEmailAlertTokensForUsers(self._users.keys())
@@ -530,7 +533,10 @@ class NotificationQueue(object):
         accounts = self._accountDB.getAccounts(list(missingAccounts))
         
         for account in accounts:
-            self._users[account.user_id] = account
+            try:
+                self._users[account.user_id] = account
+            except Exception as e:
+                logs.warning("Unable to set account %s" % account)
         
         for invite in invites:
             try:

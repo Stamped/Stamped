@@ -42,13 +42,14 @@ def invoke(request, *args, **kwargs):
         which adds logging and exception handling.
     """
     
+    taskId = kwargs.pop('taskId', None)
+
     try:
         stampedAPI = getStampedAPI()
         func = "%sAsync" % utils.getFuncName(1)
         
         if not request.is_eager:
             logs.begin(
-                #addLog=stampedAPI._logsDB.addLog, 
                 saveLog=stampedAPI._logsDB.saveLog,
                 saveStat=stampedAPI._statsDB.addStat,
                 nodeName=stampedAPI.node_name,
@@ -58,13 +59,16 @@ def invoke(request, *args, **kwargs):
         
         logs.info("%s %s %s (is_eager=%s, hostname=%s, task_id=%s)" % 
                   (func, args, kwargs, request.is_eager, request.hostname, request.id))
-        
+
         getattr(stampedAPI, func)(*args, **kwargs)
+
     except Exception as e:
         logs.error(str(e))
         raise
     finally:
         try:
+            if taskId is not None:
+                stampedAPI._asyncTasksDB.removeTask(taskId)
             if not request.is_eager:
                 logs.save()
         except:

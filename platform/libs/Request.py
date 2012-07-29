@@ -91,7 +91,7 @@ class RateLimiterState(object):
             return
 
         output = '<html>'
-        output += "<h3>RateLimiter RPC Server Failure</h3>"
+        output += "<h3>RateLimiter RPC Server Failure on %s</h3>" % self.__stack_name
         output += "<p>On stack '%s' instance '%s'.</p>" % (self.__stack_name, self.__node_name)
         output += "<p><i>There were %s failed requests to the rpc server within the last %s seconds</i></p>" %\
                   (self.__fail_limit, self.__fail_period)
@@ -122,7 +122,7 @@ class RateLimiterState(object):
             email = {}
             email['from'] = 'Stamped <noreply@stamped.com>'
             email['to'] = 'dev@stamped.com'
-            email['subject'] = "RateLimiter RPC server failure"
+            email['subject'] = "%s RateLimiter RPC server failure" % self.__stack_name
             email['body'] = output
             utils.sendEmail(email, format='html')
         except Exception as e:
