@@ -7,8 +7,26 @@ import gearman, gevent, time, pickle
 import sys
 import logs
 
+import signal, os
+
+class StampedWorker(gearman.GearmanWorker):
+
+    killed = False
+
+    def __init__(self, host):
+        gearman.GearmanWorker.__init__(self, host)
+
+    def after_poll(self, any_activity):
+        return not StampedWorker.killed
+
+def handler(signum, frame):
+    print 'Signal handler called with signal', signum
+    StampedWorker.killed = True
+
+signal.signal(signal.SIGTERM, handler)
+
 def enterWorkLoop(functions):
-    worker = gearman.GearmanWorker(['localhost:4730'])
+    worker = StampedWorker(['localhost:4730'])
     for k,v in functions.items():
         def wrapper(worker, job):
             try:
@@ -30,7 +48,13 @@ def enterWorkLoop(functions):
                     logs.warning(traceback.format_exc())
             return ''
         worker.register_task(k, wrapper)
-    worker.work()
+    worker.work(poll_timeout=1)
+
+def main(count, functions):
+    greenlets = []
+    for i in range(count):
+        greenlets.append(gevent.spawn(enterWorkLoop, functions))
+    gevent.joinall(greenlets)
 
 def enrichTasks():
     from MongoStampedAPI import globalMongoStampedAPI
@@ -54,8 +78,10 @@ def apiTasks():
     m[api.taskName(api.customizeStampAsync)] = customizeStampAsyncHelper
     return m
 
+
 if __name__ == '__main__':
     m = enrichTasks()
     m.update(apiTasks())
-    enterWorkLoop(m)
+    main(10, m)
+
 
