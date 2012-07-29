@@ -33,35 +33,23 @@ class Dashboard(object):
         total_today = 0
         today_hourly = []
         
+        # See if we've stored data earlier
         query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,today().date().isoformat()))
         
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
-            
-        for hour in range (len(today_hourly)-1, est().hour+1):
-            if unique:
-                bgn = today()
-            else:
-                bgn = today() + timedelta(hours=hour)
+        
+        for hour in range (len(today_hourly), est().hour+1):
+            bgn = today()
             end = today() + timedelta(hours=hour+1)
-            num = fun(bgn,end)
-            print bgn,end,num
-            if not unique:
-                total_today += num
-            else:
-                total_today = num
-            
-            if len(today_hourly) == est().hour+1:
-                today_hourly[-1] = total_today
-            else:
+            total_today = fun(bgn,end)
+            try:
+                today_hourly[hour] = total_today
+            except IndexError:
                 today_hourly.append(total_today)
             
         self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
-            
-        # Leading zero for graphing purposes
-        today_hourly.insert(0,0)
-        total_today = today_hourly[-1]
         
         
         # Yesterday's Stats
