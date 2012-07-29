@@ -240,12 +240,12 @@ def findAmicablePairsNaive(n):
 
 
 @task(queue='enrich', **retry_params)
-def enrichQueueFindAmicablePairsNaive(n):
+def enrichQueueFindAmicablePairsNaive(n, **garbage):
     findAmicablePairsNaive(n)
 
 
 @task(queue='api', **retry_params)
-def apiQueueFindAmicablePairsNaive(n):
+def apiQueueFindAmicablePairsNaive(n, **garbage):
     findAmicablePairsNaive(n)
 
 
@@ -267,11 +267,11 @@ def writeTimestampToS3(s3_filename, request_id):
     raise Exception('Failed 40 fucking times. How does that even happen.')
 
 @task(queue='enrich', **retry_params)
-def enrichQueueWriteTimestampToS3(s3_filename):
+def enrichQueueWriteTimestampToS3(s3_filename, **garbage):
     writeTimestampToS3(s3_filename, enrichQueueWriteTimestampToS3.request.id)
 
 @task(queue='api', **retry_params)
-def apiQueueWriteTimestampToS3(s3_filename):
+def apiQueueWriteTimestampToS3(s3_filename, **garbage):
     writeTimestampToS3(s3_filename, apiQueueWriteTimestampToS3.request.id)
 
 
