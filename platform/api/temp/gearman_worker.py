@@ -26,27 +26,33 @@ def handler(signum, frame):
 signal.signal(signal.SIGTERM, handler)
 
 def enterWorkLoop(functions):
+    from MongoStampedAPI import globalMongoStampedAPI
+    api = globalMongoStampedAPI()
+    logs.info("starting worker for %s" % functions.keys())
     worker = StampedWorker(['localhost:4730'])
-    for k,v in functions.items():
-        def wrapper(worker, job):
+    def wrapper(worker, job):
+        try:
+            k = job.task
+            logs.begin(saveLog=api._logsDB.saveLog,
+                       saveStat=api._statsDB.addStat,
+                       nodeName=api.node_name)
+            logs.async_request(k)
+            v = functions[k]
+            data = pickle.loads(job.data)
+            logs.info("%s: %s: %s" % (k, v, data))
+            v(k, data)
+        except Exception as e:
+            logs.error(str(e))
+        finally:
             try:
-                logs.begin(saveLog=stampedAPI._logsDB.saveLog,
-                           saveStat=stampedAPI._statsDB.addStat,
-                           nodeName=stampedAPI.node_name)
-                data = pickle.loads(job.data)
-                logs.info("%s: %s" % (k, data))
-                v(k, data)
-            except Exception as e:
-                logs.error(str(e))
-            finally:
-                try:
-                    logs.save()
-                except Exception:
-                    print 'Unable to save logs'
-                    import traceback
-                    traceback.print_exc()
-                    logs.warning(traceback.format_exc())
-            return ''
+                logs.save()
+            except Exception:
+                print 'Unable to save logs'
+                import traceback
+                traceback.print_exc()
+                logs.warning(traceback.format_exc())
+        return ''
+    for k,v in functions.items():
         worker.register_task(k, wrapper)
     worker.work(poll_timeout=1)
 
@@ -78,10 +84,10 @@ def apiTasks():
     m[api.taskName(api.customizeStampAsync)] = customizeStampAsyncHelper
     return m
 
-
 if __name__ == '__main__':
     m = enrichTasks()
     m.update(apiTasks())
+    print(m)
     main(10, m)
 
 
