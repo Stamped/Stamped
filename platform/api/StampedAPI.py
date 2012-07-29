@@ -177,18 +177,6 @@ class StampedAPI(AStampedAPI):
 
         return self._node_name
 
-    def callTask(self, fn, payload, **options):
-        assert hasattr(self, fn)
-
-        try:
-            return tasks.Tasks.call(fn, payload)
-        except Exception as e:
-            logs.warning
-            fallback = options.pop('fallback', True)
-            if fallback:
-                return getattr(self, fn)(**payload)
-
-            raise
 
     def API_CALL(f):
         @wraps(f)
@@ -287,7 +275,7 @@ class StampedAPI(AStampedAPI):
 
             # Asynchronously generate stamp file
 
-            self.callTask('customizeStampAsync', {'primary': primary, 'secondary': secondary})
+            tasks.Tasks.callFunction(self.customizeStampAsync, {'primary': primary, 'secondary': secondary})
 
             # try:
             #     payload = {'primary': primary, 'secondary': secondary}
