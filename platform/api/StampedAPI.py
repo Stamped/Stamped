@@ -177,6 +177,19 @@ class StampedAPI(AStampedAPI):
 
         return self._node_name
 
+    def callTask(self, fn, payload, **options):
+        assert hasattr(self, fn)
+
+        try:
+            return tasks.Tasks.call(fn, payload)
+        except Exception as e:
+            logs.warning
+            fallback = options.pop('fallback', True)
+            if fallback:
+                return getattr(self, fn)(**payload)
+
+            raise
+
     def API_CALL(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
@@ -273,7 +286,17 @@ class StampedAPI(AStampedAPI):
             account.color_secondary = secondary
 
             # Asynchronously generate stamp file
-            tasks.invoke(tasks.APITasks.customizeStamp, args=[primary, secondary])
+
+            self.callTask('customizeStampAsync', {'primary': primary, 'secondary': secondary})
+
+            # try:
+            #     payload = {'primary': primary, 'secondary': secondary}
+            #     tasks.Tasks.call('apiCustomizeStamp', payload)
+
+            # except Exception as e:
+            #     self.customizeStampAsync(primary, secondary)
+            #     logs.warning("Async task failed: %s" % e)
+
         else:
             account.color_primary   = '004AB2'
             account.color_secondary = '0057D1'
