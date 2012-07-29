@@ -224,6 +224,31 @@ def getS3Key(filename):
         key = bucket.new_key(filename)
     return key
 
+def findAmicablePairsNaive(n):
+    def sumOfDivisors(i):
+        s = 0
+        for j in range(1, i):
+            if i % j == 0:
+                s += j
+        return s
+    results = []
+    for i in range(n):
+        for j in range(i):
+            if sumOfDivisors(i) == j and i == sumOfDivisors(j):
+                results.append((i, j))
+    print results
+
+
+@task(queue='enrich', **retry_params)
+def enrichQueueFindAmicablePairsNaive(n):
+    findAmicablePairsNaive(n)
+
+
+@task(queue='api', **retry_params)
+def apiQueueFindAmicablePairsNaive(n):
+    findAmicablePairsNaive(n)
+
+
 def writeTimestampToS3(s3_filename, request_id):
     logs.debug('Writing timestamp to S3 file %s' % s3_filename)
     file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
