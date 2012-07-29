@@ -57,8 +57,8 @@ def getClient():
 def call(job, payload, **options):
 
     # Run synchronously if not on EC2
-    if not utils.is_ec2():
-        raise Exception
+    # if not utils.is_ec2():
+    #     raise Exception
 
     # Connect to broker
     client = getClient()
@@ -82,3 +82,9 @@ def callFunction(fn, payload, **options):
             return fn(**payload)
 
         raise
+
+
+
+
+
+        
