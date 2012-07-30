@@ -1386,9 +1386,11 @@ class StampedAPI(AStampedAPI):
         tasks.invoke(tasks.APITasks.buildGuide, args=[authUserId])
 
         # Post to Facebook Open Graph if enabled
+        logs.info('about to call getOpenGraphShareSettings')
         share_settings = self._getOpenGraphShareSettings(authUserId)
         if share_settings is not None and share_settings.share_follows:
             friendAcct = self.getAccount(userId)
+            logs.info('no share settings')
 
             # We need to check two things: 1) The friend has a linked FB account
             #                              2) We have the friend's FB 'third_party_id'.  If not, we'll get it
@@ -1396,6 +1398,7 @@ class StampedAPI(AStampedAPI):
                friendAcct.linked.facebook.linked_user_id is not None:
                 # If the friend has an FB linked account but we don't have the third_party_id, get it
                 if friendAcct.linked.facebook.third_party_id is None:
+                    logs.info('no third party id')
                     friend_fb_id = friendAcct.linked.facebook.linked_user_id
                     acct = self.getAccount(authUserId)
                     token = acct.linked.facebook.token
