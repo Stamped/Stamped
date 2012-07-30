@@ -348,8 +348,12 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         
                         .nav {
                             display: none;
-                            color: @text1 !important;
                             cursor: pointer;
+                            color: #888 !important;
+                            
+                            &:hover, &:active {
+                                color: #000 !important;
+                            }
                         }
                     }
                     
@@ -377,7 +381,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         margin: 2em 0 1em;
                         
                         p.resizable {
-                            max-height: 4.5em;
+                            max-height: 4.2em;
                             overflow: hidden;
                             text-overflow: ellipsis;
                         }
