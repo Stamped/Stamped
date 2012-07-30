@@ -102,12 +102,8 @@ def enterWorkLoop(functions):
         worker.register_task(k, wrapper)
     worker.work(poll_timeout=1)
 
-def main(count, functions=None, api=False):
-    pool = utils.LoggingThreadPool(count)
-    greenlets = []
-    for i in range(count):
-        pool.spawn(enterWorkLoop, functions)
-    pool.join()
+def main(functions=None, api=False):
+    enterWorkLoop(functions)
 
 
 def enrichTasks():
@@ -192,9 +188,9 @@ if __name__ == '__main__':
     # All workers have test tasks enabled.
     arg = sys.argv[1]
     if arg == 'enrich':
-        main(10, functions = enrichTasks(), api=False)
+        main(functions = enrichTasks(), api=False)
     elif arg == 'api':
-        main(10, functions = None, api=True)
+        main(functions = None, api=True)
     else:
         print "Unrecognized queue"
 
