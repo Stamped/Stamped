@@ -4886,7 +4886,7 @@ class StampedAPI(AStampedAPI):
         # Call async process
         payload = {
             'authUserId': authUserId,
-            'entityId': entityId,
+            'entityId': entity.entity_id,
             'stampId': stampId,
             'previouslyTodoed': previouslyTodoed,
         }
