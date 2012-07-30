@@ -89,9 +89,9 @@ class StampedAPIProxy(object):
         if self._ec2:
             key = str("web::getAccountByScreenName::%s" % screen_name)
             
-            ret = self._try_get_cache(key)
-            if ret is not None:
-                return ret
+            #ret = self._try_get_cache(key)
+            #if ret is not None:
+            #    return ret
             
             ret = self._export(self.api.getAccountByScreenName(screen_name).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
@@ -102,9 +102,9 @@ class StampedAPIProxy(object):
         if self._ec2:
             key = str("web::getAccount::%s" % user_id)
             
-            ret = self._try_get_cache(key)
-            if ret is not None:
-                return ret
+            #ret = self._try_get_cache(key)
+            #if ret is not None:
+            #    return ret
             
             ret = self._export(self.api.getAccount(user_id).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
