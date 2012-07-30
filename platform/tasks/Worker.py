@@ -25,11 +25,26 @@ def handler(signum, frame):
 
 signal.signal(signal.SIGTERM, handler)
 
+def getHosts():
+    stack = libs.ec2_utils.get_stack()
+
+    if stack is None:
+        return ['localhost:4730']
+
+    hosts = []
+    for node in stack['nodes']:
+        if 'broker' in node['roles'] or 'monitor' in node['roles']: # TEMP: monitor is deprecated
+            hosts.append("%s:4730" % node['private_ip_address'])
+
+    assert len(hosts) > 0
+
+    return hosts
+    
 def enterWorkLoop(functions):
     from MongoStampedAPI import globalMongoStampedAPI
     api = globalMongoStampedAPI()
     logs.info("starting worker for %s" % functions.keys())
-    worker = StampedWorker(['localhost:4730'])
+    worker = StampedWorker(getHosts())
     def wrapper(worker, job):
         try:
             k = job.task
