@@ -26,6 +26,7 @@ class Dashboard(object):
         self.stamp_collection = api._stampDB._collection
         self.acct_collection = api._userDB._collection
         self.query = logsQuery
+        
         self.writer = statWriter('dashboard')
         conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domain = conn.get_domain('dashboard')
@@ -131,7 +132,7 @@ class Dashboard(object):
 
     def todaysUsers(self):
         fun = (lambda bgn,end: self.query.activeUsers(bgn, end))
-        return self.getStats('users',fun,True)
+        return self.getStats('users',fun)
     
 
         
