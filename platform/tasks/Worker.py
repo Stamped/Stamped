@@ -6,6 +6,7 @@ import Globals
 import gearman, gevent, time, pickle
 import sys
 import logs
+import libs.ec2_utils
 
 import signal, os
 
