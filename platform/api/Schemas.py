@@ -1756,7 +1756,6 @@ class Activity(Schema):
                         commentobjects.append(comments[str(commentId)])
                 result.objects.comments = commentobjects
 
-        logs.debug("ENRICHED ENTITY: %s" % result)
         return result
 
 class EnrichedActivity(Schema):
