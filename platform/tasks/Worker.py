@@ -92,6 +92,7 @@ def main(count, functions):
         pool.spawn(enterWorkLoop, functions)
     pool.join()
 
+
 def enrichTasks():
     from MongoStampedAPI import globalMongoStampedAPI
     api = globalMongoStampedAPI()
