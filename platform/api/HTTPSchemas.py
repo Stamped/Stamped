@@ -82,7 +82,7 @@ def _profileImageURL(screenName, cache=None, size=None):
     image = "%s.jpg" % (str(screenName).lower())
     if size is not None:
         image = "%s-%dx%d.jpg" % (str(screenName).lower(), size, size)
-
+    
     if not cache:
         url = 'http://static.stamped.com/users/default.jpg'
     elif cache + timedelta(days=1) <= datetime.utcnow():

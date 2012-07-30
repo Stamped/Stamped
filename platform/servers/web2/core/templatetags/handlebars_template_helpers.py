@@ -33,8 +33,8 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     if len(args) == 1 and isinstance(size, (basestring, int)):
         size = int(args[0])
     
-    name = scope.get('name')
     screen_name = scope.get('screen_name')
+    name = scope.get('name')
     alt  = ""
     
     if size > 72:
@@ -45,9 +45,12 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
         
         alt = 'alt="%s" ' % alt
     
-    url  = scope.get('image_url', "http://static.stamped.com/users/default.jpg")
+    url = scope.get('image_url', None)
     
-    if not url.endswith('default.jpg'):
+    if url is None:
+        ts  = scope.get('timestamp', {}).get('image_cache', None)
+        url = HTTPSchemas._profileImageURL(screen_name, ts, size)
+    elif not url.endswith('default.jpg'):
         url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name.lower(), size, size)
     
     return pybars.strlist('<img %s src="%s" />' % (alt, url))
