@@ -92,7 +92,7 @@ _functionSets = {
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print 'Must provide at least one function set (i.e. %s)' %  ','.join(_functionSets.keys())
-        return
+        sys.exit(1)
     m = {}
     for k in sys.argv[1:]:
         if k in _functionSets:
@@ -100,7 +100,7 @@ if __name__ == '__main__':
             m.update(f())
         else:
             print("%s is not a valid function set" % k)
-            return
+            sys.exit(1)
     main(10, m)
 
 
