@@ -8,6 +8,7 @@ import sys
 import logs
 import libs.ec2_utils
 import random
+import utils
 
 import signal, os
 
@@ -48,18 +49,20 @@ def enterWorkLoop(functions):
     logs.info("starting worker for %s" % functions.keys())
     worker = StampedWorker(getHosts())
     def wrapper(worker, job):
-        request_num = random.randint(1, 1 << 32)
         try:
-            k = job.task
+            job_data = pickle.loads(job.data)
+            print(job_data)
+            k = job_data['key']
+            request_num = job_data['task_id']
             logs.begin(saveLog=api._logsDB.saveLog,
                        saveStat=api._statsDB.addStat,
                        nodeName=api.node_name)
             logs.async_request(k)
             v = functions[k]
-            data = pickle.loads(job.data)
-            logs.info("Request %d: %s: %s: %s" % (request_num, k, v, data))
+            data = job_data['data']
+            logs.info("Request %s: %s: %s: %s" % (request_num, k, v, data))
             v(k, data)
-            logs.info("Finished with request %d" % (request_num,))
+            logs.info("Finished with request %s" % (request_num,))
         except Exception as e:
             logs.error("Failed request %d" % (request_num,))
             logs.report()
@@ -73,15 +76,21 @@ def enterWorkLoop(functions):
                 traceback.print_exc()
                 logs.warning(traceback.format_exc())
         return ''
+    queues = set()
     for k,v in functions.items():
+        queue = k.split('::')[0]
+        queues.add(queue)
+
+    for k in queues:
         worker.register_task(k, wrapper)
     worker.work(poll_timeout=1)
 
 def main(count, functions):
+    pool = utils.LoggingThreadPool(count)
     greenlets = []
     for i in range(count):
-        greenlets.append(gevent.spawn(enterWorkLoop, functions))
-    gevent.joinall(greenlets)
+        pool.spawn(enterWorkLoop, functions)
+    pool.join()
 
 def enrichTasks():
     from MongoStampedAPI import globalMongoStampedAPI
@@ -89,11 +98,11 @@ def enrichTasks():
     m = {}
     def mergeEntityAsyncHelper(key, data):
         api.mergeEntityAsync(data['entityDict'])
-    m[api.taskName(api.mergeEntityAsync)] = mergeEntityAsyncHelper
+    m[api.taskKey('enrich', api.mergeEntityAsync)] = mergeEntityAsyncHelper
 
     def mergeEntityIdAsyncHelper(key, data):
         api.mergeEntityIdAsync(data['entity_id'])
-    m[api.taskName(api.mergeEntityIdAsync)] = mergeEntityIdAsyncHelper
+    m[api.taskKey('enrich', api.mergeEntityIdAsync)] = mergeEntityIdAsyncHelper
     return m
 
 def apiTasks():
@@ -102,9 +111,12 @@ def apiTasks():
     m = {}
     def customizeStampAsyncHelper(key, data):
         api.customizeStampAsync()
-    m[api.taskName(api.customizeStampAsync)] = customizeStampAsyncHelper
+    m[api.taskKey('api', api.customizeStampAsync)] = customizeStampAsyncHelper
     return m
 
+################
+### TEST STUFF
+################
 
 def findAmicablePairsNaive(n):
     def sumOfDivisors(i):
