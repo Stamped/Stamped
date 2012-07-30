@@ -83,8 +83,8 @@ urlpatterns = patterns('',
     url(r'^privacy-mobile/?$',                          'core.views.privacy_policy'), 
     
     # e.g., stamped.com/mobile/terms-mobile.html, stamped.com/terms-mobile.html
-    url(r'^mobile/terms-mobile.html/?$',                'mobile.views.terms_of_service'), 
-    url(r'^mobile/terms-mobile/?$',                     'mobile.views.terms_of_service'), 
+    url(r'^mobile/terms-mobile.html/?$',                'core.views.terms_of_service'), 
+    url(r'^mobile/terms-mobile/?$',                     'core.views.terms_of_service'), 
     url(r'^terms-mobile.html/?$',                       'core.views.terms_of_service'), 
     url(r'^terms-mobile/?$',                            'core.views.terms_of_service'), 
     

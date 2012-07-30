@@ -21,6 +21,7 @@
         script: libs/jquery.jscrollpane.js
     
     Third-party library dependencies:
+        script: libs/jplayer/jquery.jplayer.js
     
     Core stamped dependencies:
         script: utils.js
@@ -208,41 +209,94 @@
                         <div class="entity-actions">
                             {% for a in entity.actions %}
                                 {% with action=a.action %}
-                                    {% if action.sources.0.link and action.sources|length == 1 %}
-                                        <a class='action-link' href="{{action.sources.0.link}}">
-                                    {% else %}
-                                        <a class='action-link' href="">
-                                    {% endif %}
-                                        
-                                        <div class="action action-{{action.type}} clearfix">
-                                            <div class='entity-title' style="display: none;">
-                                                {{stamp.entity.title}}
-                                            </div>
-                                            
-                                            <div class='lhs'>
-                                                <div class='action-icon action-icon-{{action.type}}'></div>
-                                                
-                                                <!--{% if a.icon %}
-                                                    <img class='action-icon' src="{{a.icon}}" />
-                                                {% endif %}-->
-                                                
-                                                <div class='action-name'>{{a.name}}</div>
-                                            </div>
-                                            
-                                            {% if action.sources.0 %}
-                                                <div class="rhs">
-                                                    {% for source in action.sources %}
-                                                        <div class="source source-{{source.source}}">
-                                                            <!--{% if source.icon %}
-                                                                <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
-                    />
-                                                            {% endif %}-->
+                                    {% if action.type != "playlist" %}
+                                        {% if action.type == "queue" %}
+                                            <!-- TODO: support Netflix add to instant queue -->
+                                        {% else %}{% if action.type == "listen" %}
+                                            {% for source in action.sources %}
+                                                {% if source.source == "spotify" %}
+                                                    <a class='action-link' href="{{source.completion_data.source_id}}">
+                                                        <div class="action action-{{action.type}} clearfix">
+                                                            <div class='lhs'>
+                                                                <div class='action-icon action-icon-{{action.type}}'></div>
+                                                                <div class='action-name'>Open in Spotify</div>
+                                                            </div>
+                                                            
+                                                            <div class="rhs">
+                                                                <div class="source source-{{source.source}}" {% if source.completion_data.source_id %} data-source-id="{{source.completion_data.source_id}}" {% endif %} {% if source.source_data.preview_url %} data-source-preview-url="{{source.source_data.preview_url}}" {% endif %}>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    {% endfor %}
-                                                </div>
+                                                    </a>
+                                                {% else %}{% if source.source == "itunes" %}
+                                                    {% if stamp.entity.subcategory == "song" %}
+                                                        <a class='action-link' {% if source.source_data.preview_url %} href="{{source.source_data.preview_url}}"{% else %}href=""{% endif %}>
+                                                            <div class="action action-{{action.type}} stopped clearfix">
+                                                                <div class='lhs'>
+                                                                    <div class='stopped'>
+                                                                        <div class='action-icon action-icon-{{action.type}}'></div>
+                                                                        <div class='action-name'>Play preview via iTunes</div>
+                                                                    </div>
+                                                                    
+                                                                    <div class='playing'>
+                                                                        <div class='action-icon action-icon-playing'></div>
+                                                                        <div class='action-name'>Pause iTunes preview</div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div class="rhs">
+                                                                    <div class="source source-{{source.source}}" {% if source.completion_data.source_id %} data-source-id="{{source.completion_data.source_id}}" {% endif %} {% if source.source_data.preview_url %} data-source-preview-url="{{source.source_data.preview_url}}" {% endif %}>
+                                                                    </div>
+                                                                    
+                                                                    <audio id="itunes-preview" src="{{source.source_data.preview_url}}" preload="auto" />
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    {% else %}{% if stamp.entity.subcategory == "album" %}
+                                                    {% else %}{% if stamp.entity.subcategory == "artist" %}
+                                                    {% endif %}{% endif %}{% endif %}
+                                                {% else %}{% if source.source == "rdio" %}
+                                                    <!-- TODO: support proper Rdio playback and linking -->
+                                                {% endif %}{% endif %}{% endif %}
+                                            {% endfor %}
+                                        {% else %}
+                                            {% if action.sources.0.link and action.sources|length == 1 %}
+                                                <a class='action-link' href="{{action.sources.0.link}}">
+                                            {% else %}
+                                                <a class='action-link' href="">
                                             {% endif %}
-                                        </div>
-                                    </a>
+                                                
+                                                <div class="action action-{{action.type}} clearfix">
+                                                    <div class='entity-title' style="display: none;">
+                                                        {{stamp.entity.title}}
+                                                    </div>
+                                                    
+                                                    <div class='lhs'>
+                                                        <div class='action-icon action-icon-{{action.type}}'></div>
+                                                        
+                                                        <!--{% if a.icon %}
+                                                            <img class='action-icon' src="{{a.icon}}" />
+                                                        {% endif %}-->
+                                                        
+                                                        <div class='action-name'>{{a.name}}</div>
+                                                    </div>
+                                                    
+                                                    {% if action.sources.0 %}
+                                                        <div class="rhs">
+                                                            {% for source in action.sources %}
+                                                                <div class="source source-{{source.source}}">
+                                                                    <!--{% if source.icon %}
+                                                                        <img class="source-icon" src="{{source.icon}}" alt="{% if source.name %}{{source.name}}{% else %}{{action.name}}{% endif %}"
+                            />
+                                                                    {% endif %}-->
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </a>
+                                        {% endif %}{% endif %}
+                                    {% endif %}
                                 {% endwith %}
                             {% endfor %}
                         </div>
@@ -327,6 +381,8 @@
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
+        
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
         
         <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/mobile/sdetail.js"></script>
