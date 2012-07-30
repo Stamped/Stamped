@@ -43,7 +43,7 @@ class logsQuery(object):
         self.statTimeByNode = {}
 
         if domain_name is None:
-            domain_name = 'stress'
+            domain_name = 'bowser'
             
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
