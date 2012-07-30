@@ -727,7 +727,10 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def getAccount(self, authUserId):
         return self._accountDB.getAccount(authUserId)
-
+    
+    def getAccountByScreenName(self, screen_name):
+        return self._accountDB.getAccountByScreenName(screen_name)
+    
     @API_CALL
     def getLinkedAccount(self, authUserId, service_name):
         account = self.getAccount(authUserId)
