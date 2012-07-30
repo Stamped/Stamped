@@ -150,8 +150,5 @@
     {% if user.linked.facebook.third_party_id and user.linked.facebook.third_party_id|length > 0 %}
         <meta property="fb:profile_id"      content="{{user.linked.facebook.third_party_id}}" />
     {% endif %}
-    
-    <meta property="og:test" content="{{user.linked.facebook}}" />
-    <meta property="og:test" content="{{user.linked.facebook.third_party_id}}" />
 {% endif %}
 
