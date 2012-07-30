@@ -22,7 +22,7 @@ IS_PROD  = libs.ec2_utils.is_prod_stack()
 
 class Dashboard(object):
     
-    def __init__(self,api=MongoStampedAPI(),logsQuery=logsQuery()):
+    def __init__(self,api=MongoStampedAPI(), logsQuery=logsQuery()):
         self.stamp_collection = api._stampDB._collection
         self.acct_collection = api._userDB._collection
         self.query = logsQuery
@@ -30,42 +30,50 @@ class Dashboard(object):
         self.writer = statWriter('dashboard')
         conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domain = conn.get_domain('dashboard')
+     
         
     def getStats(self,stat,fun):
         
-        # Today's Stats
+        """
+        Today's Stats
+        """
+        
         total_today = 0
         today_hourly = []
         
         # See if we've stored data earlier
         query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,today().date().isoformat()))
-        
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
         
-        # Rebuild up until the last full hour (eg. if it is currently 8:04, fill in stats thru 8:00)
+        # Build up until the current hour (e.g. if it is currently 8:04, fill in stats thru 9:00)
         for hour in range (len(today_hourly), est().hour+2):
             bgn = today()
             end = today() + timedelta(hours=hour)
             total_today = fun(bgn,end)
             today_hourly.append(total_today)
         
-            # Only store data for full hours
+            # Only store data for full hours (e.g. if it is currently 8:40, only store stats thru 8:00)
+            # Also only write from a bowser stack connection to prevent data corruption
             if hour == est().hour() and IS_PROD:
                 self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
         
         
-        # Yesterday's Stats
+        """
+        Yesterday's Stats
+        """
+        
         total_yest = 0
         yest_hourly = []
         
+        # See if we've stored data earlier
         query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,dayAgo(today()).date().isoformat()))
-
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 yest_hourly.append(int(i))
         
+        # If we didn't, rebuild all of yesterday's stats and save them if on bowser
         if len(yest_hourly) == 0:
             for hour in range (0,25):
                 bgn = dayAgo(today())
@@ -75,11 +83,15 @@ class Dashboard(object):
             if IS_PROD:
                 self.writer.writeHours({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
         
-        # Weekly Avg Stats
+        
+        """
+        Weekly Stats
+        """
+        
         weeklyAgg = []
         weeklyAvg = []
         
-        # See if we have a saved record
+        # See if we've stored data earlier
         query = self.domain.select('select hours from `dashboard` where itemName() = "%s-week-%s"' % (stat,weekAgo(today()).date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
@@ -97,7 +109,8 @@ class Dashboard(object):
                         weeklyAgg[hour] += daily
                     except Exception:
                         weeklyAgg.append(daily)
-                
+            
+            # Take the aggregate and make an average
             for hour in range (0,len(weeklyAgg)):
                 weeklyAvg.append(weeklyAgg[hour] / 6.0)
             
@@ -119,7 +132,6 @@ class Dashboard(object):
         
         
         return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(est().hour))],weeklyAvg,weeklyAvg[int(math.floor(est().hour))],deltaDay,deltaWeek
-    
     
     
     def newStamps(self):
