@@ -30,7 +30,7 @@ class Dashboard(object):
         conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domain = conn.get_domain('dashboard')
         
-    def getStats(self,stat,fun,unique=False):
+    def getStats(self,stat,fun):
         
         # Today's Stats
         total_today = 0
@@ -43,16 +43,16 @@ class Dashboard(object):
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
         
-        for hour in range (len(today_hourly)-1, est().hour+1):
+        # Rebuild up until the last full hour (eg. if it is currently 8:04, fill in stats thru 8:00)
+        for hour in range (len(today_hourly), est().hour+2):
             bgn = today()
-            end = today() + timedelta(hours=hour+1)
+            end = today() + timedelta(hours=hour)
             total_today = fun(bgn,end)
-            try:
-                today_hourly[hour] = total_today
-            except IndexError:
-                today_hourly.append(total_today)
-        if IS_PROD:
-            self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
+            today_hourly.append(total_today)
+        
+            # Only store data for full hours
+            if hour == est().hour() and IS_PROD:
+                self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
         
         
         # Yesterday's Stats
@@ -66,46 +66,32 @@ class Dashboard(object):
                 yest_hourly.append(int(i))
         
         if len(yest_hourly) == 0:
-            for hour in range (0,24):
-                if unique:
-                    bgn = dayAgo(today())
-                else:
-                    bgn = dayAgo(today()) + timedelta(hours=hour)
-                end = dayAgo(today()) + timedelta(hours=hour+1)
-                num = fun(bgn,end)
-                if not unique:
-                    total_yest += num
-                else:
-                    total_yest = num
+            for hour in range (0,25):
+                bgn = dayAgo(today())
+                end = dayAgo(today()) + timedelta(hours=hour)
+                total_yest = fun(bgn,end)
                 yest_hourly.append(total_yest)
-
-            self.writer.writeHours({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
-        
-        yest_hourly.insert(0, 0)
+            if IS_PROD:
+                self.writer.writeHours({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
         
         # Weekly Avg Stats
         weeklyAgg = []
         weeklyAvg = []
-        bgn = weekAgo(today())
-        end = bgn + timedelta(hours=1)
+        
+        # See if we have a saved record
         query = self.domain.select('select hours from `dashboard` where itemName() = "%s-week-%s"' % (stat,weekAgo(today()).date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 weeklyAvg.append(float(i))
         
+        # If not then compute and store
         if len(weeklyAvg) == 0: 
             for day in range (0,6):
                 daily = 0
-                if unique and day > 0:
-                    bgn = bgn + timedelta(days=1) 
-                for hour in range (0,24):
-                    num = fun(bgn,end)
-                    if not unique:
-                        daily += num
-                        bgn = bgn + timedelta(hours=1)
-                    else:
-                        daily = num
-                    end = end + timedelta(hours = 1)
+                bgn = weekAgo(today()) + timedelta(days=day) 
+                for hour in range (0,25):
+                    end = bgn + timedelta(hours=hour)
+                    daily = fun(bgn,end)
                     try:
                         weeklyAgg[hour] += daily
                     except Exception:
@@ -113,9 +99,13 @@ class Dashboard(object):
                 
             for hour in range (0,len(weeklyAgg)):
                 weeklyAvg.append(weeklyAgg[hour] / 6.0)
-            self.writer.writeHours({'stat': stat,'time':'week','bgn':weekAgo(today()).date().isoformat(),'hours':str(weeklyAvg)})
+            
+            if IS_PROD:
+                self.writer.writeHours({'stat': stat,'time':'week','bgn':weekAgo(today()).date().isoformat(),'hours':str(weeklyAvg)})
         
         
+        
+        # Compute D/D and D/W changes
         try:
             deltaDay = float(total_today - yest_hourly[int(math.floor(est().hour))])/(yest_hourly[int(math.floor(est().hour))])*100.0
         except ZeroDivisionError:
@@ -125,6 +115,7 @@ class Dashboard(object):
             deltaWeek = float(total_today - weeklyAvg[int(math.floor(est().hour))])/(weeklyAvg[int(math.floor(est().hour))])*100
         except ZeroDivisionError:
             deltaWeek = 0.0
+        
         
         return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(est().hour))],weeklyAvg,weeklyAvg[int(math.floor(est().hour))],deltaDay,deltaWeek
     
