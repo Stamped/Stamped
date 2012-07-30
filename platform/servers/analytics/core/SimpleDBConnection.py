@@ -60,7 +60,10 @@ class SimpleDBConnection(object):
         transition = 'where'
 
         for key,value in query_dict.items():
-            query = '%s %s %s="%s"' % (query, transition, key, value)
+            if "!=" in value:
+                query = '%s %s %s != "%s"' %  (query, transition, key, value[2:])
+            else:
+                query = '%s %s %s="%s"' % (query, transition, key, value)
             transition = 'and'
         
         if bgn is not None: 
@@ -110,8 +113,6 @@ class SimpleDBConnection(object):
             return self.statCount
         else:
             return self.statList[:limit]
-        
-        
             
             
             
