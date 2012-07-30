@@ -64,6 +64,15 @@ class StampedAPIProxy(object):
         
         return value
     
+    def _export(self, d):
+        for k, v in d.iteritems():
+            if isinstance(v, datetime.datetime)
+                d[k] = v.isoformat()
+            elif isinstance(v, dict):
+                d[k] = self._export(v)
+        
+        return d
+    
     def checkAccount(self, email):
         if self._ec2:
             user = self.api.checkAccount(email)
@@ -84,7 +93,7 @@ class StampedAPIProxy(object):
             if ret is not None:
                 return ret
             
-            ret = self.api.getAccountByScreenName(screen_name).dataExport()
+            ret = self._export(self.api.getAccountByScreenName(screen_name).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
         else:
             return self._handle_get("users/show.json", { 'screen_name' : screen_name })
@@ -97,7 +106,7 @@ class StampedAPIProxy(object):
             if ret is not None:
                 return ret
             
-            ret = self.api.getAccount(user_id).dataExport()
+            ret = self._export(self.api.getAccount(user_id).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
         else:
             return self._handle_get("users/show.json", { 'user_id' : user_id })
