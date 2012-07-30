@@ -193,13 +193,13 @@
                                 <div class="inset-stamp">
                                     <div class="stamp-count-dependent stamp-count-default">
                                         <div class="stamp-count user-primary">
-                                            {{user.num_stamps}}
+                                            {{user.stats.num_stamps}}
                                         </div>
                                         
-                                        <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                        <p>{% if user.stats.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
                                     </div>
                                     
-                                    {% for distro in user.distribution %}
+                                    {% for distro in user.stats.distribution %}
                                         <div class="stamp-count-dependent stamp-count-{{distro.category}}">
                                             <div class="stamp-count user-primary">
                                                 {{distro.count}}
