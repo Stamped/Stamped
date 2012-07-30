@@ -101,7 +101,7 @@ def apiTasks():
     return m
 
 
-def findAmicablePairsNaive(n=None):
+def findAmicablePairsNaive(n):
     def sumOfDivisors(i):
         s = 0
         for j in range(1, i):
@@ -130,7 +130,7 @@ def getS3Key(filename):
         key = bucket.new_key(filename)
     return key
 
-def writeTimestampToS3(s3_filename=None, request_id=""):
+def writeTimestampToS3(s3_filename, request_id=""):
     logs.debug('Writing timestamp to S3 file %s' % s3_filename)
     file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
     delay = 0.1
@@ -149,9 +149,13 @@ def writeTimestampToS3(s3_filename=None, request_id=""):
 
 
 def testTasks():
+    def writeTimestampToS3Helper(key, data):
+        api.mergeEntityAsync(data['s3_filename'], data.get('request_id', ''))
+    def findAmicablePairsNaiveHelper(key, data):
+        api.mergeEntityAsync(data['n'])
     return {
-        'writeTimestampToS3' : writeTimestampToS3,
-        'findAmicablePairsNaive' : findAmicablePairsNaive
+        'writeTimestampToS3' : writeTimestampToS3Helper,
+        'findAmicablePairsNaive' : findAmicablePairsNaiveHelper
     }
 
 _functionSets = {
