@@ -540,7 +540,7 @@ class StampedAPI(AStampedAPI):
             'twitterKey': new_tw_account.user_token, 
             'twitterSecret': new_tw_account.user_secret
         }
-        self.callTask(self.alertFollowersFromTwitter, payload)
+        self.callTask(self.alertFollowersFromTwitterAsync, payload)
         
         return account
 
