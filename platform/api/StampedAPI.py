@@ -178,13 +178,14 @@ class StampedAPI(AStampedAPI):
 
         return self._node_name
 
-    def taskName(self, fn):
-        return 'api::%s' % fn.__name__
+    def taskKey(self, queue, fn):
+        return '%s::%s' % (queue, fn.__name__)
 
     def callTask(self, fn, payload, **options):
         try:
-            job = self.taskName(fn)
-            return tasks.Tasks.call(job, payload)
+            queue = options.pop('queue', 'api').lower()
+            key = self.taskKey(queue, fn)
+            return tasks.Tasks.call(queue, key, payload)
 
         except Exception as e:
             logs.warning("Failed to run task '%s': %s" % (fn.__name__, e))

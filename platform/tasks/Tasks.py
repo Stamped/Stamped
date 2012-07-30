@@ -11,6 +11,7 @@ import libs.ec2_utils
 
 from errors import *
 from datetime import datetime, timedelta
+from bson.objectid import ObjectId
 
 
 # Global client
@@ -64,9 +65,9 @@ def resetClient():
     global __client
     __client = None
 
-def call(job, payload, **options):
+def call(queue, key, payload, **options):
     # Naming convention is "namespace::function"
-    # assert '::' in job
+    # assert '::' in key
 
     # Run synchronously if not on EC2
     # if not utils.is_ec2():
@@ -92,6 +93,14 @@ def call(job, payload, **options):
         logs.warning(msg)
         raise Exception(msg)
 
+    # Build payload
+    data = {
+        'task_id': str(ObjectId()),
+        'key': key,
+        'data': payload,
+        'timestamp': datetime.utcnow()
+    }
+
     maxRetries = 5
     numRetries = 0
 
@@ -99,7 +108,7 @@ def call(job, payload, **options):
         try:
             # Submit job
             client = getClient()
-            client.submit_job(job, pickle.dumps(payload), background=True)
+            client.submit_job(queue, pickle.dumps(data), background=True)
 
             # Reset errors
             __errors = []
