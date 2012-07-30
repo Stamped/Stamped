@@ -98,6 +98,7 @@ urlpatterns = patterns('',
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/mobile/travis
     url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/?$',    'mobile.views.profile'), 
+    url(r'^mobile/(?P<screen_name>[\w-]{1,20})\/s\/?$', 'mobile.views.profile'), 
     
     
     # ------------------------------- MAP --------------------------------------
@@ -191,6 +192,7 @@ urlpatterns = patterns('',
     # ----------------------------- PROFILE ------------------------------------
     # e.g., stamped.com/travis
     url(r'^(?P<screen_name>[\w-]{1,20})\/?$',   'core.views.profile'), 
+    url(r'^(?P<screen_name>[\w-]{1,20})\/s\/?$','core.views.profile'), 
     
     
     # ------------------------------- MAP --------------------------------------

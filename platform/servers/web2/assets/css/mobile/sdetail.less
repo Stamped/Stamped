@@ -560,6 +560,7 @@
                             .source-image(100px);
                         }
                     }
+                    
                 }
             }
             
@@ -676,6 +677,16 @@
             }
         }
     }
+}
+
+.lhs .stopped, .lhs .playing, .lhs .media-loading {
+    display: none;
+}
+
+.stopped .lhs .stopped, 
+.media-loading .lhs .media-loading, 
+.playing .lhs .playing {
+    display: block !important;
 }
 
 
