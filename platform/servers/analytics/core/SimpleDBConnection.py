@@ -67,11 +67,11 @@ class SimpleDBConnection(object):
             transition = 'and'
         
         if bgn is not None: 
-            query = '%s %s bgn > %s' & (query, transition, t0.isoformat())
+            query = '%s %s bgn > "%s"' % (query, transition, bgn.isoformat())
             transition = 'and'
         
         if end is not None:
-            query = '%s %s bgn > %s' & (query, transition, t0.isoformat())
+            query = '%s %s bgn > "%s"' % (query, transition, bgn.isoformat())
             transition = 'and'
             
         init_results = domain.select(query)
