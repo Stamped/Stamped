@@ -990,7 +990,7 @@ class StampedAPI(AStampedAPI):
                 'twitterKey': linkedAccount.token, 
                 'twitterSecret': linkedAccount.secret,
             }
-            self.callTask(self.alertFollowersFromTwitter, payload)
+            self.callTask(self.alertFollowersFromTwitterAsync, payload)
 
         return linkedAccount
 
