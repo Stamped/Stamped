@@ -49,9 +49,9 @@ def enterWorkLoop(functions):
     logs.info("starting worker for %s" % functions.keys())
     worker = StampedWorker(getHosts())
     def wrapper(worker, job):
+        k = 'not parsed yet'
         try:
             job_data = pickle.loads(job.data)
-            print(job_data)
             k = job_data['key']
             request_num = job_data['task_id']
             logs.begin(saveLog=api._logsDB.saveLog,
@@ -66,6 +66,17 @@ def enterWorkLoop(functions):
         except Exception as e:
             logs.error("Failed request %d" % (request_num,))
             logs.report()
+
+            if libs.ec2_utils.is_ec2():
+                try:
+                    email = {}
+                    email['from'] = 'Stamped <noreply@stamped.com>'
+                    email['to'] = 'dev@stamped.com'
+                    email['subject'] = '%s - Failed Async Task - %s - %s' % (api.node_name, k ,datetime.utcnow().isoformat())
+                    email['body'] = logs.getHtmlFormattedLog()
+                    utils.sendEmail(email, format='html')
+                except Exception as e:
+                    logs.warning('UNABLE TO SEND EMAIL')
         finally:
             logs.info('Saving request log for request %d' % (request_num,))
             try:
