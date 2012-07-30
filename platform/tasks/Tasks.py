@@ -107,6 +107,7 @@ def call(queue, key, payload, **options):
     while True:
         try:
             # Submit job
+            logs.info("Submitting task: %s" % data)
             client = getClient()
             client.submit_job(queue, pickle.dumps(data), background=True)
 
