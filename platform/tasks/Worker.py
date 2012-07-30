@@ -155,9 +155,9 @@ def writeTimestampToS3(s3_filename, request_id=""):
 
 def testTasks():
     def writeTimestampToS3Helper(key, data):
-        api.mergeEntityAsync(data['s3_filename'], data.get('request_id', ''))
+        writeTimestampToS3(data['s3_filename'], data.get('request_id', ''))
     def findAmicablePairsNaiveHelper(key, data):
-        api.mergeEntityAsync(data['n'])
+        findAmicablePairsNaive(data['n'])
     return {
         'writeTimestampToS3' : writeTimestampToS3Helper,
         'findAmicablePairsNaive' : findAmicablePairsNaiveHelper
