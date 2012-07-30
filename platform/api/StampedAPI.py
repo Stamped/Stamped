@@ -3167,7 +3167,9 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
-            return 'place'
+            # place type is broken for some reason. We'll use establishment for now
+            return 'establishment'
+            #return 'place'
 
         elif kind == 'person':
             if 'artist' in types:
