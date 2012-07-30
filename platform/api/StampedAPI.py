@@ -5063,7 +5063,6 @@ class StampedAPI(AStampedAPI):
     def getActivity(self, authUserId, scope, limit=20, offset=0):
 
         activityData, final = self._activityCache.getFromCache(limit, offset, scope=scope, authUserId=authUserId)
-        logs.debug("ACTIVITY DATA: %s" % activityData)
 
         # Append user objects
         userIds     = {}
@@ -5129,10 +5128,6 @@ class StampedAPI(AStampedAPI):
         activity = []
         for item in activityData:
             try:
-                logs.debug("ACTIVITY ITEM: %s" % item)
-                logs.debug("USERS: %s" % userIds)
-                logs.debug("STAMPS: %s" % stampIds)
-                logs.debug("ENTITIES: %s" % entityIds)
                 activity.append(item.enrich(authUserId  = authUserId,
                                             users       = userIds,
                                             stamps      = stampIds,
