@@ -87,7 +87,7 @@ class StampedAPIProxy(object):
             ret = self.api.getAccountByScreenName(screen_name).dataExport()
             return self._try_set_cache(key, ret, 600 * 3)
         else:
-            raise NotImplementedError
+            return self._handle_get("users/show.json", { 'screen_name' : screen_name })
     
     def getAccount(self, user_id):
         if self._ec2:
@@ -100,7 +100,7 @@ class StampedAPIProxy(object):
             ret = self.api.getAccount(user_id).dataExport()
             return self._try_set_cache(key, ret, 600 * 3)
         else:
-            raise NotImplementedError
+            return self._handle_get("users/show.json", { 'user_id' : user_id })
     
     def updateAlerts(self, user_id, on, off):
         if self._ec2:
