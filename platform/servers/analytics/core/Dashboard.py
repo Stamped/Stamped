@@ -9,6 +9,7 @@ __license__   = "TODO"
 import Globals
 
 import keys.aws, logs, utils, math, time
+import libs.ec2_utils
 
 from boto.sdb.connection                            import SDBConnection
 from api.MongoStampedAPI                            import MongoStampedAPI
@@ -16,6 +17,8 @@ from servers.analytics.core.analytics_utils         import *
 from servers.analytics.core.logsQuery               import logsQuery
 from servers.analytics.core.statWriter              import statWriter
 from gevent.pool                                    import Pool
+
+IS_PROD  = libs.ec2_utils.is_prod_stack()
 
 class Dashboard(object):
     
@@ -48,8 +51,8 @@ class Dashboard(object):
                 today_hourly[hour] = total_today
             except IndexError:
                 today_hourly.append(total_today)
-            
-        self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
+        if IS_PROD:
+            self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
         
         
         # Yesterday's Stats
