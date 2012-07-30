@@ -46,13 +46,14 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
         
         alt = 'alt="%s" ' % alt
     
-    url = scope.get('image_url', None)
+    #url = scope.get('image_url', None)
+    #if url is None:
     
-    if url is None:
-        ts  = scope.get('timestamp', {}).get('image_cache', None)
-        url = api.HTTPSchemas._profileImageURL(screen_name, ts, size)
-    elif not url.endswith('default.jpg'):
-        url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name.lower(), size, size)
+    ts  = scope.get('timestamp', {}).get('image_cache', None)
+    url = api.HTTPSchemas._profileImageURL(screen_name, ts, size)
+    
+    #if not url.endswith('default.jpg'):
+    #    url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name.lower(), size, size)
     
     return pybars.strlist('<img %s src="%s" />' % (alt, url))
 

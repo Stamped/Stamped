@@ -133,7 +133,7 @@
     {% endif %}{% endif %}{% endif %}{% endif %}
 {% else %}
     <meta property="og:type"                content="profile"/>
-    <meta property="og:title"               content="{{user.screen_name}}"/>
+    <meta property="og:title"               content={% if user.name and user.name|length >= 1 %}" user.name" {% else %}" user.screen_name "{% endif %}/>
     
     {% if user.image_url == "http://static.stamped.com/users/default.jpg" %}
         <meta property="og:image"           content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
