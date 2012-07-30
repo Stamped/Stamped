@@ -38,7 +38,7 @@ class Stats():
                  'todos_c': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/todos/complete.json')),
                  'likes': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/stamps/likes/create.json')),
                  'entities': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/entities/create.json')),
-                 'friends': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/friendships/create.json')),
+                 'friends': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v1/friendships/create.json')),
                  'actions': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/actions/complete.json')),
                  }
     
