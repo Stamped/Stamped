@@ -100,6 +100,60 @@ def apiTasks():
     m[api.taskName(api.customizeStampAsync)] = customizeStampAsyncHelper
     return m
 
+
+def findAmicablePairsNaive(n=None):
+    def sumOfDivisors(i):
+        s = 0
+        for j in range(1, i):
+            if i % j == 0:
+                s += j
+        return s
+    results = []
+    for i in range(n):
+        for j in range(i):
+            if sumOfDivisors(i) == j and i == sumOfDivisors(j):
+                results.append((i, j))
+    print results
+
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+import keys.aws
+from contextlib import closing
+
+def getS3Key(filename):
+    BUCKET_NAME = 'stamped.com.static.images'
+
+    conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+    bucket = conn.create_bucket(BUCKET_NAME)
+    key = bucket.get_key(filename)
+    if key is None:
+        key = bucket.new_key(filename)
+    return key
+
+def writeTimestampToS3(s3_filename=None, request_id=""):
+    logs.debug('Writing timestamp to S3 file %s' % s3_filename)
+    file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
+    delay = 0.1
+    max_delay = 3
+    max_tries = 40
+    for i in range(max_tries):
+        try:
+            with closing(getS3Key(s3_filename)) as key:
+                key.set_contents_from_string(file_content)
+                key.set_acl('private')
+                return
+        except:
+            time.sleep(delay)
+            delay = min(max_delay, delay*1.5)
+    raise Exception('Failed 40 fucking times. How does that even happen.')
+
+
+def testTasks():
+    return {
+        'writeTimestampToS3' : writeTimestampToS3,
+        'findAmicablePairsNaive' : findAmicablePairsNaive
+    }
+
 _functionSets = {
     'enrich': enrichTasks,
     'api': apiTasks,
@@ -109,7 +163,8 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print 'Must provide at least one function set (i.e. %s)' %  ','.join(_functionSets.keys())
         sys.exit(1)
-    m = {}
+    # All workers have test tasks enabled.
+    m = testTasks()
     for k in sys.argv[1:]:
         if k in _functionSets:
             f = _functionSets[k]
