@@ -472,3 +472,11 @@ class StampedAddCommentPermissionsError(StampedPermissionsError):
 class StampedInvalidUniversalNewsItemError(StampedInputError):
     def __init__(self, msg=None):
         StampedInputError.__init__(self, msg)
+
+
+# Async
+class StampedTasksConnectionError(Exception):
+    pass
+
+class StampedTasksServerUnavailable(Exception):
+    pass
