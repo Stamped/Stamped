@@ -7,6 +7,7 @@ import gearman, gevent, time, pickle
 import sys
 import logs
 import libs.ec2_utils
+import random
 
 import signal, os
 
@@ -47,6 +48,7 @@ def enterWorkLoop(functions):
     logs.info("starting worker for %s" % functions.keys())
     worker = StampedWorker(getHosts())
     def wrapper(worker, job):
+        request_num = random.randint(1, 1 << 32)
         try:
             k = job.task
             logs.begin(saveLog=api._logsDB.saveLog,
@@ -55,11 +57,14 @@ def enterWorkLoop(functions):
             logs.async_request(k)
             v = functions[k]
             data = pickle.loads(job.data)
-            logs.info("%s: %s: %s" % (k, v, data))
+            logs.info("Request %d: %s: %s: %s" % (request_num, k, v, data))
             v(k, data)
+            logs.info("Finished with request %d" % (request_num,))
         except Exception as e:
-            logs.error(str(e))
+            logs.error("Failed request %d" % (request_num,))
+            logs.report()
         finally:
+            logs.info('Saving request log for request %d' % (request_num,))
             try:
                 logs.save()
             except Exception:
