@@ -140,8 +140,8 @@
         
         <meta itemprop="image"              content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
     {% else %}
-        <meta property="og:image"           content="{{user.image_url}}"/>
-        <meta itemprop="image"              content="{{user.image_url}}"/>
+        <meta property="og:image"           content="http://static.stamped.com/users/{{user.screen_name}}.jpg"/>
+        <meta itemprop="image"              content="http://static.stamped.com/users/{{user.screen_name}}.jpg"/>
     {% endif %}
     
     <meta property="og:description"         content="Check out {{user.screen_name}}'s stamp collection on Stamped! www.stamped.com/{{user.screen_name}}"/>
