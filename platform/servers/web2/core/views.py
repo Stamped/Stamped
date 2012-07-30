@@ -63,7 +63,7 @@ def handle_profile(request, schema, **kwargs):
             user    = kwargs.get('user', stampedAPIProxy.getAccountByScreenName(schema.screen_name))
             
             pprint.pprint(user)
-            utils.log(pprint.pformat(user))
+            logs.error(pprint.pformat(user))
         
         user_id     = user['user_id']
     
