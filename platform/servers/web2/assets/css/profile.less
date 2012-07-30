@@ -1739,9 +1739,10 @@ a.map-profile-link {
                 white-space: nowrap;
                 
                 padding: (@popup-padding / 2) @popup-padding;
+                display: block;
                 
                 .profile-image-wrapper, .stamp, .name {
-                    float: left;
+                    display: inline-block;
                 }
                 
                 .profile-image-wrapper {
@@ -1751,30 +1752,27 @@ a.map-profile-link {
                 
                 .stamp {
                     position: relative;
-                    top: 5px;
+                    top: -30px;
                     margin-right: 6px;
                 }
                 
                 .name {
+                    position: relative;
+                    top: -8px;
                     margin-right: 6px;
-                    max-width: 116px;
+                    width: 200px;
+                    
                     overflow: hidden;
                     text-overflow: ellipsis;
                     
                     p {
-                        position: relative;
-                        top: 5px;
                         font-size: 85%;
                         margin:  0;
-                        padding: 0px 0px 5px 0px;
                     }
                     
                     .fullname {
-                        position: relative;
-                        top: 5px;
                         font-size: 85%;
                         font-weight: bold;
-                        padding: 0;
                     }
                     
                     a {
@@ -1784,10 +1782,6 @@ a.map-profile-link {
                             text-decoration: none !important;
                         }
                     }
-                }
-                
-                .rhs {
-                    float: right;
                 }
                 
                 &:hover .name a {

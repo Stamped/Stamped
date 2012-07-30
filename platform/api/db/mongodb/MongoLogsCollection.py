@@ -22,7 +22,7 @@ class MongoLogsCollection(AMongoCollection):
             stack_info = libs.ec2_utils.get_stack()
             collection = "logs_%s" % stack_info.instance.stack
 
-        AMongoCollection.__init__(self, collection=collection, logger=True)
+        AMongoCollection.__init__(self, collection=collection, logger=True, isCapped=True)
 
     ### PUBLIC
     

@@ -140,17 +140,17 @@ class CategoryDistribution(Schema):
 class UserStatsSchema(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('num_stamps',                       int)
-        cls.addProperty('num_stamps_left',                  int)
-        cls.addProperty('num_stamps_total',                 int)
-        cls.addProperty('num_friends',                      int)
-        cls.addProperty('num_followers',                    int)
-        cls.addProperty('num_todos',                        int)
-        cls.addProperty('num_credits',                      int)
-        cls.addProperty('num_credits_given',                int)
-        cls.addProperty('num_likes',                        int)
-        cls.addProperty('num_likes_given',                  int)
-        cls.addProperty('num_unread_news',                  int)
+        cls.addProperty('num_stamps',                       int) # Recalc
+        cls.addProperty('num_stamps_left',                  int) 
+        cls.addProperty('num_stamps_total',                 int) 
+        cls.addProperty('num_friends',                      int) # Recalc
+        cls.addProperty('num_followers',                    int) # Recalc
+        cls.addProperty('num_todos',                        int) # Recalc
+        cls.addProperty('num_credits',                      int) # Recalc
+        cls.addProperty('num_credits_given',                int) 
+        cls.addProperty('num_likes',                        int) # Recalc
+        cls.addProperty('num_likes_given',                  int) 
+        cls.addProperty('num_unread_news',                  int) 
         cls.addNestedPropertyList('distribution',           CategoryDistribution)
 
 class StampStatsSchema(Schema):
@@ -1756,7 +1756,6 @@ class Activity(Schema):
                         commentobjects.append(comments[str(commentId)])
                 result.objects.comments = commentobjects
 
-        logs.debug("ENRICHED ENTITY: %s" % result)
         return result
 
 class EnrichedActivity(Schema):

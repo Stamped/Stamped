@@ -130,7 +130,7 @@
                                         </p>
                                         
                                         <p class='subline-1'>
-                                            <a class='screen-name expand-friends expand-followers' href="/popups/followers?user_id={{user.user_id}}"> {{user.num_followers}} Followers</a> / <a class='screen-name expand-friends expand-following' href="/popups/following?user_id={{user.user_id}}">{{user.num_friends}} Following</a>
+                                            <a class='screen-name expand-friends expand-followers' href="/popups/followers?user_id={{user.user_id}}"> {{user.stats.num_followers}} Followers</a> / <a class='screen-name expand-friends expand-following' href="/popups/following?user_id={{user.user_id}}">{{user.stats.num_friends}} Following</a>
                                         </p>
                                     </div>
                                     
@@ -193,13 +193,13 @@
                                 <div class="inset-stamp">
                                     <div class="stamp-count-dependent stamp-count-default">
                                         <div class="stamp-count user-primary">
-                                            {{user.num_stamps}}
+                                            {{user.stats.num_stamps}}
                                         </div>
                                         
-                                        <p>{% if user.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
+                                        <p>{% if user.stats.num_stamps != 1 %}STAMPS{% else %}STAMP{% endif %}</p>
                                     </div>
                                     
-                                    {% for distro in user.distribution %}
+                                    {% for distro in user.stats.distribution %}
                                         <div class="stamp-count-dependent stamp-count-{{distro.category}}">
                                             <div class="stamp-count user-primary">
                                                 {{distro.count}}
@@ -225,47 +225,47 @@
         <ol>
             <li class="default">
                 <a class="replaced active" href="/{{user.screen_name}}">
-                    <div class='desc'>All Stamps ({{user.num_stamps}})</div>
+                    <div class='desc'>All Stamps ({{user.stats.num_stamps}})</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
                 </a>
             </li>
             <li class="place">
-                <a class="replaced {% for d in user.distribution %}{% if d.category == "place" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=place">
-                    <div class='desc'>Places{% for d in user.distribution %}{% if d.category == "place" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                <a class="replaced {% for d in user.stats.distribution %}{% if d.category == "place" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=place">
+                    <div class='desc'>Places{% for d in user.stats.distribution %}{% if d.category == "place" %} ({{d.count}}){% endif %}{% endfor %}</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
                 </a>
             </li>
             <li class="music">
-                <a class="replaced {% for d in user.distribution %}{% if d.category == "music" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=music">
-                    <div class='desc'>Music{% for d in user.distribution %}{% if d.category == "music" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                <a class="replaced {% for d in user.stats.distribution %}{% if d.category == "music" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=music">
+                    <div class='desc'>Music{% for d in user.stats.distribution %}{% if d.category == "music" %} ({{d.count}}){% endif %}{% endfor %}</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
                 </a>
             </li>
             <li class="book">
-                <a class="replaced {% for d in user.distribution %}{% if d.category == "book" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=book">
-                    <div class='desc'>Books{% for d in user.distribution %}{% if d.category == "book" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                <a class="replaced {% for d in user.stats.distribution %}{% if d.category == "book" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=book">
+                    <div class='desc'>Books{% for d in user.stats.distribution %}{% if d.category == "book" %} ({{d.count}}){% endif %}{% endfor %}</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
                 </a>
             </li>
             <li class="film">
-                <a class="replaced {% for d in user.distribution %}{% if d.category == "film" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=film">
-                    <div class='desc'>Film & TV{% for d in user.distribution %}{% if d.category == "film" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                <a class="replaced {% for d in user.stats.distribution %}{% if d.category == "film" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=film">
+                    <div class='desc'>Film & TV{% for d in user.stats.distribution %}{% if d.category == "film" %} ({{d.count}}){% endif %}{% endfor %}</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>
                 </a>
             </li>
             <li class="app">
-                <a class="replaced {% for d in user.distribution %}{% if d.category == "app" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?subcategory=app">
-                    <div class='desc'>Apps{% for d in user.distribution %}{% if d.category == "app" %} ({{d.count}}){% endif %}{% endfor %}</div>
+                <a class="replaced {% for d in user.stats.distribution %}{% if d.category == "app" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?subcategory=app">
+                    <div class='desc'>Apps{% for d in user.stats.distribution %}{% if d.category == "app" %} ({{d.count}}){% endif %}{% endfor %}</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
                     <div class='icon'></div>

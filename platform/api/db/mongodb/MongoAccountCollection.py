@@ -251,11 +251,57 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
                     else:
                         raise StampedTwitterLinkedToMultipleAccountsError(msg)
 
+        # User stats: number of stamps
+        numStamps = self._collection._database['stamps'].find({'user.user_id': str(key)}).count()
+        if account.stats.num_stamps is None or account.stats.num_stamps != numStamps:
+            msg = "%s: Incorrect number of stamps" % key 
+            if repair:
+                logs.info(msg)
+                account.stats.num_stamps = numStamps
+                modified = True 
+            else:
+                raise StampedDataError(msg)
+
+        # User stats: number of friends
+        if api is not None:
+            numFriends = api._friendshipDB.countFriends(str(key))
+            if account.stats.num_friends is None or account.stats.num_friends != numFriends:
+                msg = "%s: Incorrect number of friends" % key 
+                if repair:
+                    logs.info(msg)
+                    account.stats.num_friends = numFriends
+                    modified = True 
+                else:
+                    raise StampedDataError(msg)
+
+        # User stats: number of followers
+        if api is not None:
+            numFollowers = api._friendshipDB.countFollowers(str(key))
+            if account.stats.num_followers is None or account.stats.num_followers != numFollowers:
+                msg = "%s: Incorrect number of followers" % key 
+                if repair:
+                    logs.info(msg)
+                    account.stats.num_followers = numFollowers
+                    modified = True 
+                else:
+                    raise StampedDataError(msg)
+
+        # User stats: number of credits
+        numCredits = self._collection._database['stamps'].find({'credits.user.user_id': str(key)}).count()
+        if account.stats.num_credits is None or account.stats.num_credits != numCredits:
+            msg = "%s: Incorrect number of credits" % key 
+            if repair:
+                logs.info(msg)
+                account.stats.num_credits = numCredits
+                modified = True 
+            else:
+                raise StampedDataError(msg)
+
         if modified and repair:
             self._collection.update({'_id' : key}, self._convertToMongo(account))
 
         # Check integrity for guide
-        self.guide_collection.checkIntegrity(key, repair=repair, api=api)
+        # self.guide_collection.checkIntegrity(key, repair=repair, api=api)
 
         return True
     
@@ -279,6 +325,15 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             document = self._getMongoDocumentFromId(documentId, forcePrimary=True)
         except Exception:
             raise StampedAccountNotFoundError("Account not found in database")
+        return self._convertFromMongo(document)
+    
+    def getAccountByScreenName(self, screen_name):
+        try:
+            screen_name = screen_name.lower()
+            document = self._collection.find({ 'screen_name_lower' : screen_name }, forcePrimary=True)
+        except Exception:
+            raise StampedAccountNotFoundError("Account not found")
+        
         return self._convertFromMongo(document)
     
     def getAccounts(self, userIds, limit=0):

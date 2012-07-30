@@ -235,15 +235,18 @@ class MongoLogDBConfig(Singleton):
 
 class AMongoCollection(object):
     
-    def __init__(self, collection, primary_key=None, obj=None, overflow=False, logger=False):
+    def __init__(self, collection, primary_key=None, obj=None, overflow=False, logger=False, isCapped=False):
         self._desc = self.__class__.__name__
 
         if logger:
             self._dbConfig = MongoLogDBConfig.getInstance()
+        else:
+            self._dbConfig = MongoDBConfig.getInstance()
+
+        if isCapped:
             size = LOG_COLLECTION_SIZE if libs.ec2_utils.is_ec2() else LOG_LOCAL_COLLECTION_SIZE
             self._init_collection(self._dbConfig.database_name, collection, size)
         else:
-            self._dbConfig = MongoDBConfig.getInstance()
             self._init_collection(self._dbConfig.database_name, collection)
         
 
@@ -259,7 +262,7 @@ class AMongoCollection(object):
         
         logs.debug("Connected to MongoDB collection: %s" % collection)
 
-    @property
+    @lazyProperty
     def isCapped(self):
         options = self._collection.options()
         return 'capped' in options and options['capped'] == True

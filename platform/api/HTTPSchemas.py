@@ -82,7 +82,7 @@ def _profileImageURL(screenName, cache=None, size=None):
     image = "%s.jpg" % (str(screenName).lower())
     if size is not None:
         image = "%s-%dx%d.jpg" % (str(screenName).lower(), size, size)
-
+    
     if not cache:
         url = 'http://static.stamped.com/users/default.jpg'
     elif cache + timedelta(days=1) <= datetime.utcnow():
@@ -2837,8 +2837,6 @@ class HTTPActivity(Schema):
         cls.addNestedPropertyList('footer_references',      HTTPTextReference)
 
     def importEnrichedActivity(self, activity):
-        logs.debug("IMPORT ACTIVITY: %s" % activity)
-        
         data = activity.dataExport()
         data.pop('subjects', None)
         data.pop('objects', None)

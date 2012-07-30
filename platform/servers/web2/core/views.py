@@ -58,9 +58,10 @@ def handle_profile(request, schema, **kwargs):
         user_id     = schema.user_id
     else:
         if TRAVIS:
-            user = travis_test.user
+            user    = travis_test.user
         else:
-            user        = kwargs.get('user', stampedAPIProxy.getUser(dict(screen_name=schema.screen_name)))
+            user    = kwargs.get('user', stampedAPIProxy.getAccountByScreenName(schema.screen_name))
+        
         user_id     = user['user_id']
     
     # simple sanity check validation of user_id
@@ -91,7 +92,7 @@ def handle_profile(request, schema, **kwargs):
             else:
                 user.update(user2)
         else:
-            user = stampedAPIProxy.getUser(dict(user_id=user_id))
+            user = stampedAPIProxy.getAccount(user_id)
             
             if user['user_id'] is None or user['user_id'] != user_id:
                 raise StampedInputError("mismatched user_id")
