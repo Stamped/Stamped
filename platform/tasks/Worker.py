@@ -115,7 +115,7 @@ def enrichTasks():
     m[api.taskKey('enrich', api.mergeEntityAsync)] = mergeEntityAsyncHelper
 
     def mergeEntityIdAsyncHelper(key, data):
-        api.mergeEntityIdAsync(data['entity_id'])
+        api.mergeEntityIdAsync(data['entityId'])
     m[api.taskKey('enrich', api.mergeEntityIdAsync)] = mergeEntityIdAsyncHelper
     return m
 
