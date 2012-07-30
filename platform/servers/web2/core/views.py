@@ -61,9 +61,6 @@ def handle_profile(request, schema, **kwargs):
             user    = travis_test.user
         else:
             user    = kwargs.get('user', stampedAPIProxy.getAccountByScreenName(schema.screen_name))
-            
-            pprint.pprint(user)
-            logs.error(pprint.pformat(user))
         
         user_id     = user['user_id']
     
