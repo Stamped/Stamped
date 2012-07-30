@@ -102,6 +102,9 @@ class SimpleDBConnection(object):
         
         pool = Pool(16)
         
+        if limit is None:
+            limit = 100
+        
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
             
