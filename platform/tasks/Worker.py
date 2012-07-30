@@ -124,6 +124,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 import keys.aws
 from contextlib import closing
+import datetime
 
 def getS3Key(filename):
     BUCKET_NAME = 'stamped.com.static.images'
