@@ -56,7 +56,7 @@ class Dashboard(object):
         
             # Only store data for full hours (e.g. if it is currently 8:40, only store stats thru 8:00)
             # Also only write from a bowser stack connection to prevent data corruption
-            if hour == est().hour() and IS_PROD:
+            if hour == est().hour and IS_PROD:
                 self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
         
         
