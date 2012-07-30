@@ -3264,16 +3264,31 @@ class StampedAPI(AStampedAPI):
             return
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        try:
-            result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
-        except StampedFacebookPermissionsError as e:
-            account.linked.facebook.have_share_permissions = False
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-            return
-        except StampedFacebookTokenError as e:
-            account.linked.facebook.token = None
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-            return
+
+
+        delay = 5
+        while True:
+            try:
+                uniqueUrl = '%s?ts=%s' (url, time()) if delay > 5 else url
+                result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, uniqueUrl, **kwargs)
+            except StampedFacebookPermissionsError as e:
+                account.linked.facebook.have_share_permissions = False
+                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+                return
+            except StampedFacebookTokenError as e:
+                account.linked.facebook.token = None
+                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+                return
+            except StampedThirdPartyError as e:
+                if delay > 60*10:
+                    raise e
+                time.sleep(delay)
+                delay *= 2
+                continue
+            break
+
+
+
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)
