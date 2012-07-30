@@ -51,6 +51,11 @@ def add(request, authUserId, http_schema, schema, **kwargs):
         else:
             schema.service_name = kwargs['service_name']
 
+    # Quick fix to prevent share settings from being overwritten
+    acct = stampedAPI.getAccount(authUserId)
+    if schema.service_name == 'facebook':
+        if acct.linked is not None and acct.linked.facebook is not None:
+            schema.share_settings = acct.linked.facebook.share_settings
     result = stampedAPI.addLinkedAccount(authUserId, schema)
 
     return transformOutput(True)

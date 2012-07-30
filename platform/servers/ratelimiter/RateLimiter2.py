@@ -172,7 +172,7 @@ class RateLimiter(object):
             node_name = stack_info.instance.name
 
         output = '<html>'
-        output += "<h3>RateLimiter Fail Limit reached</h3>"
+        output += "<h3>RateLimiter Fail Limit reached on %s</h3>" % stack_name
         output += "<p>On stack '%s' instance '%s'.</p>" % (stack_name, node_name)
         output += "<p><i>There were %s failed requests to service '%s' within the last %s seconds</p></i>" %  \
                   (self.fail_limit, self.__service_name, self.fail_period)
@@ -205,7 +205,7 @@ class RateLimiter(object):
             email = {}
             email['from'] = 'Stamped <noreply@stamped.com>'
             email['to'] = 'dev@stamped.com'
-            email['subject'] = "RateLimiter '%s' fail limit reached" % self.__service_name
+            email['subject'] = "%s RateLimiter '%s' fail limit reached" % (stack_name, self.__service_name)
             email['body'] = output
             utils.sendEmail(email, format='html')
         except Exception as e:

@@ -981,7 +981,7 @@ class StampedAPI(AStampedAPI):
         permissions = self.facebook.getUserPermissions(token)
         linked.facebook.have_share_permissions = \
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
-        self._accountDB.updateLinkedAccount(linked.facebook)
+        self._accountDB.updateLinkedAccount(authUserId, linked.facebook)
         return True
 
 
@@ -1307,6 +1307,7 @@ class StampedAPI(AStampedAPI):
             'mariobatali', 
             'michaelkors', 
             'parislemon', 
+            'kevinrose',
             'harvard',
             'barondavis', 
             'urbandaddy', 
@@ -1402,7 +1403,7 @@ class StampedAPI(AStampedAPI):
                     friend_linked = friendAcct.linked.facebook
                     friend_linked.third_party_id = friend_info['third_party_id']
                     self._accountDB.updateLinkedAccount(userId, friend_linked)
-                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
+#                tasks.invoke(tasks.APITasks.postToOpenGraph, kwargs={'authUserId': authUserId,'followUserId':userId})
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -3267,16 +3268,18 @@ class StampedAPI(AStampedAPI):
             result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
         except StampedFacebookPermissionsError as e:
             account.linked.facebook.have_share_permissions = False
-            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
             return
         except StampedFacebookTokenError as e:
             account.linked.facebook.token = None
-            self._accountDB.updateLinkedAccount(account.linked.facebook)
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
             return
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)
-
+        if account.linked.facebook.have_share_permissions is None:
+            account.linked.facebook.have_share_permissions = True
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
 
     """
      #####
