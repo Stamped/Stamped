@@ -46,7 +46,6 @@ def getHosts():
 def enterWorkLoop(functions):
     from MongoStampedAPI import globalMongoStampedAPI
     api = globalMongoStampedAPI()
-    logs.info("starting worker for %s" % functions.keys())
     worker = StampedWorker(getHosts())
     def wrapper(worker, job):
         k = 'not parsed yet'
@@ -58,10 +57,15 @@ def enterWorkLoop(functions):
                        saveStat=api._statsDB.addStat,
                        nodeName=api.node_name)
             logs.async_request(k)
-            v = functions[k]
             data = job_data['data']
-            logs.info("Request %s: %s: %s: %s" % (request_num, k, v, data))
-            v(k, data)
+            logs.info("Request %s: %s: %s" % (request_num, k, data))
+            if functions is not None:
+                v = functions[k]
+                v(k, data)
+            else:
+                fnName = k.split('::')[1]
+                v = getattr(api, fnName)
+                v(**data)
             logs.info("Finished with request %s" % (request_num,))
         except Exception as e:
             logs.error("Failed request %d" % (request_num,))
@@ -88,15 +92,17 @@ def enterWorkLoop(functions):
                 logs.warning(traceback.format_exc())
         return ''
     queues = set()
-    for k,v in functions.items():
-        queue = k.split('::')[0]
-        queues.add(queue)
-
+    if functions is not None:
+        for k,v in functions.items():
+            queue = k.split('::')[0]
+            queues.add(queue)
+    else:
+        queues.add('api')
     for k in queues:
         worker.register_task(k, wrapper)
     worker.work(poll_timeout=1)
 
-def main(count, functions):
+def main(count, functions=None, api=False):
     pool = utils.LoggingThreadPool(count)
     greenlets = []
     for i in range(count):
@@ -115,15 +121,6 @@ def enrichTasks():
     def mergeEntityIdAsyncHelper(key, data):
         api.mergeEntityIdAsync(data['entity_id'])
     m[api.taskKey('enrich', api.mergeEntityIdAsync)] = mergeEntityIdAsyncHelper
-    return m
-
-def apiTasks():
-    from MongoStampedAPI import globalMongoStampedAPI
-    api = globalMongoStampedAPI()
-    m = {}
-    def customizeStampAsyncHelper(key, data):
-        api.customizeStampAsync()
-    m[api.taskKey('api', api.customizeStampAsync)] = customizeStampAsyncHelper
     return m
 
 ################
@@ -188,24 +185,17 @@ def testTasks():
         'findAmicablePairsNaive' : findAmicablePairsNaiveHelper
     }
 
-_functionSets = {
-    'enrich': enrichTasks,
-    'api': apiTasks,
-}
-
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print 'Must provide at least one function set (i.e. %s)' %  ','.join(_functionSets.keys())
+    if len(sys.argv) != 2:
+        print 'Must provide a queue'
         sys.exit(1)
     # All workers have test tasks enabled.
-    m = testTasks()
-    for k in sys.argv[1:]:
-        if k in _functionSets:
-            f = _functionSets[k]
-            m.update(f())
-        else:
-            print("%s is not a valid function set" % k)
-            sys.exit(1)
-    main(10, m)
+    arg = sys.argv[1]
+    if arg == 'enrich':
+        main(10, functions = enrichTasks(), api=False)
+    elif arg == 'api':
+        main(10, functions = None, api=True)
+    else:
+        print "Unrecognized queue"
 
 
