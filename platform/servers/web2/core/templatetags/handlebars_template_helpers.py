@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import logs, os, pystache, utils, pybars
+import api.HTTPSchemas
 
 from subprocess import Popen, PIPE
 from pprint     import pformat
@@ -49,7 +50,7 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     
     if url is None:
         ts  = scope.get('timestamp', {}).get('image_cache', None)
-        url = HTTPSchemas._profileImageURL(screen_name, ts, size)
+        url = api.HTTPSchemas._profileImageURL(screen_name, ts, size)
     elif not url.endswith('default.jpg'):
         url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name.lower(), size, size)
     
