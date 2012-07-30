@@ -66,7 +66,7 @@ class StampedAPIProxy(object):
     
     def _export(self, d):
         for k, v in d.iteritems():
-            if isinstance(v, datetime.datetime)
+            if isinstance(v, datetime.datetime):
                 d[k] = v.isoformat()
             elif isinstance(v, dict):
                 d[k] = self._export(v)
