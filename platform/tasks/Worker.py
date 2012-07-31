@@ -147,7 +147,6 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 import keys.aws
 from contextlib import closing
-import datetime
 
 def getS3Key(filename):
     BUCKET_NAME = 'stamped.com.static.images'
@@ -161,7 +160,7 @@ def getS3Key(filename):
 
 def writeTimestampToS3(s3_filename, request_id=""):
     logs.debug('Writing timestamp to S3 file %s' % s3_filename)
-    file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
+    file_content = '%s: %s' % (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
     delay = 0.1
     max_delay = 3
     max_tries = 40
