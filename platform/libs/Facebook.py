@@ -7,13 +7,13 @@ __license__   = "TODO"
 
 import Globals
 import time
-import datetime
 import urllib, json, urlparse
 import logs, utils
 import re
 from errors import *
 from libs.Request import service_request
 from APIKeys import get_api_key
+from datetime import datetime
 
 
 
@@ -223,7 +223,7 @@ class Facebook(object):
         expires = None
         if r is not None:
             expires = r.group(1)
-            expires = datetime.datetime.fromtimestamp(time.time() + int(expires))
+            expires = datetime.fromtimestamp(time.time() + int(expires))
         return token, expires
 
 
@@ -342,7 +342,7 @@ class Facebook(object):
 #                                            (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
         callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
         permissions = 'user_about_me,user_location,email,publish_stream,publish_actions'
-        #unique = datetime.datetime.now().strftime("%H:%M:%S.%f")
+        #unique = datetime.now().strftime("%H:%M:%S.%f")
         path = "https://www.facebook.com/dialog/oauth?" \
                "client_id=%s" \
                "&redirect_uri=%s" \
