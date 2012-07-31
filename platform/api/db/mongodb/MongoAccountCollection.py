@@ -24,7 +24,7 @@ from libs.Memcache                              import globalMemcache
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, 'users', primary_key='user_id', obj=Account)
+        AMongoCollection.__init__(self, 'users', primary_key='user_id', obj=Account, overflow=True)
         AAccountDB.__init__(self)
         
         ### TEMP: For now, verify that no duplicates can occur via index
