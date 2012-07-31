@@ -84,7 +84,7 @@ def enterWorkLoop(functions):
                     email['body'] = logs.getHtmlFormattedLog()
                     utils.sendEmail(email, format='html')
                 except Exception as e:
-                    logs.warning('UNABLE TO SEND EMAIL')
+                    logs.warning('UNABLE TO SEND EMAIL: %s' % e)
 
         finally:
             logs.info('Saving request log for request %s' % (request_num,))
