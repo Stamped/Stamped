@@ -345,7 +345,7 @@ class LinkedAccount(Schema):
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
         cls.addProperty('token_expiration',                 datetime)
-        cls.addProperty('extended_timestamp',               datetime)
+        #cls.addProperty('extended_timestamp',               datetime)
         cls.addProperty('third_party_id',                   basestring)
         cls.addProperty('have_share_permissions',           bool)
         cls.addNestedProperty('share_settings',             LinkedAccountShareSettings)
