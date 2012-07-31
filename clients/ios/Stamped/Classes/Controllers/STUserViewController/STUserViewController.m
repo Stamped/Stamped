@@ -753,7 +753,6 @@ static NSString* const _shareOptionTwitter = @"Share to Twitter";
             
             cell.titleLabel.text = [dictionary objectForKey:@"title"];
             cell.detailTitleLabel.text = [dictionary objectForKey:@"detail"];
-            
             return cell;
             
         }

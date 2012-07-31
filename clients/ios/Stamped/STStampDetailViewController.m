@@ -716,9 +716,9 @@ typedef enum {
     else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
         [self showEmailViewController];
     } 
-    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
-        [self shareToInstagram];
-    }
+//    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
+//        [self shareToInstagram];
+//    }
 }
 
 static CATransform3D MakePerspetiveTransform() { 

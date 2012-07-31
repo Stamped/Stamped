@@ -20,6 +20,8 @@
 #import "CreateStampViewController.h"
 #import "STImageCache.h"
 #import "STConfirmationView.h"
+#import "STFacebook.h"
+#import "STTwitter.h"
 
 @interface STStampedActions ()
 
@@ -256,6 +258,20 @@ static STStampedActions* _sharedInstance;
                 [[Util sharedNavigationController] pushViewController:controller animated:YES];
             }
         }
+        else if ([action isEqualToString:@"stamped_facebook_auth"]) {
+            handled = YES;
+            if (flag) {
+                [[STFacebook sharedInstance] auth];
+            }
+        }
+        else if ([action isEqualToString:@"stamped_twitter_auth"]) {
+            handled = YES;
+            if (flag) {
+                [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:YES andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                    
+                }];
+            }
+        }
         else if ([action isEqualToString:@"menu"] && source.sourceID != nil && context.entityDetail) {
             handled = YES;
             NSLog(@"menu handled");
@@ -296,7 +312,6 @@ static STStampedActions* _sharedInstance;
     id<STAction> action = [STStampedActions actionViewUser:userID withOutputContext:context];
     [[STActionManager sharedActionManager] didChooseAction:action withContext:context];
 }
-
 
 + (id<STAction>)actionViewEntity:(NSString*)entityID withOutputContext:(STActionContext*)context {
     return [STSimpleAction actionWithType:@"stamped_view_entity" 

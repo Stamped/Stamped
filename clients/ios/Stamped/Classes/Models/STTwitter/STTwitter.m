@@ -460,7 +460,7 @@ static id __instance;
 }
 
 - (STCancellation*)sendTweets:(NSArray*)tweets withCallback:(void (^)(BOOL success, NSError* error, STCancellation* cancellation))block {
-    return [self fullTwitterAuthWithAddAccount:NO andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+    return [self fullTwitterAuthWithAddAccount:YES andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
         if (success && self.currentAccount) {
             for (NSInteger i = 0; i < tweets.count; i++) {
                 NSString* tweet = [tweets objectAtIndex:i];

@@ -70,6 +70,7 @@ static id __instance;
         
     } else {
         if ([STRestKitLoader sharedInstance].loggedIn) {
+            NSLog(@"adfasasdfasd");
             [self updateLinkedAccount];
         }
         else {

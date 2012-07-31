@@ -49,7 +49,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.0.1</string>
+	<string>2.0.1.Liz</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -86,13 +86,13 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>146</string>
+	<string>155</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>fbEiMTd1F3B3c35Z4OrK.ttf</string>
 		<string>fbDWeRlKQCgbrziKfMsl.ttf</string>
+		<string>fbEiMTd1F3B3c35Z4OrK.ttf</string>
 		<string>TitlingGothicFB-StandSky.ttf</string>
 	</array>
 	<key>UIPrerenderedIcon</key>

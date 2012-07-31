@@ -95,7 +95,6 @@ static const CGFloat _batchSize = 100;
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFailed];
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookLoggedOut];
     if ([STFacebook sharedInstance].facebook.isSessionValid) {      
-        NSLog(@"normal case");
         [self loadMore];
     }
     else {

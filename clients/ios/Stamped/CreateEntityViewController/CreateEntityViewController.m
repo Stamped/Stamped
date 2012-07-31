@@ -94,7 +94,7 @@ typedef enum {
                                     @"desc", @"description",
                                     //Other
                                     @"title", @"name",
-                                    @"subtitle", @"what is it",
+                                    @"subtitle", @"what_is_it?",
                                     //App
                                     @"title", @"app_name",
                                     @"author", @"creator",
@@ -117,12 +117,12 @@ typedef enum {
                                     @"title", @"book_title",
                                     @"author", @"author",
                                     //Place
-                                    @"subtitle",            @"type of place",
+                                    @"subtitle",        @"type_of_place",
                                     @"address_street",      @"address_line_1",
                                     @"address_street_ext",  @"address_line_2",
                                     @"address_locality",    @"city",
                                     @"address_region",      @"state",
-                                    @"address_postcode",    @"postal code",
+                                    @"address_postcode",    @"postal_code",
                                     @"address_country",     @"country",
 
                                     nil];
@@ -151,6 +151,9 @@ typedef enum {
             }
             else if ([items objectForKey:@"series_title"]) {
                 subcategory = @"tv";
+            }
+            else if ([items objectForKey:@"artist_title"]) {
+                subcategory = @"artist";
             }
             else {
                 subcategory = @"other";

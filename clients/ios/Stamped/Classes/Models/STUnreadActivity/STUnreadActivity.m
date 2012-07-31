@@ -10,6 +10,7 @@
 #import "STStampedAPI.h"
 #import "STEvents.h"
 #import "STActionManager.h"
+#import "STFacebook.h"
 
 static id __instance;
 
@@ -64,6 +65,7 @@ static id __instance;
         if (count.numberUnread.integerValue > 0) {
             self.count = count.numberUnread.integerValue;
         }
+        [[STFacebook sharedInstance] auth];
         if (count.action) {
             [[STActionManager sharedActionManager] didChooseAction:count.action withContext:[STActionContext context]];
         }
