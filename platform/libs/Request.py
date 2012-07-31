@@ -30,6 +30,7 @@ DEFAULT_TIMEOUT = 5
 RL_HOST = 'localhost'
 RL_PORT = 18861
 
+localData = threading.local()
 
 class RateLimiterState(object):
     def __init__(self, fail_limit, fail_period, blackout_wait):
@@ -132,7 +133,7 @@ class RateLimiterState(object):
 
     def _fail(self, exception):
         try:
-            del threading.local().rateLimiter
+            del localData.rateLimiter
         except:
             pass
 
@@ -183,7 +184,7 @@ class RateLimiterState(object):
     @property
     def _rpc_service_connection(self):
         try:
-            return threading.local().rateLimiter
+            return localData.rateLimiter
         except AttributeError:
             config = {
                 'allow_pickle' : True,
@@ -191,8 +192,8 @@ class RateLimiterState(object):
                 'instantiate_custom_exceptions' : True,
                 'import_custom_exceptions' : True,
                 }
-            threading.local().rateLimiter = rpyc.connect(self.__host, self.__port, config=config)
-            return threading.local().rateLimiter
+            localData.rateLimiter = rpyc.connect(self.__host, self.__port, config=config)
+            return localData.rateLimiter
 
     def _rpc_service_request(self, service, method, url, body, header, priority, timeout):
         async_request = rpyc.async(self._rpc_service_connection.root.request)
