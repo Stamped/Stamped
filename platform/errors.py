@@ -392,6 +392,9 @@ class StampedFacebookTokenError(StampedAuthError):
 class StampedFacebookPermissionsError(StampedAuthError):
     pass
 
+class StampedFacebookUniqueActionAlreadyTakenOnObject(StampedIllegalActionError):
+    pass
+
 class StampedThirdPartyRequestFailError(StampedInputError):
     pass
 

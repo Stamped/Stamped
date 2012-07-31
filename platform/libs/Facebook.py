@@ -82,6 +82,8 @@ class Facebook(object):
                         raise StampedFacebookTokenError('Invalid Facebook token')
                     elif code == 200:
                         raise StampedFacebookPermissionsError(msg)
+                    elif code == 3501:
+                        raise StampedFacebookUniqueActionAlreadyTakenOnObject('OG Action already exists for object')
                 if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
                     # OAuth exception
                     pass

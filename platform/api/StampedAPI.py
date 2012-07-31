@@ -3373,6 +3373,9 @@ class StampedAPI(AStampedAPI):
             account.linked.facebook.token = None
             self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
             return
+        except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
+            logs.info('Unique action already taken on OG object')
+            return
         if stampId is not None and 'id' in result:
             og_action_id = result['id']
             self._stampDB.updateStampOGActionId(stampId, og_action_id)
