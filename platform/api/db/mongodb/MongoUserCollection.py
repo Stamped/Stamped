@@ -402,15 +402,19 @@ class MongoUserCollection(AMongoCollection, AUserDB):
 
         result = []
 
-        # new format find
-        data = self._collection.find(
-            {"linked.twitter.linked_user_id": {"$in": twitterIds}}
-        ).limit(limit)
+        # Loop in chunks
+        CHUNK_SIZE = 10000
 
-        for item in data:
-            user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['twitter']['linked_user_id']
-            result.append(user)
+        for i in range(int(len(a) / CHUNK_SIZE) + 1):
+            chunk = twitterIds[CHUNK_SIZE*i:(CHUNK_SIZE+1)*i]
+
+            data = self._collection.find({"linked.twitter.linked_user_id": {"$in": chunk}}).limit(limit)
+
+            for item in data:
+                user = SuggestedUser().importUser(self._convertFromMongo(item))
+                user.search_identifier = item['linked']['twitter']['linked_user_id']
+                result.append(user)
+
         return result
 
     def findUsersByFacebook(self, facebookIds, limit=0):
@@ -418,15 +422,18 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         
         result = []
 
-        # new format find
-        data = self._collection.find(
-                {"linked.facebook.linked_user_id": {"$in": facebookIds}}
-        ).limit(limit)
+        # Loop in chunks
+        CHUNK_SIZE = 10000
+        
+        for i in range(int(len(a) / CHUNK_SIZE) + 1):
+            chunk = facebookIds[CHUNK_SIZE*i:(CHUNK_SIZE+1)*i]
 
-        for item in data:
-            user = SuggestedUser().importUser(self._convertFromMongo(item))
-            user.search_identifier = item['linked']['facebook']['linked_user_id']
-            result.append(user)
+            data = self._collection.find({"linked.facebook.linked_user_id": {"$in": chunk}}).limit(limit)
+
+            for item in data:
+                user = SuggestedUser().importUser(self._convertFromMongo(item))
+                user.search_identifier = item['linked']['facebook']['linked_user_id']
+                result.append(user)
         
         return result
 
