@@ -937,13 +937,6 @@ class StampedAPI(AStampedAPI):
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
 
-            # Kick off an async task to query FB and determine if user granted us sharing permissions
-            payload = {
-                'authUserId': authUserId,
-                'token': linkedAccount.token,
-            }
-            self.callTask(self.updateFBPermissionsAsync, payload)
-
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
 
@@ -978,10 +971,15 @@ class StampedAPI(AStampedAPI):
 
         # Send out alerts, if applicable
         if linkedAccount.service_name == 'facebook':
+
+
             payload = {
                 'authUserId': authUserId, 
                 'facebookToken': linkedAccount.token
             }
+            # Kick off an async task to query FB and determine if user granted us sharing permissions
+            self.callTask(self.updateFBPermissionsAsync, payload)
+            # Send out alert
             self.callTask(self.alertFollowersFromFacebookAsync, payload)
 
         elif linkedAccount.service_name == 'twitter':
