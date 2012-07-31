@@ -344,7 +344,8 @@ stampedAPIProxy = StampedAPIProxy()
 def stamped_view(schema=None, 
                  ignore_extra_params=False, 
                  parse_request_kwargs=None, 
-                 parse_django_kwargs=True):
+                 parse_django_kwargs=True, 
+                 no_cache=False):
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -377,13 +378,19 @@ def stamped_view(schema=None,
                 response = fn(request, *args, **subkwargs)
                 logs.info("End request: Success")
                 
-                if utils.is_ec2():
-                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
-                    response['Cache-Control'] = 'max-age=600'
+                if no_cache:
+                    expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
+                    cache_control = 'no-cache'
+                elif utils.is_ec2():
+                    expires = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
+                    cache_control = 'max-age=600'
                 else:
                     # disable caching for local development / debugging
-                    response['Expires'] = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
-                    response['Cache-Control'] = 'max-age=0'
+                    expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
+                    cache_control = 'max-age=0'
+                
+                response['Expires'] = expires
+                response['Cache-Control'] = cache_control
                 
                 return response
             

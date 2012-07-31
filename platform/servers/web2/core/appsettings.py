@@ -20,7 +20,7 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-@stamped_view(schema=HTTPResetPasswordViewSchema)
+@stamped_view(schema=HTTPResetPasswordViewSchema, no_cache=True)
 def password_reset(request, schema, **kwargs):
     body_classes = "password_reset main"
     token        = schema.token
@@ -47,7 +47,7 @@ def password_reset(request, schema, **kwargs):
         'token'             : token
     }, preload=[ 'token' ])
 
-@stamped_view()
+@stamped_view(no_cache=True)
 def password_forgot(request, **kwargs):
     body_classes = "password_forgot main"
     
@@ -57,7 +57,7 @@ def password_forgot(request, **kwargs):
         'title'             : 'Stamped - Forgot Password', 
     })
 
-@stamped_view(schema=HTTPSettingsSchema)
+@stamped_view(schema=HTTPSettingsSchema, no_cache=True)
 def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
     token        = schema.token
