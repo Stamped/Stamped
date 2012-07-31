@@ -85,7 +85,7 @@ def enterWorkLoop(functions):
                     email = {}
                     email['from'] = 'Stamped <noreply@stamped.com>'
                     email['to'] = 'dev@stamped.com'
-                    email['subject'] = '%s - Failed Async Task - %s - %s' % (api.node_name, k, datetime.utcnow().isoformat())
+                    email['subject'] = '%s - %s failed (%s)' % (api.node_name, k, datetime.utcnow().isoformat())
                     email['body'] = logs.getHtmlFormattedLog()
                     utils.sendEmail(email, format='html')
                 except Exception as e:
