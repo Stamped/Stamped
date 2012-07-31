@@ -25,8 +25,12 @@ from django.utils.functional    import wraps
 
 # initialize several useful globals
 IS_PROD  = libs.ec2_utils.is_prod_stack()
-#_baseurl = "https://api.stamped.com/v1"
-_baseurl = "https://dev.stamped.com/v1"
+
+if IS_PROD:
+    _baseurl = "https://api.stamped.com/v1"
+else:
+    _baseurl = "https://dev.stamped.com/v1"
+
 #_baseurl = "https://ec2-50-19-40-37.compute-1.amazonaws.com/v1"
 #_baseurl = "https://ec2-107-21-83-72.compute-1.amazonaws.com/v1"
 
@@ -89,9 +93,9 @@ class StampedAPIProxy(object):
         if self._ec2:
             key = str("web::getAccountByScreenName::%s" % screen_name)
             
-            #ret = self._try_get_cache(key)
-            #if ret is not None:
-            #    return ret
+            ret = self._try_get_cache(key)
+            if ret is not None:
+                return ret
             
             ret = self._export(self.api.getAccountByScreenName(screen_name).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
@@ -102,9 +106,9 @@ class StampedAPIProxy(object):
         if self._ec2:
             key = str("web::getAccount::%s" % user_id)
             
-            #ret = self._try_get_cache(key)
-            #if ret is not None:
-            #    return ret
+            ret = self._try_get_cache(key)
+            if ret is not None:
+                return ret
             
             ret = self._export(self.api.getAccount(user_id).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
@@ -264,15 +268,16 @@ class StampedAPIProxy(object):
     def getStampFromUser(self, user_id, stamp_num):
         if self._ec2:
             key = str("web::getStampFromUser::user_id=%s,stamp_num=%s" % (user_id, stamp_num))
-            ret = self._try_get_cache(key)
+            #ret = self._try_get_cache(key)
             
-            if ret is not None:
-                return ret
+            #if ret is not None:
+            #    return ret
             
             stamp  = self.api.getStampFromUser(userId=user_id, stampNumber=stamp_num)
             ret = HTTPStamp().importStamp(stamp).dataExport()
             
-            return self._try_set_cache(key, ret)
+            return ret
+            #return self._try_set_cache(key, ret)
         else:
             return self._handle_get("stamps/show.json", {
                 'user_id'   : user_id, 
@@ -339,7 +344,8 @@ stampedAPIProxy = StampedAPIProxy()
 def stamped_view(schema=None, 
                  ignore_extra_params=False, 
                  parse_request_kwargs=None, 
-                 parse_django_kwargs=True):
+                 parse_django_kwargs=True, 
+                 no_cache=False):
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -372,13 +378,19 @@ def stamped_view(schema=None,
                 response = fn(request, *args, **subkwargs)
                 logs.info("End request: Success")
                 
-                if utils.is_ec2():
-                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
-                    response['Cache-Control'] = 'max-age=600'
+                if no_cache:
+                    expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
+                    cache_control = 'no-cache'
+                elif utils.is_ec2():
+                    expires = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
+                    cache_control = 'max-age=600'
                 else:
                     # disable caching for local development / debugging
-                    response['Expires'] = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
-                    response['Cache-Control'] = 'max-age=0'
+                    expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
+                    cache_control = 'max-age=0'
+                
+                response['Expires'] = expires
+                response['Cache-Control'] = cache_control
                 
                 return response
             

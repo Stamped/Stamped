@@ -20,7 +20,7 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-@stamped_view(schema=HTTPResetPasswordViewSchema)
+@stamped_view(schema=HTTPResetPasswordViewSchema, no_cache=True)
 def password_reset(request, schema, **kwargs):
     body_classes = "password_reset main"
     token        = schema.token
@@ -36,9 +36,14 @@ def password_reset(request, schema, **kwargs):
     if account is None:
         raise StampedInputError("invalid account")
     
-    auth_service = account.auth_service
+    try:
+        auth_service = account['auth_service']
+    except Exception as e:
+        logs.warning("Unable to get auth service: %s" % e)
+        auth_service = None
+
     if auth_service != 'stamped':
-        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (accountscreen_name, auth_service))
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account['screen_name'], auth_service))
     
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 
@@ -47,7 +52,7 @@ def password_reset(request, schema, **kwargs):
         'token'             : token
     }, preload=[ 'token' ])
 
-@stamped_view()
+@stamped_view(no_cache=True)
 def password_forgot(request, **kwargs):
     body_classes = "password_forgot main"
     
@@ -57,7 +62,7 @@ def password_forgot(request, **kwargs):
         'title'             : 'Stamped - Forgot Password', 
     })
 
-@stamped_view(schema=HTTPSettingsSchema)
+@stamped_view(schema=HTTPSettingsSchema, no_cache=True)
 def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
     token        = schema.token
@@ -96,7 +101,7 @@ def alert_settings(request, schema, **kwargs):
     else:
         user_id  = g_stamped_auth.verifyEmailAlertToken(token)
         account  = stampedAPIProxy.getAccount(user_id)
-        user     = account.dataExport()
+        user     = account
         settings = user['alert_settings']
     
     options = [
@@ -196,10 +201,10 @@ def send_reset_email(request, schema, **kwargs):
         raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
     
     account = stampedAPIProxy.getAccount(user['user_id'])
-    auth_service = account.auth_service
+    auth_service = account['auth_service']
     
     if auth_service != 'stamped':
-        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account.screen_name, auth_service))
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account['screen_name'], auth_service))
     
     # send email
     logs.info("sending email to '%s' (user: '%s')" % (email, user['screen_name']))

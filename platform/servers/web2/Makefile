@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.68
+ASSET_VERSION_NUMBER        = 1.1.70
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -70,7 +70,7 @@ endef
 define ADD_JS_TARGET
 $(GENERATED_JS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@mkdir -p $(GENERATED_JS_BASE_DIR)
-	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^))$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break $(GENERATED_LINE_LENGTH) > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
+	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^))$$(END_COLOR) | java -jar bin/compressor.jar --type js --nomunge --line-break $(GENERATED_LINE_LENGTH) > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
 	@cat $$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^)) | java -jar bin/compressor.jar --type js --nomunge --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef
