@@ -33,7 +33,7 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBALVOGXFMWXYj7OIFn9g4BO7Raz6VHZCn57dL1uuftzCzLcjKu7Kl76MC0yBtQnq7cf2Q3TSF4HDybKsIZD'
+ACCESS_TOKEN = 'BAAEOIZBBUXisBANy6asZCGAtivmNHrXR1IqxU6FKAv7ZCz4kPEEdUFmHubEy2wL4BPFcCWlo2qDsDSZAWQhR93I7lYZBn3DZBYZCFCZAPvpyt5NR6aC88VyzuZCoNnSZAQOKAZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -64,7 +64,7 @@ class Facebook(object):
             response, content = service_request('facebook', method, url, query_params=params, priority=priority)
         else:
             print('body: %s  url: %s' % (params, url))
-            response, content = service_request('facebook', method, url, body=params, priority=priority)
+            response, content = service_request('facebook', method, url, body=params, priority=priority, timeout=60*2)
         if parse_json:
             result = json.loads(content)
         else:
@@ -386,7 +386,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl(AUTH_USER_ID))
-    if 'extendAccesstoken' in methods:      pprint(facebook.extendAccessToken(access_token))
+    if 'extendAccessToken' in methods:      pprint(facebook.extendAccessToken(access_token))
     if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
     if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
@@ -405,7 +405,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'extendAccessToken'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
