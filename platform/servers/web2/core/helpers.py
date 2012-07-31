@@ -89,9 +89,9 @@ class StampedAPIProxy(object):
         if self._ec2:
             key = str("web::getAccountByScreenName::%s" % screen_name)
             
-            #ret = self._try_get_cache(key)
-            #if ret is not None:
-            #    return ret
+            ret = self._try_get_cache(key)
+            if ret is not None:
+                return ret
             
             ret = self._export(self.api.getAccountByScreenName(screen_name).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
@@ -102,9 +102,9 @@ class StampedAPIProxy(object):
         if self._ec2:
             key = str("web::getAccount::%s" % user_id)
             
-            #ret = self._try_get_cache(key)
-            #if ret is not None:
-            #    return ret
+            ret = self._try_get_cache(key)
+            if ret is not None:
+                return ret
             
             ret = self._export(self.api.getAccount(user_id).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
@@ -264,15 +264,16 @@ class StampedAPIProxy(object):
     def getStampFromUser(self, user_id, stamp_num):
         if self._ec2:
             key = str("web::getStampFromUser::user_id=%s,stamp_num=%s" % (user_id, stamp_num))
-            ret = self._try_get_cache(key)
+            #ret = self._try_get_cache(key)
             
-            if ret is not None:
-                return ret
+            #if ret is not None:
+            #    return ret
             
             stamp  = self.api.getStampFromUser(userId=user_id, stampNumber=stamp_num)
             ret = HTTPStamp().importStamp(stamp).dataExport()
             
-            return self._try_set_cache(key, ret)
+            return ret
+            #return self._try_set_cache(key, ret)
         else:
             return self._handle_get("stamps/show.json", {
                 'user_id'   : user_id, 
