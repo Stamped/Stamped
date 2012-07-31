@@ -1043,7 +1043,11 @@ class StampedAPI(AStampedAPI):
         permissions = self._facebook.getUserPermissions(token)
         linked.have_share_permissions = \
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
-        self._accountDB.updateLinkedAccount(authUserId, linked.facebook)
+
+        token, expires = self._facebook.extendAccessToken(token)
+        linked.token = token
+        linked.token_expiration = expires
+        self._accountDB.updateLinkedAccount(authUserId, linked)
         return True
 
 
