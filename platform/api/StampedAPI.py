@@ -1040,7 +1040,7 @@ class StampedAPI(AStampedAPI):
         if acct.linked is None or acct.linked.facebook is None:
             return False
         linked = acct.linked.facebook
-        permissions = self.facebook.getUserPermissions(token)
+        permissions = self._facebook.getUserPermissions(token)
         linked.facebook.have_share_permissions = \
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
         self._accountDB.updateLinkedAccount(authUserId, linked.facebook)
