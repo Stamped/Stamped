@@ -723,7 +723,7 @@ class StampedAPI(AStampedAPI):
             # Asynchronously update profile picture link if screen name has changed
             payload = {
                 'old_screen_name': old_screen_name.lower(),
-                'new_screen_name': new_screen_name.lower(),
+                'new_screen_name': account.screen_name.lower(),
             }
             self.callTask(self.changeProfileImageNameAsync, payload)
 
