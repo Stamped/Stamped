@@ -191,10 +191,10 @@ class RateLimiterState(object):
                 'instantiate_custom_exceptions' : True,
                 'import_custom_exceptions' : True,
                 }
-            threading.local().rateLimiter = rpyc.connect(host, port, config=config)
+            threading.local().rateLimiter = rpyc.connect(self.__host, self.__port, config=config)
             return threading.local().rateLimiter
 
-    def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
+    def _rpc_service_request(self, service, method, url, body, header, priority, timeout):
         async_request = rpyc.async(self._rpc_service_connection.root.request)
         asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
         asyncresult.set_expiry(timeout)
@@ -211,7 +211,7 @@ class RateLimiterState(object):
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
             logs.info('### attempting rpc service request')
-            return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
+            return self._rpc_service_request(service, method.upper(), url, body, header, priority, timeout)
         except DailyLimitException as e:
             raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
         except WaitTooLongException as e:
