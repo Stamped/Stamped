@@ -74,7 +74,7 @@ class Dashboard(object):
                 yest_hourly.append(int(i))
         
         # If we didn't, rebuild all of yesterday's stats and save them if on bowser
-        if len(yest_hourly) == 0:
+        if len(yest_hourly) < 25:
             for hour in range (0,25):
                 bgn = dayAgo(today())
                 end = dayAgo(today()) + timedelta(hours=hour)
@@ -107,7 +107,7 @@ class Dashboard(object):
                     daily = fun(bgn,end)
                     try:
                         weeklyAgg[hour] += daily
-                    except Exception:
+                    except IndexError:
                         weeklyAgg.append(daily)
             
             # Take the aggregate and make an average
