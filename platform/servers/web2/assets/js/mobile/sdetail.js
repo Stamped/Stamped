@@ -315,6 +315,77 @@ var g_update_stamps = null;
                 }
             }
             
+            // initialize listen action
+            var $action_listen = $sdetail.find('.action-listen');
+            
+            $.each($action_listen, function(i, elem) {
+                var $elem = $(elem);
+                var $source_itunes  = $elem.find(".source-itunes");
+                
+                if ($source_itunes.length === 1) {
+                    var itunes_initialized = false;
+                    var itunes_initialized_callback = null;
+                    
+                    var $itunes = $("#itunes-preview");
+                    var itunes_url = $itunes.attr("src");
+                    
+                    // initialize itunes preview audio
+                    $elem.parent(".action-link").click(function(event) {
+                        event.preventDefault();
+                        var action;
+                        
+                        var play_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("stopped").addClass("playing");
+                            
+                            $itunes.jPlayer("play");
+                        };
+                        
+                        var stop_action = function() {
+                            itunes_initialized_callback = null;
+                            $elem.removeClass("playing").addClass("stopped");
+                            
+                            $itunes.jPlayer("pause");
+                        };
+                        
+                        if ($elem.hasClass("stopped")) {
+                            action = play_action;
+                        } else {
+                            action = stop_action;
+                        }
+                        
+                        if (!itunes_initialized) {
+                            itunes_initialized_callback = function() {
+                                action();
+                            };
+                        } else {
+                            action();
+                        }
+                        
+                        return false;
+                    });
+                    
+                    itunes_initialized = true;
+                    $itunes.jPlayer({
+                        ready: function () {
+                            $itunes.jPlayer("setMedia", {
+                                m4a : itunes_url
+                            });
+                            
+                            itunes_initialized = true;
+                            
+                            if (!!itunes_initialized_callback) {
+                                itunes_initialized_callback();
+                            }
+                        }, 
+                        
+                        supplied: "m4a", 
+                        swfPath: "/assets/js/libs/jplayer", 
+                        solution: "html,flash"
+                    });
+                }
+            });
+            
             // initialize expanding / collapsing links for long, overflowed metadata items
             $sdetail.find('a.nav').each(function(i, elem) {
                 var $elem  = $(elem);

@@ -24,7 +24,7 @@ from libs.Memcache                              import globalMemcache
 class MongoAccountCollection(AMongoCollection, AAccountDB):
     
     def __init__(self):
-        AMongoCollection.__init__(self, 'users', primary_key='user_id', obj=Account)
+        AMongoCollection.__init__(self, 'users', primary_key='user_id', obj=Account, overflow=True)
         AAccountDB.__init__(self)
         
         ### TEMP: For now, verify that no duplicates can occur via index
@@ -325,6 +325,15 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
             document = self._getMongoDocumentFromId(documentId, forcePrimary=True)
         except Exception:
             raise StampedAccountNotFoundError("Account not found in database")
+        return self._convertFromMongo(document)
+    
+    def getAccountByScreenName(self, screen_name):
+        try:
+            screen_name = screen_name.lower()
+            document = self._collection.find({ 'screen_name_lower' : screen_name }, forcePrimary=True)
+        except Exception:
+            raise StampedAccountNotFoundError("Account not found")
+        
         return self._convertFromMongo(document)
     
     def getAccounts(self, userIds, limit=0):

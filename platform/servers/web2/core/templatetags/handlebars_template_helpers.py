@@ -7,6 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import logs, os, pystache, utils, pybars
+import api.HTTPSchemas
 
 from subprocess import Popen, PIPE
 from pprint     import pformat
@@ -33,8 +34,8 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     if len(args) == 1 and isinstance(size, (basestring, int)):
         size = int(args[0])
     
-    name = scope.get('name')
     screen_name = scope.get('screen_name')
+    name = scope.get('name')
     alt  = ""
     
     if size > 72:
@@ -45,10 +46,21 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
         
         alt = 'alt="%s" ' % alt
     
-    url  = scope.get('image_url', "http://static.stamped.com/users/default.jpg")
+    screen_name = screen_name.lower()
+    url = scope.get('image_url', None)
     
-    if not url.endswith('default.jpg'):
-        url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name.lower(), size, size)
+    try:
+        if url is None:
+            ts  = scope.get('timestamp', {}).get('image_cache', None)
+            url = api.HTTPSchemas._profileImageURL(screen_name, ts, size)
+    except Exception:
+        pass
+    
+    if url is None:
+        url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
+    
+    #if not url.endswith('default.jpg'):
+    #    url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
     
     return pybars.strlist('<img %s src="%s" />' % (alt, url))
 

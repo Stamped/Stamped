@@ -392,6 +392,7 @@
                     border-bottom: 2px solid #d7d7d7;
                     display: block;
                 }
+                
                 a.action-link:last-child {
                     border-bottom: 0 none;
                 }
@@ -408,12 +409,18 @@
                     
                     .action-icon {
                         background: url(/assets/img/edetail-sprite.png) no-repeat;
-                        display: none;
+                        display: inline-block;
                         
                         width:  18px;
                         height: 18px;
                         
                         margin: 2px 12px 0 0;
+                    }
+                    
+                    .action-icon-media-loading {
+                        background: url(/assets/img/loading.gif) no-repeat;
+                        background-size: 100% 100%;
+                        display: inline-block;
                     }
                     
                     .action-icon-image(@x) {
@@ -458,6 +465,10 @@
                         .action-icon-image(160px);
                     }
                     
+                    .action-icon-playing {
+                        .action-icon-image(180px);
+                    }
+                    
                     &:hover {
                         .action-icon-reserve {
                             .action-icon-image-hover(0);
@@ -485,6 +496,10 @@
                         
                         .action-icon-playlist {
                             .action-icon-image-hover(160px);
+                        }
+                        
+                        .action-icon-playing {
+                            .action-icon-image-hover(180px);
                         }
                     }
                     
@@ -545,6 +560,7 @@
                             .source-image(100px);
                         }
                     }
+                    
                 }
             }
             
@@ -661,6 +677,16 @@
             }
         }
     }
+}
+
+.lhs .stopped, .lhs .playing, .lhs .media-loading {
+    display: none;
+}
+
+.stopped .lhs .stopped, 
+.media-loading .lhs .media-loading, 
+.playing .lhs .playing {
+    display: block !important;
 }
 
 

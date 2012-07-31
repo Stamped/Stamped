@@ -247,15 +247,20 @@
         
         var stamped_logo_top  = parseFloat($main_stamped_logo.css("top"));
         var stamped_logo_left = parseFloat($main_stamped_logo.css("left"));
+        var mobile = (!!(/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)));
         
         var update_stamped_logo_layout = function() {
+            if (mobile) {
+                return;
+            }
+            
             var scrollY     = $window.scrollTop();
             var min_offset  = -50;
             
             if ($main_stamped_logo.hasClass("stamped-logo-fixed")) {
-                var p_offset    = $main_stamped_logo.parent().offset();
+                var offset  = $main_stamped_logo.parent().offset();
                 
-                if (p_offset.top + stamped_logo_top - scrollY >= min_offset) {
+                if (offset.top + stamped_logo_top - scrollY >= min_offset) {
                     $main_stamped_logo.removeClass("stamped-logo-fixed").css({
                         "top"  : stamped_logo_top  + "px", 
                         "left" : stamped_logo_left + "px"

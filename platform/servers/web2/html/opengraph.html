@@ -132,22 +132,23 @@
         {% endif %}
     {% endif %}{% endif %}{% endif %}{% endif %}
 {% else %}
-    <meta property="og:type"                content="stampedapp:user"/>
-    <meta property="og:title"               content="{{user.screen_name}}"/>
+    <meta property="og:type"                content="profile"/>
+    <meta property="og:title"               content={% if user.name and user.name|length >= 1 %} "{{user.name}}" {% else %} "{{user.screen_name}}" {% endif %}/>
     
     {% if user.image_url == "http://static.stamped.com/users/default.jpg" %}
         <meta property="og:image"           content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
         
         <meta itemprop="image"              content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
     {% else %}
-        <meta property="og:image"           content="{{user.image_url}}"/>
-        <meta itemprop="image"              content="{{user.image_url}}"/>
+        <meta property="og:image"           content="http://static.stamped.com/users/{{user.screen_name}}.jpg"/>
+        <meta itemprop="image"              content="http://static.stamped.com/users/{{user.screen_name}}.jpg"/>
     {% endif %}
-    
-    <meta property="stampedapp:user_id"     content="{{user.user_id}}"/>
-    <meta property="stampedapp:screen_name" content="{{user.screen_name}}"/>
     
     <meta property="og:description"         content="Check out {{user.screen_name}}'s stamp collection on Stamped! www.stamped.com/{{user.screen_name}}"/>
     <meta itemprop="description"            content="Check out {{user.screen_name}}'s stamp collection on Stamped! www.stamped.com/{{user.screen_name}}"/>
+    
+    {% if user.linked.facebook.third_party_id and user.linked.facebook.third_party_id|length > 0 %}
+        <meta property="fb:profile_id"      content="{{user.linked.facebook.third_party_id}}" />
+    {% endif %}
 {% endif %}
 

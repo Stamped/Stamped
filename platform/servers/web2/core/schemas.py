@@ -106,23 +106,27 @@ class HTTPDownloadAppSchema(Schema):
     @classmethod
     def setSchema(cls):
         cls.addProperty('phone_number',                     basestring, required=True)
+        cls.addProperty('mobile',                           bool)
 
 class HTTPResetEmailSchema(Schema):
     
     @classmethod
     def setSchema(cls):
+        cls.addProperty('mobile',                           bool)
         cls.addProperty('email',                            basestring, required=True)
 
 class HTTPResetPasswordViewSchema(Schema):
     
     @classmethod
     def setSchema(cls):
+        cls.addProperty('mobile',                           bool)
         cls.addProperty('token',                            basestring, required=True)
 
 class HTTPResetPasswordSchema(Schema):
     
     @classmethod
     def setSchema(cls):
+        cls.addProperty('mobile',                           bool)
         cls.addProperty('token',                            basestring, required=True)
         cls.addProperty('password',                         basestring, required=True)
 
@@ -130,12 +134,14 @@ class HTTPSettingsSchema(Schema):
     
     @classmethod
     def setSchema(cls):
+        cls.addProperty('mobile',                           bool)
         cls.addProperty('token',                            basestring, required=True)
 
 class HTTPUpdateSettingsSchema(Schema):
     
     @classmethod
     def setSchema(cls):
+        cls.addProperty('mobile',                           bool)
         cls.addProperty('token',                            basestring, required=True)
         cls.addProperty('alerts_credits_apns',              bool)
         cls.addProperty('alerts_credits_email',             bool)
