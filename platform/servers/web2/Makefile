@@ -70,7 +70,7 @@ endef
 define ADD_JS_TARGET
 $(GENERATED_JS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).js: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) $(call GET_JS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@mkdir -p $(GENERATED_JS_BASE_DIR)
-	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^))$$(END_COLOR) | java -jar bin/compressor.jar --type js --line-break $(GENERATED_LINE_LENGTH) > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
+	@$$(CECHO) "cat $$(BOLD_COLOR)$$(FR_COLOR_RED)$$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^))$$(END_COLOR) | java -jar bin/compressor.jar --type js --nomunge --line-break $(GENERATED_LINE_LENGTH) > '$$(BOLD_COLOR)$$(FR_COLOR_GREEN)$$@$$(END_COLOR)'"
 	@cat $$(if $$(call ISNULL,$$(strip $$(call REST,$$^))),/dev/null,$$(call REST,$$^)) | java -jar bin/compressor.jar --type js --nomunge --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef

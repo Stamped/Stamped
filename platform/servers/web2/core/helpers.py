@@ -25,8 +25,8 @@ from django.utils.functional    import wraps
 
 # initialize several useful globals
 IS_PROD  = libs.ec2_utils.is_prod_stack()
-#_baseurl = "https://api.stamped.com/v1"
-_baseurl = "https://dev.stamped.com/v1"
+_baseurl = "https://api.stamped.com/v1"
+#_baseurl = "https://dev.stamped.com/v1"
 #_baseurl = "https://ec2-50-19-40-37.compute-1.amazonaws.com/v1"
 #_baseurl = "https://ec2-107-21-83-72.compute-1.amazonaws.com/v1"
 
