@@ -1041,7 +1041,7 @@ class StampedAPI(AStampedAPI):
             return False
         linked = acct.linked.facebook
         permissions = self._facebook.getUserPermissions(token)
-        linked.facebook.have_share_permissions = \
+        linked.have_share_permissions = \
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
         self._accountDB.updateLinkedAccount(authUserId, linked.facebook)
         return True
