@@ -3268,12 +3268,13 @@ class StampedAPI(AStampedAPI):
 
         logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
 
-
         delay = 5
         while True:
             try:
                 uniqueUrl = '%s?ts=%s' (url, time()) if delay > 5 else url
+                logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, uniqueUrl))
                 result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, uniqueUrl, **kwargs)
+                break
             except StampedFacebookPermissionsError as e:
                 account.linked.facebook.have_share_permissions = False
                 self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
@@ -3288,7 +3289,6 @@ class StampedAPI(AStampedAPI):
                 time.sleep(delay)
                 delay *= 2
                 continue
-            break
 
 
 
