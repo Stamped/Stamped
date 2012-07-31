@@ -3368,7 +3368,7 @@ class StampedAPI(AStampedAPI):
         delay = 5
         while True:
             try:
-                uniqueUrl = '%s?ts=%s' (url, time.time()) if delay > 5 else url
+                uniqueUrl = '%s?ts=%s' % (url, time.time()) if delay > 5 else url
                 logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, uniqueUrl))
                 result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, uniqueUrl, **kwargs)
                 break
