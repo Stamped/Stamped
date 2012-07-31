@@ -73,10 +73,11 @@ class Dashboard(object):
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 yest_hourly.append(int(i))
         
-        # If we didn't, rebuild all of yesterday's stats and save them if on bowser
+        # If we didn't, or we stored less than a full 24 hours, rebuild all of yesterday's stats and save them if on bowser
         if len(yest_hourly) < 25:
+            yest_hourly = []
+            bgn = dayAgo(today())
             for hour in range (0,25):
-                bgn = dayAgo(today())
                 end = dayAgo(today()) + timedelta(hours=hour)
                 total_yest = fun(bgn,end)
                 yest_hourly.append(total_yest)
