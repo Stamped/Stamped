@@ -33,7 +33,6 @@ RL_PORT = 18861
 class RateLimiterState(object):
     def __init__(self, fail_limit, fail_period, blackout_wait):
         self.__local_rlservice = None
-        self.__conn = None
         self.__request_fails = 0
         self.__fails = deque()
         self.__fail_limit = fail_limit
@@ -131,7 +130,11 @@ class RateLimiterState(object):
         return output
 
     def _fail(self, exception):
-        self.__conn = None
+        try:
+            del threading.local().rateLimiter
+        except:
+            pass
+
         self._getHost()
         if self.__blackout_start is not None:
             return
@@ -176,18 +179,22 @@ class RateLimiterState(object):
 #            self.__local_rlservice = None
             return False
 
-    def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-        if self.__conn is None:
+    @property
+    def _rpc_service_connection(self):
+        try:
+            return threading.local().rateLimiter
+        except AttributeError:
             config = {
                 'allow_pickle' : True,
                 'allow_all_attrs' : True,
                 'instantiate_custom_exceptions' : True,
                 'import_custom_exceptions' : True,
-            }
-            self.__conn = rpyc.connect(host, port, config=config)
+                }
+            threading.local().rateLimiter = rpyc.connect(host, port, config=config)
+            return threading.local().rateLimiter
 
-        time.sleep(0)
-        async_request = rpyc.async(self.__conn.root.request)
+    def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
+        async_request = rpyc.async(self._rpc_service_connection.root.request)
         asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
         asyncresult.set_expiry(timeout)
         response, content = asyncresult.value
