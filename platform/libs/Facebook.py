@@ -31,7 +31,7 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAA9tEV5MzkGfMAzdlft6NOhNzXnkKkFXLSaTznZARaruwEAnYZAOStmANYoUv9iyzYY19CBZAGLWQQoCENrbNbBAIgCVQZDZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBALVOGXFMWXYj7OIFn9g4BO7Raz6VHZCn57dL1uuftzCzLcjKu7Kl76MC0yBtQnq7cf2Q3TSF4HDybKsIZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -216,11 +216,14 @@ class Facebook(object):
             grant_type      = 'fb_exchange_token',
             fb_exchange_token = access_token,
         )
+        print('### result: %s' % result)
         r = re.search(r'access_token=([^&]*)', result)
         token = r.group(1)
         r = re.search(r'expires=([^&]*)', result)
-        expires = r.group(1)
-        expires = datetime.datetime.fromtimestamp(time.time() + int(expires))
+        expires = None
+        if r is not None:
+            expires = r.group(1)
+            expires = datetime.datetime.fromtimestamp(time.time() + int(expires))
         return token, expires
 
 

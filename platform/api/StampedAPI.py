@@ -1047,6 +1047,7 @@ class StampedAPI(AStampedAPI):
         token, expires = self._facebook.extendAccessToken(token)
         linked.token = token
         linked.token_expiration = expires
+        linked.extended_timestamp = datetime.utcnow()
         self._accountDB.updateLinkedAccount(authUserId, linked)
         return True
 
