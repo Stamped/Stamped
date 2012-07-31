@@ -14,6 +14,7 @@ from errors import *
 from libs.Request import service_request
 from APIKeys import get_api_key
 from datetime import datetime
+from BeautifulSoup import BeautifulSoup
 
 
 
@@ -288,6 +289,12 @@ class Facebook(object):
 
     def postToOpenGraph(self, fb_user_id, action, access_token, object_type, object_url, message=None, imageUrl=None):
         logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
+
+        http = httplib2.Http()
+        response, content = http.request(object_url, 'GET')
+        soup = BeautifulSoup(content)
+        logs.info('### meta tags:\n%s' % soup.findAll('meta', property=True))
+
         args = {}
         if action == 'like':
             path = "%s/og.likes" % fb_user_id
