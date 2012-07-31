@@ -215,10 +215,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             self.__group_priorities[source] = { group : value }
     
     def getGroupPriority(self, group, source):
-        try:
-            return self.__group_priorities[source][group]
-        except Exception:
-            return self.getGlobalPriority(source)
+        return self.__group_priorities.get(source, {}).get(
+                group, self.getGlobalPriority(source))
 
     def addSource(self, source):
         self.__sources.append(source)

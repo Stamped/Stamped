@@ -1231,6 +1231,10 @@ class HTTPEntity(Schema):
 
         subcategory             = self._formatSubcategory(self.subcategory)
 
+        # Temporary hack to fix bug in 2.0.1 that displays "an place"
+        if subcategory == 'establishment':
+            subcategory = 'place'
+
         # Place
         if entity.kind == 'place':
             self.address        = entity.formatAddress(extendStreet=True)
