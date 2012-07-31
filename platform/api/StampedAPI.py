@@ -971,8 +971,6 @@ class StampedAPI(AStampedAPI):
 
         # Send out alerts, if applicable
         if linkedAccount.service_name == 'facebook':
-
-
             payload = {
                 'authUserId': authUserId, 
                 'facebookToken': linkedAccount.token
