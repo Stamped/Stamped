@@ -596,7 +596,7 @@ class HTTPLinkedAccount(Schema):
         cls.addProperty('linked_name',                      basestring)
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
-        cls.addProperty('token_expiration',                 datetime)
+        cls.addProperty('token_expiration',                 basestring)
         cls.addNestedProperty('share_settings',             HTTPLinkedAccountShareSettings)
 
     def importLinkedAccount(self, linked):
@@ -2937,6 +2937,20 @@ class HTTPActivity(Schema):
 
             return action
 
+        def _buildFBLoginAction(user, link):
+            source              = HTTPActionSource()
+            source.name         = 'Connect to Facebook'
+            source.source       = 'facebook'
+            source.endpoint     = 'account/linked/facebook/login.json'
+            source.source_id    = user.user_id
+
+            action              = HTTPAction()
+            action.type         = 'facebook_connect'
+            action.name         = 'Connect to Facebook'
+            action.sources      = [ source ]
+
+            return action
+
         def _formatUserObjects(users, required=True, offset=0):
             if users is None or len(users) == 0:
                 if required:
@@ -3387,6 +3401,12 @@ class HTTPActivity(Schema):
                 self.header = "Welcome to Stamped 2.0"
                 self.image = _getIconURL('news_welcome')
                 self.action = _buildUserAction(self.objects.users[0])
+
+            elif self.verb == 'notification_fb_login':
+                _addUserObjects()
+                self.header = "Connect to Facebook"
+                self.image = _getIconURL('news_welcome')
+                self.action = _buildFBLoginAction(self.objects.users[0])
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)

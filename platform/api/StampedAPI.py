@@ -5032,6 +5032,17 @@ class StampedAPI(AStampedAPI):
                                      benefit        = 100, 
                                      unique         = True)
 
+    def _addFBLoginActivity(self, recipientId):
+        objects = ActivityObjectIds()
+        objects.user_ids = [ recipientId ]
+        body = "Connect to Facebook"
+        self._activityDB.addActivity(verb           = 'notification_fb_login',
+                                     recipientIds   = [ recipientId ],
+                                     objects        = objects,
+                                     body           = body,
+                                     benefit        = 100,
+                                     unique         = True)
+
     def _addActivity(self, verb,
                            userId,
                            objects,
