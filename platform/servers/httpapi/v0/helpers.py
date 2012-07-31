@@ -40,11 +40,12 @@ VALID_ORIGINS = [
     'http://dev.stamped.com', 
 ]
 
-VALID_ORIGINS.extend([
-    'http://localhost:19000', 
-    'http://localhost:18000', 
-    'http://localhost:8000', 
-])
+if not IS_PROD:
+    VALID_ORIGINS.extend([
+        'http://localhost:19000', 
+        'http://localhost:18000', 
+        'http://localhost:8000', 
+    ])
 
 t1 = time.time()
 

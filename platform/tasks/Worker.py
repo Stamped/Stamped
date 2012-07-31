@@ -8,6 +8,7 @@ import sys
 import logs
 import libs.ec2_utils
 import random
+import utils
 
 import signal, os
 
@@ -45,24 +46,41 @@ def getHosts():
 def enterWorkLoop(functions):
     from MongoStampedAPI import globalMongoStampedAPI
     api = globalMongoStampedAPI()
-    logs.info("starting worker for %s" % functions.keys())
     worker = StampedWorker(getHosts())
     def wrapper(worker, job):
-        request_num = random.randint(1, 1 << 32)
+        k = 'not parsed yet'
         try:
-            k = job.task
+            job_data = pickle.loads(job.data)
+            k = job_data['key']
+            request_num = job_data['task_id']
             logs.begin(saveLog=api._logsDB.saveLog,
                        saveStat=api._statsDB.addStat,
                        nodeName=api.node_name)
             logs.async_request(k)
-            v = functions[k]
-            data = pickle.loads(job.data)
-            logs.info("Request %d: %s: %s: %s" % (request_num, k, v, data))
-            v(k, data)
-            logs.info("Finished with request %d" % (request_num,))
+            data = job_data['data']
+            logs.info("Request %s: %s: %s" % (request_num, k, data))
+            if functions is not None:
+                v = functions[k]
+                v(k, data)
+            else:
+                fnName = k.split('::')[1]
+                v = getattr(api, fnName)
+                v(**data)
+            logs.info("Finished with request %s" % (request_num,))
         except Exception as e:
             logs.error("Failed request %d" % (request_num,))
             logs.report()
+
+            if libs.ec2_utils.is_ec2():
+                try:
+                    email = {}
+                    email['from'] = 'Stamped <noreply@stamped.com>'
+                    email['to'] = 'dev@stamped.com'
+                    email['subject'] = '%s - Failed Async Task - %s - %s' % (api.node_name, k ,datetime.utcnow().isoformat())
+                    email['body'] = logs.getHtmlFormattedLog()
+                    utils.sendEmail(email, format='html')
+                except Exception as e:
+                    logs.warning('UNABLE TO SEND EMAIL')
         finally:
             logs.info('Saving request log for request %d' % (request_num,))
             try:
@@ -73,15 +91,20 @@ def enterWorkLoop(functions):
                 traceback.print_exc()
                 logs.warning(traceback.format_exc())
         return ''
-    for k,v in functions.items():
+    queues = set()
+    if functions is not None:
+        for k,v in functions.items():
+            queue = k.split('::')[0]
+            queues.add(queue)
+    else:
+        queues.add('api')
+    for k in queues:
         worker.register_task(k, wrapper)
     worker.work(poll_timeout=1)
 
-def main(count, functions):
-    greenlets = []
-    for i in range(count):
-        greenlets.append(gevent.spawn(enterWorkLoop, functions))
-    gevent.joinall(greenlets)
+def main(functions=None, api=False):
+    enterWorkLoop(functions)
+
 
 def enrichTasks():
     from MongoStampedAPI import globalMongoStampedAPI
@@ -89,22 +112,16 @@ def enrichTasks():
     m = {}
     def mergeEntityAsyncHelper(key, data):
         api.mergeEntityAsync(data['entityDict'])
-    m[api.taskName(api.mergeEntityAsync)] = mergeEntityAsyncHelper
+    m[api.taskKey('enrich', api.mergeEntityAsync)] = mergeEntityAsyncHelper
 
     def mergeEntityIdAsyncHelper(key, data):
-        api.mergeEntityIdAsync(data['entity_id'])
-    m[api.taskName(api.mergeEntityIdAsync)] = mergeEntityIdAsyncHelper
+        api.mergeEntityIdAsync(data['entityId'])
+    m[api.taskKey('enrich', api.mergeEntityIdAsync)] = mergeEntityIdAsyncHelper
     return m
 
-def apiTasks():
-    from MongoStampedAPI import globalMongoStampedAPI
-    api = globalMongoStampedAPI()
-    m = {}
-    def customizeStampAsyncHelper(key, data):
-        api.customizeStampAsync()
-    m[api.taskName(api.customizeStampAsync)] = customizeStampAsyncHelper
-    return m
-
+################
+### TEST STUFF
+################
 
 def findAmicablePairsNaive(n):
     def sumOfDivisors(i):
@@ -164,24 +181,17 @@ def testTasks():
         'findAmicablePairsNaive' : findAmicablePairsNaiveHelper
     }
 
-_functionSets = {
-    'enrich': enrichTasks,
-    'api': apiTasks,
-}
-
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print 'Must provide at least one function set (i.e. %s)' %  ','.join(_functionSets.keys())
+    if len(sys.argv) != 2:
+        print 'Must provide a queue'
         sys.exit(1)
     # All workers have test tasks enabled.
-    m = testTasks()
-    for k in sys.argv[1:]:
-        if k in _functionSets:
-            f = _functionSets[k]
-            m.update(f())
-        else:
-            print("%s is not a valid function set" % k)
-            sys.exit(1)
-    main(10, m)
+    arg = sys.argv[1]
+    if arg == 'enrich':
+        main(functions = enrichTasks(), api=False)
+    elif arg == 'api':
+        main(functions = None, api=True)
+    else:
+        print "Unrecognized queue"
 
 

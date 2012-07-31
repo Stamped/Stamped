@@ -2267,6 +2267,16 @@ var g_update_stamps = null;
             }
         });
         
+        $body.on("click", ".popup-small .user", function(event) {
+            event.preventDefault();
+            
+            var $this = $(this);
+            var link  = $this.find("a.profile-image-small").attr("href");
+            
+            window.location = link;
+            return false;
+        });
+        
         
         // ---------------------------------------------------------------------
         // base page initialization
