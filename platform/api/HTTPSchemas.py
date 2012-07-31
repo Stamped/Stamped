@@ -1737,7 +1737,9 @@ class HTTPEntity(Schema):
                 )
                 sources.append(source)
 
-            self._addAction(actionType, actionTitle, sources, icon=actionIcon)
+            # Landon only implemented this for tracks. WTF man.
+            if entity.isType('track'):
+                self._addAction(actionType, actionTitle, sources, icon=actionIcon)
 
             # Actions: Download
 
