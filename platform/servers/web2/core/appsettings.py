@@ -20,7 +20,7 @@ from servers.web2.core.helpers      import *
 
 g_stamped_auth = MongoStampedAuth()
 
-@stamped_view(schema=HTTPResetPasswordViewSchema)
+@stamped_view(schema=HTTPResetPasswordViewSchema, no_cache=True)
 def password_reset(request, schema, **kwargs):
     body_classes = "password_reset main"
     token        = schema.token
@@ -47,7 +47,7 @@ def password_reset(request, schema, **kwargs):
         'token'             : token
     }, preload=[ 'token' ])
 
-@stamped_view()
+@stamped_view(no_cache=True)
 def password_forgot(request, **kwargs):
     body_classes = "password_forgot main"
     
@@ -57,7 +57,7 @@ def password_forgot(request, **kwargs):
         'title'             : 'Stamped - Forgot Password', 
     })
 
-@stamped_view(schema=HTTPSettingsSchema)
+@stamped_view(schema=HTTPSettingsSchema, no_cache=True)
 def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
     token        = schema.token
@@ -96,7 +96,7 @@ def alert_settings(request, schema, **kwargs):
     else:
         user_id  = g_stamped_auth.verifyEmailAlertToken(token)
         account  = stampedAPIProxy.getAccount(user_id)
-        user     = account.dataExport()
+        user     = account
         settings = user['alert_settings']
     
     options = [
@@ -196,10 +196,10 @@ def send_reset_email(request, schema, **kwargs):
         raise StampedHTTPError(404, msg="Email address not found", kind='invalid_input')
     
     account = stampedAPIProxy.getAccount(user['user_id'])
-    auth_service = account.auth_service
+    auth_service = account['auth_service']
     
     if auth_service != 'stamped':
-        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account.screen_name, auth_service))
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account['screen_name'], auth_service))
     
     # send email
     logs.info("sending email to '%s' (user: '%s')" % (email, user['screen_name']))

@@ -15,6 +15,7 @@ import rpyc
 import urllib
 import pickle
 import time
+import threading
 from errors import *
 from servers.ratelimiter.RateLimiterService import StampedRateLimiterService
 from servers.ratelimiter.RateLimiter2 import DailyLimitException, WaitTooLongException, TimeoutException, TooManyFailedRequestsException
@@ -29,11 +30,11 @@ DEFAULT_TIMEOUT = 5
 RL_HOST = 'localhost'
 RL_PORT = 18861
 
+localData = threading.local()
 
 class RateLimiterState(object):
     def __init__(self, fail_limit, fail_period, blackout_wait):
         self.__local_rlservice = None
-        self.__conn = None
         self.__request_fails = 0
         self.__fails = deque()
         self.__fail_limit = fail_limit
@@ -131,7 +132,11 @@ class RateLimiterState(object):
         return output
 
     def _fail(self, exception):
-        self.__conn = None
+        try:
+            del localData.rateLimiter
+        except:
+            pass
+
         self._getHost()
         if self.__blackout_start is not None:
             return
@@ -147,7 +152,7 @@ class RateLimiterState(object):
             if self.__fails[0].timestamp < cutoff:
                 self.__fails.popleft()
             else:
-               break
+                break
 
         count = len(self.__fails)
 
@@ -172,22 +177,26 @@ class RateLimiterState(object):
         else:
             self.__blackout_start = None
             self.__request_fails = 0
-#            self.__local_rlservice.shutdown()
-#            self.__local_rlservice = None
+            #            self.__local_rlservice.shutdown()
+            #            self.__local_rlservice = None
             return False
 
-    def _rpc_service_request(self, host, port, service, method, url, body, header, priority, timeout):
-        if self.__conn is None:
+    @property
+    def _rpc_service_connection(self):
+        try:
+            return localData.rateLimiter
+        except AttributeError:
             config = {
                 'allow_pickle' : True,
                 'allow_all_attrs' : True,
                 'instantiate_custom_exceptions' : True,
                 'import_custom_exceptions' : True,
-            }
-            self.__conn = rpyc.connect(host, port, config=config)
+                }
+            localData.rateLimiter = rpyc.connect(self.__host, self.__port, config=config)
+            return localData.rateLimiter
 
-        time.sleep(0)
-        async_request = rpyc.async(self.__conn.root.request)
+    def _rpc_service_request(self, service, method, url, body, header, priority, timeout):
+        async_request = rpyc.async(self._rpc_service_connection.root.request)
         asyncresult = async_request(service, priority, timeout, method, url, pickle.dumps(body), pickle.dumps(header))
         asyncresult.set_expiry(timeout)
         response, content = asyncresult.value
@@ -203,7 +212,7 @@ class RateLimiterState(object):
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
             logs.info('### attempting rpc service request')
-            return self._rpc_service_request(self.__host, self.__port, service, method.upper(), url, body, header, priority, timeout)
+            return self._rpc_service_request(service, method.upper(), url, body, header, priority, timeout)
         except DailyLimitException as e:
             raise StampedThirdPartyRequestFailError("Hit daily rate limit for service: '%s'" % service)
         except WaitTooLongException as e:
@@ -216,9 +225,9 @@ class RateLimiterState(object):
             import traceback
             print('### caught exception  type: %s  e: %s' % (type(e), e))
             logs.info("RPC Service Request fail."
-                        "service: %s  method: %s  url: %s  body: %s  header: %s"
-                        "priority: %s  timeout: %s  Exception: %s  Stack: %s" %
-                        (service, method, url, body, header, priority, timeout, e, traceback.format_exc()))
+                      "service: %s  method: %s  url: %s  body: %s  header: %s"
+                      "priority: %s  timeout: %s  Exception: %s  Stack: %s" %
+                      (service, method, url, body, header, priority, timeout, e, traceback.format_exc()))
             self._fail(e)
         logs.info('### Falling back to local rate limiter request')
         return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
