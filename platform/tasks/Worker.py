@@ -12,6 +12,8 @@ import utils
 
 import signal, os
 
+from datetime import datetime
+
 class StampedWorker(gearman.GearmanWorker):
 
     killed = False
