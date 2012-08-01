@@ -223,7 +223,7 @@ def createFacebookLoginResponse(authUserId):
 
 
 @handleHTTPRequest(exceptions=exceptions)
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
 def facebookLogin(request, authUserId, **kwargs):
     logs.info('HIT facebookLogin')
     result =  createFacebookLoginResponse(authUserId)
