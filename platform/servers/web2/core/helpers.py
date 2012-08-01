@@ -125,7 +125,7 @@ class StampedAPIProxy(object):
         else:
             raise NotImplementedError
     
-    def getUser(self, params, no_cache=false):
+    def getUser(self, params, no_cache=False):
         if self._ec2:
             key = str("web::getUser::%s" % generateKeyFromDictionary(params))
             
