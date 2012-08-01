@@ -106,18 +106,6 @@ def handle_profile(request, schema, **kwargs):
         followers = shuffle_split_users(followers)
     """
     
-    #utils.log("USER:")
-    #utils.log(pprint.pformat(user))
-    
-    #utils.log("STAMPS:")
-    #utils.log(pprint.pformat(stamps))
-    
-    #utils.log("FRIENDS:")
-    #utils.log(pprint.pformat(friends))
-    
-    #utils.log("FOLLOWERS:")
-    #utils.log(pprint.pformat(followers))
-    
     # modify schema for purposes of next / prev gallery nav links
     schema.ajax    = True
     schema.user_id = user['user_id']
@@ -253,7 +241,8 @@ def sdetail(request, schema, **kwargs):
     
     logs.info('SDETAIL: %s/%s/%s' % (schema.screen_name, schema.stamp_num, schema.stamp_title))
     
-    user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+    #user   = stampedAPIProxy.getUser(dict(screen_name=schema.screen_name))
+    user   = stampedAPIProxy.getAccountByScreenName(schema.screen_name)
     stamp  = stampedAPIProxy.getStampFromUser(user['user_id'], schema.stamp_num)
     
     if stamp is None:

@@ -125,26 +125,37 @@
     }
     
     .button-wrapper {
+        position: relative;
+        z-index: 10000;
+        
         .save-button {
-            position: relative;
-            z-index: 10000;
-            
             margin: 0 auto;
             border: 0 none;
             outline: none;
         }
         
-        #status {
+        #status, .loading {
+            position: absolute;
             display: none;
+        }
+        
+        #status {
+            top:  50%;
+            left: 70%;
+            margin-top: -18px;
             
-            margin-top: 12px;
-            text-align: center;
             font-size: 80%;
             color: #498ff2;
         }
         
         .loading {
             background: url(/assets/img/loading.gif) no-repeat;
+            
+            top:  50%;
+            left: 70%;
+            margin-left: -16px;
+            margin-top: -18px;
+            
             width:  32px;
             height: 32px;
         }
