@@ -222,7 +222,7 @@ def createFacebookLoginResponse(authUserId):
 @handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["GET"])
 def facebookLogin(request, authUserId, http_schema, **kwargs):
-    return createFacebookLogin(authUserId)
+    return createFacebookLoginResponse(authUserId)
 
 
 @handleHTTPCallbackRequest(http_schema=HTTPFacebookAuthResponse,
