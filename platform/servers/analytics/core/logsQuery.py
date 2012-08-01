@@ -16,6 +16,7 @@ from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool
 from analytics_utils                            import today
+from statWriter                                 import statWriter
 
 
 def percentile(numList,p):
