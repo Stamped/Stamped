@@ -205,8 +205,11 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 
 
 def createFacebookLoginResponse(authUserId):
+    logs.info('called createFacebookLoginResponse with user_id: %s' % authUserId)
     facebook = stampedAPI._facebook
     url = facebook.getLoginUrl(authUserId)
+
+    logs.info('url: %s' % url)
 
     response                = HTTPActionResponse()
     source                  = HTTPActionSource()
@@ -222,7 +225,9 @@ def createFacebookLoginResponse(authUserId):
 @handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["GET"])
 def facebookLogin(request, authUserId, http_schema, **kwargs):
-    return createFacebookLoginResponse(authUserId)
+    result =  createFacebookLoginResponse(authUserId)
+    logs.info('result: %s' % result)
+    return result
 
 
 @handleHTTPCallbackRequest(http_schema=HTTPFacebookAuthResponse,
