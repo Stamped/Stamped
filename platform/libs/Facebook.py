@@ -35,6 +35,8 @@ USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
 ACCESS_TOKEN = 'BAAEOIZBBUXisBANU2ZC0ZCIagEIZCZBMYb8GORccZC6dZCjFPM96lihWsGTm1q37gBgKTtGpaKbXjGFDPlXW23fQl9xXhIant5PqtccDCEHg3OzMsNPr8S382TxYmLUv28ZD'
 
+DEFAULT_TIMEOUT = 15
+
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
         self.app_id         = app_id
@@ -61,10 +63,10 @@ class Facebook(object):
         url     = "%s%s" % (baseurl, path)
 
         if method == 'get':
-            response, content = service_request('facebook', method, url, query_params=params, priority=priority)
+            response, content = service_request('facebook', method, url, query_params=params, priority=priority, timeout=DEFAULT_TIMEOUT)
         else:
             print('body: %s  url: %s' % (params, url))
-            response, content = service_request('facebook', method, url, body=params, priority=priority, timeout=60*2)
+            response, content = service_request('facebook', method, url, body=params, priority=priority, timeout=DEFAULT_TIMEOUT)
         if parse_json:
             result = json.loads(content)
         else:

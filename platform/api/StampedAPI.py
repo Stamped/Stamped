@@ -491,6 +491,8 @@ class StampedAPI(AStampedAPI):
             'authUserId': account.user_id, 
             'facebookToken': fb_acct.token
         }
+        # Kick off an async task to query FB and determine if user granted us sharing permissions
+        self.callTask(self.updateFBPermissionsAsync, payload)
         self.callTask(self.alertFollowersFromFacebookAsync, payload)
 
         return account
