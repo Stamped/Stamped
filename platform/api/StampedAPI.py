@@ -938,12 +938,6 @@ class StampedAPI(AStampedAPI):
             linkedAccount.linked_name = userInfo['name']
 
             # Kick off an async task to query FB and determine if user granted us sharing permissions
-            payload = {
-                'authUserId': authUserId,
-                'token': linkedAccount.token,
-            }
-            self.callTask(self.updateFBPermissionsAsync, payload)
-
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
 
@@ -982,6 +976,8 @@ class StampedAPI(AStampedAPI):
                 'authUserId': authUserId, 
                 'facebookToken': linkedAccount.token
             }
+            self.callTask(self.updateFBPermissionsAsync, payload)
+            # Send out alerts
             self.callTask(self.alertFollowersFromFacebookAsync, payload)
 
         elif linkedAccount.service_name == 'twitter':
@@ -1035,17 +1031,17 @@ class StampedAPI(AStampedAPI):
         return account.linked.facebook.share_settings
 
     @API_CALL
-    def updateFBPermissionsAsync(self, authUserId, token):
+    def updateFBPermissionsAsync(self, authUserId, facebookToken):
         acct = self.getAccount(authUserId)
         if acct.linked is None or acct.linked.facebook is None:
             return False
         linked = acct.linked.facebook
-        permissions = self._facebook.getUserPermissions(token)
+        permissions = self._facebook.getUserPermissions(facebookToken)
         linked.have_share_permissions = \
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
 
-        token, expires = self._facebook.extendAccessToken(token)
-        linked.token = token
+        facebookToken, expires = self._facebook.extendAccessToken(facebookToken)
+        linked.token = facebookToken
         linked.token_expiration = expires
         linked.extended_timestamp = datetime.utcnow()
         self._accountDB.updateLinkedAccount(authUserId, linked)

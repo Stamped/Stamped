@@ -10,14 +10,13 @@ testedUsers = set()
 failedUsers = set()
 
 users = api._accountDB._collection.find(
-        {'$and' : [
-            {'linked.facebook.token' : {'$exists' : 1}},
-            {'linked.facebook.token' : {'$ne' : None}},
-            {'linked.facebook.extended_timestamp' : {'$exists' : 0}}
-            ]}
+        { {'linked.facebook.extended_timestamp' : {'$exists' : 0}} }
 )
 
 for u in users:
+
+
+
     user_id = u['_id']
     token = u['linked']['facebook']['token']
     print('updating user_id: %s  token: %s' % (user_id, token))
