@@ -1,5 +1,16 @@
 <!doctype html>
 
+<!-- CSS Dependencies => assets/generated/css/base-mobile.generated.X.Y.Z.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        stylesheet: libs/h5bp.css
+        stylesheet: libs/jquery.fancybox.css
+    
+    Core stamped dependencies:
+        stylesheet: mobile/styles.css
+-->
+
 <html lang="en" {% block html_tags %}{% endblock %}>
     
     {% block pre_head %}
@@ -35,12 +46,27 @@
         {% endblock opengraph %}
         
         {% block styles %}
-        <link rel="stylesheet"          href="{{ STAMPED_STATIC_URL }}css/mobile/styles.css">
+            {% if STAMPED_DEBUG %}
+                <link rel="stylesheet"      href="/assets/css/fonts.css">
+                <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/libs/h5bp.min.css">
+                <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+                <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/mobile/styles.css">
+            {% else %}
+                <link rel="stylesheet"      href="/assets/css/fonts.css">
+                <link rel="stylesheet"      href="{{ STAMPED_STATIC_URL }}css/base-mobile.generated.{{ STAMPED_ASSET_VERSION }}.css">
+            {% endif %}
         {% endblock styles %}
         
         {% block post_styles %}
-        <link rel="stylesheet"          href="{{STAMPED_STATIC_URL}}css/retina.generated.{{ STAMPED_ASSET_VERSION}}.css" 
-                                        media="only screen and (-webkit-min-device-pixel-ratio: 2)" />
+        
+        {% if STAMPED_DEBUG %}
+            <link rel="stylesheet"          href="{{STAMPED_STATIC_URL}}css/retina.css" 
+                                            media="only screen and (-webkit-min-device-pixel-ratio: 2)" />
+        {% else %}
+            <link rel="stylesheet"          href="{{STAMPED_STATIC_URL}}css/retina.generated.{{ STAMPED_ASSET_VERSION}}.css" 
+                                            media="only screen and (-webkit-min-device-pixel-ratio: 2)" />
+        {% endif %}
+        
         {% endblock post_styles %}
         
         {% block post_head %}

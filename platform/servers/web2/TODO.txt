@@ -42,6 +42,15 @@
 
 
 TODO:
+    * find better way of invoking lessc without creating jenky temporary files
+    * better versioning at directory level
+    * cleanup duplication of mobile CSS
+    * cleanup duplication of CSS & JS in subpages
+    * cleanup JS to be OO and better organized
+    * remove modernizr as a dependency
+    * remove jQuery imagesLoaded plugin dependency
+    * remove rdio jquery library dependency
+    
     * HIGH PRIORITY:
         * misc:
             * get-the-app popup

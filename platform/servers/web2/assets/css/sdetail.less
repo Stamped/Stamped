@@ -348,8 +348,12 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         
                         .nav {
                             display: none;
-                            color: @text1 !important;
                             cursor: pointer;
+                            color: #888 !important;
+                            
+                            &:hover, &:active {
+                                color: #000 !important;
+                            }
                         }
                     }
                     
@@ -377,7 +381,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         margin: 2em 0 1em;
                         
                         p.resizable {
-                            max-height: 4.5em;
+                            max-height: 4.2em;
                             overflow: hidden;
                             text-overflow: ellipsis;
                         }
@@ -755,9 +759,8 @@ body.sdetail_popup_animation, body.sdetail_popup {
         overflow-y: scroll;
         
         p {
-            margin:  0;
+            margin:  0 0 6px;
             padding: 0 60px;
-            margin-bottom: 6px;
             
             line-height: 130%;
             letter-spacing: 0.05em;
@@ -771,7 +774,7 @@ body.sdetail_popup_animation, body.sdetail_popup {
         }
         
         .submenu {
-            margin: 1em 0;
+            margin:  1em 0;
             padding: 0 12px;
             
             .submenu-title {

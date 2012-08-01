@@ -65,7 +65,6 @@ static id __instance;
         if (count.numberUnread.integerValue > 0) {
             self.count = count.numberUnread.integerValue;
         }
-        [[STFacebook sharedInstance] auth];
         if (count.action) {
             [[STActionManager sharedActionManager] didChooseAction:count.action withContext:[STActionContext context]];
         }

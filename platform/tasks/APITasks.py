@@ -28,13 +28,6 @@ def getStampedAPI():
     
     return __stamped_api__
 
-@task
-def add(x, y):
-    msg = ("Executing task id %r, args: %r kwargs: %r" % (
-            add.request.id, add.request.args, add.request.kwargs))
-    utils.log(msg)
-    
-    return x + y
 
 def invoke(request, *args, **kwargs):
     """ 

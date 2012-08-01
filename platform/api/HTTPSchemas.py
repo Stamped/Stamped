@@ -82,7 +82,7 @@ def _profileImageURL(screenName, cache=None, size=None):
     image = "%s.jpg" % (str(screenName).lower())
     if size is not None:
         image = "%s-%dx%d.jpg" % (str(screenName).lower(), size, size)
-
+    
     if not cache:
         url = 'http://static.stamped.com/users/default.jpg'
     elif cache + timedelta(days=1) <= datetime.utcnow():
@@ -1704,40 +1704,42 @@ class HTTPEntity(Schema):
 
             # Actions: Add to Playlist
 
-            # actionType  = 'playlist'
-            # actionTitle = 'Add to playlist'
-            # if entity.isType('artist'):
-            #     actionTitle = 'Add artist to playlist'
-            # actionIcon  = _getIconURL('act_playlist_music', client=client)
-            # sources     = []
+            actionType  = 'playlist'
+            actionTitle = 'Add to playlist'
+            if entity.isType('artist'):
+                actionTitle = 'Add artist to playlist'
+            actionIcon  = _getIconURL('act_playlist_music', client=client)
+            sources     = []
 
-            # if getattr(entity.sources, 'rdio_id', None) is not None:
-            #     source              = HTTPActionSource()
-            #     source.name         = 'Add to playlist on Rdio'
-            #     source.source       = 'rdio'
-            #     source.source_id    = entity.sources.rdio_id
-            #     source.setCompletion(
-            #         action      = actionType,
-            #         entity_id   = entity.entity_id,
-            #         source      = source.source,
-            #         source_id   = source.source_id,
-            #     )
-            #     sources.append(source)
+            if getattr(entity.sources, 'rdio_id', None) is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Add to playlist on Rdio'
+                source.source       = 'rdio'
+                source.source_id    = entity.sources.rdio_id
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
 
-            # if getattr(entity.sources, 'spotify_id', None) is not None:
-            #     source              = HTTPActionSource()
-            #     source.name         = 'Add to playlist on Spotify'
-            #     source.source       = 'spotify'
-            #     source.source_id    = entity.sources.spotify_id
-            #     source.setCompletion(
-            #         action      = actionType,
-            #         entity_id   = entity.entity_id,
-            #         source      = source.source,
-            #         source_id   = source.source_id,
-            #     )
-            #     sources.append(source)
+            if getattr(entity.sources, 'spotify_id', None) is not None:
+                source              = HTTPActionSource()
+                source.name         = 'Add to playlist on Spotify'
+                source.source       = 'spotify'
+                source.source_id    = entity.sources.spotify_id
+                source.setCompletion(
+                    action      = actionType,
+                    entity_id   = entity.entity_id,
+                    source      = source.source,
+                    source_id   = source.source_id,
+                )
+                sources.append(source)
 
-            # self._addAction(actionType, actionTitle, sources, icon=actionIcon)
+            # Landon only implemented this for tracks. WTF man.
+            if entity.isType('track'):
+                self._addAction(actionType, actionTitle, sources, icon=actionIcon)
 
             # Actions: Download
 
@@ -2837,8 +2839,6 @@ class HTTPActivity(Schema):
         cls.addNestedPropertyList('footer_references',      HTTPTextReference)
 
     def importEnrichedActivity(self, activity):
-        logs.debug("IMPORT ACTIVITY: %s" % activity)
-        
         data = activity.dataExport()
         data.pop('subjects', None)
         data.pop('objects', None)

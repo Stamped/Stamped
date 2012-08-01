@@ -29,9 +29,6 @@ def main():
 
     stampedAPI  = globalMongoStampedAPI()
     screenNames = stampedAPI._userDB._getAllScreenNames()
-    print screenNames
-
-    screenNames = ['kevin', 'robby', 'bart', 'landon']
     sizes = [24, 48, 60, 96, 144]
 
     for screenName in screenNames:

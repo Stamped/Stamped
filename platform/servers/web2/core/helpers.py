@@ -25,9 +25,14 @@ from django.utils.functional    import wraps
 
 # initialize several useful globals
 IS_PROD  = libs.ec2_utils.is_prod_stack()
-#_baseurl = "https://api.stamped.com/v1"
+
+if IS_PROD:
+    _baseurl = "https://api.stamped.com/v1"
+else:
+    _baseurl = "https://dev.stamped.com/v1"
+
 #_baseurl = "https://ec2-50-19-40-37.compute-1.amazonaws.com/v1"
-_baseurl = "https://ec2-107-21-83-72.compute-1.amazonaws.com/v1"
+#_baseurl = "https://ec2-107-21-83-72.compute-1.amazonaws.com/v1"
 
 # extract all of the settings from django's settings.py which begin with STAMPED_
 # note that these settings will be included in the context of every rendered template.
@@ -47,6 +52,31 @@ class StampedAPIProxy(object):
         self.api    = globalMongoStampedAPI()
         self._cache = globalMemcache()
     
+    def _try_get_cache(self, key):
+        try:
+            return self._cache[key]
+        except KeyError:
+            pass
+        
+        return None
+    
+    def _try_set_cache(self, key, value, ttl=600):
+        try:
+            self._cache.set(key, value, time=ttl)
+        except Exception as e:
+            logs.warning("Unable to set cache: %s" % e)
+        
+        return value
+    
+    def _export(self, d):
+        for k, v in d.iteritems():
+            if isinstance(v, datetime):
+                d[k] = v.isoformat()
+            elif isinstance(v, dict):
+                d[k] = self._export(v)
+        
+        return d
+    
     def checkAccount(self, email):
         if self._ec2:
             user = self.api.checkAccount(email)
@@ -59,11 +89,31 @@ class StampedAPIProxy(object):
                 'client_secret' : CLIENT_SECRET, 
             })
     
+    def getAccountByScreenName(self, screen_name):
+        if self._ec2:
+            key = str("web::getAccountByScreenName::%s" % screen_name)
+            
+            ret = self._try_get_cache(key)
+            if ret is not None:
+                return ret
+            
+            ret = self._export(self.api.getAccountByScreenName(screen_name).dataExport())
+            return self._try_set_cache(key, ret, 600 * 3)
+        else:
+            return self._handle_get("users/show.json", { 'screen_name' : screen_name })
+    
     def getAccount(self, user_id):
         if self._ec2:
-            return self.api.getAccount(user_id)
+            key = str("web::getAccount::%s" % user_id)
+            
+            ret = self._try_get_cache(key)
+            if ret is not None:
+                return ret
+            
+            ret = self._export(self.api.getAccount(user_id).dataExport())
+            return self._try_set_cache(key, ret, 600 * 3)
         else:
-            raise NotImplementedError
+            return self._handle_get("users/show.json", { 'user_id' : user_id })
     
     def updateAlerts(self, user_id, on, off):
         if self._ec2:
@@ -74,21 +124,15 @@ class StampedAPIProxy(object):
     def getUser(self, params):
         if self._ec2:
             key = str("web::getUser::%s" % generateKeyFromDictionary(params))
+            ret = self._try_get_cache(key)
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            if ret is not None:
+                return ret
             
-            user   = self.api.getUser(HTTPUserId().dataImport(params), None)
-            result = HTTPUser().importUser(user).dataExport()
+            user = self.api.getUser(HTTPUserId().dataImport(params), None)
+            ret  = HTTPUser().importUser(user).dataExport()
             
-            try:
-                self._cache.set(key, result, time=600*3)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            return self._try_set_cache(key, ret)
         else:
             return self._handle_get("users/show.json", params)
     
@@ -97,21 +141,15 @@ class StampedAPIProxy(object):
         
         if self._ec2:
             key = str("web::getUserStamps::%s" % generateKeyFromDictionary(params))
+            ret = self._try_get_cache(key)
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            if ret is not None:
+                return ret
             
-            ts     = HTTPTimeSlice.exportTimeSlice(HTTPTimeSlice().dataImport(params))
-            result = self._transform_stamps(self.api.getStampCollection(ts, None))
+            ts  = HTTPTimeSlice.exportTimeSlice(HTTPTimeSlice().dataImport(params))
+            ret = self._transform_stamps(self.api.getStampCollection(ts, None))
             
-            try:
-                self._cache.set(key, result, time=600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            return self._try_set_cache(key, ret)
         else:
             return self._handle_get("stamps/collection.json", params)
     
@@ -119,15 +157,15 @@ class StampedAPIProxy(object):
         if stamps is None:
             stamps = []
         
-        result = []
+        ret = []
         
         for stamp in stamps:
             try:
-                result.append(HTTPStamp().importStamp(stamp).dataExport())
+                ret.append(HTTPStamp().importStamp(stamp).dataExport())
             except Exception:
                 logs.warn(utils.getFormattedException())
         
-        return result
+        return ret
     
     def _transform_users(self, users):
         output = []
@@ -143,19 +181,13 @@ class StampedAPIProxy(object):
             if limit is not None:
                 key = str("%s,%s" % (key, limit))
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            ret = self._try_get_cache(key)
             
-            result = self._transform_users(self.api.getEnrichedFriends(user_id, limit))
+            if ret is not None:
+                return ret
             
-            try:
-                self._cache.set(key, result, time=600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            ret = self._transform_users(self.api.getEnrichedFriends(user_id, limit))
+            return self._try_set_cache(key, ret)
         else:
             params = { 'user_id' : user_id }
             
@@ -167,19 +199,13 @@ class StampedAPIProxy(object):
             if limit is not None:
                 key = str("%s,%s" % (key, limit))
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            ret = self._try_get_cache(key)
             
-            result = self._transform_users(self.api.getEnrichedFollowers(user_id, limit))
+            if ret is not None:
+                return ret
             
-            try:
-                self._cache.set(key, result, time=600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            ret = self._transform_users(self.api.getEnrichedFollowers(user_id, limit))
+            return self._try_set_cache(key, ret)
         else:
             params = { 'user_id' : user_id }
             
@@ -191,20 +217,15 @@ class StampedAPIProxy(object):
             if limit is not None:
                 key = str("%s,%s" % (key, limit))
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            ret = self._try_get_cache(key)
+            
+            if ret is not None:
+                return ret
             
             user_ids = self.api.getLikes(None, stamp_id)
-            result   = self._transform_users(self.api.getUsers(user_ids, None, None))
+            ret = self._transform_users(self.api.getUsers(user_ids, None, None))
             
-            try:
-                self._cache.set(key, result, time=600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            return self._try_set_cache(key, ret)
         else:
             params = { 'stamp_id' : stamp_id }
             
@@ -216,20 +237,15 @@ class StampedAPIProxy(object):
             if limit is not None:
                 key = str("%s,%s" % (key, limit))
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            ret = self._try_get_cache(key)
+            
+            if ret is not None:
+                return ret
             
             user_ids = self.api.getStampTodos(None, stamp_id)
-            result   = self._transform_users(self.api.getUsers(user_ids, None, None))
+            ret = self._transform_users(self.api.getUsers(user_ids, None, None))
             
-            try:
-                self._cache.set(key, result, time=600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            return self._try_set_cache(key, ret)
         else:
             params = { 'stamp_id' : stamp_id }
             
@@ -252,21 +268,16 @@ class StampedAPIProxy(object):
     def getStampFromUser(self, user_id, stamp_num):
         if self._ec2:
             key = str("web::getStampFromUser::user_id=%s,stamp_num=%s" % (user_id, stamp_num))
+            #ret = self._try_get_cache(key)
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            #if ret is not None:
+            #    return ret
             
             stamp  = self.api.getStampFromUser(userId=user_id, stampNumber=stamp_num)
-            result = HTTPStamp().importStamp(stamp).dataExport()
+            ret = HTTPStamp().importStamp(stamp).dataExport()
             
-            try:
-                self._cache.set(key, result, time=600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            return ret
+            #return self._try_set_cache(key, ret)
         else:
             return self._handle_get("stamps/show.json", {
                 'user_id'   : user_id, 
@@ -276,21 +287,15 @@ class StampedAPIProxy(object):
     def getEntity(self, entity_id):
         if self._ec2:
             key = str("web::getEntity::entity_id=%s" % entity_id)
+            ret = self._try_get_cache(key)
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            if ret is not None:
+                return ret
             
             entity = self.api.getEntity(HTTPEntityIdSearchId().dataImport({'entity_id' : entity_id}), None)
-            result = HTTPEntity().importEntity(entity, None).dataExport()
+            ret = HTTPEntity().importEntity(entity, None).dataExport()
             
-            try:
-                self._cache.set(key, result, time=600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            return self._try_set_cache(key, ret)
         else:
             return self._handle_get("entities/show.json", {
                 'entity_id' : entity_id
@@ -299,21 +304,15 @@ class StampedAPIProxy(object):
     def getEntityMenu(self, entity_id):
         if self._ec2:
             key = str("web::getEntityMenu::entity_id=%s" % entity_id)
+            ret = self._try_get_cache(key)
             
-            try:
-                return self._cache[key]
-            except KeyError:
-                pass
+            if ret is not None:
+                return ret
             
             menu   = self.api.getMenu(entity_id)
-            result = HTTPMenu().importMenu(menu).dataExport()
+            ret = HTTPMenu().importMenu(menu).dataExport()
             
-            try:
-                self._cache.set(key, result, time=3600)
-            except Exception as e:
-                logs.warning("Unable to set cache: %s" % e)
-            
-            return result
+            return self._try_set_cache(key, ret)
         else:
             return self._handle_get("entities/menu.json", {
                 'entity_id' : entity_id
@@ -345,7 +344,8 @@ stampedAPIProxy = StampedAPIProxy()
 def stamped_view(schema=None, 
                  ignore_extra_params=False, 
                  parse_request_kwargs=None, 
-                 parse_django_kwargs=True):
+                 parse_django_kwargs=True, 
+                 no_cache=False):
     def decorator(fn):
         # NOTE (travis): if you hit this assertion, you're likely using the 
         # handleHTTPRequest incorrectly.
@@ -378,13 +378,19 @@ def stamped_view(schema=None,
                 response = fn(request, *args, **subkwargs)
                 logs.info("End request: Success")
                 
-                if utils.is_ec2():
-                    response['Expires'] = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
-                    response['Cache-Control'] = 'max-age=600'
+                if no_cache:
+                    expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
+                    cache_control = 'no-cache'
+                elif utils.is_ec2():
+                    expires = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
+                    cache_control = 'max-age=600'
                 else:
                     # disable caching for local development / debugging
-                    response['Expires'] = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
-                    response['Cache-Control'] = 'max-age=0'
+                    expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
+                    cache_control = 'max-age=0'
+                
+                response['Expires'] = expires
+                response['Cache-Control'] = cache_control
                 
                 return response
             

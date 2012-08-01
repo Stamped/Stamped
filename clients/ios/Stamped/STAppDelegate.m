@@ -244,7 +244,7 @@
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    
+    NSLog(@"url:%@", url.absoluteString);
     if ([[url host] isEqualToString:@"twitter"] && [url query].length > 0) {
         [[STTwitter sharedInstance] handleOpenURL:url];
 	}  
@@ -292,7 +292,7 @@
     [STStampedAPI sharedInstance].currentUserLocation = nil;
     [[STUnreadActivity sharedInstance] update];
     if ([STFacebook sharedInstance].connected) {
-        [[STFacebook sharedInstance].facebook extendAccessToken];
+        [[STFacebook sharedInstance].facebook extendAccessTokenIfNeeded];
     }
 }
 

@@ -7,13 +7,13 @@ __license__   = "TODO"
 
 import Globals
 import time
-import datetime
 import urllib, json, urlparse
 import logs, utils
 import re
 from errors import *
 from libs.Request import service_request
 from APIKeys import get_api_key
+from datetime import datetime
 
 
 
@@ -30,7 +30,8 @@ ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvq
 AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
-#ACCESS_TOKEN = 'BAAEOIZBBUXisBANy6asZCGAtivmNHrXR1IqxU6FKAv7ZCz4kPEEdUFmHubEy2wL4BPFcCWlo2qDsDSZAWQhR93I7lYZBn3DZBYZCFCZAPvpyt5NR6aC88VyzuZCoNnSZAQOKAZD'
+#ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBALVOGXFMWXYj7OIFn9g4BO7Raz6VHZCn57dL1uuftzCzLcjKu7Kl76MC0yBtQnq7cf2Q3TSF4HDybKsIZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -204,6 +205,28 @@ class Facebook(object):
         r = re.search('access_token=([^&]*)', result)
         return r.group(1)
 
+    def extendAccessToken(self, access_token, client_id=APP_ID, client_secret=APP_SECRET):
+        path = "oauth/access_token"
+        result = self._get(
+            None,
+            path,
+            parse_json      = False,
+            client_id       = client_id,
+            client_secret   = client_secret,
+            grant_type      = 'fb_exchange_token',
+            fb_exchange_token = access_token,
+        )
+        print('### result: %s' % result)
+        r = re.search(r'access_token=([^&]*)', result)
+        token = r.group(1)
+        r = re.search(r'expires=([^&]*)', result)
+        expires = None
+        if r is not None:
+            expires = r.group(1)
+            expires = datetime.fromtimestamp(time.time() + int(expires))
+        return token, expires
+
+
     def createTestUser(self, name, access_token, permissions=None, installed=True, locale='en_US', app_id=APP_ID):
         path = '%s/accounts/test-users' % app_id
         return self._post(
@@ -319,7 +342,7 @@ class Facebook(object):
 #                                            (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
         callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
         permissions = 'user_about_me,user_location,email,publish_stream,publish_actions'
-        #unique = datetime.datetime.now().strftime("%H:%M:%S.%f")
+        #unique = datetime.now().strftime("%H:%M:%S.%f")
         path = "https://www.facebook.com/dialog/oauth?" \
                "client_id=%s" \
                "&redirect_uri=%s" \
@@ -353,6 +376,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl(AUTH_USER_ID))
+    if 'extendAccesstoken' in methods:      pprint(facebook.extendAccessToken(access_token))
     if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
     if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())
@@ -371,7 +395,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'postToOpenGraph'
+    methods = 'getUserInfo'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
