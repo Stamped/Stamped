@@ -67,7 +67,7 @@ def alert_settings(request, schema, **kwargs):
     body_classes = "settings main"
     token        = schema.token
     
-    if False: # testing
+    if True: # testing
         user = travis_test.user
         
         settings = {
@@ -178,7 +178,7 @@ def alert_settings(request, schema, **kwargs):
         'user'              : user, 
         'settings'          : options, 
         'token'             : token
-    }, preload=[ 'token' ])
+    }, preload=[ 'token', 'page' ])
 
 @stamped_view(schema=HTTPResetEmailSchema)
 @require_http_methods(["POST"])
