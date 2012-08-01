@@ -244,7 +244,7 @@
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    
+    NSLog(@"url:%@", url.absoluteString);
     if ([[url host] isEqualToString:@"twitter"] && [url query].length > 0) {
         [[STTwitter sharedInstance] handleOpenURL:url];
 	}  
@@ -291,14 +291,13 @@
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     [STStampedAPI sharedInstance].currentUserLocation = nil;
     [[STUnreadActivity sharedInstance] update];
+    if ([STFacebook sharedInstance].connected) {
+        [[STFacebook sharedInstance].facebook extendAccessTokenIfNeeded];
+    }
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     [STStampedAPI sharedInstance].currentUserLocation = nil;
-}
-
-- (void)applicationDidFinishLaunching:(UIApplication *)application {
-    
 }
 
 - (void)applicationDidReceiveMemoryWarning:(UIApplication *)application {

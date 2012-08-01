@@ -69,11 +69,11 @@
         [Util reframeView:_userImageView withDeltas:CGRectMake(11, originY, 0, 0)];
         [self addSubview:_userImageView];
         
-//        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
-//        longPress.minimumPressDuration = 1.5f;
-//        [self addGestureRecognizer:longPress];
-//        [longPress release];
-//        
+        //        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPress:)];
+        //        longPress.minimumPressDuration = 1.5f;
+        //        [self addGestureRecognizer:longPress];
+        //        [longPress release];
+        //        
         // cell text
         STBlockUIView *view = [[STBlockUIView alloc] initWithFrame:CGRectMake(68, 0, self.bounds.size.width - 88.0f, 70.0f + originY)];
         view.backgroundColor = [UIColor whiteColor];
@@ -116,84 +116,82 @@
             }
             
             if (_title) {
-                
-                UIFont *font = [UIFont stampedTitleLightFontWithSize:40];
-                CGContextSetFillColorWithColor(ctx, [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.149f green:0.149f blue:0.149f alpha:1.0f] CGColor]);
-                
-                CGContextSetCharacterSpacing(ctx, 10);
-                CGPoint point = CGPointMake(0.0f, 18.0f + 7.5f); //adjusted
-                CGFloat maxWidth = rect.size.width - 36.0f - 10;
-                BOOL _drawn = NO;
-                BOOL truncate = NO;
-                
-                for (NSInteger i = 0; i < _title.length; i++) {
+                    UIFont *font = [UIFont stampedTitleLightFontWithSize:40];
+                    CGContextSetFillColorWithColor(ctx, [highlighted ? [UIColor whiteColor] : [UIColor colorWithRed:0.149f green:0.149f blue:0.149f alpha:1.0f] CGColor]);
                     
-                    NSString *subString = [_title substringWithRange:NSMakeRange(i, 1)];
-                    CGSize size = [subString sizeWithFont:font];
-                    CGFloat originX = floorf(point.x + (size.width + 1.5));
+                    CGContextSetCharacterSpacing(ctx, 10);
+                    CGPoint point = CGPointMake(0.0f, 18.0f + 7.5f); //adjusted
+                    CGFloat maxWidth = rect.size.width - 36.0f - 10;
+                    BOOL _drawn = NO;
+                    BOOL truncate = NO;
                     
-                    // draw stamp at the last shown char
-                    if (!_drawn && (truncate || i == _title.length-1)) {
-                        _drawn = YES;
+                    for (NSInteger i = 0; i < _title.length; i++) {
                         
-                        CGFloat imageOrigin = MIN(floorf(originX - 7), rect.size.width-14.0f);
-                        if (truncate && i < _title.length-1) {
-                            if ([[_title substringWithRange:NSMakeRange(i, 1)] isEqualToString:@" "]) {
-                                imageOrigin -= size.width;
+                        NSString *subString = [_title substringWithRange:NSMakeRange(i, 1)];
+                        CGSize size = [subString sizeWithFont:font];
+                        CGFloat originX = floorf(point.x + (size.width + 1.5));
+                        
+                        // draw stamp at the last shown char
+                        if (!_drawn && (truncate || i == _title.length-1)) {
+                            _drawn = YES;
+                            
+                            CGFloat imageOrigin = MIN(floorf(originX - 7), rect.size.width-14.0f);
+                            if (truncate && i < _title.length-1) {
+                                if ([[_title substringWithRange:NSMakeRange(i, 1)] isEqualToString:@" "]) {
+                                    imageOrigin -= size.width;
+                                }
                             }
+                            // 31 , 32
+                            // 29 , 24
+                            CGRect imageRect = CGRectMake(imageOrigin, 17.0f, 18.0f, 18.0f);
+                            imageRect.origin.y = floorf(rect.size.height - (17.0f+18.0f) ) - 13;
+                            imageRect.origin.y += 4;
+                            imageRect.origin.x += 1;
+                            CGContextSaveGState(ctx);
+                            CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
+                            CGContextScaleCTM(ctx, 1.0f, -1.0f);
+                            CGContextClipToMask(ctx, imageRect, [UIImage imageNamed:@"stamp_18pt_texture.png"].CGImage);
+                            
+                            if (self.highlighted) {
+                                
+                                [[UIColor whiteColor] setFill];
+                                CGContextFillRect(ctx, imageRect);
+                                
+                            } else {
+                                
+                                rect = CGContextGetClipBoundingBox(ctx);
+                                CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
+                                size_t _numLocations = 2;
+                                CGFloat _locations[2] = { 0.0, 1.0 };
+                                CGFloat _colors[8] = { r, g, b, 1, r1, g1, b1, 1 };
+                                CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
+                                CGColorSpaceRelease(_rgb);
+                                CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height);
+                                CGPoint end = CGPointMake(rect.origin.x + rect.size.width, rect.origin.y);
+                                CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
+                                CGGradientRelease(gradient);
+                                
+                            }
+                            
+                            CGContextRestoreGState(ctx);
+                            
                         }
-                        // 31 , 32
-                        // 29 , 24
-                        CGRect imageRect = CGRectMake(imageOrigin, 17.0f, 18.0f, 18.0f);
-                        imageRect.origin.y = floorf(rect.size.height - (17.0f+18.0f) ) - 13;
-                        imageRect.origin.y += 4;
-                        imageRect.origin.x += 1;
-                        CGContextSaveGState(ctx);
-                        CGContextTranslateCTM(ctx, 0.0f, rect.size.height);
-                        CGContextScaleCTM(ctx, 1.0f, -1.0f);
-                        CGContextClipToMask(ctx, imageRect, [UIImage imageNamed:@"stamp_18pt_texture.png"].CGImage);
+                        [subString drawAtPoint:point withFont:font];
                         
-                        if (self.highlighted) {
-                            
-                            [[UIColor whiteColor] setFill];
-                            CGContextFillRect(ctx, imageRect);
-                            
-                        } else {
-                            
-                            rect = CGContextGetClipBoundingBox(ctx);
-                            CGColorSpaceRef _rgb = CGColorSpaceCreateDeviceRGB();
-                            size_t _numLocations = 2;
-                            CGFloat _locations[2] = { 0.0, 1.0 };
-                            CGFloat _colors[8] = { r, g, b, 1, r1, g1, b1, 1 };
-                            CGGradientRef gradient = CGGradientCreateWithColorComponents(_rgb, _colors, _locations, _numLocations);
-                            CGColorSpaceRelease(_rgb);
-                            CGPoint start = CGPointMake(rect.origin.x, rect.origin.y + rect.size.height);
-                            CGPoint end = CGPointMake(rect.origin.x + rect.size.width, rect.origin.y);
-                            CGContextDrawLinearGradient(ctx, gradient, start, end, kCGGradientDrawsAfterEndLocation);
-                            CGGradientRelease(gradient);
-                            
+                        CGContextShowTextAtPoint(ctx, point.x, point.y, "Test", 4);
+                        point.x = originX;
+                        
+                        if (truncate) {
+                            if ([subString isEqualToString:@" "]) {
+                                point.x -= size.width;
+                            }
+                            [@"..." drawAtPoint:point withFont:font];
+                            break;
                         }
                         
-                        CGContextRestoreGState(ctx);
+                        truncate = (point.x >= maxWidth && i != _title.length-2);
                         
                     }
-                    [subString drawAtPoint:point withFont:font];
-                    
-                    CGContextShowTextAtPoint(ctx, point.x, point.y, "Test", 4);
-                    point.x = originX;
-                    
-                    if (truncate) {
-                        if ([subString isEqualToString:@" "]) {
-                            point.x -= size.width;
-                        }
-                        [@"..." drawAtPoint:point withFont:font];
-                        break;
-                    }
-                    
-                    truncate = (point.x >= maxWidth && i != _title.length-2);
-                    
-                }
-                
             }
             
         }];
@@ -228,8 +226,8 @@
         _statsDots = layer;
         
         // comment count
-        STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 200, 90.0f)];
-        commentView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
+        STBlockUIView *commentView = [[STBlockUIView alloc] initWithFrame:CGRectMake(0.0f, 68.0f, 200, 90.0f)];
+        //commentView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin;
         commentView.backgroundColor = [UIColor whiteColor];
         [self addSubview:commentView];
         [commentView setDrawingHandler:^(CGContextRef ctx, CGRect rect) {
@@ -345,11 +343,11 @@
         if (_commentCount > 0) {
             frame.size.width += 12.0f;
             if (!_hasMedia) {
-                frame.size.width += [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont systemFontOfSize:9]].width;
+                frame.size.width += [[NSString stringWithFormat:@"%i", self.commentCount] sizeWithFont:[UIFont stampedFontWithSize:12]].width;
             }
         }
         frame.origin.x = ceilf(self.bounds.size.width-(frame.size.width+16.0f));
-        frame.origin.y = _statsView.hidden ? self.bounds.size.height - 20.0f : self.bounds.size.height - (45.0f + 29.0f);
+        //frame.origin.y = _statsView.hidden ? self.bounds.size.height - 20.0f : self.bounds.size.height - (45.0f + 29.0f);
         _commentView.frame = frame;
         [_commentView setNeedsDisplay];
     }
@@ -365,30 +363,30 @@
     
     [_userImageView setupWithUser:stamp.user viewAction:YES];
     // user avatar
-//    STProfileImageSize imageSize = STProfileImageSize96;
-//    NSString* userImageURL = [Util profileImageURLForUser:stamp.user withSize:imageSize];
-//    [self.userImageCancellation cancel];
-//    self.userImageCancellation = nil;
-//    self.userImageView.image = nil;
-//    UIImage* image = nil;
-//    if ([stamp.user.userID isEqual:[STStampedAPI sharedInstance].currentUser.userID]) {
-//        image = [[STStampedAPI sharedInstance] currentUserImageForSize:imageSize];
-//    }
-//    if (!image) {
-//        image = [[STImageCache sharedInstance] cachedImageForImageURL:userImageURL];
-//    }
-//    if (!image) {
-//        self.userImageCancellation = [[STImageCache sharedInstance] imageForImageURL:userImageURL 
-//                                                                         andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-//                                                                             NSAssert1(!cancellation.cancelled, @"Called when cancelled %@", userImageURL);
-//                                                                             if (self.stamp == stamp) {
-//                                                                                 self.userImageView.image = image;
-//                                                                             }
-//                                                                         }];
-//    }
-//    else {
-//        self.userImageView.image = image;
-//    }
+    //    STProfileImageSize imageSize = STProfileImageSize96;
+    //    NSString* userImageURL = [Util profileImageURLForUser:stamp.user withSize:imageSize];
+    //    [self.userImageCancellation cancel];
+    //    self.userImageCancellation = nil;
+    //    self.userImageView.image = nil;
+    //    UIImage* image = nil;
+    //    if ([stamp.user.userID isEqual:[STStampedAPI sharedInstance].currentUser.userID]) {
+    //        image = [[STStampedAPI sharedInstance] currentUserImageForSize:imageSize];
+    //    }
+    //    if (!image) {
+    //        image = [[STImageCache sharedInstance] cachedImageForImageURL:userImageURL];
+    //    }
+    //    if (!image) {
+    //        self.userImageCancellation = [[STImageCache sharedInstance] imageForImageURL:userImageURL 
+    //                                                                         andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+    //                                                                             NSAssert1(!cancellation.cancelled, @"Called when cancelled %@", userImageURL);
+    //                                                                             if (self.stamp == stamp) {
+    //                                                                                 self.userImageView.image = image;
+    //                                                                             }
+    //                                                                         }];
+    //    }
+    //    else {
+    //        self.userImageView.image = image;
+    //    }
     [self setNeedsDisplay];
 }
 

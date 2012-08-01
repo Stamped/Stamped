@@ -375,6 +375,8 @@ static const CGFloat _bodyWidth = 214;
                                                           color:body ? [UIColor stampedGrayColor] : [UIColor stampedBlackColor]] autorelease];
     [chunks addObject:userChunk];
     
+    STChunk* previousChunkForBody = startChunk;
+    
     if (header) {
         UIFont* headerFont = [UIFont stampedFontWithSize:12];
         STTextChunk* headerChunk = [[[STTextChunk alloc] initWithPrev:userChunk
@@ -382,6 +384,7 @@ static const CGFloat _bodyWidth = 214;
                                                                  font:headerFont
                                                                 color:body ? [UIColor stampedLightGrayColor] : [UIColor stampedBlackColor]] autorelease];
         [chunks addObject:headerChunk];
+        previousChunkForBody = headerChunk;
     }
     
     UIFont* dateFont = [UIFont stampedFontWithSize:10];
@@ -415,10 +418,11 @@ static const CGFloat _bodyWidth = 214;
                                                               lineHeight:lineHeight
                                                                   indent:0
                                                                  kerning:0];
-        STChunk* bodyStart = [STChunk newlineChunkWithPrev:startChunk];
+        STChunk* bodyStart = [STChunk newlineChunkWithPrev:previousChunkForBody];
         bodyChunk = [[[STTextChunk alloc] initWithPrev:bodyStart attributedString:bodyString andPrimaryFont:bodyFont] autorelease];
         bodyLabel = [[[STAttributedLabel alloc] initWithAttributedString:bodyString width:bodyStart.frame.size.width andReferences:references] autorelease];
         bodyLabel.referenceDelegate = (id)self;
+        bodyLabel.clipsToBounds = NO;
         [Util reframeView:bodyLabel withDeltas:CGRectMake(0, 3 + bodyChunk.topLeft.y, 0, 0)];
         bodyLabel.userInteractionEnabled = YES;
     }

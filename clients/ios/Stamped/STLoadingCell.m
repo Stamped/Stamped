@@ -7,6 +7,7 @@
 //
 
 #import "STLoadingCell.h"
+#import "Util.h"
 
 @implementation STLoadingCell
 
@@ -14,14 +15,16 @@
 {
     self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"TODO"];
     if (self) {
-      self.accessoryType = UITableViewCellAccessoryNone;
-      self.selectionStyle = UITableViewCellSelectionStyleNone;
-      UIActivityIndicatorView* activityView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
-      activityView.frame = self.frame;
-      self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-      activityView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-      [self addSubview:activityView];
-      [activityView startAnimating];
+        self.accessoryType = UITableViewCellAccessoryNone;
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+        UIActivityIndicatorView* activityView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
+        activityView.frame = [Util centeredAndBounded:activityView.frame.size inFrame:[Util originRectWithRect:self.frame]];
+        activityView.contentMode = UIViewContentModeCenter;
+        activityView.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin;
+        self.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        activityView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        [self addSubview:activityView];
+        [activityView startAnimating];
     }
     return self;
 }

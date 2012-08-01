@@ -22,63 +22,64 @@
 static STDebug* _sharedInstance;
 
 + (void)initialize {
-  _sharedInstance = [[STDebug alloc] init];
+    _sharedInstance = [[STDebug alloc] init];
 }
 
 + (STDebug*)sharedInstance {
-  return _sharedInstance;
+    return _sharedInstance;
 }
 
 - (id)init
 {
-  self = [super init];
-  if (self) {
-    logs_ = [[NSMutableArray alloc] init];
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        logs_ = [[NSMutableArray alloc] init];
+    }
+    return self;
 }
 
 - (void)dealloc
 {
-  [logs_ release];
-  [super dealloc];
+    [logs_ release];
+    [super dealloc];
 }
 
 - (void)log:(id)object {
-  [self.logs addObject:[[[STDebugDatum alloc] initWithObject:object] autorelease]];
+    NSLog(@"%@", object);
+    [self.logs addObject:[[[STDebugDatum alloc] initWithObject:object] autorelease]];
 }
 
 + (void)log:(id)object {
-  [[STDebug sharedInstance] log:object];
+    [[STDebug sharedInstance] log:object];
 }
 
 - (NSArray*)logSliceWithOffset:(NSInteger)offset andCount:(NSInteger)count {
-  if (offset >= self.logs.count) {
-    return [NSArray array];
-  }
-  else {
-    NSRange range;
-    if (count + offset > self.logs.count) {
-      range = NSMakeRange(offset, self.logs.count - offset);
+    if (offset >= self.logs.count) {
+        return [NSArray array];
     }
     else {
-      range = NSMakeRange(offset, count);
+        NSRange range;
+        if (count + offset > self.logs.count) {
+            range = NSMakeRange(offset, self.logs.count - offset);
+        }
+        else {
+            range = NSMakeRange(offset, count);
+        }
+        return [self.logs subarrayWithRange:range];
     }
-    return [self.logs subarrayWithRange:range];
-  }
 }
 
 - (STDebugDatum*)logItemAtIndex:(NSInteger)index {
-  if (index < self.logCount) {
-    return [self.logs objectAtIndex:index];
-  }
-  else {
-    return nil;
-  }
+    if (index < self.logCount) {
+        return [self.logs objectAtIndex:index];
+    }
+    else {
+        return nil;
+    }
 }
 
 - (NSInteger)logCount {
-  return self.logs.count;
+    return self.logs.count;
 }
 
 @end

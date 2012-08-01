@@ -433,8 +433,6 @@ class FactualSource(GenericSource):
                 pass
         except HTTPError as e:
             logs.warning("Factual threw an %s error for %s (%s)" % (e.code, entity.title, entity.entity_id))
-            #timestamps['factual'] = controller.now
-            # Let container deal with it
             raise
 
         return True
