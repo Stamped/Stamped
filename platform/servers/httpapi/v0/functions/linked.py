@@ -225,7 +225,6 @@ def createFacebookLoginResponse(authUserId):
 @handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["POST"])
 def facebookLogin(request, authUserId, **kwargs):
-    logs.info('HIT facebookLogin')
     result =  createFacebookLoginResponse(authUserId)
     logs.info('result: %s' % result)
     return result
@@ -240,8 +239,8 @@ def facebookLoginCallback(request, http_schema, **kwargs):
 
     logs.info('### http_schema: %s ' % http_schema)
 
-    oauth_token = http_schema.state
-    authUserId, client_id = checkOAuth(oauth_token)
+    authUserId = http_schema.state
+#    authUserId, client_id = checkOAuth(oauth_token)
     # Acquire the user's FB access token
     try:
         access_token = facebook.getUserAccessToken(http_schema.code)

@@ -265,6 +265,7 @@ def handleHTTPRequest(requires_auth=True,
 
 
 def handleHTTPCallbackRequest(
+        requires_auth=True,
         http_schema=None,
         conversion=None,
         parse_request_kwargs=None,
@@ -288,18 +289,19 @@ def handleHTTPCallbackRequest(
                 params = {}
                 oauth_token = None
 
-                if 'stamped_oauth_token' in request.GET:
-                    oauth_token = request.GET['stamped_oauth_token']
-                elif 'stamped_oauth_token' in request.POST:
-                    oauth_token = request.POST['stamped_oauth_token']
-                elif 'oauth_token' in request.GET:
-                    oauth_token = request.GET['oauth_token']
-                elif 'oauth_token' in request.POST:
-                    oauth_token = request.POST['oauth_token']
-                else:
-                    raise StampedInputError("Access token not found")
+                if requires_auth:
+                    if 'stamped_oauth_token' in request.GET:
+                        oauth_token = request.GET['stamped_oauth_token']
+                    elif 'stamped_oauth_token' in request.POST:
+                        oauth_token = request.POST['stamped_oauth_token']
+                    elif 'oauth_token' in request.GET:
+                        oauth_token = request.GET['oauth_token']
+                    elif 'oauth_token' in request.POST:
+                        oauth_token = request.POST['oauth_token']
+                    else:
+                        raise StampedInputError("Access token not found")
 
-                params['authUserId'], params['authClientId'] = checkOAuth(oauth_token, required=False)
+                    params['authUserId'], params['authClientId'] = checkOAuth(oauth_token, required=False)
 
                 if parse_request:
                     parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
