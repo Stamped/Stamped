@@ -235,6 +235,10 @@ def update_alert_settings(request, schema, **kwargs):
     on  = filter(lambda k: settings[k], settings.keys())
     off = filter(lambda k: not settings[k], settings.keys())
     
+    logs.info("user_id: %s" % user_id)
+    logs.info("ON:  %s" % ", ".join(on))
+    logs.info("OFF: %s" % ", ".join(off))
+    
     stampedAPIProxy.updateAlerts(user_id, on, off)
     return transform_output(True)
 

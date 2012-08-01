@@ -42,9 +42,7 @@
 
 
 * DONE - Broken profile page when coming in after closing sDetail
-    * TEST
 * Animation looks off now on all sDetail pages. Seems like the slant is too much and looks broken. (attached)
-    * TEST
 * Mobile sDetail issues: 
     * 2x assets
     * DONE - remove buttons that don't do anything
