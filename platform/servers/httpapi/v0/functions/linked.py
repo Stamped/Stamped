@@ -246,7 +246,8 @@ def facebookLoginCallback(request, http_schema, **kwargs):
 #    authUserId, client_id = checkOAuth(oauth_token)
     # Acquire the user's FB access token
     try:
-        access_token = facebook.getUserAccessToken(http_schema.code)
+        access_token, expires = facebook.getUserAccessToken(http_schema.code)
+        logs.info('### expires: %s' % expires)
     except Exception as e:
         return HttpResponseRedirect("stamped://facebook/link/fail")
 
@@ -269,7 +270,9 @@ def facebookLoginCallback(request, http_schema, **kwargs):
         linked.third_party_id           = userInfo['third_party_id']
         stampedAPI.addLinkedAccount(authUserId, linked)
 
-    return HttpResponseRedirect("stamped://facebook/link/success")
+    #return HttpResponseRedirect("stamped://facebook/link/success")
+    url = "fb297022226980395://authorize/#access_token=%s&expires_in=%s&code=%s" % (access_token, expires, code)
+    return HttpResponseRedirect(url)
 
 
 @handleHTTPRequest(http_schema=HTTPNetflixId,

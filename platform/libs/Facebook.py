@@ -208,6 +208,12 @@ class Facebook(object):
         )
         r = re.search('access_token=([^&]*)', result)
         return r.group(1)
+        r = re.search(r'expires=([^&]*)', result)
+        expires = None
+        if r is not None:
+            expires = r.group(1)
+            #expires = datetime.fromtimestamp(time.time() + int(expires))
+        return token, expires
 
     def extendAccessToken(self, access_token, client_id=APP_ID, client_secret=APP_SECRET):
         path = "oauth/access_token"
