@@ -44,7 +44,7 @@ class logsQuery(object):
         self.statTimeByNode = {}
         
         self.writer = statWriter('latency')
-        self.cache = conn.get_domain('latency')
+        self.cache = self.conn.get_domain('latency')
 
         if domain_name is None:
             domain_name = 'bowser'
