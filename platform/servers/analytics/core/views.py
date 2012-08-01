@@ -394,8 +394,10 @@ def custom(request):
             scope = form.cleaned_data['scope']
             per = form.cleaned_data['filter']
             end = form.cleaned_data['end_date']
-            if end is not None and end > today():
-                end = today()
+            
+            bgn = today(bgn) + timedelta(days=1)
+            if end is not None and end > now():
+                end = now()
             stats = Stats.Stats()
             perUser = False
             if per == "true":
