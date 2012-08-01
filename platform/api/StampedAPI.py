@@ -5156,7 +5156,7 @@ class StampedAPI(AStampedAPI):
                                      recipientIds   = [ recipientId ],
                                      objects        = objects,
                                      body           = body,
-                                     unique         = False)
+                                     unique         = True)
 
     def _addActivity(self, verb,
                            userId,
