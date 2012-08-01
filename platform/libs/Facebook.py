@@ -226,7 +226,6 @@ class Facebook(object):
             grant_type      = 'fb_exchange_token',
             fb_exchange_token = access_token,
         )
-        print('### result: %s' % result)
         r = re.search(r'access_token=([^&]*)', result)
         token = r.group(1)
         r = re.search(r'expires=([^&]*)', result)

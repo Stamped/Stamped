@@ -247,7 +247,10 @@ def facebookLoginCallback(request, http_schema, **kwargs):
     # Acquire the user's FB access token
     try:
         access_token, expires = facebook.getUserAccessToken(http_schema.code)
+        logs.info('### FIRST: token: %s  expires: %s' % (access_token, expires))
+
         access_token, expires = facebook.extendAccessToken(access_token)
+        logs.info('### SECOND: token: %s  expires: %s' % (access_token, expires))
     except Exception as e:
         return HttpResponseRedirect("stamped://facebook/link/fail")
 
