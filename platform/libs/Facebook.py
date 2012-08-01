@@ -206,6 +206,7 @@ class Facebook(object):
             code            = code,
             redirect_uri    = redirect_uri,
         )
+        logs.info('### result: %s' % result)
         r = re.search('access_token=([^&]*)', result)
         return r.group(1)
         r = re.search(r'expires=([^&]*)', result)
@@ -385,7 +386,7 @@ def globalFacebook():
     return __globalFacebook
 
 
-CODE = 'AQDoi-mCEKtNOJIDyAfNTn4TbH5pxlgqh10QaXcM187cHVZOMsMIbPQeE8-lXT-rptA3k5bQuQEvMscv5BFy32Oo_yWzIrIUflVYmvYBSrhit5labSqr7avEJqtlDi3_qbP6G-Y7UwE3icdhulhiwJYW9hbhNr3bwdxyUCH0koWDHgCIQtFylSywcgH4wN9TWwA'
+CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
@@ -412,7 +413,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getLoginUrl'
+    methods = 'getUserAccessToken'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
