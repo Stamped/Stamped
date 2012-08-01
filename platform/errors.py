@@ -395,6 +395,9 @@ class StampedFacebookPermissionsError(StampedAuthError):
 class StampedFacebookUniqueActionAlreadyTakenOnObject(StampedIllegalActionError):
     pass
 
+class StampedFacebookOGImageSizeError(StampedIllegalActionError):
+    pass
+
 class StampedThirdPartyRequestFailError(StampedInputError):
     pass
 

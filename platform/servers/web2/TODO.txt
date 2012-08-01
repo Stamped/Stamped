@@ -41,6 +41,16 @@
 
 
 
+* DONE - Broken profile page when coming in after closing sDetail
+* Animation looks off now on all sDetail pages. Seems like the slant is too much and looks broken. (attached)
+* Mobile sDetail issues: 
+    * 2x assets
+    * DONE - remove buttons that don't do anything
+    * DONE - fix giant button size issue
+    * fix action links
+* Mobile 'change notifications' page looks broken
+
+
 TODO:
     * find better way of invoking lessc without creating jenky temporary files
     * better versioning at directory level

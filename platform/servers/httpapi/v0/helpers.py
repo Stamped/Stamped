@@ -451,7 +451,7 @@ def parseRequest(schema, request, **kwargs):
         logs.debug("Parsed request data")
         return schema
     
-    except (KeyError, AttributeError) as e:
+    except (KeyError, AttributeError, ValueError) as e:
         msg = u"Invalid form (%s): %s vs %s" % (e, pformat(data), schema)
         logs.warning(msg)
         logs.warning(utils.getFormattedException())

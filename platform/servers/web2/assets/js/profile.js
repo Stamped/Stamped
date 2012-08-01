@@ -484,12 +484,16 @@ var g_update_stamps = null;
                     
                     // TODO: experiment w/ initial scale at .25 scale and tween to this transform
                     // TODO: move these transformations into CSS!!
-                    var angle_x = "20deg";
-                    var angle_y = "-20deg";
+                    var angle_x = "10deg";
+                    var angle_y = "-10deg";
                     var angle_z = "10deg";
                     var perspective = 400;
                     
-                    var t = "perspective(" + perspective + ") translateY(-15px) rotateZ(" + angle_z + ") rotateX(" + angle_x + ") rotateY(" + angle_y + ")";
+                    
+                    // TODO: fix this!
+                    
+                    
+                    var t = "perspective(" + perspective + ") translateY(-10px) rotateZ(" + angle_z + ") rotateX(" + angle_x + ") rotateY(" + angle_y + ")";
                     
                     $preview.css({
                         '-webkit-transform' : t, 

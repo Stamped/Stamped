@@ -1181,8 +1181,8 @@ class HTTPEntity(Schema):
 
             metadata = self.metadata
             if metadata is None:
-                metadata = []
-            metadata.append(item)
+                metadata = tuple()
+            metadata = metadata + (item,)
 
             self.metadata = metadata
 
@@ -1434,7 +1434,6 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
-            # CHANGE: removed references to netflix_instant_available_until -Landon
             if entity.sources.netflix_id is not None and entity.sources.netflix_is_instant_available:
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
@@ -1545,15 +1544,11 @@ class HTTPEntity(Schema):
             self._addAction(actionType, 'Find tickets', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
-
             actionType  = 'queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
-            if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available and
-                entity.sources.netflix_instant_available_until is not None and
-                entity.sources.netflix_instant_available_until > datetime.now()):
+            if entity.sources.netflix_id is not None and entity.sources.netflix_is_instant_available:
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'

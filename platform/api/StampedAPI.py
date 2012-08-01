@@ -937,7 +937,6 @@ class StampedAPI(AStampedAPI):
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
 
-            # Kick off an async task to query FB and determine if user granted us sharing permissions
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
 
@@ -976,8 +975,9 @@ class StampedAPI(AStampedAPI):
                 'authUserId': authUserId, 
                 'facebookToken': linkedAccount.token
             }
+            # Kick off an async task to query FB and determine if user granted us sharing permissions
             self.callTask(self.updateFBPermissionsAsync, payload)
-            # Send out alerts
+            # Send out alert
             self.callTask(self.alertFollowersFromFacebookAsync, payload)
 
         elif linkedAccount.service_name == 'twitter':
@@ -1474,7 +1474,7 @@ class StampedAPI(AStampedAPI):
                         'authUserId': authUserId,
                         'followUserId': userId,
                     }
-                    # self.callTask(self.postToOpenGraphAsync, payload)
+                    self.callTask(self.postToOpenGraphAsync, payload)
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -3312,6 +3312,7 @@ class StampedAPI(AStampedAPI):
 
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
+        # Only post to open graph if we're on prod (or we're Mike)
         if not self.__is_prod and authUserId != '4ecab825112dea0cfe000293':
             return
 
@@ -3379,6 +3380,14 @@ class StampedAPI(AStampedAPI):
             except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
                 logs.info('Unique action already taken on OG object')
                 return
+            except StampedFacebookOGImageSizeError as e:
+                logs.info('OG Image size error')
+                del(kwargs['imageUrl'])
+                if delay > 60*10:
+                    raise e
+                time.sleep(delay)
+                delay *= 2
+                continue
             except StampedThirdPartyError as e:
                 logs.info('### delay is at: %s' % delay)
                 if delay > 60*10:
