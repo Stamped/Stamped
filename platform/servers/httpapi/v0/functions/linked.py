@@ -247,7 +247,7 @@ def facebookLoginCallback(request, http_schema, **kwargs):
     # Acquire the user's FB access token
     try:
         access_token, expires = facebook.getUserAccessToken(http_schema.code)
-        logs.info('### expires: %s' % expires)
+        access_token, expires = facebook.extendAccessToken(access_token)
     except Exception as e:
         return HttpResponseRedirect("stamped://facebook/link/fail")
 
@@ -271,7 +271,7 @@ def facebookLoginCallback(request, http_schema, **kwargs):
         stampedAPI.addLinkedAccount(authUserId, linked)
 
     #return HttpResponseRedirect("stamped://facebook/link/success")
-    url = "fb297022226980395://authorize/#access_token=%s&expires_in=%s&code=%s" % (access_token, expires, code)
+    url = "fb297022226980395://authorize/#access_token=%s&expires_in=%s&code=%s" % (access_token, expires, http_schema.code)
     return HttpResponseRedirect(url)
 
 
