@@ -121,6 +121,11 @@ def alert_settings(request, schema, **kwargs):
             'desc'          : 'Someone todos one of your stamps', 
         }, 
         {
+            'human_name'    : 'Comments', 
+            'name'          : 'comments', 
+            'desc'          : 'Someone comments on one of your stamps.', 
+        }, 
+        {
             'human_name'    : 'Mentions', 
             'name'          : 'mentions', 
             'desc'          : 'Someone you on a stamp or comment', 

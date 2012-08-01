@@ -49,7 +49,6 @@
     * DONE - fix giant button size issue
     * fix action links
 * Mobile 'change notifications' page looks broken
-    * TEST
 
 
 TODO:
