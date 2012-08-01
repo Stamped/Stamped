@@ -9,6 +9,7 @@ __license__   = "TODO"
 import Globals
 
 try:
+    from resolve.EntityGroups import allGroups
     from optparse   import OptionParser
     from batch.BatchUtil import *
     from pprint import pprint
@@ -298,6 +299,26 @@ def addTMDBImages(**kwargs):
 #         return []
 #     processBatch(handler, query=query, **kwargs)
 
+def clearSeedSources(**kwargs):
+    """
+    Clears out any source that is marked as "seed" and is also older than a hardcoded cutoff.
+    """
+    query = {
+        'sources.user_generated_id' : {'$exists' : False},
+        'sources.tombstone_id' : {'$exists' : False},
+    }
+    query = kwargs.pop('query', query)
+    timeCutoff = datetime(2012, 7, 1)
+    groupObjs = [group() for group in allGroups]
+    def handler(entity):
+        modified = False
+        for g in groupObjs:
+            if g.getSource(entity) == 'seed' and g.getTimestamp(entity) < timeCutoff:
+                g.setSource(entity, None)
+                modified = True
+        return [entity] if modified else []
+    processBatch(handler, query=query, **kwargs)
+
 
 _commands = {
     'track_previews': fixBadPlaylists,
@@ -306,12 +327,14 @@ _commands = {
     'remove_itunes_release_dates': removeITunesReleaseDates,
     'scrape_date_from_title': scrapeDateFromTitle,
     'tmdb_images': addTMDBImages,
+    'clear_seed_sources': clearSeedSources,
 }
 
 _actions = {
     'update' : outputToCollection,
     'enrich' : outputToCollectionAndEnrich,
     'print' : outputToConsole,
+    'print_enriched' : enrichAndOutputToConsole,
 }
 
 def parseCommandLine():
@@ -323,7 +346,7 @@ def parseCommandLine():
         default=False, help="Randomize order and slice")
 
     parser.add_option("-v", "--verbose", action="store_true", dest="verbose", 
-        default=False, help="Use keys and action.")
+        default=False, help="Also print results to console.")
 
     parser.add_option("-s", "--sparse", action="store_true", dest="sparse", 
         default=False, help="Only print keys for non-empty results.")
@@ -356,7 +379,7 @@ def parseCommandLine():
         if arg not in _commands:
             invalid = True
 
-    if len(args) < 1 or invalid or options.action not in _actions or (options.verbose and options.keys is None):
+    if len(args) < 1 or invalid or options.action not in _actions:
         print "Error: must provide commands from the list of available commands:"
         for command in _commands:
             print "   %s %s" % (command, _commands[command].__doc__)
@@ -384,8 +407,6 @@ if __name__ == '__main__':
                     sparse_output(entity_id, results)
                     old_output(entity_id, results)
                 output = doubleOutput
-            else:
-                output = sparse_output
         if options.query is not None:
             command(output=output, limit=options.limit, offset=options.offset, shuffle=options.shuffle, thread_count=options.thread_count, query=options.query)
         else:
