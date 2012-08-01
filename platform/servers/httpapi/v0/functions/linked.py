@@ -231,17 +231,20 @@ def facebookLogin(request, authUserId, **kwargs):
     return result
 
 
-@handleHTTPCallbackRequest(http_schema=HTTPFacebookAuthResponse,
+@handleHTTPCallbackRequest(requires_auth=False,
+                           http_schema=HTTPFacebookAuthResponse,
                            exceptions=exceptions)
 @require_http_methods(["GET"])
-def facebookLoginCallback(request, authUserId, http_schema, **kwargs):
+def facebookLoginCallback(request, http_schema, **kwargs):
     facebook = globalFacebook()
 
     logs.info('### http_schema: %s ' % http_schema)
 
+    oauth_token = http_schema.state
+    authUserId, client_id = checkOAuth(oauth_token)
     # Acquire the user's FB access token
     try:
-        access_token = facebook.getUserAccessToken(http_schema.oauth_token, http_schema.secret)
+        access_token = facebook.getUserAccessToken(http_schema.code)
     except Exception as e:
         return HttpResponseRedirect("stamped://facebook/link/fail")
 
