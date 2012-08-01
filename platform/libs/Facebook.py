@@ -206,9 +206,8 @@ class Facebook(object):
             code            = code,
             redirect_uri    = redirect_uri,
         )
-        logs.info('### result: %s' % result)
         r = re.search('access_token=([^&]*)', result)
-        return r.group(1)
+        token = r.group(1)
         r = re.search(r'expires=([^&]*)', result)
         expires = None
         if r is not None:
