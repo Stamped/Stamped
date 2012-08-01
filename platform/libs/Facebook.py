@@ -360,11 +360,12 @@ class Facebook(object):
                "&state=%s" % \
                (APP_ID, callback_url, permissions, authUserId)
 
-        print path
-        response, content = service_request('facebook', 'GET', path)
-        print(response)
-        print(content)
-        return content
+        return path
+#        print path
+#        response, content = service_request('facebook', 'GET', path)
+#        print(response)
+#        print(content)
+#        return content
 
 
 __globalFacebook = None
@@ -405,7 +406,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'extendAccessToken'
+    methods = 'getLoginUrl'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

@@ -199,6 +199,26 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     return HttpResponseRedirect("stamped://netflix/link/success")
 
 
+def createFacebookLoginResponse(authUserId):
+    facebook = stampedAPI._facebook
+    url = facebook.getLoginUrl(authUserId)
+
+    response                = HTTPActionResponse()
+    source                  = HTTPActionSource()
+    source.source           = 'facebook'
+    source.link             = url
+    response.setAction('facebook_login', 'Login to Facebook', [source])
+
+    print ('### Facebook login response: %s' % response.dataExport())
+    return transformOutput(response.dataExport())
+
+
+
+@handleHTTPRequest(exceptions=exceptions)
+@require_http_methods(["GET"])
+def facebookLogin(request, authUserId, http_schema, **kwargs):
+    return createFacebookLogin(authUserId)
+
 
 @handleHTTPCallbackRequest(http_schema=HTTPFacebookAuthResponse,
                            exceptions=exceptions)
