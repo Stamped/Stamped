@@ -33,7 +33,7 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'BAAEOIZBBUXisBANy6asZCGAtivmNHrXR1IqxU6FKAv7ZCz4kPEEdUFmHubEy2wL4BPFcCWlo2qDsDSZAWQhR93I7lYZBn3DZBYZCFCZAPvpyt5NR6aC88VyzuZCoNnSZAQOKAZD'
+ACCESS_TOKEN = 'BAAEOIZBBUXisBANudwjr2FnXth25tSVrQZAyKfyLi9KIbNpoZBTDhdNvFKiLraGCeLDHZAy4ZCNbG5sDZAgYXIc8ekZBSGiswxZBp0MkCAmTUMz3m18a7zLwmF2KdDoah5EZD'
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -411,7 +411,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserAccessToken'
+    methods = 'extendAccessToken'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
