@@ -3358,26 +3358,31 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
-        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        try:
-            result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
-        except StampedFacebookPermissionsError as e:
-            account.linked.facebook.have_share_permissions = False
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-            return
-        except StampedFacebookTokenError as e:
-            account.linked.facebook.token = None
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-            return
-        except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
-            logs.info('Unique action already taken on OG object')
-            return
-        if stampId is not None and 'id' in result:
-            og_action_id = result['id']
-            self._stampDB.updateStampOGActionId(stampId, og_action_id)
-        if account.linked.facebook.have_share_permissions is None:
-            account.linked.facebook.have_share_permissions = True
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+        delay = 5
+        while True:
+            try:
+                uniqueUrl = '%s?ts=%s' % (url, time.time()) if delay > 5 else url
+                logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, uniqueUrl))
+                result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, uniqueUrl, **kwargs)
+                break
+            except StampedFacebookPermissionsError as e:
+                account.linked.facebook.have_share_permissions = False
+                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+                return
+            except StampedFacebookTokenError as e:
+                account.linked.facebook.token = None
+                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+                return
+            except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
+                logs.info('Unique action already taken on OG object')
+                return
+            except StampedThirdPartyError as e:
+                logs.info('### delay is at: %s' % delay)
+                if delay > 60*10:
+                    raise e
+                time.sleep(delay)
+                delay *= 2
+                continue
 
     """
      #####
