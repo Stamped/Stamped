@@ -101,7 +101,6 @@ class Netflix(object):
             http_method=verb)
 
         oauthRequest.sign_request(  self.__signature_method_hmac_sha1, self.__consumer, token)
-        print oauthRequest.to_url()
 
         headers = {'Content-Type' :'application/x-www-form-urlencoded'} if verb =='POST' else {}
         params = oauthRequest.parameters

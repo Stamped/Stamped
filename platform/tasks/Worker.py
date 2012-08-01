@@ -12,6 +12,13 @@ import utils
 
 import signal, os
 
+from boto.s3.connection import S3Connection
+from boto.s3.key import Key
+import keys.aws
+from contextlib import closing
+
+from datetime import datetime
+
 class StampedWorker(gearman.GearmanWorker):
 
     killed = False
@@ -49,6 +56,7 @@ def enterWorkLoop(functions):
     worker = StampedWorker(getHosts())
     def wrapper(worker, job):
         k = 'not parsed yet'
+        request_num = 'not yet parsed'
         try:
             job_data = pickle.loads(job.data)
             k = job_data['key']
@@ -67,8 +75,9 @@ def enterWorkLoop(functions):
                 v = getattr(api, fnName)
                 v(**data)
             logs.info("Finished with request %s" % (request_num,))
+
         except Exception as e:
-            logs.error("Failed request %d" % (request_num,))
+            logs.error("Failed request %s" % (request_num,))
             logs.report()
 
             if libs.ec2_utils.is_ec2():
@@ -76,13 +85,14 @@ def enterWorkLoop(functions):
                     email = {}
                     email['from'] = 'Stamped <noreply@stamped.com>'
                     email['to'] = 'dev@stamped.com'
-                    email['subject'] = '%s - Failed Async Task - %s - %s' % (api.node_name, k ,datetime.utcnow().isoformat())
+                    email['subject'] = '%s - %s failed (%s)' % (api.node_name, k, datetime.utcnow().isoformat())
                     email['body'] = logs.getHtmlFormattedLog()
                     utils.sendEmail(email, format='html')
                 except Exception as e:
-                    logs.warning('UNABLE TO SEND EMAIL')
+                    logs.warning('UNABLE TO SEND EMAIL: %s' % e)
+
         finally:
-            logs.info('Saving request log for request %d' % (request_num,))
+            logs.info('Saving request log for request %s' % (request_num,))
             try:
                 logs.save()
             except Exception:
@@ -90,6 +100,7 @@ def enterWorkLoop(functions):
                 import traceback
                 traceback.print_exc()
                 logs.warning(traceback.format_exc())
+
         return ''
     queues = set()
     if functions is not None:
@@ -137,11 +148,6 @@ def findAmicablePairsNaive(n):
                 results.append((i, j))
     print results
 
-from boto.s3.connection import S3Connection
-from boto.s3.key import Key
-import keys.aws
-from contextlib import closing
-import datetime
 
 def getS3Key(filename):
     BUCKET_NAME = 'stamped.com.static.images'
@@ -155,7 +161,7 @@ def getS3Key(filename):
 
 def writeTimestampToS3(s3_filename, request_id=""):
     logs.debug('Writing timestamp to S3 file %s' % s3_filename)
-    file_content = '%s: %s' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
+    file_content = '%s: %s' % (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), request_id)
     delay = 0.1
     max_delay = 3
     max_tries = 40

@@ -36,9 +36,14 @@ def password_reset(request, schema, **kwargs):
     if account is None:
         raise StampedInputError("invalid account")
     
-    auth_service = account.auth_service
+    try:
+        auth_service = account['auth_service']
+    except Exception as e:
+        logs.warning("Unable to get auth service: %s" % e)
+        auth_service = None
+
     if auth_service != 'stamped':
-        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (accountscreen_name, auth_service))
+        raise StampedInputError("Account password not managed by Stamped for user '%s' (primary account service is '%s')" % (account['screen_name'], auth_service))
     
     return stamped_render(request, 'password_reset.html', {
         'body_classes'      : body_classes, 

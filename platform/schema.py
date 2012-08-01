@@ -98,6 +98,8 @@ class Schema(object):
                 kwargs['cast'] = lambda x: float(x) if x is not None else None
             elif kind == basestring:
                 kwargs['cast'] = lambda x: unicode(x) if x is not None else None
+            else:
+                kwargs['cast'] = lambda x: x
         cls._propertyInfo[name] = kwargs
 
     def __getattr__(self, name):
@@ -128,13 +130,12 @@ class Schema(object):
             kind = info[_kindKey]
 
             # Apply cast.  If we have a propertyList or nestedPropList, apply to all items
-            cast = info.get(_castKey, None)
-            if cast is not None:
-                t = info[_typeKey]
-                if t in [_propertyKey, _nestedPropertyKey]:
-                    value = cast(value)
-                else:
-                    value = tuple([ cast(v) for v in value])
+            cast = info[_castKey]
+            t = info[_typeKey]
+            if t in [_propertyKey, _nestedPropertyKey]:
+                value = cast(value)
+            else:
+                value = tuple([cast(v) for v in value])
 
 
             if value is None:

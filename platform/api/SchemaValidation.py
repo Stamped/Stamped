@@ -22,7 +22,7 @@ from bson.objectid          import ObjectId
 
 def parsePhoneNumber(phoneStr):
     if phoneStr is not None:
-        return re.sub("[^0-9]", "", str(phoneStr))
+        return re.sub("[^0-9]", "", unicode(phoneStr))
     return None
 
 _color_re = re.compile("^[0-9a-f]{3}(?:[0-9a-f]{3})?$", re.IGNORECASE)
