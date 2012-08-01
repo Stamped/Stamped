@@ -89,26 +89,30 @@ class StampedAPIProxy(object):
                 'client_secret' : CLIENT_SECRET, 
             })
     
-    def getAccountByScreenName(self, screen_name):
+    def getAccountByScreenName(self, screen_name, no_cache=False):
         if self._ec2:
             key = str("web::getAccountByScreenName::%s" % screen_name)
             
-            ret = self._try_get_cache(key)
-            if ret is not None:
-                return ret
+            if not no_cache:
+                ret = self._try_get_cache(key)
+                
+                if ret is not None:
+                    return ret
             
             ret = self._export(self.api.getAccountByScreenName(screen_name).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
         else:
             return self._handle_get("users/show.json", { 'screen_name' : screen_name })
     
-    def getAccount(self, user_id):
+    def getAccount(self, user_id, no_cache=False):
         if self._ec2:
             key = str("web::getAccount::%s" % user_id)
             
-            ret = self._try_get_cache(key)
-            if ret is not None:
-                return ret
+            if not no_cache:
+                ret = self._try_get_cache(key)
+                
+                if ret is not None:
+                    return ret
             
             ret = self._export(self.api.getAccount(user_id).dataExport())
             return self._try_set_cache(key, ret, 600 * 3)
@@ -121,13 +125,15 @@ class StampedAPIProxy(object):
         else:
             raise NotImplementedError
     
-    def getUser(self, params):
+    def getUser(self, params, no_cache=False):
         if self._ec2:
             key = str("web::getUser::%s" % generateKeyFromDictionary(params))
-            ret = self._try_get_cache(key)
             
-            if ret is not None:
-                return ret
+            if not no_cache:
+                ret = self._try_get_cache(key)
+                
+                if ret is not None:
+                    return ret
             
             user = self.api.getUser(HTTPUserId().dataImport(params), None)
             ret  = HTTPUser().importUser(user).dataExport()

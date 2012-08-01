@@ -1181,8 +1181,8 @@ class HTTPEntity(Schema):
 
             metadata = self.metadata
             if metadata is None:
-                metadata = []
-            metadata.append(item)
+                metadata = tuple()
+            metadata = metadata + (item,)
 
             self.metadata = metadata
 

@@ -31,7 +31,7 @@ def password_reset(request, schema, **kwargs):
     if user_id is None:
         raise StampedInputError("invalid token")
     
-    account = stampedAPIProxy.getAccount(user_id)
+    account = stampedAPIProxy.getAccount(user_id, no_cache=True)
     
     if account is None:
         raise StampedInputError("invalid account")
@@ -100,7 +100,7 @@ def alert_settings(request, schema, **kwargs):
         }
     else:
         user_id  = g_stamped_auth.verifyEmailAlertToken(token)
-        account  = stampedAPIProxy.getAccount(user_id)
+        account  = stampedAPIProxy.getAccount(user_id, no_cache=True)
         user     = account
         settings = user['alert_settings']
     
@@ -120,6 +120,11 @@ def alert_settings(request, schema, **kwargs):
             'name'          : 'todos', 
             'desc'          : 'Someone todos one of your stamps', 
         }, 
+        #{
+        #    'human_name'    : 'Comments', 
+        #    'name'          : 'comments', 
+        #    'desc'          : 'Someone comments on one of your stamps.', 
+        #}, 
         {
             'human_name'    : 'Mentions', 
             'name'          : 'mentions', 
@@ -173,7 +178,7 @@ def alert_settings(request, schema, **kwargs):
         'user'              : user, 
         'settings'          : options, 
         'token'             : token
-    }, preload=[ 'token' ])
+    }, preload=[ 'token', 'page' ])
 
 @stamped_view(schema=HTTPResetEmailSchema)
 @require_http_methods(["POST"])
@@ -234,6 +239,10 @@ def update_alert_settings(request, schema, **kwargs):
     
     on  = filter(lambda k: settings[k], settings.keys())
     off = filter(lambda k: not settings[k], settings.keys())
+    
+    logs.info("user_id: %s" % user_id)
+    logs.info("ON:  %s" % ", ".join(on))
+    logs.info("OFF: %s" % ", ".join(off))
     
     stampedAPIProxy.updateAlerts(user_id, on, off)
     return transform_output(True)
