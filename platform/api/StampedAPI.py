@@ -3377,7 +3377,6 @@ class StampedAPI(AStampedAPI):
                 logs.info('Unique action already taken on OG object')
                 return
             except StampedThirdPartyError as e:
-                logs.info('### delay is at: %s' % delay)
                 if delay > 60*10:
                     raise e
                 time.sleep(delay)
