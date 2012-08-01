@@ -2941,7 +2941,7 @@ class HTTPActivity(Schema):
 
             return action
 
-        def _buildFBLoginAction(user, link):
+        def _buildFBLoginAction(user):
             source              = HTTPActionSource()
             source.name         = 'Connect to Facebook'
             source.source       = 'facebook'
