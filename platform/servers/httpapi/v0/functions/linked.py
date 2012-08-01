@@ -36,7 +36,7 @@ def show(request, authUserId, **kwargs):
 
     # Temporary hack to only show Facebook if an extended token exists
     if linkedAccounts is not None and linkedAccounts.facebook is not None and \
-        (linkedAccounts.facebook.token_expiration is None and linkedAccounts.extended_timestamp is None):
+        (linkedAccounts.facebook.token_expiration is None and linkedAccounts.facebook.extended_timestamp is None):
         del(linkedAccounts.facebook)
     if linkedAccounts is None:
         result = {}
