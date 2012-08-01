@@ -101,7 +101,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 localTimestamp = timestamps[group]
                             if self.shouldEnrich(group, source.sourceName, entity, localTimestamp):
                                 groupObj = self.getGroup(group)
-                                assert groupObj is not None
                                 fieldsChanged = groupObj.syncFields(copy, entity)
                                 decorationsChanged = groupObj.syncDecorations(localDecorations, decorations)
                                 if fieldsChanged or group in timestamps or decorationsChanged:
@@ -114,46 +113,36 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         return modified_total
 
     def shouldEnrich(self, group, source, entity, timestamp=None):
-        if timestamp is None:
-            timestamp = self.now
-        if group in self.__groups:
-            groupObj = self.__groups[group]
-            if groupObj.eligible(entity):
-                currentSource = groupObj.getSource(entity)
-                if currentSource is None:
-                    # TODO: This screws up the data we manually inject into the
-                    # db, which don't have sources, but we also want to somehow
-                    # keep them.
-                    return True
-                else:
-                    priority = self.getGroupPriority(group, source)
-                    currentPriority = self.getGroupPriority(group, currentSource)
-                    if priority > currentPriority:
-                        return True
-                    elif priority < currentPriority:
-                        return False
-                    else:
-                        maxAge = self.getMaxAge(group, source)
-                        if self.now - timestamp > maxAge:
-                            return False
-                        else:
-                            currentMaxAge = self.getMaxAge(group, currentSource)
-                            currentTimestamp = groupObj.getTimestamp(entity)
-                            if currentTimestamp is None:
-                                return True
-                            try:
-                                currentTimestamp = currentTimestamp.replace(tzinfo=None)
-                                # if data is stale...
-                                if self.now - currentTimestamp > currentMaxAge:
-                                    return True
-                            except Exception as e:
-                                logs.warning('FAIL (%s / %s): self.now (%s) - currentTimestamp (%s) > currentMaxAge (%s)\n%s' % \
-                                    (source, group, self.now, currentTimestamp, currentMaxAge, e))
-                            return False
-            else:
-                return False
-        else:
+        timestamp = timestamp or self.now
+
+        if group not in self.__groups:
             return False
+
+        groupObj = self.__groups[group]
+        if not groupObj.eligible(entity):
+            return False
+
+        currentSource = groupObj.getSource(entity)
+        if currentSource is None:
+            return True
+
+        priority = self.getGroupPriority(group, source)
+        currentPriority = self.getGroupPriority(group, currentSource)
+        if priority > currentPriority:
+            return True
+        if priority < currentPriority:
+            return False
+
+        maxAge = self.getMaxAge(group, source)
+        if self.now - timestamp > maxAge:
+            # This is actually correct! This line says "if the data we get from the source is marked
+            # stale, don't update the actual entity with the deep copy.
+            return False
+        currentMaxAge = self.getMaxAge(group, currentSource)
+        currentTimestamp = groupObj.getTimestamp(entity)
+        if currentTimestamp is None:
+            return True
+        return self.now - currentTimestamp > currentMaxAge:
 
     @property
     def now(self):

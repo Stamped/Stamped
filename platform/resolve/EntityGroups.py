@@ -17,6 +17,7 @@ def moveField(source, target=None):
         item = getattr(proxy, source, None)
         if item:
             setattr(entity, target, item)
+            return True
     return wrapped
 
 
@@ -42,6 +43,7 @@ def importEntityMinisFromProxyField(field, entityClass, entityType):
                 logs.info('%s import failure: %s for %s' % (field, subfield['name'], proxy.name))
         if results:
             setattr(entity, field, results)
+            return True
     return wrapper
         
 
@@ -69,6 +71,7 @@ class AmazonGroup(AAmazonGroup):
         try:
             if entity.isType('book'):
                 entity.sources.amazon_underlying = proxy.underlying.key
+                return True
         except Exception:
             pass
 
@@ -210,6 +213,7 @@ class NetflixAvailableGroup(AKindTypeGroup):
 
     def enrichEntityWithEntityProxy(self, entity, proxy):
         entity.sources.netflix_is_instant_available = proxy.is_instant_available
+        return True
 
 class RdioGroup(AKindTypeGroup):
     def __init__(self, *args, **kwargs):
@@ -315,6 +319,7 @@ class iTunesGroup(AKindTypeGroup):
         preview = getattr(proxy, 'preview', None)
         if preview:
             entity.sources.itunes_preview = preview
+            return True
 
 
 class NYTimesGroup(AKindTypeGroup):
@@ -383,6 +388,7 @@ class AddressGroup(APlaceGroup):
             for k in address_components:
                 if k in proxy.address:
                     setattr(entity, 'address_%s' % k, proxy.address[k])
+            return True
 
 
 class CoordinatesGroup(APlaceGroup):
@@ -396,6 +402,7 @@ class CoordinatesGroup(APlaceGroup):
             coordinates.lat = proxy.coordinates[0]
             coordinates.lng = proxy.coordinates[1]
             entity.coordinates = coordinates
+            return True
 
 
 class PhoneGroup(APlaceGroup):
@@ -432,6 +439,7 @@ class GalleryGroup(APlaceGroup):
             gallery.append(img)
         if gallery:
             entity.gallery = gallery
+            return True
 
 
 class PriceRangeGroup(ARestaurantGroup):
@@ -494,6 +502,7 @@ class GenresGroup(AKindTypeGroup):
     def enrichEntityWithEntityProxy(self, entity, proxy):
         if len(proxy.genres) > 0:
             entity.genres = proxy.genres
+            return True
 
 
 class ArtistsGroup(AKindTypeGroup):
@@ -516,6 +525,7 @@ class LengthGroup(AKindTypeGroup):
     def enrichEntityWithEntityProxy(self, entity, proxy):
         if proxy.length > 0:
             entity.length = int(proxy.length)
+            return True
 
         
 class AlbumsGroup(AKindTypeGroup):
@@ -557,6 +567,7 @@ class DirectorsGroup(AFilmGroup):
             directors.append(entityMini)
         if directors:
             entity.directors = directors
+            return True
 
 
 class CastGroup(AFilmGroup):
@@ -572,6 +583,7 @@ class CastGroup(AFilmGroup):
             cast.append(entityMini)
         if cast:
             entity.cast = cast
+            return True
 
 
 class DescGroup(BasicFieldGroup):
@@ -599,10 +611,11 @@ class LastPopularGroup(BasicFieldGroup):
         if proxy.last_popular:
             if entity.last_popular is None or proxy.last_popular > entity.last_popular:
                 entity.last_popular = proxy.last_popular
+            popularity_score = getattr(proxy, 'popularity_score', 0)
+            if entity.total_popularity_measure is None or popularity_score > entity.total_popularity_measure:
+                entity.total_popularity_measure = popularity_score
+            return True
 
-        if proxy.popularity_score:
-            if entity.total_popularity_measure is None or proxy.popularity_score > entity.total_popularity_measure:
-                entity.total_popularity_measure = proxy.popularity_score
 
 
 class ImagesGroup(BasicFieldGroup):
@@ -626,6 +639,7 @@ class ImagesGroup(BasicFieldGroup):
             images.append(img)
         if images:
             entity.images = images
+            return True
 
 
 class ScreenshotsGroup(ASoftwareGroup):
@@ -643,6 +657,7 @@ class ScreenshotsGroup(ASoftwareGroup):
             screenshots.append(img)
         if screenshots:
             entity.screenshots = screenshots
+            return True
 
 
 class AuthorsGroup(AKindTypeGroup):
@@ -662,6 +677,7 @@ class AuthorsGroup(AKindTypeGroup):
             authors.append(entityMini)
         if authors:
             entity.authors = authors
+            return True
 
 
 class PublishersGroup(AKindTypeGroup):
@@ -681,6 +697,7 @@ class PublishersGroup(AKindTypeGroup):
             publishers.append(entityMini)
         if publishers:
             entity.publishers = publishers
+            return True
 
 class ISBNGroup(ABookGroup):
     def __init__(self):
