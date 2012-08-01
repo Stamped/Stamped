@@ -131,6 +131,7 @@ urlpatterns = patterns('',
     
     url(R'^settings/alerts/?$',                 'core.appsettings.alert_settings'),
     url(R'^settings/alerts/update$',            'core.appsettings.update_alert_settings'),
+    url(R'^/?mobile/settings/alerts/update$',   'core.appsettings.update_alert_settings'),
     
     
     # ------------------------------- BLOG -------------------------------------
