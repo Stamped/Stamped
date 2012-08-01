@@ -142,7 +142,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         currentTimestamp = groupObj.getTimestamp(entity)
         if currentTimestamp is None:
             return True
-        return self.now - currentTimestamp > currentMaxAge:
+        return self.now - currentTimestamp > currentMaxAge
 
     @property
     def now(self):
