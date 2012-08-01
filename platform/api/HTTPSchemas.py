@@ -3400,11 +3400,11 @@ class HTTPActivity(Schema):
                 self.image = _getIconURL('news_welcome')
                 self.action = _buildUserAction(self.objects.users[0])
                 
-            elif self.verb == 'notification_upgrade':
-                _addUserObjects()
-                self.header = "Welcome to Stamped 2.0"
-                self.image = _getIconURL('news_welcome')
-                self.action = _buildUserAction(self.objects.users[0])
+#            elif self.verb == 'notification_upgrade':
+#                _addUserObjects()
+#                self.header = "Welcome to Stamped 2.0"
+#                self.image = _getIconURL('news_welcome')
+#                self.action = _buildUserAction(self.objects.users[0])
 
             elif self.verb == 'notification_fb_login':
                 _addUserObjects()

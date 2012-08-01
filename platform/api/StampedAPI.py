@@ -5152,7 +5152,7 @@ class StampedAPI(AStampedAPI):
         objects = ActivityObjectIds()
         objects.user_ids = [ recipientId ]
         body = "Connect to Facebook"
-        self._activityDB.addActivity(verb           = 'notification_fb_login',
+        self._activityDB.addActivity(verb           = 'notification_upgrade',
                                      recipientIds   = [ recipientId ],
                                      objects        = objects,
                                      body           = body,
