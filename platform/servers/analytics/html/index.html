@@ -30,7 +30,7 @@
 							<td> Weekly Avg (As of {{hour}}:{% if minute < 10 %}0{{minute}}{% else %}{{minute}}{% endif %}): {{weekStamps}}</td>
 							<td> {%if deltaStampsWeek == 'N/A'%} N/A {% else %} {{deltaStampsWeek}}% {%endif%} </td>
 						</tr><tr>
-							<td> Weekly Avg (Per Day): {{stamp_graph.2.23}}</td>
+							<td> Weekly Avg (Per Day): {{stamp_graph.2.24}}</td>
 						</tr>
 					</table>
 				</div>
@@ -48,7 +48,7 @@
 							<td> Weekly Avg (As of {{hour}}:{% if minute < 10 %}0{{minute}}{% else %}{{minute}}{% endif %}): {{weekAccts}}</td>
 							<td> {%if deltaAcctsWeek == '0.00'%} -- {% else %} {{deltaAcctsWeek}}% {%endif%} </td>
 						</tr><tr>
-							<td> Weekly Avg (Per Day): {{acct_graph.2.23}}</td>
+							<td> Weekly Avg (Per Day): {{acct_graph.2.24}}</td>
 						</tr>
 					</table>
 				</div>
@@ -61,12 +61,12 @@
 							<td> Yesterday (As of {{hour}}:{% if minute < 10 %}0{{minute}}{% else %}{{minute}}{% endif %}): {{yestUsers}}</td>
 							<td> {%if deltaUsersDay == '0.00'%} -- {% else %} {{deltaUsersDay}}% {%endif%} </td>
 						</tr><tr>
-							<td> Yesterday (Total): {{user_graph.1.23}}</td>
+							<td> Yesterday (Total): {{user_graph.1.24}}</td>
 						</tr><tr>
 							<td> Weekly Avg (As of {{hour}}:{% if minute < 10 %}0{{minute}}{% else %}{{minute}}{% endif %}): {{weekUsers}}</td>
 							<td> {%if deltaUsersWeek == '0.00'%} -- {% else %} {{deltaUsersWeek}}% {%endif%} </td>
 						</tr><tr>
-							<td> Weekly Avg (Per Day): {{user_graph.2.23}}</td>
+							<td> Weekly Avg (Per Day): {{user_graph.2.24}}</td>
 						</tr>
 					</table>
 				</div>
@@ -82,11 +82,11 @@
 			
 			<script>
 				var r = Raphael(document.getElementById("stamp_graph"));
-				line1 = r.linechart(20,0,350,300,{{hours}}, {{stamp_graph}}, {axis: "0 0 1 1", axisxstep: 12, axisystep: 12});
+				line1 = r.linechart(25,0,350,300,{{hours}}, {{stamp_graph}}, {axis: "0 0 1 1", axisxstep: 12, axisystep: 12});
 				var r = new Raphael(document.getElementById("acct_graph"));
-				line2 = r.linechart(20,0,350,300,{{hours}}, {{acct_graph}}, {axis: "0 0 1 1", axisxstep: 12, axisystep: 12});
+				line2 = r.linechart(25,0,350,300,{{hours}}, {{acct_graph}}, {axis: "0 0 1 1", axisxstep: 12, axisystep: 12});
 				var r = new Raphael(document.getElementById("user_graph"));
-				line3 = r.linechart(20,0,350,300,{{hours}}, {{user_graph}}, {axis: "0 0 1 1", axisxstep: 12, axisystep: 12});
+				line3 = r.linechart(25,0,350,300,{{hours}}, {{user_graph}}, {axis: "0 0 1 1", axisxstep: 12, axisystep: 12});
 				
 				// Modify the x axis labels
 		  			var xText = line1.axis[0].text.items;      
@@ -124,6 +124,13 @@
 			</script>
 			
 			<div class="indexTotals">
+				<table class="indexLegend">
+					<tr>
+						<td style="background-color:#2f69bf; border: 2px solid black">&nbsp &nbsp</td> <td>Today</td> <td> &nbsp </td>
+						<td style="background-color:#a2bf2f; border: 2px solid black">&nbsp &nbsp</td> <td>Yesterday</td> <td> &nbsp </td>
+						<td style="background-color:#bf5a2f; border: 2px solid black">&nbsp &nbsp</td> <td>Weekly Avg.</td> <td> &nbsp </td>
+					</tr>
+				</table>
 				<h1> Total Stamps: {{total_stamps}} &nbsp &nbsp &nbsp Total Accounts: {{total_accts}}</h1>
 				<h1>  </h1>
 			</div>

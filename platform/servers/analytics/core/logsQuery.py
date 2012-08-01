@@ -41,6 +41,9 @@ class logsQuery(object):
         self.statCount = 0
         self.statCountByNode = {}
         self.statTimeByNode = {}
+        
+        self.writer = statWriter('latency')
+        self.cache = conn.get_domain('latency')
 
         if domain_name is None:
             domain_name = 'bowser'
@@ -143,6 +146,8 @@ class logsQuery(object):
     def latencyReport(self,t0,t1,uri=None,blacklist=[],whitelist=[]):
         self.statDict = {}
         self.errDict = {}
+        
+        
         
         pool = Pool(16)
         

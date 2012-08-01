@@ -8,7 +8,7 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import keys.aws, logs, utils, math, time
+import keys.aws, logs, utils, math
 import libs.ec2_utils
 
 from boto.sdb.connection                            import SDBConnection
@@ -26,23 +26,18 @@ class Dashboard(object):
         self.stamp_collection = api._stampDB._collection
         self.acct_collection = api._userDB._collection
         self.query = logsQuery
-        
         self.writer = statWriter('dashboard')
         conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domain = conn.get_domain('dashboard')
-     
-        
-    def getStats(self,stat,fun):
-        
-        """
-        Today's Stats
-        """
+    
+    
+    def _getTodaysStats(self,stat,fun): 
         
         total_today = 0
         today_hourly = []
         
         # See if we've stored data earlier
-        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,today().date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat, today().date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
                 today_hourly.append(int(i))
@@ -51,48 +46,53 @@ class Dashboard(object):
         for hour in range (len(today_hourly), est().hour+2):
             bgn = today()
             end = today() + timedelta(hours=hour)
-            total_today = fun(bgn,end)
+            total_today = fun(bgn, end)
             today_hourly.append(total_today)
         
             # Only store data for full hours (e.g. if it is currently 8:40, only store stats thru 8:00)
-            # Also only write from a bowser stack connection to prevent data corruption
+            # Also only write from a prod stack connection to prevent data misrepresentation
             if hour == est().hour and IS_PROD:
-                self.writer.writeHours({'stat': stat,'time':'day','bgn':today().date().isoformat(),'hours':str(today_hourly)})
+                self.writer.writeHours({'stat': stat, 'time': 'day', 'bgn': today().date().isoformat(), 'hours': str(today_hourly)})
         
+        return total_today, today_hourly
+    
+    
+    def _getDaysStats(self,stat,fun,date):
         
-        """
-        Yesterday's Stats
-        """
+        # This is not the proper way to get current day's stats
+        if date == today():
+            print "WARNING: For today's stats the proper function to be used is getTodaysStats"
+            raise
         
-        total_yest = 0
-        yest_hourly = []
+        total_day = 0
+        day_hourly = []
         
         # See if we've stored data earlier
-        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat,dayAgo(today()).date().isoformat()))
+        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat, date.date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
-                yest_hourly.append(int(i))
+                day_hourly.append(int(i))
         
-        # If we didn't, or we stored less than a full 24 hours, rebuild all of yesterday's stats and save them if on bowser
-        if len(yest_hourly) < 25:
-            yest_hourly = []
-            bgn = dayAgo(today())
+        # If we didn't, or we stored less than a full 24 hours, rebuild all of this day's stats and save them (if on prod stack)
+        if len(day_hourly) < 25:
+            day_hourly = []
+            bgn = today(date) # 0-hour EST
             for hour in range (0,25):
-                end = dayAgo(today()) + timedelta(hours=hour)
-                total_yest = fun(bgn,end)
-                yest_hourly.append(total_yest)
+                end = bgn + timedelta(hours=hour)
+                total_day = fun(bgn, end)
+                day_hourly.append(total_day)
             if IS_PROD:
-                self.writer.writeHours({'stat': stat,'time':'day','bgn':dayAgo(today()).date().isoformat(),'hours':str(yest_hourly)})
-        
-        
-        """
-        Weekly Stats
-        """
+                self.writer.writeHours({'stat': stat,'time':'day','bgn':date.date().isoformat(),'hours':str(day_hourly)})
+                
+        return day_hourly
+    
+    
+    def _getWeeklyAvg(self,stat,fun):
         
         weeklyAgg = []
         weeklyAvg = []
         
-        # See if we've stored data earlier
+        # See if we've stored data for this week earlier
         query = self.domain.select('select hours from `dashboard` where itemName() = "%s-week-%s"' % (stat,weekAgo(today()).date().isoformat()))
         for result in query:
             for i in result['hours'].replace('[','').replace(']','').split(','):
@@ -103,13 +103,13 @@ class Dashboard(object):
             for day in range (0,6):
                 daily = 0
                 bgn = weekAgo(today()) + timedelta(days=day) 
-                for hour in range (0,25):
-                    end = bgn + timedelta(hours=hour)
-                    daily = fun(bgn,end)
+                daily = self._getDaysStats(stat,fun,bgn)
+                print bgn, daily
+                for i in range (0,len(daily)):
                     try:
-                        weeklyAgg[hour] += daily
+                        weeklyAgg[i] += daily[i]
                     except IndexError:
-                        weeklyAgg.append(daily)
+                        weeklyAgg.append(daily[i])
             
             # Take the aggregate and make an average
             for hour in range (0,len(weeklyAgg)):
@@ -118,7 +118,15 @@ class Dashboard(object):
             if IS_PROD:
                 self.writer.writeHours({'stat': stat,'time':'week','bgn':weekAgo(today()).date().isoformat(),'hours':str(weeklyAvg)})
         
+        return weeklyAvg
+
+    
+    def getStats(self,stat,fun):
         
+        # Get all the stats we need      
+        total_today, today_hourly = self._getTodaysStats(stat,fun)
+        yest_hourly = self._getDaysStats(stat,fun,dayAgo(today()))
+        weeklyAvg = self._getWeeklyAvg(stat,fun)
         
         # Compute D/D and D/W changes
         try:
@@ -131,7 +139,6 @@ class Dashboard(object):
         except ZeroDivisionError:
             deltaWeek = 0.0
         
-        
         return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(est().hour))],weeklyAvg,weeklyAvg[int(math.floor(est().hour))],deltaDay,deltaWeek
     
     
@@ -139,9 +146,11 @@ class Dashboard(object):
         fun = (lambda bgn,end: self.stamp_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
         return self.getStats('stamps',fun)
     
+    
     def newAccounts(self):
         fun = (lambda bgn,end: self.acct_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
         return self.getStats('accts',fun)
+
 
     def todaysUsers(self):
         fun = (lambda bgn,end: self.query.activeUsers(bgn, end))

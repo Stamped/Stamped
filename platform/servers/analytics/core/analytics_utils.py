@@ -45,17 +45,23 @@ def weekAgo(date):
 #Exactly one full month prior to a given date
 def monthAgo(date):
     if date.month > 1:
-        monthAgo = datetime(date.year, date.month - 1, date.day,date.hour,date.minute,date.second,date.microsecond)
+        try:
+            monthAgo = datetime(date.year, date.month-1, date.day, date.hour, date.minute, date.second, date.microsecond)
+        except ValueError: # Day out of range for previous month - default to first day of current month
+            monthAgo = datetime(date.year, date.month, 1, date.hour, date.minute, date.second, date.microsecond) 
     else:
-        monthAgo = datetime(date.year - 1, 12,date.day,date.hour,date.minute,date.second,date.microsecond)
+        monthAgo = datetime(date.year-1, 12, date.day, date.hour, date.minute, date.second, date.microsecond)
     return monthAgo
 
 #Exactly one full month past a given date
 def monthPast(date):
     if date.month < 12:
-        monthPast = datetime(date.year, date.month + 1, date.day,date.hour,date.minute,date.second,date.microsecond)
+        try:
+            monthPast = datetime(date.year, date.month+1, date.day, date.hour, date.minute, date.second, date.microsecond)
+        except ValueError:
+            monthPast = datetime(date.year, date.month+2, 1, date.hour, date.minute, date.second, date.microsecond)
     else:
-        monthPast = datetime(date.year + 1, 1,date.day,date.hour,date.minute,date.second,date.microsecond)
+        monthPast = datetime(date.year+1, 1, date.day, date.hour, date.minute, date.second, date.microsecond)
     return monthPast
 
 #Increments to the beginning of the next month

@@ -29,14 +29,17 @@ from libs.ec2_utils                         import get_stack
 from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 
+stack_name = 'bowser'
+
 api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
 acct_collection = api._userDB._collection
 entity_collection = api._entityDB._collection
 todo_collection = api._todoDB._collection
-dash = Dashboard(api,logsQuery('bowser'))
+logsQ = logsQuery(stack_name)
+dash = Dashboard(api,logsQ)
 
-stack_name = 'bowser'
+
 
 def index(request):
     today_stamps_hourly,todayStamps,yest_stamps_hourly,yestStamps,week_stamps_hourly,weekStamps,deltaStampsDay,deltaStampsWeek = dash.newStamps()
@@ -112,8 +115,8 @@ def enrichment(request):
     attempted = None
     breakdown = None
     percentage = None
-    if request.method == 'POST': 
-        form = enrichForm(request.POST)
+    if request.GET.get('type') is not None: 
+        form = enrichForm(request.GET)
         if form.is_valid():
             subset = form.cleaned_data['type']
             unattempted, attempted, breakdown = getEnrichmentStats(entity_collection,subset)
@@ -136,8 +139,6 @@ def enrichment(request):
     return HttpResponse(t.render(c))
 
 def latency(request):
-    
-    query = logsQuery(stack_name)
     
     class latencyForm(forms.Form):
         uri = forms.CharField(max_length=30)
@@ -180,7 +181,7 @@ def latency(request):
     is_blacklist = len(blacklist) > 0
     is_whitelist = len(whitelist) > 0
     
-    report = query.latencyReport(dayAgo(today()),now(),None,blacklist,whitelist)
+    report = logsQ.latencyReport(dayAgo(today()),now(),None,blacklist,whitelist)
         
     t = loader.get_template('../html/latency.html')
     c = Context({
