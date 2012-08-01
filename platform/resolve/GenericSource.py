@@ -174,10 +174,13 @@ class GenericSource(BasicSource):
                     proxy = self.entityProxyFromKey(source_id, entity=entity)
                 # Call proxy.name, which forces a fetch from source. This will throw out any
                 # stale/broken ids we might have.
+                # TODO(paul): Er, this will cause us to drop any third party id if there's an error
+                # talking to external sources. Also, a lot of our proxies swallow exceptions.
                 proxy.name
                 timestamps[self.idName] = controller.now
                 for group in groups:
-                    group.enrichEntityWithEntityProxy(entity, proxy)
+                    if group.enrichEntityWithEntityProxy(entity, proxy):
+                        timestamps[group.groupName] = controller.now
             except Exception as e:
                 # This is a bad ID and we need to clear it.
                 delattr(entity.sources, self.idField)

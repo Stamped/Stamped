@@ -596,7 +596,7 @@ class HTTPLinkedAccount(Schema):
         cls.addProperty('linked_name',                      basestring)
         cls.addProperty('token',                            basestring)
         cls.addProperty('secret',                           basestring)
-        cls.addProperty('token_expiration',                 datetime)
+        cls.addProperty('token_expiration',                 basestring)
         cls.addNestedProperty('share_settings',             HTTPLinkedAccountShareSettings)
 
     def importLinkedAccount(self, linked):
@@ -1181,8 +1181,8 @@ class HTTPEntity(Schema):
 
             metadata = self.metadata
             if metadata is None:
-                metadata = []
-            metadata.append(item)
+                metadata = tuple()
+            metadata = metadata + (item,)
 
             self.metadata = metadata
 
@@ -1230,6 +1230,10 @@ class HTTPEntity(Schema):
         self.last_modified      = entity.timestamp.created
 
         subcategory             = self._formatSubcategory(self.subcategory)
+
+        # Temporary hack to fix bug in 2.0.1 that displays "an place"
+        if subcategory == 'establishment':
+            subcategory = 'place'
 
         # Place
         if entity.kind == 'place':
@@ -1430,7 +1434,6 @@ class HTTPEntity(Schema):
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
-            # CHANGE: removed references to netflix_instant_available_until -Landon
             if entity.sources.netflix_id is not None and entity.sources.netflix_is_instant_available:
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
@@ -1541,15 +1544,11 @@ class HTTPEntity(Schema):
             self._addAction(actionType, 'Find tickets', sources, icon=actionIcon)
 
             # Actions: Add to Netflix Instant Queue
-
             actionType  = 'queue'
             actionIcon  = _getIconURL('act_play_primary', client=client)
             sources     = []
 
-            if (entity.sources.netflix_id is not None and
-                entity.sources.netflix_is_instant_available and
-                entity.sources.netflix_instant_available_until is not None and
-                entity.sources.netflix_instant_available_until > datetime.now()):
+            if entity.sources.netflix_id is not None and entity.sources.netflix_is_instant_available:
                 source                  = HTTPActionSource()
                 source.name             = 'Add to Netflix Instant Queue'
                 source.source           = 'netflix'

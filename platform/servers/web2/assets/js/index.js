@@ -284,7 +284,7 @@
             var height = $vertically_centered.height();
             var offset = Math.max(0, (window.innerHeight - height) / 2);
             
-            if (g_page === "legal" || g_page === "faq" || g_page === "terms-of-service" || g_page === "privacy-policy" || g_page === "licenses") {
+            if (g_page === "legal" || g_page === "faq" || g_page === "terms-of-service" || g_page === "privacy-policy" || g_page === "licenses" || g_page === "settings") {
                 offset = 180;
             }
             //console.log("height: " + height + "; offset: " + offset);

@@ -937,13 +937,6 @@ class StampedAPI(AStampedAPI):
             linkedAccount.linked_user_id = userInfo['id']
             linkedAccount.linked_name = userInfo['name']
 
-            # Kick off an async task to query FB and determine if user granted us sharing permissions
-            payload = {
-                'authUserId': authUserId,
-                'token': linkedAccount.token,
-            }
-            self.callTask(self.updateFBPermissionsAsync, payload)
-
             if 'username' in userInfo:
                 linkedAccount.linked_screen_name = userInfo['username']
 
@@ -982,6 +975,9 @@ class StampedAPI(AStampedAPI):
                 'authUserId': authUserId, 
                 'facebookToken': linkedAccount.token
             }
+            # Kick off an async task to query FB and determine if user granted us sharing permissions
+            self.callTask(self.updateFBPermissionsAsync, payload)
+            # Send out alert
             self.callTask(self.alertFollowersFromFacebookAsync, payload)
 
         elif linkedAccount.service_name == 'twitter':
@@ -1035,17 +1031,17 @@ class StampedAPI(AStampedAPI):
         return account.linked.facebook.share_settings
 
     @API_CALL
-    def updateFBPermissionsAsync(self, authUserId, token):
+    def updateFBPermissionsAsync(self, authUserId, facebookToken):
         acct = self.getAccount(authUserId)
         if acct.linked is None or acct.linked.facebook is None:
             return False
         linked = acct.linked.facebook
-        permissions = self._facebook.getUserPermissions(token)
+        permissions = self._facebook.getUserPermissions(facebookToken)
         linked.have_share_permissions = \
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
 
-        token, expires = self._facebook.extendAccessToken(token)
-        linked.token = token
+        facebookToken, expires = self._facebook.extendAccessToken(facebookToken)
+        linked.token = facebookToken
         linked.token_expiration = expires
         linked.extended_timestamp = datetime.utcnow()
         self._accountDB.updateLinkedAccount(authUserId, linked)
@@ -1478,7 +1474,7 @@ class StampedAPI(AStampedAPI):
                         'authUserId': authUserId,
                         'followUserId': userId,
                     }
-                    # self.callTask(self.postToOpenGraphAsync, payload)
+                    self.callTask(self.postToOpenGraphAsync, payload)
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -3362,23 +3358,30 @@ class StampedAPI(AStampedAPI):
         if action is None or ogType is None or url is None:
             return
 
-        logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, url))
-        try:
-            result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, url, **kwargs)
-        except StampedFacebookPermissionsError as e:
-            account.linked.facebook.have_share_permissions = False
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-            return
-        except StampedFacebookTokenError as e:
-            account.linked.facebook.token = None
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-            return
-        if stampId is not None and 'id' in result:
-            og_action_id = result['id']
-            self._stampDB.updateStampOGActionId(stampId, og_action_id)
-        if account.linked.facebook.have_share_permissions is None:
-            account.linked.facebook.have_share_permissions = True
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+        delay = 5
+        while True:
+            try:
+                uniqueUrl = '%s?ts=%s' % (url, time.time()) if delay > 5 else url
+                logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, uniqueUrl))
+                result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, uniqueUrl, **kwargs)
+                break
+            except StampedFacebookPermissionsError as e:
+                account.linked.facebook.have_share_permissions = False
+                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+                return
+            except StampedFacebookTokenError as e:
+                account.linked.facebook.token = None
+                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
+                return
+            except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
+                logs.info('Unique action already taken on OG object')
+                return
+            except StampedThirdPartyError as e:
+                if delay > 60*10:
+                    raise e
+                time.sleep(delay)
+                delay *= 2
+                continue
 
     """
      #####

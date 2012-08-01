@@ -131,6 +131,7 @@ urlpatterns = patterns('',
     
     url(R'^settings/alerts/?$',                 'core.appsettings.alert_settings'),
     url(R'^settings/alerts/update$',            'core.appsettings.update_alert_settings'),
+    url(R'^/?mobile/settings/alerts/update$',   'core.appsettings.update_alert_settings'),
     
     
     # ------------------------------- BLOG -------------------------------------
@@ -161,6 +162,9 @@ urlpatterns = patterns('',
     url(r'^index$',                             'core.views.index'), 
     url(r'^index\.html?$',                      'core.views.index'), 
     url(r'^/?$',                                'core.views.index'), 
+    url(r'^1$',                                 'core.views.index'), 
+    url(r'^2$',                                 'core.views.index'), 
+    url(r'^3$',                                 'core.views.index'), 
     
     
     # ------------------------ APP STORE DOWNLOAD ------------------------------
