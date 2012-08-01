@@ -3410,7 +3410,7 @@ class HTTPActivity(Schema):
                 _addUserObjects()
                 self.header = "Connect to Facebook"
                 self.image = _getIconURL('news_welcome')
-                self.action = _buildFBLoginAction(self.objects.users[0])
+                self.action = _buildUserAction(self.objects.users[0])# _buildFBLoginAction(self.objects.users[0])
 
         else:
             raise Exception("Unrecognized verb: %s" % self.verb)
