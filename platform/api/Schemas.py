@@ -1680,6 +1680,41 @@ class ActivityReference(Schema):
         cls.addProperty('entity_id',                        basestring)
         cls.addPropertyList('indices',                      int)
 
+
+
+
+
+class RawActivityObjectId(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('comment_id',                       basestring)
+
+class RawActivity(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Metadata
+        cls.addProperty('activity_id',                      basestring)
+
+        # Structure
+        cls.addProperty('verb',                             basestring, required=True)
+        cls.addProperty('subject',                          basestring)
+        cls.addNestedProperty('objects',                    RawActivityObjectId)
+        cls.addProperty('source',                           basestring)
+        cls.addProperty('benefit',                          int)
+        cls.addNestedProperty('timestamp',                  BasicTimestamp, required=True)
+
+        # Text
+        cls.addProperty('header',                           basestring)
+        cls.addProperty('body',                             basestring)
+        cls.addProperty('footer',                           basestring)
+
+
+
+
+
 class Activity(Schema):
     @classmethod
     def setSchema(cls):
