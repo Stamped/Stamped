@@ -347,7 +347,7 @@ class Facebook(object):
             **params
         )
 
-    def getLoginUrl(self, authUserId):
+    def getLoginUrl(self, authUserId, callbackToken):
 #        callback_url = utils.getDomain() + ('account/linked/facebook/login_callback.json?secret=%s&stamped_oauth_token=%s' %
 #                                            (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
         callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
@@ -358,7 +358,7 @@ class Facebook(object):
                "&redirect_uri=%s" \
                "&scope=%s" \
                "&state=%s" % \
-               (APP_ID, callback_url, permissions, authUserId)
+               (APP_ID, callback_url, permissions, callbackToken)
 
         return path
 #        print path

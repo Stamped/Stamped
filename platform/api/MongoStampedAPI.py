@@ -42,7 +42,9 @@ from api.db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollec
 from api.db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
 from api.db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
-from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection 
+from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
+from api.db.mongodb.MongoFBCallbackTokenCollection  import MongoFBCallbackTokenCollection
+
 
 class MongoStampedAPI(StampedAPI):
     """
@@ -175,7 +177,12 @@ class MongoStampedAPI(StampedAPI):
     @lazyProperty
     def _asyncTasksDB(self):
         return MongoAsyncTasksCollection()
-    
+
+    @lazyProperty
+    def _fbCallbackTokenDB(self):
+        return MongoFBCallbackTokenCollection()
+
+
     @lazyProperty
     def _elasticsearch(self):
         try:

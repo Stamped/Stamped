@@ -207,7 +207,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 def createFacebookLoginResponse(authUserId):
     logs.info('called createFacebookLoginResponse with user_id: %s' % authUserId)
     facebook = stampedAPI._facebook
-    url = facebook.getLoginUrl(authUserId)
+    oid = stampedAPI._fbCallbackTokenDB.addUserId(authUserId)
+    url = facebook.getLoginUrl(authUserId, oid)
 
     logs.info('url: %s' % url)
 
@@ -239,7 +240,9 @@ def facebookLoginCallback(request, http_schema, **kwargs):
 
     logs.info('### http_schema: %s ' % http_schema)
 
-    authUserId = http_schema.state
+    oid = http_schema.state
+    authUserId = stampedAPI._fbCallbackTokenDB.getUserId(oid)
+    stampedAPI._fbCallbackTokenDB.removeUserId(oid)
 #    authUserId, client_id = checkOAuth(oauth_token)
     # Acquire the user's FB access token
     try:
