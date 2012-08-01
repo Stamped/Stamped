@@ -10,21 +10,16 @@ __all__ = [ 'BasicSourceContainer' ]
 import Globals
 from logs import log, report
 
-try:
-    import sys, traceback, string
-    from resolve.ASourceContainer       import ASourceContainer
-    from resolve.ASourceController      import ASourceController
-    from resolve.EntityGroups           import *
-    from datetime               import datetime
-    from datetime               import timedelta
-    from copy                   import deepcopy
-    from pprint                 import pformat, pprint
-    from api.Entity                 import buildEntity
-    import logs                 
-    from libs.ec2_utils         import is_prod_stack, is_ec2
-except Exception:
-    report()
-    raise
+from resolve.ASourceContainer       import ASourceContainer
+from resolve.ASourceController      import ASourceController
+from resolve.EntityGroups           import *
+from datetime               import datetime
+from datetime               import timedelta
+from copy                   import deepcopy
+from pprint                 import pformat, pprint
+from api.Entity                 import buildEntity
+import logs                 
+from libs.ec2_utils         import is_prod_stack, is_ec2
 
 class BasicSourceContainer(ASourceContainer,ASourceController):
     """
@@ -45,12 +40,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             self.__global_max_age = timedelta(2)
         else:
             self.__global_max_age = timedelta(minutes=0)
-        self.__failedValues = {}
-        self.failedIncrement = 10
-        self.passedDecrement = 2
-        self.failedCutoff    = 40
-        self.failedCooldown  = 1
-        self.failedPunishment = 20
 
         for group in allGroups:
             self.addGroup(group())
@@ -67,10 +56,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
           returns a bool value indicating whether the entity was enriched
         """
         self.setNow(timestamp)
-        if max_iterations == None:
-            max_iterations = self.__default_max_iterations
+        max_iterations = max_iterations or self.__default_max_iterations
         modified_total = False
-        failedSources = set()
         #logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
 
         # We will loop through all sources multiple times, because as data is enriched, previous unresolvable sources
@@ -79,13 +66,10 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         for i in range(max_iterations):
             modified = False
             for source in self.__sources:
-                if entity.kind != 'search' and entity.kind not in source.kinds:
+                if entity.kind not in source.kinds:
                     continue
 
-                if len(entity.types) > 0 and len(source.types) > 0 and not set(entity.types).intersection(source.types):
-                    continue
-                # check if a source failed, and if so, whether it has cooled down for reuse
-                if source in failedSources or self.__failedValues[source] >= self.failedCutoff:
+                if entity.types and source.types and not set(entity.types).intersection(source.types):
                     continue
 
                 groups = source.getGroups(entity)
@@ -124,26 +108,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                     groupObj.setTimestamp(entity, localTimestamp)
                                     groupObj.setSource(entity, source.sourceName)
                                     modified = True
-                    self.__failedValues[source] = max(self.__failedValues[source] - self.passedDecrement, 0)
                 except Exception as e:
-                    exc_type, exc_value, exc_traceback = sys.exc_info()
-                    f = traceback.format_exception(exc_type, exc_value, exc_traceback)
-                    f = string.joinfields(f, '')
-                    logs.warning("Source '%s' threw an exception when enriching '%s': %s" % (source, pformat(entity), e.message) , exc_info=1 )
-                    logs.warning(f)
-                    failedSources.add(source)
-                    self.__failedValues[source] += self.failedIncrement
-                    if self.__failedValues[source] < self.failedCutoff:
-                        logs.warning("'%s' is still below failed cutoff; it won't be used for this enrichment" % (source,))
-                    else:
-                        logs.warning("'%s' is beyond the failed cutoff; placing on cooldown list" % (source,))
-                    self.__failedValues[source] += self.failedPunishment
-            if not modified:
-                break
-            else:
-                modified_total = True
-        for source, value in self.__failedValues.items():
-            self.__failedValues[source] = max(value - self.failedCooldown, 0)
+                    report()
+            modified_total |= modified
         return modified_total
 
     def shouldEnrich(self, group, source, entity, timestamp=None):
@@ -220,11 +187,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
 
     def addSource(self, source):
         self.__sources.append(source)
-        self.__failedValues[source] = 0
 
     def clearSources(self):
         self.__sources = []
-        self.__failedValues = {}
 
     def getGroup(self, name):
         if name in self.__groups:
