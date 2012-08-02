@@ -491,6 +491,8 @@ class StampedAPI(AStampedAPI):
             'authUserId': account.user_id, 
             'facebookToken': fb_acct.token
         }
+        # Kick off an async task to query FB and determine if user granted us sharing permissions
+        self.callTask(self.updateFBPermissionsAsync, payload)
         self.callTask(self.alertFollowersFromFacebookAsync, payload)
 
         return account
@@ -935,6 +937,7 @@ class StampedAPI(AStampedAPI):
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
             self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
+            linkedAccount.third_party_id = userInfo['third_party_id']
             linkedAccount.linked_name = userInfo['name']
 
             if 'username' in userInfo:
@@ -1474,7 +1477,7 @@ class StampedAPI(AStampedAPI):
                         'authUserId': authUserId,
                         'followUserId': userId,
                     }
-                    self.callTask(self.postToOpenGraphAsync, payload)
+                self.callTask(self.postToOpenGraphAsync, payload)
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -3312,6 +3315,10 @@ class StampedAPI(AStampedAPI):
 
 
     def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
+        # Only post to open graph if we're on prod (or we're Mike)
+        if not self.__is_prod and authUserId != '4ecab825112dea0cfe000293':
+            return
+
         account = self.getAccount(authUserId)
 
         token = account.linked.facebook.token
@@ -3376,12 +3383,30 @@ class StampedAPI(AStampedAPI):
             except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
                 logs.info('Unique action already taken on OG object')
                 return
-            except StampedThirdPartyError as e:
+            except StampedFacebookOGImageSizeError as e:
+                logs.info('OG Image size error')
+                del(kwargs['imageUrl'])
                 if delay > 60*10:
                     raise e
                 time.sleep(delay)
                 delay *= 2
                 continue
+            except StampedThirdPartyError as e:
+                logs.info('### delay is at: %s' % delay)
+                if delay > 60*10:
+                    raise e
+                time.sleep(delay)
+                delay *= 2
+                continue
+
+
+
+        if stampId is not None and 'id' in result:
+            og_action_id = result['id']
+            self._stampDB.updateStampOGActionId(stampId, og_action_id)
+        if account.linked.facebook.have_share_permissions is None:
+            account.linked.facebook.have_share_permissions = True
+            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
 
     """
      #####
@@ -5134,6 +5159,16 @@ class StampedAPI(AStampedAPI):
                                      body           = body,
                                      benefit        = 100, 
                                      unique         = True)
+
+    def _addFBLoginActivity(self, recipientId):
+        objects = ActivityObjectIds()
+        objects.user_ids = [ recipientId ]
+        body = "Connect to Facebook"
+        self._activityDB.addActivity(verb           = 'notification_fb_login',
+                                     recipientIds   = [ recipientId ],
+                                     objects        = objects,
+                                     body           = body,
+                                     unique         = False)
 
     def _addActivity(self, verb,
                            userId,

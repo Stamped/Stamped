@@ -94,7 +94,7 @@ typedef enum {
                                     @"desc", @"description",
                                     //Other
                                     @"title", @"name",
-                                    @"subtitle", @"what is it",
+                                    @"subtitle", @"what_is_it?",
                                     //App
                                     @"title", @"app_name",
                                     @"author", @"creator",
@@ -117,12 +117,12 @@ typedef enum {
                                     @"title", @"book_title",
                                     @"author", @"author",
                                     //Place
-                                    @"subtitle",            @"type of place",
+                                    @"subtitle",        @"type_of_place",
                                     @"address_street",      @"address_line_1",
                                     @"address_street_ext",  @"address_line_2",
                                     @"address_locality",    @"city",
                                     @"address_region",      @"state",
-                                    @"address_postcode",    @"postal code",
+                                    @"address_postcode",    @"postal_code",
                                     @"address_country",     @"country",
 
                                     nil];
@@ -151,6 +151,9 @@ typedef enum {
             }
             else if ([items objectForKey:@"series_title"]) {
                 subcategory = @"tv";
+            }
+            else if ([items objectForKey:@"artist_title"]) {
+                subcategory = @"artist";
             }
             else {
                 subcategory = @"other";
@@ -187,7 +190,7 @@ typedef enum {
 //cls.addProperty('subcategory',                      basestring, required=True)
 - (NSArray*)descriptionDataSource {
     
-    return [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:@"decription", @"title", @"STTextViewTableCell", @"class", nil]];
+    return [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:@"description", @"title", @"STTextViewTableCell", @"class", nil]];
     
 }
 
@@ -218,7 +221,7 @@ typedef enum {
                 [dataSource addObject:[self descriptionDataSource]];
                 
                 self.segmentDataSource = [NSArray arrayWithObjects:@"Restaurant", @"Bar", @"Café", @"Other", nil];
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add location", @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add location", @"Add description", nil];
                 
             }
                 break;
@@ -243,7 +246,7 @@ typedef enum {
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"author", @"title", nil], nil]];
                 [dataSource addObject:[self descriptionDataSource]];
                 
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null], @"Add description", nil];
                 
             }
                 break;
@@ -267,7 +270,7 @@ typedef enum {
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"creator", @"title", nil], nil]];
                 [dataSource addObject:[self descriptionDataSource]];
                 
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add description", nil];
                 
             }
                 break;
@@ -278,7 +281,7 @@ typedef enum {
                                        [NSDictionary dictionaryWithObjectsAndKeys:@"what is it?", @"title", @"e.g. wine, electronics", @"placeholder", nil], nil]];
                 [dataSource addObject:[self descriptionDataSource]];
                 
-                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add decription", nil];
+                self.compressedSections = [NSMutableArray arrayWithObjects:[NSNull null],  @"Add description", nil];
                 
             }
                 break;

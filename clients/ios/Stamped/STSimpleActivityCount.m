@@ -7,38 +7,45 @@
 //
 
 #import "STSimpleActivityCount.h"
+#import "STSimpleAction.h"
 
 @implementation STSimpleActivityCount
 
 @synthesize numberUnread = numberUnread_;
+@synthesize action = _action;
 
 - (id)initWithCoder:(NSCoder *)decoder
 {
-  self = [super init];
-  if (self) {
-    numberUnread_ = [[decoder decodeObjectForKey:@"numberUnread"] retain];
-  }
-  return self;
+    self = [super init];
+    if (self) {
+        numberUnread_ = [[decoder decodeObjectForKey:@"numberUnread"] retain];
+        _action = [[decoder decodeObjectForKey:@"action"] retain];
+    }
+    return self;
 }
 
 - (void)dealloc
 {
-  [numberUnread_ release];
-  [super dealloc];
+    [_action release];
+    [numberUnread_ release];
+    [super dealloc];
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-  [encoder encodeObject:self.numberUnread forKey:@"numberUnread"];
+    [encoder encodeObject:self.numberUnread forKey:@"numberUnread"];
+    [encoder encodeObject:self.action forKey:@"action"];
 }
 
 + (RKObjectMapping*)mapping {
-  RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleActivityCount class]];
-  
-  [mapping mapKeyPathsToAttributes: 
-   @"num_unread", @"numberUnread",
-   nil];
-  
-  return mapping;
+    RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleActivityCount class]];
+    
+    [mapping mapKeyPathsToAttributes: 
+     @"num_unread", @"numberUnread",
+     nil];
+    
+    [mapping mapRelationship:@"action" withMapping:[STSimpleAction mapping]];
+    
+    return mapping;
 }
 
 @end

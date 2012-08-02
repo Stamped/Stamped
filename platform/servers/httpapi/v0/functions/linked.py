@@ -33,6 +33,11 @@ exceptions = [
 @require_http_methods(["GET"])
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
+
+    # Temporary hack to only show Facebook if an extended token exists
+    if linkedAccounts is not None and linkedAccounts.facebook is not None and \
+        (linkedAccounts.facebook.token_expiration is None and linkedAccounts.facebook.extended_timestamp is None):
+        del(linkedAccounts.facebook)
     if linkedAccounts is None:
         result = {}
     else:
@@ -96,9 +101,6 @@ def _buildShareSettingsFromLinkedAccount(linked):
             buildToggle(settingGroup)
         ]
         return group
-
-    if linked.token is None:
-        return []
 
     result.append(buildGroup('stamps', 'Publish My Stamps'))
     result.append(buildGroup('likes', 'Publish Stamps That I Like'))
@@ -199,18 +201,53 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
     return HttpResponseRedirect("stamped://netflix/link/success")
 
 
+def createFacebookLoginResponse(authUserId):
+    logs.info('called createFacebookLoginResponse with user_id: %s' % authUserId)
+    facebook = stampedAPI._facebook
+    oid = stampedAPI._fbCallbackTokenDB.addUserId(authUserId)
+    url = facebook.getLoginUrl(authUserId, oid)
 
-@handleHTTPCallbackRequest(http_schema=HTTPFacebookAuthResponse,
+    logs.info('url: %s' % url)
+
+    response                = HTTPActionResponse()
+    source                  = HTTPActionSource()
+    source.source           = 'facebook'
+    source.link             = url
+    response.setAction('facebook_login', 'Login to Facebook', [source])
+
+    print ('### Facebook login response: %s' % response.dataExport())
+    return transformOutput(response.dataExport())
+
+
+
+@handleHTTPRequest(exceptions=exceptions)
+@require_http_methods(["POST"])
+def facebookLogin(request, authUserId, **kwargs):
+    result =  createFacebookLoginResponse(authUserId)
+    logs.info('result: %s' % result)
+    return result
+
+
+@handleHTTPCallbackRequest(requires_auth=False,
+                           http_schema=HTTPFacebookAuthResponse,
                            exceptions=exceptions)
 @require_http_methods(["GET"])
-def facebookLoginCallback(request, authUserId, http_schema, **kwargs):
+def facebookLoginCallback(request, http_schema, **kwargs):
     facebook = globalFacebook()
 
     logs.info('### http_schema: %s ' % http_schema)
 
+    oid = http_schema.state
+    authUserId = stampedAPI._fbCallbackTokenDB.getUserId(oid)
+    stampedAPI._fbCallbackTokenDB.removeUserId(oid)
+#    authUserId, client_id = checkOAuth(oauth_token)
     # Acquire the user's FB access token
     try:
-        access_token = facebook.getUserAccessToken(http_schema.oauth_token, http_schema.secret)
+        access_token, expires = facebook.getUserAccessToken(http_schema.code)
+        logs.info('### FIRST: token: %s  expires: %s' % (access_token, expires))
+
+        access_token, expires = facebook.extendAccessToken(access_token)
+        logs.info('### SECOND: token: %s  expires: %s' % (access_token, expires))
     except Exception as e:
         return HttpResponseRedirect("stamped://facebook/link/fail")
 
@@ -233,7 +270,9 @@ def facebookLoginCallback(request, authUserId, http_schema, **kwargs):
         linked.third_party_id           = userInfo['third_party_id']
         stampedAPI.addLinkedAccount(authUserId, linked)
 
-    return HttpResponseRedirect("stamped://facebook/link/success")
+    #return HttpResponseRedirect("stamped://facebook/link/success")
+    url = "fb297022226980395://authorize/#access_token=%s&expires_in=%s&code=%s" % (access_token, expires, http_schema.code)
+    return HttpResponseRedirect(url)
 
 
 @handleHTTPRequest(http_schema=HTTPNetflixId,

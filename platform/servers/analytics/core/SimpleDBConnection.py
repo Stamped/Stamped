@@ -60,15 +60,18 @@ class SimpleDBConnection(object):
         transition = 'where'
 
         for key,value in query_dict.items():
-            query = '%s %s %s="%s"' % (query, transition, key, value)
+            if "!=" in value:
+                query = '%s %s %s != "%s"' %  (query, transition, key, value[2:])
+            else:
+                query = '%s %s %s="%s"' % (query, transition, key, value)
             transition = 'and'
         
         if bgn is not None: 
-            query = '%s %s bgn > %s' & (query, transition, t0.isoformat())
+            query = '%s %s bgn > "%s"' % (query, transition, bgn.isoformat())
             transition = 'and'
         
         if end is not None:
-            query = '%s %s bgn > %s' & (query, transition, t0.isoformat())
+            query = '%s %s bgn > "%s"' % (query, transition, bgn.isoformat())
             transition = 'and'
             
         init_results = domain.select(query)

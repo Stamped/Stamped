@@ -94,7 +94,7 @@ static const CGFloat _batchSize = 100;
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFinished];
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFailed];
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookLoggedOut];
-    if ([STFacebook sharedInstance].facebook.isSessionValid) {        
+    if ([STFacebook sharedInstance].facebook.isSessionValid) {      
         [self loadMore];
     }
     else {
@@ -117,7 +117,7 @@ static const CGFloat _batchSize = 100;
         self.waitingForFB = NO;
         [self loadMore];
         if (self.shouldShowFacebookPopUp) {
-            self.shouldShowFacebookPopUp = YES;
+            self.shouldShowFacebookPopUp = NO;
             [[STFacebook sharedInstance] showFacebookAlert];
         }
     }
