@@ -937,6 +937,7 @@ class StampedAPI(AStampedAPI):
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
             self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
+            linkedAccount.third_party_id = userInfo['third_party_id']
             linkedAccount.linked_name = userInfo['name']
 
             if 'username' in userInfo:
