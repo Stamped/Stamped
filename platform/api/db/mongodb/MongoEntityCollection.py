@@ -74,6 +74,10 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
     def entity_stats(self):
         return MongoEntityStatsCollection()
 
+    @lazyProperty
+    def whitelisted_tastemaker_entities(self):
+        return MongoWhitelistedTastemakerEntityIdsCollection()
+
     def _convertFromMongo(self, document, mini=False):
         if document is None:
             return None
@@ -523,6 +527,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         if name == 'menu':
             self.__menu_db.updateMenu(value)
 
+    def getWhitelistedTastemakerEntityIds(self, section):
+        return self.whitelisted_tastemaker_entities.getEntityIds(section)
+
 
 
 class MongoEntityStatsCollection(AMongoCollection):
@@ -789,5 +796,17 @@ class MongoEntitySeedCollection(AMongoCollection, AEntityDB):
     
     def addEntity(self, entity):
         return self._addObject(entity)
+
+# For use with tastemaker guide
+class MongoWhitelistedTastemakerEntityIdsCollection(AMongoCollection):
+    
+    def __init__(self):
+        AMongoCollection.__init__(self, collection='tastemaker_guide_whitelist', overflow=True)
+
+    ### PUBLIC
+    
+    def getEntityIds(self, section):
+        documents = self._getRelationships(section)
+        return documents
 
 
