@@ -1043,6 +1043,7 @@ class StampedAPI(AStampedAPI):
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
 
         facebookToken, expires = self._facebook.extendAccessToken(facebookToken)
+        expires = datetime.fromtimestamp(time.time() + expires)
         linked.token = facebookToken
         linked.token_expiration = expires
         linked.extended_timestamp = datetime.utcnow()

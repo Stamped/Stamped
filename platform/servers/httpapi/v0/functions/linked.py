@@ -258,8 +258,11 @@ def facebookLoginCallback(request, http_schema, **kwargs):
 
     # If the user already has a FB account, then update it with the new access_token
     if acct.linked is not None and acct.linked.facebook is not None:
+        expires_dt = datetime.fromtimestamp(time.time() + expires)
         linked = acct.linked.facebook
         linked.token = access_token
+        linked.token_expiration = expires_dt
+        linked.extended_timestamp = datetime.utcnow()
         stampedAPI._accountDB.updateLinkedAccount(authUserId, linked)
     # Otherwise, we'll get the User's info with the access token and create a new linked account
     else:

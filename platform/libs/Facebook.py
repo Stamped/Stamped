@@ -33,7 +33,7 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'BAAEOIZBBUXisBANU2ZC0ZCIagEIZCZBMYb8GORccZC6dZCjFPM96lihWsGTm1q37gBgKTtGpaKbXjGFDPlXW23fQl9xXhIant5PqtccDCEHg3OzMsNPr8S382TxYmLUv28ZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBALOGJoY9PqoHlO2icemRstxQfqZBx45UEAHym2JwuYBGB6WYZCHjkheHKFKZBiddTioiK7X129ijZAdIZAWsZD'
 
 DEFAULT_TIMEOUT = 15
 
@@ -236,8 +236,8 @@ class Facebook(object):
         expires = None
         if r is not None:
             expires = r.group(1)
-            expires = datetime.fromtimestamp(time.time() + int(expires))
-        return token, expires
+            #expires = datetime.fromtimestamp(time.time() + int(expires))
+        return token, int(expires)
 
 
     def createTestUser(self, name, access_token, permissions=None, installed=True, locale='en_US', app_id=APP_ID):
