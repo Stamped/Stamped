@@ -165,7 +165,7 @@ class AlertEmail(Email):
                 entity = stampedAPI._entityDB.getEntity(entityId)
                 params['title'] = entity.title
 
-        if 'bio' not in params:
+        if 'bio' not in params or params['bio'] is None:
             params['bio'] = ''
         else:
             replacements = [
