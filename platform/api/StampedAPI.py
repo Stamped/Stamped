@@ -4097,6 +4097,7 @@ class StampedAPI(AStampedAPI):
         if guideRequest.section in ['book', 'film', 'music']:
             entityIds = self._entityDB.getWhitelistedTastemakerEntityIds(guideRequest.section)
             entityStats = self._entityStatsDB.getStatsForEntities(entityIds)
+            entityStats = filter(lambda x: True in [x.isType(t) for t in types], entityStats)
         else:
             entityStats = self._entityStatsDB.getPopularEntityStats(types=types, viewport=viewport, limit=limit)
 
