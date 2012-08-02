@@ -17,8 +17,6 @@ from django.http                    import HttpResponseRedirect
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
 
-# TODO: stricter input schema validation
-
 TRAVIS = False
 import travis_test
 
