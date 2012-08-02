@@ -47,7 +47,8 @@ static id __instance;
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [STEvents addObserver:self selector:@selector(facebookBack:) event:EventTypeFacebookCameBack];
         if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
-            facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+//            facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
+            facebook.accessToken = @"BAAEOIZBBUXisBAJauKhJRDowYfZB70IfSupWChCz9iYNq6yiAn8YK2eN3fQJwDltPZCAW7L5BiLcEp7wvwhx7oeB3bZAbfUhgAdLaGgBPBremsfrTgajPOEk9gHIbnWilwwPVHFW9wZDZD";
             facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
         }
     }

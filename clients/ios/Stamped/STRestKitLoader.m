@@ -16,6 +16,9 @@
 
 //#if defined (DEV_BUILD)
 static NSString* const _baseURL = @"https://dev.stamped.com/v1";
+
+//static NSString* const _baseURL = @"https://stress-api-1431215555.us-east-1.elb.amazonaws.com/v1";
+
 //#else
 //static NSString* const _baseURL = @"https://api1.stamped.com/v1";
 //#endif
@@ -975,7 +978,6 @@ static STRestKitLoader* _sharedInstance;
     self.currentUser = currentUser;
     [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUserUpdatedNotification object:currentUser];
 }
-
 
 @end
 

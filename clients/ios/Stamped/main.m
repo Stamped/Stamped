@@ -13,7 +13,6 @@
 
 int main(int argc, char* argv[]) {
     @autoreleasepool {
-        
         if ([[STConfiguration sharedInstance] internalVersion] > 0) {
             return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
         }

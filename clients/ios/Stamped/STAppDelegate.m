@@ -292,7 +292,7 @@
     [STStampedAPI sharedInstance].currentUserLocation = nil;
     [[STUnreadActivity sharedInstance] update];
     if ([STFacebook sharedInstance].connected) {
-        [[STFacebook sharedInstance].facebook extendAccessTokenIfNeeded];
+        [[STFacebook sharedInstance].facebook extendAccessToken];
     }
 }
 
