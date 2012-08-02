@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, logs, copy, pymongo
+import time
 
 from datetime                                           import datetime, timedelta
 from utils                                              import lazyProperty
@@ -17,6 +18,7 @@ from api.db.mongodb.AMongoCollection                    import AMongoCollection
 from api.db.mongodb.MongoAlertQueueCollection           import MongoAlertQueueCollection
 from api.db.mongodb.MongoActivityItemCollection         import MongoActivityItemCollection
 from api.db.mongodb.MongoActivityLinkCollection         import MongoActivityLinkCollection
+from api.db.mongodb.MongoFriendsCollection              import MongoFriendsCollection
 
 
 class MongoActivityCollection(AActivityDB):
@@ -303,6 +305,10 @@ class MongoActivityCollection(AActivityDB):
     def raw_activity_links_collection(self):
         return MongoRawActivityLinkCollection()
 
+    @lazyProperty
+    def friends_collection(self):
+        return MongoFriendsCollection()
+
     def addRawActivity(self, verb, **kwargs):
         subject         = kwargs.get('subject', None)
         objects         = kwargs.get('objects', {})
@@ -362,6 +368,7 @@ class MongoActivityCollection(AActivityDB):
         for recipientId in recipientIds:
             self.raw_activity_links_collection.addActivityLink(activityId, recipientId, created=created)
 
+            self.build_activity(recipientId)
         ### TODO: Create / save alert
 
 
@@ -395,6 +402,118 @@ class MongoActivityCollection(AActivityDB):
     def removeUserRawActivity(self, userId):
         activityIds = self.raw_activity_links_collection.getActivityIds(subject=userId)
         self._removeRawActivityIds(activityIds)
+
+
+
+
+
+    def build_activity(self, user_id):
+        """
+        Generate cached and grouped activity items for personal and universal news.
+
+        Args
+            user_id: the user id keyed to the activity
+
+        Returns: N/A
+
+        """
+        activity_ids = self.raw_activity_links_collection.get_activity_ids_for_user(user_id)
+        friend_ids = self.friends_collection.getFriends(user_id, limit=None)
+
+        personal_items = self.raw_activity_items_collection.get_activity_items(activity_ids)
+
+        universal_verbs = ['todo', 'follow', 'like', 'comment']
+        universal_items = self.raw_activity_items_collection.get_activity_for_users(friend_ids, verbs=universal_verbs)
+
+        def build_activity_keys(items):
+            keys = {}
+            keys_order = []
+            for item in items:
+                # Generate unique key
+                key = '%s::%s' % (item.verb, item.activity_id)
+
+                # Generate grouped key
+                if item.verb == 'todo':
+                    key = 'todo::%s::%s' % (item.objects.entity_id, item.timestamp.created.isoformat()[:10])
+                    
+                elif item.verb == 'follow':
+                    key = 'follow::%s::%s' % (item.objects.user_id, item.timestamp.created.isoformat()[:10])
+
+                elif item.verb == 'like' or item.verb == 'credit' or item.verb.startswith('action_'):
+                    key = '%s::%s::%s' % (item.verb, item.objects.stamp_id, item.timestamp.created.isoformat()[:10])
+
+                elif item.verb in set(['comment', 'reply', 'mention']):
+                    if item.comment_id is not None:
+                        key = 'comment::%s' % item.objects.comment_id
+                    else:
+                        key = 'mention::%s' % item.objects.stamp_id
+
+                # Apply keys
+                if key in keys:
+                    # Existing item
+                    if item.subject is not None and item.subject not in keys[key].subjects:
+                        keys[key].subjects = list(keys[key].subjects) + [item.subject]
+                        if item.benefit is not None:
+                            if keys[key].benefit is None:
+                                keys[key].benefit = 0
+                            keys[key].benefit += 1
+                        if item.timestamp.created > keys[key].timestamp.created:
+                            keys[key].timestamp.created = item.timestamp.created
+                    else:
+                        logs.warning("Missing subjects! %s" % item)
+                else:
+                    # New item
+                    # Hacky: build item for now
+                    activity = Activity()
+                    activity.benefit = item.benefit
+                    activity.timestamp = item.timestamp
+                    if item.subject is not None:
+                        activity.subjects = [item.subject]
+                    activity.verb = item.verb
+                    objects = ActivityObjectIds()
+                    if item.objects.user_id is not None:
+                        objects.user_ids = [item.objects.user_id]
+                    if item.objects.stamp_id is not None:
+                        objects.stamp_ids = [item.objects.stamp_id]
+                    if item.objects.entity_id is not None:
+                        objects.entity_ids = [item.objects.entity_id]
+                    if item.objects.comment_id is not None:
+                        objects.comment_ids = [item.objects.comment_id]
+                    activity.objects = objects 
+                    activity.source = item.source
+                    if item.header is not None:
+                        activity.header = item.header
+                    if item.body is not None:
+                        activity.body = item.body
+                    if item.footer is not None:
+                        activity.footer = item.footer
+
+                    keys[key] = activity 
+                    keys_order.append(key)
+
+            return keys, keys_order
+
+        personal_keys, personal_keys_order = build_activity_keys(personal_items)
+        universal_keys, universal_keys_order = build_activity_keys(universal_items)
+
+        mark = str(int(time.time() * 1000000))
+
+        i = 9999
+        personal_result = []
+        for key in personal_keys_order:
+            item = personal_keys[key]
+            sort = ("%s|%s" % (mark, str(i).zfill(4))).zfill(22)
+            personal_result.append((item, sort))
+            i -= 1
+
+        i = 9999
+        universal_result = []
+        for key in universal_keys_order:
+            if key not in personal_keys:
+                item = universal_keys[key]
+                sort = ("%s|%s" % (mark, str(i).zfill(4))).zfill(22)
+                universal_result.append((item, sort))
+                i -= 1
 
 
 
@@ -441,8 +560,8 @@ class MongoRawActivityItemCollection(AMongoCollection):
         document = self._getMongoDocumentFromId(documentId)
         return self._convertFromMongo(document)
 
-    def getActivityItems(self, activityIds, **kwargs):
-        ids = map(self._getObjectIdFromString, activityIds)
+    def get_activity_items(self, activity_ids, **kwargs):
+        ids = map(self._getObjectIdFromString, activity_ids)
 
         documents = self._getMongoDocumentsFromIds(ids, **kwargs)
 
@@ -482,11 +601,11 @@ class MongoRawActivityItemCollection(AMongoCollection):
             result.append(self._getStringFromObjectId(document['_id']))
         return result
 
-    def getActivityForUsers(self, userIds, **kwargs):
-        if len(userIds) == 0:
+    def get_activity_for_users(self, user_ids, **kwargs):
+        if len(user_ids) == 0:
             return []
         
-        query       = { 'subjects' : { '$in' : userIds } }
+        query       = { 'subjects' : { '$in' : user_ids } }
 
         verbs       = kwargs.pop('verbs', [])
         since       = kwargs.pop('since', None)
@@ -560,12 +679,12 @@ class MongoRawActivityLinkCollection(AMongoCollection):
             logs.warning("Cannot remove document: %s" % e)
             raise Exception
 
-    def getActivityIdsForUser(self, userId, **kwargs):
+    def get_activity_ids_for_user(self, user_id, **kwargs):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
         limit       = kwargs.pop('limit', 0)
 
-        query = { 'user_id' : userId }
+        query = { 'user_id' : user_id }
         if since is not None and before is not None:
             query['timestamp.created'] = {'$gte': since, '$lte': before}
         elif since is not None:
