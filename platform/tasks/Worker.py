@@ -135,15 +135,22 @@ def pushToUnhandledQueue(task_id, key, data, **kwargs):
     """
     TODO put things on unhandled queue
     """
-    pass
+    from tasks.Tasks import call
+    call('error', key, data)
 
 def attributeHandler(target, fallbackHandler=pushToUnhandledQueue):
     def wrapper(task_id, key, data, **kwargs):
-        if hasattr(target, key):
-            v = getattr(target, key)
-            v(**data)
-        elif fallbackHandler is not None:
+        comps = key.split('::')
+        if len(comps) == 2:
+            k = comps[1]
+            if hasattr(target, k):
+                v = getattr(target, k)
+                v(**data)
+                return
+        if fallbackHandler is not None:
             fallbackHandler(task_id, key, data, **kwargs)
+        else:
+            logs.warning('Dropped task! %s %s', task_id, key)
     return wrapper
 
 ###########################################
@@ -157,6 +164,13 @@ def enrichHandler():
     from MongoStampedAPI import globalMongoStampedAPI
     api = globalMongoStampedAPI()
     return loggingHandler(attributeHandler(api))
+
+def printer(task_id, key, data, **kwargs):
+    from pprint import pformat
+    logs.warning('Error task: %s, %s\n%s' % (task_id, key, pformat(data)))
+
+def errorHandler():
+    return loggingHandler(printer)
 
 ###########################################
 
@@ -172,6 +186,8 @@ if __name__ == '__main__':
         handler = enrichHandler()
     elif queue == 'api':
         handler = apiHandler()
+    elif queue == 'error':
+        handler = errorHandler()
 
     if handler is not None:
         enterWorkLoop(queue, handler)
