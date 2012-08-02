@@ -4086,12 +4086,16 @@ class StampedAPI(AStampedAPI):
     def getTastemakerGuide(self, guideRequest):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
-        limit = 1000
+        limit = 500
         viewport = guideRequest.viewport
         if viewport is not None:
             since = None
             limit = 250
-        entityStats = self._entityStatsDB.getPopularEntityStats(types=types, viewport=viewport, limit=limit)
+        if guideRequest.section in ['book', 'film', 'music']:
+            entityIds = self._entityDB.getWhitelistedTastemakerEntityIds(guideRequest.section)
+            entityStats = self._entityStatsDB.getStatsForEntities(entityIds)
+        else:
+            entityStats = self._entityStatsDB.getPopularEntityStats(types=types, viewport=viewport, limit=limit)
 
         # Rank entities
         limit = 20
