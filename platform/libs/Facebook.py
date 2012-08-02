@@ -132,10 +132,13 @@ class Facebook(object):
     def getUserPermissions(self, access_token, user_id='me'):
         path = '%s/permissions' % user_id
         result = self._get(access_token, path)
-        if 'data' in result and len(result['data'] > 0):
-            return result['data'][0]
-        else:
-            return []
+        try:
+            if 'data' in result and len(result['data']) > 0:
+                return result['data'][0]
+        except Exception as e:
+            logs.warning("Unable to read result: %s (%s)" % (result, e))
+
+        return []
 
     def getFriendIds(self, access_token):
         path = 'me/friends'
