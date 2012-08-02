@@ -29,7 +29,11 @@ from libs.ec2_utils                         import get_stack
 from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
 
-stack_name = 'bowser'
+stack_name = get_stack()
+
+if stack_name is None:
+    print "No stack name found.. Defaulting to bowser"
+    stack_name = 'bowser'
 
 api = MongoStampedAPI()
 stamp_collection = api._stampDB._collection
