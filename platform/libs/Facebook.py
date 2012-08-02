@@ -132,7 +132,7 @@ class Facebook(object):
     def getUserPermissions(self, access_token, user_id='me'):
         path = '%s/permissions' % user_id
         result = self._get(access_token, path)
-        if 'data' in result and len(result['data'] > 0):
+        if 'data' in result and len(result['data']) > 0:
             return result['data'][0]
         else:
             return []
