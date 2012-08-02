@@ -14,6 +14,8 @@ from errors import *
 from libs.Request import service_request
 from APIKeys import get_api_key
 from datetime import datetime
+import httplib2
+from BeautifulSoup import BeautifulSoup
 
 
 
@@ -22,7 +24,7 @@ APP_SECRET      = get_api_key('facebook', 'app_secret')
 APP_NAMESPACE   = get_api_key('facebook', 'app_namespace')
 
 USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBADc0xvUq2cVvQs3vDvGQ57g0oTjahwKaEjCZAFI3Uot8suKSvqLI9LyvDVL5Qg9CmuqJOHSMTT1cgDXk5uj7ODE8CsAZDZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAO4BgIokl8sBOlrBCpgyeo8NAp4NZCvQxuAEUYJzc2U7vIZC7hBcUhJmLES0u32kJFzNXffl3fK3AOHMpdlKe3ZBnlrMlpqI3GrIRcc'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
 #ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
@@ -31,7 +33,9 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBALVOGXFMWXYj7OIFn9g4BO7Raz6VHZCn57dL1uuftzCzLcjKu7Kl76MC0yBtQnq7cf2Q3TSF4HDybKsIZD'
+ACCESS_TOKEN = 'BAAEOIZBBUXisBANU2ZC0ZCIagEIZCZBMYb8GORccZC6dZCjFPM96lihWsGTm1q37gBgKTtGpaKbXjGFDPlXW23fQl9xXhIant5PqtccDCEHg3OzMsNPr8S382TxYmLUv28ZD'
+
+DEFAULT_TIMEOUT = 15
 
 class Facebook(object):
     def __init__(self, app_id=APP_ID, app_secret=APP_SECRET, app_namespace=APP_NAMESPACE):
@@ -59,10 +63,10 @@ class Facebook(object):
         url     = "%s%s" % (baseurl, path)
 
         if method == 'get':
-            response, content = service_request('facebook', method, url, query_params=params, priority=priority)
+            response, content = service_request('facebook', method, url, query_params=params, priority=priority, timeout=DEFAULT_TIMEOUT)
         else:
             print('body: %s  url: %s' % (params, url))
-            response, content = service_request('facebook', method, url, body=params, priority=priority)
+            response, content = service_request('facebook', method, url, body=params, priority=priority, timeout=DEFAULT_TIMEOUT)
         if parse_json:
             result = json.loads(content)
         else:
@@ -84,6 +88,8 @@ class Facebook(object):
                         raise StampedFacebookPermissionsError(msg)
                     elif code == 3501:
                         raise StampedFacebookUniqueActionAlreadyTakenOnObject('OG Action already exists for object')
+                    elif code == 1611118:
+                        raise StampedFacebookOGImageSizeError(msg)
                 if 'type' in result['error'] and result['error']['type'] == 'OAuthException':
                     # OAuth exception
                     pass
@@ -126,7 +132,10 @@ class Facebook(object):
     def getUserPermissions(self, access_token, user_id='me'):
         path = '%s/permissions' % user_id
         result = self._get(access_token, path)
-        return result['data'][0]
+        if 'data' in result and len(result['data'] > 0):
+            return result['data'][0]
+        else:
+            return []
 
     def getFriendIds(self, access_token):
         path = 'me/friends'
@@ -205,7 +214,13 @@ class Facebook(object):
             redirect_uri    = redirect_uri,
         )
         r = re.search('access_token=([^&]*)', result)
-        return r.group(1)
+        token = r.group(1)
+        r = re.search(r'expires=([^&]*)', result)
+        expires = None
+        if r is not None:
+            expires = r.group(1)
+            #expires = datetime.fromtimestamp(time.time() + int(expires))
+        return token, expires
 
     def extendAccessToken(self, access_token, client_id=APP_ID, client_secret=APP_SECRET):
         path = "oauth/access_token"
@@ -218,7 +233,6 @@ class Facebook(object):
             grant_type      = 'fb_exchange_token',
             fb_exchange_token = access_token,
         )
-        print('### result: %s' % result)
         r = re.search(r'access_token=([^&]*)', result)
         token = r.group(1)
         r = re.search(r'expires=([^&]*)', result)
@@ -288,6 +302,12 @@ class Facebook(object):
 
     def postToOpenGraph(self, fb_user_id, action, access_token, object_type, object_url, message=None, imageUrl=None):
         logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
+
+        http = httplib2.Http()
+        response, content = http.request(object_url, 'GET')
+        soup = BeautifulSoup(content)
+        logs.info('### meta tags:\n%s' % soup.findAll('meta', property=True))
+
         args = {}
         if action == 'like':
             path = "%s/og.likes" % fb_user_id
@@ -339,7 +359,7 @@ class Facebook(object):
             **params
         )
 
-    def getLoginUrl(self, authUserId):
+    def getLoginUrl(self, authUserId, callbackToken):
 #        callback_url = utils.getDomain() + ('account/linked/facebook/login_callback.json?secret=%s&stamped_oauth_token=%s' %
 #                                            (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
         callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
@@ -350,13 +370,14 @@ class Facebook(object):
                "&redirect_uri=%s" \
                "&scope=%s" \
                "&state=%s" % \
-               (APP_ID, callback_url, permissions, authUserId)
+               (APP_ID, callback_url, permissions, callbackToken)
 
-        print path
-        response, content = service_request('facebook', 'GET', path)
-        print(response)
-        print(content)
-        return content
+        return path
+#        print path
+#        response, content = service_request('facebook', 'GET', path)
+#        print(response)
+#        print(content)
+#        return content
 
 
 __globalFacebook = None
@@ -370,7 +391,7 @@ def globalFacebook():
     return __globalFacebook
 
 
-CODE = 'AQDoi-mCEKtNOJIDyAfNTn4TbH5pxlgqh10QaXcM187cHVZOMsMIbPQeE8-lXT-rptA3k5bQuQEvMscv5BFy32Oo_yWzIrIUflVYmvYBSrhit5labSqr7avEJqtlDi3_qbP6G-Y7UwE3icdhulhiwJYW9hbhNr3bwdxyUCH0koWDHgCIQtFylSywcgH4wN9TWwA'
+CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
@@ -378,7 +399,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
     if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl(AUTH_USER_ID))
-    if 'extendAccesstoken' in methods:      pprint(facebook.extendAccessToken(access_token))
+    if 'extendAccessToken' in methods:      pprint(facebook.extendAccessToken(access_token))
     if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
     if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))
     if 'getAppAccessToken' in methods:      pprint(facebook.getAppAccessToken())

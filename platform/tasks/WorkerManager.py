@@ -35,7 +35,7 @@ class MetaWorker(object):
 
     def work(self):
         self.__processes = []
-        sleep_time = 1
+        sleep_time = 5 * 60
         last_sleep = time.time()
         while not self.__shutdown:
             if len(self.__processes) == self.__count:
@@ -52,9 +52,7 @@ class MetaWorker(object):
                             pass
                         else:
                             logs.warning('Process exited with code %s'  % returnstatus)
-                elapsed = time.time() - last_sleep
-                sleep_duration = sleep_time - elapsed
-                sleep_until = time.time()
+                sleep_until = last_sleep + sleep_time
                 while True:
                     sleep_remaining = sleep_until - time.time()
                     if sleep_remaining > 0:
@@ -63,7 +61,7 @@ class MetaWorker(object):
                         break
                 last_sleep = time.time()
             else:
-                print 'adding processs %i' % len(self.__processes)
+                print 'adding process %i' % len(self.__processes)
                 self.addProcess()
         for p in self.__processes:
             print 'killing process %i' % len(self.__processes)
