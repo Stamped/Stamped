@@ -1476,7 +1476,7 @@ class StampedAPI(AStampedAPI):
                         'authUserId': authUserId,
                         'followUserId': userId,
                     }
-                    self.callTask(self.postToOpenGraphAsync, payload)
+                self.callTask(self.postToOpenGraphAsync, payload)
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):

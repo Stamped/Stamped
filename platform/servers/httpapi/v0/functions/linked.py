@@ -102,9 +102,6 @@ def _buildShareSettingsFromLinkedAccount(linked):
         ]
         return group
 
-    if linked.token is None:
-        return []
-
     result.append(buildGroup('stamps', 'Publish My Stamps'))
     result.append(buildGroup('likes', 'Publish Stamps That I Like'))
     result.append(buildGroup('todos', "Publish My Todo's"))
