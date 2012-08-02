@@ -310,7 +310,8 @@ def trending(request):
     kinds=None
     quant = 25
     scope = 'today'
-    stat = 'stamped'       
+    stat = 'stamped'
+    topUsers = []       
     if request.method == 'POST': 
         form = trendForm(request.POST) # A form bound to the POST data
         if form.is_valid():
@@ -343,9 +344,8 @@ def trending(request):
         results = getTopStamped(kinds,today().isoformat(),stamp_collection)
         results = results[0:quant]
         
-    mongo = mongoQuery(api)
-    
-    topUsers = mongo.topUsers(limit=50)
+        mongo = mongoQuery(api)
+        topUsers = mongo.topUsers(limit=50)
     
     t = loader.get_template('../html/trending.html')
     c = Context({

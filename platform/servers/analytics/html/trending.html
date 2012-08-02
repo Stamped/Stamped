@@ -14,12 +14,14 @@
 				</form>
 			</div>
 			
-			<div class="top_users">
-				<h2>Top 50 Users on Stamped </h2>
-					{% for user, followers in topUsers %}
-						{{forloop.counter}}) {{user}}: {{followers}} Followers <br>
-					{% endfor %}
-			</div>
+			{% if topUsers|length > 0 %}
+				<div class="top_users">
+					<h2>Top 50 Users on Stamped </h2>
+						{% for user, followers in topUsers %}
+							{{forloop.counter}}) {{user}}: {{followers}} Followers <br>
+						{% endfor %}
+				</div>
+			{% endif %}
 			
 			<div class="trending_content">
 				<h2>Top {{quantity}} {% if stat == 'stamped' %}Stamped{% else %}Todo'd {%endif%} 

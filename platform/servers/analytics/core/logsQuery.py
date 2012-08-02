@@ -16,7 +16,7 @@ from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool
 from analytics_utils                            import today
-from statWriter                                 import statWriter
+
 
 
 def percentile(numList,p):
@@ -42,9 +42,6 @@ class logsQuery(object):
         self.statCount = 0
         self.statCountByNode = {}
         self.statTimeByNode = {}
-        
-        self.writer = statWriter('latency')
-        self.cache = self.conn.get_domain('latency')
 
         if domain_name is None:
             domain_name = 'bowser'
@@ -148,8 +145,6 @@ class logsQuery(object):
         self.statDict = {}
         self.errDict = {}
         
-        
-        
         pool = Pool(16)
         
         for i in range (0,16):
@@ -157,72 +152,9 @@ class logsQuery(object):
             pool.spawn(self.latencyQuery,self.domains[suffix],t0,t1,uri,blacklist,whitelist)
             
         pool.join()
-        
-        for uri in self.statDict:
-            sum = 0
-            max = 0
-            for num in self.statDict[uri]:
-                sum += num
-                if num > max:
-                    max = num
-            mean = float(sum) / len(self.statDict[uri])
-            sorte = sorted(self.statDict[uri])
-            median = percentile(sorte,.5)
-            ninetieth = percentile(sorte,.9)
-            n = len(self.statDict[uri])
-            errors4 = 0
-            errors5 = 0
-            if uri+'-4' in self.errDict:
-                errors4 = self.errDict[uri+'-4']
-            if uri+'-5' in self.errDict:
-                errors5 = self.errDict[uri+'-5']
             
-            self.statDict[uri] = '%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5
-            
-        return self.statDict
-    
-    
-    def dailyLatencyReport(self,t0,t1,uri,blacklist,whitelist):
-        self.statDict = {}
-        diff = (t1 - t0).days + 1
-        output = []
-        for i in range (0,diff):
-            t2 = today(t0+datetime.timedelta(days=i+1))
-            t3 = today(t0+datetime.timedelta(days=i+2))
-            self.statDict = {}
-            self.errDict = {}
-            
-            pool = Pool(16)
-            
-            for k in range (0,16):
-                suffix = '0'+hex(k)[2]
-                pool.spawn(self.latencyQuery,self.domains[suffix],t2,t3,uri,blacklist,whitelist)
-                
-            pool.join()
-            
-            for uri in self.statDict:
-                sum = 0
-                max = 0
-                for num in self.statDict[uri]:
-                    sum += num
-                    if num > max:
-                        max = num
-                mean = float(sum) / len(self.statDict[uri])
-                sorte = sorted(self.statDict[uri])
-                median = percentile(sorte,.5)
-                ninetieth = percentile(sorte,.9)
-                n = len(self.statDict[uri])
-                errors4 = 0
-                errors5 = 0
-                if uri+'-4' in self.errDict:
-                    errors4 = self.errDict[uri+'-4']
-                if uri+'-5' in self.errDict:
-                    errors5 = self.errDict[uri+'-5']
-                
-                output.append((t2.date().isoformat(),'%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5))
-                
-        return output
-    
+        return self.statDict, self.errDict
+
     def qpsReport(self,time,interval,total_seconds):
         blacklist=[]
         whitelist=[]

@@ -9,52 +9,99 @@ __license__   = "TODO"
 import Globals
 
 import keys.aws, logs, utils, math
-import libs.ec2_utils
+import ast
 
 from boto.sdb.connection                            import SDBConnection
-from api.MongoStampedAPI                            import MongoStampedAPI
 from servers.analytics.core.analytics_utils         import *
 from servers.analytics.core.logsQuery               import logsQuery
 from servers.analytics.core.statWriter              import statWriter
 from gevent.pool                                    import Pool
 
-IS_PROD  = libs.ec2_utils.is_prod_stack()
 
-class Dashboard(object):
+
+class LatencyReport(object):
     
-    def __init__(self,api=MongoStampedAPI(), logsQuery=logsQuery()):
-        self.stamp_collection = api._stampDB._collection
-        self.acct_collection = api._userDB._collection
-        self.query = logsQuery
-        self.writer = statWriter('dashboard')
+    def __init__(self,logsQuery=logsQuery()):
+        self.logsQ = logsQuery
         conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-        self.domain = conn.get_domain('dashboard')
+        self.writer = statWriter('latency',conn=conn)
+        self.cache = conn.get_domain('latency')
     
     
-    def _getTodaysStats(self,stat,fun): 
+    def _getTodaysLatency(self): 
         
-        total_today = 0
-        today_hourly = []
-        
-        # See if we've stored data earlier
-        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat, today().date().isoformat()))
-        for result in query:
-            for i in result['hours'].replace('[','').replace(']','').split(','):
-                today_hourly.append(int(i))
+        diffs_overall = {}
+        errs_overall = {}
         
         # Build up until the current hour (e.g. if it is currently 8:04, fill in stats thru 9:00)
-        for hour in range (len(today_hourly), est().hour+2):
-            bgn = today()
-            end = today() + timedelta(hours=hour)
-            total_today = fun(bgn, end)
-            today_hourly.append(total_today)
-        
-            # Only store data for full hours (e.g. if it is currently 8:40, only store stats thru 8:00)
-            # Also only write from a prod stack connection to prevent data misrepresentation
-            if hour == est().hour and IS_PROD:
-                self.writer.writeHours({'stat': stat, 'time': 'day', 'bgn': today().date().isoformat(), 'hours': str(today_hourly)})
-        
-        return total_today, today_hourly
+        for hour in range (1, est().hour+2):
+            diffs_hourly = {}
+            errs_hourly = {}
+            cache_hit = False
+            # See if we've stored hourly data earlier
+            query = self.cache.select('select diffs,errs from `latency` where itemName() = "hour-%s-%s"' % (hour,today().date().isoformat()))
+            for result in query:
+                cache_hit = True
+                try: 
+                    diffs = ast.literal_eval(result['diffs'])
+                    errs = ast.literal_eval(result['errs'])
+                except ValueError:
+                    cache_hit = False
+                    break
+                    
+            if not cache_hit:
+                diffs,errs = self.logsQ.latencyReport(today(),today() + timedelta(hours=hour))
+                
+                for key,value in diffs.items():
+                    diffs_hourly[key] = value
+                    try:
+                        diffs_overall[key].extend(value)
+                    except KeyError:
+                        diffs_overall[key] = value
+                
+                for key,value in errs.items():
+                    errs_hourly[key] = value
+                    try:
+                        errs_overall[key] += value
+                    except KeyError:
+                        errs_overall[key] = value
+                        
+            if hour <= est().hour:
+                self.writer.writeLatency({'hour': hour, 'date': today().date().isoformat(), 'diffs': str(diffs_hourly), 'errs': str(errs_hourly)})
+            
+        return diffs_overall
+#        for uri in self.statDict:
+#            sum = 0
+#            max = 0
+#            for num in self.statDict[uri]:
+#                sum += num
+#                if num > max:
+#                    max = num
+#            mean = float(sum) / len(self.statDict[uri])
+#            sorte = sorted(self.statDict[uri])
+#            median = percentile(sorte,.5)
+#            ninetieth = percentile(sorte,.9)
+#            n = len(self.statDict[uri])
+#            errors4 = 0
+#            errors5 = 0
+#            if uri+'-4' in self.statDict:
+#                errors4 = self.statDict[uri+'-4']
+#            if uri+'-5' in self.statDict:
+#                errors5 = self.statDict[uri+'-5']
+#            
+#            self.statDict[uri] = '%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5
+#                
+#            bgn = today()
+#            end = today() + timedelta(hours=hour)
+#            total_today = fun(bgn, end)
+#            today_hourly.append(total_today)
+#        
+#            # Only store data for full hours (e.g. if it is currently 8:40, only store stats thru 8:00)
+#            # Also only write from a prod stack connection to prevent data misrepresentation
+#            if hour == est().hour and IS_PROD:
+#                self.writer.writeHours({'stat': stat, 'time': 'day', 'bgn': today().date().isoformat(), 'hours': str(today_hourly)})
+#        
+#        return total_today, today_hourly
     
     
     def _getDaysStats(self,stat,fun,date):
@@ -129,21 +176,17 @@ class Dashboard(object):
         weeklyAvg = self._getWeeklyAvg(stat,fun)
         
         # Compute D/D and D/W changes
-        yest_now = yest_hourly[est().hour] + est().minute * ((yest_hourly[est().hour + 1]) - (yest_hourly[est().hour])) / 60
-        
-        weekly_now = weeklyAvg[est().hour] + est().minute * ((weeklyAvg[est().hour + 1]) - (weeklyAvg[est().hour])) / 60
-        
         try:
-            deltaDay = ((total_today - yest_now) / float(yest_now)) * 100.0
+            deltaDay = float(total_today - yest_hourly[int(math.floor(est().hour))])/(yest_hourly[int(math.floor(est().hour))])*100.0
         except ZeroDivisionError:
             deltaDay = 0.0
         
         try: 
-            deltaWeek = ((total_today - weekly_now) / weekly_now) * 100
+            deltaWeek = float(total_today - weeklyAvg[int(math.floor(est().hour))])/(weeklyAvg[int(math.floor(est().hour))])*100
         except ZeroDivisionError:
             deltaWeek = 0.0
         
-        return today_hourly,total_today,yest_hourly,yest_now,weeklyAvg,weekly_now,deltaDay,deltaWeek
+        return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(est().hour))],weeklyAvg,weeklyAvg[int(math.floor(est().hour))],deltaDay,deltaWeek
     
     
     def newStamps(self):
