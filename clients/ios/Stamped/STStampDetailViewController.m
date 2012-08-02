@@ -280,21 +280,19 @@ typedef enum {
     }
     
     if (!_panGesture) {
-        UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
+        UIPanGestureRecognizer *pan = [[[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)] autorelease];
         pan.delegate = (id<UIGestureRecognizerDelegate>)self;
         [self.scrollView addGestureRecognizer:pan];
         _panGesture = [pan retain];
         [pan setEnabled:NO];
-        [pan release];
     }
     
     if (!_commentView) {
-        STCreateCommentView *view = [[STCreateCommentView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height+44.0f, self.view.bounds.size.width, 44)];
+        STCreateCommentView *view = [[[STCreateCommentView alloc] initWithFrame:CGRectMake(0.0f, self.view.bounds.size.height+44.0f, self.view.bounds.size.width, 44)] autorelease];
         view.delegate = (id<STCreateCommentViewDelegate>)self;
         view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         [self.view addSubview:view];
         _commentView = [view retain];
-        [view release];        
     }
     
 }
@@ -347,7 +345,6 @@ typedef enum {
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [[STActionManager sharedActionManager] setStampContext:self.stamp];
-    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(localModification:) name:STStampedAPILocalStampModificationNotification object:nil];
@@ -719,9 +716,9 @@ typedef enum {
     else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
         [self showEmailViewController];
     } 
-    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
-        [self shareToInstagram];
-    }
+//    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
+//        [self shareToInstagram];
+//    }
 }
 
 static CATransform3D MakePerspetiveTransform() { 

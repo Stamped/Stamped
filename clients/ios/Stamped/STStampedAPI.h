@@ -317,5 +317,7 @@ extern NSString* const STStampedAPIUnfollowNotification;
 
 @property (nonatomic, readwrite, retain) UIImage* currentUserImage;
 
+- (void)clearEntityCache;
+
 @end
 

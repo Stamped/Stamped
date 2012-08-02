@@ -19,4 +19,3 @@ signal.signal(signal.SIGTERM, handler)
 
 for p in processes:
     p.wait()
-

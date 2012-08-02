@@ -549,14 +549,21 @@
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
-    
-    UITextPosition *beginning = textView.beginningOfDocument;
-    UITextPosition *start = [textView positionFromPosition:beginning offset:range.location];
-    UITextPosition *end = [textView positionFromPosition:start offset:range.length];
-    UITextRange *textRange = [textView textRangeFromPosition:start toPosition:end];
-    CGRect rect = [textView convertRect:[textView caretRectForPosition:textRange.start] toView:self.scrollView];
-    [self.scrollView scrollRectToVisible:rect animated:YES];
-    
+    UITextPosition *beginning;
+    if ([[UIDevice currentDevice].systemVersion doubleValue] >= 5.0) {
+        beginning = textView.beginningOfDocument;
+        UITextPosition *start = [textView positionFromPosition:beginning offset:range.location];
+        UITextPosition *end = [textView positionFromPosition:start offset:range.length];
+        UITextRange *textRange = [textView textRangeFromPosition:start toPosition:end];
+        CGRect rect = [textView convertRect:[textView caretRectForPosition:textRange.start] toView:self.scrollView];
+        rect.size.height += 40;
+        [self.scrollView scrollRectToVisible:rect animated:YES];
+    }
+    else {
+        CGRect frame = textView.frame;
+        frame.size.height += 40;
+        [self.scrollView scrollRectToVisible:frame animated:YES];
+    }
     return YES;
 }
 
