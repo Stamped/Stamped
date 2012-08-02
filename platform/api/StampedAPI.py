@@ -3385,7 +3385,10 @@ class StampedAPI(AStampedAPI):
                 return
             except StampedFacebookOGImageSizeError as e:
                 logs.info('OG Image size error')
-                del(kwargs['imageUrl'])
+                try:
+                    del(kwargs['imageUrl'])
+                except KeyError:
+                    pass
                 if delay > 60*10:
                     raise e
                 time.sleep(delay)
