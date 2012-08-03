@@ -421,7 +421,11 @@ var g_update_stamps = null;
         var iOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/i);
         
         if (iOS) {
-            (function() {
+            var key = "stamped.v1.cookies.popups.ios.download";
+            
+            if (!$.cookie(key)) {
+                $.cookie(key, "true", { expires: 30, path: '/' });
+                
                 var popup_options = g_get_fancybox_popup_large_options({
                     content     : $("#popup-ios").html(), 
                     type        : "html", 
@@ -433,8 +437,7 @@ var g_update_stamps = null;
                 popup_options.helpers.overlay.opacity = 0.8;
                 
                 $.fancybox.open(popup_options);
-                return false;
-            })();
+            }
         }
     });
 })();

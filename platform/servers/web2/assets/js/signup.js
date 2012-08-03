@@ -140,7 +140,7 @@
                 var key = "stamped.v1.cookies.popups.signup";
                 
                 if (!$.cookie(key)) {
-                    $.cookie(key, "true");
+                    $.cookie(key, "true", { expires: 30, path: '/' });
                     
                     open_popup_signup();
                 }
