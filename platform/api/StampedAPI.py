@@ -5168,7 +5168,7 @@ class StampedAPI(AStampedAPI):
     def _addFBLoginActivity(self, recipientId):
         objects = ActivityObjectIds()
         objects.user_ids = [ recipientId ]
-        body = 'Tap here to enable sharing of your stamps, likes and to-dos with friends. Preferences can always be changed in "Settings."'
+        body = 'Tap here to share your stamps and activity with friends. You can always change preferences in "Settings."'
         self._activityDB.addActivity(verb           = 'notification_fb_login',
                                      recipientIds   = [ recipientId ],
                                      objects        = objects,
