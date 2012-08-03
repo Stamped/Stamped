@@ -1044,9 +1044,14 @@ class StampedAPI(AStampedAPI):
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
 
         facebookToken, expires = self._facebook.extendAccessToken(facebookToken)
-        expires = datetime.fromtimestamp(time.time() + expires)
         linked.token = facebookToken
-        linked.token_expiration = expires
+
+        if expires is not None:
+            expires = datetime.fromtimestamp(time.time() + expires)
+            linked.token_expiration = expires
+        else:
+            logs.warning("NO EXPIRATION FOR USER %s: %s" % (authUserId, facebookToken))
+
         linked.extended_timestamp = datetime.utcnow()
         self._accountDB.updateLinkedAccount(authUserId, linked)
         return True
