@@ -8,10 +8,8 @@
 
 (function() {
     $(document).ready(function() {
-        var g_page              = STAMPED_PRELOAD.page;
-        var screen_name         = STAMPED_PRELOAD.user.screen_name;
-        var screen_name_lower   = screen_name.toLowerCase();
-        var $body               = $("body");
+        var g_page  = STAMPED_PRELOAD.page;
+        var $body   = $("body");
         
         
         // ---------------------------------------------------------------------
@@ -133,7 +131,9 @@
         
         // autoshow the signup popup if certain conditions are met
         if (g_page === "profile" || g_page === "sdetail") {
-            var referrer = document.referrer;
+            var screen_name         = STAMPED_PRELOAD.user.screen_name;
+            var screen_name_lower   = screen_name.toLowerCase();
+            var referrer            = document.referrer;
             var likely_tweet = true; //(!!referrer && !!referrer.match(/.*(t\.co|twitter\.com|facebook\.com|m\.facebook\.com).*/i));
             
             if (likely_tweet && (screen_name === "travis" || screen_name === "justinbieber" || screen_name === "ellendegeneres")) {
