@@ -787,7 +787,7 @@ a.sdetail, .pronounced-title a {
 
 @popup-padding:  24px;
 
-#popup-signup {
+#popup-signup, #popup-ios {
     display: none;
 }
 
@@ -808,6 +808,7 @@ a.sdetail, .pronounced-title a {
 }
 
 .popup-large {
+    position: relative;
     text-align: center;
     width: 100%;
     
@@ -821,9 +822,10 @@ a.sdetail, .pronounced-title a {
     .popup-header {
         .pronounced-title {
             line-height: 100%;
-            margin-bottom: 0;
             padding-top: 15px;
             padding-bottom: 0;
+            white-space: normal;
+            margin-bottom: 24px;
         }
     }
     
@@ -838,7 +840,7 @@ a.sdetail, .pronounced-title a {
         }
         
         .learn-more {
-            margin: .2em 0 .5em;
+            margin: 24px 0 0;
         }
         
         .download-desc {
@@ -850,7 +852,7 @@ a.sdetail, .pronounced-title a {
             position: relative;
             border: 1px solid #bfbfbf;
             margin: 0 auto;
-            width: 70%;
+            width: 90%;
             line-height: 31px;
             box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
             white-space: nowrap;
@@ -859,9 +861,15 @@ a.sdetail, .pronounced-title a {
             .rounded(4px);
             
             input {
+                position: relative;
+                top: -2px;
+                
+                display: block;
+                float: left;
                 text-align: center;
                 font-weight: 200;
                 font-size: 140%;
+                width: 70%;
                 
                 margin-left: 0;
                 margin-top: 8px;
@@ -877,9 +885,6 @@ a.sdetail, .pronounced-title a {
             }
             
             .send-button {
-                position: relative;
-                top: 4px;
-                
                 float: right;
                 opacity: .3;
                 
@@ -935,7 +940,22 @@ a.sdetail, .pronounced-title a {
         position: absolute;
         left: 50%;
         bottom: -60px;
-        margin-left: -68px;
+        margin-left: -64px;
+    }
+}
+
+.popup-ios {
+    text-align: center;
+    
+    .launcher-icon-button {
+        margin: 0 auto 12px;
+    }
+    
+    .popup-header {
+        .desc {
+            font-size: 110%;
+            color: #888;
+        }
     }
 }
 
@@ -952,13 +972,8 @@ a.sdetail, .pronounced-title a {
     width:  200px;
     height: 32px;
     
-    &:hover {
-        background-position: -202px 0;
-    }
-    
-    &:active {
-        background-position: -404px 0;
-    }
+    &:hover  { background-position: -202px 0; }
+    &:active { background-position: -404px 0; }
 }
 
 .app-store-button {
@@ -973,6 +988,29 @@ a.sdetail, .pronounced-title a {
     }
 }
 
+.download-the-free-app-button {
+    background: url(/assets/img/downloadthefreeapp_btn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  198px;
+    height: 42px;
+    
+    &:hover  { background-position: -200px 0; }
+    &:active { background-position: -400px 0; }
+}
+
+.launcher-icon-button {
+    background: url(/assets/img/index/launchericon_sprite.png) no-repeat;
+    display: block;
+    
+    width:  64px;
+    height: 64px;
+    
+    &:hover, &:active {
+        background-position: -66px 0;
+    }
+}
+
 .send-button {
     background: url(/assets/img/sendbtn_sprite.png) no-repeat;
     display: block;
@@ -982,38 +1020,6 @@ a.sdetail, .pronounced-title a {
     
     &:hover  { background-position: -70px  0; }
     &:active { background-position: -140px 0; }
-}
-
-.get-the-app-button {
-    background: url(/assets/img/gettheapp_btn_sprite.png) no-repeat;
-    
-    display: block;
-    width:  120px;
-    height: 32px;
-    
-    &:hover {
-        background-position: -121px 0;
-    }
-    
-    &:active {
-        background-position: -242px 0;
-    }
-}
-
-.download-the-free-app-button {
-    background: url(/assets/img/downloadthefreeapp_btn_sprite.png) no-repeat;
-    
-    display: block;
-    width:  198px;
-    height: 42px;
-    
-    &:hover {
-        background-position: -200px 0;
-    }
-    
-    &:active {
-        background-position: -400px 0;
-    }
 }
 
 .submit-button {
@@ -1036,5 +1042,28 @@ a.sdetail, .pronounced-title a {
     
     &:hover  { background-position: -123px 0; cursor: pointer; }
     &:active { background-position: -246px 0; cursor: pointer; }
+}
+
+.download-the-app {
+    background: url(/assets/img/gettheapp_btn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  120px;
+    height: 31px;
+    
+    &:hover  { background-position: -122px 0; }
+    &:active { background-position: -244px 0; }
+}
+
+.app-store-button-blue {
+    background: url(/assets/img/appstore_btn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  183px;
+    height: 65px;
+    
+    &:hover, &:active {
+        background-position: -185px 0;
+    }
 }
 

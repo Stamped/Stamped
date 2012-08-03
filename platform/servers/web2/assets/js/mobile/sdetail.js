@@ -70,60 +70,9 @@ var g_update_stamps = null;
             });
         };
         
-        // returns the default fancybox options merged with the optional given options
-        var get_fancybox_options = function(options) {
-            var default_options = {
-                openEffect      : 'elastic', 
-                openEasing      : 'easeOutBack', 
-                openSpeed       : 300, 
-                
-                closeEffect     : 'elastic', 
-                closeEasing     : 'easeInBack', 
-                closeSpeed      : 300, 
-                
-                tpl             : {
-				    error       : '<p class="fancybox-error">Whoops! Looks like we messed something up on our end. Our bad.<br/>Please try again later.</p>', 
-                    closeBtn    : '<a title="Close" class="close-button"><div class="close-button-inner"></div></a>'
-                }, 
-                
-                helpers         : {
-                    overlay     : {
-                        speedIn  : 150, 
-                        speedOut : 300, 
-                        opacity  : 0.8, 
-                        
-                        css      : {
-                            cursor             : 'pointer', 
-                            'background-color' : '#fff'
-                        }, 
-                        
-                        closeClick  : true
-                    }
-                }
-            };
-            
-            var output = {};
-            
-            for (var key in default_options) {
-                if (default_options.hasOwnProperty(key)) {
-                    output[key] = default_options[key];
-                }
-            }
-            
-            if (!!options) {
-                for (var key in options) {
-                    if (options.hasOwnProperty(key)) {
-                        output[key] = options[key];
-                    }
-                }
-            }
-            
-            return output;
-        };
-        
         // returns the default fancybox popup options merged with the optional given options
         var get_fancybox_popup_options = function(options) {
-            var output = get_fancybox_options({
+            var output = g_get_fancybox_options({
                 type        : "ajax", 
                 scrolling   : 'no', // we prefer our own, custom jScrollPane scrolling
                 wrapCSS     : '', 
@@ -166,7 +115,7 @@ var g_update_stamps = null;
             $scope.find('.normal_blurb').emoji();
             update_timestamps($scope);
             
-            $scope.find("a.lightbox").fancybox(get_fancybox_options({
+            $scope.find("a.lightbox").fancybox(g_get_fancybox_options({
                 closeClick : true
             }));
         };
@@ -468,6 +417,25 @@ var g_update_stamps = null;
         
         
         init_sdetail();
+        
+        var iOS = !!navigator.userAgent.match(/(iPad|iPhone|iPod)/i);
+        
+        if (iOS) {
+            (function() {
+                var popup_options = g_get_fancybox_popup_large_options({
+                    content     : $("#popup-ios").html(), 
+                    type        : "html", 
+                    width       : 220, 
+                    minWidth    : 220, 
+                    height      : 220
+                });
+                
+                popup_options.helpers.overlay.opacity = 0.8;
+                
+                $.fancybox.open(popup_options);
+                return false;
+            })();
+        }
     });
 })();
 

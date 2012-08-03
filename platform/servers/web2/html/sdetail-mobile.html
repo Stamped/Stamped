@@ -25,6 +25,7 @@
     
     Core stamped dependencies:
         script: utils.js
+        script: fancybox_utils.js
         script: mobile/sdetail.js
 -->
 
@@ -352,7 +353,7 @@
             <div id="stamped-intro">
                 <div class="separator"></div>
                 <div id="stamped-desc" class="replaced">Stamped is a new way to declare your favorite things and discover new ones!</div>
-                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button"></a>
+                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button-blue"></a>
             </div>
         </div>
     </div>
@@ -361,7 +362,7 @@
 {% block scripts %}
     {{ block.super }}
      
-    {% if DEBUG %}
+    {% if STAMPED_DEBUG %}
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.emoji.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
@@ -371,6 +372,7 @@
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
         
         <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/fancybox_utils.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/mobile/sdetail.js"></script>
     {% else %}
         <script src="{{ STAMPED_STATIC_URL }}js/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
