@@ -287,7 +287,7 @@
 
 - (void)postStampBadgeTableCellShare:(PostStampBadgeTableCell*)cell {
     //Check out my my first stamp with @stampedapp: [entity.title]. [link]
-    [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:NO andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+    [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:YES andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
         if (success) {
             TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
             NSString* text;

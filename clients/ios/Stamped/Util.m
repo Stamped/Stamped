@@ -1604,6 +1604,7 @@ static STPopUpView* volatile _currentPopUp = nil;
         article = @"an";
     }
     else if ([string isEqualToString:@"establishment"]) {
+        noun = @"place";
         article = @"an";
     }
     else if ([string isEqualToString:@"other"]) {

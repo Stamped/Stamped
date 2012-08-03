@@ -21,11 +21,21 @@
 //#endif
 //static NSString* const kPushNotificationPath = @"/account/alerts/ios/update.json";
 
-@interface STRootViewController ()
+@interface STRootViewController () <UINavigationControllerDelegate>
+
+@property (nonatomic, readwrite, retain) UIViewController* lastController;
 
 @end
 
 @implementation STRootViewController
+
+@synthesize lastController = _lastController;
+
+- (void)dealloc
+{
+    [_lastController release];
+    [super dealloc];
+}
 
 - (void)viewDidLoad {
   [super viewDidLoad];
@@ -50,6 +60,14 @@
     
 }
 
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+}
+
 - (void)didReceiveMemoryWarning {
 }
 
@@ -66,7 +84,6 @@
 #pragma mark - UINavigationControllerDelegate
 
 - (void)navigationController:(UINavigationController *)navigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
-    
     NSInteger index = [self.viewControllers indexOfObject:viewController];
     if (index!=NSNotFound && index > 0 && viewController.navigationItem.leftBarButtonItem == nil) {
         
@@ -76,11 +93,34 @@
             viewController.navigationItem.leftBarButtonItem = button;
             [button release];
         }
-    
     }
-    
     [self.navigationBar setNeedsDisplay];
-    
+    if ([[UIDevice currentDevice].systemVersion doubleValue] < 5.0) {
+        [self.lastController viewWillDisappear:animated];
+        [viewController viewWillAppear:animated];
+    }
+}         
+
+- (void)navigationController:(UINavigationController *)navigationController didShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    if ([[UIDevice currentDevice].systemVersion doubleValue] < 5.0) {
+        [self.lastController viewDidDisappear:animated];
+        [viewController viewDidAppear:animated];
+        self.lastController = nil;
+    }
+}
+
+- (UIViewController *)popViewControllerAnimated:(BOOL)animated {
+    if ([[UIDevice currentDevice].systemVersion doubleValue] < 5.0) {
+        self.lastController = self.topViewController;
+    }
+    return [super popViewControllerAnimated:animated];
+}
+
+- (void)pushViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    if ([[UIDevice currentDevice].systemVersion doubleValue] < 5.0) {
+        self.lastController = self.topViewController;
+    }
+    return [super pushViewController:viewController animated:animated];
 }
 
 - (void)pop:(id)sender {

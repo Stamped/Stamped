@@ -742,7 +742,7 @@ static NSString* const _shareOptionTwitter = @"Share to Twitter";
         
         if ([[dictionary objectForKey:@"class"] isEqualToString:@"STDescriptionTableCell"]) {
             
-            static NSString *DetailCellIdentifier = @"DecriptionIdentifier";
+            static NSString *DetailCellIdentifier = @"DescriptionIdentifier";
             STDescriptionTableCell *cell = [tableView dequeueReusableCellWithIdentifier:DetailCellIdentifier];
             if (cell == nil) {
                 cell = [[[STDescriptionTableCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:DetailCellIdentifier] autorelease];
@@ -753,7 +753,6 @@ static NSString* const _shareOptionTwitter = @"Share to Twitter";
             
             cell.titleLabel.text = [dictionary objectForKey:@"title"];
             cell.detailTitleLabel.text = [dictionary objectForKey:@"detail"];
-            
             return cell;
             
         }

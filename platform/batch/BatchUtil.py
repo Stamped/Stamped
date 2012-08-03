@@ -10,6 +10,7 @@ import Globals
 
 try:
     from api.MongoStampedAPI    import globalMongoStampedAPI
+    from resolve.FullResolveContainer import FullResolveContainer
     import logs
     import random
     from abc                    import ABCMeta, abstractmethod, abstractproperty
@@ -77,6 +78,12 @@ def outputToConsole(entity_id, result_entities):
     for entity in result_entities:
         accum.append('%s\n' % pformat(entity.dataExport()))
     print(''.join(accum))
+
+def enrichAndOutputToConsole(entity_id, result_entities):
+    fullResolver = FullResolveContainer()
+    for entity in result_entities:
+        fullResolver.enrichEntity(entity, {})
+    outputToConsole(entity_id, result_entities)
 
 def _sparsePrint(schema, keys, keypath):
     if schema is None:

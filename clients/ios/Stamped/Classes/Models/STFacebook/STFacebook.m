@@ -46,12 +46,10 @@ static id __instance;
         facebook = [[Facebook alloc] initWithAppId:kFacebookAppID andDelegate:(id<FBSessionDelegate>)self];
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         [STEvents addObserver:self selector:@selector(facebookBack:) event:EventTypeFacebookCameBack];
-        
         if ([defaults objectForKey:@"FBAccessTokenKey"] && [defaults objectForKey:@"FBExpirationDateKey"]) {
             facebook.accessToken = [defaults objectForKey:@"FBAccessTokenKey"];
             facebook.expirationDate = [defaults objectForKey:@"FBExpirationDateKey"];
         }
-        
     }
     return self;    
 }
@@ -97,6 +95,9 @@ static id __instance;
     if (self.facebook.accessToken) {
         NSMutableDictionary* params = [NSMutableDictionary dictionary];
         [params setObject:self.facebook.accessToken forKey:@"token"];
+        if (self.facebook.expirationDate) {
+//            [params setObject:self.facebook.expirationDate forKey:@"token_expiration"];
+        }
         [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/facebook/add.json"
                                                      post:YES
                                             authenticated:YES
@@ -120,7 +121,6 @@ static id __instance;
     [defaults setObject:[facebook accessToken] forKey:@"FBAccessTokenKey"];
     [defaults setObject:[facebook expirationDate] forKey:@"FBExpirationDateKey"];
     [defaults synchronize];
-    
     if ([STRestKitLoader sharedInstance].loggedIn) {
         [self updateLinkedAccount];
     }
@@ -134,7 +134,6 @@ static id __instance;
 }
 
 - (void)fbDidExtendToken:(NSString*)accessToken  expiresAt:(NSDate*)expiresAt {
-    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:accessToken forKey:@"FBAccessTokenKey"];
     [defaults setObject:expiresAt forKey:@"FBExpirationDateKey"];
@@ -160,7 +159,7 @@ static id __instance;
 }
 
 - (void)fbSessionInvalidated {
-    
+    NSLog(@"invalidated");
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults removeObjectForKey:@"FBAccessTokenKey"];
     [defaults removeObjectForKey:@"FBExpirationDateKey"];
@@ -197,12 +196,16 @@ static id __instance;
 
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
     
-    //NSLog(@"facebook error : %@", [error localizedDescription]);
+    NSLog(@"facebook error : %@", [error localizedDescription]);
     
 }
 
 
 #pragma mark - Getters
+
+- (BOOL)connected {
+    return self.facebook.accessToken != nil;
+}
 
 - (BOOL)isSessionValid {
     return [self.facebook isSessionValid];

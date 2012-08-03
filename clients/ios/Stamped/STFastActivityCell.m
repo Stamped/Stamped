@@ -778,7 +778,6 @@ const static NSInteger _bodyOffset = 5;
 }
 
 - (void)userImageClicked:(id<STUser>)user {
-    NSLog(@"herererere");
     STActionContext* context = [STActionContext context];
     context.user = user;
     id<STAction> action = [STStampedActions actionViewUser:user.userID withOutputContext:context];

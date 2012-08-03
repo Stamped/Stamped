@@ -18,6 +18,7 @@
 #import "ImageLoader.h"
 #import "UserStampView.h"
 #import "STUsersViewController.h"
+#import "STImageCache.h"
 
 #define kPreviewCellWidth 33.0f
 #define kPreviewCellHeight 33.0f
@@ -97,7 +98,7 @@ static const NSInteger _cellsPerRow = 7;
     NSInteger index = 0;
     NSInteger total = [STPreviewsView totalItemsForPreviews:previews];
     if (total > 0) {
-
+        
         NSInteger numberOfRows = [STPreviewsView totalRowsForPreviews:previews andMaxRows:maxRows];
         self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, floorf(_cellWidth * MIN(_cellsPerRow, total)), floorf(numberOfRows * _cellHeight));
         NSInteger limit = MIN(_cellsPerRow * numberOfRows, total);
@@ -110,7 +111,7 @@ static const NSInteger _cellsPerRow = 7;
             id<STAction> action = [STStampedActions actionViewStamp:credit.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             [view setupImageWithUser:credit.user];
-//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:size]];
+            //            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:credit.user withSize:size]];
             [view setupWithUser:credit.user];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
@@ -125,7 +126,7 @@ static const NSInteger _cellsPerRow = 7;
             id<STAction> action = [STStampedActions actionViewStamp:preview.stampID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             [view setupImageWithUser:user];
-//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:size]];
+            //            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:user withSize:size]];
             [view setupWithUser:user];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
@@ -141,7 +142,7 @@ static const NSInteger _cellsPerRow = 7;
             id<STAction> action = [STStampedActions actionViewUser:like.userID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             [view setupImageWithUser:like];
-//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:size]];
+            //            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:like withSize:size]];
             view.iconImageView.image = likeIcon;
             [view setupWithUser:nil];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
@@ -152,27 +153,27 @@ static const NSInteger _cellsPerRow = 7;
         UIImage *todoIcon = [UIImage imageNamed:@"todo_mini"];
         for (id<STUser> todo in previews.todos) {
             if (index >= limit)   break;
-          
+            
             STActionContext *context = [STActionContext context];
             context.user = todo;
             id<STAction> action = [STStampedActions actionViewUser:todo.userID withOutputContext:context];
             STPreviewView *view = [self dequeuePreviewViewAtIndex:index];
             [view setupImageWithUser:todo];
-//            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:size]];
+            //            view.imageURL = [NSURL URLWithString:[Util profileImageURLForUser:todo withSize:size]];
             view.iconImageView.image = todoIcon;
             [view setupWithUser:nil];
             view.pair = [STActionPair actionPairWithAction:action andContext:context];
             index++;
             
         }
-
+        
         for (NSInteger i = 0; i < limit; i++) {
-           
+            
             NSInteger col = i % _cellsPerRow;
             NSInteger row = i / _cellsPerRow;
             CGFloat xOffset = col * _cellWidth;
             CGFloat yOffset = row * _cellHeight;
-           
+            
             if (i == limit - 1 && continuedFlag) {
                 
                 UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -191,7 +192,7 @@ static const NSInteger _cellsPerRow = 7;
                 
             }
         }
-   
+        
     }
     
     
@@ -384,7 +385,7 @@ static const NSInteger _cellsPerRow = 7;
 - (void)setupWithUser:(id<STUser>)user {
     
     if (user) {
-
+        
         _stampView.hidden = NO;
         [_stampView setupWithUser:user];
         self.iconImageView.hidden = YES;
@@ -394,7 +395,7 @@ static const NSInteger _cellsPerRow = 7;
         
         _stampView.hidden = YES;
         self.iconImageView.hidden = NO;
-
+        
     }
     
 }
@@ -405,19 +406,31 @@ static const NSInteger _cellsPerRow = 7;
     _imageURL = [imageURL retain];
     
     _imageView.image = nil;
-    [[ImageLoader sharedLoader] imageForURL:_imageURL style:^UIImage*(UIImage *image) {
-
-        UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
-        [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
-        UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
-        return scaledImage;
-        
-    } styleIdentifier:@"st_preview@2x.jpg" completion:^(UIImage *image, NSURL *url) {
-        if ([_imageURL isEqual:url]) {
-            _imageView.image = image;
-        }
-    }];
+    if (imageURL) {
+        [[STImageCache sharedInstance] imageForImageURL:imageURL.absoluteString andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+            UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
+            [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
+            UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+            if ([_imageURL isEqual:imageURL]) {
+                _imageView.image = scaledImage;
+            }
+        }];
+    }
+    
+    //    [[ImageLoader sharedLoader] imageForURL:_imageURL style:^UIImage*(UIImage *image) {
+    //
+    //        UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
+    //        [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
+    //        UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    //        UIGraphicsEndImageContext();
+    //        return scaledImage;
+    //        
+    //    } styleIdentifier:@"st_preview@2x.jpg" completion:^(UIImage *image, NSURL *url) {
+    //        if ([_imageURL isEqual:url]) {
+    //            _imageView.image = image;
+    //        }
+    //    }];
     
 }
 
