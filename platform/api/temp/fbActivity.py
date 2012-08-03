@@ -1,7 +1,6 @@
 import Globals
 from time import sleep
 from MongoStampedAPI import MongoStampedAPI
-from errors import StampedFacebookTokenError
 
 api = MongoStampedAPI()
 
