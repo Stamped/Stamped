@@ -237,7 +237,7 @@ def facebookLoginCallback(request, http_schema, **kwargs):
 
     oid = http_schema.state
     authUserId = stampedAPI._fbCallbackTokenDB.getUserId(oid)
-    stampedAPI._fbCallbackTokenDB.removeUserId(oid)
+    #stampedAPI._fbCallbackTokenDB.removeUserId(oid)
 #    authUserId, client_id = checkOAuth(oauth_token)
     # Acquire the user's FB access token
     try:
