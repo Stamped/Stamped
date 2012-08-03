@@ -3403,8 +3403,8 @@ class HTTPActivity(Schema):
 
             elif self.verb == 'notification_fb_login':
                 _addUserObjects()
-                self.header = "Connect to Facebook"
-                self.image = _getIconURL('news_welcome')
+                self.header = "Turn on Facebook Sharing"
+                self.image = _getIconURL('fb_logo')
                 self.action = _buildFBLoginAction(self.objects.users[0])
 
         else:

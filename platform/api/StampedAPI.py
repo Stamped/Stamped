@@ -1044,6 +1044,7 @@ class StampedAPI(AStampedAPI):
             ('publish_actions' in permissions) and (permissions['publish_actions'] == 1)
 
         facebookToken, expires = self._facebook.extendAccessToken(facebookToken)
+        expires = datetime.fromtimestamp(time.time() + expires)
         linked.token = facebookToken
         linked.token_expiration = expires
         linked.extended_timestamp = datetime.utcnow()
@@ -5167,12 +5168,12 @@ class StampedAPI(AStampedAPI):
     def _addFBLoginActivity(self, recipientId):
         objects = ActivityObjectIds()
         objects.user_ids = [ recipientId ]
-        body = "Connect to Facebook"
+        body = 'Tap here to share your stamps and activity with friends. You can always change preferences in "Settings."'
         self._activityDB.addActivity(verb           = 'notification_fb_login',
                                      recipientIds   = [ recipientId ],
                                      objects        = objects,
                                      body           = body,
-                                     unique         = False)
+                                     unique         = True)
 
     def _addActivity(self, verb,
                            userId,

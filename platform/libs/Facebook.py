@@ -241,8 +241,7 @@ class Facebook(object):
         r = re.search(r'expires=([^&]*)', result)
         expires = None
         if r is not None:
-            expires = r.group(1)
-            expires = datetime.fromtimestamp(time.time() + int(expires))
+            expires = int(r.group(1))
         return token, expires
 
 
