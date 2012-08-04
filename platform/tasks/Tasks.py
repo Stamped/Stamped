@@ -151,7 +151,7 @@ def call(queue, key, payload, **options):
                         email['subject'] = "%s.%s - Unable to connect to task broker" % \
                             (stack_info.instance.stack, stack_info.instance.name)
                     except Exception:
-                        subject = msg
+                        email['subject'] = msg
 
                     email['body'] = "All async tasks running locally\n\n%s\n\n" % msg
                     for error in __errors:

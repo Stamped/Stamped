@@ -17,8 +17,6 @@ from django.http                    import HttpResponseRedirect
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
 
-# TODO: stricter input schema validation
-
 TRAVIS = False
 import travis_test
 
@@ -136,8 +134,12 @@ def handle_profile(request, schema, **kwargs):
     #if not mobile:
     #    body_classes += " wide-body";
     
-    if sdetail is not None and entity is not None:
-        title = "%s - %s" % (title, stamp['entity']['title'])
+    page = 'profile'
+    if sdetail is not None:
+        page = 'sdetail'
+        
+        if entity is not None:
+            title = "%s - %s" % (title, stamp['entity']['title'])
     
     template = 'profile.html'
     
@@ -145,6 +147,7 @@ def handle_profile(request, schema, **kwargs):
         'user'                  : user, 
         'stamps'                : stamps, 
         
+        'page'                  : page, 
         'friends'               : friends, 
         'followers'             : followers, 
         
@@ -158,7 +161,7 @@ def handle_profile(request, schema, **kwargs):
         'title'                 : title, 
         'URL'                   : url, 
         'mobile'                : mobile, 
-    }, preload=[ 'user', 'sdetail', 'mobile' ])
+    }, preload=[ 'page', 'user', 'sdetail', 'mobile' ])
 
 def handle_map(request, schema, **kwargs):
     screen_name     = schema.screen_name
@@ -221,13 +224,14 @@ def handle_map(request, schema, **kwargs):
         'user'          : user, 
         'stamps'        : stamps, 
         'lite'          : lite, 
+        'page'          : 'map', 
         
         'stamp_id'      : stamp_id, 
         'body_classes'  : body_classes, 
         'title'         : title, 
         'URL'           : url, 
         'mobile'        : mobile, 
-    }, preload=[ 'user', 'stamps', 'stamp_id', 'lite' ])
+    }, preload=[ 'page', 'user', 'stamps', 'stamp_id', 'lite' ])
 
 @stamped_view(schema=HTTPStampDetail, ignore_extra_params=True)
 def sdetail(request, schema, **kwargs):
@@ -276,10 +280,11 @@ def sdetail(request, schema, **kwargs):
     entity  = stampedAPIProxy.getEntity(stamp['entity']['entity_id'])
     sdetail = stamped_render(request, template, {
         'user'               : user, 
+        'page'               : 'sdetail', 
         'feedback_users'     : users, 
         'stamp'              : stamp, 
         'entity'             : entity
-    })
+    }, preload=[ 'page' ])
     
     if ajax:
         return sdetail

@@ -90,7 +90,7 @@
             <meta property="og:type"        content="stampedapp:establishment"/>
         {% endif %}{% endif %}{% endif %}
         
-        {% if entity.coordinates|length > 0 %}
+        {% if entity.coordinates|length > 2 %}
             <meta property="stampedapp:location:latitude"   content='{{entity.coordinates|split0:","}}'/>
             <meta property="stampedapp:location:longitude"  content='{{entity.coordinates|split1:","}}'/>
             

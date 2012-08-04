@@ -249,6 +249,10 @@
         var stamped_logo_left = parseFloat($main_stamped_logo.css("left"));
         var mobile = (!!(/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)));
         
+        if (mobile && $map_window.length > 0) {
+            $map_window.hide().remove();
+        }
+        
         var update_stamped_logo_layout = function() {
             if (mobile) {
                 return;
@@ -547,7 +551,7 @@
         });*/
         
         // Sadly, Fancybox Youtube videos and IE are not friends...
-        if (!$.browser.msie) {
+        if (!(mobile || $.browser.msie)) {
             $main.on("click", ".lightbox-video", function(event) {
                 event.preventDefault();
                 

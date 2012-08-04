@@ -489,10 +489,6 @@ var g_update_stamps = null;
                     var angle_z = "10deg";
                     var perspective = 400;
                     
-                    
-                    // TODO: fix this!
-                    
-                    
                     var t = "perspective(" + perspective + ") translateY(-10px) rotateZ(" + angle_z + ") rotateX(" + angle_x + ") rotateY(" + angle_y + ")";
                     
                     $preview.css({
@@ -1888,10 +1884,13 @@ var g_update_stamps = null;
                             //link_type = 'iframe';
                             //link_href = 'http://www.singlepage.com/joes-stone-crab/menu?ref=Stamped';
                             
+                            var width = (mobile ? 300 : Math.min(window.innerWidth - 24, 480));
+                            
                             var popup_options = get_fancybox_popup_options({
                                 href            : link_href, 
                                 type            : link_type, 
-                                maxWidth        : 480, //Math.min((2 * window.innerWidth) / 3, 480), 
+                                maxWidth        : width, 
+                                width           : width, 
                                 
                                 afterShow       : function() {
                                     $('.menus').jScrollPane({

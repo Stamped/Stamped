@@ -9,26 +9,26 @@
  * Copyright (c) 2011-2012 Stamped Inc.
  */
 
-/*#stamped-logo, .stamped-logo {
-    background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
-    width:  368px;
-    height: 368px;
-    
-    // TODO: test retina offsets
-    top:   -130px;
-    left:  -90px;
-}*/
 
-.popup-large {
-    .popup-body {
-        .sms {
-            line-height: 62px;
-        }
-    }
-    
-    .app-store-button {
-        margin-left: -120px;
-    }
+/* **************************************************************************
+                                    IMPORTS
+   ************************************************************************** */
+
+
+@import "common.less";
+
+
+/* **************************************************************************
+                            BASIC HIGH-LEVEL SETUP
+   ************************************************************************** */
+
+
+
+#stamped-logo, .stamped-logo {
+    background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
+    .background-size(184px, 184px);
+    //width:  368px;
+    //height: 368px;
 }
 
 
@@ -36,255 +36,63 @@
                                     INDEX
    ************************************************************************** */
 
-/*#main {
-    .pane-body {
-        width: 470px * 2;
-    }
+
+#apple-legal {
+    max-height: 1.5em;
+    overflow: hidden;
 }
 
-.speech-bubble {
-    width: 190px * 2;
-}
-
-.user-video-preview {
-    width: 108px * 2;
+.ribbon-wrapper, .post-header, .profile-header-post {
+    height: 14px !important;
     
-    .user-video-preview-image {
-        height: 64px * 2;
+    .ribbon-top {
+        position: relative;
+        height: 14px !important;
+        top: -1px;
     }
 }
 
-#pane-4 {
-    .title, .desc {
-        max-width: 270px * 2;
+.profile-header-post {
+    .ribbon-bottom {
+        position: relative;
+        height: 14px !important;
+        top: 1px;
     }
 }
 
 #hero-video-preview {
-    left: 290px * 2;
-    margin-top: -129px * 2;
-    width: 470px * 2;
-    
     .user-video-preview-image {
         background: url(/assets/img/index/user_video_preview_bieber@2x.jpg) no-repeat;
-        height: 270px * 2;
-    }
-}*/
-
-/*
-.active-pane-0 #pane-nav-0, 
-.active-pane-1 #pane-nav-1, 
-.active-pane-2 #pane-nav-2, 
-.active-pane-3 #pane-nav-3, 
-.active-pane-4 #pane-nav-4 {
-    background-position: -70px 0;
-    
-    &:hover {
-        background-position: -70px 0;
-    }
-}*/
-
-/*
-.iphone-body-shadow {
-    background: url(/assets/img/index/iphone_main_shadow_sprite@2x.png) no-repeat;
-}
-
-#main-iphone {
-    margin: -530px 0 0 120px;
-    width:  377px * 2;
-    height: 564px * 2;
-}
-
-#iphone-hero {
-    position: absolute;
-    width:  370px * 2;
-    height: 614px * 2;
-}
-
-.iphone-body-shadow-0 {
-    top:   20px * 2;
-    left: -40px * 2;
-}
-
-.iphone-body-shadow-1 {
-    top:  70px * 2;
-    left: 60px * 2;
-}
-
-.iphone-body {
-    width:  289px * 2;
-    height: 564px * 2;
-}
-
-.iphone-body-lighting {
-    background: url(/assets/img/index/iphone_shine@2x.png) no-repeat;
-    
-    width:  288px * 2;
-    height: 564px * 2;
-}
-
-.iphone-body-overlay {
-    margin-left: -134px * 2;
-    
-    background: url(/assets/img/index/iphone_sprite@2x.png) no-repeat;
-    background-position: -600px 0;
-    
-    width:  289px * 2;
-    height: 564px * 2;
-}
-
-.iphone-screen {
-    width:  244px * 2;
-    height: 366px * 2;
-}
-
-.iphone-screen-inbox {
-    .iphone-inbox-header {
-        background: url(/assets/img/index/iphone_main_inbox_header@2x.png) no-repeat;
-        height: 51px * 2;
-    }
-    
-    .iphone-inbox-body {
-        background: url(/assets/img/index/iphone_main_inbox_body@2x.jpg) no-repeat;
-        height: 365px * 2;
-        
-        top:  51px * 2;
-    }
-    
-    .iphone-inbox-footer {
-        background: url(/assets/img/index/iphone_main_inbox_footer@2x.png) no-repeat;
-        height: 42px * 2;
+        .background-size(100%, 100%);
     }
 }
 
-.iphone-screen-sdetail {
-    .iphone-screen-sdetail-0 {
-        background: url(/assets/img/index/iphone_main_sdetail_0@2x.jpg) no-repeat;
-        height: 100%;
-        
-        display: none;
-    }
-}
-
-.iphone-screen-guide {
-    .iphone-screen-guide-0 {
-        background: url(/assets/img/index/iphone_main_guide_0@2x.jpg) no-repeat;
-    }
-}
-
-.iphone-screen-back-button {
-    left: 4px * 2;
-    top:  20px * 2;
-    
-    width:  52px * 2;
-    height: 25px * 2;
-}
-
-.iphone-screen-active-inbox {
-    .iphone-screen-inbox {
-        left: 0 !important;
-        opacity: 1;
-    }
-    
-    .iphone-screen-sdetail {
-        left: (244px * 2) !important;
-        opacity: 0;
-    }
-    
-    .iphone-screen-guide {
-        left: (244px * 2) !important;
-        opacity: 0;
-    }
-}
-
-.iphone-screen-active-sdetail {
-    .iphone-screen-inbox {
-        left: (-244px * 2) !important;
-        opacity: 0;
-    }
-    
-    .iphone-screen-sdetail {
-        left: 0 !important;
-        opacity: 1;
-    }
-    
-    .iphone-screen-guide {
-        left: (244px * 2) !important;
-        opacity: 0;
-    }
-}
-
-.iphone-screen-active-guide {
-    .iphone-screen-inbox {
-        left: (-244px * 2) !important;
-        opacity: 0;
-    }
-    
-    .iphone-screen-sdetail {
-        left: (-244px * 2) !important;
-        opacity: 0;
-    }
-    
-    .iphone-screen-guide {
-        left: 0 !important;
-        opacity: 1;
-    }
-}*/
-
-/*
-footer .app-store-button {
-    margin-top: -36px;
-}
-
-.pane-nav-button {
+/*.pane-nav-button {
     background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
-    width:  31px;
-    height: 31px;
-    
-    &:hover {
-        background-position: -35px 0;
-    }
-    
-    &:active {
-        background-position: -70px 0;
-    }
-}
-
-.active-pane-nav-button {
-    background-position: -70px 0;
-    
-    &:hover {
-        background-position: -70px 0;
-    }
+    .background-size(184px, 20px);
 }
 
 .pane-nav-arrow {
     background: url(/assets/img/index/navdots_sprite@2x.png) no-repeat;
+    .background-size(184px, 20px);
     
-    width:  36px;
-    height: 36px;
-    background-position: -105px 0;
+    background-position: -54px 0;
     
-    &:hover {
-        background-position: -145px 0;
-    }
-    
-    &:active {
-        background-position: -185px 0;
-    }
+    &:hover  { background-position: -76px 0; cursor: pointer; }
+    &:active { background-position: -98px 0; cursor: pointer; }
 }
 
 .pane-nav-arrow-down {
-    background-position: -225px 0;
+    background-position: -120px 0;
     
-    &:hover  { background-position: -265px 0; }
-    &:active { background-position: -305px 0; }
-}
+    &:hover  { background-position: -142px 0; }
+    &:active { background-position: -164px 0; }
+}*/
 
+/*
 .social-button {
     background: url(/assets/img/index/social_sprite@2x.png) no-repeat;
-    width:  40px;
-    height: 40px;
+    .background-size(40px * 3, 40px * 2);
 }
 
 .social-button-template(@x, @offset) {
@@ -297,76 +105,45 @@ footer .app-store-button {
 }
 
 .social-button-twitter {
-    .social-button-template(0, -44px);
+    .social-button-template(0, -22px);
 }
 
 .social-button-facebook {
-    .social-button-template(1, -44px);
+    .social-button-template(1, -22px);
 }
 
 .social-button-google {
-    .social-button-template(2, -44px);
-}
-
-.launcher-icon-button {
-    background: url(/assets/img/index/launchericon_sprite@2x.png) no-repeat;
-    width:  128px;
-    height: 128px;
-    
-    &:hover, &:active {
-        background-position: -132px 0;
-    }
-}
+    .social-button-template(2, -22px);
+}*/
 
 .play-video-button-small {
     background: url(/assets/img/index/playbutton_small_sprite@2x.png) no-repeat;
-    display: block;
-    
-    width:  80px;
-    height: 80px;
-    
-    &:hover, &:active {
-        background-position: -84px 0;
-    }
+    .background-size(40px * 2, 40px);
 }
 
 .play-video-button-large {
     background: url(/assets/img/index/playbutton_large_sprite@2x.png) no-repeat;
-    display: block;
-    
-    width:  128px;
-    height: 128px;
-    
-    &:hover, &:active {
-        background-position: -132px 0;
-    }
+    .background-size(64px * 2, 64px);
 }
 
 .bieber-video-preview-icon {
     background: url(/assets/img/index/bieberlittle@2x.gif) no-repeat;
-    width:  90px;
-    height: 90px;
+    .background-size(100%, 100%);
 }
 
 .overview-video-preview-icon {
     background: url(/assets/img/index/overviewvideo@2x.png) no-repeat;
-    
-    width:  90px;
-    height: 90px;
+    .background-size(100%, 100%);
 }
 
 #category-illustration {
     background: url(/assets/img/index/illustration@2x.png) no-repeat;
-    width:  746px;
-    height: 168px;
+    .background-size(100%, 100%);
 }
 
 .third-party-logo {
     background: url(/assets/img/index/thirdparties_sprite@2x.png) no-repeat;
-    display: block;
-    
-    width:  108px;
-    height: 48px;
+    .background-size(56px * 10, 24px);
 }
 
 .third-party-logo-template(@x, @offset) {
@@ -379,24 +156,24 @@ footer .app-store-button {
 }
 
 .third-party-logo-spotify {
-    .third-party-logo-template(0, -112px);
+    .third-party-logo-template(0, -56px);
 }
 
 .third-party-logo-rdio {
-    .third-party-logo-template(1, -112px);
+    .third-party-logo-template(1, -56px);
 }
 
 .third-party-logo-netflix {
-    .third-party-logo-template(2, -112px);
+    .third-party-logo-template(2, -56px);
 }
 
 .third-party-logo-fandango {
-    .third-party-logo-template(3, -112px);
+    .third-party-logo-template(3, -56px);
 }
 
 .third-party-logo-opentable {
-    .third-party-logo-template(4, -112px);
-}*/
+    .third-party-logo-template(4, -56px);
+}
 
 
 /* **************************************************************************
@@ -406,19 +183,16 @@ footer .app-store-button {
 
 .stamp-badge, .twitter-badge {
     background: url(/assets/img/about/stamped_twitter_sprite@2x.png) no-repeat;
-    
-    width:  32px;
-    height: 32px;
+    .background-size(16px * 2, 16px);
 }
 
 .twitter-badge {
-    background-position: -36px 0;
+    background-position: -18px 0;
 }
 
 .made-in-nyc-logo {
     background: url(/assets/img/about/nyctoken.1@2x.png) no-repeat;
-    width:  210px;
-    height: 210px;
+    .background-size(100px, 100px);
 }
 
 
@@ -429,9 +203,194 @@ footer .app-store-button {
 
 .empty-stamps {
     background: url(/assets/img/nostamps@2x.png) no-repeat;
+    .background-size(115px, 115px);
+}
+
+.social-feedback {
+    .social-feedback-image(@l, @t) {
+        background: url(/assets/img/feedbackicons_sprite_large@2x.png) no-repeat;
+        background-position: @l @t;
+        .background-size(17px, 17px);
+    }
     
-    width:  230px;
-    height: 230px;
+    .social-feedback-like {
+        .social-feedback-image(0, 0);
+    }
+    .count_0 .social-feedback-like {
+        background-position:   0 -20px;
+    }
+    
+    .social-feedback-todo {
+        .social-feedback-image(-19px, 0);
+    }
+    .count_0 .social-feedback-todo {
+        background-position:   -19px -20px;
+    }
+    
+    .social-feedback-comments {
+        .social-feedback-image(-38px, 0);
+    }
+    .count_0 .social-feedback-comments {
+        background-position:   -38px -20px;
+    }
+}
+
+/*.popup-small, .popup-body {
+    width:     100px !important;
+    max-width: 100px !important;
+}*/
+
+
+/* **************************************************************************
+                                MOBILE SDETAIL
+   ************************************************************************** */
+
+
+#stamped-desc {
+    background: url(/assets/img/stamped_is_sprite@2x.png) no-repeat;
+    .background-size(215px * 2, 86px);
+}
+
+.download-the-app {
+    background: url(/assets/img/gettheapp_btn_sprite@2x.png) no-repeat;
+    .background-size(120px * 3, 31px);
+}
+
+.app-store-button-blue {
+    background: url(/assets/img/appstore_btn_sprite@2x.png) no-repeat;
+    .background-size(183px * 2, 65px);
+}
+
+/*
+.action-icon, .source {
+    background: url(/assets/img/edetail-sprite@2x.png) no-repeat !important;
+    .background-size(18px * 11, 18px * 3);
+}
+
+.action-icon-media-loading {
+    background: url(/assets/img/loading.gif) no-repeat !important;
+}
+
+.action-icon-image(@x) {
+    background-position: -@x 0 !important;
+}
+
+.action-icon-image-hover(@x) {
+    background-position: -@x -20px !important;
+}
+
+.action-icon-reserve {
+    .action-icon-image(0);
+}
+
+.action-icon-menu {
+    .action-icon-image(20px);
+}
+
+.action-icon-buy {
+    .action-icon-image(40px);
+}
+
+.action-icon-add_to_instant_queue {
+    .action-icon-image(60px);
+}
+
+.action-icon-listen {
+    .action-icon-image(100px);
+}
+
+.action-icon-download {
+    .action-icon-image(140px);
+}
+
+.action-icon-playlist {
+    .action-icon-image(160px);
+}
+
+.action-icon-playing {
+    .action-icon-image(180px);
+}
+
+.action-icon-phone {
+    .action-icon-image(200px);
+}
+
+&:hover {
+    .action-icon-reserve {
+        .action-icon-image-hover(0);
+    }
+    
+    .action-icon-menu {
+        .action-icon-image-hover(20px);
+    }
+    
+    .action-icon-buy {
+        .action-icon-image-hover(40px);
+    }
+    
+    .action-icon-add_to_instant_queue {
+        .action-icon-image-hover(60px);
+    }
+    
+    .action-icon-listen {
+        .action-icon-image-hover(100px);
+    }
+    
+    .action-icon-download {
+        .action-icon-image-hover(140px);
+    }
+    
+    .action-icon-playlist {
+        .action-icon-image-hover(160px);
+    }
+    
+    .action-icon-playing {
+        .action-icon-image-hover(180px);
+    }
+    
+    .action-icon-phone {
+        .action-icon-image-hover(200px);
+    }
+}
+
+.source-image(@x) {
+    background-position: -@x -39px !important;
+    display: inline-block !important;
+}
+
+.source-opentable {
+    .source-image(0);
+}
+
+.source-amazon {
+    .source-image(20px);
+}
+
+.source-fandango {
+    .source-image(40px);
+}
+
+.source-rdio {
+    .source-image(60px);
+}
+
+.source-spotify {
+    .source-image(80px);
+}
+
+.source-itunes {
+    .source-image(100px);
+}*/
+
+
+/* **************************************************************************
+                                SETTINGS PAGE
+   ************************************************************************** */
+
+
+.option-likes {
+    background: url(/assets/img/notificationicons@2x.png) no-repeat;
+    .background-size(46px * 10, 46px);
 }
 
 
@@ -439,117 +398,39 @@ footer .app-store-button {
                             RETINA DISPLAY BUTTONS
    ************************************************************************** */
 
-/*
+
 .download-the-app-button {
     background: url(/assets/img/index/downloadbtn_sprite@2x.png) no-repeat;
-    width:  400px;
-    height: 64px;
-    
-    &:hover {
-        background-position: -404px 0;
-    }
-    
-    &:active {
-        background-position: -808px 0;
-    }
+    .background-size(200px * 3, 32px);
 }
 
 .app-store-button {
     background: url(/assets/img/index/appstore_sprite@2x.png) no-repeat;
-    width:  224px;
-    height: 80px;
-    
-    &:hover, &:active {
-        background-position: -228px 0;
-    }
-}
-
-.send-button {
-    background: url(/assets/img/submitbtn_sprite@2x.png) no-repeat;
-    
-    width:  137px;
-    height: 62px;
-    
-    &:hover  { background-position: -141px 0; }
-    &:active { background-position: -282px 0; }
-}
-
-.submit-button {
-    background: url(/assets/img/sendbtn_sprite@2x.png) no-repeat;
-    
-    width:  137px;
-    height: 62px;
-    
-    &:hover  { background-position: -141px 0; }
-    &:active { background-position: -282px 0; }
-}
-
-.save-button {
-    background: url(/assets/img/savechangesbtn_sprite@2x.png) no-repeat;
-    
-    width:  222px;
-    height: 62px;
-    
-    &:hover  { background-position: -226px 0; }
-    &:active { background-position: -452px 0; }
+    .background-size(112px * 2, 40px);
 }
 
 .download-the-free-app-button {
     background: url(/assets/img/downloadthefreeapp_btn_sprite@2x.png) no-repeat;
-    
-    width:  396px;
-    height: 84px;
-    
-    &:hover  { background-position: -400px 0; }
-    &:active { background-position: -800px 0; }
+    .background-size(198px * 3, 42px);
 }
 
-.option-likes {
-    background: url(/assets/img/notificationicons@2x.png) no-repeat;
-    
-    width:  92px;
-    height: 92px;
+.launcher-icon-button {
+    background: url(/assets/img/index/launchericon_sprite@2x.png) no-repeat;
+    .background-size(64px * 2, 64px);
 }
 
-.option-phone-icon {
-    background-position: -96px * 0;
+.send-button {
+    background: url(/assets/img/submitbtn_sprite@2x.png) no-repeat;
+    .background-size(68px * 3, 31px);
 }
 
-.option-email-icon {
-    background-position: -96px * 1;
+.submit-button {
+    background: url(/assets/img/sendbtn_sprite@2x.png) no-repeat;
+    .background-size(68px * 3, 31px);
 }
 
-.option-credits .option-icon {
-    background-position: -96px * 2;
+.save-button {
+    background: url(/assets/img/savechangesbtn_sprite@2x.png) no-repeat;
+    .background-size(121px * 3, 31px);
 }
-
-.option-likes .option-icon {
-    background-position: -96px * 3;
-}
-
-.option-todos .option-icon {
-    background-position: -96px * 4;
-}
-
-.option-mentions .option-icon {
-    background-position: -96px * 5;
-}
-
-.option-replies .option-icon {
-    background-position: -96px * 6;
-}
-
-.option-followers .option-icon {
-    background-position: -96px * 7;
-}
-
-.option-friends .option-icon {
-    background-position: -96px * 8;
-}
-
-.option-actions .option-icon {
-    background-position: -96px * 9;
-}
-
-*/
 

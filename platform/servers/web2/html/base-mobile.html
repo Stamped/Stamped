@@ -83,7 +83,7 @@
             {% endblock pre_header %}
             
             {% block header %}
-                <a href="/{{user.screen_name}}" class="user-logo-large"></a>
+                <a href="/" class="user-logo-large"></a>
                 <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app"></a>
             {% endblock header %}
             
@@ -94,6 +94,12 @@
         {% block pre_main %}
         <div id="main-page-content" class="main">
             {% endblock pre_main %}
+            
+            {% block popup-ios %}
+                <div id="popup-ios">
+                    {% include "popup-ios.html" %}
+                </div>
+            {% endblock popup-ios %}
             
             {% block main %}
             {% endblock main %}
