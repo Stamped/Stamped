@@ -41,15 +41,9 @@
 
 
 
-* DONE - Broken profile page when coming in after closing sDetail
-* Animation looks off now on all sDetail pages. Seems like the slant is too much and looks broken. (attached)
 * Mobile sDetail issues: 
     * 2x assets
-    * DONE - remove buttons that don't do anything
-    * DONE - fix giant button size issue
     * fix action links
-* Mobile 'change notifications' page looks broken
-
 
 TODO:
     * find better way of invoking lessc without creating jenky temporary files
@@ -57,9 +51,11 @@ TODO:
     * cleanup duplication of mobile CSS
     * cleanup duplication of CSS & JS in subpages
     * cleanup JS to be OO and better organized
-    * remove modernizr as a dependency
-    * remove jQuery imagesLoaded plugin dependency
-    * remove rdio jquery library dependency
+    * remove unnecessary dependencies:
+        * modernizr
+        * jQuery imagesLoaded plugin
+        * DONE - rdio jquery library
+    * reuse backbone for client-side updating logic
     
     * HIGH PRIORITY:
         * misc:
@@ -80,7 +76,6 @@ TODO:
                 * jobs page
     
     * navbar occasional missing graphics
-    * blurred FUCK MEDIOCRITY easter egg w/ f hotkey?
     /* Stop breaking my iphone font size! */
     div, p, a, li, td { -webkit-text-size-adjust:none; }
     
@@ -143,7 +138,7 @@ TODO:
         * DONE - Polish social sharing buttons
         * DONE - Opening / closing animations
         * DONE - Comment collapsing ala Google Plus
-        * ALPHA - Relayout according to sdetail spec
+        * DONE - Relayout according to sdetail spec
         * DONE - Transformed entity image
         * Move like / todo / comment counters to their own section
     
@@ -296,6 +291,11 @@ OLD:
             * DONE - blue border on active tastemaker's image
         * pane 4 (videos):
             * get v1 video preview asset image
+    * DONE - remove buttons that don't do anything
+    * DONE - fix giant button size issue
+    * DONE - Broken profile page when coming in after closing sDetail
+    * DONE - Animation looks off now on all sDetail pages
+    * DONE - Mobile 'change notifications' page looks broken
 
 ChangeList 6/8/2012:
 -------------------
@@ -342,11 +342,6 @@ ChangeList 6/22/2012:
     
     * sDetail:
         * Opening sDetail and closing now properly remembers the window's scroll offset
-
-
-            if ($http_user_agent ~* '(2\.0 MMP|240x320|400X240|AvantGo|BlackBerry|Blazer|Cellphone|Danger|DoCoMo|Elaine\/3\.0|EudoraWeb|Googlebot-Mobile|hiptop|IEMobile|KYOCERA\/WX310K|LG\/U990|MIDP-2\.|MMEF20|MOT-V|NetFront|Newt|Nintendo Wii|Nitro|Nokia|Opera Mini|Palm|PlayStation Portable|portalmmm|Proxinet|ProxiNet|SHARP-TQ-GX10|SHG-i900|Small|SonyEricsson|Symbian OS|SymbianOS|TS21i-10|UP\.Browser|UP\.Link|webOS|Windows CE|WinWAP|YahooSeeker\/M1A1-R2D2|NF-Browser|iPhone|iPod|Android|BlackBerry9530|G-TU915 Obigo|LGE VX|webOS|Nokia5800)') {
-                rewrite ^/(.*)$ /mobile/$1 break;
-            }
 
 rickroll: http://www.youtube.com/watch?v=ZL_Q4jBTh_8
 
