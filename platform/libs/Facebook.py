@@ -23,17 +23,9 @@ APP_ID          = get_api_key('facebook', 'app_id')
 APP_SECRET      = get_api_key('facebook', 'app_secret')
 APP_NAMESPACE   = get_api_key('facebook', 'app_namespace')
 
-USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAO4BgIokl8sBOlrBCpgyeo8NAp4NZCvQxuAEUYJzc2U7vIZC7hBcUhJmLES0u32kJFzNXffl3fK3AOHMpdlKe3ZBnlrMlpqI3GrIRcc'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
-
-AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
-
-USER_ID = '1337040065'
-#ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
 ACCESS_TOKEN = 'AAAEOIZBBUXisBAFC4pEYEpUYJlzM7FPq9m77m7k2k5wIrcZCmXSZC0TT1ri6VcMWV5acLBZAs6lHzdkFJrWHZASY4XbKTqUQZD'
+USER_ID = '1337040065'
+CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
 
 DEFAULT_TIMEOUT = 15
 
@@ -385,14 +377,12 @@ def globalFacebook():
     return __globalFacebook
 
 
-CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
-
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
     facebook = Facebook()
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
-    if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl(AUTH_USER_ID))
+    if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl('12345'))
     if 'extendAccessToken' in methods:      pprint(facebook.extendAccessToken(access_token))
     if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
     if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))
