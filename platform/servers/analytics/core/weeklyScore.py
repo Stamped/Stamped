@@ -32,7 +32,7 @@ class weeklyScore(object):
 
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
-            self.domains[suffix] = self.conn.get_domain('stats_dev_%s' % (suffix))
+            self.domains[suffix] = self.conn.get_domain('bowser_%s' % (suffix))
     
     
     
