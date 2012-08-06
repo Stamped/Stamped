@@ -94,7 +94,6 @@ class MongoActivityCollection(AActivityDB):
             self.add_raw_activity(verb, **kwargs)
         except Exception as e:
             logs.warning("Failed to run add_raw_activity: %s" % e)
-            raise
 
         subject         = kwargs.pop('subject', None)
         objects         = kwargs.pop('objects', {})
