@@ -91,9 +91,9 @@ class MongoActivityCollection(AActivityDB):
     
     def addActivity(self, verb, **kwargs):
         try:
-            self.addRawActivity(verb, **kwargs)
+            self.add_raw_activity(verb, **kwargs)
         except Exception as e:
-            logs.warning("Failed to run addRawActivity: %s" % e)
+            logs.warning("Failed to run add_raw_activity: %s" % e)
             raise
 
         subject         = kwargs.pop('subject', None)
@@ -228,7 +228,7 @@ class MongoActivityCollection(AActivityDB):
 
     def removeLikeActivity(self, userId, stampId):
         try:
-            self.removeLikeRawActivity(userId, stampId)
+            self.remove_like_raw_activity(userId, stampId)
         except Exception as e:
             logs.warning(e)
 
@@ -237,7 +237,7 @@ class MongoActivityCollection(AActivityDB):
 
     def removeTodoActivity(self, userId, entityId):
         try:
-            self.removeTodoRawActivity(userId, entityId)
+            self.remove_todo_raw_activity(userId, entityId)
         except Exception as e:
             logs.warning(e)
             
@@ -246,7 +246,7 @@ class MongoActivityCollection(AActivityDB):
 
     def removeFollowActivity(self, userId, friendId):
         try:
-            self.removeFollowRawActivity(userId, friendId)
+            self.remove_follow_raw_activity(userId, friendId)
         except Exception as e:
             logs.warning(e)
             
@@ -255,7 +255,7 @@ class MongoActivityCollection(AActivityDB):
 
     def removeFriendActivity(self, userId, friendId):
         try:
-            self.removeFriendRawActivity(userId, friendId)
+            self.remove_friend_raw_activity(userId, friendId)
         except Exception as e:
             logs.warning(e)
             
@@ -264,7 +264,7 @@ class MongoActivityCollection(AActivityDB):
 
     def removeCommentActivity(self, userId, commentId):
         try:
-            self.removeCommentRawActivity(userId, commentId)
+            self.remove_comment_raw_activity(userId, commentId)
         except Exception as e:
             logs.warning(e)
             
@@ -273,7 +273,7 @@ class MongoActivityCollection(AActivityDB):
 
     def removeActivityForStamp(self, stampId):
         try:
-            self.removeRawActivityForStamp(stampId)
+            self.remove_raw_activity_for_stamp(stampId)
         except Exception as e:
             logs.warning(e)
             
@@ -283,7 +283,7 @@ class MongoActivityCollection(AActivityDB):
     
     def removeUserActivity(self, userId):
         try:
-            self.removeUserRawActivity(userId)
+            self.remove_user_raw_activity(userId)
         except Exception as e:
             logs.warning(e)
             
@@ -309,15 +309,15 @@ class MongoActivityCollection(AActivityDB):
     def friends_collection(self):
         return MongoFriendsCollection()
 
-    def addRawActivity(self, verb, **kwargs):
+    def add_raw_activity(self, verb, **kwargs):
         subject         = kwargs.get('subject', None)
         objects         = kwargs.get('objects', {})
         benefit         = kwargs.get('benefit', None)
         source          = kwargs.get('source', None)
         body            = kwargs.get('body', None)
 
-        sendAlert       = kwargs.get('sendAlert', True)
-        recipientIds    = kwargs.get('recipientIds', [])
+        send_alert      = kwargs.get('sendAlert', True)
+        recipient_ids   = kwargs.get('recipientIds', [])
 
         now             = datetime.utcnow()
         created         = kwargs.get('created', now) 
@@ -358,50 +358,49 @@ class MongoActivityCollection(AActivityDB):
         # Check if it already exists and insert
         try:
             # Unique index on verb + subject + objects
-            activity = self.raw_activity_items_collection.addActivityItem(item)
-            activityId = activity.activity_id
+            activity = self.raw_activity_items_collection.add_activity_item(item)
+            activity_id = activity.activity_id
         except DuplicateKeyError as e:
-            # return
-            raise
+            return
 
         # Add link
-        for recipientId in recipientIds:
-            self.raw_activity_links_collection.addActivityLink(activityId, recipientId, created=created)
+        for recipient_id in recipient_ids:
+            self.raw_activity_links_collection.add_activity_link(activity_id, recipient_id, created=created)
 
-            self.build_activity(recipientId)
+            # self.build_activity(recipient_id)
         ### TODO: Create / save alert
 
 
-    def _removeRawActivityIds(self, activityIds):
-        self.raw_activity_links_collection.removeActivityLinks(activityIds)
-        self.raw_activity_items_collection.removeActivityItems(activityIds)
+    def _remove_raw_activity_ids(self, activity_ids):
+        self.raw_activity_links_collection.remove_activity_links(activity_ids)
+        self.raw_activity_items_collection.remove_activity_items(activity_ids)
 
-    def _removeRawActivity(self, verb, userId, objects):
-        activityIds = self.raw_activity_items_collection.getActivityIds(verb=verb, subject=userId, objects=objects)
-        self._removeRawActivityIds(activityIds)
+    def _remove_raw_activity(self, verb, user_id, objects):
+        activity_ids = self.raw_activity_items_collection.get_activity_ids(verb=verb, subject=user_id, objects=objects)
+        self._remove_raw_activity_ids(activity_ids)
 
-    def removeLikeRawActivity(self, userId, stampId):
-        return self._removeRawActivity('like', userId, objects={'stamp_id': stampId})
+    def remove_like_raw_activity(self, user_id, stamp_id):
+        return self._remove_raw_activity('like', user_id, objects={'stamp_id': stamp_id})
 
-    def removeTodoRawActivity(self, userId, entityId):
-        return self._removeRawActivity('todo', userId, objects={'entity_id': entityId})
+    def remove_todo_raw_activity(self, user_id, entity_id):
+        return self._remove_raw_activity('todo', user_id, objects={'entity_id': entity_id})
 
-    def removeFollowRawActivity(self, userId, friendId):
-        return self._removeRawActivity('follow', userId, objects={'user_id': friendId})
+    def remove_follow_raw_activity(self, user_id, friend_id):
+        return self._remove_raw_activity('follow', user_id, objects={'user_id': friend_id})
 
-    def removeFriendRawActivity(self, userId, friendId):
-        return self._removeRawActivity('friend', userId, objects={'user_id': friendId})
+    def remove_friend_raw_activity(self, user_id, friend_id):
+        return self._remove_raw_activity('friend', user_id, objects={'user_id': friend_id})
 
-    def removeCommentRawActivity(self, userId, commentId):
-        return self._removeRawActivity('comment', userId, objects={'comment_id': commentId})
+    def remove_comment_raw_activity(self, user_id, comment_id):
+        return self._remove_raw_activity('comment', user_id, objects={'comment_id': comment_id})
 
-    def removeRawActivityForStamp(self, stampId):
-        activityIds = self.raw_activity_items_collection.getActivityIds(objects={'stamp_id': stampId})
-        self._removeRawActivityIds(activityIds)
+    def remove_raw_activity_for_stamp(self, stamp_id):
+        activity_ids = self.raw_activity_items_collection.get_activity_ids(objects={'stamp_id': stamp_id})
+        self._remove_raw_activity_ids(activity_ids)
     
-    def removeUserRawActivity(self, userId):
-        activityIds = self.raw_activity_links_collection.getActivityIds(subject=userId)
-        self._removeRawActivityIds(activityIds)
+    def remove_user_raw_activity(self, user_id):
+        activity_ids = self.raw_activity_links_collection.get_activity_ids(subject=user_id)
+        self._remove_raw_activity_ids(activity_ids)
 
 
 
@@ -443,7 +442,7 @@ class MongoActivityCollection(AActivityDB):
                     key = '%s::%s::%s' % (item.verb, item.objects.stamp_id, item.timestamp.created.isoformat()[:10])
 
                 elif item.verb in set(['comment', 'reply', 'mention']):
-                    if item.comment_id is not None:
+                    if item.objects.comment_id is not None:
                         key = 'comment::%s' % item.objects.comment_id
                     else:
                         key = 'mention::%s' % item.objects.stamp_id
@@ -517,7 +516,6 @@ class MongoActivityCollection(AActivityDB):
 
 
 
-
 class MongoRawActivityItemCollection(AMongoCollection):
     
     def __init__(self):
@@ -538,26 +536,26 @@ class MongoRawActivityItemCollection(AMongoCollection):
     
     ### PUBLIC
     
-    def addActivityItem(self, activity):
+    def add_activity_item(self, activity):
         try:
             return self._addObject(activity)
         except DuplicateKeyError:
             logs.info("Activity item already exists: %s" % activity)
             raise
     
-    def removeActivityItem(self, activityId):
-        documentId = self._getObjectIdFromString(activityId)
-        result = self._removeMongoDocument(documentId)
+    def remove_activity_item(self, activity_id):
+        document_id = self._getObjectIdFromString(activity_id)
+        result = self._removeMongoDocument(document_id)
         return result
     
-    def removeActivityItems(self, activityIds):
-        documentIds = map(self._getObjectIdFromString, activityIds)
-        result = self._removeMongoDocuments(documentIds)
+    def remove_activity_items(self, activity_ids):
+        document_ids = map(self._getObjectIdFromString, activity_ids)
+        result = self._removeMongoDocuments(document_ids)
         return result
 
-    def getActivityItem(self, activityId):
-        documentId = self._getObjectIdFromString(activityId)
-        document = self._getMongoDocumentFromId(documentId)
+    def get_activity_item(self, activity_id):
+        document_id = self._getObjectIdFromString(activity_id)
+        document = self._getMongoDocumentFromId(document_id)
         return self._convertFromMongo(document)
 
     def get_activity_items(self, activity_ids, **kwargs):
@@ -567,7 +565,7 @@ class MongoRawActivityItemCollection(AMongoCollection):
 
         return map(self._convertFromMongo, documents)
 
-    def getActivityIds(self, **kwargs):
+    def get_activity_ids(self, **kwargs):
         query = {}
 
         # Subject
@@ -645,39 +643,39 @@ class MongoRawActivityLinkCollection(AMongoCollection):
     
     ### PUBLIC
 
-    def addActivityLink(self, activityId, userId, **kwargs):
+    def add_activity_link(self, activity_id, user_id, **kwargs):
         # Note: 'created' was necessary for backfilling data 
         item                = ActivityLink()
-        item.activity_id    = activityId 
-        item.user_id        = userId
+        item.activity_id    = activity_id 
+        item.user_id        = user_id
         timestamp           = BasicTimestamp()
         timestamp.created   = kwargs.pop('created', datetime.utcnow())
         item.timestamp      = timestamp
         self._addObject(item)
 
-    def removeActivityLink(self, activityId):
+    def remove_activity_link(self, activity_id):
         try:
-            self._collection.remove({'activity_id': activityId})
+            self._collection.remove({'activity_id': activity_id})
             return True
         except Exception as e:
             logs.warning("Cannot remove document: %s" % e)
-            raise Exception
+            raise 
 
-    def removeActivityLinks(self, activityIds):
+    def remove_activity_links(self, activity_ids):
         try:
-            self._collection.remove({'activity_id': {'$in': activityIds}},)
+            self._collection.remove({'activity_id': {'$in': activity_ids}},)
             return True
         except Exception as e:
             logs.warning("Cannot remove documents: %s" % e)
-            raise Exception
+            raise 
 
-    def removeActivityLinkForUser(self, activityId, userId):
+    def remove_activity_link_for_user(self, activity_id, user_id):
         try:
-            self._collection.remove({'activity_id': activityId}, {'user_id': userId})
+            self._collection.remove({'activity_id': activity_id}, {'user_id': user_id})
             return True
         except Exception as e:
             logs.warning("Cannot remove document: %s" % e)
-            raise Exception
+            raise 
 
     def get_activity_ids_for_user(self, user_id, **kwargs):
         since       = kwargs.pop('since', None)
@@ -696,11 +694,11 @@ class MongoRawActivityLinkCollection(AMongoCollection):
 
         return [ document['activity_id'] for document in documents ]
 
-    def countActivityIdsForUser(self, userId, **kwargs):
+    def count_activity_ids_for_user(self, user_id, **kwargs):
         since       = kwargs.pop('since', None)
         before      = kwargs.pop('before', None)
 
-        query = { 'user_id' : userId }
+        query = { 'user_id' : user_id }
         if since is not None and before is not None:
             query['timestamp.created'] = {'$gte': since, '$lte': before}
         elif since is not None:
