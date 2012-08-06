@@ -55,6 +55,7 @@ class PeriodicTaskRunner(object):
                     try:
                         self.__api.callTask(*args, **kwargs)
                     except Exception:
+                        # Logged in StampedAPI
                         pass
                     logs.info('Next invocation: ' + str(now + interval))
                     last_run = now
