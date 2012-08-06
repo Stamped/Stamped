@@ -156,7 +156,7 @@ def createNetflixLoginResponse(authUserId, netflixAddId=None):
 def netflixLogin(request, http_schema, authUserId, **kwargs):
     return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
-@handleHTTPCallbackRequest(requires_auth=False,
+@handleHTTPRequest(requires_auth=False,
                            http_schema=HTTPNetflixAuthResponse,
                            exceptions=exceptions)
 @require_http_methods(["GET"])
@@ -214,7 +214,7 @@ def createFacebookLoginResponse(authUserId):
 
 @handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["POST"])
-def facebookLogin(authUserId, **kwargs):
+def facebookLogin(request, authUserId, **kwargs):
     result =  createFacebookLoginResponse(authUserId)
     logs.info('result: %s' % result)
     return result
