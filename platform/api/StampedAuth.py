@@ -178,7 +178,9 @@ class StampedAuth(AStampedAuth):
         ### Update linked account with latest user token
         facebookToken, expires = self._facebook.extendAccessToken(fb_token)
         account.linked.facebook.token = facebookToken
-        account.linked.facebook.token_expiration = expires
+        if expires is not None:
+            expires = datetime.fromtimestamp(time.time() + expires)
+            account.linked.facebook.token_expiration = expires
         account.linked.facebook.extended_timestamp = datetime.utcnow()
         self._accountDB.updateLinkedAccount(account.user_id, account.linked.facebook)
 

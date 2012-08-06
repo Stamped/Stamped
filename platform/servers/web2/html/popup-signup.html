@@ -11,25 +11,19 @@
     
     {% block popup-header %}
     <div class="popup-header clearfix">
-        <div class="pronounced-title">Enter your phone number</div>
+        <div class="pronounced-title">Text a link to your iPhone to download the app.</div>
     </div>
     {% endblock popup-header %}
     
     {% block popup-body %}
     <div class="popup-body">
-        <p class="learn-more">or <a href="/">learn more</a>.</p>
-        <p class="download-desc">Text a download link to your iPhone:</p>
-        
         <form class="sms-form">
             <div class="sms clearfix">
                 <input name="phone_number" class="phone-number" value="555-555-5555" maxlength="14"></input> <button type="submit" class="send-button" action="/download-app" method="POST"></button>
             </div>
         </form>
         
-        <div class="or"><span class="dotted-left"></span><span>or</span><span class="dotted-right"></span></div>
-        
-        <p>using your phone's browser, simply visit</p>
-        <p><a href="/download" class="active-link">stamped.com/download</a></p>
+        <p class="learn-more">or <a href="/">learn more</a>.</p>
     </div>
     {% endblock popup-body %}
     
