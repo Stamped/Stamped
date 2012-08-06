@@ -937,6 +937,7 @@ class StampedAPI(AStampedAPI):
             userInfo = self._facebook.getUserInfo(linkedAccount.token)
             self._verifyFacebookAccount(userInfo['id'], authUserId)
             linkedAccount.linked_user_id = userInfo['id']
+            linkedAccount.third_party_id = userInfo['third_party_id']
             linkedAccount.linked_name = userInfo['name']
 
             if 'username' in userInfo:
@@ -1473,11 +1474,11 @@ class StampedAPI(AStampedAPI):
                     friend_linked = friendAcct.linked.facebook
                     friend_linked.third_party_id = friend_info['third_party_id']
                     self._accountDB.updateLinkedAccount(userId, friend_linked)
-                    payload = {
-                        'authUserId': authUserId,
-                        'followUserId': userId,
-                    }
-                    self.callTask(self.postToOpenGraphAsync, payload)
+                payload = {
+                    'authUserId': authUserId,
+                    'followUserId': userId,
+                }
+                self.callTask(self.postToOpenGraphAsync, payload)
 
     @API_CALL
     def removeFriendship(self, authUserId, userRequest):
@@ -3385,7 +3386,10 @@ class StampedAPI(AStampedAPI):
                 return
             except StampedFacebookOGImageSizeError as e:
                 logs.info('OG Image size error')
-                del(kwargs['imageUrl'])
+                try:
+                    del(kwargs['imageUrl'])
+                except KeyError:
+                    pass
                 if delay > 60*10:
                     raise e
                 time.sleep(delay)
@@ -4086,12 +4090,17 @@ class StampedAPI(AStampedAPI):
     def getTastemakerGuide(self, guideRequest):
         # Get popular stamps
         types = self._mapGuideSectionToTypes(guideRequest.section, guideRequest.subsection)
-        limit = 1000
+        limit = 500
         viewport = guideRequest.viewport
         if viewport is not None:
             since = None
             limit = 250
-        entityStats = self._entityStatsDB.getPopularEntityStats(types=types, viewport=viewport, limit=limit)
+        if guideRequest.section in ['book', 'film', 'music']:
+            entityIds = self._entityDB.getWhitelistedTastemakerEntityIds(guideRequest.section)
+            entityStats = self._entityStatsDB.getStatsForEntities(entityIds)
+            entityStats = filter(lambda x: True in [x.isType(t) for t in types], entityStats)
+        else:
+            entityStats = self._entityStatsDB.getPopularEntityStats(types=types, viewport=viewport, limit=limit)
 
         # Rank entities
         limit = 20
@@ -5159,12 +5168,12 @@ class StampedAPI(AStampedAPI):
     def _addFBLoginActivity(self, recipientId):
         objects = ActivityObjectIds()
         objects.user_ids = [ recipientId ]
-        body = "Connect to Facebook"
+        body = 'Tap here to share your stamps and activity with friends. You can always change preferences in "Settings."'
         self._activityDB.addActivity(verb           = 'notification_fb_login',
                                      recipientIds   = [ recipientId ],
                                      objects        = objects,
                                      body           = body,
-                                     unique         = False)
+                                     unique         = True)
 
     def _addActivity(self, verb,
                            userId,

@@ -748,7 +748,7 @@ class HTTPNetflixId(Schema):
 class HTTPNetflixAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamped_oauth_token',              basestring)
+        cls.addProperty('state',                            basestring)
         cls.addProperty('netflix_add_id',                   basestring)
         cls.addProperty('oauth_token',                      basestring)
         cls.addProperty('secret',                           basestring)
@@ -3403,8 +3403,8 @@ class HTTPActivity(Schema):
 
             elif self.verb == 'notification_fb_login':
                 _addUserObjects()
-                self.header = "Connect to Facebook"
-                self.image = _getIconURL('news_welcome')
+                self.header = "Turn on Facebook Sharing"
+                self.image = _getIconURL('fb_logo')
                 self.action = _buildFBLoginAction(self.objects.users[0])
 
         else:

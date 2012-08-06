@@ -9,6 +9,7 @@
 #import "STAvatarView.h"
 #import "ImageLoader.h"
 #import "STTextCalloutView.h"
+#import "STImageCache.h"
 
 @implementation STAvatarView
 @synthesize imageURL=_imageURL;
@@ -33,7 +34,7 @@
         [self addSubview:background];
         _background = [background retain];
         [background release];
-
+        
         UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectInset(self.bounds, 3.0f, 3.0f)];
         imageView.backgroundColor = [UIColor colorWithRed:0.7490f green:0.7490f blue:0.7490f alpha:1.0f];
         imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -75,21 +76,30 @@
     if (_imageURL && [_imageURL isEqual:imageURL]) return;
     [_imageURL release], _imageURL=nil;
     _imageURL = [imageURL retain];
-        
+    
     self.imageView.image = nil;
-    [[ImageLoader sharedLoader] imageForURL:_imageURL style:^UIImage*(UIImage *image){
-      
+    [[STImageCache sharedInstance] imageForImageURL:imageURL.absoluteString andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
         UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
         [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
         UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        return scaledImage;
-        
-    } styleIdentifier:[NSString stringWithFormat:@"st_ava_%f", floorf(self.bounds.size.width)] completion:^(UIImage *image, NSURL *url) {
-        if ([_imageURL isEqual:url]) {
-            self.imageView.image = image;
+        if ([_imageURL isEqual:imageURL]) {
+            self.imageView.image = scaledImage;
         }
     }];
+    //    [[ImageLoader sharedLoader] imageForURL:_imageURL style:^UIImage*(UIImage *image){
+    //      
+    //        UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0);
+    //        [image drawInRect:CGRectMake(0.0f, 0.0f, self.bounds.size.width, self.bounds.size.height)];
+    //        UIImage *scaledImage = UIGraphicsGetImageFromCurrentImageContext();
+    //        UIGraphicsEndImageContext();
+    //        return scaledImage;
+    //        
+    //    } styleIdentifier:[NSString stringWithFormat:@"st_ava_%f", floorf(self.bounds.size.width)] completion:^(UIImage *image, NSURL *url) {
+    //        if ([_imageURL isEqual:url]) {
+    //            self.imageView.image = image;
+    //        }
+    //    }];
     
 }
 

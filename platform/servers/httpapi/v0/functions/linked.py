@@ -8,6 +8,8 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import time
+from datetime import datetime
 from servers.httpapi.v0.helpers import *
 from errors             import *
 from api.HTTPSchemas        import *
@@ -34,10 +36,6 @@ exceptions = [
 def show(request, authUserId, **kwargs):
     linkedAccounts = stampedAPI.getLinkedAccounts(authUserId)
 
-    # Temporary hack to only show Facebook if an extended token exists
-    if linkedAccounts is not None and linkedAccounts.facebook is not None and \
-        (linkedAccounts.facebook.token_expiration is None and linkedAccounts.facebook.extended_timestamp is None):
-        del(linkedAccounts.facebook)
     if linkedAccounts is None:
         result = {}
     else:
@@ -102,9 +100,6 @@ def _buildShareSettingsFromLinkedAccount(linked):
         ]
         return group
 
-    if linked.token is None:
-        return []
-
     result.append(buildGroup('stamps', 'Publish My Stamps'))
     result.append(buildGroup('likes', 'Publish Stamps That I Like'))
     result.append(buildGroup('todos', "Publish My Todo's"))
@@ -139,23 +134,23 @@ def showSettings(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(result)
 
-def createNetflixLoginResponse(request, netflixAddId=None):
-    if 'oauth_token' in request.GET:
-        oauth_token = request.GET['oauth_token']
-    elif 'oauth_token' in request.POST:
-        oauth_token = request.POST['oauth_token']
-    else:
-        raise StampedMissingLinkedAccountTokenError("Access token not found")
-
+def createNetflixLoginResponse(authUserId, netflixAddId=None):
+#    if 'oauth_token' in request.GET:
+#        oauth_token = request.GET['oauth_token']
+#    elif 'oauth_token' in request.POST:
+#        oauth_token = request.POST['oauth_token']
+#    else:
+#        raise StampedMissingLinkedAccountTokenError("Access token not found")
 
     netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl(oauth_token, netflixAddId)
+    oid = stampedAPI._callbackTokenDB.addUserId(authUserId)
+    secret, url = netflix.getLoginUrl(oid, netflixAddId)
 
     response                = HTTPActionResponse()
     source                  = HTTPActionSource()
     source.source           = 'netflix'
     source.link             = url
-    #source.endpoint         = 'account/linked/netflix/login_callback.json'
+
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
     print ('### netflix login response: %s' % response.dataExport())
@@ -171,18 +166,18 @@ def netflixLogin(request, http_schema, authUserId, **kwargs):
 @handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse,
                            exceptions=exceptions)
 @require_http_methods(["GET"])
-def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
+def netflixLoginCallback(request, http_schema, **kwargs):
     netflix = globalNetflix()
 
     logs.info('### http_schema: %s ' % http_schema)
+    oid = http_schema.state
+    authUserId = stampedAPI._callbackTokenDB.getUserId(oid)
 
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
         result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
-
-
 
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
@@ -207,8 +202,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 def createFacebookLoginResponse(authUserId):
     logs.info('called createFacebookLoginResponse with user_id: %s' % authUserId)
     facebook = stampedAPI._facebook
-    oid = stampedAPI._fbCallbackTokenDB.addUserId(authUserId)
-    url = facebook.getLoginUrl(authUserId, oid)
+    oid = stampedAPI._callbackTokenDB.addUserId(authUserId)
+    url = facebook.getLoginUrl(oid)
 
     logs.info('url: %s' % url)
 
@@ -241,9 +236,8 @@ def facebookLoginCallback(request, http_schema, **kwargs):
     logs.info('### http_schema: %s ' % http_schema)
 
     oid = http_schema.state
-    authUserId = stampedAPI._fbCallbackTokenDB.getUserId(oid)
-    stampedAPI._fbCallbackTokenDB.removeUserId(oid)
-#    authUserId, client_id = checkOAuth(oauth_token)
+    authUserId = stampedAPI._callbackTokenDB.getUserId(oid)
+
     # Acquire the user's FB access token
     try:
         access_token, expires = facebook.getUserAccessToken(http_schema.code)
@@ -256,13 +250,21 @@ def facebookLoginCallback(request, http_schema, **kwargs):
 
     acct = stampedAPI.getAccount(authUserId)
 
+
+    expires_dt = datetime.fromtimestamp(time.time() + expires)
     # If the user already has a FB account, then update it with the new access_token
     if acct.linked is not None and acct.linked.facebook is not None:
-        expires_dt = datetime.fromtimestamp(time.time() + expires)
         linked = acct.linked.facebook
         linked.token = access_token
         linked.token_expiration = expires_dt
         linked.extended_timestamp = datetime.utcnow()
+
+        linked.share_settings = LinkedAccountShareSettings()
+        linked.share_settings.share_stamps  = True
+        linked.share_settings.share_likes   = True
+        linked.share_settings.share_todos   = True
+        linked.share_settings.share_follows = True
+
         stampedAPI._accountDB.updateLinkedAccount(authUserId, linked)
     # Otherwise, we'll get the User's info with the access token and create a new linked account
     else:
@@ -270,10 +272,19 @@ def facebookLoginCallback(request, http_schema, **kwargs):
         linked                          = LinkedAccount()
         linked.service_name             = 'facebook'
         linked.token                    = access_token
+        linked.token_expiration         = expires_dt
+        linked.extended_timestamp       = datetime.utcnow()
         linked.linked_user_id           = userInfo['id']
         linked.linked_screen_name       = userInfo.get('username', None)
         linked.linked_name              = userInfo['name']
         linked.third_party_id           = userInfo['third_party_id']
+
+        linked.share_settings = LinkedAccountShareSettings()
+        linked.share_settings.share_stamps  = True
+        linked.share_settings.share_likes   = True
+        linked.share_settings.share_todos   = True
+        linked.share_settings.share_follows = True
+
         stampedAPI.addLinkedAccount(authUserId, linked)
 
     #return HttpResponseRedirect("stamped://facebook/link/success")

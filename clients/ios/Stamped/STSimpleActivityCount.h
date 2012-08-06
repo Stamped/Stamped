@@ -13,6 +13,7 @@
 @interface STSimpleActivityCount : NSObject <STActivityCount, NSCoding>
 
 @property (nonatomic, readwrite, copy) NSNumber* numberUnread;
+@property (nonatomic, readwrite, retain) id<STAction> action;
 
 + (RKObjectMapping*)mapping;
 

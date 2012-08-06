@@ -1,7 +1,6 @@
 import Globals
 from time import sleep
 from MongoStampedAPI import MongoStampedAPI
-from errors import StampedFacebookTokenError
 
 api = MongoStampedAPI()
 
@@ -16,13 +15,14 @@ if __name__ == '__main__':
 
 
 users = list(api._accountDB._collection.find({'linked.facebook.extended_timestamp' : {'$exists' : 0}}))
+print('%s accounts found for update.  Updating %s' % (len(users), limit))
 
 if len(users) > limit:
     users = users[:limit]
 
 for u in users:
     user_id = u['_id']
-    print('updating user_id: %s  token: %s' % (user_id, token))
+    print('updating user_id: %s' % user_id)
     try:
         api._addFBLoginActivity(user_id)
         testedUsers.add(user_id)

@@ -33,7 +33,7 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBALOGJoY9PqoHlO2icemRstxQfqZBx45UEAHym2JwuYBGB6WYZCHjkheHKFKZBiddTioiK7X129ijZAdIZAWsZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAFC4pEYEpUYJlzM7FPq9m77m7k2k5wIrcZCmXSZC0TT1ri6VcMWV5acLBZAs6lHzdkFJrWHZASY4XbKTqUQZD'
 
 DEFAULT_TIMEOUT = 15
 
@@ -132,7 +132,13 @@ class Facebook(object):
     def getUserPermissions(self, access_token, user_id='me'):
         path = '%s/permissions' % user_id
         result = self._get(access_token, path)
-        return result['data'][0]
+        try:
+            if 'data' in result and len(result['data']) > 0:
+                return result['data'][0]
+        except Exception as e:
+            logs.warning("Unable to read result: %s (%s)" % (result, e))
+
+        return []
 
     def getFriendIds(self, access_token):
         path = 'me/friends'
@@ -235,9 +241,8 @@ class Facebook(object):
         r = re.search(r'expires=([^&]*)', result)
         expires = None
         if r is not None:
-            expires = r.group(1)
-            #expires = datetime.fromtimestamp(time.time() + int(expires))
-        return token, int(expires)
+            expires = int(r.group(1))
+        return token, expires
 
 
     def createTestUser(self, name, access_token, permissions=None, installed=True, locale='en_US', app_id=APP_ID):
@@ -356,12 +361,9 @@ class Facebook(object):
             **params
         )
 
-    def getLoginUrl(self, authUserId, callbackToken):
-#        callback_url = utils.getDomain() + ('account/linked/facebook/login_callback.json?secret=%s&stamped_oauth_token=%s' %
-#                                            (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
+    def getLoginUrl(self, callbackToken):
         callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
         permissions = 'user_about_me,user_location,email,publish_stream,publish_actions'
-        #unique = datetime.now().strftime("%H:%M:%S.%f")
         path = "https://www.facebook.com/dialog/oauth?" \
                "client_id=%s" \
                "&redirect_uri=%s" \
@@ -370,11 +372,6 @@ class Facebook(object):
                (APP_ID, callback_url, permissions, callbackToken)
 
         return path
-#        print path
-#        response, content = service_request('facebook', 'GET', path)
-#        print(response)
-#        print(content)
-#        return content
 
 
 __globalFacebook = None

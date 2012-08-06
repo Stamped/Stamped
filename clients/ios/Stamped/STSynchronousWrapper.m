@@ -47,7 +47,7 @@
   if (self) {
     _proxy = [[STWeakProxy alloc] initWithValue:self];
     _loadingView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-    _loadingView.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+      _loadingView.frame = [Util centeredAndBounded:_loadingView.frame.size inFrame:[Util originRectWithRect:self.frame]];
     _completion = [completionBlock copy];
     [self addSubview:_loadingView];
     _loadingView.hidden = NO;
@@ -115,7 +115,7 @@
   if (child) {
     [UIView animateWithDuration:duration animations:^{
       CGRect frame = self.loadingView.frame;
-      frame.size.height += delta;
+      frame.origin.y += delta/2;
       self.loadingView.frame = frame;
     } completion:completion_block];
   }

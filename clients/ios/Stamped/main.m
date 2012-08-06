@@ -12,13 +12,16 @@
 #import "Util.h"
 
 int main(int argc, char* argv[]) {
-    if ([[STConfiguration sharedInstance] internalVersion] > 0) {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
-    }
-    else {
-        NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-        int retVal = UIApplicationMain(argc, argv, nil, nil);
-        [pool release];
-        return retVal;
+    @autoreleasepool {
+        
+        if ([[STConfiguration sharedInstance] internalVersion] > 0) {
+            return UIApplicationMain(argc, argv, nil, NSStringFromClass([STAppDelegate class]));
+        }
+        else {
+            NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+            int retVal = UIApplicationMain(argc, argv, nil, nil);
+            [pool release];
+            return retVal;
+        }
     }
 }

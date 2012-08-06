@@ -406,7 +406,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         CHUNK_SIZE = 10000
 
         for i in range(int(len(twitterIds) / CHUNK_SIZE) + 1):
-            chunk = twitterIds[CHUNK_SIZE*i:(CHUNK_SIZE+1)*i]
+            chunk = twitterIds[CHUNK_SIZE*i:CHUNK_SIZE*(i+1)]
 
             data = self._collection.find({"linked.twitter.linked_user_id": {"$in": chunk}}).limit(limit)
 
@@ -426,7 +426,7 @@ class MongoUserCollection(AMongoCollection, AUserDB):
         CHUNK_SIZE = 10000
         
         for i in range(int(len(facebookIds) / CHUNK_SIZE) + 1):
-            chunk = facebookIds[CHUNK_SIZE*i:(CHUNK_SIZE+1)*i]
+            chunk = facebookIds[CHUNK_SIZE*i:CHUNK_SIZE*(i+1)]
 
             data = self._collection.find({"linked.facebook.linked_user_id": {"$in": chunk}}).limit(limit)
 
