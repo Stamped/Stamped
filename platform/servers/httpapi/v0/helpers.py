@@ -401,12 +401,16 @@ def checkOAuth(oauth_token, required=True):
         return authenticated_user_id, client_id
 
     except StampedAuthUserNotFoundError:
-        raise StampedHTTPError(401, "access_denied", "User not found")
+        if required == False:
+            raise StampedHTTPError(401, "access_denied", "User not found")
     except StampedInvalidAuthTokenError:
-        raise StampedHTTPError(401, "invalid_token")
+        if required == False:
+            raise StampedHTTPError(401, "invalid_token")
     except Exception, e:
-        logs.warning("Error: %s" % e)
-        raise StampedHTTPError(401, "invalid_token")
+        if required == False:
+            logs.warning("Error: %s" % e)
+            raise StampedHTTPError(401, "invalid_token")
+    return None, None
 
 def parseRequest(schema, request, **kwargs):
     data = { }
