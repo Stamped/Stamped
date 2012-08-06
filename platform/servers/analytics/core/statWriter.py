@@ -59,6 +59,6 @@ class statWriter(object):
                 domain = self.conn.get_domain(domain)
             except SDBResponseError:
                 domain = self.conn.create_domain(domain)
-            domain.put_attributes(key, {'diffs': stat['diffs'], 'errs': stat['errs']}, replace=True)
+            domain.put_attributes(key, stat['stats'], replace=True)
         
         return True

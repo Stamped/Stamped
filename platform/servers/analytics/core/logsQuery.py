@@ -38,7 +38,6 @@ class logsQuery(object):
         self.domains = {}
         self.statSet  = set()
         self.statDict = {}
-        self.errDict = {}
         self.statCount = 0
         self.statCountByNode = {}
         self.statTimeByNode = {}
@@ -131,10 +130,13 @@ class logsQuery(object):
                 
                 if 'cde' in stat:
                     errType = stat['cde'][0]
+                    if errType != "4" and errType != "5":
+                        print stat
+                        continue
                     try:
-                        self.errDict['%s-%s' % (key,errType)] +=1
+                        self.statDict['%s-%s' % (key,errType)] +=1
                     except KeyError:
-                        self.errDict['%s-%s' % (key,errType)] = 1
+                        self.statDict['%s-%s' % (key,errType)] = 1
                 else:
                     try:
                         self.statDict[key].append(diff)
@@ -143,7 +145,6 @@ class logsQuery(object):
             
     def latencyReport(self,t0,t1,uri=None,blacklist=[],whitelist=[]):
         self.statDict = {}
-        self.errDict = {}
         
         pool = Pool(16)
         
@@ -152,8 +153,33 @@ class logsQuery(object):
             pool.spawn(self.latencyQuery,self.domains[suffix],t0,t1,uri,blacklist,whitelist)
             
         pool.join()
+        
+        bucketed_diffs = {}
+        
+        for key,value in self.statDict.items():
+            if "-4" in key or "-5" in key:
+                continue
+            new_vals = {} 
+            for diff in value:
+                diff = round(diff,2)
+                if diff in new_vals:
+                    new_vals[diff] += 1
+                else:
+                    new_vals[diff] = 1
             
-        return self.statDict, self.errDict
+            # Enforce simpledb size limits for now
+            if len(str(new_vals)) > 1024:
+                new_vals = {} 
+                for diff in value:
+                    diff = round(diff,1)
+                    if diff in new_vals:
+                        new_vals[diff] += 1
+                    else:
+                        new_vals[diff] = 1
+            
+            bucketed_diffs[key] = new_vals
+        
+        return bucketed_diffs
 
     def qpsReport(self,time,interval,total_seconds):
         blacklist=[]

@@ -46,7 +46,7 @@ logsQ = logsQuery(stack_name)
 dash = Dashboard(api,logsQ)
 
 
-
+@login_required
 def index(request):
     today_stamps_hourly,todayStamps,yest_stamps_hourly,yestStamps,week_stamps_hourly,weekStamps,deltaStampsDay,deltaStampsWeek = dash.newStamps()
 
@@ -110,6 +110,7 @@ def index(request):
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def enrichment(request):
     
     class enrichForm(forms.Form):
@@ -144,6 +145,7 @@ def enrichment(request):
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def latency(request):
     
     class latencyForm(forms.Form):
@@ -204,6 +206,7 @@ def latency(request):
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def stress(request):
     
     query = logsQuery(stack_name)
@@ -248,6 +251,7 @@ def stress(request):
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def segmentation(request):
     
     powerT,activeT,irregularT,dormantT = [],[],[],[]
@@ -295,6 +299,7 @@ def segmentation(request):
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def trending(request):
     
     class trendForm(forms.Form):
@@ -371,6 +376,7 @@ def trending(request):
     })
     return HttpResponse(t.render(c))
 
+@login_required
 def custom(request):
 
     class inputForm(forms.Form):
