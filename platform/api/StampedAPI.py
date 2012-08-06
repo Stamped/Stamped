@@ -1894,8 +1894,7 @@ class StampedAPI(AStampedAPI):
         gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
 
     def updateAutoCompleteIndexAsync(self):
-        return
-        # pushNewIndexToS3()
+        pushNewIndexToS3()
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):
