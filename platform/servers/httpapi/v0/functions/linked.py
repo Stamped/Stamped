@@ -157,8 +157,9 @@ def netflixLogin(request, http_schema, authUserId, **kwargs):
     return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
 @handleHTTPRequest(requires_auth=False,
-                           http_schema=HTTPNetflixAuthResponse,
-                           exceptions=exceptions)
+                   parse_request_kwargs={'allow_oauth_token' : True},
+                   http_schema=HTTPNetflixAuthResponse,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, http_schema, **kwargs):
     netflix = globalNetflix()
@@ -220,9 +221,9 @@ def facebookLogin(request, authUserId, **kwargs):
     return result
 
 
-@handleHTTPCallbackRequest(requires_auth=False,
-                           http_schema=HTTPFacebookAuthResponse,
-                           exceptions=exceptions)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPFacebookAuthResponse,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def facebookLoginCallback(request, http_schema, **kwargs):
     facebook = globalFacebook()
