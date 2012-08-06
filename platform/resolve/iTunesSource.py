@@ -136,10 +136,10 @@ class _iTunesObject(object):
     def source(self):
         return "itunes"
     
-    @property
+    @lazyProperty
     def images(self):
         try:
-            return [ self.data['artworkUrl100'] ]
+            return [ self._findBestImage(self.data['artworkUrl100']) ]
         except KeyError:
             return []
     
@@ -224,9 +224,17 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
             }
                 for track in results if track.pop('wrapperType', None) == 'track'
         ]
+
+    @lazyProperty
+    def images(self):
+        artistImages = super(_iTunesObject, self).images
+        if artistImages:
+            return artistImages
+
+        # iTunes doesn't usually provide image for artists, so we just take the album art.
+        albums = self.albums
+        return [self._findBestImage(albums[0]['data']['artworkUrl100'])] if albums else []
     
-    #def __repr__(self):
-    #    return "%s, %s" % (pformat(self.tracks), pformat(self.albums))
 
 class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
     """
@@ -733,8 +741,6 @@ class iTunesSource(GenericSource):
         groups = GenericSource.getGroups(self, entity)
         if not entity.isType('app') and not entity.isType('movie') and not entity.isType('tv'):
             groups.remove('desc')
-        if entity.isType('artist'):
-            groups.remove('images')
         return groups
 
     def entityProxyFromKey(self, itunesId, **kwargs):
