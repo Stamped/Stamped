@@ -71,8 +71,8 @@ if __name__ == '__main__':
     task_runner = PeriodicTaskRunner()
     task_runner.register_task(
             datetime.timedelta(hours=3),
-            MongoStampedAPI.crawlExternalSourcesAsync, {})
+            MongoStampedAPI.crawlExternalSourcesAsync, {}, queue='enrich')
     task_runner.register_task(
             datetime.timedelta(days=1),
-            MongoStampedAPI.updateAutoCompleteIndexAsync, {})
+            MongoStampedAPI.updateAutoCompleteIndexAsync, {}, queue='enrich')
     task_runner.run()
