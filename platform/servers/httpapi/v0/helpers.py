@@ -401,13 +401,13 @@ def checkOAuth(oauth_token, required=True):
         return authenticated_user_id, client_id
 
     except StampedAuthUserNotFoundError:
-        if required == False:
+        if required:
             raise StampedHTTPError(401, "access_denied", "User not found")
     except StampedInvalidAuthTokenError:
-        if required == False:
+        if required:
             raise StampedHTTPError(401, "invalid_token")
     except Exception, e:
-        if required == False:
+        if required:
             logs.warning("Error: %s" % e)
             raise StampedHTTPError(401, "invalid_token")
     return None, None
