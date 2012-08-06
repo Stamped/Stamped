@@ -135,13 +135,6 @@ def showSettings(request, authUserId, http_schema, **kwargs):
     return transformOutput(result)
 
 def createNetflixLoginResponse(authUserId, netflixAddId=None):
-#    if 'oauth_token' in request.GET:
-#        oauth_token = request.GET['oauth_token']
-#    elif 'oauth_token' in request.POST:
-#        oauth_token = request.POST['oauth_token']
-#    else:
-#        raise StampedMissingLinkedAccountTokenError("Access token not found")
-
     netflix = globalNetflix()
     oid = stampedAPI._callbackTokenDB.addUserId(authUserId)
     secret, url = netflix.getLoginUrl(oid, netflixAddId)
@@ -160,8 +153,8 @@ def createNetflixLoginResponse(authUserId, netflixAddId=None):
 @handleHTTPRequest(http_schema=HTTPNetflixId,
                    exceptions=exceptions)
 @require_http_methods(["GET"])
-def netflixLogin(request, http_schema, authUserId, **kwargs):
-    return createNetflixLoginResponse(request, http_schema.netflix_id)
+def netflixLogin(authUserId, http_schema, **kwargs):
+    return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
 @handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse,
                            exceptions=exceptions)
@@ -220,7 +213,7 @@ def createFacebookLoginResponse(authUserId):
 
 @handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["POST"])
-def facebookLogin(request, authUserId, **kwargs):
+def facebookLogin(authUserId, **kwargs):
     result =  createFacebookLoginResponse(authUserId)
     logs.info('result: %s' % result)
     return result
