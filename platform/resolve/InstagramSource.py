@@ -1,4 +1,5 @@
 # Model classes taken from https://github.com/Instagram/python-instagram/blob/master/instagram/models.py
+from __future__ import absolute_import
 
 import Globals
 from utils              import lazyProperty

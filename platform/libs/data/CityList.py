@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 # top 1000 US cities by population
 # converted from http://www.world-gazetteer.com/

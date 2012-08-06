@@ -1,4 +1,5 @@
 # python_example.py
+from __future__ import absolute_import
 
 # Steve Ivy <steveivy@gmail.com>
 # http://monkinetic.com

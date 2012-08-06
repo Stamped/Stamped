@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 import os, sys, pymongo, json, struct, ssl, binascii
 from socket import socket

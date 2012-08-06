@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 """Truncation beautifier function
 This simple function attempts to intelligently truncate a given string
 """

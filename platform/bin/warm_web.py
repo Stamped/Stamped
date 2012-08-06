@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 """
     Small utility for warming the web server caches for the pages which we anticipate 

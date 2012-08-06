@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 __author__    = "Stamped (dev@Stamped.com)"
 __version__   = "1.0"

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 import pymongo, json, codecs, os, sys
 from subprocess import Popen, PIPE

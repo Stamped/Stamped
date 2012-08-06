@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 """
     Top-level module imported by all of the Stamped platform which accomplishes 

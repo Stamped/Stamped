@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 __author__ = "Kirsten Jones <synedra@gmail.com>"
 __version__ = "$Rev$"
 __date_ = "$Date$"

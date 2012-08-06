@@ -1,6 +1,7 @@
 # Create your views here.
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"

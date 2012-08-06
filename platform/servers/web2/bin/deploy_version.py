@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 __author__    = "Stamped (dev@stamped.com)"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"

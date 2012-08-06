@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import os.path
 
 def load_from_search_strings_file():

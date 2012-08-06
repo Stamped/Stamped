@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #Robby test script to activate new accounts
+from __future__ import absolute_import
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"

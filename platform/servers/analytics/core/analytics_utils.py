@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import Globals
 import math
 from datetime import datetime,timedelta

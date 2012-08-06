@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 from django.core.management import execute_manager
 import imp
 try:

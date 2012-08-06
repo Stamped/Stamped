@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from BeautifulSoup import BeautifulSoup
 from sys import argv
 from datetime import *

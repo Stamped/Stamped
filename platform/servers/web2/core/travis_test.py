@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 user = {
     u'bio': u'Lead engineer at Stamped; formerly worked at Microsoft and Pixar.',

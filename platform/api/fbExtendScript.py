@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import Globals
 from time import sleep
 from MongoStampedAPI import MongoStampedAPI

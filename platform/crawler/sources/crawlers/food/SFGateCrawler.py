@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 #SFGate only maintains a list of the top 100 restaurants in the SF area
 

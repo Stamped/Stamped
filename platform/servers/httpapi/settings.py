@@ -1,4 +1,5 @@
 # Django settings for httpapi project.
+from __future__ import absolute_import
 
 import Globals
 import logs

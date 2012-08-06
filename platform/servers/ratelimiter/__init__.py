@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import os, sys
 
 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

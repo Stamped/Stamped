@@ -1,4 +1,5 @@
 # Django settings for www project.
+from __future__ import absolute_import
 
 import Globals
 import utils, os, libs.ec2_utils

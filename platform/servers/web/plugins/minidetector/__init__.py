@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 from servers.web.plugins.minidetector.useragents import search_strings
 

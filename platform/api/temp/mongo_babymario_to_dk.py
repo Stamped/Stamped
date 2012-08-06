@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 import pymongo, json, codecs, os, sys, bson, unicodedata
 from subprocess import Popen, PIPE
