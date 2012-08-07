@@ -215,7 +215,8 @@ def handleHTTPRequest(requires_auth=True,
                         logs.debug("Origin not included")
                 
                 params = {}
-                params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request, required=requires_auth)
+                if not 'keep_oauth_token' in parse_request_kwargs:
+                    params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request)
                 params['client_id'] = checkClient(request, required=requires_client)
                 
                 if parse_request:
@@ -297,7 +298,7 @@ def optionalOAuth(request):
     
     return authUserId
 
-def checkOAuthWithRequest(request, required=True):
+def checkOAuthWithRequest(request):
     ### Parse Request for Access Token
     try:
         if request.method == 'GET':
@@ -311,9 +312,9 @@ def checkOAuthWithRequest(request, required=True):
             return None, None
         raise StampedHTTPError(400, "invalid_request")
 
-    return checkOAuth(oauth_token, required)
+    return checkOAuth(oauth_token)
 
-def checkOAuth(oauth_token, required=True):
+def checkOAuth(oauth_token):
     logs.token(oauth_token)
 
     ### Validate OAuth Access Token
@@ -331,16 +332,12 @@ def checkOAuth(oauth_token, required=True):
         return authenticated_user_id, client_id
 
     except StampedAuthUserNotFoundError:
-        if required:
-            raise StampedHTTPError(401, "access_denied", "User not found")
+        raise StampedHTTPError(401, "access_denied", "User not found")
     except StampedInvalidAuthTokenError:
-        if required:
-            raise StampedHTTPError(401, "invalid_token")
+        raise StampedHTTPError(401, "invalid_token")
     except Exception, e:
-        if required:
-            logs.warning("Error: %s" % e)
-            raise StampedHTTPError(401, "invalid_token")
-    return None, None
+        logs.warning("Error: %s" % e)
+        raise StampedHTTPError(401, "invalid_token")
 
 def parseRequest(schema, request, **kwargs):
     data = { }
@@ -360,7 +357,7 @@ def parseRequest(schema, request, **kwargs):
                 v = None
             data[k] = v
 
-        if not kwargs.get('allow_oauth_token', False):
+        if not kwargs.get('keep_oauth_token', False):
             data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
@@ -422,7 +419,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
             data[fileName] = f.read()
             logs.attachment(fileName, f.size)
 
-        if not kwargs.get('allow_oauth_token', False):
+        if not kwargs.get('keep_oauth_token', False):
             data.pop('oauth_token',   None)
         data.pop('client_id', None)
         data.pop('client_secret', None)

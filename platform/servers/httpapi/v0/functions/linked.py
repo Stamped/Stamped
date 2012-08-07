@@ -157,7 +157,7 @@ def netflixLogin(request, http_schema, authUserId, **kwargs):
     return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
 @handleHTTPRequest(requires_auth=False,
-                   parse_request_kwargs={'allow_oauth_token' : True},
+                   parse_request_kwargs={'keep_oauth_token' : True},
                    http_schema=HTTPNetflixAuthResponse,
                    exceptions=exceptions)
 @require_http_methods(["GET"])
