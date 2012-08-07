@@ -159,12 +159,12 @@ def handleThirdPartyOAuthToken():
 
         @wraps(fn)
         def wrapper(request, *args, **kwargs):
-            if request.method == 'GET' and 'oauth_token' in request.GET:
-                request.GET['thirdparty_oauth_token'] = request.GET['oauth_token']
-                del(request.GET['oauth_token'])
-            if request.method == 'POST' and 'oauth_token' in request.POST:
-                request.POST['thirdparty_oauth_token'] = request.POST['oauth_token']
-                del(request.POST['oauth_token'])
+#            if request.method == 'GET' and 'oauth_token' in request.GET:
+#                request.GET['thirdparty_oauth_token'] = request.GET['oauth_token']
+#                del(request.GET['oauth_token'])
+#            if request.method == 'POST' and 'oauth_token' in request.POST:
+#                request.POST['thirdparty_oauth_token'] = request.POST['oauth_token']
+#                del(request.POST['oauth_token'])
             ret = fn(request, *args, **kwargs)
             return ret
 
@@ -172,13 +172,13 @@ def handleThirdPartyOAuthToken():
     return decorator
 
 
-@handleThirdPartyOAuthToken()
 @handleHTTPRequest(http_schema=HTTPNetflixId,
                    exceptions=exceptions)
 @require_http_methods(["GET"])
 def netflixLogin(request, http_schema, authUserId, **kwargs):
     return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
+@handleThirdPartyOAuthToken()
 @handleHTTPRequest(requires_auth=False,
                    parse_request_kwargs={'keep_oauth_token' : True},
                    http_schema=HTTPNetflixAuthResponse,
