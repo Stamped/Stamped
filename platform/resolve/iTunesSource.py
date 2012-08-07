@@ -11,27 +11,21 @@ __license__   = "TODO"
 __all__ = [ 'iTunesSource', 'iTunesArtist', 'iTunesAlbum', 'iTunesTrack', 'iTunesMovie', 'iTunesBook', 'iTunesSearchAll' ]
 
 import Globals
-from logs import report
-
-try:
-    import logs, urllib2, datetime
-    from libs.iTunes                import globaliTunes
-    from resolve.GenericSource      import GenericSource, listSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
-    from utils                      import lazyProperty, basicNestedObjectToString
-    from gevent.pool                import Pool
-    from pprint                     import pprint, pformat
-    from resolve.Resolver           import *
-    from resolve.ResolverObject     import *
-    from resolve.TitleUtils         import *
-    from libs.LibUtils              import parseDateString
-    from resolve.StampedSource      import StampedSource
-    from api.Entity                 import mapCategoryToTypes
-    from search.ScoringUtils        import *
-    from resolve.Resolver           import trackSimplify
-    from search.DataQualityUtils    import *
-except Exception:
-    report()
-    raise
+import logs, urllib2, datetime
+from libs.iTunes                import globaliTunes
+from resolve.GenericSource      import GenericSource, listSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
+from utils                      import lazyProperty, basicNestedObjectToString
+from gevent.pool                import Pool
+from pprint                     import pprint, pformat
+from resolve.Resolver           import *
+from resolve.ResolverObject     import *
+from resolve.TitleUtils         import *
+from libs.LibUtils              import parseDateString
+from resolve.StampedSource      import StampedSource
+from api.Entity                 import mapCategoryToTypes
+from search.ScoringUtils        import *
+from resolve.Resolver           import trackSimplify
+from search.DataQualityUtils    import *
 
 class _iTunesObject(object):
     """
@@ -145,8 +139,8 @@ class _iTunesObject(object):
     @lazyProperty
     def images(self):
         try:
-            return [ self.data['artworkUrl100'] ]
-        except Exception:
+            return [ self._findBestImage(self.data['artworkUrl100']) ]
+        except KeyError:
             return []
     
     def __repr__(self):
@@ -164,22 +158,22 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
     def _cleanName(self, rawName):
         return cleanArtistTitle(rawName)
 
-    @lazyProperty
+    @property
     def raw_name(self):
         return self.data['artistName']
 
-    @lazyProperty
+    @property
     def url(self):
         try:
             return self.data['artistLinkUrl']
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def key(self):
         return self.data['artistId']
 
-    @lazyProperty
+    @property
     def amgId(self):
         return self.data.get('amgArtistId', None)
 
@@ -202,11 +196,11 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
             }
                 for album in results if album.pop('collectionType', None) == 'Album' ]
 
-    @lazyProperty
+    @property
     def genres(self):
         try:
             return [ self.data['primaryGenreName'] ]
-        except Exception:
+        except KeyError:
             return []
 
     @lazyProperty
@@ -230,9 +224,17 @@ class iTunesArtist(_iTunesObject, ResolverPerson):
             }
                 for track in results if track.pop('wrapperType', None) == 'track'
         ]
+
+    @lazyProperty
+    def images(self):
+        artistImages = super(_iTunesObject, self).images
+        if artistImages:
+            return artistImages
+
+        # iTunes doesn't usually provide image for artists, so we just take the album art.
+        albums = self.albums
+        return [self._findBestImage(albums[0]['data']['artworkUrl100'])] if albums else []
     
-    #def __repr__(self):
-    #    return "%s, %s" % (pformat(self.tracks), pformat(self.albums))
 
 class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
     """
@@ -245,48 +247,41 @@ class iTunesAlbum(_iTunesObject, ResolverMediaCollection):
     def _cleanName(self, rawName):
         return cleanAlbumTitle(rawName)
 
-    @lazyProperty
+    @property
     def raw_name(self):
-        suffix = ''
-        try:
-            if self.data['contentAdvisoryRating'] == 'Clean':
-                pass
-                # suffix = ' (Clean)'
-        except Exception:
-            pass
-        return '%s%s' % (self.data['collectionName'], suffix)
+        return self.data['collectionName']
 
-    @lazyProperty
+    @property
     def url(self):
         try:
             return self.data['collectionViewUrl']
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def key(self):
         return self.data['collectionId']
 
-    @lazyProperty
+    @property
     def artists(self):
         result = [{
-                'name':     self.data.get('artistName', None),
-                'key':      self.data.get('artistId', None),
-                'url':      self.data.get('artistViewUrl', None),
+                'name':     self.data.get('artistName'),
+                'key':      self.data.get('artistId'),
+                'url':      self.data.get('artistViewUrl'),
                 }]
         if any(value is not None for value in result[0].values()):
             return result
         else:
             return []
 
-    @lazyProperty
+    @property
     def genres(self):
         try:
             return [ self.data['primaryGenreName'] ]
-        except Exception:
+        except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def release_date(self):
         try:
             return parseDateString(self.data['releaseDate'])
@@ -329,25 +324,18 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
     def _cleanName(self, rawName):
         return cleanTrackTitle(rawName)
 
-    @lazyProperty
+    @property
     def raw_name(self):
-        suffix = ''
-        try:
-            if self.data['contentAdvisoryRating'] == 'Clean':
-                pass
-                # suffix = ' (Clean)'
-        except Exception:
-            pass
-        return '%s%s' % (self.data['trackName'], suffix)
+        return self.data['trackName']
 
-    @lazyProperty
+    @property
     def url(self):
         try:
             return self.data['trackViewUrl']
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def key(self):
         return self.data['trackId']
 
@@ -355,7 +343,7 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
     def artistId(self):
         return self.data.get('artistId', None)
 
-    @lazyProperty
+    @property
     def artists(self):
         result = [{
                 'name':     self.data.get('artistName'),
@@ -371,7 +359,7 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
     def albumId(self):
         return self.data.get('collectionId', None)
 
-    @lazyProperty
+    @property
     def albums(self):
         result = [{
             'name':     self.data.get('collectionName'),
@@ -383,25 +371,25 @@ class iTunesTrack(_iTunesObject, ResolverMediaItem):
         else:
             return []
 
-    @lazyProperty
+    @property
     def genres(self):
         try:
             return [ self.data['primaryGenreName'] ]
-        except Exception:
+        except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def release_date(self):
         try:
             return parseDateString(self.data['releaseDate'])
         except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def length(self):
         return float(self.data['trackTimeMillis']) / 1000
 
-    @lazyProperty
+    @property
     def preview(self):
         try:
             return self.data['previewUrl']
@@ -420,34 +408,34 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
     def _cleanName(self, rawName):
         return cleanMovieTitle(rawName)
 
-    @lazyProperty
+    @property
     def raw_name(self):
         return self.data['trackName']
 
-    @lazyProperty
+    @property
     def url(self):
         try:
             return self.data['trackViewUrl']
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def key(self):
         return self.data['trackId']
 
-    @lazyProperty
+    @property
     def cast(self):
         #TODO try to improve with scraping
         return []
 
-    @lazyProperty
+    @property
     def directors(self):
         try:
             return [ { 'name' : self.data['artistName'] } ]
         except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def release_date(self):
         # iTunes movie release dates are LIES. If there's something in a title in parens, we can trust it. Otherwise,
         # throw it out.
@@ -457,35 +445,35 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
         else:
             return None
 
-    @lazyProperty
+    @property
     def length(self):
         try:
             return self.data['trackTimeMillis'] / 1000
-        except Exception:
+        except KeyError:
             return -1
 
-    @lazyProperty
+    @property
     def mpaa_rating(self):
         try:
             return self.data['contentAdvisoryRating']
         except KeyError:
             return None
 
-    @lazyProperty 
+    @property 
     def genres(self):
         try:
             return [ self.data['primaryGenreName'] ]
         except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def description(self):
         try:
             return self.data['longDescription']
         except KeyError:
             return ''
 
-    @lazyProperty
+    @property
     def preview(self):
         try:
             return self.data['previewUrl']
@@ -504,34 +492,34 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
     def _cleanName(self, rawName):
         return cleanTvTitle(rawName)
 
-    @lazyProperty
+    @property
     def raw_name(self):
         return self.data['artistName']
 
-    @lazyProperty
+    @property
     def url(self):
         try:
             return self.data['artistLinkUrl']
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def key(self):
         return self.data['artistId']
 
-    @lazyProperty
+    @property
     def cast(self):
         #TODO try to improve with scraping
         return []
 
-    @lazyProperty
+    @property
     def directors(self):
         try:
             return [ { 'name' : self.data['artistName'] } ]
         except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def release_date(self):
         year = getFilmReleaseYearFromTitle(self.raw_name)
         if year is not None:
@@ -539,18 +527,18 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
         else:
             return None
 
-    @lazyProperty
+    @property
     def seasons(self):
         return -1
 
-    @lazyProperty 
+    @property 
     def genres(self):
         try:
             return [ self.data['primaryGenreName'] ]
         except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def description(self):
         try:
             return self.data['longDescription']
@@ -565,29 +553,29 @@ class iTunesBook(_iTunesObject, ResolverMediaItem):
     def _cleanName(self, rawName):
         return cleanBookTitle(rawName)
 
-    @lazyProperty
+    @property
     def raw_name(self):
         return self.data['trackName']
 
-    @lazyProperty
+    @property
     def url(self):
         try:
             return self.data['trackViewUrl']
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def key(self):
         return self.data['trackId']
 
-    @lazyProperty
+    @property
     def authors(self):
         try:
             return [ { 'name' : self.data['artistName'] } ]
         except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def publishers(self):
         return []
 
@@ -595,7 +583,7 @@ class iTunesBook(_iTunesObject, ResolverMediaItem):
     def release_date(self):
         try:
             return parseDateString(self.data['releaseDate'])
-        except Exception:
+        except KeyError:
             return None
 
     @property
@@ -618,22 +606,22 @@ class iTunesApp(_iTunesObject, ResolverSoftware):
     def _cleanName(self, rawName):
         return cleanAppTitle(rawName)
 
-    @lazyProperty
+    @property
     def raw_name(self):
         return self.data['trackName']
 
-    @lazyProperty
+    @property
     def url(self):
         try:
             return self.data['trackViewUrl']
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty
+    @property
     def key(self):
         return self.data['trackId']
 
-    @lazyProperty
+    @property
     def publishers(self):
         try:
             return [ { 'name' : self.data['sellerName'] } ]
@@ -644,10 +632,10 @@ class iTunesApp(_iTunesObject, ResolverSoftware):
     def release_date(self):
         try:
             return parseDateString(self.data['releaseDate'])
-        except Exception:
+        except KeyError:
             return None
 
-    @lazyProperty 
+    @property 
     def genres(self):
         try:
             if 'genres' in self.data:
@@ -656,25 +644,25 @@ class iTunesApp(_iTunesObject, ResolverSoftware):
         except KeyError:
             return []
 
-    @lazyProperty
+    @property
     def description(self):
         try:
             return self.data['description']
         except KeyError:
             return ''
 
-    @lazyProperty
+    @property
     def screenshots(self):
         try:
             return self.data['screenshotUrls']
-        except Exception:
+        except KeyError:
             return []
 
-    @lazyProperty 
+    @property 
     def images(self):
         try:
             return [ self.data['artworkUrl512'] ]
-        except Exception:
+        except KeyError:
             return []
 
 class iTunesSearchAll(ResolverProxy, ResolverSearchAll):
@@ -753,8 +741,6 @@ class iTunesSource(GenericSource):
         groups = GenericSource.getGroups(self, entity)
         if not entity.isType('app') and not entity.isType('movie') and not entity.isType('tv'):
             groups.remove('desc')
-        if entity.isType('artist'):
-            groups.remove('images')
         return groups
 
     def entityProxyFromKey(self, itunesId, **kwargs):
