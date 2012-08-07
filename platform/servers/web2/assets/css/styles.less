@@ -787,7 +787,7 @@ a.sdetail, .pronounced-title a {
 
 @popup-padding:  24px;
 
-#popup-signup, #popup-ios {
+#popup-signup, #popup-ios, #popup-intro {
     display: none;
 }
 
@@ -959,6 +959,62 @@ a.sdetail, .pronounced-title a {
     }
 }
 
+.popup-intro {
+    .ribbon-wrapper {
+        background: #3784f2 !important;
+        height: 7px !important;
+        
+        .ribbon-bottom, .ribbon-top {
+            height: 7px !important;
+            background-position: 0 -5px;
+        }
+    }
+    
+    .popup-header {
+        .pronounced-title {
+            text-align: center;
+            line-height: 115%;
+            
+            span {
+                display: block;
+                white-space: nowrap;
+            }
+        }
+    }
+    
+    .category-illustration {
+        margin: 12px auto 24px;
+    }
+    
+    .popup-body {
+        padding-bottom: 24px;
+
+        @angle: 90deg;
+        @c1: #3784f2;
+        @c0: lighten(#3784f2, 10%);
+        
+        background: @c0;
+        background: -webkit-linear-gradient(@angle, @c0, @c1);
+        background: -moz-linear-gradient(@angle, @c0, @c1);
+        background: -o-linear-gradient(@angle, @c0, @c1);
+        background: linear-gradient(@angle, @c0, @c1);
+    }
+    
+    .desc {
+        margin: 2px 0 8px;
+        padding: 16px 0 0;
+        color: #FFF;
+    }
+    
+    .sms {
+        background: #fff;
+        
+        input {
+            color: #999;
+        }
+    }
+}
+
 
 /* **************************************************************************
                                    BUTTONS
@@ -1065,5 +1121,11 @@ a.sdetail, .pronounced-title a {
     &:hover, &:active {
         background-position: -185px 0;
     }
+}
+
+.category-illustration {
+    background: url(/assets/img/index/illustration.png) no-repeat;
+    width:  373px;
+    height: 84px;
 }
 
