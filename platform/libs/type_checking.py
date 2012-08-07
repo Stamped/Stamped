@@ -254,7 +254,7 @@ class ArgsMatchingFunction(object):
 disable_type_checking = False
 
 def get_args_matching_function(func):
-    if type(func).__name__ == 'function':
+    if isinstance(func, types.FunctionType):
         func = ArgsMatchingFunction(func)
     return func
 
