@@ -16,6 +16,7 @@ from servers.analytics.core.analytics_utils         import *
 from servers.analytics.core.logsQuery               import logsQuery
 from servers.analytics.core.statWriter              import statWriter
 from gevent.pool                                    import Pool
+from time import time
 
 
 
@@ -30,81 +31,33 @@ class LatencyReport(object):
     
     def _getTodaysLatency(self): 
         
-        diffs_overall = {}
-        errs_overall = {}
-        
         # Build up until the current hour (e.g. if it is currently 8:04, fill in stats thru 9:00)
         for hour in range (1, est().hour+1):
             stats = {}
             diffs_hourly = {}
             errs_hourly = {}
             cache_hit = False
+            t0 = time()
             # See if we've stored hourly data earlier
             query = self.cache.select('select * from `latency` where itemName() = "hour-%s-%s"' % (hour,today().date().isoformat()))
             for result in query:
                 cache_hit = True
-                print "found it!"
                 for key, value in result.items():
                     stats[str(key)] = ast.literal_eval(str(value))
-                    
+                t1 = time()
+                print "Cache hit for hour %s. Extraction time: %s seconds" % (hour, t1 - t0)
+            
             if not cache_hit:
-                stats = self.logsQ.latencyReport(today(),today() + timedelta(hours=hour))
-                
-            self.writer.writeLatency({'hour': hour, 'date': today().date().isoformat(), 'stats': stats})    
+                stats = self.logsQ.latencyReport(today() + timedelta(hours=hour - 1),today() + timedelta(hours=hour))
+                t1 = time()
+                print "Cache miss for hour %s. Extraction time: %s seconds" % (hour, t1 - t0)
             
-            for key,value in stats.items():
-                if "-4" in key or "-5" in key:
-                    errs_hourly[key] = value
-                    try:
-                        errs_overall[key] += value
-                    except KeyError:
-                        errs_overall[key] = value
-                else:
-                    for bucket, count in value.items():
-                        if key not in diffs_hourly:
-                            diffs_hourly[key] = {}
-                        diffs_hourly[key][bucket] = count
-                        
-                        if key not in diffs_overall:
-                            diffs_overall[key] = {}
-                        try:
-                            diffs_overall[key][bucket] += count
-                        except KeyError:
-                            diffs_overall[key][bucket] = count
-    
-        for key, buckets in diffs_overall.items():
-            sum = 0
-            max = 0
-            for count, val in buckets:
-                sum += num
-                if num > max:
-                    max = num
-            mean = float(sum) / len(buckets)
-            sorte = sorted(self.statDict[uri])
-            median = percentile(sorte,.5)
-            ninetieth = percentile(sorte,.9)
-            n = len(self.statDict[uri])
-            errors4 = 0
-            errors5 = 0
-            if uri+'-4' in self.statDict:
-                errors4 = self.statDict[uri+'-4']
-            if uri+'-5' in self.statDict:
-                errors5 = self.statDict[uri+'-5']
+                self.writer.writeLatency({'hour': hour, 'date': today().date().isoformat(), 'stats': stats})    
+                t2 = time()
+                print "Cache miss for hour %s. Write time: %s seconds" % (hour, t2 - t1)
             
-            self.statDict[uri] = '%.3f' % mean,'%.3f' % median,'%.3f' % ninetieth, '%.3f' % max, n, errors4,errors5
-                
-            bgn = today()
-            end = today() + timedelta(hours=hour)
-            total_today = fun(bgn, end)
-            today_hourly.append(total_today)
-        
-            # Only store data for full hours (e.g. if it is currently 8:40, only store stats thru 8:00)
-            # Also only write from a prod stack connection to prevent data misrepresentation
-            if hour == est().hour and IS_PROD:
-                self.writer.writeHours({'stat': stat, 'time': 'day', 'bgn': today().date().isoformat(), 'hours': str(today_hourly)})
-        
-        return total_today, today_hourly
-    
+        return stats
+     
     
     def _getDaysStats(self,stat,fun,date):
         

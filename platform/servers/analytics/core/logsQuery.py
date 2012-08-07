@@ -15,7 +15,7 @@ from api.MongoStampedAPI                        import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool
-from analytics_utils                            import today
+from analytics_utils                            import today, v2_init,now
 
 
 
@@ -38,6 +38,7 @@ class logsQuery(object):
         self.domains = {}
         self.statSet  = set()
         self.statDict = {}
+        self.errDict = {}
         self.statCount = 0
         self.statCountByNode = {}
         self.statTimeByNode = {}
@@ -51,13 +52,17 @@ class logsQuery(object):
             
             
 
-    def performQuery(self,domain,fields,uri,t0,t1,byNode=False):
+    def performQuery(self,domain,fields,uri,t0,t1,byNode=False,form_dict=None):
         
         if uri is not None:
             query = 'select %s from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, uri, t0.isoformat(), t1.isoformat())
         else:
             query = 'select %s from `%s` where bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, t0.isoformat(), t1.isoformat())
 
+        if form_dict is not None:
+            for key, value in form_dict.items():
+                query = '%s and frm_%s = "%s"' % (query, key, value)
+            
         stats = domain.select(query)
         
         for stat in stats:
@@ -102,6 +107,53 @@ class logsQuery(object):
         
         return len(self.statSet)
     
+    # Number of users who have taken some kind of entity action
+    def actingUsers(self, t0 ,t1):
+        self.statSet = set()
+        
+        pool = Pool(16)
+        
+        for i in range (0,16):
+            suffix = '0'+hex(i)[2]
+            pool.spawn(self.performQuery,self.domains[suffix],'uid',"/v1/actions/complete.json",t0,t1)
+        
+        pool.join()
+        
+        return len(self.statSet)
+    
+    # Guide Users
+    def guideReport(self, t0, t1, section=None):
+        self.statSet = set()
+        self.statCount = 0
+        
+        pool = Pool(16)
+        
+        for i in range (0,16):
+            suffix = '0'+hex(i)[2]
+            if section is not None:
+                pool.spawn(self.performQuery,self.domains[suffix],'count(*)',"/v1/guide/collection.json",t0,t1, form_dict={'section': section})
+            else:
+                pool.spawn(self.performQuery,self.domains[suffix],'uid',"/v1/guide/collection.json",t0,t1)
+        
+        pool.join()
+        
+        return self.statCount
+    
+    # Universal news users
+    def newsUsers(self, t0, t1):
+        self.statSet = set()
+        
+        pool = Pool(16)
+        
+        for i in range (0,16):
+            suffix = '0'+hex(i)[2]
+            pool.spawn(self.performQuery, self.domains[suffix], 'uid', "/v1/activity/collection.json", t0, t1, form_dict={'scope': 'friends'})
+        
+        pool.join()
+        
+        return len(self.statSet)
+    
+    
     def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist):
         if uri is None:
             query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1/%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
@@ -134,17 +186,19 @@ class logsQuery(object):
                         print stat
                         continue
                     try:
-                        self.statDict['%s-%s' % (key,errType)] +=1
+                        self.errDict['%s-%s' % (key,errType)] += 1
                     except KeyError:
-                        self.statDict['%s-%s' % (key,errType)] = 1
+                        self.errDict['%s-%s' % (key,errType)] = 1
                 else:
                     try:
                         self.statDict[key].append(diff)
                     except KeyError:
                         self.statDict[key] = [diff]
-            
+
+
     def latencyReport(self,t0,t1,uri=None,blacklist=[],whitelist=[]):
         self.statDict = {}
+        self.errDict = {}
         
         pool = Pool(16)
         
@@ -154,33 +208,38 @@ class logsQuery(object):
             
         pool.join()
         
-        bucketed_diffs = {}
+        output = {}
         
-        for key,value in self.statDict.items():
-            if "-4" in key or "-5" in key:
-                continue
-            new_vals = {} 
-            for diff in value:
-                diff = round(diff,2)
-                if diff in new_vals:
-                    new_vals[diff] += 1
-                else:
-                    new_vals[diff] = 1
+        for uri, diffs in self.statDict.items():
+            agg = sum(diffs)
+            n = len(diffs)
+            mean = float(agg) / n
+            sortedDiffs = sorted(diffs)
+            max = sortedDiffs[-1]
+            median = percentile(sortedDiffs, .5)
+            ninetieth = percentile(sortedDiffs, .9)
             
-            # Enforce simpledb size limits for now
-            if len(str(new_vals)) > 1024:
-                new_vals = {} 
-                for diff in value:
-                    diff = round(diff,1)
-                    if diff in new_vals:
-                        new_vals[diff] += 1
-                    else:
-                        new_vals[diff] = 1
+            inner_sum = reduce(lambda agg,i: agg + (i - mean) ** 2, diffs, 0)
+            variance = ((1.0 / n) * inner_sum) ** 0.5
             
-            bucketed_diffs[key] = new_vals
-        
-        return bucketed_diffs
-
+            errors4 = 0
+            errors5 = 0
+            if uri+'-4' in self.errDict:
+                errors4 = self.errDict[uri+'-4']
+            if uri+'-5' in self.errDict:
+                errors5 = self.errDict[uri+'-5']
+            
+            output[uri] = {'mean' : mean,
+                           'median' : median,
+                           'ninetieth' : ninetieth,
+                           'variance' : variance,
+                           'length' : n,
+                           '400 errors' : errors4,
+                           '500 errors' : errors5
+                           }
+            
+        return output
+              
     def qpsReport(self,time,interval,total_seconds):
         blacklist=[]
         whitelist=[]

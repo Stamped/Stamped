@@ -74,3 +74,23 @@ class mongoQuery(object):
             for type in types:
                 output.append(collection.find({field: {"$gte": t0, "$lte": t1}, 'entity.types': type }).count())
                 return output
+            
+    def countMutualRelationships(self):
+        user_ids = self.api._userDB._getAllUserIds()
+        count = 0
+        for user_id in user_ids:
+            friends = self.api._friendshipDB.getFriends(user_id)
+            followers = self.api._friendshipDB.getFollowers(user_id)
+            for friend in friends:
+                if friend in followers:
+                    count += 1
+                    break
+        
+        return count
+            
+        
+        
+        
+        
+        
+        
