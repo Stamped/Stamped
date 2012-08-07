@@ -136,7 +136,7 @@ def showSettings(request, authUserId, http_schema, **kwargs):
 
 def createNetflixLoginResponse(authUserId, netflixAddId=None):
     netflix = globalNetflix()
-    oid = stampedAPI._callbackTokenDB.addUserId(authUserId)
+    oid = stampedAPI.addCallbackToken(authUserId)
     secret, url = netflix.getLoginUrl(oid, netflixAddId)
 
     response                = HTTPActionResponse()
@@ -166,7 +166,7 @@ def netflixLoginCallback(request, http_schema, **kwargs):
 
     logs.info('### http_schema: %s ' % http_schema)
     oid = http_schema.state
-    authUserId = stampedAPI._callbackTokenDB.getUserId(oid)
+    authUserId = stampedAPI.getCallbackToken(oid)
 
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
@@ -197,7 +197,7 @@ def netflixLoginCallback(request, http_schema, **kwargs):
 def createFacebookLoginResponse(authUserId):
     logs.info('called createFacebookLoginResponse with user_id: %s' % authUserId)
     facebook = stampedAPI._facebook
-    oid = stampedAPI._callbackTokenDB.addUserId(authUserId)
+    oid = stampedAPI.addCallbackToken(authUserId)
     url = facebook.getLoginUrl(oid)
 
     logs.info('url: %s' % url)
@@ -231,7 +231,7 @@ def facebookLoginCallback(request, http_schema, **kwargs):
     logs.info('### http_schema: %s ' % http_schema)
 
     oid = http_schema.state
-    authUserId = stampedAPI._callbackTokenDB.getUserId(oid)
+    authUserId = stampedAPI.getCallbackToken(oid)
 
     # Acquire the user's FB access token
     try:
