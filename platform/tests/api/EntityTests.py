@@ -80,6 +80,9 @@ class StampedAPIEntitiesSearch(StampedAPIEntityHttpTest):
 
 class StampedAPIEntitiesAutoSuggest(StampedAPIEntityHttpTest):
     def test_autosuggest_results(self):
+        #api.__autocomplete = api buildAutoCompleteIndex()
+        #api.__autocomplete_last_loaded = datetime.now()
+
         path = "entities/autosuggest.json"
         data = {
             "oauth_token": self.token['access_token'],

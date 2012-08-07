@@ -17,7 +17,7 @@ from libs.LRUCache       import lru_cache
 from libs.CachedFunction import *
 from libs.CountedFunction import countedFn
 from libs.Request         import service_request
-from APIKeys              import get_api_key
+from libs.APIKeys         import get_api_key
 
 class GooglePlaces(AKeyBasedAPI):
     BASE_URL        = 'https://maps.googleapis.com/maps/api/place'

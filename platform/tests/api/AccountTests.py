@@ -545,8 +545,8 @@ class StampedAPIAccountChangePassword(StampedAPIAccountHttpTest):
             "password": "54321"
         }
         result = self.handlePOST(path, data)
-        self.assertTrue(len(result['token']['access_token']) == 22)
-        self.assertTrue(len(result['token']['refresh_token']) == 43)
+        self.assertEqual(len(result['token']['access_token']),  22)
+        self.assertEqual(len(result['token']['refresh_token']), 43)
         self.token = result['token']
 
 class StampedAPIAccountAlertSettings(StampedAPIAccountHttpTest):
@@ -556,8 +556,8 @@ class StampedAPIAccountAlertSettings(StampedAPIAccountHttpTest):
             "oauth_token": self.token['access_token']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(len(result) == 7)
-        self.assertTrue(result[0]['group_id'] == 'alerts_followers')
+        self.assertEqual(len(result), 9)
+        self.assertEqual(result[0]['group_id'], 'alerts_followers')
 
     def test_update_settings(self):
         path = "account/alerts/update.json"
@@ -567,8 +567,8 @@ class StampedAPIAccountAlertSettings(StampedAPIAccountHttpTest):
             "off": "alerts_replies_email"
         }
         result = self.handlePOST(path, data)
-        self.assertTrue(len(result) == 7)
-        self.assertTrue(result[0]['group_id'] == 'alerts_followers')
+        self.assertEqual(len(result), 9)
+        self.assertEqual(result[0]['group_id'], 'alerts_followers')
         # Check todos_email
         for group in result:
             if group['group_id'] == 'alerts_todos':

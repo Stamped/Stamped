@@ -24,7 +24,7 @@ from api.Schemas    import MenuItem
 from api.Schemas    import MenuPrice
 from threading      import Lock
 from libs.Request   import service_request
-from APIKeys        import get_api_key
+from libs.APIKeys        import get_api_key
 
 CLIENT_ID   = get_api_key('singleplatform', 'client_id')
 SIGNING_KEY = get_api_key('singleplatform', 'signing_key')

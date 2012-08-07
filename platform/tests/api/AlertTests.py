@@ -59,7 +59,7 @@ class StampedAPISendAlertsTest(StampedAPIAlertsHttpTest):
             "oauth_token": self.tokenA['access_token']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(len(result) == 14)
+        self.assertEqual(len(result), 9)
 
     # Activity unread is used for badge count
     def test_activity_unread(self):
@@ -69,7 +69,7 @@ class StampedAPISendAlertsTest(StampedAPIAlertsHttpTest):
             "oauth_token": self.tokenA['access_token']
         }
         result = self.handleGET(path, data)
-        self.assertTrue(result['num_unread'] == 2)
+        self.assertEqual(result['num_unread'], 3)
 
 
 if __name__ == '__main__':

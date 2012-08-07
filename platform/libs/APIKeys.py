@@ -11,7 +11,7 @@ import Globals
 import os
 import keys
 import logs
-from ec2_utils import get_stack
+from libs.ec2_utils import get_stack
 
 __stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
 __keys_dir = os.path.dirname(keys.__file__)

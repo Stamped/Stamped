@@ -85,9 +85,10 @@ class StampedAPICollectionsShow(StampedAPICollectionHttpTest):
             "scope" : "popular",
             "before" : int(time.time()),
         }
-        
+
+        # As of Aug. 6, 2012, we're only returning white-listed items, so this will return 0
         self.async(lambda: self.handleGET(path, data), [ 
-                   lambda x: self.assertEqual(len(x), 1),
+                   lambda x: self.assertEqual(len(x), 0),
         ])
     
     def test_user_user_id(self):

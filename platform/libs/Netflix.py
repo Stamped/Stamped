@@ -16,7 +16,7 @@ from libs.LRUCache          import lru_cache
 from libs.CachedFunction    import cachedFn
 from libs.CountedFunction   import countedFn
 from libs.Request           import *
-from APIKeys                import get_api_key
+from libs.APIKeys           import get_api_key
 
 HOST              = 'api-public.netflix.com'
 PORT              = '80'

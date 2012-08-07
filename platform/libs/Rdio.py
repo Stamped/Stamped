@@ -43,7 +43,7 @@ try:
     from urllib                 import quote_plus
     from django.utils.encoding  import iri_to_uri
     from libs.Request           import service_request
-    from APIKeys                import get_api_key
+    from libs.APIKeys           import get_api_key
     from errors                 import *
 
     try:

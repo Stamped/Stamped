@@ -4,10 +4,10 @@ import Globals
 import json, httplib2
 import logs
 from errors import *
-import oauth as oauth
+import libs.oauth as oauth
 
 from libs.Request       import service_request
-from APIKeys            import get_api_key
+from libs.APIKeys       import get_api_key
 
 TWITTER_CONSUMER_KEY    = get_api_key('twitter', 'consumer_key')
 TWITTER_CONSUMER_SECRET = get_api_key('twitter', 'consumer_secret')

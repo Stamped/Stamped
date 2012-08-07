@@ -91,35 +91,35 @@ class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
         result = self.handleGET(path, data)
 
         # Verify all four results are returned
-        self.assertTrue(len(result) == 4)
+        self.assertEqual(len(result), 4)
 
         # Verify first result is Book A
-        self.assertTrue(result[0]['title'] == 'Book A')
+        self.assertEqual(result[0]['title'], 'Book A')
 
         # Verify first result has 3 stamps and 1 to-do
-        self.assertTrue(len(result[0]['previews']['stamps']) == 3)
-        self.assertTrue(len(result[0]['previews']['todos']) == 1)
+        self.assertEqual(len(result[0]['previews']['stamps']), 3)
+        self.assertEqual(len(result[0]['previews']['todos']), 1)
 
         # Verify second result is Book B
-        self.assertTrue(result[1]['title'] == 'Book B')
+        self.assertEqual(result[1]['title'], 'Book B')
 
         # Verify second result has 2 stamps and 2 to-dos
-        self.assertTrue(len(result[1]['previews']['stamps']) == 2)
-        self.assertTrue(len(result[1]['previews']['todos']) == 2)
+        self.assertEqual(len(result[1]['previews']['stamps']), 2)
+        self.assertEqual(len(result[1]['previews']['todos']), 2)
 
         # Verify third result is Book C
-        self.assertTrue(result[2]['title'] == 'Book C')
+        self.assertEqual(result[2]['title'], 'Book C')
 
         # Verify third result has 2 stamps and 1 to-do
-        self.assertTrue(len(result[2]['previews']['stamps']) == 2)
-        self.assertTrue(len(result[2]['previews']['todos']) == 1)
+        self.assertEqual(len(result[2]['previews']['stamps']), 2)
+        self.assertEqual(len(result[2]['previews']['todos']), 1)
 
         # Verify fourth restult is Book D
-        self.assertTrue(result[3]['title'] == 'Book D')
+        self.assertEqual(result[3]['title'], 'Book D')
 
         # Verify fourth result has 1 stamp and no to-dos
-        self.assertTrue(len(result[3]['previews']['stamps']) == 1)
-        self.assertTrue('todos' not in result[3]['previews'] or result[3]['previews']['todos'] == None)
+        self.assertEqual(len(result[3]['previews']['stamps']), 1)
+        self.assertEqual('todos' not in result[3]['previews'] or result[3]['previews']['todos'], None)
 
     def test_guide_inbox_empty(self):
         path = "guide/collection.json"
@@ -136,7 +136,7 @@ class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
         """
 
         # Verify no results are returned
-        self.assertTrue(len(result) == 0)
+        self.assertEqual(len(result), 0)
         
     def test_guide_tastemakers(self):
         path = "guide/collection.json"
@@ -153,13 +153,13 @@ class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
         """
 
         # Verify all four results are returned
-        self.assertTrue(len(result) == 4)
+        self.assertEqual(len(result), 4)
 
         # Verify order
-        self.assertTrue(result[0]['title'] == 'Book A')
-        self.assertTrue(result[1]['title'] == 'Book B')
-        self.assertTrue(result[2]['title'] == 'Book C')
-        self.assertTrue(result[3]['title'] == 'Book D')
+        self.assertEqual(result[0]['title'], 'Book A')
+        self.assertEqual(result[1]['title'], 'Book B')
+        self.assertEqual(result[2]['title'], 'Book C')
+        self.assertEqual(result[3]['title'], 'Book D')
 
     def test_guide_me(self):
         path = "guide/collection.json"
@@ -189,7 +189,7 @@ class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
         """
 
         # Verify no results are returned
-        self.assertTrue(len(result) == 0)
+        self.assertEqual(len(result), 0)
 
 
 if __name__ == '__main__':

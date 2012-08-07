@@ -17,7 +17,7 @@ try:
     from libs.LRUCache        import lru_cache
     from libs.CachedFunction  import cachedFn
     from libs.CountedFunction import countedFn
-    from APIKeys              import get_api_key
+    from libs.APIKeys         import get_api_key
 except:
     report()
     raise

@@ -22,7 +22,7 @@ argument "purge" to clean out the mongo cache entirely.
 """
 
 import Globals
-import binascii, bson, datetime, ec2_utils, functools, logs, utils, pylibmc
+import binascii, bson, datetime, libs.ec2_utils, functools, logs, utils, pylibmc
 from pymongo.errors import AutoReconnect
 from api.db.mongodb.AMongoCollection import MongoDBConfig
 from schema import Schema

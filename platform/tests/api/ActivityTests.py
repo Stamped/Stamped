@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+from __future__ import absolute_import
 
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
@@ -10,7 +10,6 @@ import Globals, utils, pprint
 from tests.AStampedAPIHttpTestCase import *
 from api.MongoStampedAPI import *
 from api.Schemas import *
-from pprint import pprint
 
 # ######## #
 # ACTIVITY #
@@ -617,7 +616,6 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         self.api._activityCache.setCacheBlockBufferSize(0)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
-        pprint(results)
         self.assertEqual(len(results), 6)
 
         # Create a new activity item that will appear for User A
@@ -627,7 +625,6 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         # First test that this new item will not be retrieved if we pull from offset != 0
         offset = 5
         results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
-        pprint(results2)
         self.assertEqual(len(results2), 1)
         self.assertEqual(results2[0].activity_id, results[5].activity_id)
 

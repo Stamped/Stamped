@@ -76,7 +76,7 @@ from datetime               import timedelta
 from utils                  import lazyProperty
 from libs.RateLimiter       import RateLimiter
 from libs.Request           import service_request
-from APIKeys                import get_api_key
+from libs.APIKeys           import get_api_key
 
 _API_V3_Key             = get_api_key('factual', 'api_key')
 _API_V3_Secret          = get_api_key('factual', 'api_secret')

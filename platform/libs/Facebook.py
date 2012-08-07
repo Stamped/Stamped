@@ -13,7 +13,7 @@ import logs, utils
 import re
 from errors import *
 from libs.Request import service_request
-from APIKeys import get_api_key
+from libs.APIKeys import get_api_key
 from datetime import datetime
 import httplib2
 from BeautifulSoup import BeautifulSoup

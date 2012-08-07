@@ -7,7 +7,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, logs, utils, pylibmc, json, datetime
+import binascii, bson, libs.ec2_utils, functools, logs, utils, pylibmc, json, datetime
 
 from schema import Schema
 

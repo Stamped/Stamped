@@ -515,7 +515,7 @@ class StampedAPI(AStampedAPI):
 
         # If an email address is not provided, create a mock email address.  Necessary because we index on email in Mongo
         #  and require uniqueness
-        if account.email is None or accounttest is not None:
+        if account.email is None:
             account.email = 'tw_%s' % twitterUser['id']
         else:
             account.email = str(account.email).lower().strip()

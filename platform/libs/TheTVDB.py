@@ -21,7 +21,7 @@ from libs.CachedFunction  import cachedFn
 from libs.CountedFunction import countedFn
 from libs.Request        import service_request
 from api.Schemas         import MediaCollectionEntity
-from APIKeys import get_api_key
+from libs.APIKeys import get_api_key
 
 API_KEY = get_api_key('tvdb', 'api_key')
 
