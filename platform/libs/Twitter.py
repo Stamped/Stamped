@@ -53,6 +53,12 @@ class Twitter(object):
             raise StampedThirdPartyError('There was an error connecting to Twitter')
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
+        elif 'errors' in result:
+            errors = result['errors']
+            # Internal Error
+            if len(errors) == 1 and 'code' in errors[0] and errors[0]['code'] == 131:
+                raise StampedThirdPartyInternalError('Twitter returned an internal error')
+            raise StampedThirdPartyError('There was an error connecting to Twitter')
         return result
 
     def __get(self, service, user_token=None, user_secret=None, priority='high', **params):

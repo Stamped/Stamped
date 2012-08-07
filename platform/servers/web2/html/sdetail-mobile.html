@@ -17,7 +17,7 @@
         script: libs/jquery.emoji.js
         script: libs/jquery-easing.js
         script: libs/jquery.fancybox.js
-        script: libs/jquery.cooki.js
+        script: libs/jquery.cookie.js
         script: libs/jquery.mousewheel.js
         script: libs/jquery.jscrollpane.js
     
@@ -113,6 +113,10 @@
                                 <p class="normal_blurb">{{content.blurb}}</p>
                             {% endif %}
                         {% endfor %}
+                        
+                        {% if stamp.contents.0.images.0.sizes.0.url %}
+                            {% handlebars_template "stamp-card-image-sdetail-mobile" stamp %}
+                        {% endif %}
                         
                         <div class='social-feedback-expanded'>
                             {% handlebars_template "social-feedback" stamp %}
