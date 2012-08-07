@@ -85,7 +85,7 @@ class S3ImageDB(AImageDB):
             '62x62': (62, 62),  # 2x
             '31x31': (31, 31),  # 1x
         }
-    
+
     def addResizedProfileImages(self, screen_name, image_url):
         # Filename is lowercase screen name
         prefix = 'users/%s' % screen_name.lower()
@@ -244,6 +244,7 @@ class S3ImageDB(AImageDB):
         # Save original
         if original_url is None or original_url.lower() != ("%s.jpg" % prefix).lower():
             original = resizeImage(image, max_size)
+            print ('### prefix: %s' % prefix)
             url = self._addJPG(prefix, original)
             output = ImageSizeSchema()
             output.width = original.size[0]
@@ -256,6 +257,7 @@ class S3ImageDB(AImageDB):
             for name, size in sizes.iteritems():
                 resized = resizeImage(image, size)
                 name = '%s-%s' % (prefix, name)
+                print ('### name: %s' % name)
                 url = self._addJPG(name, resized)
                 output = ImageSizeSchema()
                 output.width = resized.size[0]

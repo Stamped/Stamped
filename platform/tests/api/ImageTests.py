@@ -38,7 +38,7 @@ class ImageDBTests(AImageHttpTest):
         self.baseurl = 'http://%s.s3.amazonaws.com' % self.imageDB.bucket_name
     
     def test_profile_images(self):
-        self.util_test_images("users", self.imageDB.addProfileImage)
+        self.util_test_images("users", self.imageDB.addResizedProfileImages)
     
     def test_entity_images(self):
         self.util_test_images("entities", self.imageDB.addEntityImage)
@@ -54,14 +54,16 @@ class ImageDBTests(AImageHttpTest):
             
             baseurl = "%s/%s/%s" % (self.baseurl, path, entityId)
             url = "%s.jpg" % (baseurl, )
+
+            print('### url: %s' % url)
             
             try:
                 f = utils.getFile(url)
             except HTTPError:
                 logs.warn("unable to download '%s'" % url)
                 raise
-            
-            image2 = self.imageDB.getImage(f)
+
+            image2 = utils.getImage(f)
             
             self.assertEqual(image.size, image2.size)
             # note: we convert all images to JPEG upon upload, which'll 
