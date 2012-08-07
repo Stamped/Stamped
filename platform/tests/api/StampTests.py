@@ -267,12 +267,12 @@ class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
 
             # Validate credit
             self._validate_credited_stamp(result, recipients=[self.userB, self.userC])
-        except Exception:
-            raise 
-        finally:
-            self.deleteStamp(self.tokenA, result['stamp_id'])
+
             self.deleteAccount(self.tokenB)
             self.deleteAccount(self.tokenC)
+            self.deleteStamp(self.tokenA, result['stamp_id'])
+        except Exception as e:
+            raise 
 
     def test_restamp_credit_redundant(self):
         try:
@@ -306,12 +306,13 @@ class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
 
             # Validate credit
             self._validate_credited_stamp(result, recipients=[self.userB, self.userC])
-        except Exception:
-            raise 
-        finally:
+
             self.deleteStamp(self.tokenA, result['stamp_id'])
             self.deleteAccount(self.tokenB)
             self.deleteAccount(self.tokenC)
+
+        except Exception:
+            raise 
 
 class StampedAPIStampsShow(StampedAPIStampConsumeHttpTest):
     def test_show(self):
