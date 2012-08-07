@@ -787,7 +787,7 @@ a.sdetail, .pronounced-title a {
 
 @popup-padding:  24px;
 
-#popup-signup, #popup-ios {
+#popup-signup, #popup-ios, #popup-intro {
     display: none;
 }
 
@@ -959,6 +959,35 @@ a.sdetail, .pronounced-title a {
     }
 }
 
+.popup-intro {
+    .ribbon-wrapper {
+        background: #1B6CD9 !important;
+        height: 7px !important;
+        
+        .ribbon-bottom, .ribbon-top {
+            height: 7px !important;
+            background-position: 0 -5px;
+        }
+    }
+    
+    .pronounced-title {
+        text-align: center;
+        
+        span {
+            display: block;
+            white-space: nowrap;
+        }
+    }
+    
+    .category-illustration {
+        margin: 0 auto 18px;
+    }
+    
+    .desc {
+        margin: 0 0 8px;
+    }
+}
+
 
 /* **************************************************************************
                                    BUTTONS
@@ -1065,5 +1094,11 @@ a.sdetail, .pronounced-title a {
     &:hover, &:active {
         background-position: -185px 0;
     }
+}
+
+.category-illustration {
+    background: url(/assets/img/index/illustration.png) no-repeat;
+    width:  373px;
+    height: 84px;
 }
 

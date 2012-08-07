@@ -114,6 +114,10 @@
                             {% endif %}
                         {% endfor %}
                         
+                        {% if stamp.contents.0.images.0.sizes.0.url %}
+                            {% handlebars_template "stamp-card-image-sdetail-mobile" stamp %}
+                        {% endif %}
+                        
                         <div class='social-feedback-expanded'>
                             {% handlebars_template "social-feedback" stamp %}
                             

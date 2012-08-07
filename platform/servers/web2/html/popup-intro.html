@@ -1,0 +1,36 @@
+{% load stamped_tags %}
+
+{% block pre-popup %}
+<div class="popup popup-large popup-intro">
+    <div class="ribbon-wrapper">
+        <div class="ribbon-bottom"></div>
+    </div>
+    {% endblock pre-popup %}
+    
+    {% block popup-header %}
+    <div class="popup-header clearfix">
+        <div class="pronounced-title"><span>{{ user.screen_name|title }} is using Stamped;</span> <span>a new way to record and share</span> <span>your favorite things.</span></div>
+        
+        <div class="category-illustration"></div>
+    </div>
+    {% endblock popup-header %}
+    
+    {% block popup-body %}
+    <div class="popup-body">
+        <div class="desc">Text a link to your iPhone to download the app.</div>
+        
+        <form class="sms-form">
+            <div class="sms clearfix">
+                <input name="phone_number" class="phone-number" value="555-555-5555" maxlength="14"></input> <button type="submit" class="send-button" action="/download-app" method="POST"></button>
+            </div>
+        </form>
+    </div>
+    {% endblock popup-body %}
+    
+    {% block post-popup %}
+    <div class="ribbon-wrapper">
+        <div class="ribbon-top"></div>
+    </div>
+</div>
+{% endblock post-popup %}
+
