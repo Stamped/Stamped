@@ -265,7 +265,7 @@
                 </a>
             </li>
             <li class="app">
-                <a class="replaced {% for d in user.stats.distribution %}{% if d.category == "app" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?subcategory=app">
+                <a class="replaced {% for d in user.stats.distribution %}{% if d.category == "app" %}{% if d.count > 0 %}active{% else %}disabled{% endif %}{% endif %}{% endfor %}" href="/{{user.screen_name}}?category=app">
                     <div class='desc'>Apps{% for d in user.stats.distribution %}{% if d.category == "app" %} ({{d.count}}){% endif %}{% endfor %}</div>
                     <div class='desc-overlay'></div>
                     <div class='selection'></div>
