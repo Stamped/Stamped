@@ -23,7 +23,7 @@ from logs import report
 try:
     import logs, sys, utils, time
     import libs.worldcities
-    from api import Entity
+    from api_old import Entity
     
     from resolve.Resolver                   import *
     from resolve.ResolverObject             import *
@@ -33,7 +33,7 @@ try:
     from gevent.pool                import Pool
     from pprint                     import pprint
     from libs.LibUtils              import parseDateString
-    from api.Schemas                import BasicEntity
+    from api_old.Schemas                import BasicEntity
     from datetime                   import datetime
     from optparse                   import OptionParser
     from bson                       import ObjectId
@@ -46,7 +46,7 @@ try:
     from resolve.SpotifySource              import SpotifySource
     from resolve.GooglePlacesSource         import GooglePlacesSource
     from resolve.AmazonSource               import AmazonSource
-    from api.Entity                     import mapCategoryToKinds, mapCategoryToTypes, mapSubcategoryToTypes, mapSubcategoryToKinds
+    from api_old.Entity                     import mapCategoryToKinds, mapCategoryToTypes, mapSubcategoryToTypes, mapSubcategoryToKinds
 except:
     report()
     raise

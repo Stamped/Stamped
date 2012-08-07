@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import bson, logs, utils, random
-import api.Schemas as Schemas
+import api_old.Schemas as Schemas
 
 from utils      import abstract
 # from bin.checkdb    import *

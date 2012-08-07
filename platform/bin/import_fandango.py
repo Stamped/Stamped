@@ -9,9 +9,9 @@ import Globals
 import feedparser, re
 
 from datetime           import *
-from api.Schemas            import *
+from api_old.Schemas            import *
 from optparse           import OptionParser
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.MongoStampedAPI    import MongoStampedAPI
 
 stampedAPI = MongoStampedAPI()
 

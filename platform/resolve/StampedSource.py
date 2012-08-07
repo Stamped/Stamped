@@ -23,19 +23,19 @@ from resolve.GenericSource              import GenericSource
 from utils                      import lazyProperty
 from pprint                     import pformat
 from libs.LibUtils              import parseDateString
-from api.Schemas                import BasicEntity
-from api.Schemas                    import BasicEntityMini as BasicEntityMini1
-from api.Schemas                import BasicEntityMini as BasicEntityMini2
+from api_old.Schemas                import BasicEntity
+from api_old.Schemas                    import BasicEntityMini as BasicEntityMini1
+from api_old.Schemas                import BasicEntityMini as BasicEntityMini2
 from datetime                   import datetime
 from bson                       import ObjectId
-from api.Entity                     import buildEntity
+from api_old.Entity                     import buildEntity
 
 # TODO GET RID OF SEARCH IMPORTS
 from search.SearchResult import SearchResult
 from search.ScoringUtils import *
 from search.DataQualityUtils import *
 from resolve.TitleUtils import *
-from api.db.mongodb.MongoEntityCollection import MongoEntityStatsCollection, MongoEntityCollection
+from db.mongodb.MongoEntityCollection import MongoEntityStatsCollection, MongoEntityCollection
 
 from libs.SearchUtils import formatSearchQuery
 

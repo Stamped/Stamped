@@ -9,8 +9,8 @@ import Globals
 from pprint import pformat
 import sys, traceback, string, random, pprint
 
-from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
-from api.db.mongodb.MongoStampCollection import MongoStampCollection
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoStampCollection import MongoStampCollection
 
 from resolve.AmazonSource import AmazonSource
 from resolve.FactualSource import FactualSource

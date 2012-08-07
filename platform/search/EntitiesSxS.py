@@ -26,7 +26,7 @@ from search.DataQualityUtils import MIN_RESULT_DATA_QUALITY_TO_INCLUDE
 # the pickled objects
 import datetime
 import search.SearchResultCluster
-from api.Schemas import PlaceEntity
+from api_old.Schemas import PlaceEntity
 from resolve.ResolverObject import *
 
 def loadSearchResultsFromFile(filename):

@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 
 from tests.StampedTestUtils       import *
-from api.Schemas            import *
+from api_old.Schemas            import *
 from ASearchTestSuite       import ASearchTestSuite, SearchResultConstraint
 
 class OtherSearchTests(ASearchTestSuite):

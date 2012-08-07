@@ -8,8 +8,8 @@ __license__   = "TODO"
 import Globals, utils
 
 from datetime           import datetime
-from api.Schemas        import *
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.Schemas        import *
+from api_old.MongoStampedAPI    import MongoStampedAPI
 
 user_ids = set([ 
     #"4e57048dccc2175fca000005", # travis

@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import json, re, time, utils
 
-from api.MongoStampedAPI        import MongoStampedAPI
+from api_old.MongoStampedAPI        import MongoStampedAPI
 from libs.apple             import AppleAPI
 from crawler.match.EntityMatcher    import EntityMatcher
 

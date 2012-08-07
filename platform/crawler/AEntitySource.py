@@ -7,11 +7,11 @@ __license__   = "TODO"
 
 import Globals, EntitySources, utils
 
-from api.IASyncProducer import IASyncProducer
+from api_old.IASyncProducer import IASyncProducer
 from gevent import Greenlet
 from gevent.queue import Queue
 from utils import abstract
-from api import Constants, Entity
+from api_old import Constants, Entity
 
 class AEntitySource(Greenlet, IASyncProducer):
     """

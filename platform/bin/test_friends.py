@@ -3,8 +3,8 @@
 import Globals, utils
 import time
 
-from api.MongoStampedAPI    import MongoStampedAPI
-from api.Schemas            import *
+from api_old.MongoStampedAPI    import MongoStampedAPI
+from api_old.Schemas            import *
 
 api = MongoStampedAPI()
 user_ids = [ 

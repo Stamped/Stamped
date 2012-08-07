@@ -11,10 +11,10 @@ import os, json, utils, random, time, hashlib, logs
 import datetime
 
 from errors                         import *
-from api.auth                           import convertPasswordForStorage
-from api.HTTPSchemas                    import *
-from api.MongoStampedAPI                import MongoStampedAPI
-from api.MongoStampedAuth               import MongoStampedAuth
+from api_old.auth                           import convertPasswordForStorage
+from api_old.HTTPSchemas                    import *
+from api_old.MongoStampedAPI                import MongoStampedAPI
+from api_old.MongoStampedAuth               import MongoStampedAuth
 from django.http                    import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts               import render_to_response
 from django.views.decorators.http   import require_http_methods

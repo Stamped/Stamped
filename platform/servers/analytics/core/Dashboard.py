@@ -11,7 +11,7 @@ import Globals
 import keys.aws, logs, utils, math
 
 from boto.sdb.connection                            import SDBConnection
-from api.MongoStampedAPI                            import MongoStampedAPI
+from api_old.MongoStampedAPI                            import MongoStampedAPI
 from servers.analytics.core.analytics_utils         import *
 from servers.analytics.core.logsQuery               import logsQuery
 from servers.analytics.core.statWriter              import statWriter

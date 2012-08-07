@@ -21,9 +21,9 @@ from abc                        import ABCMeta, abstractmethod
 from resolve.Resolver                   import *
 from resolve.ResolverObject             import *
 from resolve.ASourceController          import *
-from api.Schemas                import *
+from api_old.Schemas                import *
 from resolve.EntityGroups               import *
-from api.Entity                     import buildEntity
+from api_old.Entity                     import buildEntity
 
 MERGE_TIMEOUT   = 60*60*5 # 5 hour timeout
 SEARCH_TIMEOUT  = 10

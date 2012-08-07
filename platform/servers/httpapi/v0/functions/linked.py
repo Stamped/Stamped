@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 from servers.httpapi.v0.helpers import *
 from errors             import *
-from api.HTTPSchemas        import *
+from api_old.HTTPSchemas        import *
 from libs.Netflix       import *
 from libs.Facebook           import *
 from django.http        import HttpResponseRedirect

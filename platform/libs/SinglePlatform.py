@@ -16,11 +16,11 @@ import datetime, logs, sys, time
 from pprint         import pprint
 from libs.LRUCache  import lru_cache
 from libs.Memcache  import memcached_function
-from api.Schemas    import Menu
-from api.Schemas    import Submenu
-from api.Schemas    import MenuSection
-from api.Schemas    import MenuItem
-from api.Schemas    import MenuPrice
+from api_old.Schemas    import Menu
+from api_old.Schemas    import Submenu
+from api_old.Schemas    import MenuSection
+from api_old.Schemas    import MenuItem
+from api_old.Schemas    import MenuPrice
 from threading      import Lock
 from libs.Request   import service_request
 from APIKeys        import get_api_key

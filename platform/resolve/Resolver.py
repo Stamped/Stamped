@@ -349,7 +349,7 @@ def demo(generic_source, default_title, subcategory=None):
     """
     import sys
     from resolve import StampedSource
-    from api import Schemas
+    from api_old import Schemas
 
     title = default_title
     count = 1
@@ -368,7 +368,7 @@ def demo(generic_source, default_title, subcategory=None):
     if len(sys.argv) > 4:
         index = int(sys.argv[3])
 
-    from api.MongoStampedAPI import MongoStampedAPI
+    from api_old.MongoStampedAPI import MongoStampedAPI
     api = MongoStampedAPI()
     db = api._entityDB
     query = {'titlel':title.lower()}

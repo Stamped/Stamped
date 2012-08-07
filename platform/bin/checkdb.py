@@ -12,7 +12,7 @@ import bin.integrity as integrity
 
 from optparse               import OptionParser
 from pprint                 import pprint
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.MongoStampedAPI    import MongoStampedAPI
 from utils                  import abstract
 
 # Index collections

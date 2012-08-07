@@ -26,7 +26,7 @@ try:
     from resolve.GenericSource              import generatorSource
     from pprint                     import pformat
     from gevent.pool                import Pool
-    from api.Schemas                import TimesSchema, HoursSchema
+    from api_old.Schemas                import TimesSchema, HoursSchema
     from search.ScoringUtils        import *
     from search.DataQualityUtils    import *
 except:

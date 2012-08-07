@@ -22,7 +22,7 @@ from threading import Thread
 import sources
 
 # import all databases
-import api.db
+import api_old.db
 
 #-----------------------------------------------------------
 
@@ -168,7 +168,7 @@ def parseCommandLine():
     elif options.sink == "merge":
         options.sink = MergeEntitySink()
     else:
-        from api.MongoStampedAPI import MongoStampedAPI
+        from api_old.MongoStampedAPI import MongoStampedAPI
         options.sink = MongoStampedAPI(options.db)
     
     return options

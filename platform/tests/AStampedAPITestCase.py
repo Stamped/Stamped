@@ -7,12 +7,18 @@ __license__   = "TODO"
 
 import Globals, utils
 import atexit
+import logs
 
-from api.Schemas                import *
-from tests.StampedTestUtils           import *
-from tests.framework.FixtureTest                import *
-from api.MongoStampedAPI            import MongoStampedAPI
-from utils                      import lazyProperty
+try:
+    from api_old.Schemas                import *
+    from tests.StampedTestUtils           import *
+    from tests.framework.FixtureTest                import *
+    from api_old.MongoStampedAPI            import MongoStampedAPI
+    from utils                      import lazyProperty
+    from api.stampedapi import StampedAPI
+except Exception as e:
+    logs.report()
+    raise
 
 _accounts  = []
 _test_case = None
@@ -22,7 +28,7 @@ __globalAPI = None
 def globalAPI():
     global __globalAPI
     if __globalAPI is None:
-        __globalAPI = MongoStampedAPI()
+        __globalAPI = StampedAPI()
     return __globalAPI
 
 class StampedAPIException(Exception):
@@ -57,7 +63,7 @@ class AStampedAPITestCase(AStampedTestCase):
         account.email       = kwargs.pop('email', '%s@stamped.com' % name)
         account.password    = kwargs.pop('password', "12345")
         account.screen_name = kwargs.pop('screen_name', name)
-        account             = self.api.addAccount(account)
+        account             = self.api.accounts.addAccount(account)
 
         self.assertValidKey(account.user_id)
         _accounts.append(account.user_id)
@@ -82,7 +88,7 @@ class AStampedAPITestCase(AStampedTestCase):
         fbAccount.color_primary     = kwargs.pop('color_primary', None)
         fbAccount.color_secondary   = kwargs.pop('color_secondary', None)
 
-        account = self.api.addFacebookAccount(fbAccount)
+        account = self.api.accounts.addFacebookAccount(fbAccount)
 
         self.assertValidKey(account.user_id)
         _accounts.append(account.user_id)
@@ -105,7 +111,7 @@ class AStampedAPITestCase(AStampedTestCase):
         twAccount.color_primary     = kwargs.pop('color_primary', None)
         twAccount.color_secondary   = kwargs.pop('color_secondary', None)
 
-        account = self.api.addTwitterAccount(twAccount)
+        account = self.api.accounts.addTwitterAccount(twAccount)
 
         self.assertValidKey(account.user_id)
         _accounts.append(account.user_id)
@@ -121,26 +127,26 @@ class AStampedAPITestCase(AStampedTestCase):
         linked.secret                   = kwargs.pop('secret', None)
         linked.token_expiration         = kwargs.pop('token_expiration', None)
 
-        return self.api.addLinkedAccount(authUserId, linked)
+        return self.api.accounts.addLinkedAccount(authUserId, linked)
 
     def removeLinkedAccount(self, authuserId, service_name):
-        return self.api.removeLinkedAccount(authUserId, service_name)
+        return self.api.accounts.removeLinkedAccount(authUserId, service_name)
 
 
     def loginWithFacebook(self, fb_user_token, **kwargs):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
 
-        account, token = self.api.verifyFacebookUserCredentials(c_id, fb_user_token)
+        account, token = self.api.accounts.verifyFacebookUserCredentials(c_id, fb_user_token)
         return account, token
 
     def loginWithTwitter(self, tw_user_token, tw_user_secret, **kwargs):
         c_id        = kwargs.pop('client_id', DEFAULT_CLIENT_ID)
 
-        account, token = self.api.verifyTwitterUserCredentials(c_id, tw_user_token, tw_user_secret)
+        account, token = self.api.accounts.verifyTwitterUserCredentials(c_id, tw_user_token, tw_user_secret)
         return account, token
 
     def deleteAccount(self, authUserId):
-        return self.api.removeAccount(authUserId)
+        return self.api.accounts.removeAccount(authUserId)
 
     def createFriendship(self, authUserId, targetUserId=None, targetScreenName=None):
         userTiny = UserTiny()
@@ -159,7 +165,7 @@ class AStampedAPITestCase(AStampedTestCase):
 
 
     def showAccount(self, authUserId):
-        return self.api.getAccount(authUserId)
+        return self.api.accounts.get(authUserId)
 
     def showLinkedAccounts(self, authUserId):
         return self.api.getLinkedAccounts(authuserId)

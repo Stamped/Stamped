@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import base64, Image, utils
 
-from api.MongoStampedAPI import MongoStampedAPI
+from api_old.MongoStampedAPI import MongoStampedAPI
 from optparse import OptionParser
 from pprint import pprint
 

@@ -123,13 +123,13 @@ def main():
         print '--entity_id and --search_id cannot be used with query arguments!'
 
     if options.entity_id:
-        from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
+        from db.mongodb.MongoEntityCollection import MongoEntityCollection
         entity = MongoEntityCollection().getEntity(options.entity_id)
     elif options.search_id:
         entity = getEntityFromSearchId(options.search_id)
     else:
         query = buildQueryFromArgs(args)
-        from api.MongoStampedAPI import MongoStampedAPI
+        from api_old.MongoStampedAPI import MongoStampedAPI
         cursor = MongoStampedAPI()._entityDB._collection.find(query)
         if cursor.count() == 0:
             print("Could not find a matching entity for query: %s" % query)

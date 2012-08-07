@@ -9,9 +9,9 @@ __license__   = "TODO"
 
 import Globals
 from optparse import OptionParser
-from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
-from api.db.mongodb.MongoStampCollection import MongoStampCollection
-from api.db.mongodb.MongoTodoCollection import MongoTodoCollection
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoStampCollection import MongoStampCollection
+from db.mongodb.MongoTodoCollection import MongoTodoCollection
 
 def main():
     usage = "Usage: %prog [options]"

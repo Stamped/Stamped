@@ -10,7 +10,7 @@ import os, sys
 from utils import AttributeDict, Singleton, get_db_config
 from bson import json_util
 import json
-from api.db.mongodb.AMongoCollection import MongoDBConfig
+from db.mongodb.AMongoCollection import MongoDBConfig
 from libs import MongoCache
 import functools
 from tests.StampedTestUtils import *
@@ -103,7 +103,7 @@ def fixtureTest(useLocalDb=False,
 
             if not useLocalDb:
                 MongoDBConfig.getInstance().database_name = 'stamped_fixtures'
-                from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+                from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
                 MongoDBConfig2.getInstance().database_name = 'stamped_fixtures'
                 MongoCache.disableStaleness = True
                 MongoCache.cacheTableName = 'cache_fixture'
@@ -176,7 +176,7 @@ def fixtureTest(useLocalDb=False,
                         dumpDbDictToFilename({MongoCache.cacheTableName: list(getattr(db, MongoCache.cacheTableName).find())}, cacheFixtureFilename)
 
                 MongoDBConfig.getInstance().database_name = 'stamped'
-                from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+                from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
                 MongoDBConfig2.getInstance().database_name = 'stamped'
                 MongoCache.disableStaleness = False
                 if MongoCache.cacheTableName == 'cache_fixture':

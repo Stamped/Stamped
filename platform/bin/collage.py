@@ -8,9 +8,9 @@ __license__   = "TODO"
 import Globals
 import pprint, time, utils
 
-from api.S3ImageDB              import S3ImageDB
-from api.HTTPSchemas        import HTTPTimeSlice
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.S3ImageDB              import S3ImageDB
+from api_old.HTTPSchemas        import HTTPTimeSlice
+from api_old.MongoStampedAPI    import MongoStampedAPI
 from libs.ImageCollages     import *
 
 def save_local_image(image, filename):

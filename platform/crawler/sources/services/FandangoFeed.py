@@ -10,7 +10,7 @@ import feedparser, gevent, os, re
 
 from gevent.pool import Pool
 from crawler.AEntitySource import AExternalDumpEntitySource
-from api.Schemas import BasicEntity
+from api_old.Schemas import BasicEntity
 
 __all__ = [ "FandangoFeed" ]
 

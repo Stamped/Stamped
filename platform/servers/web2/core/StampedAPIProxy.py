@@ -9,8 +9,8 @@ import Globals
 import copy, json, logs, urllib2, utils
 import libs.ec2_utils
 
-from api.HTTPSchemas            import *
-from api.MongoStampedAPI        import globalMongoStampedAPI
+from api_old.HTTPSchemas            import *
+from api_old.MongoStampedAPI        import globalMongoStampedAPI
 from libs.Memcache              import globalMemcache, generateKeyFromDictionary
 from django.utils.functional    import wraps
 

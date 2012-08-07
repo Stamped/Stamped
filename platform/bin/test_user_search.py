@@ -3,7 +3,7 @@
 import Globals, utils
 import sys, time
 
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.MongoStampedAPI    import MongoStampedAPI
 from pprint                 import pprint
 
 if len(sys.argv) < 1:

@@ -11,7 +11,7 @@ import re, time, utils
 from libs.AmazonAPI         import AmazonAPI
 from gevent.pool            import Pool
 from crawler.match.EntityMatcher    import EntityMatcher
-from api.MongoStampedAPI        import MongoStampedAPI
+from api_old.MongoStampedAPI        import MongoStampedAPI
 from difflib                import SequenceMatcher
 from optparse               import OptionParser
 from pprint                 import pprint

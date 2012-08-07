@@ -11,7 +11,7 @@ import sys, time
 from resolve.EntitySearch   import EntitySearch
 from optparse       import OptionParser
 from pprint         import pprint
-from api.Entity     import categories
+from api_old.Entity     import categories
 
 # TODO: AUTOSUGGEST
     # after setting up CDN, going to have to run a cache-warming process

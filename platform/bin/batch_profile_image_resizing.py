@@ -12,7 +12,7 @@ try:
     import Image, ImageFile
     from StringIO import StringIO
     from errors   import *
-    from api.MongoStampedAPI import globalMongoStampedAPI
+    from api_old.MongoStampedAPI import globalMongoStampedAPI
 
     from boto.cloudfront    import CloudFrontConnection
     from boto.s3.connection import S3Connection

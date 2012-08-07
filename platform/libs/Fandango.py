@@ -12,7 +12,7 @@ from datetime       import datetime
 from optparse       import OptionParser
 from BeautifulSoup       import BeautifulSoup
 from libs.LibUtils  import parseDateString
-from api.Schemas    import *
+from api_old.Schemas    import *
 
 __all__ = [ "Fandango" ]
 

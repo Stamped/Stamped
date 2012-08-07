@@ -603,11 +603,11 @@ def init_db_config(config_desc):
     # where and when the MongoDBConfig Singleton is imported, it'll register as the same 
     # instance that AMongoCollection knows about or not. For now, as a workaround, just 
     # import it multiple ways and initialize the config with both possible import paths.
-    from api.db.mongodb.AMongoCollection import MongoDBConfig
+    from db.mongodb.AMongoCollection import MongoDBConfig
     cfg = MongoDBConfig.getInstance()
     cfg.config = AttributeDict(config)
     
-    from api.db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
+    from db.mongodb.AMongoCollection import MongoDBConfig as MongoDBConfig2
     cfg2 = MongoDBConfig2.getInstance()
     cfg2.config = AttributeDict(config)
     
@@ -782,7 +782,7 @@ def parseTemplate(src, params):
     return template.render(params)
 
 def runMongoCommand(mongo_cmd, db='stamped', verbose=False):
-    from api.db.mongodb.AMongoCollection import MongoDBConfig
+    from db.mongodb.AMongoCollection import MongoDBConfig
     
     cmd_template = "mongo --quiet %s:%s/%s --eval 'printjson(%s);'"
     cfg = MongoDBConfig.getInstance()

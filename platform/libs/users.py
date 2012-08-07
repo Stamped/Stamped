@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals, utils
 import math, time
 
-from api.MongoStampedAPI import MongoStampedAPI
+from api_old.MongoStampedAPI import MongoStampedAPI
 
 def __get_collection(db, ns):
     collection = db

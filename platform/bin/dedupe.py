@@ -9,7 +9,7 @@ import Globals, utils
 import bson, sys
 
 from crawler.match.EntityMatcher import EntityMatcher
-from api.MongoStampedAPI     import MongoStampedAPI
+from api_old.MongoStampedAPI     import MongoStampedAPI
 from gevent              import Greenlet
 from gevent.pool         import Pool
 from optparse            import OptionParser

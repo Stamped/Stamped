@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-from api.MongoStampedAPI import MongoStampedAPI
+from api_old.MongoStampedAPI import MongoStampedAPI
 from gevent.pool import Pool
 
 

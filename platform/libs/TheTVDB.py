@@ -10,7 +10,7 @@ __all__       = [ 'TheTVDB', 'globalTheTVDB' ]
 import Globals
 import string, sys, urllib, utils
 
-from api.Schemas            import *
+from api_old.Schemas            import *
 from optparse        import OptionParser
 from libs.LibUtils        import parseDateString
 from lxml            import objectify, etree
@@ -19,7 +19,7 @@ from libs.LRUCache        import lru_cache
 from libs.CachedFunction  import cachedFn
 from libs.CountedFunction import countedFn
 from libs.Request        import service_request
-from api.Schemas         import MediaCollectionEntity
+from api_old.Schemas         import MediaCollectionEntity
 from APIKeys import get_api_key
 
 API_KEY = get_api_key('tvdb', 'api_key')

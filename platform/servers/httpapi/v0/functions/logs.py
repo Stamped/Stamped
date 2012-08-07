@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 from servers.httpapi.v0.helpers import *
-from api.Schemas        import ClientLogsEntry
+from api_old.Schemas        import ClientLogsEntry
 
 @handleHTTPRequest(http_schema=HTTPClientLogsEntry, conversion=HTTPClientLogsEntry.exportClientLogsEntry)
 @require_http_methods(["POST"])

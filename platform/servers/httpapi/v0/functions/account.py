@@ -10,7 +10,7 @@ __license__   = "TODO"
 
 from servers.httpapi.v0.helpers import *
 from errors             import *
-from api.HTTPSchemas        import *
+from api_old.HTTPSchemas        import *
 from libs.Netflix       import *
 from libs.Facebook           import *
 
@@ -64,7 +64,7 @@ createTwitterAccountExceptions = [
                    parse_request_kwargs={'obfuscate':['password']},
                    exceptions=accountExceptions)
 def create(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    account = stampedAPI.accounts.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -82,7 +82,7 @@ def create(request, client_id, http_schema, schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['password']},
                    exceptions=upgradeAccountExceptions)
 def upgrade(request, client_id, authUserId, http_schema, **kwargs):
-    account = stampedAPI.upgradeAccount(authUserId, http_schema.email, http_schema.password)
+    account = stampedAPI.accounts.upgradeAccount(authUserId, http_schema.email, http_schema.password)
 
     user   = HTTPUser().importAccount(account)
 
@@ -100,7 +100,7 @@ def upgrade(request, client_id, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token']},
                    exceptions=createFacebookAccountExceptions)
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    account = stampedAPI.accounts.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -119,7 +119,7 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret']},
                    exceptions=createTwitterAccountExceptions)
 def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
+    account = stampedAPI.accounts.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
     user   = HTTPUser().importAccount(account)
     logs.user(user.user_id)
@@ -133,7 +133,7 @@ def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest()
 def remove(request, authUserId, **kwargs):
-    account = stampedAPI.removeAccount(authUserId)
+    account = stampedAPI.accounts.removeAccount(authUserId)
     account = HTTPAccount().importAccount(account)
 
     return transformOutput(account.dataExport())
@@ -142,7 +142,7 @@ def remove(request, authUserId, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(parse_request=False, exceptions=accountExceptions)
 def show(request, authUserId, **kwargs):
-    account = stampedAPI.getAccount(authUserId)
+    account = stampedAPI.accounts.get(authUserId)
     account = HTTPAccount().importAccount(account)
 
     return transformOutput(account.dataExport())
@@ -153,7 +153,7 @@ def show(request, authUserId, **kwargs):
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm,
                    exceptions=updateAccountExceptions)
 def update(request, authUserId, http_schema, schema, **kwargs):
-    account = stampedAPI.updateAccount(authUserId, schema)
+    account = stampedAPI.accounts.updateAccount(authUserId, schema)
 
     user    = HTTPUser().importUser(account)
     return transformOutput(user.dataExport())
@@ -162,7 +162,7 @@ def update(request, authUserId, http_schema, schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp, exceptions=accountExceptions)
 def customizeStamp(request, authUserId, data, **kwargs):
-    account = stampedAPI.customizeStamp(authUserId, data)
+    account = stampedAPI.accounts.customizeStamp(authUserId, data)
     user    = HTTPUser().importUser(account)
 
     return transformOutput(user.dataExport())
@@ -174,7 +174,7 @@ def customizeStamp(request, authUserId, data, **kwargs):
                    http_schema=HTTPAccountCheck, 
                    exceptions=accountExceptions)
 def check(request, client_id, http_schema, **kwargs):
-    user = stampedAPI.checkAccount(http_schema.login)
+    user = stampedAPI.accounts.checkAccount(http_schema.login)
     user = HTTPUser().importUser(user)
 
     return transformOutput(user.dataExport())
@@ -241,7 +241,7 @@ def _buildAlertsFromAccount(account):
 @require_http_methods(["GET"])
 @handleHTTPRequest()
 def showAlerts(request, authUserId, **kwargs):
-    account  = stampedAPI.getAccount(authUserId)
+    account  = stampedAPI.accounts.get(authUserId)
     result = _buildAlertsFromAccount(account)
 
     return transformOutput(result)
@@ -258,7 +258,7 @@ def updateAlerts(request, authUserId, http_schema, **kwargs):
     if http_schema.off is not None:
         off = set(http_schema.off.split(','))
 
-    account  = stampedAPI.updateAlerts(authUserId, on, off)
+    account  = stampedAPI.accounts.updateAlerts(authUserId, on, off)
     result = _buildAlertsFromAccount(account)
 
     return transformOutput(result)
@@ -270,7 +270,7 @@ def updateApns(request, authUserId, http_schema, **kwargs):
     if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
 
-    stampedAPI.updateAPNSToken(authUserId, http_schema.token)
+    stampedAPI.accounts.updateAPNSToken(authUserId, http_schema.token)
     return transformOutput(True)
 
 
@@ -280,6 +280,6 @@ def removeApns(request, authUserId, http_schema, **kwargs):
     if len(http_schema.token) != 64:
         raise StampedInputError('Invalid token length')
 
-    stampedAPI.removeAPNSTokenForUser(authUserId, http_schema.token)
+    stampedAPI.accounts.removeAPNSTokenForUser(authUserId, http_schema.token)
     return transformOutput(True)
 

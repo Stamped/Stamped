@@ -12,7 +12,7 @@ from crawler.GooglePlacesEntityMatcher  import GooglePlacesEntityMatcher
 from gevent.pool                import Pool
 from crawler.match.EntityMatcher        import EntityMatcher
 from libs.GooglePlaces               import GooglePlaces
-from api.MongoStampedAPI            import MongoStampedAPI
+from api_old.MongoStampedAPI            import MongoStampedAPI
 from optparse                   import OptionParser
 from pprint                     import pprint
 

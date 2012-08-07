@@ -17,7 +17,7 @@ from datetime               import datetime
 from datetime               import timedelta
 from copy                   import deepcopy
 from pprint                 import pformat, pprint
-from api.Entity                 import buildEntity
+from api_old.Entity                 import buildEntity
 import logs                 
 from libs.ec2_utils         import is_prod_stack, is_ec2
 

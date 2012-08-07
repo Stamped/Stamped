@@ -8,8 +8,8 @@ __license__   = "TODO"
 import Globals
 
 from schema             import *
-from api.Schemas        import *
-from api.HTTPSchemas    import *
+from api_old.Schemas        import *
+from api_old.HTTPSchemas    import *
 
 class HTTPWebTimeSlice(Schema):
     

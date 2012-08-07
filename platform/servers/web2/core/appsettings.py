@@ -9,8 +9,8 @@ import Globals
 import utils
 import travis_test
 
-from api.MongoStampedAPI            import globalMongoStampedAPI
-from api.MongoStampedAuth           import MongoStampedAuth
+from api_old.MongoStampedAPI            import globalMongoStampedAPI
+from api_old.MongoStampedAuth           import MongoStampedAuth
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
 

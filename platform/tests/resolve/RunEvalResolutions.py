@@ -15,8 +15,8 @@ import tempfile
 import traceback
 import pprint
 
-from api.MongoStampedAPI import globalMongoStampedAPI
-from api.HTTPSchemas import HTTPEntitySearchResultsItem
+from api_old.MongoStampedAPI import globalMongoStampedAPI
+from api_old.HTTPSchemas import HTTPEntitySearchResultsItem
 from resolve import FullResolveContainer, EntityProxyContainer, EntityProxySource
 from resolve.AmazonSource import AmazonSource
 from resolve.FactualSource import FactualSource

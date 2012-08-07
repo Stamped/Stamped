@@ -9,7 +9,7 @@ import Globals, utils
 import sys
 
 from crawler.match.EntityMatcher import EntityMatcher
-from api.MongoStampedAPI     import MongoStampedAPI
+from api_old.MongoStampedAPI     import MongoStampedAPI
 from Schemas             import Entity
 from optparse            import OptionParser
 

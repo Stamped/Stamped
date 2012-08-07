@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import api.HTTPSchemas
+import api_old.HTTPSchemas
 import utils
 
 import servers.web2.core.views       as views

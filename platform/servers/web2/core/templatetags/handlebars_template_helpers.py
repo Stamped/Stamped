@@ -7,7 +7,7 @@ __license__   = "TODO"
 
 import Globals
 import logs, os, pystache, utils, pybars
-import api.HTTPSchemas
+import api_old.HTTPSchemas
 
 from subprocess import Popen, PIPE
 from pprint     import pformat

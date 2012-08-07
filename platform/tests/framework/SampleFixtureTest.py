@@ -10,15 +10,15 @@ from tests.framework.FixtureTest import *
 from tests.StampedTestUtils import *
 import datetime
 from libs.MongoCache import mongoCachedFn
-from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
-from api.db.mongodb.MongoUserCollection import MongoUserCollection
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoUserCollection import MongoUserCollection
 
 @mongoCachedFn(memberFn=False)
 def myCachedFn():
     return str(datetime.datetime.now() + datetime.timedelta(1))
 
 def generate_john_doe():
-    from api.Schemas import PersonEntity
+    from api_old.Schemas import PersonEntity
     person = PersonEntity()
     person.schema_version = 12
     person.title = 'John Doe'

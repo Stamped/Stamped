@@ -13,9 +13,9 @@ import Globals
 from logs import log, report
 
 try:
-    from api.MongoStampedAPI                import MongoStampedAPI
+    from api_old.MongoStampedAPI                import MongoStampedAPI
     from tests.AStampedAPIHttpTestCase            import *
-    from api.Schemas                    import Entity
+    from api_old.Schemas                    import Entity
     from pprint                         import pprint
     from datetime                       import datetime
 except:

@@ -8,10 +8,10 @@ __license__   = "TODO"
 import Globals, utils
 
 from crawler.match.EntityMatcher    import EntityMatcher
-from api.AEntitySink            import AEntitySink
+from api_old.AEntitySink            import AEntitySink
 from Schemas                import Entity
 from pprint                 import pprint
-from api.MongoStampedAPI        import MongoStampedAPI
+from api_old.MongoStampedAPI        import MongoStampedAPI
 
 from crawler.match.EntityMatcher import EntityMatcher
 

@@ -13,8 +13,8 @@ import datetime as dt
 from StampedAPIProxy            import globalStampedAPIProxy
 from errors                     import *
 
-from api.HTTPSchemas            import *
-from api.MongoStampedAPI        import globalMongoStampedAPI
+from api_old.HTTPSchemas            import *
+from api_old.MongoStampedAPI        import globalMongoStampedAPI
 from libs.Memcache              import globalMemcache, generateKeyFromDictionary
 
 from servers.web2               import settings

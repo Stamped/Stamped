@@ -7,8 +7,8 @@ __license__   = "TODO"
 
 import Globals
 import sys, datetime, logs, gevent, utils, math
-from api import Constants
-from api.db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
+from api_old import Constants
+from db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
 from resolve.AmazonSource import AmazonSource
 from resolve.EntityProxyContainer import EntityProxyContainer
 from resolve.EntityProxySource import EntityProxySource
@@ -21,7 +21,7 @@ from resolve.TMDBSource import TMDBSource
 from resolve.TheTVDBSource import TheTVDBSource
 from resolve.iTunesSource import iTunesSource
 from resolve.GenericSource import SEARCH_TIMEOUT
-from api.Schemas import PlaceEntity
+from api_old.Schemas import PlaceEntity
 from search.SearchResultDeduper import SearchResultDeduper
 from search.DataQualityUtils import *
 from greenlet import GreenletExit

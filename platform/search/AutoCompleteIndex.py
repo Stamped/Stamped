@@ -17,7 +17,7 @@ from whoosh.analysis import *
 from whoosh.support.charset import accent_map
 
 import keys.aws
-from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
 from errors import StampedDocumentNotFoundError
 from search.AutoCompleteTrie import AutoCompleteTrie
 

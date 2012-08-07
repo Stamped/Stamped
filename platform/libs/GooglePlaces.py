@@ -11,7 +11,7 @@ import json, logs, string, urllib, urllib2
 from optparse       import OptionParser
 from libs.Geocoder       import Geocoder
 from libs.AKeyBasedAPI   import AKeyBasedAPI
-from api.Schemas    import PlaceEntity, Coordinates
+from api_old.Schemas    import PlaceEntity, Coordinates
 from libs.LRUCache       import lru_cache
 from libs.CachedFunction import *
 from libs.CountedFunction import countedFn

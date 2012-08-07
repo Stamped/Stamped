@@ -25,7 +25,7 @@ try:
     from resolve.TitleUtils         import *
     from libs.LibUtils              import parseDateString
     from resolve.StampedSource      import StampedSource
-    from api.Entity                 import mapCategoryToTypes
+    from api_old.Entity                 import mapCategoryToTypes
     from search.ScoringUtils        import *
     from resolve.Resolver           import trackSimplify
     from search.DataQualityUtils    import *

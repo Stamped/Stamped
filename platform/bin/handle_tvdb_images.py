@@ -8,11 +8,11 @@ __license__   = "TODO"
 import Globals
 import bson, os, sys, urllib2, utils
 
-from api.S3ImageDB      import S3ImageDB
+from api_old.S3ImageDB      import S3ImageDB
 from StringIO           import StringIO
 from PIL                import Image, ImageFilter
 from gevent.pool        import Pool
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.MongoStampedAPI    import MongoStampedAPI
 
 if __name__ == '__main__':
     import argparse

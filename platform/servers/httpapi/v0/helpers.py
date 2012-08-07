@@ -8,25 +8,33 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import stamped
-import os, json, utils, random, time, hashlib, logs
-import libs.ec2_utils
+import logs
+try:
+    import stamped
+    import os, json, utils, random, time, hashlib, logs
+    import libs.ec2_utils
 
-from pprint                         import pformat
-from errors                         import *
-from api.HTTPSchemas                    import *
-from api.MongoStampedAPI            import globalMongoStampedAPI
-from api.MongoStampedAuth           import MongoStampedAuth
+    from pprint                         import pformat
+    from errors                         import *
+    from api_old.HTTPSchemas                    import *
+    from api_old.MongoStampedAPI            import globalMongoStampedAPI
+    from api_old.MongoStampedAuth           import MongoStampedAuth
 
-from libs.Memcache                  import globalMemcache
+    from api.stampedapi import StampedAPI
 
-from django.views.decorators.http   import require_http_methods
-from django.utils.functional        import wraps
-from django.http                    import HttpResponse
+    from libs.Memcache                  import globalMemcache
 
-from datetime                       import datetime
+    from django.views.decorators.http   import require_http_methods
+    from django.utils.functional        import wraps
+    from django.http                    import HttpResponse
 
-IS_PROD = libs.ec2_utils.is_prod_stack()
+    from datetime                       import datetime
+
+    IS_PROD = libs.ec2_utils.is_prod_stack()
+except Exception as e:
+    print e
+    logs.report()
+    raise
 
 # TODO (travis): VALID_ORIGINS should be dependent on IS_PROD to be 100% as 
 # restrictive as possible.
@@ -51,7 +59,7 @@ t1 = time.time()
 
 # TODO (travis): use single global stamped API instance
 # e.g., there are MongoStampedAPIs instantiated throughout the codebase => refactor
-stampedAPI  = globalMongoStampedAPI()
+stampedAPI  = StampedAPI()
 stampedAuth = MongoStampedAuth()
 cache       = globalMemcache()
 
@@ -202,10 +210,10 @@ def handleHTTPRequest(requires_auth=True,
                 if request.method == 'OPTIONS' and valid_origin is not None:
                     return _add_cors_headers(HttpResponse())
                 
-                logs.begin(saveLog=stampedAPI._logsDB.saveLog,
-                           saveStat=stampedAPI._statsDB.addStat,
-                           requestData=request,
-                           nodeName=stampedAPI.node_name)
+                # logs.begin(saveLog=stampedAPI._logsDB.saveLog,
+                #            saveStat=stampedAPI._statsDB.addStat,
+                #            requestData=request,
+                #            nodeName=stampedAPI.node_name)
                 logs.info("%s %s" % (request.method, request.path))
 
                 if valid_origin is None:
@@ -353,7 +361,6 @@ def checkClient(request, required=True):
         stampedAuth.verifyClientCredentials(clientId, clientSecret)
 
         client = stampedAuth.getClientDetails(clientId)
-        stampedAPI.setVersion(client.api_version)
         
         return clientId
     except StampedInvalidClientError:
@@ -396,7 +403,6 @@ def checkOAuth(oauth_token, required=True):
         logs.client(client_id)
         
         client = stampedAuth.getClientDetails(client_id)
-        stampedAPI.setVersion(client.api_version)
         
         return authenticated_user_id, client_id
 

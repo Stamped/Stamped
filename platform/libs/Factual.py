@@ -63,7 +63,7 @@ from urlparse               import urlparse, parse_qsl
 from libs.LRUCache          import lru_cache
 from libs.CachedFunction    import cachedFn
 from libs.CountedFunction   import countedFn
-from api.Schemas            import BasicEntity
+from api_old.Schemas            import BasicEntity
 from libs.SinglePlatform    import StampedSinglePlatform
 from pprint                 import pprint
 from functools              import partial
@@ -671,7 +671,7 @@ def resolveEntities(size=None, log=None):
     Resolve a random batch of entities, and output accuracy stats
     """
     f = Factual(log=sys.stdout)
-    from api import MongoStampedAPI
+    from api_old import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
@@ -797,7 +797,7 @@ def demo():
     print("Finished")
 
 def enrichAll():
-    from api import MongoStampedAPI
+    from api_old import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
@@ -813,7 +813,7 @@ def enrichAll():
         stampedAPI.factualEnrich(entity)
 
 def populateMenus():
-    from api import MongoStampedAPI
+    from api_old import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     
@@ -829,7 +829,7 @@ def populateMenus():
         stampedAPI.updateMenus(entity.entity_id)
 
 def resolveAll():
-    from api import MongoStampedAPI
+    from api_old import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     f = Factual()
@@ -849,7 +849,7 @@ def resolveAll():
 
 
 def sourceAndTimestamp():
-    from api import MongoStampedAPI
+    from api_old import MongoStampedAPI
     stampedAPI = MongoStampedAPI.MongoStampedAPI()
     entityDB   = stampedAPI._entityDB
     

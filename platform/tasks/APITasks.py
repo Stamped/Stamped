@@ -20,7 +20,7 @@ def getStampedAPI():
     """ hack to ensure that tasks only instantiate the Stamped API once """
     
     import Globals
-    from api.MongoStampedAPI import MongoStampedAPI
+    from api_old.MongoStampedAPI import MongoStampedAPI
     global __stamped_api__
     
     if __stamped_api__ is None:

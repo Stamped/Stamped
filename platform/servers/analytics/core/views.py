@@ -25,8 +25,8 @@ from servers.analytics.core.weeklyScore     import weeklyScore
 from servers.analytics.core.analytics_utils import *
 from libs.ec2_utils                         import get_stack
 
-from api.MongoStampedAPI                    import MongoStampedAPI
-from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
+from api_old.MongoStampedAPI                    import MongoStampedAPI
+from db.mongodb.MongoStatsCollection    import MongoStatsCollection
 
 
 # utils.init_db_config('peach.db3')

@@ -14,7 +14,7 @@ try:
     import logs
     import re
     import urlparse
-    from api.Schemas            import *
+    from api_old.Schemas            import *
 except:
     raise
 
@@ -43,7 +43,7 @@ def _fullResolveContainer():
     return resolve.FullResolveContainer.FullResolveContainer()
 
 def _stampedAPI():
-    from api import MongoStampedAPI
+    from api_old import MongoStampedAPI
     return MongoStampedAPI.globalMongoStampedAPI()
 
 def _entityDB():

@@ -19,7 +19,7 @@ from logs import report
 try:
     from resolve.FullResolveContainer   import FullResolveContainer
     from tests.AStampedAPIHttpTestCase            import *
-    from api.Schemas                    import Entity
+    from api_old.Schemas                    import Entity
     from pprint                         import pformat
     from datetime                       import datetime
 except:

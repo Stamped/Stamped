@@ -12,7 +12,7 @@ import logs, math, utils
 from abc            import ABCMeta, abstractmethod
 from PIL            import Image, ImageFilter
 from gevent.pool    import Pool
-from api.S3ImageDB  import S3ImageDB
+from api_old.S3ImageDB  import S3ImageDB
 from libs.LRUCache       import lru_cache
 
 class AImageCollage(object):

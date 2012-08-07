@@ -13,20 +13,20 @@ import libs.ec2_utils
 from errors                 import *
 from optparse               import OptionParser
 
-from api.MongoStampedAPI import MongoStampedAPI
+from api_old.MongoStampedAPI import MongoStampedAPI
 
-from api.db.mongodb.MongoInboxStampsCollection          import MongoInboxStampsCollection
-from api.db.mongodb.MongoUserStampsCollection           import MongoUserStampsCollection
-from api.db.mongodb.MongoCreditReceivedCollection       import MongoCreditReceivedCollection
-from api.db.mongodb.MongoUserLikesCollection            import MongoUserLikesCollection
-from api.db.mongodb.MongoUserTodosEntitiesCollection    import MongoUserTodosEntitiesCollection
-from api.db.mongodb.MongoStampCommentsCollection        import MongoStampCommentsCollection
+from db.mongodb.MongoInboxStampsCollection          import MongoInboxStampsCollection
+from db.mongodb.MongoUserStampsCollection           import MongoUserStampsCollection
+from db.mongodb.MongoCreditReceivedCollection       import MongoCreditReceivedCollection
+from db.mongodb.MongoUserLikesCollection            import MongoUserLikesCollection
+from db.mongodb.MongoUserTodosEntitiesCollection    import MongoUserTodosEntitiesCollection
+from db.mongodb.MongoStampCommentsCollection        import MongoStampCommentsCollection
 
-from api.db.mongodb.MongoAccountCollection              import MongoAccountCollection
-from api.db.mongodb.MongoEntityCollection               import MongoEntityCollection, MongoEntityStatsCollection
-from api.db.mongodb.MongoStampCollection                import MongoStampCollection, MongoStampStatsCollection
-from api.db.mongodb.MongoTodoCollection                 import MongoTodoCollection
-from api.db.mongodb.MongoGuideCollection                import MongoGuideCollection
+from db.mongodb.MongoAccountCollection              import MongoAccountCollection
+from db.mongodb.MongoEntityCollection               import MongoEntityCollection, MongoEntityStatsCollection
+from db.mongodb.MongoStampCollection                import MongoStampCollection, MongoStampStatsCollection
+from db.mongodb.MongoTodoCollection                 import MongoTodoCollection
+from db.mongodb.MongoGuideCollection                import MongoGuideCollection
 
 import gevent
 from gevent.queue import Queue, Empty

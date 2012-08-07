@@ -9,7 +9,7 @@ import Globals
 import re, time, utils
 
 from gevent.pool        import Pool
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.MongoStampedAPI    import MongoStampedAPI
 from optparse           import OptionParser
 from pprint             import pprint
 from rdioapi            import Rdio

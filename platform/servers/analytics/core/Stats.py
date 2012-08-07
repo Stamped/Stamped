@@ -14,7 +14,7 @@ import logs, utils, math
 
 from boto.sdb.connection                    import SDBConnection
 from boto.exception                         import SDBResponseError
-from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
+from db.mongodb.MongoStatsCollection    import MongoStatsCollection
 from gevent.pool                            import Pool
 from servers.analytics.core.logsQuery           import logsQuery
 from servers.analytics.core.mongoQuery          import mongoQuery

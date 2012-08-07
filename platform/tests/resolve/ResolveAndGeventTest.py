@@ -1,7 +1,7 @@
 import Globals
 
 import gevent
-from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
 
 import random
 

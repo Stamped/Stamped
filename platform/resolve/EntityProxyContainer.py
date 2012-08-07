@@ -9,7 +9,7 @@ __all__ = [ 'EntityProxyContainer' ]
 
 import Globals
 
-from api import Entity
+from api_old import Entity
 from resolve.BasicSourceContainer import BasicSourceContainer
 from resolve.EntityProxySource import EntityProxySource
 

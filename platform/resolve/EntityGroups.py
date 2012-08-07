@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 
 import sys, inspect
-from api.Schemas import *
+from api_old.Schemas import *
 from resolve.AEntityGroups import *
 
 def moveField(source, target=None):

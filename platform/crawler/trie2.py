@@ -9,9 +9,9 @@ import Globals
 import keys.aws, utils
 import gzip, json, math, re, string, time, sys, threading
 
-from api.MongoStampedAPI    import MongoStampedAPI
-from api.HTTPSchemas        import *
-from api.Schemas        import *
+from api_old.MongoStampedAPI    import MongoStampedAPI
+from api_old.HTTPSchemas        import *
+from api_old.Schemas        import *
 from gevent.pool        import Pool
 from optparse           import OptionParser
 from pprint             import pprint, pformat

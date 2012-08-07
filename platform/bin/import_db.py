@@ -9,7 +9,7 @@ import Globals
 import pymongo, os, utils
 
 from subprocess import Popen, PIPE
-from api.db.mongodb.AMongoCollection import MongoDBConfig
+from db.mongodb.AMongoCollection import MongoDBConfig
 
 def main():
     import argparse

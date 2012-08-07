@@ -14,7 +14,7 @@ from datetime   import *
 from errors     import Fail
 from libs.ec2_utils import is_ec2, get_db_nodes, get_stack
 
-from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
+from db.mongodb.MongoLogsCollection import MongoLogsCollection
 
 LOG_COLLECTION_SIZE         = 1024*1024*1024   # 1 gb
 LOG_LOCAL_COLLECTION_SIZE   = 1024*1024*100    # 100 mb

@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import math, pprint, utils
 
-import api.HTTPSchemas
+import api_old.HTTPSchemas
 
 from libs.AImageCollage import AImageCollage
 

@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import Entity
+import api_old.Entity
 import copy, json, re, urllib, utils, logs
 
 from resolve                import EntityProxyContainer

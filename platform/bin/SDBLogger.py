@@ -15,7 +15,7 @@ from errors     import Fail
 from libs.ec2_utils import is_ec2, get_db_nodes, get_stack
 from servers.analytics.core.SimpleDBConnection import SimpleDBConnection
 
-from api.db.mongodb.MongoLogsCollection import MongoLogsCollection
+from db.mongodb.MongoLogsCollection import MongoLogsCollection
 
 
 def parseCommandLine():

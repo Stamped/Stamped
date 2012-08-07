@@ -9,7 +9,7 @@ import Globals, utils, sys
 import libs.ec2_utils
 
 from libs.ElasticMongo      import ElasticMongo
-from api.MongoStampedAPI    import MongoStampedAPI
+from api_old.MongoStampedAPI    import MongoStampedAPI
 
 """
 import pyes
