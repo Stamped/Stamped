@@ -152,7 +152,7 @@ def handleThirdPartyOAuthToken():
                     get['thirdparty_oauth_verifier'] = get['oauth_verifier']
                     del(get['oauth_verifier'])
                 request.GET = get
-            if request.method == 'POST' and 'oauth_token' in request.POST:
+            if request.method == 'POST':
                 post = request.POST.copy()
                 if 'oauth_token' in request.POST:
                     post['thirdparty_oauth_token'] = post['oauth_token']
