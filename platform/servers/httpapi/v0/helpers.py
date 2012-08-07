@@ -127,6 +127,49 @@ def handleStampedExceptions(e, handlers=None):
 
         return transformOutput(error, status=500)
 
+def handleThirdPartyOAuthToken():
+    """
+        We use this decorator to rename oauth fields in a request to 'thirdparty_<field>', for the rare cases
+         where third party service callbacks use oauth fields that conflict with our expected oauth field names.
+         Currently, only Netflix does this by attaching the 'oauth_token' field in the login callback request.
+    """
+    def decorator(fn):
+        # NOTE (travis): if you hit this assertion, you're likely using the
+        # handleHTTPRequest incorrectly.
+        assert callable(fn)
+
+        @wraps(fn)
+        def wrapper(request, *args, **kwargs):
+            if request.method == 'GET':
+                get = request.GET.copy()
+                if 'oauth_token' in request.GET:
+                    get['thirdparty_oauth_token'] = get['oauth_token']
+                    del(get['oauth_token'])
+                if 'oauth_token_secret' in request.GET:
+                    get['thirdparty_oauth_token_secret'] = get['oauth_token_secret']
+                    del(get['oauth_token_secret'])
+                if 'oauth_verifier' in request.GET:
+                    get['thirdparty_oauth_verifier'] = get['oauth_verifier']
+                    del(get['oauth_verifier'])
+                request.GET = get
+            if request.method == 'POST' and 'oauth_token' in request.POST:
+                post = request.POST.copy()
+                if 'oauth_token' in request.POST:
+                    post['thirdparty_oauth_token'] = post['oauth_token']
+                    del(post['oauth_token'])
+                if 'oauth_token_secret' in request.POST:
+                    post['thirdparty_oauth_token_secret'] = post['oauth_token_secret']
+                    del(post['oauth_token_secret'])
+                if 'oauth_verifier' in request.POST:
+                    post['thirdparty_oauth_verifier'] = post['oauth_verifier']
+                    del(post['oauth_verifier'])
+                request.POST = post
+            ret = fn(request, *args, **kwargs)
+            return ret
+
+        return wrapper
+    return decorator
+
 def handleHTTPRequest(requires_auth=True, 
                       requires_client=False,
                       http_schema=None,

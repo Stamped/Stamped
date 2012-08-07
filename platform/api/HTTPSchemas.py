@@ -750,9 +750,9 @@ class HTTPNetflixAuthResponse(Schema):
     def setSchema(cls):
         cls.addProperty('state',                            basestring)
         cls.addProperty('netflix_add_id',                   basestring)
-        cls.addProperty('oauth_token',                      basestring)
+        cls.addProperty('thirdparty_oauth_token',           basestring)
+        cls.addProperty('thirdparty_oauth_verifier',        basestring)
         cls.addProperty('secret',                           basestring)
-        cls.addProperty('oauth_verifier',                   basestring)
 
 class HTTPFacebookAuthResponse(Schema):
     @classmethod
