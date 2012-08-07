@@ -53,7 +53,7 @@ Number = SimpleTypeMatcher(numbers.Number)
 def get_type_matcher(type_matcher_arg):
     if type_matcher_arg is None:
         return NoneMatcher
-    if not isinstance(type_matcher_arg, TypeMatcher):
+    if isinstance(type_matcher_arg, type):
         type_matcher_arg = SimpleTypeMatcher(type_matcher_arg)
     return type_matcher_arg
 
@@ -106,7 +106,6 @@ class DictTypeMatcher(TypeMatcher):
             self.__val_type_matcher.description
         )
 
-DictTypeMatcher(str, int)
 DictOf = lambda key, val : DictTypeMatcher(key, val)
 
 
