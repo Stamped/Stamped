@@ -52,16 +52,16 @@ class logsQuery(object):
             
             
 
-    def performQuery(self,domain,fields,uri,t0,t1,byNode=False,form_dict=None):
+    def performQuery(self,domain,fields,uri,t0,t1,byNode=False,form_dict={}):
         
         if uri is not None:
             query = 'select %s from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, uri, t0.isoformat(), t1.isoformat())
         else:
             query = 'select %s from `%s` where bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, t0.isoformat(), t1.isoformat())
 
-        if form_dict is not None:
-            for key, value in form_dict.items():
-                query = '%s and frm_%s = "%s"' % (query, key, value)
+        
+        for key, value in form_dict.items():
+            query = '%s and frm_%s = "%s"' % (query, key, value)
             
         stats = domain.select(query)
         
@@ -107,20 +107,6 @@ class logsQuery(object):
         
         return len(self.statSet)
     
-    # Number of users who have taken some kind of entity action
-    def actingUsers(self, t0 ,t1):
-        self.statSet = set()
-        
-        pool = Pool(16)
-        
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            pool.spawn(self.performQuery,self.domains[suffix],'uid',"/v1/actions/complete.json",t0,t1)
-        
-        pool.join()
-        
-        return len(self.statSet)
-    
     # Guide Users
     def guideReport(self, t0, t1, section=None):
         self.statSet = set()
@@ -152,6 +138,28 @@ class logsQuery(object):
         pool.join()
         
         return len(self.statSet)
+    
+    def entityActionUsers(self, t0, t1, source=None, action=None):
+        self.statSet = set()
+        
+        form = {}
+        
+        if source is not None:
+            form['source'] = source
+        
+        if action is not None:
+            form['action'] = action
+            
+        pool = Pool(16)
+        
+        for i in range (0,16):
+            suffix = '0'+hex(i)[2]
+            pool.spawn(self.performQuery, self.domains[suffix], 'uid', "/v1/actions/complete.json", t0, t1, form_dict=form)
+        
+        pool.join()
+        
+        return len(self.statSet)
+
     
     
     def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist):
