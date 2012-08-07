@@ -602,8 +602,8 @@ class StampedSource(GenericSource):
 
     def trackSource(self, query):
         queries = [query.name]
-        queries.extend(album['name'] for album in query.albums[:20])
         queries.extend(artist['name'] for artist in query.artists[:20])
+        queries.extend(album['name'] for album in query.albums[:20])
         return self.__querySource(queries, query, types='track')
 
     def albumSource(self, query):
@@ -767,20 +767,22 @@ class StampedSource(GenericSource):
                         '$and' : tokenSearchQuery,
                     }
                     mongo_query.update(kwargs)
+                    query_id = None
                     if query_obj.source == 'stamped' and query_obj.key:
+                        query_id = query_obj.key
                         mongo_query['_id'] = {'$lt' : ObjectId(query_obj.key)}
                     matches = self.__id_query(mongo_query)
                     for match in matches:
-                        entity_id = match['_id']
-                        if entity_id not in id_set:
-                            id_set.add(entity_id)
-                            yield entity_id
+                        entity = self.__entityDB.getEntity(match['_id'])
+                        if query_id in entity.sources.nemesis_ids:
+                            continue
+                        if entity.entity_id not in id_set:
+                            id_set.add(entity.entity_id)
+                            yield entity
             except GeneratorExit:
                 pass
             logs.debug('Consumed %d results from query: %s' % (len(id_set), id_set))
-        def constructor(entity_id):
-            return self.proxyFromEntity(self.__entityDB.getEntity(str(entity_id)))
-        return self.generatorSource(entityGenerator(), constructor, unique=True, tolerant=True)
+        return self.generatorSource(entityGenerator(), self.proxyFromEntity, unique=True, tolerant=True)
 
     def entityProxyFromKey(self, entity_id, **kwargs):
         return self.proxyFromEntity(self.__entityDB.getEntity(entity_id))

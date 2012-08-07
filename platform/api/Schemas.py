@@ -594,6 +594,10 @@ class EntitySources(Schema):
         cls.addProperty('tombstone_source',                 basestring)
         cls.addProperty('tombstone_timestamp',              datetime)
 
+        cls.addPropertyList('nemesis_ids',                  basestring)
+        cls.addProperty('nemesis_source',                   basestring)
+        cls.addProperty('nemesis_timestamp',                datetime)
+
         cls.addProperty('user_generated_id',                basestring)
         cls.addProperty('user_generated_subtitle',          basestring)
         cls.addProperty('user_generated_timestamp',         datetime)
