@@ -400,8 +400,7 @@ def parseRequest(schema, request, **kwargs):
                 v = None
             data[k] = v
 
-        if not kwargs.get('keep_oauth_token', False):
-            data.pop('oauth_token', None)
+        data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
         
@@ -462,8 +461,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
             data[fileName] = f.read()
             logs.attachment(fileName, f.size)
 
-        if not kwargs.get('keep_oauth_token', False):
-            data.pop('oauth_token',   None)
+        data.pop('oauth_token',   None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
         

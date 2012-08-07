@@ -158,7 +158,6 @@ def netflixLogin(request, http_schema, authUserId, **kwargs):
 
 @handleThirdPartyOAuthToken()
 @handleHTTPRequest(requires_auth=False,
-                   parse_request_kwargs={'keep_oauth_token' : True},
                    http_schema=HTTPNetflixAuthResponse,
                    exceptions=exceptions)
 @require_http_methods(["GET"])
@@ -171,7 +170,7 @@ def netflixLoginCallback(request, http_schema, **kwargs):
 
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
-        result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
+        result = netflix.requestUserAuth(http_schema.thirdparty_oauth_token, http_schema.secret)
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
 
