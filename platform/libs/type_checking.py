@@ -131,6 +131,13 @@ ArgMatcher = namedtuple('ArgMatcher', ['name', 'required', 'type_matcher'])
 
 
 class ArgsMatchingFunction(object):
+    """
+    Wrapper around a function that adds argument type-checking.
+    TODO: Also extend the python docstring with the arg type information. If we do this we will also want to encapsulate
+          return information in this.
+    TODO: Consider checking user input against function.func_code details.
+    """
+
     # A set of enums clarifying the order in which we expect to see the decorators.
     TOKEN_ARG = 1
     TOKEN_KWARG = 2
