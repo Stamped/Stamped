@@ -140,62 +140,66 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         
                         margin: 2px 12px 0 0;
                     }
-                    
+
                     .action-icon-image(@x) {
                         background-position: -@x 0;
                         display: inline-block;
                     }
-                    
+
                     .action-icon-image-hover(@x) {
                         background-position: -@x -20px;
                     }
-                    
+
                     .action-icon-media-loading {
                         background: url(/assets/img/loading.gif) no-repeat;
                         background-size: 100% 100%;
                         display: inline-block;
                     }
-                    
+
                     .action-icon-reserve {
                         .action-icon-image(0);
                     }
-                    
+
                     .action-icon-menu {
                         .action-icon-image(20px);
                     }
-                    
+
                     .action-icon-buy {
                         .action-icon-image(40px);
                     }
-                    
+
                     .action-icon-add_to_instant_queue {
                         .action-icon-image(60px);
                     }
-                    
+
                     .action-icon-tickets {
                         .action-icon-image(80px);
                     }
-                    
+
                     .action-icon-listen {
                         .action-icon-image(100px);
                     }
-                    
+
                     .action-icon-watch {
                         .action-icon-image(120px);
                     }
-                    
+
                     .action-icon-download {
                         .action-icon-image(140px);
                     }
-                    
+
                     .action-icon-playlist {
                         .action-icon-image(160px);
                     }
-                    
+
                     .action-icon-playing {
                         .action-icon-image(180px);
                     }
-                    
+
+                    .action-icon-phone {
+                        .action-icon-image(200px);
+                    }
+
                     &:hover {
                         .action-icon-reserve {
                             .action-icon-image-hover(0);
@@ -236,6 +240,10 @@ body.sdetail_popup_animation, body.sdetail_popup {
                         .action-icon-playing {
                             .action-icon-image-hover(180px);
                         }
+                        
+                        .action-icon-phone {
+                            .action-icon-image-hover(200px);
+                        }
                     }
                     
                     .lhs {
@@ -265,32 +273,32 @@ body.sdetail_popup_animation, body.sdetail_popup {
                                 display: none;
                             }
                         }
-                        
+
                         .source-image(@x) {
                             background-position: -@x -39px;
                             display: inline-block;
                         }
-                        
+
                         .source-opentable {
                             .source-image(0);
                         }
-                        
+
                         .source-amazon {
                             .source-image(20px);
                         }
-                        
+
                         .source-fandango {
                             .source-image(40px);
                         }
-                        
+
                         .source-rdio {
                             .source-image(60px);
                         }
-                        
+
                         .source-spotify {
                             .source-image(80px);
                         }
-                        
+
                         .source-itunes {
                             .source-image(100px);
                         }
@@ -842,4 +850,9 @@ body.sdetail_popup_animation, body.sdetail_popup {
         color: #bfbfbf;
     }
 }
+
+
+/* **************************************************************************
+                                ACTION ICONS
+   ************************************************************************** */
 
