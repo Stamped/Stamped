@@ -170,7 +170,7 @@
                 
                 setTimeout(function() {
                     if (!$.cookie(key)) {
-                        $.cookie(key, "true", { expires: 30, path: '/' });
+                        //$.cookie(key, "true", { expires: 30, path: '/' });
                         
                         open_popup_intro();
                     }

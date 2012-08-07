@@ -980,11 +980,35 @@ a.sdetail, .pronounced-title a {
     }
     
     .category-illustration {
-        margin: 0 auto 18px;
+        margin: 8px auto 24px;
+    }
+    
+    .popup-body {
+        padding-bottom: 24px;
+
+        @angle: 90deg;
+        @c1: #1B6CD9;
+        @c0: #3784f2;
+        
+        background: @c0;
+        background: -webkit-linear-gradient(@angle, @c0, @c1);
+        background: -moz-linear-gradient(@angle, @c0, @c1);
+        background: -o-linear-gradient(@angle, @c0, @c1);
+        background: linear-gradient(@angle, @c0, @c1);
     }
     
     .desc {
-        margin: 0 0 8px;
+        margin: 2px 0 8px;
+        padding: 16px 0 0;
+        color: #FFF;
+    }
+    
+    .sms {
+        background: #fff;
+        
+        input {
+            color: #999;
+        }
     }
 }
 
