@@ -77,8 +77,16 @@ class mongoQuery(object):
                 output.append(collection.find({field: {"$gte": t0, "$lte": t1}, 'entity.types': type }).count())
                 return output
             
-    def countMutualRelationships(self):
-        user_ids = self.api._userDB._getAllUserIds()
+    def countMutualRelationships(self, version="v2"):
+        if version not in ["v1","v2"]:
+            return 0
+        if version == "v2":
+            ids = self.api._userDB._collection.find({'timestamp.created': {'$gte': v2_init()}})
+        else:
+            ids = self.api._userDB._collection.find({'timestamp.created': {'$lt': v2_init()}})
+        
+        user_ids = map(lambda x: str(x['_id']), ids)
+                                                          
         count = 0
         for user_id in user_ids:
             friends = self.api._friendshipDB.getFriends(user_id)
