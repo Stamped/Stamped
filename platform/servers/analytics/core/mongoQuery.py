@@ -117,9 +117,9 @@ class mongoQuery(object):
         user_ids = map(lambda x: ObjectId(x['_id']), users)
         
         if version == "v1":
-            result = self.api._userDB._collection.find({'timestamp.created': {'$lt': v2_init()}, '_id': {'$in': user_ids}})
+            result = self.api._userDB._collection.find({'timestamp.created': {'$lt': v2_init()}, '_id': {'$in': user_ids}}).count()
         else:
-            result = self.api._userDB._collection.find({'timestamp.created': {'$gte': v2_init()}, '_id': {'$in': user_ids}})
+            result = self.api._userDB._collection.find({'timestamp.created': {'$gte': v2_init()}, '_id': {'$in': user_ids}}).count()
 
         return result
         
