@@ -10,12 +10,14 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 __all__ = [ 'arg', 'varargs', 'kwarg', 'varkwargs', 'returns',
-            'Fn', 'Any', 'Numeric', 'IterableOf', 'ListOf', 'SetOf', 'DictOf', 'AnyOf' ]
+            'Fn', 'Any', 'Number', 'IterableOf', 'ListOf', 'SetOf', 'DictOf', 'AnyOf' ]
 
 import Globals
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import namedtuple
 import functools
+import numbers
+import types
 
 class TypeMatcher(object):
     __metaclass__ = ABCMeta
@@ -29,25 +31,6 @@ class TypeMatcher(object):
         pass
 
 
-class FunctionBasedMatcher(TypeMatcher):
-    def __init__(self, fn, desc):
-        self.__fn = fn
-        self.__desc = desc
-
-    def matches_instance(self, instance):
-        return self.__fn(instance)
-
-    @property
-    def description(self):
-        return self.__desc
-
-
-NoneMatcher = FunctionBasedMatcher(lambda x : x is None, '<None>')
-Fn = FunctionBasedMatcher(lambda x : type(x).__name__ == 'function', '<function>')
-Any = FunctionBasedMatcher(lambda x : True, '<any>')
-Numeric = FunctionBasedMatcher(lambda x : hasattr(x, '__abs__'), '<numeric>')
-
-
 class SimpleTypeMatcher(TypeMatcher):
     def __init__(self, class_object):
         super(SimpleTypeMatcher, self).__init__()
@@ -59,6 +42,12 @@ class SimpleTypeMatcher(TypeMatcher):
     @property
     def description(self):
         return 'isinstance(%s)' % self.__class_object
+
+
+NoneMatcher = SimpleTypeMatcher(types.NoneType)
+Fn = SimpleTypeMatcher(types.FunctionType)
+Any = SimpleTypeMatcher(object)
+Number = SimpleTypeMatcher(numbers.Number)
 
 
 def get_type_matcher(type_matcher_arg):
