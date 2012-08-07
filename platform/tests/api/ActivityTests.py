@@ -10,6 +10,7 @@ import Globals, utils, pprint
 from tests.AStampedAPIHttpTestCase import *
 from api.MongoStampedAPI import *
 from api.Schemas import *
+from pprint import pprint
 
 # ######## #
 # ACTIVITY #
@@ -110,7 +111,6 @@ class StampedAPIActivityFriendship(StampedAPIActivityHttpTest):
         self.assertEqual(len(result), 2)
         self._assertFollowSubjects(result, 1)
         self._assertBody(result, ['UserB is now following UserA.'])
-
         self.deleteFriendship(self.tokenC, self.userB)
 
 
@@ -126,7 +126,8 @@ class StampedAPIActivityLikes(StampedAPIActivityHttpTest):
 
         for token in [self.tokenA, self.tokenB, self.tokenC]:
             self.createLike(token, stamp['stamp_id'])
-        
+
+        # Should have Welcome activity, and grouped 'UserX and 2 others liked Kanye West' activity
         result = self.showActivity(self.tokenD)
         self.assertTrue(len(result) == 2)
         self._assertBenefit(result)
@@ -274,6 +275,7 @@ class StampedAPIActivityTodos(StampedAPIActivityHttpTest):
         self.deleteAccount(self.tokenF)
         result = self.showActivity(self.tokenE)
 
+        # All we expect is welcome notification
         self.assertEqual(len(result), 1)
 
         self.deleteAccount(self.tokenE)
@@ -603,6 +605,10 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
 
 
     def test_cache_clear_on_offset_0(self):
+        if api._cache._client is None:
+            logs.info('SKIPPING TEST - requires memcached server')
+            return True
+
         scope = 'friends'
         offset = 0
         limit = 10
@@ -611,6 +617,7 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         self.api._activityCache.setCacheBlockBufferSize(0)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        pprint(results)
         self.assertEqual(len(results), 6)
 
         # Create a new activity item that will appear for User A
@@ -620,6 +627,7 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         # First test that this new item will not be retrieved if we pull from offset != 0
         offset = 5
         results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        pprint(results2)
         self.assertEqual(len(results2), 1)
         self.assertEqual(results2[0].activity_id, results[5].activity_id)
 

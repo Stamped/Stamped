@@ -1164,6 +1164,13 @@ class StampedAPI(AStampedAPI):
 
         return self.addToNetflixInstant(nf_user_id, nf_token, nf_secret, netflixId)
 
+    @API_CALL
+    def addCallbackToken(self, user_id):
+        return self._callbackTokenDB.addUserId(user_id)
+
+    @API_CALL
+    def getCallbackToken(self, oid):
+        return self._callbackTokenDB.getUserId(oid)
 
     """
     #     #
