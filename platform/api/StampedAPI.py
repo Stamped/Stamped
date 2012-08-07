@@ -1535,7 +1535,7 @@ class StampedAPI(AStampedAPI):
 
         # If either account is private, make sure authUserId is friend
         if userA.privacy == True and authUserId != userA.user_id:
-            check                   = Friendship()
+            friendship              = Friendship()
             friendship.user_id      = authUserId
             friendship.friend_id    = userA.user_id
 
@@ -1543,7 +1543,7 @@ class StampedAPI(AStampedAPI):
                 raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
 
         if userB.privacy == True and authUserId != userB.user_id:
-            check                   = Friendship()
+            friendship              = Friendship()
             friendship.user_id      = authUserId
             friendship.friend_id    = userB.user_id
 
@@ -2573,7 +2573,7 @@ class StampedAPI(AStampedAPI):
                                 try:
                                     comment.user = userIds[str(comment.user.user_id)]
                                 except KeyError:
-                                    logs.warning("Key error for user (user_id = %s)" % userId)
+                                    logs.warning("Key error for user (user_id = %s)" % comment.user.user_id)
                                     raise
                                 commentPreviews.append(comment)
                             except KeyError:
