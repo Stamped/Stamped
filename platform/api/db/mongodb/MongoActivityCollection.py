@@ -330,6 +330,7 @@ class MongoActivityCollection(AActivityDB):
         item.verb = verb
         item.subject = subject
 
+        ### TODO (PHASE II): Better handling of schema conversion
         obj = RawActivityObjectId()
         if 'user_ids' in objects and len(objects['user_ids']) > 0:
             obj.user_id = objects['user_ids'][0]
@@ -461,7 +462,7 @@ class MongoActivityCollection(AActivityDB):
                         logs.warning("Missing subjects! %s" % item)
                 else:
                     # New item
-                    # Hacky: build item for now
+                    ### TODO (PHASE II): Better handling of schema conversion
                     activity = Activity()
                     activity.benefit = item.benefit
                     activity.timestamp = item.timestamp
@@ -496,11 +497,24 @@ class MongoActivityCollection(AActivityDB):
 
         mark = str(int(time.time() * 1000000))
 
+        """
+        Generate a "sort" value that will be used in the db to order our grouped, cached items. This is composed
+        of a timestamp for versioning concatenated with an value for ordering within that timestamp. Queries to the 
+        database will return data sorted by this value in descending order, and we can include a check in retrieval 
+        to verify that the timestamp is unique -- this is hack to get around the fact that Mongo does not allow 
+        for atomic insertion and deletion. 
+
+        It's theoretically possible for two sets of data to have the same timestamp, so we should add an additional 
+        hash to decrease the odds of duplication. I'm not terrible concerned about this in the short term, though.
+
+        Also, note that we've effectively capped the number of grouped, cached items that we can generate at 10,000.
+        """
+
         i = 9999
         personal_result = []
         for key in personal_keys_order:
             item = personal_keys[key]
-            sort = ("%s|%s" % (mark, str(i).zfill(4))).zfill(22)
+            sort = ("%s|%04d" % (mark, i)).zfill(22)
             personal_result.append((item, sort))
             i -= 1
 
@@ -509,7 +523,7 @@ class MongoActivityCollection(AActivityDB):
         for key in universal_keys_order:
             if key not in personal_keys:
                 item = universal_keys[key]
-                sort = ("%s|%s" % (mark, str(i).zfill(4))).zfill(22)
+                sort = ("%s|%04d" % (mark, i)).zfill(22)
                 universal_result.append((item, sort))
                 i -= 1
 
