@@ -10,7 +10,6 @@ import Globals, utils, pprint
 from tests.AStampedAPIHttpTestCase import *
 from api.MongoStampedAPI import *
 from api.Schemas import *
-from pprint import pprint
 
 # ######## #
 # ACTIVITY #
@@ -434,7 +433,7 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         global api
         self.api = api
         if api._cache._client is None:
-            logs.info('WARNING: Not connected to memcached server.')
+            print('WARNING: Not connected to memcached server.')
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         (self.userC, self.tokenC) = self.createAccount('UserC')
@@ -525,8 +524,6 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         scope = 'friends'
         offset = 0
         limit = 6
-
-        from pprint import pformat
 
         self.api._activityCache.setCacheBlockSize(50)
         self.api._activityCache.setCacheBlockBufferSize(20)
