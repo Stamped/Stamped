@@ -134,23 +134,16 @@ def showSettings(request, authUserId, http_schema, **kwargs):
 
     return transformOutput(result)
 
-def createNetflixLoginResponse(request, netflixAddId=None):
-    if 'oauth_token' in request.GET:
-        oauth_token = request.GET['oauth_token']
-    elif 'oauth_token' in request.POST:
-        oauth_token = request.POST['oauth_token']
-    else:
-        raise StampedMissingLinkedAccountTokenError("Access token not found")
-
-
+def createNetflixLoginResponse(authUserId, netflixAddId=None):
     netflix = globalNetflix()
-    secret, url = netflix.getLoginUrl(oauth_token, netflixAddId)
+    oid = stampedAPI.addCallbackToken(authUserId)
+    secret, url = netflix.getLoginUrl(oid, netflixAddId)
 
     response                = HTTPActionResponse()
     source                  = HTTPActionSource()
     source.source           = 'netflix'
     source.link             = url
-    #source.endpoint         = 'account/linked/netflix/login_callback.json'
+
     response.setAction('netflix_login', 'Login to Netflix', [source])
 
     print ('### netflix login response: %s' % response.dataExport())
@@ -161,23 +154,25 @@ def createNetflixLoginResponse(request, netflixAddId=None):
                    exceptions=exceptions)
 @require_http_methods(["GET"])
 def netflixLogin(request, http_schema, authUserId, **kwargs):
-    return createNetflixLoginResponse(request, http_schema.netflix_id)
+    return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
-@handleHTTPCallbackRequest(http_schema=HTTPNetflixAuthResponse,
-                           exceptions=exceptions)
+@handleThirdPartyOAuthToken()
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPNetflixAuthResponse,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
-def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
+def netflixLoginCallback(request, http_schema, **kwargs):
     netflix = globalNetflix()
 
     logs.info('### http_schema: %s ' % http_schema)
+    oid = http_schema.state
+    authUserId = stampedAPI.getCallbackToken(oid)
 
     # Acquire the user's final oauth_token/secret pair and add the netflix linked account
     try:
-        result = netflix.requestUserAuth(http_schema.oauth_token, http_schema.secret)
+        result = netflix.requestUserAuth(http_schema.thirdparty_oauth_token, http_schema.secret)
     except Exception as e:
         return HttpResponseRedirect("stamped://netflix/link/fail")
-
-
 
     linked                          = LinkedAccount()
     linked.service_name             = 'netflix'
@@ -202,8 +197,8 @@ def netflixLoginCallback(request, authUserId, http_schema, **kwargs):
 def createFacebookLoginResponse(authUserId):
     logs.info('called createFacebookLoginResponse with user_id: %s' % authUserId)
     facebook = stampedAPI._facebook
-    oid = stampedAPI._fbCallbackTokenDB.addUserId(authUserId)
-    url = facebook.getLoginUrl(authUserId, oid)
+    oid = stampedAPI.addCallbackToken(authUserId)
+    url = facebook.getLoginUrl(oid)
 
     logs.info('url: %s' % url)
 
@@ -226,9 +221,9 @@ def facebookLogin(request, authUserId, **kwargs):
     return result
 
 
-@handleHTTPCallbackRequest(requires_auth=False,
-                           http_schema=HTTPFacebookAuthResponse,
-                           exceptions=exceptions)
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPFacebookAuthResponse,
+                   exceptions=exceptions)
 @require_http_methods(["GET"])
 def facebookLoginCallback(request, http_schema, **kwargs):
     facebook = globalFacebook()
@@ -236,9 +231,8 @@ def facebookLoginCallback(request, http_schema, **kwargs):
     logs.info('### http_schema: %s ' % http_schema)
 
     oid = http_schema.state
-    authUserId = stampedAPI._fbCallbackTokenDB.getUserId(oid)
-    #stampedAPI._fbCallbackTokenDB.removeUserId(oid)
-#    authUserId, client_id = checkOAuth(oauth_token)
+    authUserId = stampedAPI.getCallbackToken(oid)
+
     # Acquire the user's FB access token
     try:
         access_token, expires = facebook.getUserAccessToken(http_schema.code)

@@ -348,15 +348,15 @@ class Netflix(object):
             ratings.append( ( self._getFromLinks(self.__asList(x['link']), 'rel', 'catalog/title', 'href') , x['user_rating']) )
         return ratings
 
-    def getLoginUrl(self, stamped_oauth_token, netflixAddId=None):
+    def getLoginUrl(self, callbackToken, netflixAddId=None):
         #request the oauth token and secret
         token_info = self.__get('oauth/request_token')
         token = oauth.OAuthToken(
             token_info['oauth_token'].encode('ascii'),
             token_info['oauth_token_secret'].encode('ascii'),
         )
-        callback_url = utils.getDomain() + ('account/linked/netflix/login_callback.json?secret=%s&stamped_oauth_token=%s' %
-                                             (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
+        callback_url = utils.getDomain() + ('account/linked/netflix/login_callback.json?secret=%s&state=%s' %
+                                             (token_info['oauth_token_secret'].encode('ascii'), callbackToken))
         if netflixAddId is not None:
             callback_url += "&netflix_add_id=%s" % netflixAddId
         token.set_callback(callback_url)
