@@ -162,7 +162,17 @@
                 'nymag'             : true, 
                 'michaelkors'       : true, 
                 'parislemon'        : true, 
-                'ellendegeneres'    : true
+                'ellendegeneres'    : true, 
+                'ryanseacrest'      : true, 
+                'nytimes'           : true, 
+                'time'              : true, 
+                'nickswisher'       : true, 
+                'passionpit'        : true, 
+                'kevinrose'         : true, 
+                'harvard'           : true, 
+                'barondavis'        : true, 
+                'tconrad'           : true, 
+                'bostonglobe'       : true
             };
             
             if (likely_tweet && (screen_name in callout_users)) {
