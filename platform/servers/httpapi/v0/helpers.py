@@ -215,7 +215,7 @@ def handleHTTPRequest(requires_auth=True,
                         logs.debug("Origin not included")
                 
                 params = {}
-                if 'keep_oauth_token' not in parse_request_kwargs:
+                if parse_request_kwargs is None or 'keep_oauth_token' not in parse_request_kwargs:
                     params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request, requires_auth)
                 params['client_id'] = checkClient(request, required=requires_client)
                 
