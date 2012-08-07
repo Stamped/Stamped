@@ -1166,11 +1166,11 @@ class StampedAPI(AStampedAPI):
 
     @API_CALL
     def addCallbackToken(self, user_id):
-        return stampedAPI._callbackTokenDB.addUserId(user_id)
+        return self._callbackTokenDB.addUserId(user_id)
 
     @API_CALL
     def getCallbackToken(self, oid):
-        return stampedAPI._callbackTokenDB.getUserId(oid)
+        return self._callbackTokenDB.getUserId(oid)
 
     """
     #     #
