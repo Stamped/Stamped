@@ -215,8 +215,8 @@ def handleHTTPRequest(requires_auth=True,
                         logs.debug("Origin not included")
                 
                 params = {}
-                if not 'keep_oauth_token' in parse_request_kwargs:
-                    params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request)
+                if 'keep_oauth_token' not in parse_request_kwargs:
+                    params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request, requires_auth)
                 params['client_id'] = checkClient(request, required=requires_client)
                 
                 if parse_request:
@@ -298,7 +298,7 @@ def optionalOAuth(request):
     
     return authUserId
 
-def checkOAuthWithRequest(request):
+def checkOAuthWithRequest(request, required=True):
     ### Parse Request for Access Token
     try:
         if request.method == 'GET':
