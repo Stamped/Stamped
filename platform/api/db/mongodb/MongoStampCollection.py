@@ -434,6 +434,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         return self._collection.find(query).count()
     
     def updateStampStats(self, stampId, stat, value=None, increment=1):
+        logs.info('### UPDATE STAMP STATS')
         key = 'stats.%s' % (stat)
         if value is not None:
             self._collection.update(

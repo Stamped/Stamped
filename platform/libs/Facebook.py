@@ -34,7 +34,7 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAFC4pEYEpUYJlzM7FPq9m77m7k2k5wIrcZCmXSZC0TT1ri6VcMWV5acLBZAs6lHzdkFJrWHZASY4XbKTqUQZD'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAIJoZAiPhuxF6TUkj6w8h8cpIgF4SMrMVS2l0xaB1ceZAw2HpZBoAAbtQx55e15oCBTCT69bhRBQVOaoCZBMDgfcOzyCWSnJSRN1ZCUO5'
 
 DEFAULT_TIMEOUT = 15
 
@@ -421,7 +421,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'extendAccessToken'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
