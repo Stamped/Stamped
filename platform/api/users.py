@@ -63,7 +63,7 @@ class Users(APIModule):
 
         return self._userDB.getUserByScreenName(userTiny.screen_name)
 
-    def _getUserStampDistribution(self, userId):
+    def getUserStampDistribution(self, userId):
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds)
         entityIds   = map(lambda x: x.entity.entity_id, stamps)
@@ -129,7 +129,7 @@ class Users(APIModule):
 
         if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
             if user.stats.distribution is None or len(user.stats.distribution) == 0:
-                distribution = self._getUserStampDistribution(user.user_id)
+                distribution = self.getUserStampDistribution(user.user_id)
                 user.stats.distribution = distribution
                 ### TEMP: This should be async
                 self._userDB.updateDistribution(user.user_id, distribution)

@@ -12,6 +12,7 @@ from api_old import Blacklist
 from api_old.Schemas                    import *
 from api_old.auth                       import convertPasswordForStorage
 from api_old                            import SchemaValidation
+from api_old.S3ImageDB                  import S3ImageDB
 
 import utils
 import datetime
@@ -21,6 +22,7 @@ import libs.Facebook
 import libs.Twitter
 
 from api.module import APIModule
+from api.activity import Activity
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
 
@@ -36,7 +38,6 @@ from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenColle
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 
-from api_old.S3ImageDB              import S3ImageDB
 
 
 from utils import lazyProperty, LoggingThreadPool
@@ -112,6 +113,10 @@ class Accounts(APIModule):
     @lazyProperty
     def _twitter(self):
         return libs.Twitter.Twitter()
+
+    @lazyProperty
+    def _activity(self):
+        return Activity()
 
 
     def _validateStampColors(self, primary, secondary):
@@ -405,8 +410,7 @@ class Accounts(APIModule):
                 time.sleep(delay)
                 delay *= 2
 
-        ### REFACTOR
-        # self._addWelcomeActivity(userId)
+        self._activity.addWelcomeActivity(userId)
 
         # Send welcome email
         if libs.ec2_utils.is_prod_stack() and account.email is not None and account.auth_service == 'stamped':
@@ -620,6 +624,10 @@ class Accounts(APIModule):
 
     def get(self, authUserId):
         return self._accountDB.getAccount(authUserId)
+
+    def getAccount(self, authUserId):
+        logs.warning("DEPRECATED FUNCTION (getAccount()): Use 'get()' instead")
+        return self.get(authUserId)
     
     def getAccountByScreenName(self, screen_name):
         return self._accountDB.getAccountByScreenName(screen_name)
@@ -851,7 +859,7 @@ class Accounts(APIModule):
         self._accountDB.updateLinkedAccount(authUserId, linkedAccount)
         return linkedAccount
 
-    def _getOpenGraphShareSettings(self, authUserId):
+    def getOpenGraphShareSettings(self, authUserId):
         account = self.getAccount(authUserId)
 
         if account.linked is None or\

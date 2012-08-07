@@ -37,7 +37,7 @@ def _convertHTTPEntity(entity,
 def create(request, authUserId, authClientId, http_schema, **kwargs):
     entity          = http_schema.exportEntity(authUserId)
     
-    entity          = stampedAPI.addEntity(entity)
+    entity          = stampedAPI.entities.addEntity(entity)
     entity          = _convertHTTPEntity(entity, authClientId)
     
     return transformOutput(entity.dataExport())
@@ -55,7 +55,7 @@ def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
     except Exception as e:
         logs.warning("Failed to get cache: %s" % e)
             
-    entity      = stampedAPI.getEntity(http_schema, authUserId)
+    entity      = stampedAPI.entities.getEntity(http_schema, authUserId)
     entity      = _convertHTTPEntity(entity, authClientId)
 
     result = transformOutput(entity.dataExport())
@@ -69,7 +69,7 @@ def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
 @handleHTTPRequest(http_schema=HTTPEntityId,
                    exceptions=entityExceptions)
 def remove(request, authUserId, authClientId, http_schema, **kwargs):
-    entity = stampedAPI.removeCustomEntity(authUserId, http_schema.entity_id)
+    entity = stampedAPI.entities.removeCustomEntity(authUserId, http_schema.entity_id)
     entity = _convertHTTPEntity(entity, authClientId)
 
     return transformOutput(entity.dataExport())
@@ -80,7 +80,7 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
                    http_schema=HTTPEntitySearchRequest,
                    exceptions=entityExceptions)
 def autosuggest(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.getEntityAutoSuggestions(query=http_schema.query, 
+    result = stampedAPI.entities.getEntityAutoSuggestions(query=http_schema.query, 
                                                  category=http_schema.category,
                                                  coordinates=http_schema.exportCoordinates(),
                                                  authUserId=authUserId)
@@ -92,7 +92,7 @@ def autosuggest(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPEntitySearchRequest,
                    exceptions=entityExceptions)
 def search(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.searchEntities(authUserId=authUserId, 
+    result = stampedAPI.entities.searchEntities(authUserId=authUserId, 
                                        query=http_schema.query, 
                                        category=http_schema.category,
                                        coords=http_schema.exportCoordinates())
@@ -118,7 +118,7 @@ def search(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPEntitySuggestionRequest,
                    exceptions=entityExceptions)
 def suggested(request, authUserId, http_schema, **kwargs):
-    sections    = stampedAPI.getSuggestedEntities(authUserId=authUserId, 
+    sections    = stampedAPI.entities.getSuggestedEntities(authUserId=authUserId, 
                                                   category=http_schema.category,
                                                   subcategory=http_schema.subcategory,
                                                   coordinates=http_schema.exportCoordinates(),
@@ -149,7 +149,7 @@ def suggested(request, authUserId, http_schema, **kwargs):
                    http_schema=HTTPEntityId,
                    exceptions=entityExceptions)
 def menu(request, authUserId, http_schema, **kwargs):
-    menu        = stampedAPI.getMenu(http_schema.entity_id)
+    menu        = stampedAPI.entities.getMenu(http_schema.entity_id)
     http_menu   = HTTPMenu().importMenu(menu)
     
     return transformOutput(http_menu.dataExport())
@@ -160,7 +160,7 @@ def menu(request, authUserId, http_schema, **kwargs):
                    exceptions=entityExceptions)
 @require_http_methods(["GET"])
 def stampedBy(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.entityStampedBy(http_schema.entity_id, authUserId)
+    result = stampedAPI.entities.entityStampedBy(http_schema.entity_id, authUserId)
     result = HTTPStampedBy().importStampedBy(result)
     return transformOutput(result.dataExport())
 
@@ -174,7 +174,7 @@ def completeAction(request, authUserId, http_schema, **kwargs):
     for k, v in http_schema.dataExport().items():
         data[str(k)] = v
     
-    result = stampedAPI.completeAction(authUserId, **data)
+    result = stampedAPI.entities.completeAction(authUserId, **data)
     return transformOutput(result)
 
 _secret = 'supersmash'

@@ -58,7 +58,7 @@ def create(request, authUserId, data, **kwargs):
     if 'credits' in data and data['credits'] is not None:
         data['credits'] = data['credits'].split(',')
     
-    stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
+    stamp = stampedAPI.stamps.addStamp(authUserId, entityRequest, data)
     stamp = HTTPStamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
@@ -74,7 +74,7 @@ def share(request, authUserId, http_schema, data, **kwargs):
         else:
             http_schema.service_name = kwargs['service_name']
 
-    stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
+    stamp = stampedAPI.stamps.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
     stamp = HTTPStamp().importStamp(stamp)
     return transformOutput(stamp.dataExport())
 
@@ -82,7 +82,7 @@ def share(request, authUserId, http_schema, data, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPStampId, exceptions=stampExceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
+    stampedAPI.stamps.removeStamp(authUserId, http_schema.stamp_id)
     return transformOutput(True)
 
 
@@ -100,9 +100,9 @@ def show(request, authUserId, http_schema, uri, **kwargs):
             logs.warning("Failed to get cache: %s" % e)
 
     if http_schema.stamp_id is not None:
-        stamp = stampedAPI.getStamp(http_schema.stamp_id, authUserId)
+        stamp = stampedAPI.stamps.getStamp(http_schema.stamp_id, authUserId)
     else:
-        stamp = stampedAPI.getStampFromUser(userId=http_schema.user_id, 
+        stamp = stampedAPI.stamps.getStampFromUser(userId=http_schema.user_id, 
                                             stampNumber=http_schema.stamp_num)
     
     stamp = HTTPStamp().importStamp(stamp)
@@ -130,7 +130,7 @@ def collection(request, authUserId, http_schema, schema, uri, **kwargs):
         except Exception as e:
             logs.warning("Failed to get cache: %s" % e)
 
-    stamps = stampedAPI.getStampCollection(schema, authUserId)
+    stamps = stampedAPI.stamps.getStampCollection(schema, authUserId)
 
     result = transformStamps(stamps)
 
@@ -154,7 +154,7 @@ def search(request, authUserId, http_schema, schema, uri, **kwargs):
         except Exception as e:
             logs.warning("Failed to get cache: %s" % e)
 
-    stamps = stampedAPI.searchStampCollection(schema, authUserId)
+    stamps = stampedAPI.stamps.searchStampCollection(schema, authUserId)
 
     result = transformStamps(stamps)
 
@@ -180,7 +180,7 @@ def guide(request, authUserId, http_schema, schema, uri, **kwargs):
             logs.warning("Failed to get cache: %s" % e)
     # TODO: Remove this try/catch and address underlying issue that arises when entitystats and stampstats are out of sync
     try:
-        entities = stampedAPI.getGuide(schema, authUserId)
+        entities = stampedAPI.guides.getGuide(schema, authUserId)
     except Exception as e:
         logs.warning('Failed to build guide: %s' % e)
         entities = []
@@ -216,7 +216,7 @@ def searchGuide(request, authUserId, http_schema, schema, uri, **kwargs):
         except Exception as e:
             logs.warning("Failed to get cache: %s" % e)
             
-    entities = stampedAPI.searchGuide(schema, authUserId)
+    entities = stampedAPI.guides.searchGuide(schema, authUserId)
     result = []
 
     for entity in entities:
@@ -238,7 +238,7 @@ def searchGuide(request, authUserId, http_schema, schema, uri, **kwargs):
 @handleHTTPRequest(http_schema=HTTPStampId,
                    exceptions=stampExceptions)
 def likesCreate(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.addLike(authUserId, http_schema.stamp_id)
+    stamp = stampedAPI.likes.addLike(authUserId, http_schema.stamp_id)
     stamp = HTTPStamp().importStamp(stamp)
 
     return transformOutput(stamp.dataExport())
@@ -248,7 +248,7 @@ def likesCreate(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPStampId,
                    exceptions=stampExceptions)
 def likesRemove(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.removeLike(authUserId, http_schema.stamp_id)
+    stamp = stampedAPI.likes.removeLike(authUserId, http_schema.stamp_id)
     stamp = HTTPStamp().importStamp(stamp)
     
     return transformOutput(stamp.dataExport())
@@ -260,7 +260,7 @@ def likesRemove(request, authUserId, http_schema, **kwargs):
                    exceptions=stampExceptions)
 def likesShow(request, authUserId, http_schema, **kwargs):
     ### TODO: Add paging
-    userIds = stampedAPI.getLikes(authUserId, http_schema.stamp_id)
+    userIds = stampedAPI.likes.getLikes(authUserId, http_schema.stamp_id)
     output  = { 'user_ids': userIds }
     
     return transformOutput(output)
@@ -272,7 +272,7 @@ def likesShow(request, authUserId, http_schema, **kwargs):
                    exceptions=stampExceptions)
 def todosShow(request, authUserId, http_schema, **kwargs):
     ### TODO: Add paging
-    userIds = stampedAPI.getStampTodos(authUserId, http_schema.stamp_id)
+    userIds = stampedAPI.stamps.getStampTodos(authUserId, http_schema.stamp_id)
     output  = { 'user_ids': userIds }
     
     return transformOutput(output)

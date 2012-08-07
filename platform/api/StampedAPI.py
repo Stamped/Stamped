@@ -28,6 +28,12 @@ try:
     from api.accounts import Accounts
     from api.users import Users
     from api.friendships import Friendships
+    from api.entities import Entities
+    from api.stamps import Stamps
+    from api.guides import Guides
+    from api.likes import Likes
+    from api.comments import Comments
+    from api.todos import Todos
 
 except Exception as e:
     report()
@@ -53,3 +59,31 @@ class StampedAPI(object):
     @lazyProperty
     def users(self):
         return Users()
+
+    @lazyProperty
+    def friendships(self):
+        return Friendships()
+
+    @lazyProperty
+    def entities(self):
+        return Entities()
+
+    @lazyProperty
+    def stamps(self):
+        return Stamps()
+
+    @lazyProperty
+    def guides(self):
+        return Guides()
+
+    @lazyProperty
+    def likes(self):
+        return Likes()
+
+    @lazyProperty
+    def comments(self):
+        return Comments()
+
+    @lazyProperty
+    def todos(self):
+        return Todos()

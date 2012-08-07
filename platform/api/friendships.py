@@ -22,9 +22,14 @@ from db.mongodb.MongoInvitationCollection import MongoInvitationCollection
 from db.mongodb.MongoStampCollection import MongoStampCollection
 from db.mongodb.MongoUserCollection import MongoUserCollection
 
+from api.users import Users
+from api.activity import Activity
+from api.guides import Guides
+
 from utils import lazyProperty, LoggingThreadPool
 
 from api.module import APIModule
+from api.accounts import Accounts
 
 class Friendships(APIModule):
 
@@ -59,9 +64,25 @@ class Friendships(APIModule):
     def _userDB(self):
         return MongoUserCollection()
 
+    @lazyProperty
+    def _users(self):
+        return Users()
+
+    @lazyProperty
+    def _activity(self):
+        return Activity()
+
+    @lazyProperty
+    def _guides(self):
+        return Guides()
+
+    @lazyProperty
+    def _accounts(self):
+        return Accounts()
+
 
     def addFriendship(self, authUserId, userRequest):
-        user = self.getUserFromIdOrScreenName(userRequest)
+        user = self._users.getUserFromIdOrScreenName(userRequest)
 
         # Verify that you're not following yourself :)
         if user.user_id == authUserId:
@@ -98,12 +119,11 @@ class Friendships(APIModule):
         return user
 
     def addFriendshipAsync(self, authUserId, userId):
-        if self._activity:
-            # Add activity for followed user
-            self._addFollowActivity(authUserId, userId)
+        # Add activity for followed user
+        self._activity.addFollowActivity(authUserId, userId)
 
-            # Remove 'friend' activity item
-            self._activityDB.removeFriendActivity(authUserId, userId)
+        # Remove 'friend' activity item
+        self._activityDB.removeFriendActivity(authUserId, userId)
 
         # Add stamps to Inbox
         stampIds = self._collectionDB.getUserStampIds(userId)
@@ -114,10 +134,10 @@ class Friendships(APIModule):
         self._userDB.updateUserStats(userId,     'num_followers', increment=1)
 
         # Refresh guide
-        self.call_task(self.buildGuideAsync, {'authUserId': authUserId})
+        self.call_task(self._guides.buildGuideAsync, {'authUserId': authUserId})
 
         # Post to Facebook Open Graph if enabled
-        share_settings = self._getOpenGraphShareSettings(authUserId)
+        share_settings = self._accounts.getOpenGraphShareSettings(authUserId)
         if share_settings is not None and share_settings.share_follows:
             friendAcct = self.getAccount(userId)
 
@@ -141,7 +161,7 @@ class Friendships(APIModule):
                 self.call_task(self.postToOpenGraphAsync, payload)
 
     def removeFriendship(self, authUserId, userRequest):
-        user                    = self.getUserFromIdOrScreenName(userRequest)
+        user                    = self._users.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -175,11 +195,11 @@ class Friendships(APIModule):
         raise NotImplementedError
 
     def checkFriendship(self, authUserId, userRequest):
-        userA = self.getUserFromIdOrScreenName({
+        userA = self._users.getUserFromIdOrScreenName({
                     'user_id': userRequest.user_id_a,
                     'screen_name': userRequest.screen_name_a
                 })
-        userB = self.getUserFromIdOrScreenName({
+        userB = self._users.getUserFromIdOrScreenName({
                     'user_id': userRequest.user_id_b,
                     'screen_name': userRequest.screen_name_b
                 })
@@ -209,7 +229,7 @@ class Friendships(APIModule):
 
     def getFriends(self, userRequest):
         # TODO (travis): optimization - no need to query DB for user here if userRequest already contains user_id!
-        user = self.getUserFromIdOrScreenName(userRequest)
+        user = self._users.getUserFromIdOrScreenName(userRequest)
 
         # Note: This function returns data even if user is private
 
@@ -230,7 +250,7 @@ class Friendships(APIModule):
     
     def getFollowers(self, userRequest):
         # TODO (travis): optimization - no need to query DB for user here if userRequest already contains user_id!
-        user = self.getUserFromIdOrScreenName(userRequest)
+        user = self._users.getUserFromIdOrScreenName(userRequest)
         
         # Note: This function returns data even if user is private
         
@@ -250,7 +270,7 @@ class Friendships(APIModule):
         return self._userDB.lookupUsers(user_ids, None, limit=limit)
     
     def addBlock(self, authUserId, userRequest):
-        user = self.getUserFromIdOrScreenName(userRequest)
+        user = self._users.getUserFromIdOrScreenName(userRequest)
 
         friendship                      = Friendship()
         friendship.user_id              = authUserId
@@ -275,7 +295,7 @@ class Friendships(APIModule):
         return user
 
     def checkBlock(self, authUserId, userRequest):
-        user                    = self.getUserFromIdOrScreenName(userRequest)
+        user                    = self._users.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id
@@ -289,7 +309,7 @@ class Friendships(APIModule):
         return self._friendshipDB.getBlocks(authUserId)
 
     def removeBlock(self, authUserId, userRequest):
-        user                    = self.getUserFromIdOrScreenName(userRequest)
+        user                    = self._users.getUserFromIdOrScreenName(userRequest)
         friendship              = Friendship()
         friendship.user_id      = authUserId
         friendship.friend_id    = user.user_id

@@ -19,7 +19,7 @@ exceptions = [
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def create(request, authUserId, http_schema, **kwargs):
-    comment = stampedAPI.addComment(authUserId, http_schema.stamp_id, http_schema.blurb)
+    comment = stampedAPI.comments.addComment(authUserId, http_schema.stamp_id, http_schema.blurb)
     comment = HTTPComment().importComment(comment)
     
     return transformOutput(comment.dataExport())
@@ -29,7 +29,7 @@ def create(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPCommentId,
                    exceptions=exceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    stampedAPI.removeComment(authUserId, http_schema.comment_id)
+    stampedAPI.comments.removeComment(authUserId, http_schema.comment_id)
     return transformOutput(True)
 
 
@@ -37,7 +37,7 @@ def remove(request, authUserId, http_schema, **kwargs):
                    exceptions=exceptions)
 @require_http_methods(["GET"])
 def collection(request, authUserId, http_schema, **kwargs):
-    comments = stampedAPI.getComments(http_schema.stamp_id, authUserId,
+    comments = stampedAPI.comments.getComments(http_schema.stamp_id, authUserId,
                                       before=http_schema.exportBefore(),
                                       limit=http_schema.limit,
                                       offset=http_schema.offset)

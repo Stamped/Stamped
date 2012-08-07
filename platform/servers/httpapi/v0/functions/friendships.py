@@ -17,7 +17,7 @@ friendshipExceptions = [
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def create(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.addFriendship(authUserId, http_schema)
+    user = stampedAPI.friendships.addFriendship(authUserId, http_schema)
     user = HTTPUser().importUser(user)
     
     return transformOutput(user.dataExport())
@@ -26,7 +26,7 @@ def create(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.removeFriendship(authUserId, http_schema)
+    user = stampedAPI.friendships.removeFriendship(authUserId, http_schema)
     user = HTTPUser().importUser(user)
     
     return transformOutput(user.dataExport())
@@ -35,7 +35,7 @@ def remove(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPUserRelationship, exceptions=friendshipExceptions)
 def check(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.checkFriendship(authUserId, http_schema)
+    result = stampedAPI.friendships.checkFriendship(authUserId, http_schema)
     
     return transformOutput(result)
 
@@ -43,7 +43,7 @@ def check(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def friends(request, authUserId, http_schema, **kwargs):
-    userIds = stampedAPI.getFriends(http_schema)
+    userIds = stampedAPI.friendships.getFriends(http_schema)
     output  = { 'user_ids' : userIds }
     
     return transformOutput(output)
@@ -52,7 +52,7 @@ def friends(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def followers(request, authUserId, http_schema, **kwargs):
-    userIds = stampedAPI.getFollowers(http_schema)
+    userIds = stampedAPI.friendships.getFollowers(http_schema)
     output  = { 'user_ids': userIds }
     
     return transformOutput(output)
@@ -60,7 +60,7 @@ def followers(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def blocksCreate(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.addBlock(authUserId, http_schema)
+    user = stampedAPI.friendships.addBlock(authUserId, http_schema)
     user = HTTPUser().importUser(user)
     
     return transformOutput(user.dataExport())
@@ -69,7 +69,7 @@ def blocksCreate(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def blocksCheck(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.checkBlock(authUserId, http_schema)
+    result = stampedAPI.friendships.checkBlock(authUserId, http_schema)
 
     return transformOutput(result)
 
@@ -77,7 +77,7 @@ def blocksCheck(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["GET"])
 @handleHTTPRequest(exceptions=friendshipExceptions)
 def blocking(request, authUserId, **kwargs):
-    userIds = stampedAPI.getBlocks(authUserId)
+    userIds = stampedAPI.friendships.getBlocks(authUserId)
     output  = { 'user_ids' : userIds }
     
     return transformOutput(output)
@@ -86,7 +86,7 @@ def blocking(request, authUserId, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def blocksRemove(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.removeBlock(authUserId, http_schema)
+    user = stampedAPI.friendships.removeBlock(authUserId, http_schema)
     user = HTTPUser().importUser(user)
     
     return transformOutput(user.dataExport())
@@ -96,7 +96,7 @@ def blocksRemove(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPEmails, exceptions=friendshipExceptions)
 def invite(request, authUserId, http_schema, **kwargs):
     emails = http_schema.emails.split(',')
-    result = stampedAPI.inviteFriends(authUserId, emails)
+    result = stampedAPI.friendships.inviteFriends(authUserId, emails)
 
     return transformOutput(True)
 

@@ -20,7 +20,7 @@ def create(request, authUserId, http_schema, **kwargs):
         'search_id': http_schema.search_id,
         }
 
-    todo = stampedAPI.addTodo(authUserId, entityRequest, stampId)
+    todo = stampedAPI.todos.addTodo(authUserId, entityRequest, stampId)
     todo = HTTPTodo().importTodo(todo)
 
     return transformOutput(todo.dataExport())
@@ -28,14 +28,14 @@ def create(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPTodoComplete, exceptions=exceptions)
 @require_http_methods(["POST"])
 def complete(request, authUserId, http_schema, **kwargs):
-    todo = stampedAPI.completeTodo(authUserId, http_schema.entity_id, http_schema.complete)
+    todo = stampedAPI.todos.completeTodo(authUserId, http_schema.entity_id, http_schema.complete)
     todo = HTTPTodo().importTodo(todo)
     return transformOutput(todo.dataExport())
 
 @handleHTTPRequest(http_schema=HTTPEntityId, exceptions=exceptions)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
-    stampedAPI.removeTodo(authUserId, http_schema.entity_id)
+    stampedAPI.todos.removeTodo(authUserId, http_schema.entity_id)
 
     return transformOutput(True)
 
@@ -44,7 +44,7 @@ def remove(request, authUserId, http_schema, **kwargs):
                    exceptions=exceptions)
 @require_http_methods(["GET"])
 def collection(request, authUserId, schema, **kwargs):
-    todos = stampedAPI.getTodos(authUserId, schema)
+    todos = stampedAPI.todos.getTodos(authUserId, schema)
 
     result = []
     for todo in todos:
