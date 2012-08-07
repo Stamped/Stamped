@@ -354,6 +354,9 @@ class Facebook(object):
         )
 
     def getLoginUrl(self, callbackToken):
+        """
+
+        """
         callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
         permissions = 'user_about_me,user_location,email,publish_stream,publish_actions'
         path = "https://www.facebook.com/dialog/oauth?" \
@@ -382,7 +385,10 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     facebook = Facebook()
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
+
+    # Using string '12345' as a demo to fake the token
     if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl('12345'))
+
     if 'extendAccessToken' in methods:      pprint(facebook.extendAccessToken(access_token))
     if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
     if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))
