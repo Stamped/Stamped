@@ -159,10 +159,10 @@ def handleThirdPartyOAuthToken():
 
         @wraps(fn)
         def wrapper(request, *args, **kwargs):
-            if 'oauth_token' in request.GET:
+            if request.method == 'GET' and 'oauth_token' in request.GET:
                 request.GET['thirdparty_oauth_token'] = request.GET['oauth_token']
                 del(request.GET['oauth_token'])
-            if 'oauth_token' in request.POST:
+            if request.method == 'POST' and 'oauth_token' in request.POST:
                 request.POST['thirdparty_oauth_token'] = request.POST['oauth_token']
                 del(request.POST['oauth_token'])
             ret = fn(request, *args, **kwargs)
