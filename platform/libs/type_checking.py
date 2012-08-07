@@ -339,6 +339,7 @@ if __name__ == '__main__':
     @arg('s', basestring, 'string to repeat')
     @arg('n', int, 'num times to repeat string s')
     @kwarg('sep', basestring, 'separator')
+    @returns(basestring)
     def repeat_string_n_times(s, n, sep=''):
         return sep.join([s] * n)
 
@@ -352,6 +353,7 @@ if __name__ == '__main__':
     @arg('counts', DictOf(basestring, int), 'counts of words thus far, to be updated')
     @arg('text', AnyOf(basestring, ListOf(basestring)), 'text to count words in')
     @kwarg('is_stop_word', Fn, 'indicates which words we should not bother counting')
+    @returns(DictOf(basestring, int))
     def count_additional_words(counts, text, is_stop_word=lambda x:False):
         if isinstance(text, basestring):
             text = text.split()
@@ -367,6 +369,7 @@ if __name__ == '__main__':
 
     @kwarg('remove_dupes', bool, 'if true, dupes are not included in the result')
     @varargs(list, 'lists to be concatenated')
+    @returns(list)
     def concatenate_lists(remove_dupes=False, *lists):
         result = []
         for list in lists:
@@ -384,6 +387,7 @@ if __name__ == '__main__':
     @kwarg('strict', bool, 'If false, we also allow any value to be missing')
     @varargs(DictOf(basestring, Any))
     @varkwargs()
+    @returns(bool)
     def check_dict_values(strict=False, *dicts, **required_values):
         for dct in dicts:
             for (key, val) in required_values.items():
