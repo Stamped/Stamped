@@ -161,7 +161,7 @@ class mongoQuery(object):
         return count
     
     
-    def launchDayStampRetention(self, stat, version="v2"):
+    def launchDayStampRetention(self, version="v2"):
     
         
         if version == "v2":
@@ -175,7 +175,7 @@ class mongoQuery(object):
         
         launch_user_ids = set()
         for stamp in launch_stamps:
-            launch_user_ids.add(str(x['user']['user_id']))
+            launch_user_ids.add(str(stamp['user']['user_id']))
         
         launch_users = len(launch_user_ids)
 
