@@ -171,7 +171,7 @@ class mongoQuery(object):
             init = v1_init()
             end = v2_init()
             
-        launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init, '$lt': v2_init + timedelta(days=2)}})
+        launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init, '$lt': init + timedelta(days=2)}})
         
         launch_user_ids = set()
         for stamp in launch_stamps:
