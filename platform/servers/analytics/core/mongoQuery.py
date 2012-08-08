@@ -166,19 +166,20 @@ class mongoQuery(object):
         user_set = set()
         
         if stat == "stamp":
+            
             launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': v2_init(), '$lt': v2_init() + timedelta(days=2)}})
-            
+            print "got stamps"
             launch_user_ids = map(lambda x: str(x['user']['user_id']), launch_stamps)
-            
+            print "got user ids"
             new_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': v2_init() + timedelta(days=2)}})
-            
+            print "got new stamps"
             new_user_ids = map(lambda x: str(x['user']['user_id']), new_stamps)
-            
+            print "got new user ids"
             for user_id in new_user_ids:
                 if user_id in launch_user_ids:
                     user_set.add(user_id)
             
-            return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (len(set(launch_user_ids)),len(set(new_user_ids)))
+            return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (len(set(launch_user_ids)),len(user_set)))
         
         
         
