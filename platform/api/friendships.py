@@ -30,6 +30,7 @@ from utils import lazyProperty, LoggingThreadPool
 
 from api.module import APIObject
 from api.accounts import Accounts
+from api.linkedaccountapi import LinkedAccountAPI
 
 class Friendships(APIObject):
 
@@ -79,6 +80,10 @@ class Friendships(APIObject):
     @lazyProperty
     def _accounts(self):
         return Accounts()
+
+    @lazyProperty
+    def _linked_account_api(self):
+        return LinkedAccountAPI()
 
 
     def addFriendship(self, authUserId, userRequest):
@@ -155,10 +160,10 @@ class Friendships(APIObject):
                     friend_linked.third_party_id = friend_info['third_party_id']
                     self._accountDB.updateLinkedAccount(userId, friend_linked)
                 payload = {
-                    'authUserId': authUserId,
-                    'followUserId': userId,
+                    'auth_user_id': authUserId,
+                    'follow_user_id': userId,
                 }
-                self.call_task(self.postToOpenGraphAsync, payload)
+                self.call_task(self._linked_account_api.post_og_async, payload)
 
     def removeFriendship(self, authUserId, userRequest):
         user                    = self._users.getUserFromIdOrScreenName(userRequest)

@@ -27,7 +27,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
         self._collection.ensure_index([('user_id', pymongo.ASCENDING)])
     
     def _convertToMongo(self, token):
-        document = token.dataExport()
+        document = token.data_export()
         if 'token_id' in document:
             document['_id'] = document['token_id']
             del(document['token_id'])
@@ -38,7 +38,7 @@ class MongoAuthAccessTokenCollection(AMongoCollection, AAuthAccessTokenDB):
             if '_id' in document:
                 document['token_id'] = document['_id']
                 del(document['_id'])
-        return AccessToken().dataImport(document)
+        return AccessToken().data_import(document)
 
 
     ### CACHING

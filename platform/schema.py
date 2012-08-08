@@ -8,6 +8,9 @@ __license__   = "TODO"
 import Globals, logs, utils
 import copy, json, pprint
 
+# TEMP: Used for deprecate warning
+import inspect
+
 class SchemaException(Exception):
     pass
 
@@ -226,7 +229,10 @@ class Schema(object):
         return True 
 
     def dataExport(self):
-        logs.warning("DEPRECATED FUNCTION: Use 'data_export'")
+        try:
+            logs.warning("**DEPRECATED: Use 'data_export' (called by %s:%s)" % (inspect.stack()[2][1], inspect.stack()[2][2]))
+        except Exception:
+            logs.warning("**DEPRECATED: Use 'data_export'")
         return self.data_export()
 
     def data_export(self):
@@ -254,7 +260,10 @@ class Schema(object):
         return properties
 
     def dataImport(self, properties, **kwargs):
-        logs.warning("DEPRECATED FUNCTION: Use 'data_import'")
+        try:
+            logs.warning("**DEPRECATED: Use 'data_import' (called by %s:%s)" % (inspect.stack()[2][1], inspect.stack()[2][2]))
+        except Exception:
+            logs.warning("**DEPRECATED: Use 'data_import'")
         return self.data_import(properties, **kwargs)
 
     def data_import(self, properties, **kwargs):

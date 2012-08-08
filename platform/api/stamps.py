@@ -34,6 +34,7 @@ from api.entities import Entities
 from api.users import Users
 from api.accounts import Accounts
 from api.activity import Activity
+from api.linkedaccountapi import LinkedAccountAPI
 
 
 CREDIT_BENEFIT  = 1 # Per credit
@@ -106,6 +107,10 @@ class Stamps(APIObject):
     @lazyProperty
     def _activity(self):
         return Activity()
+
+    @lazyProperty
+    def _linked_account_api(self):
+        return LinkedAccountAPI()
 
 
     @lazyProperty
@@ -701,11 +706,11 @@ class Stamps(APIObject):
             share_settings = self._accounts.getOpenGraphShareSettings(authUserId)
             if share_settings is not None and share_settings.share_stamps:
                 payload = {
-                    'authUserId': authUserId,
-                    'stampId': stamp.stamp_id, 
-                    'imageUrl': imageUrl,
+                    'auth_user_id': authUserId,
+                    'stamp_id': stamp.stamp_id, 
+                    'image_url': imageUrl,
                 }
-                self.call_task(self.postToOpenGraphAsync, payload)
+                self.call_task(self._linked_account_api.post_og_async, payload)
     
     def addResizedStampImagesAsync(self, imageUrl, stampId, contentId):
         assert imageUrl is not None, "stamp image url unavailable!"
@@ -868,10 +873,10 @@ class Stamps(APIObject):
         # Remove OG activity item, if it was created, and if the user still has a linked FB account
         if og_action_id is not None and self._accounts.getOpenGraphShareSettings(authUserId) is not None:
             payload = {
-                'authUserId': authUserId,
+                'auth_user_id': authUserId,
                 'og_action_id': og_action_id,
             }
-            self.call_task(self.deleteFromOpenGraphAsync, payload)
+            self.call_task(self._linked_account_api.remove_og_async, payload)
 
     def getStamp(self, stampId, authUserId=None, enrich=True):
         stamp = self._stampDB.getStamp(stampId)
@@ -1035,157 +1040,6 @@ class Stamps(APIObject):
         return stats
 
     # TODO: Move this helper function to a more centralizated location?
-
-    def _kindTypeToOpenGraphType(self, kind, types):
-        if kind == 'place':
-            if 'bar' in types:
-                return 'bar'
-            elif 'restaurant' in types:
-                return 'restaurant'
-            # place type is broken for some reason. We'll use establishment for now
-            return 'establishment'
-            #return 'place'
-
-        elif kind == 'person':
-            if 'artist' in types:
-                return 'artist'
-            return 'person'
-
-        elif kind == 'media_collection':
-            if 'tv' in types:
-                return 'tv_show'
-            elif 'album' in types:
-                return 'album'
-
-        elif kind == 'media_item':
-            if 'track' in types:
-                return 'song'
-            elif 'movie' in types:
-                return 'movie'
-            elif 'book' in types:
-                return 'book'
-            elif 'song' in types:
-                return 'song'
-
-        elif kind == 'software':
-            if 'app' in types:
-                return 'app'
-            elif 'video_game' in types:
-                return 'video_game'
-        return 'other'
-
-    def _getOpenGraphUrl(self, stamp=None, user=None):
-        #TODO: fill this with something other than the dummy url
-        if stamp is not None:
-            return stamp.url
-        if user is not None:
-            return "http://www.stamped.com/%s" % user.screen_name
-
-    def deleteFromOpenGraphAsync(self, authUserId, og_action_id):
-        account = self.getAccount(authUserId)
-        if account.linked is not None and account.linked.facebook is not None\
-           and account.linked.facebook.token is not None:
-            token = account.linked.facebook.token
-            result = self._facebook.deleteFromOpenGraph(og_action_id, token)
-
-
-    def postToOpenGraphAsync(self, authUserId, stampId=None, likeStampId=None, todoStampId=None, followUserId=None, imageUrl=None):
-        # Only post to open graph if we're on prod (or we're Mike)
-        if not self.__is_prod and authUserId != '4ecab825112dea0cfe000293':
-            return
-
-        account = self.getAccount(authUserId)
-
-        token = account.linked.facebook.token
-        if token is None:
-            return
-        fb_user_id = account.linked.facebook.linked_user_id
-        action = None
-        ogType = None
-        url = None
-
-        kwargs = {}
-        stamp = None
-        user = None
-        if imageUrl is not None:
-            kwargs['imageUrl'] = imageUrl
-        if stampId is not None:
-            action = 'stamp'
-            stamp = self.getStamp(stampId)
-            kind = stamp.entity.kind
-            types = stamp.entity.types
-            ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stamp = stamp)
-            kwargs['message'] = stamp.contents[-1].blurb
-        elif likeStampId is not None:
-            action = 'like'
-            stamp = self.getStamp(likeStampId)
-            kind = stamp.entity.kind
-            types = stamp.entity.types
-            ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stamp = stamp)
-        elif todoStampId is not None:
-            action = 'todo'
-            stamp = self.getStamp(todoStampId)
-            kind = stamp.entity.kind
-            types = stamp.entity.types
-            ogType = self._kindTypeToOpenGraphType(kind, types)
-            url = self._getOpenGraphUrl(stamp = stamp)
-        elif followUserId is not None:
-            action = 'follow'
-            user = self.getUser({'user_id' : followUserId})
-            ogType = 'profile'
-            url = self._getOpenGraphUrl(user = user)
-
-        if action is None or ogType is None or url is None:
-            return
-
-        delay = 5
-        while True:
-            try:
-                uniqueUrl = '%s?ts=%s' % (url, time.time()) if delay > 5 else url
-                logs.info('### calling postToOpenGraph with action: %s  token: %s  ogType: %s  url: %s' % (action, token, ogType, uniqueUrl))
-                result = self._facebook.postToOpenGraph(fb_user_id, action, token, ogType, uniqueUrl, **kwargs)
-                break
-            except StampedFacebookPermissionsError as e:
-                account.linked.facebook.have_share_permissions = False
-                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-                return
-            except StampedFacebookTokenError as e:
-                account.linked.facebook.token = None
-                self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-                return
-            except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
-                logs.info('Unique action already taken on OG object')
-                return
-            except StampedFacebookOGImageSizeError as e:
-                logs.info('OG Image size error')
-                try:
-                    del(kwargs['imageUrl'])
-                except KeyError:
-                    pass
-                if delay > 60*10:
-                    raise e
-                time.sleep(delay)
-                delay *= 2
-                continue
-            except StampedThirdPartyError as e:
-                logs.info('### delay is at: %s' % delay)
-                if delay > 60*10:
-                    raise e
-                time.sleep(delay)
-                delay *= 2
-                continue
-
-
-
-        if stampId is not None and 'id' in result:
-            og_action_id = result['id']
-            self._stampDB.updateStampOGActionId(stampId, og_action_id)
-        if account.linked.facebook.have_share_permissions is None:
-            account.linked.facebook.have_share_permissions = True
-            self._accountDB.updateLinkedAccount(authUserId, account.linked.facebook)
-
 
 
 

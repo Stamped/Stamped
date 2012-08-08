@@ -296,7 +296,7 @@ class AMongoCollection(object):
             assert obj.__class__.__name__ == self._obj.__name__
         
         try:
-            document = obj.dataExport()
+            document = obj.data_export()
         except (NameError, AttributeError):
             document = obj
         
@@ -317,7 +317,7 @@ class AMongoCollection(object):
             del(document['_id'])
         
         if self._obj is not None:
-            return self._obj().dataImport(document, overflow=self._overflow)
+            return self._obj().data_import(document, overflow=self._overflow)
         else:
             return document
     

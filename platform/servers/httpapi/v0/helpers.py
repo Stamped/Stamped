@@ -242,7 +242,7 @@ def handleHTTPRequest(requires_auth=True,
                     if conversion is not None:
                         params['schema']        = conversion(params['http_schema'])
                     elif http_schema is not None:
-                        params['data']          = params['http_schema'].dataExport()
+                        params['data']          = params['http_schema'].data_export()
 
                 if 'PATH_INFO' in request.META:
                     params['uri'] = request.META['PATH_INFO'].lower()
@@ -322,7 +322,7 @@ def handleHTTPCallbackRequest(
                     if conversion is not None:
                         params['schema']        = conversion(params['http_schema'])
                     elif http_schema is not None:
-                        params['data']          = params['http_schema'].dataExport()
+                        params['data']          = params['http_schema'].data_export()
 
                 kwargs.update(params)
                 ret = fn(request, *args, **kwargs)
@@ -451,7 +451,7 @@ def parseRequest(schema, request, **kwargs):
                 raise
             return
         
-        schema.dataImport(data)
+        schema.data_import(data)
         schema.validate()
         
         logs.debug("Parsed request data")
@@ -515,7 +515,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
                 raise
             return
         
-        schema.dataImport(data)
+        schema.data_import(data)
         schema.validate()
         
         logs.debug("Parsed request data")
@@ -530,7 +530,7 @@ def _getCacheKey(uri, schema=None):
     key = str("http::%s" % uri)
     if schema is not None:
         dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime) else obj
-        data = json.dumps(schema.dataExport(), sort_keys=True, separators=(',',':'), default=dthandler)
+        data = json.dumps(schema.data_export(), sort_keys=True, separators=(',',':'), default=dthandler)
         key = "%s::%s" % (key, data)
     return key
 

@@ -104,7 +104,7 @@ class MongoActivityCollection(AActivityDB):
         sentTo          = set()
 
         if isinstance(objects, Schema):
-            objects = objects.dataExport()
+            objects = objects.data_export()
 
         activityId      = None
 
@@ -115,7 +115,7 @@ class MongoActivityCollection(AActivityDB):
             if subject is not None:
                 activity.subjects = [ subject ]
             if len(objects) > 0:
-                activity.objects = ActivityObjectIds().dataImport(objects)
+                activity.objects = ActivityObjectIds().data_import(objects)
             if source is not None:
                 activity.source = source
             if benefit is not None:
@@ -194,7 +194,7 @@ class MongoActivityCollection(AActivityDB):
                 alert.recipient_id  = recipientId
                 alert.subject       = subject
                 alert.verb          = verb
-                alert.objects       = ActivityObjectIds().dataImport(objects)
+                alert.objects       = ActivityObjectIds().data_import(objects)
                 alert.created       = created
                 alerts.append(alert)
 

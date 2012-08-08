@@ -28,6 +28,7 @@ from api.stamps import Stamps
 from api.activity import Activity
 from api.entities import Entities
 from api.accounts import Accounts
+from api.linkedaccountapi import LinkedAccountAPI
 
 
 LIKE_BENEFIT    = 1 # Per like
@@ -69,6 +70,10 @@ class LikeAPI(APIObject):
     @lazyProperty
     def _accounts(self):
         return Accounts()
+
+    @lazyProperty
+    def _linked_account_api(self):
+        return LinkedAccountAPI()
 
 
     def create(self, auth_user_id, stamp_id):
@@ -136,7 +141,8 @@ class LikeAPI(APIObject):
         # Post to Facebook Open Graph if enabled
         share_settings = self._accounts.getOpenGraphShareSettings(auth_user_id)
         if share_settings is not None and share_settings.share_likes:
-            self.call_task(self.postToOpenGraphAsync, {'authUserId': auth_user_id, 'likeStampId': stamp.stamp_id})
+            payload = {'auth_user_id': auth_user_id, 'like_stamp_id': stamp.stamp_id}
+            self.call_task(self._linked_account_api.post_og_async, payload)
 
     def addLikeAsync(self, authUserId, stampId, previouslyLiked=False):
         logs.warning("DEPRECATED: Use 'add_async'")

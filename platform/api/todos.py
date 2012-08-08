@@ -28,6 +28,7 @@ from api.stamps import Stamps
 from api.activity import Activity
 from api.accounts import Accounts
 from api.entities import Entities
+from api.linkedaccountapi import LinkedAccountAPI
 
 
 class Todos(APIObject):
@@ -70,6 +71,10 @@ class Todos(APIObject):
     @lazyProperty
     def _entities(self):
         return Entities()
+
+    @lazyProperty
+    def _linked_account_api(self):
+        return LinkedAccountAPI()
 
 
     def _enrichTodoObjects(self, rawTodos, **kwargs):
@@ -344,7 +349,8 @@ class Todos(APIObject):
         if stampId is not None:
             share_settings = self._accounts.getOpenGraphShareSettings(authUserId)
             if share_settings is not None and share_settings.share_todos:
-                self.call_task(self._stamps.postToOpenGraphAsync, {'authUserId': authUserId, 'todoStampId':stampId})
+                payload = {'auth_user_id': authUserId, 'todo_stamp_id':stampId}
+                self.call_task(self._linked_account_api.post_og_async, payload)
 
     def completeTodo(self, authUserId, entityId, complete):
         try:
