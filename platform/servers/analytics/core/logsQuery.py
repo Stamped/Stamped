@@ -162,6 +162,33 @@ class logsQuery(object):
         pool.join()
         
         return len(self.statSet)
+    
+    def launchDayFollowRetention(self, version="v2"):
+    
+        
+        if version == "v2":
+            init = v2_init()
+            end = now()
+        else:
+            init = v1_init()
+            end = v2_init()
+            
+        launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init, '$lt': init + timedelta(days=2)}})
+        
+        launch_user_ids = set()
+        for stamp in launch_stamps:
+            launch_user_ids.add(str(stamp['user']['user_id']))
+        
+        launch_users = len(launch_user_ids)
+
+        new_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init + timedelta(days=2), '$lt': end}})
+
+        new_user_ids = map(lambda x: str(x['user']['user_id']), new_stamps)
+        
+        returning_users = set(filter(lambda x: x in launch_users))
+        
+        return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (launch_users, len(returning_users))
+    
 
     
     

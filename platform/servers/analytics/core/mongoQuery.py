@@ -183,7 +183,7 @@ class mongoQuery(object):
 
         new_user_ids = map(lambda x: str(x['user']['user_id']), new_stamps)
         
-        returning_users = set(filter(lambda x: x in launch_users))
+        returning_users = set(filter(lambda x: x in launch_users,new_user_ids))
         
         return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (launch_users, len(returning_users))
         
