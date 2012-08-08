@@ -161,25 +161,31 @@ class mongoQuery(object):
         return count
     
     
-    def launchDayRetention(self, stat, version):
+    def launchDayStampRetention(self, stat, version="v2"):
+    
         
-        user_set = set()
+        if version == "v2":
+            init = v2_init()
+            end = now()
+        else:
+            init = v1_init()
+            end = v2_init()
+            
+        launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init, '$lt': v2_init + timedelta(days=2)}})
         
-        if stat == "stamp":
-            
-            launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': v2_init(), '$lt': v2_init() + timedelta(days=2)}})
-            print "got stamps"
-            launch_user_ids = map(lambda x: str(x['user']['user_id']), launch_stamps)
-            print "got user ids"
-            new_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': v2_init() + timedelta(days=2)}})
-            print "got new stamps"
-            new_user_ids = map(lambda x: str(x['user']['user_id']), new_stamps)
-            print "got new user ids"
-            for user_id in new_user_ids:
-                if user_id in launch_user_ids:
-                    user_set.add(user_id)
-            
-            return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (len(set(launch_user_ids)),len(user_set))
+        launch_user_ids = set()
+        for stamp in launch_stamps:
+            launch_user_ids.add(str(x['user']['user_id']))
+        
+        launch_users = len(launch_user_ids)
+
+        new_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init + timedelta(days=2), '$lt': end}})
+
+        new_user_ids = map(lambda x: str(x['user']['user_id']), new_stamps)
+        
+        returning_users = set(filter(lambda x: x in launch_users))
+        
+        return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (launch_users, len(returning_users))
         
         
         
