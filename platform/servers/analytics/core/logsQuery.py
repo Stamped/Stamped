@@ -52,7 +52,7 @@ class logsQuery(object):
             
             
 
-    def performQuery(self,domain,fields,uri,t0,t1,byNode=False,form_dict={}):
+    def performQuery(self,domain,fields,uri,t0,t1,byNode=False,form_dict={},logged_out=False):
         
         if uri is not None:
             query = 'select %s from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, uri, t0.isoformat(), t1.isoformat())
@@ -67,30 +67,33 @@ class logsQuery(object):
         
         for stat in stats:
             
-            try:
-                if fields == 'count(*)':
-                    self.statCount += int(stat['Count'])
-                elif byNode:
-                    bgn = stat['bgn'].split('T')
-                    end = stat['end'].split('T')
-                    if end[0] == bgn[0]:
-                        bgn = bgn[1].split(':')
-                        end = end[1].split(':')
-                        hours = float(end[0]) - float(bgn[0])
-                        minutes = float(end[1]) - float(bgn[1])
-                        seconds = float(end[2]) - float(bgn[2])
-                        diff = seconds + 60*(minutes + 60*hours)
-                    
-                    try:
-                        self.statCountByNode[stat['nde']] += 1
-                        self.statTimeByNode[stat['nde']] += diff
-                    except KeyError:
-                        self.statCountByNode[stat['nde']] = 1
-                        self.statTimeByNode[stat['nde']] = diff
-                else:
+            if fields == 'count(*)':
+                self.statCount += int(stat['Count'])
+            elif byNode:
+                bgn = stat['bgn'].split('T')
+                end = stat['end'].split('T')
+                if end[0] == bgn[0]:
+                    bgn = bgn[1].split(':')
+                    end = end[1].split(':')
+                    hours = float(end[0]) - float(bgn[0])
+                    minutes = float(end[1]) - float(bgn[1])
+                    seconds = float(end[2]) - float(bgn[2])
+                    diff = seconds + 60*(minutes + 60*hours)
+                
+                try:
+                    self.statCountByNode[stat['nde']] += 1
+                    self.statTimeByNode[stat['nde']] += diff
+                except KeyError:
+                    self.statCountByNode[stat['nde']] = 1
+                    self.statTimeByNode[stat['nde']] = diff
+            elif logged_out and 'uid' not in stat:
+                self.statCount += 1
+                print stat
+            else:
+                try:
                     self.statSet.add(stat[fields])
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
         
         
     def activeUsers(self,t0, t1):
@@ -295,7 +298,7 @@ class logsQuery(object):
         
         return count_report,mean_report
         
-    def customQuery(self,t0,t1,fields,uri):
+    def customQuery(self,t0,t1,fields,uri,form={},logged_out=False):
         
         if fields == 'count(*)':
             self.statCount = 0
@@ -307,7 +310,7 @@ class logsQuery(object):
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
             
-            pool.spawn(self.performQuery,self.domains[suffix],fields,uri,t0,t1)
+            pool.spawn(self.performQuery,self.domains[suffix],fields,uri,t0,t1,form_dict=form,logged_out=logged_out)
 
         pool.join()
         
