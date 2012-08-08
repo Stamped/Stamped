@@ -4282,8 +4282,6 @@ class StampedAPI(AStampedAPI):
         user = self.getUser({'user_id': authUserId})
         now = datetime.utcnow()
 
-        logs.info('### BUILD_USER_GUIDE')
-
         t0 = time.time()
 
         stampIds = self._collectionDB.getInboxStampIds(user.user_id)
@@ -4293,8 +4291,6 @@ class StampedAPI(AStampedAPI):
         entityStats = self._entityStatsDB.getStatsForEntities(entityIds)
         todos = set(self._todoDB.getTodoEntityIds(user.user_id))
         friendIds = self._friendshipDB.getFriends(user.user_id)
-
-        logs.info('### stampStats: %s' % stampStats)
 
         t1 = time.time()
 
@@ -4411,14 +4407,12 @@ class StampedAPI(AStampedAPI):
                     stampTimestamps[stat.entity_id][stat.user_id] = t
 
             # Build todosMap
-            logs.info('### stat.preview_todos: %s' % (stat.preview_todos,))
             if stat.preview_todos is not None:
                 if stat.entity_id not in todosMap:
                     todosMap[stat.entity_id] = set()
                 for userId in stat.preview_todos:
                     if userId in friendIds or userId == user.user_id:
-                        logs.info('### Adding userId to todos map: %s' % userId)
-                        todosMap[stat.entity_id].add(userId)       
+                        todosMap[stat.entity_id].add(userId)
 
 
 
@@ -4456,12 +4450,7 @@ class StampedAPI(AStampedAPI):
                 if entity.entity_id in todos:
                     if entity.entity_id not in todosMap:
                         todosMap[entity.entity_id] = set()
-                    logs.info('### Adding users own id to todosMap: %s' % user.user_id)
                     todosMap[entity.entity_id].add(user.user_id)
-
-            logs.info('### todosMap: %s' % todosMap)
-
-
 
             r.sort(key=itemgetter(1))
             r.reverse()
@@ -4493,7 +4482,6 @@ class StampedAPI(AStampedAPI):
                 if item.entity_id in todosMap:
                     userIds = list(todosMap[result[0]])
                     if len(userIds) > 0:
-                        logs.info('### TODO MATCH for entity: %s for user: %s todoUserIds: %s' % (item.entity_id, user.name, userIds))
                         item.todo_user_ids = userIds
 
                 cache.append(item)
@@ -4502,9 +4490,6 @@ class StampedAPI(AStampedAPI):
         logs.info("Time to build guide: %s seconds" % (time.time() - t0))
 
         self._guideDB.updateGuide(guide)
-
-        logs.info('### GUIDE: %s' % guide)
-
 
         return guide
 

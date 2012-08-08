@@ -39,18 +39,22 @@ class Twitter(object):
                 http_method=verb)
             oauthRequest.sign_request(  self.__signature_method, self.__consumer, token)
 
-            header = oauthRequest.to_header()
+            header = oauthRequest.parameters#to_header()
         else:
             header = None
-        body = oauthRequest.to_postdata() if verb == 'POST' else None
+        #body = oauthRequest.parameters if verb == 'POST' else None
+        body = None
+        params = None
         logs.debug(url)
 
         # Send the http request
         try:
             response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
             result = json.loads(content)
-        except Exception:
-            logs.warning('Error connecting to Twitter')
+        except Exception as e:
+            logs.warning('Error connecting to Twitter: %s' % e)
+            from traceback import print_exc
+            print_exc()
             raise StampedThirdPartyError('There was an error connecting to Twitter')
         if 'error' in result:
             raise StampedInputError('Twitter API Fail: %s' % result['error'])
@@ -156,10 +160,8 @@ def globalTwitter():
     return __globalTwitter
 
 
-#TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
-#TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
-TWITTER_USER_A0_TOKEN      = "558345111-gsOAXPBGrvjOaWNmTyCtivPcEoH6yHVh627IynHU"
-TWITTER_USER_A0_SECRET     = "NpWLdSOrvHrtTpy2SALH4Ty1T5QUWdMZQhAMcW6Jp4"
+TWITTER_USER_A0_TOKEN      = "595895658-K0PpPWPSBvEVYN46cZOJIQtljZczyoOSTXd68Bju"
+TWITTER_USER_A0_SECRET     = "ncDA2SHT0Tn02LRGJmx2LeoDioH7XsKemYk3ktrEyw"
 
 #TWITTER_USER_A0_TOKEN      = "11131112-gJWVu3jAcXDy5ujuyFzD8C1NqU7sA2foMAlrA8RZs"
 #TWITTER_USER_A0_SECRET     = "5X0o2biSxIMZpXBbslujtCB8xtGx4sRKekg0D86KM"
@@ -174,6 +176,7 @@ def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_S
     if 'user_secret' in params:             user_secret = params['user_secret']
 
     #headers = utils.getTwitter('https://api.twitter.com/account/verify_credentials.json', user_token, user_secret)
+    if 'createFriendship' in methods:       pprint(twitter.createFriendship(user_token, user_secret, 'TestUserB0'))
     if 'getFriendData' in methods:          pprint(twitter.getFriendData(user_token, user_secret))
     if 'getUserInfo' in methods:            pprint(twitter.getUserInfo(user_token, user_secret))
     if 'getFriendIds' in methods:           pprint(twitter.getFriendIds(user_token, user_secret))
@@ -182,7 +185,7 @@ def demo(method, user_token=TWITTER_USER_A0_TOKEN, user_secret=TWITTER_USER_A0_S
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'getUserInfo'
+    methods = 'createFriendship'
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]
     if len(sys.argv) > 2:

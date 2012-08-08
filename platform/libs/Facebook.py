@@ -34,7 +34,7 @@ AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
 
 USER_ID = '1337040065'
 #ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAIJoZAiPhuxF6TUkj6w8h8cpIgF4SMrMVS2l0xaB1ceZAw2HpZBoAAbtQx55e15oCBTCT69bhRBQVOaoCZBMDgfcOzyCWSnJSRN1ZCUO5'
+ACCESS_TOKEN = 'BAAEOIZBBUXisBANAw4DZBVRYRZC392NEKZC6bDLOAg18ZBUijFoGgLKQD8ZCmuClhrxk2L4sFENCf0pZAW0ZBQT0V84S5iZBIMWkHjYThAnJSlXfXoQzFNAjej2vEquQ4cJ8ZD'
 
 DEFAULT_TIMEOUT = 15
 
@@ -66,7 +66,6 @@ class Facebook(object):
         if method == 'get':
             response, content = service_request('facebook', method, url, query_params=params, priority=priority, timeout=DEFAULT_TIMEOUT)
         else:
-            print('body: %s  url: %s' % (params, url))
             response, content = service_request('facebook', method, url, body=params, priority=priority, timeout=DEFAULT_TIMEOUT)
         if parse_json:
             result = json.loads(content)
@@ -303,6 +302,13 @@ class Facebook(object):
             path,
         )
 
+    def getActionInfo(self, access_token, action_id):
+        path = action_id
+        return self._get(
+            access_token,
+            path,
+        )
+
     def postToOpenGraph(self, fb_user_id, action, access_token, object_type, object_url, message=None, imageUrl=None):
         logs.info('### access_token: %s  object_type: %s  object_url: %s' % (access_token, object_type, object_url))
 
@@ -395,6 +401,8 @@ def globalFacebook():
 
 
 CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
+ACTION_ID = '4423525036250'
+
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
@@ -415,6 +423,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
                                                    'app', 'http://stamped.com/JSinatra/s/37',
                                                    message="Test message", imageUrl='http://static.stamped.com/users/ml.jpg'))
     if 'getOpenGraphActivity' in methods:   pprint(facebook.getOpenGraphActivity(access_token))
+    if 'getActionInfo' in methods:          pprint(facebook.getActionInfo(access_token, ACTION_ID))
     if 'getTestUsers' in methods:           pprint(facebook.getTestUsers())
     if 'clearTestUsers' in methods:         pprint(facebook.clearTestUsers())
 

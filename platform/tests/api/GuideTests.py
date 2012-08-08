@@ -19,6 +19,15 @@ class StampedAPIGuideHttpTest(AStampedAPIHttpTestCase):
         (self.userB, self.tokenB) = self.createAccount('UserB')
         (self.userC, self.tokenC) = self.createAccount('UserC')
         (self.userD, self.tokenD) = self.createAccount('UserD')
+        (self.userE, self.tokenE) = self.createAccount('UserE')
+
+        # Build friendships
+        self.createFriendship(self.tokenA, self.userB)
+        self.createFriendship(self.tokenA, self.userC)
+        self.createFriendship(self.tokenB, self.userA)
+        self.createFriendship(self.tokenB, self.userC)
+        self.createFriendship(self.tokenC, self.userA)
+        self.createFriendship(self.tokenC, self.userB)
 
         # Build five entities
         self.entities = []
@@ -32,6 +41,7 @@ class StampedAPIGuideHttpTest(AStampedAPIHttpTestCase):
             }
             result = self.createEntity(self.tokenC, data=data)
             self.entities.append(result)
+
 
         # Build stamps
         self.stamps = []
@@ -50,15 +60,9 @@ class StampedAPIGuideHttpTest(AStampedAPIHttpTestCase):
         self.createTodo(self.tokenC, self.entities[1]['entity_id'])
         self.createTodo(self.tokenB, self.entities[2]['entity_id'])
 
-        # Build friendships
-        # We must create the friendships after creating stamps and todos.  buildGuide is triggered by addFriendship.
-        # If the added friends have no stamps, then we would create an empty guide and cache it for a day
-        self.createFriendship(self.tokenA, self.userB)
-        self.createFriendship(self.tokenA, self.userC)
-        self.createFriendship(self.tokenB, self.userA)
-        self.createFriendship(self.tokenB, self.userC)
-        self.createFriendship(self.tokenC, self.userA)
-        self.createFriendship(self.tokenC, self.userB)
+
+        # We create another friendship for UserA in order to trigger _buildUserGuide once more for him.
+        self.createFriendship(self.tokenA, self.userE)
 
         """
         Note: The guide's cache only refreshes once every 24 hours currently, so any actions taken
@@ -79,6 +83,7 @@ class StampedAPIGuideHttpTest(AStampedAPIHttpTestCase):
         self.deleteAccount(self.tokenB)
         self.deleteAccount(self.tokenC)
         self.deleteAccount(self.tokenD)
+        self.deleteAccount(self.tokenE)
 
     def assertGuide(self, results, title, numStamps, numTodos):
         exists = False
@@ -89,10 +94,12 @@ class StampedAPIGuideHttpTest(AStampedAPIHttpTestCase):
                 if numStamps == 0:
                     self.assertTrue('stamps' not in r['previews'] or r['previews']['stamps'] is None)
                 else:
+                    self.assertTrue('stamps' in r['previews'])
                     self.assertEqual(len(r['previews']['stamps']), numStamps)
                 if numTodos == 0:
                     self.assertTrue('todos' not in r['previews'] or r['previews']['todos'] is None)
                 else:
+                    self.assertTrue('todos' in r['previews'])
                     self.assertEqual(len(r['previews']['todos']), numTodos)
                 break
         self.assertTrue(exists)
@@ -100,16 +107,13 @@ class StampedAPIGuideHttpTest(AStampedAPIHttpTestCase):
 class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
     def test_guide_inbox(self):
         path = "guide/collection.json"
-        data = { 
+        data = {
             "oauth_token": self.tokenA['access_token'],
             "section": "book",
             "scope" : "inbox",
         }
 
-        print('### oauth_token: %s' % self.tokenA['access_token'])
-        print('### user_id: %s' % self.userA['user_id'])
         result = self.handleGET(path, data)
-        print result
 
         # Verify all four results are returned
         self.assertEqual(len(result), 4)
@@ -119,23 +123,23 @@ class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
         self.assertGuide(result, 'Book C', 2, 1)
         self.assertGuide(result, 'Book D', 1, 0)
 
-#    def test_guide_inbox_empty(self):
-#        path = "guide/collection.json"
-#        data = {
-#            "oauth_token": self.tokenD['access_token'],
-#            "section": "book",
-#            "scope" : "inbox",
-#        }
-#
-#        result = self.handleGET(path, data)
-#
-#        """
-#        Note: UserD is not following anyone, so inbox will be empty
-#        """
-#
-#        # Verify no results are returned
-#        self.assertEqual(len(result), 0)
-#
+    def test_guide_inbox_empty(self):
+        path = "guide/collection.json"
+        data = {
+            "oauth_token": self.tokenD['access_token'],
+            "section": "book",
+            "scope" : "inbox",
+        }
+
+        result = self.handleGET(path, data)
+
+        """
+        Note: UserD is not following anyone, so inbox will be empty
+        """
+
+        # Verify no results are returned
+        self.assertEqual(len(result), 0)
+
 #    def test_guide_tastemakers(self):
 #        path = "guide/collection.json"
 #        data = {
@@ -151,43 +155,43 @@ class StampedAPIGuideCollection(StampedAPIGuideHttpTest):
 #        """
 #
 #        # Once fixture tests are added, we will expect 4 results
-#        self.assertEqual(len(result), 0)
+#        self.assertEqual(len(result), 4)
 #
 #        # Verify order
 #        self.assertEqual(result[0]['title'], 'Book A')
 #        self.assertEqual(result[1]['title'], 'Book B')
 #        self.assertEqual(result[2]['title'], 'Book C')
 #        self.assertEqual(result[3]['title'], 'Book D')
-#
-#    def test_guide_me(self):
-#        path = "guide/collection.json"
-#        data = {
-#            "oauth_token": self.tokenB['access_token'],
-#            "section": "book",
-#            "scope" : "me",
-#        }
-#
-#        result = self.handleGET(path, data)
-#
-#        # Verify 2 results are returned (one for each to-do).
-#        self.assertTrue(len(result) == 2)
-#
-#    def test_guide_me_empty(self):
-#        path = "guide/collection.json"
-#        data = {
-#            "oauth_token": self.tokenD['access_token'],
-#            "section": "book",
-#            "scope" : "me",
-#        }
-#
-#        result = self.handleGET(path, data)
-#
-#        """
-#        Note: UserD has not to-do'd anything, so 'me' scope will be empty
-#        """
-#
-#        # Verify no results are returned
-#        self.assertEqual(len(result), 0)
+
+    def test_guide_me(self):
+        path = "guide/collection.json"
+        data = {
+            "oauth_token": self.tokenB['access_token'],
+            "section": "book",
+            "scope" : "me",
+        }
+
+        result = self.handleGET(path, data)
+
+        # Verify 2 results are returned (one for each to-do).
+        self.assertTrue(len(result) == 2)
+
+    def test_guide_me_empty(self):
+        path = "guide/collection.json"
+        data = {
+            "oauth_token": self.tokenD['access_token'],
+            "section": "book",
+            "scope" : "me",
+        }
+
+        result = self.handleGET(path, data)
+
+        """
+        Note: UserD has not to-do'd anything, so 'me' scope will be empty
+        """
+
+        # Verify no results are returned
+        self.assertEqual(len(result), 0)
 
 
 if __name__ == '__main__':

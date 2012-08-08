@@ -219,7 +219,7 @@ class StampedAPIUsersFindContacts(StampedAPIUserHttpTest):
 
 class StampedAPISuggested(StampedAPIUserHttpTest):
     def test_suggested(self):
-        suggestedUsers = ['mariobatali', 'petertravers', 'rebeccaminkoff', 'nymag']
+        suggestedUsers = ['justinbieber', 'ellendegeneres', 'mariobatali', 'nymag']
         newAccounts = []
         
         for suggestedUser in suggestedUsers:
