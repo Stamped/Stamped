@@ -150,7 +150,7 @@ class mongoQuery(object):
             
             try:
                 user = self.api._userDB.getUser(userId)
-            except StampedDocumentNotFoundError:
+            except:
                 continue
             
             user_time = user.timestamp.created
