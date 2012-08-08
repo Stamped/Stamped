@@ -25,13 +25,14 @@ from db.mongodb.MongoSearchEntityCollection import MongoSearchEntityCollection
 
 from utils import lazyProperty, LoggingThreadPool
 from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
+from resolve.merge import Merge
 
-from api.module import APIModule
+from api.module import APIObject
 
-class Entities(APIModule):
+class Entities(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
 
         self.__autocomplete = emptyIndex()
         self.__autocomplete_last_loaded = datetime.datetime.now()
@@ -74,6 +75,10 @@ class Entities(APIModule):
     def _searchEntityDB(self):
         return MongoSearchEntityCollection()
 
+    @lazyProperty
+    def _merge(self):
+        return Merge()
+
 
     def getEntityFromRequest(self, entityRequest):
         if isinstance(entityRequest, Schema):
@@ -94,7 +99,7 @@ class Entities(APIModule):
         if entityId is not None and entityId.startswith('T_'):
             ### RESTRUCTURE TODO: Where does this go? Temporarily raise
             raise NotImplementedError
-            entityId = self._convertSearchId(entityId)
+            entityId = self._merge.convertSearchId(entityId)
             return self._entityDB.getEntity(entityId, forcePrimary=True)
         else:
             ### RESTRUCTURE TODO: Where does this go?

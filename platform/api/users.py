@@ -15,19 +15,19 @@ import datetime
 import logs
 
 from db.mongodb.MongoUserCollection import MongoUserCollection
-from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
-from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
-from db.mongodb.MongoEntityCollection import MongoEntityCollection
 from db.mongodb.MongoStampCollection import MongoStampCollection
+from db.mongodb.MongoEntityCollection import MongoEntityCollection
+from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
+from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 
 from utils import lazyProperty, LoggingThreadPool
 
-from api.module import APIModule
+from api.module import APIObject
 
-class Users(APIModule):
+class Users(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
 
     @lazyProperty
     def _userDB(self):
@@ -115,17 +115,6 @@ class Users(APIModule):
 
     def getUser(self, userRequest, authUserId=None):
         user = self.getUserFromIdOrScreenName(userRequest)
-
-        if user.privacy == True:
-            if authUserId is None:
-                raise StampedViewUserPermissionsError("Insufficient privileges to view user")
-
-            friendship              = Friendship()
-            friendship.user_id      = authUserId
-            friendship.friend_id    = user.user_id
-
-            if not self._friendshipDB.checkFriendship(friendship):
-                raise StampedViewUserPermissionsError("Insufficient privileges to view user")
 
         if user.stats.num_stamps is not None and user.stats.num_stamps > 0:
             if user.stats.distribution is None or len(user.stats.distribution) == 0:

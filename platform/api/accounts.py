@@ -21,7 +21,7 @@ import libs.ec2_utils
 import libs.Facebook
 import libs.Twitter
 
-from api.module import APIModule
+from api.module import APIObject
 from api.activity import Activity
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection
@@ -42,10 +42,10 @@ from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsColle
 
 from utils import lazyProperty, LoggingThreadPool
 
-class Accounts(APIModule):
+class Accounts(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
 
     @lazyProperty
     def _accountDB(self):

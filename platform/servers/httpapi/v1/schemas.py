@@ -2574,7 +2574,7 @@ class HTTPStamp(Schema):
         self.is_liked           = False
         self.is_todo            = False
 
-    def importStampMini(self, stamp):
+    def import_stamp_mini(self, stamp):
         entity                  = stamp.entity
         coordinates             = getattr(entity, 'coordinates', None)
         credits                 = getattr(stamp, 'credits', [])
@@ -2639,8 +2639,8 @@ class HTTPStamp(Schema):
 
         return self
 
-    def importStamp(self, stamp):
-        self.importStampMini(stamp)
+    def import_stamp(self, stamp):
+        self.import_stamp_mini(stamp)
         previews = HTTPPreviews()
 
         if stamp.previews.comments is not None:

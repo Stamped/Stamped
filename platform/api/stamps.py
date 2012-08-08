@@ -27,8 +27,9 @@ from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 
 from utils import lazyProperty, LoggingThreadPool
 from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
+from libs.Memcache import generateKeyFromDictionary
 
-from api.module import APIModule
+from api.module import APIObject
 from api.entities import Entities
 from api.users import Users
 from api.accounts import Accounts
@@ -38,10 +39,10 @@ from api.activity import Activity
 CREDIT_BENEFIT  = 1 # Per credit
 
 
-class Stamps(APIModule):
+class Stamps(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
 
     @lazyProperty
     def _userDB(self):
@@ -1076,8 +1077,7 @@ class Stamps(APIModule):
     def _getOpenGraphUrl(self, stamp=None, user=None):
         #TODO: fill this with something other than the dummy url
         if stamp is not None:
-            url = generateStampUrl(stamp)
-            return url
+            return stamp.url
         if user is not None:
             return "http://www.stamped.com/%s" % user.screen_name
 

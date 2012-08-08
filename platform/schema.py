@@ -201,22 +201,22 @@ class Schema(object):
         return not self.__eq__(other)
 
     def __getstate__(self):
-        return self.dataExport()
+        return self.data_export()
 
     def __setstate__(self, state):
         self.__properties = {}
         self.__required_count = 0
-        self.dataImport(state)
+        self.data_import(state)
 
     #TODO: make this a true repr string
     def __repr__(self):
         return str(self)
 
     def __str__(self):
-        return '<%s %s>' % (self.__class__.__name__, self.dataExport())
+        return '<%s %s>' % (self.__class__.__name__, self.data_export())
 
     def __unicode__(self):
-        return u'<%s %s>' % (self.__class__.__name__, self.dataExport())
+        return u'<%s %s>' % (self.__class__.__name__, self.data_export())
 
     def validate(self):
         if self.__required_count < len(self.__class__._required_fields):
@@ -226,6 +226,10 @@ class Schema(object):
         return True 
 
     def dataExport(self):
+        logs.warning("DEPRECATED FUNCTION: Use 'data_export'")
+        return self.data_export()
+
+    def data_export(self):
         properties = {}
         for k,v in self.__properties.items():
             info = self.__class__._propertyInfo[k]
@@ -234,7 +238,7 @@ class Schema(object):
                 properties[k] = copy.deepcopy(v)
             elif t == _nestedPropertyKey:
                 if v is not None:
-                    properties[k] = v.dataExport()
+                    properties[k] = v.data_export()
                 else:
                     properties[k] = None
             elif t == _propertyListKey:
@@ -246,10 +250,14 @@ class Schema(object):
                 if v is None:
                     properties[k] = None 
                 else:
-                    properties[k] = tuple([ v2.dataExport() for v2 in v])
+                    properties[k] = tuple([ v2.data_export() for v2 in v])
         return properties
 
     def dataImport(self, properties, **kwargs):
+        logs.warning("DEPRECATED FUNCTION: Use 'data_import'")
+        return self.data_import(properties, **kwargs)
+
+    def data_import(self, properties, **kwargs):
         overflow = False
         if 'overflow' in kwargs and kwargs['overflow'] == True:
             overflow = True
@@ -269,13 +277,13 @@ class Schema(object):
                             nested = self.__properties[k]
                         else:
                             nested = p[_kindKey]()
-                        nested.dataImport(v, **kwargs)
+                        nested.data_import(v, **kwargs)
                         self.__setattr__(k, nested)
 
                     elif p[_typeKey] == _nestedPropertyListKey and v is not None:
                         l = tuple(v)
                         nestedKind = p[_kindKey]
-                        nestedPropList = tuple([nestedKind().dataImport(item) for item in l])
+                        nestedPropList = tuple([nestedKind().data_import(item) for item in l])
                         self.__setattr__(k, nestedPropList)
                     else:
                         self.__setattr__(k, v)

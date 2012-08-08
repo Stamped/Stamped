@@ -23,15 +23,15 @@ from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 
 from utils import lazyProperty, LoggingThreadPool
 
-from api.module import APIModule
+from api.module import APIObject
 from api.stamps import Stamps
 from api.activity import Activity
 
 
-class Comments(APIModule):
+class Comments(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
 
     @lazyProperty
     def _userDB(self):

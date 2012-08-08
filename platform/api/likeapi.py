@@ -19,9 +19,11 @@ from db.mongodb.MongoUserCollection import MongoUserCollection
 from db.mongodb.MongoStampCollection import MongoStampCollection
 from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 
+from db.likedb import LikeDB
+
 from utils import lazyProperty, LoggingThreadPool
 
-from api.module import APIModule
+from api.module import APIObject
 from api.stamps import Stamps
 from api.activity import Activity
 from api.entities import Entities
@@ -31,18 +33,22 @@ from api.accounts import Accounts
 LIKE_BENEFIT    = 1 # Per like
 
 
-class Likes(APIModule):
+class LikeAPI(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
 
     @lazyProperty
     def _userDB(self):
         return MongoUserCollection()
-    
+
     @lazyProperty
     def _stampDB(self):
         return MongoStampCollection()
+    
+    @lazyProperty
+    def _likeDB(self):
+        return LikeDB()
     
     @lazyProperty
     def _friendshipDB(self):
@@ -65,23 +71,23 @@ class Likes(APIModule):
         return Accounts()
 
 
-    def addLike(self, authUserId, stampId):
-        stamp = self._stampDB.getStamp(stampId)
-        stamp = self._stamps.enrichStampObjects(stamp, authUserId=authUserId)
+    def create(self, auth_user_id, stamp_id):
+        stamp = self._stampDB.getStamp(stamp_id)
+        stamp = self._stamps.enrichStampObjects(stamp, authUserId=auth_user_id)
 
         # Check to verify that user hasn't already liked stamp
-        if self._stampDB.checkLike(authUserId, stampId):
-            logs.info("'Like' exists for user (%s) on stamp (%s)" % (authUserId, stampId))
+        if self._likeDB.check(auth_user_id, stamp_id):
+            logs.info("'Like' exists for user (%s) on stamp (%s)" % (auth_user_id, stamp_id))
             return stamp
 
         # Check if user has liked the stamp previously; if so, don't give credit
-        previouslyLiked = False
-        history = self._stampDB.getUserLikesHistory(authUserId)
-        if stampId in history:
-            previouslyLiked = True
+        previously_liked = False
+        history = self._likeDB.get_history_for_user(auth_user_id)
+        if stamp_id in history:
+            previously_liked = True
 
         # Add like
-        self._stampDB.addLike(authUserId, stampId)
+        self._likeDB.add(auth_user_id, stamp_id)
 
         # Force attributes
         if stamp.stats.num_likes is None:
@@ -93,28 +99,33 @@ class Likes(APIModule):
 
         # Add like async
         payload = {
-            'authUserId': authUserId, 
-            'stampId': stampId, 
-            'previouslyLiked': previouslyLiked
+            'auth_user_id': auth_user_id, 
+            'stamp_id': stamp_id, 
+            'previously_liked': previously_liked
         }
-        self.call_task(self.addLikeAsync, payload)
+        self.call_task(self.add_async, payload)
 
         return stamp
 
-    def addLikeAsync(self, authUserId, stampId, previouslyLiked=False):
-        stamp = self._stampDB.getStamp(stampId)
+    def addLike(self, authUserId, stampId):
+        logs.warning("DEPRECATED FUNCTION: Use 'create' instead")
+        return self.create(authUserId, stampId)
+
+
+    def add_async(self, auth_user_id, stamp_id, previously_liked=False):
+        stamp = self._stampDB.getStamp(stamp_id)
 
         # Increment user stats
         self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=1)
-        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=1)
+        self._userDB.updateUserStats(auth_user_id, 'num_likes_given', increment=1)
 
         # Give credit if not previously liked
-        if not previouslyLiked and stamp.user.user_id != authUserId:
+        if not previously_liked and stamp.user.user_id != auth_user_id:
             # Update user stats with new credit
             self._userDB.updateUserStats(stamp.user.user_id, 'num_stamps_left', increment=LIKE_BENEFIT)
 
             # Add activity for stamp owner
-            self._activity.addLikeActivity(authUserId, stamp.stamp_id, stamp.user.user_id, LIKE_BENEFIT)
+            self._activity.addLikeActivity(auth_user_id, stamp.stamp_id, stamp.user.user_id, LIKE_BENEFIT)
 
         # Update entity stats
         self.call_task(self._entities.updateEntityStatsAsync, {'entityId': stamp.entity.entity_id})
@@ -123,24 +134,29 @@ class Likes(APIModule):
         self.call_task(self._stamps.updateStampStatsAsync, {'stampId': stamp.stamp_id})
 
         # Post to Facebook Open Graph if enabled
-        share_settings = self._accounts.getOpenGraphShareSettings(authUserId)
+        share_settings = self._accounts.getOpenGraphShareSettings(auth_user_id)
         if share_settings is not None and share_settings.share_likes:
-            self.call_task(self.postToOpenGraphAsync, {'authUserId': authUserId, 'likeStampId': stamp.stamp_id})
+            self.call_task(self.postToOpenGraphAsync, {'authUserId': auth_user_id, 'likeStampId': stamp.stamp_id})
 
-    def removeLike(self, authUserId, stampId):
+    def addLikeAsync(self, authUserId, stampId, previouslyLiked=False):
+        logs.warning("DEPRECATED: Use 'add_async'")
+        return self.add_async(authUserId, stampId, previouslyLiked)
+
+
+    def remove(self, auth_user_id, stamp_id):
         # Remove like (if it exists)
-        if not self._stampDB.removeLike(authUserId, stampId):
-            logs.warning('Attempted to remove a like that does not exist')
-            stamp = self._stampDB.getStamp(stampId)
-            return self._stamps.enrichStampObjects(stamp, authUserId=authUserId)
+        if not self._likeDB.remove(auth_user_id, stamp_id):
+            logs.info('Like does not exist')
+            stamp = self._stampDB.getStamp(stamp_id)
+            return self._stamps.enrichStampObjects(stamp, authUserId=auth_user_id)
 
         # Get stamp object
-        stamp = self._stampDB.getStamp(stampId)
-        stamp = self._stamps.enrichStampObjects(stamp, authUserId=authUserId)
+        stamp = self._stampDB.getStamp(stamp_id)
+        stamp = self._stamps.enrichStampObjects(stamp, authUserId=auth_user_id)
 
         # Decrement user stats by one
         self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=-1)
-        self._userDB.updateUserStats(authUserId, 'num_likes_given', increment=-1)
+        self._userDB.updateUserStats(auth_user_id, 'num_likes_given', increment=-1)
 
         if stamp.stats.num_likes is None:
             stamp.stats.num_likes = 0
@@ -155,28 +171,20 @@ class Likes(APIModule):
 
         return stamp
 
-    def getLikes(self, authUserId, stampId):
-        ### TODO: Add paging
-        stamp = self._stampDB.getStamp(stampId)
-        stamp = self._stamps.enrichStampObjects(stamp, authUserId=authUserId)
+    def removeLike(self, authUserId, stampId):
+        logs.warning("DEPRECATED: Use 'remove'")
+        return self.remove(authUserId, stampId)
 
-        # Verify user has the ability to view the stamp's likes
-        if stamp.user.user_id != authUserId:
-            friendship              = Friendship()
-            friendship.user_id      = stamp.user.user_id
-            friendship.friend_id    = authUserId
-            
-            # Check if stamp is private; if so, must be a follower
-            if stamp.user.privacy == True:
-                if not self._friendshipDB.checkFriendship(friendship):
-                    raise StampedAddCommentPermissionsError("Insufficient privileges to add comment")
-            
-            if authUserId is not None:
-                # Check if block exists between user and stamp owner
-                if self._friendshipDB.blockExists(friendship) == True:
-                    raise StampedBlockedUserError("Block exists")
+
+    def get(self, stamp_id, auth_user_id):
+        ### TODO: Add paging
+        stamp = self._stampDB.getStamp(stamp_id)
         
         # Get user ids
-        userIds = self._stampDB.getStampLikes(stampId)
+        user_ids = self._likeDB.get(stamp_id)
         
-        return userIds
+        return user_ids
+
+    def getLikes(self, authUserId, stampId):
+        logs.warning("DEPRECATED: Use 'get'")
+        return self.get(stampId, authuserId)

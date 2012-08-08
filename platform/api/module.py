@@ -11,10 +11,18 @@ import Globals
 import logs
 import tasks.Tasks
 
-class APIModule(object):
+from utils import lazyProperty
+
+from libs.Memcache import globalMemcache
+
+class APIObject(object):
 
     def __init__(self):
         pass
+
+    @lazyProperty
+    def _cache(self):
+        return globalMemcache()
 
     def task_key(self, queue, fn):
         return '%s::%s' % (queue, fn.__name__)

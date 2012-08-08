@@ -10,6 +10,7 @@ import Globals
 
 from api_old.Schemas import *
 from api_old.S3ImageDB import S3ImageDB
+from api_old.ActivityCollectionCache import ActivityCollectionCache
 
 import utils
 import datetime
@@ -23,15 +24,21 @@ from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
 from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 
-
 from utils import lazyProperty, LoggingThreadPool
 
-from api.module import APIModule
+from api.module import APIObject
 
-class Activity(APIModule):
+class Activity(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
+
+        self.ACTIVITY_CACHE_BLOCK_SIZE = 50
+        self.ACTIVITY_CACHE_BUFFER_SIZE = 20
+
+        self._activityCache = ActivityCollectionCache(self, cacheBlockSize=self.ACTIVITY_CACHE_BLOCK_SIZE, 
+            cacheBufferSize=self.ACTIVITY_CACHE_BUFFER_SIZE)
+
 
     @lazyProperty
     def _userDB(self):

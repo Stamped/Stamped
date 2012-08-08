@@ -32,8 +32,7 @@ def _convertHTTPEntity(entity,
 
 
 @require_http_methods(["POST"])
-@handleHTTPRequest(http_schema=HTTPEntityNew,
-                   exceptions=entityExceptions)
+@handleHTTPRequest(http_schema=HTTPEntityNew, exceptions=entityExceptions)
 def create(request, authUserId, authClientId, http_schema, **kwargs):
     entity          = http_schema.exportEntity(authUserId)
     
@@ -44,9 +43,7 @@ def create(request, authUserId, authClientId, http_schema, **kwargs):
 
 
 @require_http_methods(["GET"])
-@handleHTTPRequest(requires_auth=False,
-                   http_schema=HTTPEntityIdSearchId,
-                   exceptions=entityExceptions)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntityIdSearchId, exceptions=entityExceptions)
 def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
     try:
         return getCache(uri, http_schema)
@@ -66,8 +63,7 @@ def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
 
 
 @require_http_methods(["POST"])
-@handleHTTPRequest(http_schema=HTTPEntityId,
-                   exceptions=entityExceptions)
+@handleHTTPRequest(http_schema=HTTPEntityId, exceptions=entityExceptions)
 def remove(request, authUserId, authClientId, http_schema, **kwargs):
     entity = stampedAPI.entities.removeCustomEntity(authUserId, http_schema.entity_id)
     entity = _convertHTTPEntity(entity, authClientId)
@@ -76,9 +72,7 @@ def remove(request, authUserId, authClientId, http_schema, **kwargs):
 
 
 @require_http_methods(["GET"])
-@handleHTTPRequest(requires_auth=False,
-                   http_schema=HTTPEntitySearchRequest,
-                   exceptions=entityExceptions)
+@handleHTTPRequest(requires_auth=False, http_schema=HTTPEntitySearchRequest, exceptions=entityExceptions)
 def autosuggest(request, authUserId, http_schema, **kwargs):
     result = stampedAPI.entities.getEntityAutoSuggestions(query=http_schema.query, 
                                                  category=http_schema.category,

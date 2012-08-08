@@ -31,7 +31,7 @@ try:
     from api.entities import Entities
     from api.stamps import Stamps
     from api.guides import Guides
-    from api.likes import Likes
+    from api.likeapi import LikeAPI
     from api.comments import Comments
     from api.todos import Todos
 
@@ -78,7 +78,7 @@ class StampedAPI(object):
 
     @lazyProperty
     def likes(self):
-        return Likes()
+        return LikeAPI()
 
     @lazyProperty
     def comments(self):

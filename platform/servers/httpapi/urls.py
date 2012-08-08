@@ -138,10 +138,12 @@ urlpatterns = patterns('',
     (r'v1/stamps/collection.json',                          'v0.functions.stamps.collection'),
     (r'v1/stamps/search.json',                              'v0.functions.stamps.search'),
     
-    (r'v1/stamps/likes/create.json',                        'v0.functions.stamps.likesCreate'),
-    (r'v1/stamps/likes/remove.json',                        'v0.functions.stamps.likesRemove'),
-    (r'v1/stamps/likes/show.json',                          'v0.functions.stamps.likesShow'),
-    (r'v1/stamps/todos/show.json',                          'v0.functions.stamps.todosShow'),
+    ### LIKES
+    (r'v1/stamps/likes/create.json',                        'v1.likes.create.run'),
+    (r'v1/stamps/likes/remove.json',                        'v1.likes.remove.run'),
+    (r'v1/stamps/likes/show.json',                          'v1.likes.show.run'),
+
+    (r'v1/stamps/todos/show.json',                          'v0.functions.likes.todosShow'),
     
     ### COMMENTS
     (r'v1/comments/create.json',                            'v0.functions.comments.create'),

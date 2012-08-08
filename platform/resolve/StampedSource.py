@@ -447,7 +447,7 @@ class EntitySearchAll(ResolverProxy, ResolverSearchAll):
 
 
 class StampedSource(GenericSource):
-    def __init__(self, stamped_api = None):
+    def __init__(self):
         GenericSource.__init__(self, 'stamped', 
             groups=['tombstone'],
             kinds=[
@@ -458,8 +458,6 @@ class StampedSource(GenericSource):
                 'software',
             ]
         )
-        
-        self._stamped_api = stamped_api
     
     @property 
     def idName(self):
@@ -467,10 +465,6 @@ class StampedSource(GenericSource):
 
     @lazyProperty
     def __entityDB(self):
-        # Must check for None here. StampedAPI extends greenlet, whose truth value means if it's
-        # active.
-        if self._stamped_api is not None:
-            return self._stamped_api._entityDB
         return MongoEntityCollection()
         
     

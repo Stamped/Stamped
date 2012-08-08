@@ -28,13 +28,13 @@ from api.guides import Guides
 
 from utils import lazyProperty, LoggingThreadPool
 
-from api.module import APIModule
+from api.module import APIObject
 from api.accounts import Accounts
 
-class Friendships(APIModule):
+class Friendships(APIObject):
 
     def __init__(self):
-        APIModule.__init__(self)
+        APIObject.__init__(self)
 
     @lazyProperty
     def _friendshipDB(self):

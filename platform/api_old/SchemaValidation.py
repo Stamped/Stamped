@@ -74,7 +74,11 @@ def validateUserId(userId):
     return validateObjectId(userId)
 
 def validateStampId(stampId):
-    return validateObjectId(stampId)
+    logs.warning("DEPRECATED: Use 'validate_stamp_id'")
+    return validate_stamp_id(stampId)
+
+def validate_stamp_id(stamp_id):
+    return validateObjectId(stamp_id)
 
 def validateCoordinates(string):
     # Structure: "lat0,lng0"

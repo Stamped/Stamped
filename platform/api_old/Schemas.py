@@ -1574,6 +1574,11 @@ class Stamp(Schema):
         self.timestamp  = StampTimestamp()
         self.stats      = StampStatsSchema()
 
+    @property
+    def url(self):
+        ### TODO: Allow for different stacks
+        return 'http://www.stamped.com/%s/s/%s' % (self.user.screen_name, self.stats.stamp_num)
+
     def minimize(self):
         data = self.dataExport()
         if 'previews' in data:
