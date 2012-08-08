@@ -774,7 +774,7 @@ class StampedSource(GenericSource):
                     matches = self.__id_query(mongo_query)
                     for match in matches:
                         entity = self.__entityDB.getEntity(match['_id'])
-                        if query_id in entity.sources.nemesis_ids:
+                        if entity.sources.nemesis_ids and query_id in entity.sources.nemesis_ids:
                             continue
                         if entity.entity_id not in id_set:
                             id_set.add(entity.entity_id)

@@ -2109,7 +2109,8 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('singleplatform_url',               basestring)
         cls.addProperty('spotify_id',                       basestring)
         cls.addProperty('opentable_url',                    basestring)
-        cls.addPropertyList('nemesis_ids',                  basestring)
+        cls.addProperty('tombstone_id',                     basestring)
+        cls.addProperty('nemesis_ids',                      basestring)
 
         cls.addProperty('purge_tombstone',                  basestring)
         cls.addProperty('purge_tracks',                     basestring)

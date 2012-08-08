@@ -117,7 +117,9 @@ def extraInfo(entity):
     return ''.join(extra)
 
 def _quickLink(key, value):
-    if value is None or value == '' or value == _invalidPlaceholder or value.find('http') == -1:
+    if key == 'tombstone_id' and value:
+        value = 'v1/entities/edit.html?secret=supersmash&entity_id=' + value
+    elif value is None or value == '' or value == _invalidPlaceholder or value.find('http') == -1:
         return ""
     return """
 <a href="%s">%s</a>
@@ -228,7 +230,8 @@ def formForEntity(entity_id, **hidden_params):
         fields['fandango_url'] = fandango_url
     fields['image_url'] = primaryImageURL(entity)
     fields['tombstone_id'] = getattr(entity.sources, 'tombstone_id', None)
-    fields['nemesis_ids'] = ', '.join(getattr(entity.sources, 'nemesis_ids', []))
+    nemesis_ids = getattr(entity.sources, 'nemesis_ids')
+    fields['nemesis_ids'] = ', '.join(nemesis_ids) if nemesis_ids else ''
     hidden_params['entity_id'] = entity_id
     html = []
     desc = entity.desc
@@ -452,9 +455,10 @@ def update(updates):
         entity.sources.tombstone_timestamp = now
     nemesis_ids = updates.nemesis_ids
     if nemesis_ids is not None and nemesis_ids not in bad_versions:
-        entity.sources.nemesis_ids = [item.strip() for item in nemesis_id.split(',')]
+        entity.sources.nemesis_ids = [item.strip() for item in nemesis_ids.split(',')]
         entity.sources.nemesis_source = 'manual'
         entity.sources.nemesis_timestamp = now
+        # TODO(geoff): Return any stamps or todos.
     if updates.purge_tombstone == 'on':
         del entity.sources.tombstone_id
         del entity.sources.tombstone_timestamp

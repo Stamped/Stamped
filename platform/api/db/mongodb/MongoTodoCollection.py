@@ -19,14 +19,14 @@ from api.Entity                             import buildEntity
 
 class MongoTodoCollection(AMongoCollectionView, ATodoDB):
 
-    def __init__(self):
-        AMongoCollectionView.__init__(self, collection='favorites', primary_key='todo_id', obj=RawTodo)
+    def __init__(self, collection='favorites'):
+        AMongoCollectionView.__init__(self, collection=collection, primary_key='todo_id', obj=RawTodo)
         ATodoDB.__init__(self)
 
-        self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING),\
+        self._collection.ensure_index([('entity.entity_id', pymongo.ASCENDING),
             ('user_id', pymongo.ASCENDING), ('_id', pymongo.DESCENDING)])
 
-        self._collection.ensure_index([('user_id', pymongo.ASCENDING),\
+        self._collection.ensure_index([('user_id', pymongo.ASCENDING),
             ('timestamp.created', pymongo.DESCENDING)])
 
         # Indices for _getTimeSlice within AMongoCollectionView
@@ -35,6 +35,10 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         self._collection.ensure_index([('entity.types', pymongo.ASCENDING), ('timestamp.stamped', pymongo.DESCENDING)])
         self._collection.ensure_index([('source_stamp_ids', pymongo.ASCENDING)])
         self._collection.ensure_index([('stamp.stamp_id', pymongo.ASCENDING)])
+
+    @lazyProperty
+    def __seed_collection(self):
+        return MongoSeedTodoCollection()
 
     def _convertFromMongo(self, document):
         """
@@ -193,6 +197,7 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         return MongoUserTodosHistoryCollection()
 
     def addTodo(self, todo):
+        self.__seed_collection.addTodo(todo)
         todo = self._addObject(todo)
 
         # Add a reference to the todo in the user's 'todo' history collection
@@ -275,3 +280,10 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
             logs.warning("Cannot complete todo")
             raise Exception
 
+
+class MongoSeedTodoCollection(MongoTodoCollection):
+    def __init__(self):
+        super(MongoSeedTodoCollection, self).__init__('seedfavorites')
+
+    def addTodo(self, todo):
+        self._addObject(todo)
