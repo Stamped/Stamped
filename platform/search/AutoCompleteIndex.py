@@ -12,7 +12,7 @@ from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from collections import namedtuple
 from contextlib import closing
-from datetime import datetime
+from datetime import datetime, timedelta
 from tempfile import TemporaryFile
 from whoosh.analysis import *
 from whoosh.support.charset import accent_map
@@ -80,8 +80,9 @@ def tokenizeTitleAndNormalize(title):
 
 
 def entityScoringFn(entity):
-    # TODO(geoff): factor in how many stamps are on the entity
-    return entity.last_popular, entity.num_stamps
+    # Get a boost if it was popular in the last 30 days.
+    # TODO(geoff): Need a much better ranking function
+    return datetime.now() - entity.last_popular < timedelta(30), entity.num_stamps
 
 
 def categorizeEntity(entity):
