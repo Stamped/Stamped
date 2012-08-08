@@ -257,6 +257,9 @@ desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
 <input type="checkbox" name="purge_tombstone"/>Purge Tombstone<br/>
             """)
     html.append("""
+<input type="checkbox" name="break_cluster"/>Break Cluster<br/>
+            """)
+    html.append("""
 <input type="checkbox" name="purge_image"/>Purge Image<br/>
             """)
     for k,v in hidden_params.items():
@@ -459,11 +462,12 @@ def update(updates):
         entity.sources.nemesis_ids = [item.strip() for item in nemesis_ids.split(',')]
         entity.sources.nemesis_source = 'manual'
         entity.sources.nemesis_timestamp = now
-        revive_tombstoned_entities(entity.entity_id)
     if updates.purge_tombstone == 'on':
         del entity.sources.tombstone_id
         del entity.sources.tombstone_timestamp
         del entity.sources.tombstone_source
+    if updates.break_cluster == 'on':
+        revive_tombstoned_entities(entity.entity_id)
     for k in simple_fields:
         v = getattr(updates, k)
         if v == '':

@@ -10,7 +10,7 @@ __license__   = "TODO"
 
 __all__ = [ 'StampedSource',
             'EntityProxyArtist', 'EntityProxyAlbum', 'EntityProxyTrack', 'EntityProxyMovie', 'EntityProxyTV',
-            'EntityProxyBook', 'EntityProxyPlace', 'EntityProxyApp', 'EntitySearchAll']
+            'EntityProxyBook', 'EntityProxyPlace', 'EntityProxyApp']
 
 import Globals
 import re
@@ -439,17 +439,10 @@ class EntityProxyApp(_EntityProxyObject, ResolverSoftware):
             return []
 
 
-class EntitySearchAll(ResolverProxy, ResolverSearchAll):
-
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
-
 class StampedSource(GenericSource):
     def __init__(self, stamped_api = None):
         GenericSource.__init__(self, 'stamped', 
-            groups=['tombstone'],
+            groups=['tombstone', 'nemeses'],
             kinds=[
                 'person',
                 'place',
@@ -767,22 +760,22 @@ class StampedSource(GenericSource):
                         '$and' : tokenSearchQuery,
                     }
                     mongo_query.update(kwargs)
-                    query_id = None
+                    nemesis_ids = None
                     if query_obj.source == 'stamped' and query_obj.key:
-                        query_id = query_obj.key
                         mongo_query['_id'] = {'$lt' : ObjectId(query_obj.key)}
+                        nemesis_ids = query_obj.entity.sources.nemesis_ids
                     matches = self.__id_query(mongo_query)
                     for match in matches:
-                        entity = self.__entityDB.getEntity(match['_id'])
-                        if entity.sources.nemesis_ids and query_id in entity.sources.nemesis_ids:
+                        match_id = str(match['_id'])
+                        if nemesis_ids and match_id in nemesis_ids:
                             continue
-                        if entity.entity_id not in id_set:
-                            id_set.add(entity.entity_id)
-                            yield entity
+                        if match_id not in id_set:
+                            id_set.add(match_id)
+                            yield match_id
             except GeneratorExit:
                 pass
             logs.debug('Consumed %d results from query: %s' % (len(id_set), id_set))
-        return self.generatorSource(entityGenerator(), self.proxyFromEntity, unique=True, tolerant=True)
+        return self.generatorSource(entityGenerator(), self.entityProxyFromKey, unique=True, tolerant=True)
 
     def entityProxyFromKey(self, entity_id, **kwargs):
         return self.proxyFromEntity(self.__entityDB.getEntity(entity_id))

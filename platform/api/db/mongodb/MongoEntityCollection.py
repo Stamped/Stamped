@@ -495,7 +495,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
 
     def getEntitiesByTombstoneId(self, tombstoneId):
-        return self.getEntitiesByQuery({'sources.tombstone_id' : tombstone_id})
+        return self.getEntitiesByQuery({'sources.tombstone_id' : tombstoneId})
 
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)

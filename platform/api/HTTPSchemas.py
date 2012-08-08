@@ -2112,6 +2112,7 @@ class HTTPEntityUpdate(Schema):
         cls.addProperty('tombstone_id',                     basestring)
         cls.addProperty('nemesis_ids',                      basestring)
 
+        cls.addProperty('break_cluster',                    basestring)
         cls.addProperty('purge_tombstone',                  basestring)
         cls.addProperty('purge_tracks',                     basestring)
         cls.addProperty('purge_image',                      basestring)

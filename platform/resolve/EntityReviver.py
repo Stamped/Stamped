@@ -61,7 +61,7 @@ def clear_tombstone_id(entity, entity_db, entity_cache):
     Clears out all tombstone related field on the entity and persist it into the entity_db. Also save the entity in the
     cache.
     """
-    if entity.entities_by_id not in entity_cache:
+    if entity.entity_id not in entity_cache:
         del entity.sources.tombstone_id
         del entity.sources.tombstone_source
         del entity.sources.tombstone_timestamp
