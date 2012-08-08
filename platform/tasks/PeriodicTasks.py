@@ -63,7 +63,8 @@ class PeriodicTaskRunner(object):
                 updated_tasks.append((interval, args, kwargs, last_run))
             self.__registered_tasks = updated_tasks
 
-            sleep_seconds = max(int(sleep_time.total_seconds()), 5)
+            # We're discarding the days in sleep_time, but we're never sleeping for more than one hour anyway.
+            sleep_seconds = max(int(sleep_time.seconds), 5)
             logs.info('Sleeping for %d seconds' % sleep_seconds)
             time.sleep(sleep_seconds)
 
