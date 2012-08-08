@@ -146,14 +146,14 @@ class mongoQuery(object):
         for stamp in stamps:
             
             userId = str(stamp['user']['user_id'])
-            stamp_time = datetime.strptime( str(stamp['timestamp']['created']), "%Y-%m-%d %H:%M:%S" )
+            stamp_time = datetime.strptime( str(stamp['timestamp']['created'][:18]), "%Y-%m-%d %H:%M:%S" )
             
             try:
                 user = self.api._userDB.getUser(userId)
             except StampedDocumentNotFoundError:
                 continue
             
-            user_time = datetime.strptime( str(user['timestamp']['created']), "%Y-%m-%d %H:%M:%S" )
+            user_time = datetime.strptime( str(user['timestamp']['created'][:18]), "%Y-%m-%d %H:%M:%S" )
             
             if stamp_time > user_time + td0 and stamp_time <= user_time + td1:
                 count += 1
