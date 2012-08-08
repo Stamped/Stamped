@@ -139,9 +139,9 @@ class mongoQuery(object):
         count = 0
         
         if version == "v2":
-            stamps = self.api._userDB._collection.find({'timestamp.created' : {'$gte' : v2_init()}})
+            stamps = self.api._stampDB._collection.find({'timestamp.created' : {'$gte' : v2_init()}})
         else:
-            stamps = self.api._userDB._collection.find({'timestamp.created' : {'$lt' : v2_init()}})
+            stamps = self.api._stampDB._collection.find({'timestamp.created' : {'$lt' : v2_init()}})
             
         userIds = map(lambda x: str(x['user.user_id']), stamps)
         stamp_timestamps = map(lambda x: datetime.strptime( str(x['timestamp.created']), "%Y-%m-%dT%H:%M:%S" ), stamps)
