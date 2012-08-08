@@ -143,10 +143,10 @@ class mongoQuery(object):
         else:
             stamps = self.api._stampDB._collection.find({'timestamp.created' : {'$lt' : v2_init()}})
             
-        userIds = map(lambda x: str(x['user.user_id']), stamps)
-        stamp_timestamps = map(lambda x: datetime.strptime( str(x['timestamp.created']), "%Y-%m-%dT%H:%M:%S" ), stamps)
+        userIds = map(lambda x: str(x['user']['user_id']), stamps)
+        stamp_timestamps = map(lambda x: datetime.strptime( str(x['timestamp']['created']), "%Y-%m-%dT%H:%M:%S" ), stamps)
         users = map(lambda x: self.api._userDB.getUser(x), userIds)
-        user_timestamps = map(lambda x: datetime.strptime( str(x['timestamp.created']), "%Y-%m-%dT%H:%M:%S" ), users)
+        user_timestamps = map(lambda x: datetime.strptime( str(x['timestamp']['created']), "%Y-%m-%dT%H:%M:%S" ), users)
         timestamps = zip(stamp_timestamps, user_timestamps)
         
         for user_time, stamp_time in timestamps:
