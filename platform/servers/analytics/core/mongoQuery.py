@@ -153,7 +153,7 @@ class mongoQuery(object):
             except StampedDocumentNotFoundError:
                 continue
             
-            user_time = user['timestamp']['created']
+            user_time = user.timestamp.created
             
             if stamp_time > user_time + td0 and stamp_time <= user_time + td1:
                 count += 1
