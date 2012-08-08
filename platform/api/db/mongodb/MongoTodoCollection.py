@@ -260,6 +260,11 @@ class MongoTodoCollection(AMongoCollectionView, ATodoDB):
         documents = self._collection.find(query, fields=['user_id']).limit(limit)
         return map(lambda x: x['user_id'], documents)
 
+    def getEntityIdForTodo(self, todoId):
+        entityIds = [todo['entity']['entity_id'] for todo in
+                self._collection.find({'_id': self._getObjectIdFromString(todoId)}, fields=['entity.entity_id'])]
+        return entityIds[0] if entityIds else None
+
     def updateTodoEntity(self, todoId, entity):
         self._collection.update({'_id': self._getObjectIdFromString(todoId)}, {'$set': {'entity': entity.dataExport()}})
 

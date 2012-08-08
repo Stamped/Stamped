@@ -15,6 +15,7 @@ try:
     import re
     import urlparse
     from api.Schemas            import *
+    from resolve.EntityReviver import *
 except:
     raise
 
@@ -458,7 +459,7 @@ def update(updates):
         entity.sources.nemesis_ids = [item.strip() for item in nemesis_ids.split(',')]
         entity.sources.nemesis_source = 'manual'
         entity.sources.nemesis_timestamp = now
-        # TODO(geoff): Return any stamps or todos.
+        revive_tombstoned_entities(entity.entity_id)
     if updates.purge_tombstone == 'on':
         del entity.sources.tombstone_id
         del entity.sources.tombstone_timestamp
