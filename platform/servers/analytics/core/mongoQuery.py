@@ -179,7 +179,7 @@ class mongoQuery(object):
                 if user_id in launch_user_ids:
                     user_set.add(user_id)
             
-            return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (len(set(launch_user_ids)),len(user_set)))
+            return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (len(set(launch_user_ids)),len(user_set))
         
         
         
