@@ -5302,12 +5302,17 @@ class StampedAPI(AStampedAPI):
 
             modified_successor = False
             for group in self.__full_resolve.groups:
+                if group.groupName == 'tombstone':
+                    continue
                 source = group.getSource(entity)
                 entity_timestamp = group.getTimestamp(entity)
+                if group.groupName == 'nemeses':
+                    # Discard the nemesis ids timestamp, because we want to copy them no matter now old they are.
+                    entity_timestamp = None
                 if (self.__full_resolve.shouldEnrich(group.groupName, source, successor, entity_timestamp)
                         and group.syncFields(entity, successor)):
                     group.setSource(successor, source)
-                    group.setTimestamp(entity_timestamp)
+                    group.setTimestamp(successor, entity_timestamp)
                     modified_successor = True
 
             successor_decorations = {}

@@ -34,6 +34,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.__groups = {}
         self.__sources = []
         self.__default_max_iterations = 10
+        self.__group_max_ages = {}
         if is_prod_stack():
             self.__global_max_age = timedelta(7)
         elif is_ec2():
@@ -46,6 +47,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.setGlobalPriority('seed', 100)
         self.setGlobalPriority('manual', 10000)
         self.setGlobalPriority('derived', -100)
+        self.setMaxAge('stamped', 'nemeses', timedelta())
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):
         """
@@ -193,6 +195,9 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
     def getGlobalMaxAge(self):
         return self.__global_max_age
 
+    def setMaxAge(self, group, source, age):
+        self.__group_max_ages[group, source] = age
+
     def getMaxAge(self, group, source):
-        return self.getGlobalMaxAge()
+        return self.__group_max_ages.get((group, source), self.getGlobalMaxAge())
 

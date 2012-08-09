@@ -99,6 +99,19 @@ class StampedNemesesGroup(BasicFieldGroup):
     def eligible(self, entity):
         return True
 
+    def syncFields(self, entity, destination):
+        source_ids = entity.sources.nemesis_ids
+        if not source_ids:
+            return False
+        destination_ids = destination.sources.nemesis_ids
+        if not destination_ids:
+            destination.sources.nemesis_ids = source_ids
+            return True
+        final_ids = set(source_ids + destination_ids)
+        if len(final_ids) > len(destination_ids):
+            destination.sources.nemesis_ids = final_ids
+            return True
+
 
 class FactualGroup(APlaceGroup):
     def __init__(self):
