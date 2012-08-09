@@ -14,13 +14,12 @@ import utils
 import datetime
 import logs
 
-from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
-from db.mongodb.MongoAccountCollection import MongoAccountCollection
-from db.mongodb.MongoActivityCollection import MongoActivityCollection
-from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
-from db.mongodb.MongoInvitationCollection import MongoInvitationCollection
-from db.mongodb.MongoStampCollection import MongoStampCollection
-from db.mongodb.MongoUserCollection import MongoUserCollection
+from db.userdb import UserDB
+from db.stampdb import StampDB
+from db.accountdb import AccountDB
+from db.activitydb import ActivityDB
+from db.invitationdb import InvitationDB
+from db.friendshipdb import FriendshipDB
 
 from api.users import Users
 from api.activity import Activity
@@ -29,7 +28,7 @@ from api.guides import Guides
 from utils import lazyProperty, LoggingThreadPool
 
 from api.module import APIObject
-from api.accounts import Accounts
+from api.accountapi import AccountAPI
 from api.linkedaccountapi import LinkedAccountAPI
 
 class Friendships(APIObject):
@@ -39,31 +38,27 @@ class Friendships(APIObject):
 
     @lazyProperty
     def _friendshipDB(self):
-        return MongoFriendshipCollection()
+        return FriendshipDB()
 
     @lazyProperty
     def _accountDB(self):
-        return MongoAccountCollection()
+        return AccountDB()
     
     @lazyProperty
     def _activityDB(self):
-        return MongoActivityCollection()
-    
-    @lazyProperty
-    def _collectionDB(self):
-        return MongoCollectionCollection()
+        return ActivityDB()
     
     @lazyProperty
     def _inviteDB(self):
-        return MongoInvitationCollection()
+        return InvitationDB()
     
     @lazyProperty
     def _stampDB(self):
-        return MongoStampCollection()
+        return StampDB()
     
     @lazyProperty
     def _userDB(self):
-        return MongoUserCollection()
+        return UserDB()
 
     @lazyProperty
     def _users(self):
@@ -79,7 +74,7 @@ class Friendships(APIObject):
 
     @lazyProperty
     def _accounts(self):
-        return Accounts()
+        return AccountAPI()
 
     @lazyProperty
     def _linked_account_api(self):
@@ -131,7 +126,7 @@ class Friendships(APIObject):
         self._activityDB.removeFriendActivity(authUserId, userId)
 
         # Add stamps to Inbox
-        stampIds = self._collectionDB.getUserStampIds(userId)
+        stampIds = self._stampDB.getUserStampIds(userId)
         self._stampDB.addInboxStampReferencesForUser(authUserId, stampIds)
 
         # Increment stats for both users
@@ -193,7 +188,7 @@ class Friendships(APIObject):
         self._userDB.updateUserStats(userId,     'num_followers', increment=-1)
 
         # Remove stamps from Inbox
-        stampIds = self._collectionDB.getUserStampIds(userId)
+        stampIds = self._stampDB.getUserStampIds(userId)
         self._stampDB.removeInboxStampReferencesForUser(authUserId, stampIds)
 
     def approveFriendship(self, data, auth):

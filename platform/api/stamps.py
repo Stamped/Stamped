@@ -18,14 +18,12 @@ import logs
 
 from db.userdb import UserDB
 from db.likedb import LikeDB
+from db.tododb import TodoDB
 from db.stampdb import StampDB
-
-from db.mongodb.MongoTodoCollection import MongoTodoCollection
-from db.mongodb.MongoStampCollection import MongoStampStatsCollection
-from db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
-from db.mongodb.MongoCommentCollection import MongoCommentCollection
-from db.mongodb.MongoActivityCollection import MongoActivityCollection
-from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
+from db.entitydb import EntityDB
+from db.commentdb import CommentDB
+from db.activitydb import ActivityDB
+from db.friendshipdb import FriendshipDB
 
 from utils import lazyProperty, LoggingThreadPool
 from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
@@ -34,7 +32,7 @@ from libs.Memcache import generateKeyFromDictionary
 from api.module import APIObject
 from api.entities import Entities
 from api.users import Users
-from api.accounts import Accounts
+from api.accountapi import AccountAPI
 from api.activity import Activity
 from api.linkedaccountapi import LinkedAccountAPI
 
@@ -53,7 +51,7 @@ class Stamps(APIObject):
 
     @lazyProperty
     def _todoDB(self):
-        return MongoTodoCollection()
+        return TodoDB()
 
     @lazyProperty
     def _likeDB(self):
@@ -65,27 +63,19 @@ class Stamps(APIObject):
 
     @lazyProperty
     def _entityDB(self):
-        return MongoEntityCollection()
+        return EntityDB()
     
     @lazyProperty
     def _commentDB(self):
-        return MongoCommentCollection()
+        return CommentDB()
     
     @lazyProperty
     def _activityDB(self):
-        return MongoActivityCollection()
+        return ActivityDB()
 
     @lazyProperty
     def _friendshipDB(self):
-        return MongoFriendshipCollection()
-    
-    @lazyProperty
-    def _stampStatsDB(self):
-        return MongoStampStatsCollection()
-
-    @lazyProperty
-    def _entityStatsDB(self):
-        return MongoEntityStatsCollection()
+        return FriendshipDB()
     
 
     ### RESTRUCTURE TODO
@@ -104,7 +94,7 @@ class Stamps(APIObject):
 
     @lazyProperty
     def _accounts(self):
-        return Accounts()
+        return AccountAPI()
 
     @lazyProperty
     def _activity(self):
@@ -484,7 +474,7 @@ class Stamps(APIObject):
             badges.append(badge)
 
         try:
-            stats = self._entityStatsDB.getEntityStats(entityId)
+            stats = self._entityDB.getEntityStats(entityId)
             if stats.num_stamps == 0:
                 badge           = Badge()
                 badge.user_id   = userId
@@ -825,7 +815,7 @@ class Stamps(APIObject):
         ### TODO: Remove from inboxes? Or let integrity checker do that?
 
         # Remove from stats
-        self._stampStatsDB.removeStampStats(stampId)
+        self._stampDB.removeStampStats(stampId)
 
         ### TODO: Remove from activity? To do? Anything else?
 
@@ -904,14 +894,14 @@ class Stamps(APIObject):
         if isinstance(stampIds, basestring):
             # One stampId
             try:
-                stat = self._stampStatsDB.getStampStats(stampIds)
+                stat = self._stampDB.getStampStats(stampIds)
             except (StampedUnavailableError, KeyError):
                 stat = None
             return stat
 
         else:
             # Multiple stampIds
-            statsList = self._stampStatsDB.getStatsForStamps(stampIds)
+            statsList = self._stampDB.getStatsForStamps(stampIds)
             statsDict = {}
             for stat in statsList:
                 statsDict[stat.stamp_id] = stat
@@ -1037,7 +1027,7 @@ class Stamps(APIObject):
         score = max(quality, float(quality * popularity))
         stats.score = score
 
-        self._stampStatsDB.updateStampStats(stats)
+        self._stampDB.updateStampStats(stats)
 
         return stats
 
@@ -1102,22 +1092,22 @@ class Stamps(APIObject):
 
         if scope == 'credit':
             if userId is not None:
-                return self._collectionDB.getUserCreditStampIds(userId)
+                return self._stampDB.getUserCreditStampIds(userId)
             elif authUserId is not None:
-                return self._collectionDB.getUserCreditStampIds(authUserId)
+                return self._stampDB.getUserCreditStampIds(authUserId)
             else:
                 raise StampedInputError("User required")
 
         if scope == 'user':
             if userId is not None:
-                return self._collectionDB.getUserStampIds(userId)
+                return self._stampDB.getUserStampIds(userId)
             raise StampedInputError("User required")
 
         if userId is not None and scope is not None:
             raise StampedInputError("Invalid scope combination")
 
         if userId is not None:
-            self._collectionDB.getUserStampIds(userId)
+            self._stampDB.getUserStampIds(userId)
 
         if scope == 'popular':
             return None
@@ -1126,10 +1116,10 @@ class Stamps(APIObject):
             raise StampedNotLoggedInError("Must be logged in to view %s" % scope)
 
         if scope == 'me':
-            return self._collectionDB.getUserStampIds(authUserId)
+            return self._stampDB.getUserStampIds(authUserId)
 
         if scope == 'inbox':
-            return self._collectionDB.getInboxStampIds(authUserId)
+            return self._stampDB.getInboxStampIds(authUserId)
 
         if scope == 'friends':
             raise NotImplementedError()
@@ -1165,7 +1155,7 @@ class Stamps(APIObject):
                 #     """
                 #     before = start - datetime.timedelta(hours=(24*daysOffset))
                 #     since = before - datetime.timedelta(hours=24)
-                #     stampIds += self._stampStatsDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
+                #     stampIds += self._stampDB.getPopularStampIds(since=since, before=before, limit=limit, minScore=3)
                 #     daysOffset += 1
                 # stampIds = stampIds[:limit]
                 try:

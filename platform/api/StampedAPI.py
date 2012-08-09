@@ -25,7 +25,7 @@ try:
 
     from utils import lazyProperty, LoggingThreadPool
 
-    from api.accounts import Accounts
+    from api.accountapi import AccountAPI
     from api.users import Users
     from api.friendships import Friendships
     from api.entities import Entities
@@ -54,7 +54,7 @@ class StampedAPI(object):
 
     @lazyProperty
     def accounts(self):
-        return Accounts()
+        return AccountAPI()
 
     @lazyProperty
     def users(self):

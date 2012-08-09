@@ -14,14 +14,13 @@ import utils
 import datetime
 import logs
 
+from db.tododb import TodoDB
 from db.userdb import UserDB
 from db.stampdb import StampDB
+from db.entitydb import EntityDB
+from db.friendshipdb import FriendshipDB
 
 from db.mongodb.MongoMenuCollection import MongoMenuCollection
-from db.mongodb.MongoTodoCollection import MongoTodoCollection
-from db.mongodb.MongoStampCollection import MongoStampStatsCollection
-from db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
-from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 from db.mongodb.MongoSearchEntityCollection import MongoSearchEntityCollection
 
 
@@ -47,7 +46,7 @@ class Entities(APIObject):
 
     @lazyProperty
     def _todoDB(self):
-        return MongoTodoCollection()
+        return TodoDB()
 
     @lazyProperty
     def _userDB(self):
@@ -59,19 +58,11 @@ class Entities(APIObject):
 
     @lazyProperty
     def _entityDB(self):
-        return MongoEntityCollection()
+        return EntityDB()
 
     @lazyProperty
     def _friendshipDB(self):
-        return MongoFriendshipCollection()
-    
-    @lazyProperty
-    def _stampStatsDB(self):
-        return MongoStampStatsCollection()
-
-    @lazyProperty
-    def _entityStatsDB(self):
-        return MongoEntityStatsCollection()
+        return FriendshipDB()
 
     @lazyProperty
     def _searchEntityDB(self):
@@ -442,7 +433,7 @@ class Entities(APIObject):
 
     def entityStampedBy(self, entityId, authUserId=None, limit=100):
         try:
-            stats = self._entityStatsDB.getEntityStats(entityId)
+            stats = self._entityDB.getEntityStats(entityId)
         except StampedUnavailableError:
             stats = self.updateEntityStatsAsync(entityId)
 
@@ -513,7 +504,7 @@ class Entities(APIObject):
             self.call_task(self.updateTombstonedEntityReferencesAsync, {'oldEntityId': entity.entity_id})
 
         numStamps = self._stampDB.countStampsForEntity(entityId)
-        popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+        popularStampIds = self._stampDB.getPopularStampIds(entityId=entityId, limit=1000)
 
         # If for some reason popularStampIds doesn't include all stamps, recalculate them
         if numStamps < 1000 and len(popularStampIds) < numStamps:
@@ -522,13 +513,13 @@ class Entities(APIObject):
             for stampId in allStampIds:
                 if stampId not in popularStampIds:
                     stat = self.updateStampStatsAsync(stampId)
-            popularStampIds = self._stampStatsDB.getPopularStampIds(entityId=entityId, limit=1000)
+            popularStampIds = self._stampDB.getPopularStampIds(entityId=entityId, limit=1000)
 
         popularStamps = self._stampDB.getStamps(popularStampIds)
         popularStamps.sort(key=lambda x: popularStampIds.index(x.stamp_id))
         popularStampIds = map(lambda x: x.stamp_id, popularStamps)
         popularUserIds = map(lambda x: x.user.user_id, popularStamps)
-        popularStampStats = self._stampStatsDB.getStatsForStamps(popularStampIds)
+        popularStampStats = self._stampDB.getStatsForStamps(popularStampIds)
 
         if len(popularStampIds) != len(popularUserIds):
             logs.warning("%s: Length of popularStampIds doesn't equal length of popularUserIds" % entityId)
@@ -647,7 +638,7 @@ class Entities(APIObject):
         if entity.kind == 'place' and entity.coordinates is not None:
             stats.lat = entity.coordinates.lat
             stats.lng = entity.coordinates.lng
-        self._entityStatsDB.saveEntityStats(stats)
+        self._entityDB.saveEntityStats(stats)
 
         return stats
 

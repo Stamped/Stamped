@@ -8,6 +8,7 @@ __license__   = "TODO"
 
 import Globals
 
+import logs
 from utils import lazyProperty
 
 from db.mongodb.MongoTodoCollection import MongoTodoCollection
@@ -18,7 +19,7 @@ class TodoDB(object):
 
     @lazyProperty
     def __todo_collection(self):
-        return MongoStampCollection()
+        return MongoTodoCollection()
 
     @lazyProperty
     def __user_todos_entities_collection(self):

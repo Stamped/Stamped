@@ -24,6 +24,7 @@ import libs.Twitter
 from api.module import APIObject
 from api.activity import Activity
 
+from db.likedb import LikeDB
 from db.accountdb import AccountDB
 from db.userdb import UserDB
 from db.tododb import TodoDB
@@ -31,13 +32,8 @@ from db.stampdb import StampDB
 from db.commentdb import CommentDB
 from db.friendshipdb import FriendshipDB
 from db.activitydb import ActivityDB
-
-from db.mongodb.MongoStampCollection            import MongoStampStatsCollection
-from db.mongodb.MongoCollectionCollection       import MongoCollectionCollection
-from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
-from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
-from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
-from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
+from db.invitationdb import InvitationDB
+from db.oauthdb import OAuthDB
 
 
 
@@ -52,7 +48,9 @@ class AccountAPI(APIObject):
     def _accountDB(self):
         return AccountDB()
 
-
+    @lazyProperty
+    def _likeDB(self):
+        return LikeDB()
     
     @lazyProperty
     def _todoDB(self):
@@ -72,7 +70,7 @@ class AccountAPI(APIObject):
     
     @lazyProperty
     def _inviteDB(self):
-        return MongoInvitationCollection()
+        return InvitationDB()
     
     @lazyProperty
     def _commentDB(self):
@@ -83,28 +81,12 @@ class AccountAPI(APIObject):
         return ActivityDB()
     
     @lazyProperty
-    def _collectionDB(self):
-        return MongoCollectionCollection()
-    
-    @lazyProperty
-    def _emailAlertDB(self):
-        return MongoAuthEmailAlertsCollection()
-    
-    @lazyProperty
     def _friendshipDB(self):
         return FriendshipDB()
     
     @lazyProperty
-    def _stampStatsDB(self):
-        return MongoStampStatsCollection()
-    
-    @lazyProperty
-    def _accessTokenDB(self):
-        return MongoAuthAccessTokenCollection()
-    
-    @lazyProperty
-    def _refreshTokenDB(self):
-        return MongoAuthRefreshTokenCollection()
+    def _oauthDB(self):
+        return OAuthDB()
 
 
     @lazyProperty
@@ -443,14 +425,13 @@ class AccountAPI(APIObject):
 
         ### TODO: Verify w/ password
 
-        stampIds    = self._collectionDB.getUserStampIds(account.user_id)
+        stampIds    = self._stampDB.getUserStampIds(account.user_id)
         friendIds   = self._friendshipDB.getFriends(account.user_id)
         followerIds = self._friendshipDB.getFollowers(account.user_id)
 
         # Remove tokens
-        self._refreshTokenDB.removeRefreshTokensForUser(account.user_id)
-        self._accessTokenDB.removeAccessTokensForUser(account.user_id)
-        self._emailAlertDB.removeTokenForUser(account.user_id)
+        self._oauthDB.removeRefreshTokensForUser(account.user_id)
+        self._oauthDB.removeAccessTokensForUser(account.user_id)
 
         # Remove friends / followers
         for followerId in followerIds:
@@ -499,7 +480,7 @@ class AccountAPI(APIObject):
 
         if stampIds is not None and len(stampIds) > 0:
             self._stampDB.removeStamps(stampIds)
-            self._stampStatsDB.removeStatsForStamps(stampIds)
+            self._stampDB.removeStatsForStamps(stampIds)
 
         self._stampDB.removeAllUserStampReferences(account.user_id)
         self._stampDB.removeAllInboxStampReferences(account.user_id)
@@ -512,17 +493,17 @@ class AccountAPI(APIObject):
             self._commentDB.removeComment(comment.comment_id)
 
         # Remove likes
-        likedStampIds = self._stampDB.getUserLikes(account.user_id)
+        likedStampIds = self._likeDB.get_for_user(account.user_id)
         likedStamps = self._stampDB.getStamps(likedStampIds)
 
         for stamp in likedStamps:
-            self._stampDB.removeLike(account.user_id, stamp.stamp_id)
+            self._likeDB.remove(account.user_id, stamp.stamp_id)
 
             # Decrement user stats by one
             self._userDB.updateUserStats(stamp.user.user_id, 'num_likes', increment=-1)
 
         # Remove like history
-        self._stampDB.removeUserLikesHistory(account.user_id)
+        self._likeDB.remove_history_for_user(account.user_id)
 
         # Remove activity items
         self._activityDB.removeUserActivity(account.user_id)

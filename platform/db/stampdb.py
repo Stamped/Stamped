@@ -8,9 +8,12 @@ __license__   = "TODO"
 
 import Globals
 
+import logs
 from utils import lazyProperty
 
 from db.mongodb.MongoStampCollection import MongoStampCollection
+from db.mongodb.MongoStampCollection import MongoStampStatsCollection
+from db.mongodb.MongoStampCollection import MongoWhitelistedTastemakerStampIdsCollection
 from db.mongodb.MongoUserStampsCollection import MongoUserStampsCollection
 from db.mongodb.MongoInboxStampsCollection import MongoInboxStampsCollection
 from db.mongodb.MongoCreditGiversCollection import MongoCreditGiversCollection
@@ -39,6 +42,10 @@ class StampDB(object):
         return MongoCreditReceivedCollection()
 
     @lazyProperty
+    def __stamp_stats_collection(self):
+        return MongoStampStatsCollection()
+
+    @lazyProperty
     def __whitelisted_tastemaker_stamps(self):
         return MongoWhitelistedTastemakerStampIdsCollection()
 
@@ -59,32 +66,6 @@ class StampDB(object):
     def removeStamp(self, stampId):
         return self.__stamp_collection.removeStamp(stampId)
     
-    def addUserStampReference(self, userId, stampId):
-        return self.__user_stamps_collection.addUserStamp(userId, stampId)
-    
-    def removeUserStampReference(self, userId, stampId):
-        return self.__user_stamps_collection.removeUserStamp(userId, stampId)
-    
-    def removeAllUserStampReferences(self, userId):
-        return self.__user_stamps_collection.removeAllUserStamps(userId)
-    
-    def addInboxStampReference(self, userIds, stampId):
-        if not isinstance(userIds, list):
-            userIds = [ userIds ]
-        return self.__inbox_stamps_collection.addInboxStamps(userIds, stampId)
-    
-    def removeInboxStampReference(self, userIds, stampId):
-        return self.__inbox_stamps_collection.removeInboxStamps(userIds, stampId)
-    
-    def addInboxStampReferencesForUser(self, userId, stampIds):
-        return self.__inbox_stamps_collection.addInboxStampsForUser(userId, stampIds)
-    
-    def removeInboxStampReferencesForUser(self, userId, stampIds):
-        return self.__inbox_stamps_collection.removeInboxStampsForUser(userId, stampIds)
-    
-    def removeAllInboxStampReferences(self, userId):
-        return self.__inbox_stamps_collection.removeAllInboxStamps(userId)
-    
     def getStamps(self, stampIds, **kwargs):
         return self.__stamp_collection.getStamps(stampIds, **kwargs)
     
@@ -100,8 +81,8 @@ class StampDB(object):
     def countStampsForEntity(self, entityId, userIds=None):
         return self.__stamp_collection.countStampsForEntity(entityId, userIds=userIds)
     
-    def updateStampStats(self, stampId, stat, value=None, increment=1):
-        return self.__stamp_collection.updateStampStats(stampid, stat, value=value, increment=increment)
+    def removeStamps(self, stampIds):
+        return self.__stamp_collection.removeStamps(stampIds)
 
     def updateStampOGActionId(self, stampId, og_action_id):
         return self.__stamp_collection.updateStampOGActionId(stampId, og_action_id)
@@ -126,6 +107,47 @@ class StampDB(object):
     
     def getStampFromUserStampNum(self, userId, stampNum):
         return self.__stamp_collection.getStampFromUserStampNum(userId, stampNum)
+
+    def getWhitelistedTastemakerStampIds(self):
+        return self.__whitelisted_tastemaker_stamps.getStampIds()
+
+    ### USER REFERENCES
+    
+    def addUserStampReference(self, userId, stampId):
+        return self.__user_stamps_collection.addUserStamp(userId, stampId)
+    
+    def removeUserStampReference(self, userId, stampId):
+        return self.__user_stamps_collection.removeUserStamp(userId, stampId)
+    
+    def removeAllUserStampReferences(self, userId):
+        return self.__user_stamps_collection.removeAllUserStamps(userId)
+    
+    def getUserStampIds(self, userId):
+        return self.__user_stamps_collection.getUserStampIds(userId)
+
+    ### INBOX REFERENCES
+    
+    def addInboxStampReference(self, userIds, stampId):
+        if not isinstance(userIds, list):
+            userIds = [ userIds ]
+        return self.__inbox_stamps_collection.addInboxStamps(userIds, stampId)
+    
+    def removeInboxStampReference(self, userIds, stampId):
+        return self.__inbox_stamps_collection.removeInboxStamps(userIds, stampId)
+    
+    def addInboxStampReferencesForUser(self, userId, stampIds):
+        return self.__inbox_stamps_collection.addInboxStampsForUser(userId, stampIds)
+    
+    def removeInboxStampReferencesForUser(self, userId, stampIds):
+        return self.__inbox_stamps_collection.removeInboxStampsForUser(userId, stampIds)
+    
+    def removeAllInboxStampReferences(self, userId):
+        return self.__inbox_stamps_collection.removeAllInboxStamps(userId)
+    
+    def getInboxStampIds(self, userId):
+        return self.__inbox_stamps_collection.getInboxStampIds(userId)
+
+    ### CREDIT
     
     def giveCredit(self, creditedUserId, stampId, userId):
         self.__credit_received_collection.addCredit(creditedUserId, stampId)
@@ -147,8 +169,32 @@ class StampDB(object):
     def getCreditedStamps(self, userId, entityId, limit=0):
         return self.__stamp_collection.getCreditedStamps(userId, entityId, limit=limit)
     
-    def removeStamps(self, stampIds):
-        return self.__stamp_collection.removeStamps(stampIds)
+    def getUserCreditStampIds(self, userId):
+        return self.__credit_received_collection.getCredit(userId)
 
-    def getWhitelistedTastemakerStampIds(self):
-        return self.__whitelisted_tastemaker_stamps.getStampIds()
+    ### STATS
+    
+    def addStampStats(self, stats):
+        return self.__stamp_stats_collection.addStampStats(stats)
+    
+    def getStampStats(self, stampId):
+        return self.__stamp_stats_collection.getStampStats(stampId)
+
+    def getStatsForStamps(self, stampIds):
+        return self.__stamp_stats_collection.getStatsForStamps(stampIds)
+    
+    def updateStampStats(self, stats):
+        return self.__stamp_stats_collection.updateStampStats(stats)
+    
+    def removeStampStats(self, stampId):
+        return self.__stamp_stats_collection.removeStampStats(stampId)
+    
+    def removeStatsForStamps(self, stampIds):
+        return self.__stamp_stats_collection.removeStatsForStamps(stampIds)
+
+    def getPopularStampIds(self, **kwargs):
+        return self.__stamp_stats_collection.getPopularStampIds(**kwargs)
+
+    def getPopularStampStats(self, **kwargs):
+        return self.__stamp_stats_collection.getPopularStampStats(**kwargs)
+

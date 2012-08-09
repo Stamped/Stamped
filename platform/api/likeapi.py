@@ -27,7 +27,7 @@ from api.module import APIObject
 from api.stamps import Stamps
 from api.activity import Activity
 from api.entities import Entities
-from api.accounts import Accounts
+from api.accountapi import AccountAPI
 from api.linkedaccountapi import LinkedAccountAPI
 
 
@@ -69,7 +69,7 @@ class LikeAPI(APIObject):
 
     @lazyProperty
     def _accounts(self):
-        return Accounts()
+        return AccountAPI()
 
     @lazyProperty
     def _linked_account_api(self):

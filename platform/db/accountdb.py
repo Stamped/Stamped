@@ -8,6 +8,7 @@ __license__   = "TODO"
 
 import Globals
 
+import logs
 from utils import lazyProperty
 
 from db.mongodb.MongoAccountCollection import MongoAccountCollection

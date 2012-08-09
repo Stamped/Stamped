@@ -16,10 +16,8 @@ import logs
 
 from db.userdb import UserDB
 from db.stampdb import StampDB
-
-from db.mongodb.MongoEntityCollection import MongoEntityCollection
-from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
-from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
+from db.entitydb import EntityDB
+from db.friendshipdb import FriendshipDB
 
 from utils import lazyProperty, LoggingThreadPool
 
@@ -36,15 +34,11 @@ class Users(APIObject):
 
     @lazyProperty
     def _friendshipDB(self):
-        return MongoFriendshipCollection()
-    
-    @lazyProperty
-    def _collectionDB(self):
-        return MongoCollectionCollection()
+        return FriendshipDB()
 
     @lazyProperty
     def _entityDB(self):
-    	return MongoEntityCollection()
+    	return EntityDB()
     
     @lazyProperty
     def _stampDB(self):
@@ -65,7 +59,7 @@ class Users(APIObject):
         return self._userDB.getUserByScreenName(userTiny.screen_name)
 
     def getUserStampDistribution(self, userId):
-        stampIds    = self._collectionDB.getUserStampIds(userId)
+        stampIds    = self._stampDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds)
         entityIds   = map(lambda x: x.entity.entity_id, stamps)
         entities    = self._entityDB.getEntityMinis(entityIds)

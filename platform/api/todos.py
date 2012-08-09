@@ -26,7 +26,7 @@ from utils import lazyProperty, LoggingThreadPool
 from api.module import APIObject
 from api.stamps import Stamps
 from api.activity import Activity
-from api.accounts import Accounts
+from api.accountapi import AccountAPI
 from api.entities import Entities
 from api.linkedaccountapi import LinkedAccountAPI
 
@@ -66,7 +66,7 @@ class Todos(APIObject):
 
     @lazyProperty
     def _accounts(self):
-        return Accounts()
+        return AccountAPI()
 
     @lazyProperty
     def _entities(self):
