@@ -294,9 +294,9 @@ def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs
     try:
         result = stampedAPI.addToNetflixInstantWithUserId(authUserId, http_schema.netflix_id)
     except StampedThirdPartyInvalidCredentialsError:
-        return createNetflixLoginResponse(request, http_schema.netflix_id)
+        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
     if result == None:
-        return createNetflixLoginResponse(request, http_schema.netflix_id)
+        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
     response = HTTPActionResponse()
 
