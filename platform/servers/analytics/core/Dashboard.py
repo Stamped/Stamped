@@ -157,8 +157,12 @@ class Dashboard(object):
 
 
     def todaysUsers(self):
-        fun = (lambda bgn,end: self.query.activeUsers(bgn, end))
+        fun = (lambda bgn, end: self.query.activeUsers(bgn, end))
         return self.getStats('users',fun)
+    
+    def returningUsers(self):
+        fun = (lambda bgn, end: self.query.activeUsers(bgn,end) - self.acct_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
+        return self.getStats('returning', fun)
     
 
         

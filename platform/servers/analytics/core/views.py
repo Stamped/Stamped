@@ -52,7 +52,7 @@ def index(request):
 
     today_accts_hourly,todayAccts,yest_accts_hourly,yestAccts,week_accts_hourly,weekAccts,deltaAcctsDay,deltaAcctsWeek = dash.newAccounts()
 
-    today_users_hourly,todayUsers,yest_users_hourly,yestUsers,week_users_hourly,weekUsers,deltaUsersDay,deltaUsersWeek = dash.todaysUsers()
+    today_users_hourly,todayUsers,yest_users_hourly,yestUsers,week_users_hourly,weekUsers,deltaUsersDay,deltaUsersWeek = dash.returningUsers()
 
     
     stamp_graph = [today_stamps_hourly,yest_stamps_hourly,week_stamps_hourly]
@@ -382,7 +382,7 @@ def custom(request):
     class inputForm(forms.Form):
         stat_choices =[("stamps","Stamps Created"),("agg_stamps","Aggregate Stamps"),
                        ("accounts","Accounts Created"),("agg_accts","Aggregate Accounts"),
-                       ("users","Active Users"),("friendships","Friendships Created"),
+                       ("users","Active Users"),("return_users","Returning Users"),("friendships","Friendships Created"),
                        ("friends","Number of Friends"),("comments","Comments Posted"),
                        ("todos","Todos Created"),("todos_c","Todos Completed"),
                        ("likes","Likes"),("entities","Entities Created"),

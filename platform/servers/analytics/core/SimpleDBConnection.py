@@ -5,7 +5,7 @@ from boto.sdb.connection    import SDBConnection
 from boto.exception         import SDBResponseError
 from gevent.pool            import Pool
 
-def reveal (cursor,limit=None,duration=None):
+def extract (cursor,limit=None,duration=None):
     count = 0
     output = []
     for stat in  cursor:
@@ -31,6 +31,7 @@ def reveal (cursor,limit=None,duration=None):
 
 class SimpleDBConnection(object):
     
+    # Instantiate a connection to simpledb
     def __init__(self):
         try:
             self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
@@ -52,6 +53,12 @@ class SimpleDBConnection(object):
             self.v2_prod_domains[suffix] = self.conn.get_domain('bowser_%s' % suffix)
             self.v2_dev_domains[suffix] = self.conn.get_domain('stats_dev_%s' % suffix)
             self.v2_stress_domains[suffix] = self.conn.get_domain('stress_%s' % suffix)
+    
+    #Clear all data storage for a new query
+    def clear(self):
+        self.statList = []
+        self.statCount = 0
+        self.statSet = set()
     
     # Perform a query and write to an optional list, set or dict (key is first field specified)
     def execute(self, domain, query_dict, fields, bgn=None, end=None, destination=None, limit=None, duration=None):
@@ -76,7 +83,7 @@ class SimpleDBConnection(object):
             
         init_results = domain.select(query)
         
-        results = reveal(init_results,limit=limit,duration=duration)
+        results = extract(init_results,limit=limit,duration=duration)
         
         if destination != None:
             if fields == 'count(*)':
@@ -86,7 +93,7 @@ class SimpleDBConnection(object):
         
         return results
     
-    def query (self, stack, query_dict, fields='*', bgn=None, end=None, limit=None, duration=None):
+    def query(self, stack, query_dict, fields='*', bgn=None, end=None, limit=None, duration=None):
         
         if fields == 'count(*)':
             self.statCount = 0

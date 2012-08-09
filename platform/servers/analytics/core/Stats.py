@@ -40,6 +40,7 @@ class Stats():
                  'entities': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/entities/create.json')),
                  'friends': (lambda t0, t1: self.logsQ.customQuery(v1_init(),t1,'count(*)','/v1/friendships/create.json')),
                  'actions': (lambda t0, t1: self.logsQ.customQuery(t0,t1,'count(*)','/v1/actions/complete.json')),
+                 'return_users': (lambda t0,t1: self.logsQ.activeUsers(t0,t1) - self.mongoQ.newAccounts(t0,t1))
                  }
     
     

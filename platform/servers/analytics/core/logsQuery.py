@@ -15,7 +15,7 @@ from api.MongoStampedAPI                        import MongoStampedAPI
 from boto.sdb.connection                        import SDBConnection
 from boto.exception                             import SDBResponseError
 from gevent.pool                                import Pool
-from analytics_utils                            import today, v2_init,now
+from analytics_utils                            import *
 
 
 
@@ -173,22 +173,32 @@ class logsQuery(object):
             init = v1_init()
             end = v2_init()
             
-        launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init, '$lt': init + timedelta(days=2)}})
-        
-        launch_user_ids = set()
-        for stamp in launch_stamps:
-            launch_user_ids.add(str(stamp['user']['user_id']))
-        
-        launch_users = len(launch_user_ids)
+        launch_followers = self.customQuery(init,init+timedelta(days=2),'uid','/v1/friendships/create.json',user_list=True)
 
-        new_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init + timedelta(days=2), '$lt': end}})
-
-        new_user_ids = map(lambda x: str(x['user']['user_id']), new_stamps)
+        new_followers = self.customQuery(init+timedelta(days=2),end,'uid','/v1/friendships/create.json',user_list=True)
         
-        returning_users = set(filter(lambda x: x in launch_users))
+        returning_followers = set.intersection(launch_followers,new_followers)
         
-        return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (launch_users, len(returning_users))
+        return "Users following in first 2 days: %s\nUsers stamping again more recently:%s" % (len(launch_followers), len(returning_followers))
     
+    
+    def guideReturnRate(self):
+        
+        previous_users = set()
+        returning_users = set()
+        start = v2_init()
+        end = v2_init() + timedelta(days=1)
+        while end < now():
+            days_users = self.customQuery(start, end, 'uid', '/v1/guide/collection.json', user_list=True)
+            start += timedelta(days=1)
+            end += timedelta(days=1)
+            for user in days_users:
+                if user in previous_users:
+                    returning_users.add(user)
+                else:
+                    previous_users.add(user)
+        
+        return "Number of guide users: %s \n Number of returning users %s" % (len(previous_users),len(returning_users))
 
     
     
@@ -325,7 +335,7 @@ class logsQuery(object):
         
         return count_report,mean_report
         
-    def customQuery(self,t0,t1,fields,uri,form={},logged_out=False):
+    def customQuery(self,t0,t1,fields,uri,form={},logged_out=False,user_list=False):
         
         if fields == 'count(*)':
             self.statCount = 0
@@ -343,6 +353,8 @@ class logsQuery(object):
         
         if fields == 'count(*)':
             return self.statCount
+        elif user_list:
+            return self.statSet
         else:
             return len(self.statSet)
 
