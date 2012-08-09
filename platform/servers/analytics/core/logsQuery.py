@@ -268,7 +268,7 @@ class logsQuery(object):
             ninetieth = percentile(sortedDiffs, .9)
             
             inner_sum = reduce(lambda agg,i: agg + (i - mean) ** 2, diffs, 0)
-            variance = ((1.0 / n) * inner_sum) ** 0.5
+            variance = (1.0 / n) * inner_sum
             
             errors4 = 0
             errors5 = 0
@@ -282,8 +282,9 @@ class logsQuery(object):
                            'ninetieth' : ninetieth,
                            'variance' : variance,
                            'length' : n,
-                           '400 errors' : errors4,
-                           '500 errors' : errors5
+                           'max': max,
+                           '400_errors' : errors4,
+                           '500_errors' : errors5
                            }
             
         return output

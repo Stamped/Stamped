@@ -11,12 +11,12 @@ import Globals
 import keys.aws, logs, utils, math
 import ast
 
-from boto.sdb.connection                            import SDBConnection
-from servers.analytics.core.analytics_utils         import *
-from servers.analytics.core.logsQuery               import logsQuery
-from servers.analytics.core.statWriter              import statWriter
-from gevent.pool                                    import Pool
-from time import time
+from boto.sdb.connection                        import SDBConnection
+from servers.analytics.core.analytics_utils     import *
+from servers.analytics.core.logsQuery           import logsQuery
+from servers.analytics.core.statWriter          import statWriter
+from gevent.pool                                import Pool
+from time                                       import time
 
 
 
@@ -24,18 +24,17 @@ class LatencyReport(object):
     
     def __init__(self,logsQuery=logsQuery()):
         self.logsQ = logsQuery
-        conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-        self.writer = statWriter('latency',conn=conn)
-        self.cache = conn.get_domain('latency')
+        self.writer = statWriter('latency',conn=self.logsQ.conn)
+        self.cache = self.logsQ.conn.get_domain('latency')
     
     
-    def _getTodaysLatency(self): 
+    def getTodaysLatency(self): 
+        
+        overall_stats = {}
         
         # Build up until the current hour (e.g. if it is currently 8:04, fill in stats thru 9:00)
         for hour in range (1, est().hour+1):
             stats = {}
-            diffs_hourly = {}
-            errs_hourly = {}
             cache_hit = False
             t0 = time()
             # See if we've stored hourly data earlier
@@ -51,112 +50,56 @@ class LatencyReport(object):
                 stats = self.logsQ.latencyReport(today() + timedelta(hours=hour - 1),today() + timedelta(hours=hour))
                 t1 = time()
                 print "Cache miss for hour %s. Extraction time: %s seconds" % (hour, t1 - t0)
-            
                 self.writer.writeLatency({'hour': hour, 'date': today().date().isoformat(), 'stats': stats})    
-                t2 = time()
-                print "Cache miss for hour %s. Write time: %s seconds" % (hour, t2 - t1)
-            
-        return stats
-     
-    
-    def _getDaysStats(self,stat,fun,date):
-        
-        # This is not the proper way to get current day's stats
-        if date == today():
-            print "WARNING: For today's stats the proper function to be used is getTodaysStats"
-            raise
-        
-        total_day = 0
-        day_hourly = []
-        
-        # See if we've stored data earlier
-        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-day-%s"' % (stat, date.date().isoformat()))
-        for result in query:
-            for i in result['hours'].replace('[','').replace(']','').split(','):
-                day_hourly.append(int(i))
-        
-        # If we didn't, or we stored less than a full 24 hours, rebuild all of this day's stats and save them (if on prod stack)
-        if len(day_hourly) < 25:
-            day_hourly = []
-            bgn = today(date) # 0-hour EST
-            for hour in range (0,25):
-                end = bgn + timedelta(hours=hour)
-                total_day = fun(bgn, end)
-                day_hourly.append(total_day)
-            if IS_PROD:
-                self.writer.writeHours({'stat': stat,'time':'day','bgn':date.date().isoformat(),'hours':str(day_hourly)})
+
+            for key,values in stats.items():
+                if key not in overall_stats:
+                    overall_stats[key] = values
+                else:
+                    overall = overall_stats[key]
+                    
+                    total_length = overall['length'] + values['length']
+                    
+                    compound_mean = ((overall['mean'] * overall['length']) + (values['mean'] * values['length'])) / total_length
+                    
+                    # This is a crappy and relatively inaccurate way to calculate aggregate median (just a weighted average of the medians)
+                    compound_median = ((overall['median'] * overall['length']) + (values['median'] * values['length'])) / total_length
+                    
+                    # Calculate the compound variance 
+                    compound_variance = (values['length'] * (values['variance'] + (compound_mean - values['mean'])**2) +
+                                         overall['length'] * (overall['variance'] + (compound_mean - overall['mean'])**2)) / total_length
+                    
+                    # Standard deviation is teh square root of variance
+                    standard_dev = compound_variance ** 0.5
+                    
+                    # Ninetieth percentile has a z-score of 1.28. We are assuming that all stat samples are normally distributed (which is a huge assumption to make but is the only way to get a close guess at 90th percentile)
+                    ninetieth = compound_mean + (standard_dev * 1.28)
+                    
+                    overall['max'] = max(values['max'], overall['max'])
+                    overall['median'] = compound_median
+                    overall['mean'] = compound_mean
+                    overall['variance'] = compound_variance
+                    overall['length'] = total_length
+                    overall['ninetieth'] = ninetieth
+                    overall['500_errors'] += values['500_errors']
+                    overall['400_errors'] += values['400_errors']
                 
-        return day_hourly
+        return overall_stats
     
-    
-    def _getWeeklyAvg(self,stat,fun):
         
-        weeklyAgg = []
-        weeklyAvg = []
+    def dailyLatencySplits(self,uri,t0,t1,blacklist,whitelist):
+        report = {}
+        start = today(t0)
         
-        # See if we've stored data for this week earlier
-        query = self.domain.select('select hours from `dashboard` where itemName() = "%s-week-%s"' % (stat,weekAgo(today()).date().isoformat()))
-        for result in query:
-            for i in result['hours'].replace('[','').replace(']','').split(','):
-                weeklyAvg.append(float(i))
-        
-        # If not then compute and store
-        if len(weeklyAvg) == 0: 
-            for day in range (0,6):
-                daily = 0
-                bgn = weekAgo(today()) + timedelta(days=day) 
-                daily = self._getDaysStats(stat,fun,bgn)
-                print bgn, daily
-                for i in range (0,len(daily)):
-                    try:
-                        weeklyAgg[i] += daily[i]
-                    except IndexError:
-                        weeklyAgg.append(daily[i])
+        while start < today(t1):
+            end = start + timedelta(days=1)
+            report[start.date().isoformat()] = self.logsQ.latencyReport(start, end, uri, blacklist, whitelist)
+            start += timedelta(days=1)
             
-            # Take the aggregate and make an average
-            for hour in range (0,len(weeklyAgg)):
-                weeklyAvg.append(weeklyAgg[hour] / 6.0)
+        return report
             
-            if IS_PROD:
-                self.writer.writeHours({'stat': stat,'time':'week','bgn':weekAgo(today()).date().isoformat(),'hours':str(weeklyAvg)})
-        
-        return weeklyAvg
-
-    
-    def getStats(self,stat,fun):
-        
-        # Get all the stats we need      
-        total_today, today_hourly = self._getTodaysStats(stat,fun)
-        yest_hourly = self._getDaysStats(stat,fun,dayAgo(today()))
-        weeklyAvg = self._getWeeklyAvg(stat,fun)
-        
-        # Compute D/D and D/W changes
-        try:
-            deltaDay = float(total_today - yest_hourly[int(math.floor(est().hour))])/(yest_hourly[int(math.floor(est().hour))])*100.0
-        except ZeroDivisionError:
-            deltaDay = 0.0
-        
-        try: 
-            deltaWeek = float(total_today - weeklyAvg[int(math.floor(est().hour))])/(weeklyAvg[int(math.floor(est().hour))])*100
-        except ZeroDivisionError:
-            deltaWeek = 0.0
-        
-        return today_hourly,total_today,yest_hourly,yest_hourly[int(math.floor(est().hour))],weeklyAvg,weeklyAvg[int(math.floor(est().hour))],deltaDay,deltaWeek
     
     
-    def newStamps(self):
-        fun = (lambda bgn,end: self.stamp_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
-        return self.getStats('stamps',fun)
-    
-    
-    def newAccounts(self):
-        fun = (lambda bgn,end: self.acct_collection.find({'timestamp.created': {'$gte': bgn,'$lt': end}}).count())
-        return self.getStats('accts',fun)
-
-
-    def todaysUsers(self):
-        fun = (lambda bgn,end: self.query.activeUsers(bgn, end))
-        return self.getStats('users',fun)
     
 
         

@@ -25,6 +25,7 @@ from servers.analytics.core.weeklyScore     import weeklyScore
 from servers.analytics.core.mongoQuery      import mongoQuery
 from servers.analytics.core.analytics_utils import *
 from libs.ec2_utils                         import get_stack
+from Latency                                import LatencyReport
 
 from api.MongoStampedAPI                    import MongoStampedAPI
 from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
@@ -44,6 +45,7 @@ entity_collection = api._entityDB._collection
 todo_collection = api._todoDB._collection
 logsQ = logsQuery(stack_name)
 dash = Dashboard(api,logsQ)
+latencyReport = LatencyReport(logsQ)
 
 
 @login_required
@@ -168,9 +170,7 @@ def latency(request):
             if end is None:
                 end = now()
             
-            customResults = query.dailyLatencyReport(bgn,end,uri,blacklist,whitelist)
-            
-            print customResults
+            customResults = latencyReport.dailyLatencySplits(uri,bgn,end,blacklist,whitelist)
             
         else: form = latencyForm()
     else: form = latencyForm()
@@ -189,7 +189,7 @@ def latency(request):
     is_blacklist = len(blacklist) > 0
     is_whitelist = len(whitelist) > 0
     
-    report = logsQ.latencyReport(dayAgo(today()),now(),None,blacklist,whitelist)
+    report = latencyReport.getTodaysLatency()
         
     t = loader.get_template('../html/latency.html')
     c = Context({
