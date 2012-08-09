@@ -43,7 +43,7 @@ from api.db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntitie
 from api.db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
 from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
-from api.db.mongodb.MongoFBCallbackTokenCollection  import MongoFBCallbackTokenCollection
+from api.db.mongodb.MongoCallbackTokenCollection  import MongoCallbackTokenCollection
 
 
 class MongoStampedAPI(StampedAPI):
@@ -179,8 +179,8 @@ class MongoStampedAPI(StampedAPI):
         return MongoAsyncTasksCollection()
 
     @lazyProperty
-    def _fbCallbackTokenDB(self):
-        return MongoFBCallbackTokenCollection()
+    def _callbackTokenDB(self):
+        return MongoCallbackTokenCollection()
 
 
     @lazyProperty

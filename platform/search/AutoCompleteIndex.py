@@ -7,17 +7,19 @@ __license__   = "TODO"
 
 import Globals
 import pickle
+import re
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 from collections import namedtuple
 from contextlib import closing
-from datetime import datetime
+from datetime import datetime, timedelta
 from tempfile import TemporaryFile
 from whoosh.analysis import *
 from whoosh.support.charset import accent_map
 
 import keys.aws
 from api.db.mongodb.MongoEntityCollection import MongoEntityCollection
+from libs import ec2_utils
 from errors import StampedDocumentNotFoundError
 from search.AutoCompleteTrie import AutoCompleteTrie
 
@@ -31,7 +33,8 @@ def buildAutoCompleteIndex():
     entityDb = MongoEntityCollection()
     query = {
         'sources.tombstone_id' : { '$exists':False },
-        'sources.user_generated_id' : { '$exists':False }
+        'sources.user_generated_id' : { '$exists':False },
+        'schema_version' : 0,
     }
     allEntities = (convertEntity(entity, entityDb) for entity in entityDb._collection.find(
         query, fields=['title', 'last_popular', 'types']))
@@ -72,13 +75,14 @@ def normalizeTitle(title):
 
 def tokenizeTitleAndNormalize(title):
     # Remove apostrophes, so contractions don't get broken into two separate words.
-    title = ''.join(c for c in title if c != "'")
+    title = u''.join(c for c in title if c != "'")
     return [token.text for token in TOKENIZER(title)]
 
 
 def entityScoringFn(entity):
-    # TODO(geoff): factor in how many stamps are on the entity
-    return entity.last_popular, entity.num_stamps
+    # Get a boost if it was popular in the last 30 days.
+    # TODO(geoff): Need a much better ranking function
+    return datetime.now() - entity.last_popular < timedelta(30), entity.num_stamps
 
 
 def categorizeEntity(entity):
@@ -96,9 +100,10 @@ def emptyIndex():
     return dict([(category, AutoCompleteTrie()) for category in ('music', 'book', 'film', 'app')])
 
 
-def getS3Key():
+def getS3Key(stack_name=None):
+    stack_name = stack_name or ec2_utils.get_stack().instance.stack
     BUCKET_NAME = 'stamped.com.static.images'
-    FILE_NAME = 'search/v2/autocomplete'
+    FILE_NAME = 'search/v2/autocomplete/' + stack_name
 
     conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
     bucket = conn.create_bucket(BUCKET_NAME)
@@ -108,11 +113,11 @@ def getS3Key():
     return key
 
 
-def saveIndexToS3(index):
+def saveIndexToS3(index, stack_name=None):
     with TemporaryFile() as tmpFile:
         pickle.dump(index, tmpFile)
         tmpFile.seek(0)
-        with closing(getS3Key()) as key:
+        with closing(getS3Key(stack_name)) as key:
             key.set_contents_from_file(tmpFile)
             key.set_acl('private')
 
@@ -121,9 +126,9 @@ def pushNewIndexToS3():
     saveIndexToS3(buildAutoCompleteIndex())
 
 
-def loadIndexFromS3():
+def loadIndexFromS3(stack_name=None):
     with TemporaryFile() as tmpFile:
-        with closing(getS3Key()) as key:
+        with closing(getS3Key(stack_name)) as key:
             key.get_contents_to_file(tmpFile)
         tmpFile.seek(0)
         return pickle.load(tmpFile)
@@ -135,18 +140,21 @@ if __name__ == '__main__':
     USAGE:
         AutoCompleteIndex.py build indexFileOutput
         AutoCompleteIndex.py search indexFile category searchTerm ...
-        If the index filename given is "S3" then the index stored in S3 is used.
+        If the index filename given is "<stackname>.S3" then the index stored in S3 is used.
     """
 
+    s3_pattern = re.compile(r'(.*)\.S3')
     if argv[1] == 'build':
-        if argv[2] == 'S3':
-            saveIndexToS3(buildAutoCompleteIndex())
+        match = s3_pattern.match(argv[2])
+        if match:
+            saveIndexToS3(buildAutoCompleteIndex(), match.group(1))
         else:
             with open(argv[2], 'w') as fileOut:
                 pickle.dump(buildAutoCompleteIndex(), fileOut)
     elif argv[1] == 'search':
-        if argv[2] == 'S3':
-            categoryMapping = loadIndexFromS3()
+        match = s3_pattern.match(argv[2])
+        if match:
+            categoryMapping = loadIndexFromS3(match.group(1))
         else:
             with open(argv[2]) as fileIn:
                 categoryMapping = pickle.load(fileIn)

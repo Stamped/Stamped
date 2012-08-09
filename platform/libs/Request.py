@@ -80,7 +80,7 @@ class RateLimiterState(object):
         try:
             ratelimiter_nodes = libs.ec2_utils.get_nodes('ratelimiter')
         except:
-            logs.error("Could not find a node with tag 'ratelimiter on same stack")
+            logs.warning("Could not find a node with tag 'ratelimiter' on same stack")
         if ratelimiter_nodes is None:
             self.__host = 'localhost'
         else:

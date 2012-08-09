@@ -385,6 +385,9 @@ class StampedThirdPartyInvalidCredentialsError(StampedInvalidCredentialsError):
     def __init__(self, msg=None):
         StampedInvalidCredentialsError.__init__(self, msg)
 
+class StampedThirdPartyInternalError(StampedThirdPartyError):
+    pass
+
 class StampedFacebookTokenError(StampedAuthError):
     def __init__(self, msg=None):
         StampedAuthError.__init__(self,msg)

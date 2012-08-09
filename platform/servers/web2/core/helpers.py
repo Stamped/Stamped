@@ -309,11 +309,12 @@ def get_body_classes(base, schema):
     
     if has_category:
         body_classes += " %s" % schema.category
-    else:
-        body_classes += " default"
     
     if has_subcategory:
         body_classes += " %s" % schema.subcategory
+    
+    if not (has_category or has_subcategory):
+        body_classes += " default"
     
     return body_classes
 
