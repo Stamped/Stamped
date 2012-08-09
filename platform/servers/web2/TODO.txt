@@ -41,10 +41,6 @@
 
 
 
-* Mobile sDetail issues: 
-    * 2x assets
-    * fix action links
-
 TODO:
     * find better way of invoking lessc without creating jenky temporary files
     * better versioning at directory level
@@ -53,8 +49,6 @@ TODO:
     * cleanup JS to be OO and better organized
     * remove unnecessary dependencies:
         * modernizr
-        * jQuery imagesLoaded plugin
-        * DONE - rdio jquery library
     * reuse backbone for client-side updating logic
     
     * HIGH PRIORITY:
@@ -296,6 +290,10 @@ OLD:
     * DONE - Broken profile page when coming in after closing sDetail
     * DONE - Animation looks off now on all sDetail pages
     * DONE - Mobile 'change notifications' page looks broken
+    * DONE - Mobile sDetail issues: 
+        * DONE - 2x assets
+        * DONE - fix action links
+
 
 ChangeList 6/8/2012:
 -------------------
