@@ -1,3 +1,9 @@
+/*! gravity.pde
+ * 
+ * @author: Travis Fischer
+ * @date:   December 2008 (Java)
+ * @port:   August 2012 to processing.js
+ */
 
 Body[] bodies;
 
@@ -24,9 +30,7 @@ static int MAX_GRAVITY_NO_PARTICLES     = 300;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(24);
-    stroke(#000000);
-    fill(#FFFFFF);
+    frameRate(32);
     smooth();
     loop();
     

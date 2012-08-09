@@ -81,25 +81,25 @@ class StampedAPIActivityHttpTest(AStampedAPIHttpTestCase):
 class StampedAPIActivityShow(StampedAPIActivityHttpTest):
     def test_show(self):
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
 
 class StampedAPIActivityFriendship(StampedAPIActivityHttpTest):
     def test_show_friendship(self):
         # Default (1 follower)
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
         self._assertFollowSubjects(result, 1)
 
         # Add friend (2 followers)
         self.createFriendship(self.tokenC, self.userA)
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
         self._assertFollowSubjects(result, 2)
 
         # Remove friend (1 follower), but activity item remains
         self.deleteFriendship(self.tokenC, self.userA)
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
         self._assertFollowSubjects(result, 2)
 
     def test_show_friendship_universal(self):
@@ -110,7 +110,6 @@ class StampedAPIActivityFriendship(StampedAPIActivityHttpTest):
         self.assertEqual(len(result), 2)
         self._assertFollowSubjects(result, 1)
         self._assertBody(result, ['UserB is now following UserA.'])
-
         self.deleteFriendship(self.tokenC, self.userB)
 
 
@@ -126,9 +125,10 @@ class StampedAPIActivityLikes(StampedAPIActivityHttpTest):
 
         for token in [self.tokenA, self.tokenB, self.tokenC]:
             self.createLike(token, stamp['stamp_id'])
-        
+
+        # Should have Welcome activity, and grouped 'UserX and 2 others liked Kanye West' activity
         result = self.showActivity(self.tokenD)
-        self.assertTrue(len(result) == 1)
+        self.assertTrue(len(result) == 2)
         self._assertBenefit(result)
         
         self.deleteStamp(self.tokenD, stamp['stamp_id'])
@@ -167,7 +167,7 @@ class StampedAPIActivityMentions(StampedAPIActivityHttpTest):
 
 
         self.async(lambda: self.handleGET(path, data), [
-            lambda x: self.assertEqual(len(x), 2),
+            lambda x: self.assertEqual(len(x), 3),
         ])
 
         self.deleteStamp(self.tokenA, stamp['stamp_id'])
@@ -186,7 +186,7 @@ class StampedAPIActivityCredit(StampedAPIActivityHttpTest):
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
 
         self.async(lambda: self.showActivity(self.tokenB), [
-            lambda x: self.assertEqual(len(x), 2),
+            lambda x: self.assertEqual(len(x), 3),
             lambda x: self._assertBenefit(x),
             ])
 
@@ -206,7 +206,7 @@ class StampedAPIActivityMentionAndCredit(StampedAPIActivityHttpTest):
         stamp = self.createStamp(self.tokenA, entity['entity_id'], stampData)
 
         self.async(lambda: self.showActivity(self.tokenB), [
-            lambda x: self.assertEqual(len(x), 2),
+            lambda x: self.assertEqual(len(x), 3),
             lambda x:self.assertTrue(x[0]['verb'] == 'credit'),
         ])
 
@@ -220,7 +220,7 @@ class StampedAPIActivityTodos(StampedAPIActivityHttpTest):
 
         # Assert that the UserE's todo appears in User A's activity feed and that they include the entity and stamp
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
         self._assertBody(result, ['UserB added %s as a to-do.' % self.entityA['title']])
         self.assertEqual(len(result[0]['objects']['entities']), 1)
 
@@ -229,7 +229,7 @@ class StampedAPIActivityTodos(StampedAPIActivityHttpTest):
         self.createTodo(self.tokenD, self.entityA['entity_id'])
 
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
         self._assertBody(result, ['UserB and UserD added %s as a to-do.' % self.entityA['title']])
 
         self.deleteFriendship(self.tokenD, self.userA)
@@ -238,13 +238,13 @@ class StampedAPIActivityTodos(StampedAPIActivityHttpTest):
 
         # Assert nothing happens to the activity feed when User B and D removes the todo
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
         self._assertBody(result, ['UserB and UserD added %s as a to-do.' % self.entityA['title']])
 
         # Assert adding a todo from a non-friend on User A's stamp shows up in the aggregate item
         self.createTodo(self.tokenC, self.entityA['entity_id'], self.stampA['stamp_id'])
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
         self._assertBody(result, ['UserB and 2 others added %s as a to-do.' % self.entityA['title']])
 
         self.deleteTodo(self.tokenC, self.entityA['entity_id'])
@@ -258,23 +258,24 @@ class StampedAPIActivityTodos(StampedAPIActivityHttpTest):
 
         # Make sure that the 'follow' and 'todo' activity items appear for UserE
         result = self.showActivity(self.tokenE)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
 
         # Unfriend UserE from UserF, make sure that the activity item remains
         self.deleteFriendship(self.tokenF, self.userE)
         result = self.showActivity(self.tokenE)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
 
         # UserF follows UserE again.  Make sure no new activity item appears
         self.createFriendship(self.tokenF, self.userE)
         result = self.showActivity(self.tokenE)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
 
         # Assert that deleting UserF's account also removed the 'follow' activity item from User A's feed
         self.deleteAccount(self.tokenF)
         result = self.showActivity(self.tokenE)
 
-        self.assertEqual(len(result), 0)
+        # All we expect is welcome notification
+        self.assertEqual(len(result), 1)
 
         self.deleteAccount(self.tokenE)
 
@@ -305,27 +306,27 @@ class StampedAPIActivityActionComplete(StampedAPIActivityHttpTest):
         # Make sure the complete action was added to User A's activity feed
         result = self.showActivity(self.tokenA)
         self._assertVerbExists(result, 'action_listen')
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
         self._assertBody(result, ['UserB listened to Call Your Girlfriend - Single on rdio.'])
 
         # Repeat the same action, make sure it doesn't get added to the activity feed again
         self.handlePOST(path, data)
 
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
 
         # Test that if User A listens to his own stamped song, it doesn't show up on his feed
         data['oauth_token'] =  self.tokenA['access_token']
         self.handlePOST(path, data)
         result = self.showActivity(self.tokenA)
 
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
 
         # Have UserC listen to the album and test that activity notifications are grouped
         data['oauth_token'] =  self.tokenC['access_token']
         self.handlePOST(path, data)
         result = self.showActivity(self.tokenA)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
         self._assertBody(result, ['UserB and UserC listened to Call Your Girlfriend - Single on rdio.',
                                   'UserC and UserB listened to Call Your Girlfriend - Single on rdio.'])
 
@@ -386,7 +387,7 @@ class StampedAPIActivityUniversal(StampedAPIActivityHttpTest):
     def test_follow_activity(self):
         # There should be 1 personal activity item for User A - User D followed User A:
         results = self.showActivity(self.tokenA)
-        self.assertEqual(len(results), 1)
+        self.assertEqual(len(results), 2)
         self._assertBody(results, ['UserD is now following you.'])
 
     def test_follow_activity_universal(self):
@@ -401,7 +402,7 @@ class StampedAPIActivityUniversal(StampedAPIActivityHttpTest):
     def test_follow_activity_overlap(self):
         # Now look at UserD's feeds.  We expect to see that User A, B, and C have added him as a follower in his personal feed
         results = self.showActivity(self.tokenD)
-        self.assertEqual(len(results), 1)
+        self.assertEqual(len(results), 2)
         self._assertBody(results, ['UserA and 2 others are now following you.', 'UserB and 2 others are now following you.',
                                                                                 'UserC and 2 others are now following you.'])
     def test_follow_activity_overlap_universal(self):
@@ -415,9 +416,7 @@ class StampedAPIActivityUniversal(StampedAPIActivityHttpTest):
     def test_like_activity(self):
         # Test UserC's personal feed.  We expect to see that UserB has liked his stamp, also a grouped item for followers
         results = self.showActivity(self.tokenC)
-#        from pprint import pprint
-#        pprint([(result['body'], result['activity_id']) for result in results])
-        self.assertEqual(len(results), 2)
+        self.assertEqual(len(results), 3)
         self._assertBody(results, ['UserB liked Kanye West.'])
 
     def test_like_activity_universal(self):
@@ -434,7 +433,7 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         global api
         self.api = api
         if api._cache._client is None:
-            logs.info('WARNING: Not connected to memcached server.')
+            print('WARNING: Not connected to memcached server.')
         (self.userA, self.tokenA) = self.createAccount('UserA')
         (self.userB, self.tokenB) = self.createAccount('UserB')
         (self.userC, self.tokenC) = self.createAccount('UserC')
@@ -526,8 +525,6 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         offset = 0
         limit = 6
 
-        from pprint import pformat
-
         self.api._activityCache.setCacheBlockSize(50)
         self.api._activityCache.setCacheBlockBufferSize(20)
 
@@ -605,6 +602,10 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
 
 
     def test_cache_clear_on_offset_0(self):
+        if api._cache._client is None:
+            logs.info('SKIPPING TEST - requires memcached server')
+            return True
+
         scope = 'friends'
         offset = 0
         limit = 10
@@ -613,6 +614,7 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         self.api._activityCache.setCacheBlockBufferSize(0)
 
         results = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        pprint(results)
         self.assertEqual(len(results), 6)
 
         # Create a new activity item that will appear for User A
@@ -622,6 +624,7 @@ class StampedAPIHttpActivityCache(AStampedAPIHttpTestCase):
         # First test that this new item will not be retrieved if we pull from offset != 0
         offset = 5
         results2 = self.api.getActivity(self.userA['user_id'], scope=scope, limit=limit, offset=offset)
+        pprint(results2)
         self.assertEqual(len(results2), 1)
         self.assertEqual(results2[0].activity_id, results[5].activity_id)
 

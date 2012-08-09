@@ -7,7 +7,7 @@
     
     <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/test.css">
     
-<script type="text/javascript" src="{{ STAMPED_STATIC_URL}}js/libs/processing-1.3.6.js"></script>
+<script type="text/javascript" src="{{ STAMPED_STATIC_URL}}js/libs/processing-1.4.0.js"></script>
 {% endblock head %}
 
 {% block main %}
@@ -23,21 +23,13 @@
         
      </head>
      <body>
-       <canvas id="gravity" data-processing-sources="{{STAMPED_STATIC_URL}}pde/gravity2.pde"></canvas>
+       <canvas id="tenebrous" data-processing-sources="{{STAMPED_STATIC_URL}}pde/intersection/intersection.pde"></canvas>
        
         <!--
         <div id="collage">
             <img crossOrigin="anonymous" id="collage_img" src="http://static.stamped.com/collages/collage-travis-music-940x256.jpg" width="940" height="256" />
         </div>
         -->
-        
-        <p>
-            TEST1
-            
-            {% with coordinates="40.714728,-73.998672" %}
-                {% handlebars_template "static-map-small" %}
-            {% endwith %}
-        </p>
     </div>
 {% endblock main %}
 
