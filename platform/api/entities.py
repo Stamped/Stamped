@@ -14,10 +14,12 @@ import utils
 import datetime
 import logs
 
+from db.userdb import UserDB
+from db.stampdb import StampDB
+
 from db.mongodb.MongoMenuCollection import MongoMenuCollection
 from db.mongodb.MongoTodoCollection import MongoTodoCollection
-from db.mongodb.MongoUserCollection import MongoUserCollection
-from db.mongodb.MongoStampCollection import MongoStampCollection, MongoStampStatsCollection
+from db.mongodb.MongoStampCollection import MongoStampStatsCollection
 from db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
 from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 from db.mongodb.MongoSearchEntityCollection import MongoSearchEntityCollection
@@ -49,11 +51,11 @@ class Entities(APIObject):
 
     @lazyProperty
     def _userDB(self):
-        return MongoUserCollection()
+        return UserDB()
     
     @lazyProperty
     def _stampDB(self):
-        return MongoStampCollection()
+        return StampDB()
 
     @lazyProperty
     def _entityDB(self):

@@ -461,9 +461,6 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
             return self._convertFromMongo(document)
         except Exception:
             return None
-
-    def checkStamp(self, userId, entityId):
-        return self.getStampFromUserEntity(userId, entityId) is not None
     
     def getStampsFromUsersForEntity(self, userIds, entityId):
         try:

@@ -14,8 +14,9 @@ import utils
 import datetime
 import logs
 
-from db.mongodb.MongoUserCollection import MongoUserCollection
-from db.mongodb.MongoStampCollection import MongoStampCollection
+from db.userdb import UserDB
+from db.stampdb import StampDB
+
 from db.mongodb.MongoEntityCollection import MongoEntityCollection
 from db.mongodb.MongoCollectionCollection import MongoCollectionCollection
 from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
@@ -31,7 +32,7 @@ class Users(APIObject):
 
     @lazyProperty
     def _userDB(self):
-        return MongoUserCollection()
+        return UserDB()
 
     @lazyProperty
     def _friendshipDB(self):
@@ -47,7 +48,7 @@ class Users(APIObject):
     
     @lazyProperty
     def _stampDB(self):
-        return MongoStampCollection()
+        return StampDB()
 
     ### PRIVATE
 

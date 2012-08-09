@@ -23,7 +23,7 @@ import libs.Twitter
 
 from api.module import APIObject
 
-from db.mongodb.MongoAccountCollection import MongoAccountCollection
+from db.accountdb import AccountDB
 
 from utils import lazyProperty, LoggingThreadPool
 
@@ -33,8 +33,8 @@ class LinkedAccountAPI(APIObject):
         APIObject.__init__(self)
 
     @lazyProperty
-    def _account_db(self):
-        return MongoAccountCollection()
+    def __account_db(self):
+        return AccountDB()
 
     @lazyProperty
     def _facebook(self):
@@ -90,7 +90,7 @@ class LinkedAccountAPI(APIObject):
             return "http://www.stamped.com/%s" % user.screen_name
 
     def remove_og_async(self, auth_user_id, og_action_id):
-        account = self._account_db.getAccount(auth_user_id)
+        account = self.__account_db.getAccount(auth_user_id)
         if account.linked is not None and account.linked.facebook is not None\
            and account.linked.facebook.token is not None:
             token = account.linked.facebook.token
@@ -103,7 +103,7 @@ class LinkedAccountAPI(APIObject):
         if not self.__is_prod and auth_user_id != '4ecab825112dea0cfe000293':
             return
 
-        account = self._account_db.getAccount(auth_user_id)
+        account = self.__account_db.getAccount(auth_user_id)
 
         token = account.linked.facebook.token
         if token is None:
@@ -158,11 +158,11 @@ class LinkedAccountAPI(APIObject):
                 break
             except StampedFacebookPermissionsError as e:
                 account.linked.facebook.have_share_permissions = False
-                self._accountDB.updateLinkedAccount(auth_user_id, account.linked.facebook)
+                self.__account_db.updateLinkedAccount(auth_user_id, account.linked.facebook)
                 return
             except StampedFacebookTokenError as e:
                 account.linked.facebook.token = None
-                self._accountDB.updateLinkedAccount(auth_user_id, account.linked.facebook)
+                self.__account_db.updateLinkedAccount(auth_user_id, account.linked.facebook)
                 return
             except StampedFacebookUniqueActionAlreadyTakenOnObject as e:
                 logs.info('Unique action already taken on OG object')
@@ -193,5 +193,5 @@ class LinkedAccountAPI(APIObject):
             self._stampDB.updateStampOGActionId(stamp_id, og_action_id)
         if account.linked.facebook.have_share_permissions is None:
             account.linked.facebook.have_share_permissions = True
-            self._accountDB.updateLinkedAccount(auth_user_id, account.linked.facebook)
+            self.__account_db.updateLinkedAccount(auth_user_id, account.linked.facebook)
 

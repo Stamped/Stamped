@@ -372,13 +372,7 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         if document is None:
             raise StampedAccountNotFoundError("Unable to find account (%s)" % email)
         return self._convertFromMongo(document)
-    
-    def getAccountByScreenName(self, screenName):
-        screenName = str(screenName).lower()
-        document = self._collection.find_one({"screen_name_lower": screenName})
-        if document is None:
-            raise StampedAccountNotFoundError("Unable to find account (%s)" % screenName)
-        return self._convertFromMongo(document)
+
 
     def getAccountsByFacebookId(self, facebookId):
         documents = self._collection.find({"linked.facebook.linked_user_id" : facebookId })
@@ -394,18 +388,6 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         documents = self._collection.find({"linked.netflix.linked_user_id" : netflixId })
         accounts = [self._convertFromMongo(doc) for doc in documents]
         return accounts
-
-    def addLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
-        return self.user_linked_alerts_history_collection.addLinkedAlert(userId, serviceName, serviceId)
-
-    def checkLinkedAccountAlertHistory(self, userId, serviceName, serviceId):
-        result = self.user_linked_alerts_history_collection.checkLinkedAlert(userId, serviceName, serviceId)
-        if result:
-            return True
-        return False
-
-    def removeLinkedAccountAlertHistory(self, userId):
-        return self.user_linked_alerts_history_collection.removeLinkedAlerts(userId)
 
     def addLinkedAccount(self, userId, linkedAccount):
         # create a dict of all twitter fields and bools indicating if required

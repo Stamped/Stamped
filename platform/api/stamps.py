@@ -16,12 +16,14 @@ import datetime
 import time
 import logs
 
-from db.mongodb.MongoUserCollection import MongoUserCollection
+from db.userdb import UserDB
+from db.likedb import LikeDB
+from db.stampdb import StampDB
+
 from db.mongodb.MongoTodoCollection import MongoTodoCollection
-from db.mongodb.MongoStampCollection import MongoStampCollection, MongoStampStatsCollection
+from db.mongodb.MongoStampCollection import MongoStampStatsCollection
 from db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
 from db.mongodb.MongoCommentCollection import MongoCommentCollection
-from db.mongodb.MongoAccountCollection import MongoAccountCollection
 from db.mongodb.MongoActivityCollection import MongoActivityCollection
 from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
 
@@ -47,15 +49,19 @@ class Stamps(APIObject):
 
     @lazyProperty
     def _userDB(self):
-        return MongoUserCollection()
+        return UserDB()
 
     @lazyProperty
     def _todoDB(self):
         return MongoTodoCollection()
+
+    @lazyProperty
+    def _likeDB(self):
+        return LikeDB()
     
     @lazyProperty
     def _stampDB(self):
-        return MongoStampCollection()
+        return StampDB()
 
     @lazyProperty
     def _entityDB(self):
@@ -64,10 +70,6 @@ class Stamps(APIObject):
     @lazyProperty
     def _commentDB(self):
         return MongoCommentCollection()
-    
-    @lazyProperty
-    def _accountDB(self):
-        return MongoAccountCollection()
     
     @lazyProperty
     def _activityDB(self):
@@ -334,7 +336,7 @@ class Stamps(APIObject):
 
             ### TODO: Intelligent matching with stampId
             # Likes
-            likes = self._stampDB.getUserLikes(authUserId)
+            likes = self._likeDB.get_for_user(authUserId)
 
             logs.debug('Time for authUserId queries: %s' % (time.time() - t1))
             t1 = time.time()
@@ -930,7 +932,7 @@ class Stamps(APIObject):
         MAX_PREVIEW             = 10
         stats.last_stamped      = stamp.timestamp.stamped
 
-        likes                   = self._stampDB.getStampLikes(stampId)
+        likes                   = self._likeDB.get(stampId)
         stats.num_likes         = len(likes)
         likes                   = likes[-MAX_PREVIEW:]
         likes.reverse()
