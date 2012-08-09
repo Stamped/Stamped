@@ -108,7 +108,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             modified_total |= modified
         return modified_total
 
-    def shouldEnrich(self, group, source, entity):
+    def shouldEnrich(self, group, source, entity, dataTimestamp=None):
         if group not in self.__groups:
             return False
 
@@ -131,6 +131,11 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         currentTimestamp = groupObj.getTimestamp(entity)
         if currentTimestamp is None:
             return True
+
+        dataTimestamp = dataTimestamp or self.now
+        if self.now - dataTimestamp > currentMaxAge:
+            # If the data we get from the source is too old, we don't even bother.
+            return False
         return self.now - currentTimestamp > currentMaxAge
 
     @property
