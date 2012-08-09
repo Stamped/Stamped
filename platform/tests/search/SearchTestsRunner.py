@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, sys, re, functools
+import argparse, os, sys, re, functools
 from gevent.pool import Pool
 from search import EntitySearch
 from tests.search.SearchResultsScorer import ExpectedResults, SearchResultsScorer
@@ -84,7 +84,7 @@ class TestResultsFile(object):
 
 
 
-record_results = False
+__flags = False
 
 class SearchTestsRunner(AStampedTestCase):
     def _run_tests(self, test_set_name, test_cases):
@@ -140,12 +140,10 @@ class SearchTestsRunner(AStampedTestCase):
         sys.stdin.readline()
 
 def main():
-    argv = sys.argv
-
-    record_results_flag = '--record_results'
-    if record_results_flag in argv:
-        del argv[argv.index(record_results_flag)]
-        global record_results
-        record_results = True
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--record_results', action='store_true', default=False)
+    global __flags
+    __flags, new_argv = parser.parse_known_args(sys.argv)
+    sys.argv[:] = new_argv[:]
 
     FixtureTest.main()
