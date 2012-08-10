@@ -14,7 +14,7 @@ from schema import Schema
 from api.accountapi import AccountAPI
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
-from servers.httpapi.v1.accounts.errors import account_exceptions
+from servers.httpapi.v1.account.errors import account_exceptions
 from servers.httpapi.v1.schemas import HTTPAccount
 
 # APIs

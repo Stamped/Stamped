@@ -12,7 +12,7 @@ from schema import Schema
 from api.accountapi import AccountAPI
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
-from servers.httpapi.v1.accounts.errors import account_exceptions
+from servers.httpapi.v1.account.errors import account_exceptions
 
 # APIs
 account_api = AccountAPI()
@@ -32,7 +32,7 @@ def run(request, auth_user_id, form, **kwargs):
     if len(form.token) != 64:
         raise StampedInputError('Invalid token length')
 
-    account_api.updateAPNSToken(auth_user_id, form.token)
+    account_api.removeAPNSTokenForUser(auth_user_id, form.token)
 
     return json_response(True)
 

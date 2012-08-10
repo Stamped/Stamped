@@ -10,11 +10,9 @@ __license__   = "TODO"
 
 from schema import Schema
 from api.accountapi import AccountAPI
-from api_old.SchemaValidation import validateHexColor
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
-from servers.httpapi.v1.accounts.errors import account_exceptions
-from servers.httpapi.v1.schemas import HTTPUser
+from servers.httpapi.v1.account.errors import account_exceptions
 
 # APIs
 account_api = AccountAPI()
@@ -23,18 +21,18 @@ account_api = AccountAPI()
 class HTTPForm(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('color_primary', basestring, required=True, cast=validateHexColor)
-        cls.addProperty('color_secondary', basestring, required=True, cast=validateHexColor)
+        cls.addProperty('token', basestring, required=True)
 
 # Set exceptions as list of exceptions 
 exceptions = account_exceptions
 
 @require_http_methods(["POST"])
 @stamped_http_api_request(form=HTTPForm, exceptions=exceptions)
-def run(request, auth_user_id, data, **kwargs):
-    account = account_api.customizeStamp(auth_user_id, data)
-    user = HTTPUser().importUser(account)
-    result = user.dataExport()
+def run(request, auth_user_id, form, **kwargs):
+    if len(form.token) != 64:
+        raise StampedInputError('Invalid token length')
 
-    return json_response(result)
+    account_api.updateAPNSToken(auth_user_id, form.token)
+
+    return json_response(True)
 

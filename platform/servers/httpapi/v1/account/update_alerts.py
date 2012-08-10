@@ -12,7 +12,8 @@ from schema import Schema
 from api.accountapi import AccountAPI
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
-from servers.httpapi.v1.accounts.errors import account_exceptions
+from servers.httpapi.v1.account.errors import account_exceptions
+from servers.httpapi.v1.account.helpers import build_alert_response
 
 # APIs
 account_api = AccountAPI()
@@ -21,7 +22,8 @@ account_api = AccountAPI()
 class HTTPForm(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('token', basestring, required=True)
+        cls.addProperty('on', basestring)
+        cls.addProperty('off', basestring)
 
 # Set exceptions as list of exceptions 
 exceptions = account_exceptions
@@ -29,10 +31,16 @@ exceptions = account_exceptions
 @require_http_methods(["POST"])
 @stamped_http_api_request(form=HTTPForm, exceptions=exceptions)
 def run(request, auth_user_id, form, **kwargs):
-    if len(form.token) != 64:
-        raise StampedInputError('Invalid token length')
+    on = None
+    if form.on is not None:
+        on = set(form.on.split(','))
 
-    account_api.removeAPNSTokenForUser(auth_user_id, form.token)
+    off = None
+    if form.off is not None:
+        off = set(form.off.split(','))
 
-    return json_response(True)
+    account = account_api.updateAlerts(auth_user_id, on, off)
+    result = build_alert_response(account)
+
+    return json_response(result)
 
