@@ -16,7 +16,7 @@ try:
     from copy                       import copy
     from resolve.GenericSource      import GenericSource, multipleSource, listSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
-    from pprint                     import pformat
+    from pprint                     import pformat, pprint
     from gevent.pool                import Pool
     from resolve.Resolver           import *
     from resolve.ResolverObject     import *
@@ -266,12 +266,6 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
     # TODO: We also have track # information which might be useful for de-duping against Amazon and possibly others.
 
 
-class SpotifySearchAll(ResolverProxy, ResolverSearchAll):
-
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
 class SpotifySource(GenericSource):
     """
     """
@@ -365,27 +359,6 @@ class SpotifySource(GenericSource):
         
         artists = self.__spotify.search('artist', q=q, timeout=MERGE_TIMEOUT)['artists']
         return listSource(artists, constructor=lambda x: SpotifyArtist(x['href'], data=x))
-
-    def searchAllSource(self, query, timeout=None):
-        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
-            return self.emptySource
-
-        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
-            logs.debug('Skipping %s (types: %s)' % (self.sourceName, query.types))
-            return self.emptySource
-
-        logs.debug('Searching %s...' % self.sourceName)
-            
-        q = query.query_string
-        return multipleSource(
-            [
-                lambda : self.artistSource(query_string=q),
-                lambda : self.albumSource(query_string=q),
-                lambda : self.trackSource(query_string=q),
-            ],
-            constructor=SpotifySearchAll
-        )
 
     def __augmentArtistsAndAlbumsWithTracks(self, artistSearchResults, albumSearchResults, trackSearchResults):
         """
