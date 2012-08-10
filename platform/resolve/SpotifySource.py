@@ -27,6 +27,10 @@ except:
     raise
 
 
+def available_in_us(item):
+    return 'US' in item['availability']['territories']
+
+
 class _SpotifyObject(object):
     """
     Abstract superclass (mixin) for Spotify objects.
@@ -135,7 +139,7 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
                 'key'   : entry['album']['href'],
             }
                 for entry in album_list
-                    if entry['album']['artist'] == self.name and entry['album']['availability']['territories'].find('US') != -1
+                    if entry['album']['artist'] == self.name and available_in_us(entry['album'])
         ]
 
     @lazyProperty
@@ -331,6 +335,7 @@ class SpotifySource(GenericSource):
             raise ValueError("query and query_string cannot both be None")
         
         tracks = self.__spotify.search('track', q=q, timeout=MERGE_TIMEOUT)['tracks']
+        tracks = filter(available_in_us, tracks)
         return listSource(tracks, constructor=lambda x: SpotifyTrack(x['href'], data=x))
 
     def albumSource(self, query=None, query_string=None):
@@ -342,7 +347,7 @@ class SpotifySource(GenericSource):
             raise ValueError("query and query_string cannot both be None")
         
         albums = self.__spotify.search('album',q=q, timeout=MERGE_TIMEOUT)['albums']
-        albums = [ entry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
+        albums = filter(available_in_us, albums)
         return listSource(albums, constructor=lambda x: SpotifyAlbum(x['href'], data=x))
 
 
