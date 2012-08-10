@@ -8,14 +8,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from api_old.Schemas import Account
-
-from schema import Schema
 from api.accountapi import AccountAPI
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
 from servers.httpapi.v1.accounts.errors import account_exceptions
-from servers.httpapi.v1.schemas import HTTPAccount
+from servers.httpapi.v1.accounts.helpers import build_alert_response
 
 # APIs
 account_api = AccountAPI()
@@ -27,8 +24,7 @@ exceptions = account_exceptions
 @stamped_http_api_request(exceptions=exceptions)
 def run(request, auth_user_id, **kwargs):
     account = account_api.get(auth_user_id)
-    account = HTTPAccount().importAccount(account)
-    result = account.dataExport()
+    result = build_alert_response(account)
 
     return json_response(result)
 
