@@ -7,11 +7,11 @@ __license__   = 'TODO'
 
 import Globals
 
-from db.mongodb.AMongoCollection import AMongoCollection
+from api.db.mongodb.AMongoCollection import AMongoCollection
 from bson import ObjectId
 
 
-class MongoFBCallbackTokenCollection(AMongoCollection):
+class MongoCallbackTokenCollection(AMongoCollection):
 
     def __init__(self):
         AMongoCollection.__init__(self, collection='userfbcallbacktokens')

@@ -750,11 +750,11 @@ class HTTPNetflixId(Schema):
 class HTTPNetflixAuthResponse(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('stamped_oauth_token',              basestring)
+        cls.addProperty('state',                            basestring)
         cls.addProperty('netflix_add_id',                   basestring)
-        cls.addProperty('oauth_token',                      basestring)
+        cls.addProperty('thirdparty_oauth_token',           basestring)
+        cls.addProperty('thirdparty_oauth_verifier',        basestring)
         cls.addProperty('secret',                           basestring)
-        cls.addProperty('oauth_verifier',                   basestring)
 
 class HTTPFacebookAuthResponse(Schema):
     @classmethod
@@ -1231,11 +1231,11 @@ class HTTPEntity(Schema):
         self.desc               = entity.desc
         self.last_modified      = entity.timestamp.created
 
-        subcategory             = self._formatSubcategory(self.subcategory)
-
         # Temporary hack to fix bug in 2.0.1 that displays "an place"
-        if subcategory == 'establishment':
-            subcategory = 'place'
+        if self.subcategory == 'establishment':
+            self.subcategory = 'place'
+            
+        subcategory             = self._formatSubcategory(self.subcategory)
 
         # Place
         if entity.kind == 'place':

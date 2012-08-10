@@ -89,7 +89,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                 # TODO: This is a dictionary for legacy reasons, it should really be a set.
                 timestamps = {}
                 localDecorations = {} # opaque decorations, for group object based extensions (i.e. Menus)
-                #logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
+                logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
                 groupObjs = [self.getGroup(group) for group in targetGroups]
                 try:
                     enriched = source.enrichEntity(copy, groupObjs, self, localDecorations, timestamps)

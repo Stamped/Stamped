@@ -135,6 +135,49 @@ def handleStampedExceptions(e, handlers=None):
 
         return transformOutput(error, status=500)
 
+def handleThirdPartyOAuthToken():
+    """
+        We use this decorator to rename oauth fields in a request to 'thirdparty_<field>', for the rare cases
+         where third party service callbacks use oauth fields that conflict with our expected oauth field names.
+         Currently, only Netflix does this by attaching the 'oauth_token' field in the login callback request.
+    """
+    def decorator(fn):
+        # NOTE (travis): if you hit this assertion, you're likely using the
+        # handleHTTPRequest incorrectly.
+        assert callable(fn)
+
+        @wraps(fn)
+        def wrapper(request, *args, **kwargs):
+            if request.method == 'GET':
+                get = request.GET.copy()
+                if 'oauth_token' in request.GET:
+                    get['thirdparty_oauth_token'] = get['oauth_token']
+                    del(get['oauth_token'])
+                if 'oauth_token_secret' in request.GET:
+                    get['thirdparty_oauth_token_secret'] = get['oauth_token_secret']
+                    del(get['oauth_token_secret'])
+                if 'oauth_verifier' in request.GET:
+                    get['thirdparty_oauth_verifier'] = get['oauth_verifier']
+                    del(get['oauth_verifier'])
+                request.GET = get
+            if request.method == 'POST':
+                post = request.POST.copy()
+                if 'oauth_token' in request.POST:
+                    post['thirdparty_oauth_token'] = post['oauth_token']
+                    del(post['oauth_token'])
+                if 'oauth_token_secret' in request.POST:
+                    post['thirdparty_oauth_token_secret'] = post['oauth_token_secret']
+                    del(post['oauth_token_secret'])
+                if 'oauth_verifier' in request.POST:
+                    post['thirdparty_oauth_verifier'] = post['oauth_verifier']
+                    del(post['oauth_verifier'])
+                request.POST = post
+            ret = fn(request, *args, **kwargs)
+            return ret
+
+        return wrapper
+    return decorator
+
 def handleHTTPRequest(requires_auth=True, 
                       requires_client=False,
                       http_schema=None,
@@ -223,7 +266,8 @@ def handleHTTPRequest(requires_auth=True,
                         logs.debug("Origin not included")
                 
                 params = {}
-                params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request, required=requires_auth)
+
+                params['authUserId'], params['authClientId'] = checkOAuthWithRequest(request, requires_auth)
                 params['client_id'] = checkClient(request, required=requires_client)
                 
                 if parse_request:
@@ -266,77 +310,6 @@ def handleHTTPRequest(requires_auth=True,
                     import traceback
                     traceback.print_exc()
                     logs.warning(traceback.format_exc())
-
-        return wrapper
-    return decorator
-
-
-
-def handleHTTPCallbackRequest(
-        requires_auth=True,
-        http_schema=None,
-        conversion=None,
-        parse_request_kwargs=None,
-        parse_request=True,
-        exceptions=None):
-
-    def decorator(fn):
-        # NOTE (travis): if you hit this assertion, you're likely using the
-        # handleHTTPRequest incorrectly.
-        assert callable(fn)
-
-        @wraps(fn)
-        def wrapper(request, *args, **kwargs):
-            try:
-                logs.begin(saveLog=stampedAPI._logsDB.saveLog,
-                    saveStat=stampedAPI._statsDB.addStat,
-                    requestData=request,
-                    nodeName=stampedAPI.node_name)
-                logs.info("%s %s" % (request.method, request.path))
-
-                params = {}
-                oauth_token = None
-
-                if requires_auth:
-                    if 'stamped_oauth_token' in request.GET:
-                        oauth_token = request.GET['stamped_oauth_token']
-                    elif 'stamped_oauth_token' in request.POST:
-                        oauth_token = request.POST['stamped_oauth_token']
-                    elif 'oauth_token' in request.GET:
-                        oauth_token = request.GET['oauth_token']
-                    elif 'oauth_token' in request.POST:
-                        oauth_token = request.POST['oauth_token']
-                    else:
-                        raise StampedInputError("Access token not found")
-
-                    params['authUserId'], params['authClientId'] = checkOAuth(oauth_token, required=False)
-
-                if parse_request:
-                    parse_kwargs = parse_request_kwargs or { 'allow_oauth_token' : True }
-
-                    if http_schema is not None:
-                        params['http_schema']   = parseRequest(http_schema(), request, **parse_kwargs)
-                    else:
-                        params['http_schema']   = parseRequest(None, request, **parse_kwargs)
-
-                    if conversion is not None:
-                        params['schema']        = conversion(params['http_schema'])
-                    elif http_schema is not None:
-                        params['data']          = params['http_schema'].data_export()
-
-                kwargs.update(params)
-                ret = fn(request, *args, **kwargs)
-                logs.info("End request: Success")
-
-                return ret
-
-            except Exception as e:
-                handleStampedExceptions(e, exceptions)
-            finally:
-                try:
-                    logs.save()
-                except Exception:
-                    print 'Unable to save logs'
 
         return wrapper
     return decorator
@@ -388,9 +361,9 @@ def checkOAuthWithRequest(request, required=True):
             return None, None
         raise StampedHTTPError(400, "invalid_request")
 
-    return checkOAuth(oauth_token, required)
+    return checkOAuth(oauth_token)
 
-def checkOAuth(oauth_token, required=True):
+def checkOAuth(oauth_token):
     logs.token(oauth_token)
 
     ### Validate OAuth Access Token
@@ -432,8 +405,7 @@ def parseRequest(schema, request, **kwargs):
                 v = None
             data[k] = v
 
-        if not kwargs.get('allow_oauth_token', False):
-            data.pop('oauth_token', None)
+        data.pop('oauth_token', None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
         
@@ -494,8 +466,7 @@ def parseFileUpload(schema, request, fileName='image', **kwargs):
             data[fileName] = f.read()
             logs.attachment(fileName, f.size)
 
-        if not kwargs.get('allow_oauth_token', False):
-            data.pop('oauth_token',   None)
+        data.pop('oauth_token',   None)
         data.pop('client_id', None)
         data.pop('client_secret', None)
         

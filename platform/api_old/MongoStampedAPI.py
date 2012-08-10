@@ -42,8 +42,8 @@ from db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
 from db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
 from db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
-from db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
-from db.mongodb.MongoFBCallbackTokenCollection  import MongoFBCallbackTokenCollection
+from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
+from api.db.mongodb.MongoCallbackTokenCollection  import MongoCallbackTokenCollection
 
 
 class MongoStampedAPI(StampedAPI):
@@ -179,8 +179,8 @@ class MongoStampedAPI(StampedAPI):
         return MongoAsyncTasksCollection()
 
     @lazyProperty
-    def _fbCallbackTokenDB(self):
-        return MongoFBCallbackTokenCollection()
+    def _callbackTokenDB(self):
+        return MongoCallbackTokenCollection()
 
 
     @lazyProperty

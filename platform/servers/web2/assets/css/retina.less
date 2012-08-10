@@ -27,8 +27,6 @@
 #stamped-logo, .stamped-logo {
     background: url(/assets/img/index/stamped-logo@2x.png) no-repeat;
     .background-size(184px, 184px);
-    //width:  368px;
-    //height: 368px;
 }
 
 
@@ -208,9 +206,9 @@
 
 .social-feedback {
     .social-feedback-image(@l, @t) {
-        background: url(/assets/img/feedbackicons_sprite_large@2x.png) no-repeat;
-        background-position: @l @t;
-        .background-size(17px, 17px);
+        background: url(/assets/img/feedbackicons_sprite_large.1@2x.png) no-repeat;
+        background-position: @l @t !important;
+        .background-size(19px * 3 - 2, 17px * 2);
     }
     
     .social-feedback-like {
@@ -247,7 +245,7 @@
 
 
 #stamped-desc {
-    background: url(/assets/img/stamped_is_sprite@2x.png) no-repeat;
+    background: url(/assets/img/stamped_is_sprite.1@2x.png) no-repeat;
     .background-size(215px * 2, 86px);
 }
 
@@ -263,7 +261,7 @@
 
 /*
 .action-icon, .source {
-    background: url(/assets/img/edetail-sprite@2x.png) no-repeat !important;
+    background: url(/assets/img/edetail-sprite.1@2x.png) no-repeat !important;
     .background-size(18px * 11, 18px * 3);
 }
 

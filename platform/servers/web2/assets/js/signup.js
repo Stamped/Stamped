@@ -31,6 +31,20 @@
             return false;
         };
         
+        var open_popup_intro = function() {
+            var popup_options = g_get_fancybox_popup_large_options({
+                content     : $("#popup-intro").html(), 
+                type        : "html", 
+                width       : 480, 
+                minWidth    : 480
+            });
+            
+            popup_options.helpers.overlay.opacity = 0.7;
+            
+            $.fancybox.open(popup_options);
+            return false;
+        };
+        
         $body.on("click", ".download-stamped-popup", function(event) {
             event.preventDefault();
             
@@ -129,21 +143,48 @@
             return false;
         });
         
-        // autoshow the signup popup if certain conditions are met
+        // autoshow the intro popup if certain conditions are met
         if (g_page === "profile" || g_page === "sdetail") {
             var screen_name         = STAMPED_PRELOAD.user.screen_name;
             var screen_name_lower   = screen_name.toLowerCase();
             var referrer            = document.referrer;
             var likely_tweet = true; //(!!referrer && !!referrer.match(/.*(t\.co|twitter\.com|facebook\.com|m\.facebook\.com).*/i));
             
-            if (likely_tweet && (screen_name === "travis" || screen_name === "justinbieber" || screen_name === "ellendegeneres")) {
-                var key = "stamped.v1.cookies.popups.signup";
+            var callout_users = {
+                'travis'            : true, 
+                'robby'             : true, 
+                'scooterbraun'      : true, 
+                'kennyhamilton'     : true, 
+                'alfredoflores'     : true, 
+                'hoogs'             : true, 
+                'justinbieber'      : true, 
+                'urbandaddy'        : true, 
+                'nymag'             : true, 
+                'michaelkors'       : true, 
+                'parislemon'        : true, 
+                'ellendegeneres'    : true, 
+                'ryanseacrest'      : true, 
+                'nytimes'           : true, 
+                'time'              : true, 
+                'nickswisher'       : true, 
+                'passionpit'        : true, 
+                'kevinrose'         : true, 
+                'harvard'           : true, 
+                'barondavis'        : true, 
+                'tconrad'           : true, 
+                'bostonglobe'       : true
+            };
+            
+            if (likely_tweet && (screen_name in callout_users)) {
+                var key = "stamped.v1.cookies.popups.intro";
                 
-                if (!$.cookie(key)) {
-                    $.cookie(key, "true", { expires: 30, path: '/' });
-                    
-                    open_popup_signup();
-                }
+                setTimeout(function() {
+                    if (!$.cookie(key)) {
+                        $.cookie(key, "true", { expires: 30, path: '/' });
+                        
+                        open_popup_intro();
+                    }
+                }, 1000);
             }
         }
     });

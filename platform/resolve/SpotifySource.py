@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-"""
-"""
-
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -19,7 +16,7 @@ try:
     from copy                       import copy
     from resolve.GenericSource      import GenericSource, multipleSource, listSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
-    from pprint                     import pformat
+    from pprint                     import pformat, pprint
     from gevent.pool                import Pool
     from resolve.Resolver           import *
     from resolve.ResolverObject     import *
@@ -28,6 +25,20 @@ try:
 except:
     report()
     raise
+
+
+def available_in_us(item):
+    # Most items have the availability field, but in the case of tracks, sometimes the availability is marked on the
+    # album instead...
+    try:
+        territories = item['availability']['territories']
+    except KeyError:
+        pass
+    try:
+        territories = item['album']['availability']['territories']
+    except KeyError:
+        return True
+    return not territories or 'US' in territories
 
 
 class _SpotifyObject(object):
@@ -138,7 +149,7 @@ class SpotifyArtist(_SpotifyObject, ResolverPerson):
                 'key'   : entry['album']['href'],
             }
                 for entry in album_list
-                    if entry['album']['artist'] == self.name and entry['album']['availability']['territories'].find('US') != -1
+                    if entry['album']['artist'] == self.name and available_in_us(entry['album'])
         ]
 
     @lazyProperty
@@ -269,12 +280,6 @@ class SpotifyTrack(_SpotifyObject, ResolverMediaItem):
     # TODO: We also have track # information which might be useful for de-duping against Amazon and possibly others.
 
 
-class SpotifySearchAll(ResolverProxy, ResolverSearchAll):
-
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
 class SpotifySource(GenericSource):
     """
     """
@@ -329,9 +334,6 @@ class SpotifySource(GenericSource):
             return self.albumSource(query)
         if query.kind == 'media_item' and query.isType('track'):
             return self.trackSource(query)
-        if query.kind == 'search':
-            return self.searchAllSource(query)
-        
         return self.emptySource
 
     def trackSource(self, query=None, query_string=None):
@@ -343,6 +345,7 @@ class SpotifySource(GenericSource):
             raise ValueError("query and query_string cannot both be None")
         
         tracks = self.__spotify.search('track', q=q, timeout=MERGE_TIMEOUT)['tracks']
+        tracks = filter(available_in_us, tracks)
         return listSource(tracks, constructor=lambda x: SpotifyTrack(x['href'], data=x))
 
     def albumSource(self, query=None, query_string=None):
@@ -354,7 +357,7 @@ class SpotifySource(GenericSource):
             raise ValueError("query and query_string cannot both be None")
         
         albums = self.__spotify.search('album',q=q, timeout=MERGE_TIMEOUT)['albums']
-        albums = [ entry for entry in albums if entry['availability']['territories'].find('US') != -1 ]
+        albums = filter(available_in_us, albums)
         return listSource(albums, constructor=lambda x: SpotifyAlbum(x['href'], data=x))
 
 
@@ -368,27 +371,6 @@ class SpotifySource(GenericSource):
         
         artists = self.__spotify.search('artist', q=q, timeout=MERGE_TIMEOUT)['artists']
         return listSource(artists, constructor=lambda x: SpotifyArtist(x['href'], data=x))
-
-    def searchAllSource(self, query, timeout=None):
-        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
-            return self.emptySource
-
-        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
-            logs.debug('Skipping %s (types: %s)' % (self.sourceName, query.types))
-            return self.emptySource
-
-        logs.debug('Searching %s...' % self.sourceName)
-            
-        q = query.query_string
-        return multipleSource(
-            [
-                lambda : self.artistSource(query_string=q),
-                lambda : self.albumSource(query_string=q),
-                lambda : self.trackSource(query_string=q),
-            ],
-            constructor=SpotifySearchAll
-        )
 
     def __augmentArtistsAndAlbumsWithTracks(self, artistSearchResults, albumSearchResults, trackSearchResults):
         """
@@ -427,7 +409,8 @@ class SpotifySource(GenericSource):
         tracks, albums, artists = [], [], []
         def conductTypeSearch((target, proxyClass, typeString, resultsKey)):
             rawResults = self.__spotify.search(typeString, q=queryText, priority='high', timeout=SEARCH_TIMEOUT)[resultsKey]
-            target.extend([proxyClass(rawResult['href'], data=rawResult, maxLookupCalls=0) for rawResult in rawResults])
+            target.extend([proxyClass(rawResult['href'], data=rawResult, maxLookupCalls=0)
+                for rawResult in rawResults if available_in_us(rawResult)])
         typeSearches = (
             (tracks, SpotifyTrack, 'track', 'tracks'),
             (albums, SpotifyAlbum, 'album', 'albums'),

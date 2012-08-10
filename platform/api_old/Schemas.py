@@ -1653,6 +1653,35 @@ class Todo(Schema):
 # Activity #
 # ######## #
 
+class RawActivityObjectId(Schema):
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('user_id',                          basestring)
+        cls.addProperty('stamp_id',                         basestring)
+        cls.addProperty('entity_id',                        basestring)
+        cls.addProperty('comment_id',                       basestring)
+
+
+class RawActivity(Schema):
+    @classmethod
+    def setSchema(cls):
+        # Metadata
+        cls.addProperty('activity_id',                      basestring)
+
+        # Structure
+        cls.addProperty('verb',                             basestring, required=True)
+        cls.addProperty('subject',                          basestring)
+        cls.addNestedProperty('objects',                    RawActivityObjectId)
+        cls.addProperty('source',                           basestring)
+        cls.addProperty('benefit',                          int)
+        cls.addNestedProperty('timestamp',                  BasicTimestamp, required=True)
+
+        # Text
+        cls.addProperty('header',                           basestring)
+        cls.addProperty('body',                             basestring)
+        cls.addProperty('footer',                           basestring)
+
+
 class ActivityObjects(Schema):
     @classmethod
     def setSchema(cls):
@@ -1660,6 +1689,7 @@ class ActivityObjects(Schema):
         cls.addNestedPropertyList('stamps',                 Stamp)
         cls.addNestedPropertyList('entities',               BasicEntityMini)
         cls.addNestedPropertyList('comments',               Comment)
+
 
 class ActivityObjectIds(Schema):
     @classmethod
@@ -1669,6 +1699,7 @@ class ActivityObjectIds(Schema):
         cls.addPropertyList('entity_ids',                   basestring)
         cls.addPropertyList('comment_ids',                  basestring)
 
+
 class ActivityLink(Schema):
     @classmethod
     def setSchema(cls):
@@ -1677,6 +1708,7 @@ class ActivityLink(Schema):
         cls.addProperty('user_id',                          basestring, required=True)
         cls.addNestedProperty('timestamp',                  BasicTimestamp)
 
+
 class ActivityReference(Schema):
     @classmethod
     def setSchema(cls):
@@ -1684,6 +1716,7 @@ class ActivityReference(Schema):
         cls.addProperty('stamp_id',                         basestring)
         cls.addProperty('entity_id',                        basestring)
         cls.addPropertyList('indices',                      int)
+
 
 class Activity(Schema):
     @classmethod
@@ -1766,6 +1799,7 @@ class Activity(Schema):
                 result.objects.comments = commentobjects
 
         return result
+
 
 class EnrichedActivity(Schema):
     @classmethod

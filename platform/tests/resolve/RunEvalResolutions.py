@@ -6,6 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
+import argparse
 import inspect
 import os
 import pickle
@@ -44,7 +45,7 @@ SOURCES = {
     'netflix_id' : NetflixSource(),
 }
 
-OUTPUT_PREFIX = 'tmp'
+FLAGS = None
 
 class RunEvalResolutions(AStampedTestCase):
     @fixtureTest(useLocalDb=True)
@@ -105,7 +106,7 @@ class RunEvalResolutions(AStampedTestCase):
         |      %s
         \\---------------------------------------------
         """
-        tmpPrefix = category + '-' + OUTPUT_PREFIX
+        tmpPrefix = category + '-' + FLAGS.output_prefix
         with tempfile.NamedTemporaryFile(prefix=tmpPrefix, delete=False) as output:
             pickle.dump(resolutionResult, output)
             if formattedErrors:
@@ -166,15 +167,9 @@ class RunEvalResolutions(AStampedTestCase):
 
 
 if __name__ == '__main__':
-    # Hacky command line parsing. Modify argv in place, because main() will do its own parsing
-    # later.
-    for i, arg in enumerate(sys.argv):
-        if arg.startswith('--prefix'):
-            if arg == '--prefix':
-                OUTPUT_PREFIX = argv[i+1]
-                del argv[i]
-            elif arg.startswith('--prefix='):
-                OUTPUT_PREFIX = arg[9:]
-            del argv[i]
-            break
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--prefix', action='store', default='tmp', dest='output_prefix')
+    FLAGS, new_argv = parser.parse_known_args(sys.argv)
+    sys.argv[:] = new_argv[:]
+
     main()
