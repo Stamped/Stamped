@@ -320,9 +320,6 @@ class SpotifySource(GenericSource):
             return self.albumSource(query)
         if query.kind == 'media_item' and query.isType('track'):
             return self.trackSource(query)
-        if query.kind == 'search':
-            return self.searchAllSource(query)
-        
         return self.emptySource
 
     def trackSource(self, query=None, query_string=None):
