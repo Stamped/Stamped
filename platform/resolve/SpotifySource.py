@@ -409,7 +409,8 @@ class SpotifySource(GenericSource):
         tracks, albums, artists = [], [], []
         def conductTypeSearch((target, proxyClass, typeString, resultsKey)):
             rawResults = self.__spotify.search(typeString, q=queryText, priority='high', timeout=SEARCH_TIMEOUT)[resultsKey]
-            target.extend([proxyClass(rawResult['href'], data=rawResult, maxLookupCalls=0) for rawResult in rawResults])
+            target.extend([proxyClass(rawResult['href'], data=rawResult, maxLookupCalls=0)
+                for rawResult in rawResults if available_in_us(rawResult)])
         typeSearches = (
             (tracks, SpotifyTrack, 'track', 'tracks'),
             (albums, SpotifyAlbum, 'album', 'albums'),
