@@ -301,8 +301,8 @@ class logsQuery(object):
             self.statCountByNode = {}
             self.statTimeByNode = {}
             
-            t1 = t0 + datetime.timedelta(0,i*interval)
-            t2 = t0 + datetime.timedelta(0,(i+1)*interval)
+            t1 = t0 + timedelta(0,i*interval)
+            t2 = t0 + timedelta(0,(i+1)*interval)
             
             pool = Pool(32)
         
