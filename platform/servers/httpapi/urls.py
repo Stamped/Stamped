@@ -102,11 +102,11 @@ urlpatterns = patterns('',
 
     ### FRIENDS
     (r'v1/friendships/create.json',                         'v1.friendships.create.run'),
-    (r'v1/friendships/remove.json',                         'v0.functions.friendships.remove'),
-    (r'v1/friendships/check.json',                          'v0.functions.friendships.check'),
-    (r'v1/friendships/friends.json',                        'v0.functions.friendships.friends'),
-    (r'v1/friendships/followers.json',                      'v0.functions.friendships.followers'),
-    (r'v1/friendships/invite.json',                         'v0.functions.friendships.invite'),
+    (r'v1/friendships/remove.json',                         'v1.friendships.remove.run'),
+    (r'v1/friendships/check.json',                          'v1.friendships.check.run'),
+    (r'v1/friendships/friends.json',                        'v1.friendships.friends.run'),
+    (r'v1/friendships/followers.json',                      'v1.friendships.followers.run'),
+    (r'v1/friendships/invite.json',                         'v1.friendships.invite.run'),
     
     ### ENTITIES
     (r'v1/entities/create.json',                            'v0.functions.entities.create'),

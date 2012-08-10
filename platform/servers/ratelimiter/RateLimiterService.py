@@ -20,7 +20,7 @@ import servers.ratelimiter.RateLimiter2
 from servers.ratelimiter.RateLimiter2       import RateLimiter, Request
 from libs.ec2_utils     import get_stack
 
-from api.db.mongodb.MongoRateLimiterLogCollection import MongoRateLimiterLogCollection
+from db.mongodb.MongoRateLimiterLogCollection import MongoRateLimiterLogCollection
 
 
 LIMITS_DIR = os.path.dirname(servers.ratelimiter.RateLimiter2.__file__)

@@ -8,14 +8,11 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import logs
-
 from schema import Schema
-from api_old.SchemaValidation import validateUserId, validateScreenName
+from api_old.SchemaValidation import validateEmails
 from api.friendshipapi import FriendshipAPI
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
-from servers.httpapi.v1.schemas import HTTPUser
 from servers.httpapi.v1.friendships.errors import friendship_exceptions
 
 # APIs
@@ -25,8 +22,7 @@ friendship_api = FriendshipAPI()
 class HTTPForm(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('user_id', basestring, cast=validateUserId)
-        cls.addProperty('screen_name', basestring, cast=validateScreenName)
+        cls.addProperty('emails', basestring, cast=validateEmails)
 
 # Set exceptions as list of exceptions 
 exceptions = friendship_exceptions
@@ -35,10 +31,8 @@ exceptions = friendship_exceptions
 @stamped_http_api_request(form=HTTPForm, exceptions=exceptions)
 def run(request, auth_user_id, form, **kwargs):
     ### TODO: This should not be passing the form!
-    user = friendship_api.addFriendship(auth_user_id, form)
-    user = HTTPUser().importUser(user)
+    emails = form.emails.split(',')
+    friendship_api.inviteFriends(auth_user_id, emails)
 
-    result = user.dataExport()
-
-    return json_response(result)
+    return json_response(True)
 

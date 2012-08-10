@@ -57,40 +57,6 @@ def followers(request, authUserId, http_schema, **kwargs):
     
     return transformOutput(output)
 
-@require_http_methods(["POST"])
-@handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
-def blocksCreate(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.friendships.addBlock(authUserId, http_schema)
-    user = HTTPUser().importUser(user)
-    
-    return transformOutput(user.dataExport())
-
-
-@require_http_methods(["GET"])
-@handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
-def blocksCheck(request, authUserId, http_schema, **kwargs):
-    result = stampedAPI.friendships.checkBlock(authUserId, http_schema)
-
-    return transformOutput(result)
-
-
-@require_http_methods(["GET"])
-@handleHTTPRequest(exceptions=friendshipExceptions)
-def blocking(request, authUserId, **kwargs):
-    userIds = stampedAPI.friendships.getBlocks(authUserId)
-    output  = { 'user_ids' : userIds }
-    
-    return transformOutput(output)
-
-
-@require_http_methods(["POST"])
-@handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
-def blocksRemove(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.friendships.removeBlock(authUserId, http_schema)
-    user = HTTPUser().importUser(user)
-    
-    return transformOutput(user.dataExport())
-
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPEmails, exceptions=friendshipExceptions)

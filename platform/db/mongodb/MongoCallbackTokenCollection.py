@@ -7,7 +7,7 @@ __license__   = 'TODO'
 
 import Globals
 
-from api.db.mongodb.AMongoCollection import AMongoCollection
+from db.mongodb.AMongoCollection import AMongoCollection
 from bson import ObjectId
 
 

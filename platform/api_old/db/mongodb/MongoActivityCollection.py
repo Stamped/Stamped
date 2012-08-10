@@ -13,6 +13,7 @@ from utils                              import lazyProperty
 from api_old.Schemas                            import *
 
 from api_old.AActivityDB                        import AActivityDB
+from db.mongodb.AMongoCollection import AMongoCollection
 from db.mongodb.MongoAlertQueueCollection          import MongoAlertQueueCollection
 from db.mongodb.MongoActivityItemCollection        import MongoActivityItemCollection
 from db.mongodb.MongoActivityLinkCollection        import MongoActivityLinkCollection

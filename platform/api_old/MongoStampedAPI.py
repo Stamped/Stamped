@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import absolute_import
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -33,17 +35,15 @@ from db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
 from db.mongodb.MongoMenuCollection             import MongoMenuCollection
 from db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
 from db.mongodb.MongoLogsCollection             import MongoLogsCollection
-from db.mongodb.MongoStatsCollection            import MongoStatsCollection
 from db.mongodb.MongoGuideCollection            import MongoGuideCollection
 from db.mongodb.MongoAuthAccessTokenCollection  import MongoAuthAccessTokenCollection
 from db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshTokenCollection
 from db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 from db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
-from db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
 from db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
-from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
-from api.db.mongodb.MongoCallbackTokenCollection  import MongoCallbackTokenCollection
+from db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
+from db.mongodb.MongoCallbackTokenCollection  import MongoCallbackTokenCollection
 
 
 class MongoStampedAPI(StampedAPI):

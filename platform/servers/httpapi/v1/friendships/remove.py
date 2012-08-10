@@ -35,7 +35,7 @@ exceptions = friendship_exceptions
 @stamped_http_api_request(form=HTTPForm, exceptions=exceptions)
 def run(request, auth_user_id, form, **kwargs):
     ### TODO: This should not be passing the form!
-    user = friendship_api.addFriendship(auth_user_id, form)
+    user = friendship_api.removeFriendship(auth_user_id, form)
     user = HTTPUser().importUser(user)
 
     result = user.dataExport()
