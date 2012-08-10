@@ -111,7 +111,7 @@ def handleStampedExceptions(e, handlers=None):
             if message is not None:
                 error['message'] = unicode(message)
 
-            return transformOutput(error, status=code)
+            return json_response(error, status=code)
     else:
         error = {
             'error' :   'stamped_error',
@@ -134,7 +134,7 @@ def handleStampedExceptions(e, handlers=None):
             except Exception as e:
                 logs.warning('UNABLE TO SEND EMAIL: %s')
 
-        return transformOutput(error, status=500)
+        return json_response(error, status=500)
 
 def stamped_http_api_request(requires_auth=True, 
                             requires_client=False,

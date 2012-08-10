@@ -326,14 +326,12 @@ class MongoAccountCollection(AMongoCollection, AAccountDB):
         except Exception:
             raise StampedAccountNotFoundError("Account not found in database")
         return self._convertFromMongo(document)
-    
-    def getAccountByScreenName(self, screen_name):
-        try:
-            screen_name = screen_name.lower()
-            document = self._collection.find({ 'screen_name_lower' : screen_name }, forcePrimary=True)
-        except Exception:
-            raise StampedAccountNotFoundError("Account not found")
-        
+
+    def getAccountByScreenName(self, screenName):
+        screenName = str(screenName).lower()
+        document = self._collection.find_one({"screen_name_lower": screenName})
+        if document is None:
+            raise StampedAccountNotFoundError("Unable to find account (%s)" % screenName)
         return self._convertFromMongo(document)
     
     def getAccounts(self, userIds, limit=0):

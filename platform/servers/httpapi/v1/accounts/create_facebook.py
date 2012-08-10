@@ -13,6 +13,7 @@ import logs
 from api_old.Schemas import FacebookAccountNew
 
 from schema import Schema
+from errors import StampedLinkedAccountAlreadyExistsError, StampedThirdPartyError
 from api_old.SchemaValidation import validateEmail, validateString, validateURL, validateHexColor, validateScreenName, parsePhoneNumber
 from api.accountapi import AccountAPI
 from api.oauthapi import OAuthAPI
