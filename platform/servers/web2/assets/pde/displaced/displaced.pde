@@ -2,7 +2,7 @@
  * 
  * @author: Travis Fischer
  * @date:   December 2008 (Java)
- * @port:   August 2012 to processing.js
+ * @port:   August 2012 to processing
  */
 
 /* @pjs preload="displaced1.jpeg"; */
@@ -84,7 +84,7 @@ void update() {
                     x = (i * avg) >> 10;
                     y = (j * avg) >> 10;
                     
-                    // Boundary checks
+                    // boundary checks
                     x = (x <= 0 ? 0 : (x >= width  ? width  - 1 : x));
                     y = (y <= 0 ? 0 : (y >= height ? height - 1 : y));
                 }
@@ -115,6 +115,7 @@ void loadBackground(PImage image) {
 void disturb(int x, int y) {
     _rippleRadius = int(random(1, 3));
     
+    // apply a weighted filter to the height-field centered around the disturbance point
     for(int j = -_rippleRadius; j <= _rippleRadius; j++) {
         int val = (int)(8 - _rippleRadius - abs(j));
         

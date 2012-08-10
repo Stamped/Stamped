@@ -2,7 +2,7 @@
  * 
  * @author: Travis Fischer
  * @date:   December 2008 (Java)
- * @port:   August 2012 to processing.js
+ * @port:   August 2012 to processing
  */
 
 static int SIMULATION_WIDTH  = 640;
@@ -54,6 +54,132 @@ void update() {
 
 void mouseClicked() {
     particles.add(new Particle(mouseX, mouseY));
+}
+
+class Particle {
+    // position
+    float _x;
+    float _y;
+    
+    // direction
+    float _theta;
+    float _dTheta;
+    
+    // current thickness
+    float _size;
+    
+    // number of frames until this particle will branch next
+    int _length;
+    
+    // particle's fill color
+    color _fill;
+    
+    // creates a particle at a random location and size
+    Particle() {
+        this(random(0.0, width - 1.0), random(0.0, height - 1.0));
+    }
+    
+    // creates a particle with a random size
+    Particle(float x, float y) {
+        this(x, y, random(0.0, TWO_PI), random(30, MAX_TREE_SIZE));
+    }
+    
+    // creates a particle spawned from the given trunk
+    Particle(Particle trunk) {
+        this(trunk, (random(0.0, 1.0) < 0.5));
+    }
+    
+    // creates a particle spawned from the given trunk
+    Particle(Particle trunk, boolean sign) {
+        this(trunk._x, trunk._y, trunk._theta + (sign ? 1 : -1) * 
+             (random(10.0, MAX_TREE_SIZE - 10.0)) * 180.0 / PI, 
+             random(trunk._size * (2.0 / 3.0), trunk._size + log(trunk._size) / 8.0));
+    }
+    
+    // creates a new particle
+    Particle(float x, float y, float theta, float size) {
+        this._x = x;
+        this._y = y;
+        
+        this._theta  = theta;
+        this._dTheta = random(-0.005, 0.005);
+        this._size   = size;
+        
+        this._reset_color();
+        this._reset_length();
+    }
+    
+    private void _reset_color() {
+        // 50% of the time, make the particle black
+        if (random(0.0, 1.0) > 0.5) {
+            _fill = color(0, 0, 0, 200);
+        } else {
+            // 50% of the time, give the particle a random color from within a predefined color palette
+            int offset   = 3 * int(random(0.0, (TENEBROUS_PALETTE.length - 1) / 3.0));
+            _fill  = color(TENEBROUS_PALETTE[offset], TENEBROUS_PALETTE[offset + 1], TENEBROUS_PALETTE[offset + 2], 255);
+        }
+    }
+    
+    private void _reset_length() {
+        this._length = int(random(10, 100));
+    }
+    
+    boolean update() {
+        // update particle direction and size
+        this._theta += this._dTheta;
+        this._size  -= (this._size / (MAX_TREE_SIZE * 16.0));
+        
+        // kill particle if it grows too small
+        if (this._size <= MIN_TREE_SIZE) {
+            return false;
+        }
+        
+        // update particle's position
+        this._x += DEFAULT_SPEED * cos(this._theta);
+        this._y += DEFAULT_SPEED * sin(this._theta);
+        
+        float radius = this._size / 2.0;
+        
+        // kill particle if it strays outside the canvas
+        if (this._x + radius < 0 || this._x - radius >= width || 
+            this._y + radius < 0 || this._y - radius >= height) {
+            return false;
+        }
+        
+        this._length--;
+        
+        if (this._length <= 0) {
+            // spawn a new branch
+            particles.add(new Particle(this));
+            
+            this._reset_length();
+        } else {
+            float rand = random(0.0, 1.0);
+            
+            if (rand < 0.005) {
+                // split into two branches and stop this particle's growth
+                particles.add(new Particle(this, true));
+                particles.add(new Particle(this, false));
+                
+                return false;
+            } else if (rand > 0.99) {
+                // possible to change direction
+                this._dTheta = -this._dTheta;
+            }
+        }
+        
+        return true;
+    }
+    
+    void draw() {
+        float radius = this._size / 2.0;
+        
+        fill(this._fill);
+        stroke(color(127, 127, 127, 50));
+        strokeWeight(1.0);
+        
+        ellipse(this._x, this._y, radius, radius);
+    }
 }
 
 /* RGB triples constituting a list of predefined colors
@@ -113,117 +239,4 @@ static int[] TENEBROUS_PALETTE = {
     102, 123, 152, 113, 132, 138, 114, 139, 141, 118, 152, 149, 115, 144, 162, 
     114, 139, 171, 124, 150, 180, 129, 157, 195, 144, 175, 220,   
 };
-
-class Particle {
-    // position
-    float _x;
-    float _y;
-    
-    // direction
-    float _theta;
-    float _dTheta;
-    
-    // current thickness
-    float _size;
-    
-    // number of frames until this particle will branch next
-    int _length;
-    
-    color _color;
-    
-    // Creates a Particle at a random location and size
-    Particle() {
-        this(random(0.0, width - 1.0), random(0.0, height - 1.0));
-    }
-    
-    Particle(float x, float y) {
-        this(x, y, random(0.0, TWO_PI), random(30, MAX_TREE_SIZE));
-    }
-    
-    Particle(Particle trunk) {
-        this(trunk, (random(0.0, 1.0) < 0.5));
-    }
-    
-    Particle(Particle trunk, boolean sign) {
-        this(trunk._x, trunk._y, trunk._theta + (sign ? 1 : -1) * 
-             (random(10.0, MAX_TREE_SIZE - 10.0)) * 180.0 / PI, 
-             random(trunk._size * (2.0 / 3.0), trunk._size + log(trunk._size) / 8.0));
-    }
-    
-    Particle(float x, float y, float theta, float size) {
-        this._x = x;
-        this._y = y;
-        
-        this._theta  = theta;
-        this._dTheta = random(-0.005, 0.005);
-        this._size   = size;
-        
-        // Select a random color from within a predefined color palette
-        int offset   = 3 * int(random(0.0, (TENEBROUS_PALETTE.length - 1) / 3.0));
-        this._color  = color(TENEBROUS_PALETTE[offset], TENEBROUS_PALETTE[offset + 1], TENEBROUS_PALETTE[offset + 2], 255);
-        
-        if (random(0.0, 1.0) > 0.5) {
-            this._color = color(0, 0, 0, 200);
-        }
-        
-        this._reset_length();
-    }
-    
-    void _reset_length() {
-        this._length = (int) random(10, 100);
-    }
-    
-    boolean update() {
-        this._theta += this._dTheta;
-        this._size  -= (this._size / (MAX_TREE_SIZE * 16.0));
-        
-        // Stop growing if this particle grows too small
-        if (this._size <= MIN_TREE_SIZE) {
-            return false;
-        }
-        
-        this._x += DEFAULT_SPEED * cos(this._theta);
-        this._y += DEFAULT_SPEED * sin(this._theta);
-        
-        float radius = this._size / 2.0;
-        
-        if (this._x + radius < 0 || this._x - radius >= width || 
-            this._y + radius < 0 || this._y - radius >= height) {
-            return false;
-        }
-        
-        this._length--;
-        
-        if (this._length <= 0) { // spawn a new branch
-            particles.add(new Particle(this));
-            
-            this._reset_length();
-        } else {
-            float rand = random(0.0, 1.0);
-            
-            if (rand < 0.005) {
-                // Split into two branches and stop this particle's growth
-                particles.add(new Particle(this, true));
-                particles.add(new Particle(this, false));
-                
-                return false;
-            } else if (rand > 0.99) {
-                // possible to change direction
-                this._dTheta = -this._dTheta;
-            }
-        }
-        
-        return true;
-    }
-    
-    void draw() {
-        float radius = this._size / 2.0;
-        
-        fill(this._color);
-        stroke(color(127, 127, 127, 50));
-        strokeWeight(1.0);
-        
-        ellipse(this._x, this._y, radius, radius);
-    }
-}
 

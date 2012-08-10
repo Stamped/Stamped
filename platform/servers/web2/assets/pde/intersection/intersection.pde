@@ -77,7 +77,6 @@ void draw() {
     update();
     
     if (_variation == 2) {
-        
         stroke(#666666);
         fill(color(0, 0, 0, 24));
         
@@ -117,7 +116,7 @@ void update() {
     }
     
     if (_variation != 2) {
-        // O(N^2)  TODO:  Optimize to O(NlogN)
+        // O(N^2)  TODO:  optimize to O(NlogN)
         for(int i = 0; i < _circles.length - 1; i++) {
             int diameter = _circles[i].getDiameter();
             
@@ -275,7 +274,7 @@ class Circle {
         _x += _dX;
         _y += _dY;
         
-        // Wrap circle around the edge of the Simulation
+        // wrap circle around the edge of the simulation
         if (_x + _radius < 0 && _dX < 0) {
             _x = width + _radius + rand;
         } else if (_x - _radius >= width && _dX > 0) {
@@ -303,17 +302,17 @@ class Circle {
         float yDif = circle.getY() - _y;
         float dist = sqrt(xDif * xDif + yDif * yDif);
         
-        // Reject if dist btwn circles is greater than their radii combined
+        // reject if dist btwn circles is greater than their radii combined
         if (dist > _radius + rad) {
             return false;
         }
         
-        // Reject if one circle is inside of the other
+        // reject if one circle is inside of the other
         return (dist >= abs(rad - _radius));
     }
     
     PVector[] getIntersection(Circle circle) {
-        int rad  = circle.getRadius();
+        int rad    = circle.getRadius();
         float cirX = circle.getX();
         float cirY = circle.getY();
         float xDif = cirX - _x;
@@ -326,7 +325,7 @@ class Circle {
             return null;
         }
         
-        // jeject if one circle is inside of the other
+        // reject if one circle is inside of the other
         if (dist < abs(rad - _radius)) {
             return null;
         }
@@ -352,11 +351,11 @@ class Circle {
         xDif *= h;
         yDif *= h;
         
-        int x1 = (int)(pX + yDif);
-        int y1 = (int)(pY - xDif);
-        int x2 = (int)(pX - yDif);
-        int y2 = (int)(pY + xDif);
-        
+        float x1 = (pX + yDif);
+        float y1 = (pY - xDif);
+        float x2 = (pX - yDif);
+        float y2 = (pY + xDif);
+       
         // there are (at least) two intersections
         return new PVector[] { new PVector(x1, y1), new PVector(x2, y2) };
     }
@@ -367,7 +366,7 @@ class Circle {
 }
 
 /* RGB triples constituting a list of predefined colors
- * taken from "Images/intersectionPalette.png"
+ * taken from "intersectionPalette.png"
  */
 static int INTERSECTION_PALETTE[] = {
     255,255,255, 255,255,255, 255,255,255, 
