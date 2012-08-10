@@ -7,34 +7,21 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import time
-import urllib, json, urlparse
+import json, urlparse
 import logs, utils
 import re
+import httplib2
+from BeautifulSoup import BeautifulSoup
+
 from errors import *
 from libs.Request import service_request
 from libs.APIKeys import get_api_key
-from datetime import datetime
-import httplib2
-from BeautifulSoup import BeautifulSoup
 
 
 
 APP_ID          = get_api_key('facebook', 'app_id')
 APP_SECRET      = get_api_key('facebook', 'app_secret')
 APP_NAMESPACE   = get_api_key('facebook', 'app_namespace')
-
-USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAO4BgIokl8sBOlrBCpgyeo8NAp4NZCvQxuAEUYJzc2U7vIZC7hBcUhJmLES0u32kJFzNXffl3fK3AOHMpdlKe3ZBnlrMlpqI3GrIRcc'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
-
-AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
-
-USER_ID = '1337040065'
-#ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'BAAEOIZBBUXisBANAw4DZBVRYRZC392NEKZC6bDLOAg18ZBUijFoGgLKQD8ZCmuClhrxk2L4sFENCf0pZAW0ZBQT0V84S5iZBIMWkHjYThAnJSlXfXoQzFNAjej2vEquQ4cJ8ZD'
 
 DEFAULT_TIMEOUT = 15
 
@@ -399,10 +386,12 @@ def globalFacebook():
 
     return __globalFacebook
 
-
+USER_ID = '100003940534060'
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAO4BgIokl8sBOlrBCpgyeo8NAp4NZCvQxuAEUYJzc2U7vIZC7hBcUhJmLES0u32kJFzNXffl3fK3AOHMpdlKe3ZBnlrMlpqI3GrIRcc'
+AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
+USER_ID = '1337040065'
 CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
 ACTION_ID = '4423525036250'
-
 
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
@@ -430,7 +419,7 @@ def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
 if __name__ == '__main__':
     import sys
     params = {}
-    methods = 'extendAccessToken'
+    methods = 'getUserInfo'
     params['access_token'] = ACCESS_TOKEN
     if len(sys.argv) > 1:
         methods = [x.strip() for x in sys.argv[1].split(',')]

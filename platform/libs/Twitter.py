@@ -39,17 +39,14 @@ class Twitter(object):
                 http_method=verb)
             oauthRequest.sign_request(  self.__signature_method, self.__consumer, token)
 
-            header = oauthRequest.parameters#to_header()
+            header = oauthRequest.to_header()
         else:
             header = None
-        #body = oauthRequest.parameters if verb == 'POST' else None
-        body = None
-        params = None
         logs.debug(url)
 
         # Send the http request
         try:
-            response, content = service_request('twitter', verb, url, query_params=params, body=body, header=header, priority=priority)
+            response, content = service_request('twitter', verb, url, query_params=params, body=None, header=header, priority=priority)
             result = json.loads(content)
         except Exception as e:
             logs.warning('Error connecting to Twitter: %s' % e)
