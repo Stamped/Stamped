@@ -47,7 +47,7 @@ class LatencyReport(object):
                 print "Cache hit for hour %s. Extraction time: %s seconds" % (hour, t1 - t0)
             
             if not cache_hit:
-                stats = self.logsQ.latencyReport(today() + timedelta(hours=hour - 1),today() + timedelta(hours=hour))
+                stats = self.logsQ.latencyReport(today() + timedelta(hours=hour - 1),today() + timedelta(hours=hour), include_scope=True)
                 t1 = time()
                 print "Cache miss for hour %s. Extraction time: %s seconds" % (hour, t1 - t0)
                 self.writer.writeLatency({'hour': hour, 'date': today().date().isoformat(), 'stats': stats})    
@@ -89,9 +89,10 @@ class LatencyReport(object):
         
     def dailyLatencySplits(self,uri,t0,t1,blacklist,whitelist):
         report = {}
-        start = today(t0)
+        # Get the appropriate EST start time from a UTC date
+        start = today(t0 + timedelta(days=1))
         
-        while start < today(t1):
+        while start <= today(t1 + timedelta(days=1)):
             end = start + timedelta(days=1)
             report[start.date().isoformat()] = self.logsQ.latencyReport(start, end, uri, blacklist, whitelist)
             start += timedelta(days=1)

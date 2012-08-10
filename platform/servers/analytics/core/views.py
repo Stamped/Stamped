@@ -158,8 +158,8 @@ def latency(request):
         whitelist= forms.CharField(required=False)
 
     customResults = []
-    if request.method == 'POST': 
-        form = latencyForm(request.POST)
+    if request.GET.get('uri') is not None: 
+        form = latencyForm(request.GET)
         if form.is_valid():
             uri = form.cleaned_data['uri']
             bgn = form.cleaned_data['start_date']
@@ -175,20 +175,6 @@ def latency(request):
         else: form = latencyForm()
     else: form = latencyForm()
     
-    
-    blacklist = []
-    whitelist = []
-    try: 
-        blacklist = request.POST['blacklist'].split(',')
-    except KeyError:
-        try:
-            whitelist = request.POST['whitelist'].split(',')
-        except KeyError:
-            pass
-    
-    is_blacklist = len(blacklist) > 0
-    is_whitelist = len(whitelist) > 0
-    
     report = latencyReport.getTodaysLatency()
         
     t = loader.get_template('../html/latency.html')
@@ -197,10 +183,6 @@ def latency(request):
                  'minute': est().minute,
                  'stack': stack_name,
                  'report': report,
-                 'blacklist': blacklist,
-                 'whitelist': whitelist,
-                 'is_whitelist': is_whitelist,
-                 'is_blacklist': is_blacklist,
                  'form': form,
                  'customResults': customResults
     })
@@ -224,8 +206,8 @@ def stress(request):
     headers = []
     window = 0
     interval = 1
-    if request.method == 'POST': 
-        form = qpsForm(request.POST)
+    if request.GET.get('window') is not None: 
+        form = qpsForm(request.GET)
         if form.is_valid():
             window = int(form.cleaned_data['window'])
             interval = int(form.cleaned_data['interval'])
@@ -323,8 +305,8 @@ def trending(request):
     scope = 'today'
     stat = 'stamped'
     topUsers = []       
-    if request.method == 'POST': 
-        form = trendForm(request.POST) # A form bound to the POST data
+    if request.GET.get('stat') is not None: 
+        form = trendForm(request.GET)
         if form.is_valid():
             stat = form.cleaned_data['stat']
             scope = form.cleaned_data['scope']
@@ -398,8 +380,8 @@ def custom(request):
         
    
     bgns,ends,values,base = [],[],[],[]
-    if request.method == 'POST': 
-        form = inputForm(request.POST) # A form bound to the POST data
+    if request.GET.get('stat') is not None: 
+        form = inputForm(request.GET)
         if form.is_valid():
             stat = form.cleaned_data['stat']
             bgn = form.cleaned_data['start_date']

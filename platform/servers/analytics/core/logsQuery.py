@@ -202,7 +202,7 @@ class logsQuery(object):
 
     
     
-    def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist):
+    def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist,include_scope=False):
         if uri is None:
             query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1/%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
         else:
@@ -225,7 +225,7 @@ class logsQuery(object):
                 diff = seconds + 60*(minutes + 60*hours)
                 key = stat['uri']
 
-                if 'frm_scope' in stat:
+                if 'frm_scope' in stat and include_scope:
                     key = "%s?scope=%s" % (stat['uri'], stat['frm_scope'])
                 
                 if 'cde' in stat:
@@ -244,7 +244,7 @@ class logsQuery(object):
                         self.statDict[key] = [diff]
 
 
-    def latencyReport(self,t0,t1,uri=None,blacklist=[],whitelist=[]):
+    def latencyReport(self,t0,t1,uri=None,blacklist=[],whitelist=[],include_scope=False):
         self.statDict = {}
         self.errDict = {}
         
@@ -252,7 +252,7 @@ class logsQuery(object):
         
         for i in range (0,16):
             suffix = '0'+hex(i)[2]
-            pool.spawn(self.latencyQuery,self.domains[suffix],t0,t1,uri,blacklist,whitelist)
+            pool.spawn(self.latencyQuery,self.domains[suffix],t0,t1,uri,blacklist,whitelist,include_scope)
             
         pool.join()
         
