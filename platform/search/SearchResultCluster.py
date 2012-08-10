@@ -132,9 +132,9 @@ class ArtistSearchResultCluster(SearchResultCluster):
         return ArtistEntityProxyComparator()
 
 class AlbumSearchResultCluster(SearchResultCluster):
-        @property
-        def comparator(self):
-            return AlbumEntityProxyComparator()
+    @property
+    def comparator(self):
+        return AlbumEntityProxyComparator()
 
 class TrackSearchResultCluster(SearchResultCluster):
     @property
