@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals
+import api.Globals
 
 from api_old.Schemas import *
 
@@ -38,7 +38,7 @@ class UserAPI(APIObject):
 
     @lazyProperty
     def _entityDB(self):
-    	return EntityDB()
+        return EntityDB()
     
     @lazyProperty
     def _stampDB(self):
@@ -61,7 +61,7 @@ class UserAPI(APIObject):
     def getUserStampDistribution(self, userId):
         stampIds    = self._stampDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds)
-        entityIds   = map(lambda x: x.entity.entity_id, stamps)
+        entityIds   = [stamp.entity.entity_id for stamp in stamps]
         entities    = self._entityDB.getEntityMinis(entityIds)
 
         categories  = {}
