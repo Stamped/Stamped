@@ -26,14 +26,14 @@ try:
     from utils import lazyProperty, LoggingThreadPool
 
     from api.accountapi import AccountAPI
-    from api.users import Users
-    from api.friendships import Friendships
-    from api.entities import Entities
-    from api.stamps import Stamps
-    from api.guides import Guides
+    from api.userapi import UserAPI
+    from api.friendshipapi import FriendshipAPI
+    from api.entityapi import EntityAPI
+    from api.stampapi import StampAPI
+    from api.guideapi import GuideAPI
     from api.likeapi import LikeAPI
-    from api.comments import Comments
-    from api.todos import Todos
+    from api.commentapi import CommentAPI
+    from api.todoapi import TodoAPI
 
 except Exception as e:
     report()
@@ -58,23 +58,23 @@ class StampedAPI(object):
 
     @lazyProperty
     def users(self):
-        return Users()
+        return UserAPI()
 
     @lazyProperty
     def friendships(self):
-        return Friendships()
+        return FriendshipAPI()
 
     @lazyProperty
     def entities(self):
-        return Entities()
+        return EntityAPI()
 
     @lazyProperty
     def stamps(self):
-        return Stamps()
+        return StampAPI()
 
     @lazyProperty
     def guides(self):
-        return Guides()
+        return GuideAPI()
 
     @lazyProperty
     def likes(self):
@@ -82,8 +82,8 @@ class StampedAPI(object):
 
     @lazyProperty
     def comments(self):
-        return Comments()
+        return CommentAPI()
 
     @lazyProperty
     def todos(self):
-        return Todos()
+        return TodoAPI()

@@ -15,6 +15,7 @@ from db.mongodb.MongoEntityCollection import MongoEntityCollection
 from db.mongodb.MongoEntityCollection import MongoEntityStatsCollection
 from db.mongodb.MongoEntityCollection import MongoWhitelistedTastemakerEntityIdsCollection
 from db.mongodb.MongoMenuCollection import MongoMenuCollection
+from db.mongodb.MongoSearchEntityCollection import MongoSearchEntityCollection
 
 class EntityDB(object):
 
@@ -33,6 +34,10 @@ class EntityDB(object):
     @lazyProperty
     def __whitelisted_tastemaker_entity_ids_collection(self):
         return MongoWhitelistedTastemakerEntityIdsCollection()
+
+    @lazyProperty
+    def __search_entity_collection(self):
+        return MongoSearchEntityCollection()
 
 
     def checkIntegrity(self, key, repair=False, api=None):
@@ -96,3 +101,20 @@ class EntityDB(object):
     
     def getPopularEntityStats(self, **kwargs):
         return self.__entity_stats_collection.getPopularEntityStats(**kwargs)
+
+    ### MENUS
+
+    def getMenu(self, entityId):
+        return self.__menu_collection.getMenu(entityId)
+    
+    def updateMenu(self, menu):
+        return self.__menu_collection.updateMenu(menu)
+
+    ### SEARCH ENTITIES
+
+    def getSearchEntityBySearchId(self, search_id):
+        return self.__search_entity_collection.getSearchEntityBySearchId(search_id)
+
+    def writeSearchEntity(self, search_entity):
+        return self.__search_entity_collection.writeSearchEntity(search_entity)
+

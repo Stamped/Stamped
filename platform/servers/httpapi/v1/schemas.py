@@ -210,7 +210,7 @@ def _cleanImageURL(url):
 
     return url
 
-def _phoneToInt(string):
+def convertPhoneToInt(string):
     if string is None:
         return None 
 

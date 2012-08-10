@@ -21,7 +21,7 @@ import libs.ec2_utils
 import libs.Facebook
 import libs.Twitter
 
-from api.module import APIObject
+from api.helpers import APIObject
 
 from db.accountdb import AccountDB
 

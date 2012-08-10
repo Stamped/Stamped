@@ -15,18 +15,18 @@ import datetime
 import time
 import logs
 
-from db.mongodb.MongoUserCollection import MongoUserCollection
-from db.mongodb.MongoStampCollection import MongoStampCollection
-from db.mongodb.MongoFriendshipCollection import MongoFriendshipCollection
+from db.userdb import UserDB
+from db.stampdb import StampDB
+from db.friendshipdb import FriendshipDB
 
 from db.likedb import LikeDB
 
 from utils import lazyProperty, LoggingThreadPool
 
-from api.module import APIObject
-from api.stamps import Stamps
-from api.activity import Activity
-from api.entities import Entities
+from api.helpers import APIObject
+from api.stampapi import StampAPI
+from api.activityapi import ActivityAPI
+from api.entityapi import EntityAPI
 from api.accountapi import AccountAPI
 from api.linkedaccountapi import LinkedAccountAPI
 
@@ -41,11 +41,11 @@ class LikeAPI(APIObject):
 
     @lazyProperty
     def _userDB(self):
-        return MongoUserCollection()
+        return UserDB()
 
     @lazyProperty
     def _stampDB(self):
-        return MongoStampCollection()
+        return StampDB()
     
     @lazyProperty
     def _likeDB(self):
@@ -53,19 +53,19 @@ class LikeAPI(APIObject):
     
     @lazyProperty
     def _friendshipDB(self):
-        return MongoFriendshipCollection()
+        return FriendshipDB()
 
     @lazyProperty
     def _stamps(self):
-        return Stamps()
+        return StampAPI()
 
     @lazyProperty
     def _activity(self):
-        return Activity()
+        return ActivityAPI()
 
     @lazyProperty
     def _entities(self):
-        return Entities()
+        return EntityAPI()
 
     @lazyProperty
     def _accounts(self):

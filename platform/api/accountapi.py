@@ -21,8 +21,8 @@ import libs.ec2_utils
 import libs.Facebook
 import libs.Twitter
 
-from api.module import APIObject
-from api.activity import Activity
+from api.helpers import APIObject
+from api.activityapi import ActivityAPI
 
 from db.likedb import LikeDB
 from db.accountdb import AccountDB
@@ -99,7 +99,7 @@ class AccountAPI(APIObject):
 
     @lazyProperty
     def _activity(self):
-        return Activity()
+        return ActivityAPI()
 
 
     def _validateStampColors(self, primary, secondary):

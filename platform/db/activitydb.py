@@ -8,7 +8,11 @@ __license__   = "TODO"
 
 import Globals
 
+from api_old.Schemas import *
+
 import logs
+import datetime
+
 from utils import lazyProperty
 
 from db.mongodb.MongoAlertQueueCollection import MongoAlertQueueCollection
@@ -76,7 +80,7 @@ class ActivityDB(object):
         group           = kwargs.pop('group', False)
         groupRange      = kwargs.pop('groupRange', None)
 
-        now             = datetime.utcnow()
+        now             = datetime.datetime.utcnow()
         created         = kwargs.pop('created', now) 
 
         alerts          = []
@@ -178,7 +182,7 @@ class ActivityDB(object):
                 alerts.append(alert)
 
         if len(alerts): 
-            self.alerts_collection.addAlerts(alerts)
+            self.__alert_queue_collection.addAlerts(alerts)
 
     def _removeActivityIds(self, activityIds):
         self.__activity_link_collection.removeActivityLinks(activityIds)
