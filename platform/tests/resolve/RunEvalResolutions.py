@@ -45,7 +45,7 @@ SOURCES = {
     'netflix_id' : NetflixSource(),
 }
 
-__flags = None
+FLAGS = None
 
 class RunEvalResolutions(AStampedTestCase):
     @fixtureTest(useLocalDb=True)
@@ -106,7 +106,7 @@ class RunEvalResolutions(AStampedTestCase):
         |      %s
         \\---------------------------------------------
         """
-        tmpPrefix = category + '-' + __flags.output_prefix
+        tmpPrefix = category + '-' + FLAGS.output_prefix
         with tempfile.NamedTemporaryFile(prefix=tmpPrefix, delete=False) as output:
             pickle.dump(resolutionResult, output)
             if formattedErrors:
@@ -169,7 +169,7 @@ class RunEvalResolutions(AStampedTestCase):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--prefix', action='store', default='tmp', dest='output_prefix')
-    __flags, new_argv = parser.parse_known_args(sys.argv)
+    FLAGS, new_argv = parser.parse_known_args(sys.argv)
     sys.argv[:] = new_argv[:]
 
     main()
