@@ -59,7 +59,7 @@ def makeTransparent(img):
                 pixdata[x, y] = (255, 255, 255, 0)
                 #img.save("img2.png", "PNG")
 
-def createImage(a,b,c,d,e,f,g,h):
+def createImage(a,b,c,d,e,f,g,h, x, y):
 
 
     #albumArtUrl = "http://a1.mzstatic.com/us/r1000/030/Music/88/b5/b2/mzi.shgvhklf.600x600-75.jpg"
@@ -76,8 +76,8 @@ def createImage(a,b,c,d,e,f,g,h):
 
     mode = "RGBA"
     size = 612, 612
-    albumOffset = 40, 100
-    shadowOffset = 20, 105
+    albumOffset = 0, 100
+    shadowOffset = x, y
 
     transparent = (
         255,
@@ -102,6 +102,7 @@ def createImage(a,b,c,d,e,f,g,h):
 
     buf.paste(shadow, shadowOffset, shadowmask)
     buf.paste(albumArtImg, albumOffset, mask)
+    #buf.paste(mask)
 
     #makeTransparent(buf)
 
@@ -129,13 +130,16 @@ screen = pygame.display.set_mode(size)
 #h = 0.00174
 a = 1.75
 b = -1.54
-c = 368
+c = 292
 d = 1.02
 e = 3.72
-f = -756
+f = -820
 g = -0.00017
 h = 0.00187
-createImage(a,b,c,d,e,f,g,h)
+x = -24
+y = 103
+
+createImage(a,b,c,d,e,f,g,h, x, y)
 
 ball = pygame.image.load("instagramtest.png")
 background = pygame.image.load("instagram.jpg")
@@ -165,24 +169,28 @@ while 1:
     if pressed[pygame.K_c]: c = 2 * (mousex-300)
     if pressed[pygame.K_d]: d = 0.003 * (mousex-100)
     if pressed[pygame.K_e]: e = 1 + (0.01 * (mousex-300))
-    if pressed[pygame.K_f]: f = 3 * (mousex-300)
+    if pressed[pygame.K_f]: f = 4 * (mousex-300)
     if pressed[pygame.K_g]: g = 0.00001 * (mousex-300)
     if pressed[pygame.K_h]: h = 0.00001 * (mousex-300)
     if pressed[pygame.K_r]:
         b=c=d=f=g=h = 0
         a = e = 1
+    if pressed[pygame.K_s]:
+        x = mousex - 100
+        y = mousey - 100
 
     #h += 0.00001
 
 
 
-    createImage(a,b,c,d,e,f,g,h)
+    createImage(a,b,c,d,e,f,g,h, x, y)
     ball = pygame.image.load("instagramtest.png")
 
     ballrect = ball.get_rect()
 
 
-    text = font.render("a:%s b:%s c:%s d:%s e:%s f:%s g:%s h:%s  key:%s x:%s y:%s" % (a,b,c,d,e,f,g,h, key, mousex, mousey), 1, (5, 5, 5))
+    #text = font.render("a:%s b:%s c:%s d:%s e:%s f:%s g:%s h:%s  key:%s x:%s y:%s" % (a,b,c,d,e,f,g,h, key, mousex, mousey), 1, (5, 5, 5))
+    text = font.render("x:%s  y:%s" % (x, y), 1, (5, 5, 5))
     textpos = text.get_rect(centerx=ball.get_width()/2)
 
     screen.fill(white)
