@@ -373,7 +373,7 @@ class StampAPI(APIObject):
                                 try:
                                     comment.user = userIds[str(comment.user.user_id)]
                                 except KeyError:
-                                    logs.warning("Key error for user (user_id = %s)" % userId)
+                                    logs.warning("Key error for user (user_id = %s)" % comment.user.user_id)
                                     raise
                                 commentPreviews.append(comment)
                             except KeyError:

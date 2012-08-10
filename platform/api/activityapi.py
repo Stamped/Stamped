@@ -128,7 +128,6 @@ class ActivityAPI(APIObject):
                                            requireRecipient = True)
 
     def addMentionActivity(self, userId, recipientIds, stampId=None, commentId=None):
-        objects = ActivityObjectIds()
         if stampId is None and commentId is None:
             raise Exception('Mention activity must include either a stampId or commentId')
         objects = ActivityObjectIds()

@@ -204,23 +204,6 @@ class FriendshipAPI(APIObject):
                     'screen_name': userRequest.screen_name_b
                 })
 
-        # If either account is private, make sure authUserId is friend
-        if userA.privacy == True and authUserId != userA.user_id:
-            check                   = Friendship()
-            friendship.user_id      = authUserId
-            friendship.friend_id    = userA.user_id
-
-            if not self._friendshipDB.checkFriendship(check):
-                raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
-
-        if userB.privacy == True and authUserId != userB.user_id:
-            check                   = Friendship()
-            friendship.user_id      = authUserId
-            friendship.friend_id    = userB.user_id
-
-            if not self._friendshipDB.checkFriendship(check):
-                raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
-
         friendship              = Friendship()
         friendship.user_id      = userA.user_id
         friendship.friend_id    = userB.user_id

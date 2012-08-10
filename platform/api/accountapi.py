@@ -978,3 +978,11 @@ class AccountAPI(APIObject):
 
         return self.addToNetflixInstant(nf_user_id, nf_token, nf_secret, netflixId)
 
+    def addCallbackToken(self, user_id):
+        # RESTRUCTURE TODO: add the addCallbackToken function to accountdb
+        return self._accountDB.addCallbackToken(user_id)
+    
+    def getCallbackToken(self, oid):
+        # RESTRUCTURE TODO: add the getCallbackToken function to accountdb
+        return self._accountDB.getCallbackToken(oid)
+
