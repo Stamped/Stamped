@@ -1,21 +1,21 @@
-/*! hilbert.pde
+/*! rrt.pde
  *  
  * @author: Travis Fischer
- * @date:   December 2008 (Java)
- * @port:   August 2012 to processing.js
+ * @date:   August 2012
  * 
- * Generative art simulation based around a series of recursive Hilbert space-
- * filling curves.
+ * Exploration of rapidly exploring random trees (RTTs) in the form of generative art.
  * 
- * @see: http://en.wikipedia.org/wiki/Hilbert_curve
+ * @see: http://en.wikipedia.org/wiki/Rapidly_exploring_random_tree
  */
 
-static int SIMULATION_WIDTH  = 640;
-static int SIMULATION_HEIGHT = 480;
+static int SIMULATION_WIDTH         = 640;
+static int SIMULATION_HEIGHT        = 480;
 
-HilbertSystem system;
-int counter, depth;
-boolean done;
+static int   DEFAULT_NUM_VERTICES   = 1;
+static float DEFAULT_CURVE          = 2.0;
+static float DEFAULT_INV_DISTANCE   = 40.0;
+
+RRTree tree;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
@@ -29,183 +29,109 @@ void setup() {
 void reset() {
     background(#FFFFFF);
     
-    system  = new HilbertSystem();
-    done    = true;
-    counter = 0;
-    depth   = 1;
+    tree = new RRTree();
 }
 
 void draw() {
-    update();
-}
-
-void update() {
-    if (done) {
-        if (depth < 8) {
-            system.generate(depth++);
-        }
-        
-        counter = 0;
-        done = false;
-    } else {
-        done = !system.update(counter++);
-    }
+    tree.update();
 }
 
 void mouseClicked() {
-    system.invert_color();
-    
-    //reset();
+    reset();
 }
 
-class HilbertSystem {
-    int VARIATION_CIRCLE = 0;
-    int VARIATION_RECT   = 1;
-    int COLOR_DEFAULT    = 0;
-    int COLOR_NONE       = 1;
+class RRTree {
+    ArrayList _vertices;
+    float _distance;
+    float _curve;
     
-    private String _axiom;
-    // any chars which are not in _rules are considered to be constants
-    private String _rules;
-    
-    private color STROKE_COLOR = color(0, 0, 0, 48);
-    private float _x, _y;
-    private float _theta;
-    private String _result;
-    private int _horizLength, _vertLength;
-    private float _angle;
-    private int _depth;
-    private int _variation, _color;
-    
-    HilbertSystem() {
-        _rules = "LR";
-        _axiom = "L";
-        
-        _angle      = PI / 2; // 90 degree turns
-        _variation  = VARIATION_CIRCLE;
-        _color      = COLOR_DEFAULT;
+    RRTree() {
+        this(DEFAULT_NUM_VERTICES, 
+             (width + height) / (2.0 * DEFAULT_INV_DISTANCE), 
+             DEFAULT_CURVE);
     }
     
-    void invert_color() {
-        if (_color == COLOR_DEFAULT) {
-            _color = COLOR_NONE;
-        } else {
-            _color = COLOR_DEFAULT;
+    RRTree(int num_vertices, float distance, float curve) {
+        _vertices = new ArrayList(num_vertices * 16);
+        _distance = distance;
+        _curve    = curve;
+        
+        for (int i = 0; i < num_vertices; i++) {
+            _vertices.add(new PVector(random(0, width - 1), random(0, height - 1)));
         }
     }
     
-    String process_system(int maxDepth) {
-        return this.process(_axiom, maxDepth);
+    color random_color(int alpha) {
+        int[] palette = PALETTE;
+        
+        // select a random color from within a predefined color palette
+        int offset = 3 * int(random(0, (palette.length - 1) / 3));
+        return color(palette[offset],  palette[offset + 1], palette[offset + 2], alpha);
+        
+        //return color(0, 0, 0, alpha);
     }
     
-    String process(String state, int depth) {
-        if (depth <= 0) {
-            return state;
-        }
+    boolean update() {
+        PVector rand = new PVector(random(0, width - 1), random(0, height - 1));
+        float min_dist = 999999;
+        int min_i = -1;
         
-        String nextState = "";
-        
-        for (int i = 0; i < state.length(); i++) {
-            char cur = state.charAt(i);
+        // find closest existing vertex to existing vertices
+        for (int i = 0; i < _vertices.size(); i++) {
+            PVector v      = ((PVector) _vertices.get(i));
+            float cur_dist = rand.dist(v);
             
-            if (_rules.indexOf(cur) >= 0) {
-                nextState += this.process_rule(cur);
-            } else { 
-                nextState += cur;
+            if (cur_dist < min_dist) {
+                min_i = i;
+                min_dist = cur_dist;
             }
         }
         
-        return this.process(nextState, depth - 1);
-    }
-    
-    String process_rule(char rule) {
-        String replacement = "";
-        
-        if (rule == 'L') {
-            replacement = "+RF-LFL-FR+";
-        } else if (rule == 'R') {
-            replacement = "-LF+RFR+FL-";
-        }
-        
-        return replacement;
-    }
-
-    void generate(int depth) {
-        _theta = 0;
-        _x = 0; _y = height - 1;
-        
-        _depth  = depth;
-        _result = this.process_system(depth);
-        
-        _horizLength = width;
-        _vertLength  = height;
-        
-        for(int i = 0; i < depth; i++) {
-            _horizLength = int(_horizLength / 2);
-            _vertLength  = int(_vertLength  / 2);
-        }
-    }
-
-    color random_color(int alpha) {
-        if (_color == COLOR_DEFAULT) {
-            int[] palette = HILBERT_PALETTE;
-            
-            // Select a random color from within a predefined color palette
-            int offset = 3 * int(random(0, (palette.length - 1) / 3));
-            return color(palette[offset],  
-                         palette[offset + 1], 
-                         palette[offset + 2], 
-                         alpha);
-        }
-        
-        return color(0, 0, 0, random(10, 150));
-    }
-    
-    boolean update(int i) {
-        if (i >= _result.length()) {
+        if (min_i < 0) {
             return false;
         }
         
-        char cur = _result.charAt(i);
+        PVector closest = ((PVector) _vertices.get(min_i));
+        PVector offset  = rand;
+        offset.sub(closest);
         
-        if (cur == 'F') {
-            float new_x = round(_x + _horizLength * cos(_theta));
-            float new_y = round(_y + _vertLength  * sin(_theta));
+        float distance = random(_distance * 0.75, _distance * 1.25);
+        offset.normalize();
+        offset.mult(distance);
+        
+        PVector newV = offset;
+        newV.add(closest);
+        _vertices.add(newV);
+        
+        stroke(color(0, 0, 0, 180));
+        strokeWeight(2.0);
+        
+        if (_curve <= 0) {
+            line(closest.x, closest.y, newV.x, newV.y);
+        } else {
+            float curve  = distance * _curve;
+            PVector dir  = new PVector();
+            PVector ctx0 = new PVector(closest.x + random(-curve, curve), 
+                                       closest.y + random(-curve, curve));
+            PVector ctx1 = new PVector(newV.x + random(-curve, curve), 
+                                       newV.y + random(-curve, curve));
             
-            stroke(STROKE_COLOR);
-            strokeWeight(1.0);
-            line(_x, _y, new_x, new_y);
-            
-            float width = random(3.0, _horizLength + 3);
-            float half  = (width / 2);
-            
-            strokeWeight(7.0 - this._depth);
-            stroke(this.random_color(int(random(10, 150))));
-            fill(0, 0, 0, 0);
-            
-            // randomly switch between rects and circles
-            //_variation = (random(0.0, 1.0) > 0.5 ? VARIATION_RECT : VARIATION_CIRCLE);
-            
-            if (_variation == VARIATION_RECT) {
-                rect(_x, _y, width, width);
-            } else if (_variation == VARIATION_CIRCLE) {
-                ellipse(_x, _y, width, width);
-            }
-            
-            _x = new_x;
-            _y = new_y;
-        } else if (cur == '-') {
-            _theta += _angle;
-        } else if (cur == '+') {
-            _theta -= _angle;
+            bezier(closest.x, closest.y, 
+                   ctx0.x, ctx0.y, 
+                   ctx1.x, ctx1.y, 
+                   newV.x, newV.y);
         }
+        
+        stroke(255, 255, 255, 48);
+        fill(random_color(int(random(10, 150))));
+        ellipse(newV.x, newV.y, distance, distance);
         
         return true;
     }
 }
 
 // color palette extracted from a seed image
-static int[] HILBERT_PALETTE = {
+static int[] PALETTE = {
     71, 49, 19, 108, 63, 16, 99, 100, 68, 71, 125, 105, 82, 138, 113, 
     115, 148, 131, 108, 150, 148, 125, 148, 128, 174, 15, 68, 
     175, 77, 71, 195, 62, 69, 205, 91, 71, 176, 144, 94, 

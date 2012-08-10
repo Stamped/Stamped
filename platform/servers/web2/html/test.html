@@ -6,8 +6,6 @@
     {{ block.super }}
     
     <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/test.css">
-    
-<script type="text/javascript" src="{{ STAMPED_STATIC_URL}}js/libs/processing-1.4.0.js"></script>
 {% endblock head %}
 
 {% block main %}
@@ -36,11 +34,7 @@
 {% block scripts %}
     {{ block.super }}
      
-     <!-- jQuery plugins -->
-    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
-    
+    <script type="text/javascript" src="/assets/js/libs/processing-1.4.0.js"></script>
     <script src="{{ STAMPED_STATIC_URL }}js/test.js"></script>
     
     {% ssi STAMPED_TEMPLATE_FILE %}
