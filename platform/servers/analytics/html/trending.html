@@ -7,7 +7,7 @@
 			<h2> Trending on Stamped </h3>
 			
 			<div id="trending_form" class="trending_form">
-			    <form action="/trending/" method="post">
+			    <form action="/trending/" method="get">
 					{% csrf_token %}
 					{{ form }}
 					<input type ="submit"/>

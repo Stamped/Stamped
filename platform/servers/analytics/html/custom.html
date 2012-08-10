@@ -18,7 +18,7 @@
 	    	<h2>Custom Database Query </h2> 
 	    	   
 		    <div id="custom_form" class="custom_form">
-			    <form action="/custom/" method="post">
+			    <form action="/custom/" method="get">
 					{% csrf_token %}
 					{{ form }}
 					<input type ="submit"/>
