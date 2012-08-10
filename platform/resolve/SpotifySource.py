@@ -28,7 +28,17 @@ except:
 
 
 def available_in_us(item):
-    return 'US' in item['availability']['territories']
+    # Most items have the availability field, but in the case of tracks, sometimes the availability is marked on the
+    # album instead...
+    try:
+        territories = item['availability']['territories']
+    except KeyError:
+        pass
+    try:
+        territories = item['album']['availability']['territories']
+    except KeyError:
+        return True
+    return not territories or 'US' in territories
 
 
 class _SpotifyObject(object):
