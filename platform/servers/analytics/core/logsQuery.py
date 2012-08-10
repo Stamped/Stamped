@@ -296,7 +296,7 @@ class logsQuery(object):
 
         count_report = {}
         mean_report = {}
-        t0 = time - datetime.timedelta(0,total_seconds)
+        t0 = time - timedelta(0,total_seconds)
         for i in range (0,total_seconds/interval):
             self.statCountByNode = {}
             self.statTimeByNode = {}
