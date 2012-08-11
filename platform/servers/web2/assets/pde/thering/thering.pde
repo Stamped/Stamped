@@ -36,9 +36,9 @@ void setup() {
 void reset() {
     background(/** color **/ #000000 /** endcolor **/);
     
-    _noRingParticles = /** int [ 50, 50000 ] **/ 5000  /** endint **/;
-    _originRadius    = /** int [ 0, 250 ]    **/ 50    /** endint **/;
-    _blackout        = /** boolean **/           false /** endboolean **/;
+    _noRingParticles = /** int [ 50, 50000 ] **/ 5000  /** endint     **/;
+    _originRadius    = /** int [ 0, 250 ]    **/ 50    /** endint     **/;
+    _blackout        = /** boolean           **/ false /** endboolean **/;
     
     _ringParticles   = new ArrayList(_noRingParticles);
     
@@ -46,7 +46,7 @@ void reset() {
     float thetaAdd = (random(0.0, 1.0) * 4 + TWO_PI) / _noRingParticles;
     _ringParticles.clear();
     
-    // Initial particles sling-shot around ring origin
+    // initial particles sling-shot around ring origin
     for(int i = 0; i < _noRingParticles; i++, theta += thetaAdd) {
         float emitX = (width  / 2) + _originRadius * sin(theta);
         float emitY = (height / 2) + _originRadius * cos(theta);
@@ -56,13 +56,13 @@ void reset() {
 }
 
 void draw() {
-    // Move and Draw all of the RingParticles
+    // move and draw all of the particles
     for (int i = 0; i < _ringParticles.size(); i++) {
         RingParticle particle = ((RingParticle) _ringParticles.get(i));
         particle.update();
     }
     
-    // Randomly switch between blackout periods
+    // randomly switch between blackout periods
     if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.995 /** endfloat **/) {
         _blackout = !_blackout;
     }
@@ -100,26 +100,26 @@ class RingParticle {
     }
     
     void update() {
-        // record Particle's Old Position
+        // record particle's old position
         int oldX = (int)_x, oldY = (int)_y;
         
-        // update Particle's Position
+        // update particle's position
         _x += _dX;
         _y += _dY;
         
-        // apply slight, random changes to Particle's Velocity
+        // apply slight, random changes to particle's velocity
         _dX += (random(0.0, 1.0) - random(0.0, 1.0)) * 0.5;
         _dY += (random(0.0, 1.0) - random(0.0, 1.0)) * 0.5;
         
         if (oldX != (int)_x || oldY != (int)_y) {
-            // randomly intersperse blood color with Black
+            // randomly intersperse blood color with black
             if (int(red(_color)) == 255 && random(0.0, 1.0) > 0.95) {
                 stroke(BLOOD_COLOR);
             } else {
                 stroke(_color);
             }
             
-            // draw a line connecting old particle's Position to new Position
+            // draw a line connecting old particle's position to new position
             line(oldX, oldY, _x, _y);
             
             if (_x < 0 || _x >= width || _y < 0 || _y >= height || ++_age > PARTICLE_MAX_AGE) {
@@ -128,11 +128,11 @@ class RingParticle {
         }
     }
     
-    // Die and be reborn
+    // die and be reborn
     void respawn() {
         float theta = TWO_PI * random(0.0, 1.0);
         
-        // initial Position of new Particle on Radius of Origin
+        // initial position of new particle on radius of origin
         _x = (width  / 2) + _originRadius * sin(theta);
         _y = (height / 2) + _originRadius * cos(theta);
         

@@ -138,21 +138,21 @@ void update() {
                         // want the smaller of the two diameters
                         int d = (diameter > diameter2 ? diameter2 : diameter);
                         
-                        int alpha;
+                        int a;
                         if (_variation == 0) {
-                            alpha = 32 - ((dist << 5) / d);
+                            a = 32 - ((dist << 5) / d);
                         } else {
-                            alpha = 128 - (int)((dist << 8) / d);
+                            a = 128 - (int)((dist << 8) / d);
                         }
                         
-                        if (alpha > 255) {
-                            alpha = 255;
-                        } else if (alpha < 0) {
-                            alpha = 255 + alpha;
+                        if (a > 255) {
+                            a = 255;
+                        } else if (a < 0) {
+                            a = 255 + a;
                         }
                         
                         if (_variation == 0) {
-                            c = color(red(c), green(c), blue(c), alpha);
+                            c = color(red(c), green(c), blue(c), a);
                         } else {
                             c = color(red(c), green(c), blue(c), 24);
                         }

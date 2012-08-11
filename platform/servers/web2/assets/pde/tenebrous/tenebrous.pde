@@ -8,17 +8,21 @@
 static int SIMULATION_WIDTH     = /** int ( 0, 1024 ]   **/ 640  /** endint **/;
 static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ]   **/ 480  /** endint **/;
 
-static int NO_INITIAL_TREES     = /** int [ 1, 32 ]     **/ 5    /** endint **/;
+static int NUM_INITIAL_TREES    = /** int [ 1,  32  ]   **/ 5    /** endint **/;
+static int MAX_SIMULATION_AGE   = /** int [ 10, inf ]   **/ 800  /** endint **/;
 
 static float MAX_TREE_SIZE      = /** float [ 10, 180 ] **/ 60   /** endfloat **/;
-static float MIN_TREE_SIZE      = /** float [ 0.5, 5  ] **/ 0.9  /** endfloat **/;
+static float MIN_TREE_SIZE      = /** float [ 0.5, 5  ] **/ 1.5  /** endfloat **/;
 static float PARTICLE_SPEED     = /** float [ 0.1, 20 ] **/ 3.33 /** endfloat **/;
+
 
 ArrayList particles;
 
+int age;
+
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(30);
+    frameRate(24);
     smooth();
     loop();
     
@@ -29,8 +33,9 @@ void reset() {
     background(/** color **/ #FFFFFF /** endcolor **/);
     
     particles = new ArrayList();
+    age = 0;
     
-    for (int i = 0; i < NO_INITIAL_TREES; i++) {
+    for (int i = 0; i < NUM_INITIAL_TREES; i++) {
         particles.add(new Particle());
     }
 }
@@ -44,6 +49,10 @@ void draw() {
 }
 
 void update() {
+    if (++age > MAX_SIMULATION_AGE) {
+        reset();
+    }
+    
     for(int i = 0; i < particles.size(); i++) {
         Particle particle = ((Particle) particles.get(i));
         
@@ -85,29 +94,29 @@ class Particle {
         this(x, y, random(0.0, TWO_PI), random(30, MAX_TREE_SIZE));
     }
     
-    // creates a particle spawned from the given trunk
-    Particle(Particle trunk) {
-        this(trunk, (random(0.0, 1.0) < 0.5));
-    }
-    
-    // creates a particle spawned from the given trunk
-    Particle(Particle trunk, boolean sign) {
-        this(trunk._x, trunk._y, trunk._theta + (sign ? 1 : -1) * 
-             (random(10.0, MAX_TREE_SIZE - 10.0)) * 180.0 / PI, 
-             random(trunk._size * (2.0 / 3.0), trunk._size + log(trunk._size) / 8.0));
-    }
-    
     // creates a new particle
     Particle(float x, float y, float theta, float size) {
-        this._x = x;
-        this._y = y;
+        _x = x;
+        _y = y;
         
-        this._theta  = theta;
-        this._dTheta = random(-0.005, 0.005);
-        this._size   = size;
+        _theta  = theta;
+        _dTheta = random(-0.005, 0.005);
+        _size   = size;
         
-        this._reset_color();
-        this._reset_length();
+        _reset_color();
+        _reset_length();
+    }
+    
+    // returns a new particle spawned from the given trunk
+    static Particle _spawn(Particle trunk) {
+        return Particle._spawn(trunk, (random(0.0, 1.0) < 0.5));
+    }
+    
+    // returns a new particle spawned from the given trunk
+    static Particle _spawn(Particle trunk, boolean sign) {
+        return new Particle(trunk._x, trunk._y, trunk._theta + (sign ? 1 : -1) * 
+                            (random(10.0, MAX_TREE_SIZE - 10.0)) * 180.0 / PI, 
+                            random(trunk._size * (2.0 / 3.0), trunk._size + log(trunk._size) / 8.0));
     }
     
     private void _reset_color() {
@@ -126,51 +135,50 @@ class Particle {
     }
     
     private void _reset_length() {
-        this._length = int(random(/** int [ 5, 50 ]   **/ 10  /** endint **/, 
-                                  /** int [ 50, 300 ] **/ 100 /** endint **/));
+        _length = int(random(/** int [ 5, 50 ]   **/ 10 /** endint **/, /** int [ 50, 300 ] **/ 100 /** endint **/));
     }
     
     boolean update() {
         // update particle direction and size
-        this._theta += this._dTheta;
-        this._size  -= (this._size / (MAX_TREE_SIZE * /** float [ 1, 128 ] **/ 16.0 /** endfloat **/));
+        _theta += _dTheta;
+        _size  -= (_size / (MAX_TREE_SIZE * /** float [ 1, 128 ] **/ 16.0 /** endfloat **/));
         
         // kill particle if it grows too small
-        if (this._size <= MIN_TREE_SIZE) {
+        if (_size <= MIN_TREE_SIZE) {
             return false;
         }
         
         // update particle's position
-        this._x += PARTICLE_SPEED * cos(this._theta);
-        this._y += PARTICLE_SPEED * sin(this._theta);
+        _x += PARTICLE_SPEED * cos(_theta);
+        _y += PARTICLE_SPEED * sin(_theta);
         
-        float radius = this._size / 2.0;
+        float radius = _size / 2.0;
         
         // kill particle if it strays outside the canvas
-        if (this._x + radius < 0 || this._x - radius >= width || 
-            this._y + radius < 0 || this._y - radius >= height) {
+        if (_x + radius < 0 || _x - radius >= width || 
+            _y + radius < 0 || _y - radius >= height) {
             return false;
         }
         
-        this._length--;
+        _length--;
         
-        if (this._length <= 0) {
+        if (_length <= 0) {
             // spawn a new branch
-            particles.add(new Particle(this));
+            particles.add(Particle._spawn(this));
             
-            this._reset_length();
+            _reset_length();
         } else {
             float rand = random(0.0, 1.0);
             
             if (rand < /** float [ 0, 0.1 ] **/ 0.005 /** endfloat **/) {
                 // split into two branches and stop this particle's growth
-                particles.add(new Particle(this, true));
-                particles.add(new Particle(this, false));
+                particles.add(Particle._spawn(this, true));
+                particles.add(Particle._spawn(this, false));
                 
                 return false;
             } else if (rand > /** float [ 0.9, 1 ] **/ 0.99 /** endfloat **/) {
                 // possible to change direction
-                this._dTheta = -this._dTheta;
+                _dTheta = -_dTheta;
             }
         }
         
@@ -178,13 +186,13 @@ class Particle {
     }
     
     void draw() {
-        float radius = this._size / 2.0;
+        float radius = _size / 2.0;
         
-        fill(this._fill);
+        fill(_fill);
         stroke(/** color **/ color(127, 127, 127, 50) /** endcolor **/);
         strokeWeight(/** int [ 0, 10 ] **/ 1.0 /** endint **/);
         
-        ellipse(this._x, this._y, radius, radius);
+        ellipse(_x, _y, radius, radius);
     }
 }
 

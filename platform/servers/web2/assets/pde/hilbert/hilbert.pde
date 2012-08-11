@@ -8,10 +8,19 @@
  * filling curves.
  * 
  * @see: http://en.wikipedia.org/wiki/Hilbert_curve
+ * 
+ * @note: due to a bug in the String.charAt function of processing.js, this 
+ * simulation won't run as a standalone processing program (the difference 
+ * between the two being that charAt comparisons need to use double-quotes 
+ * in processing.js, whereas they should be using single quotes in standard 
+ * processing as well as Java in general.
  */
 
 static int SIMULATION_WIDTH  = /** int ( 0, 1024 ] **/ 640 /** endint **/;
 static int SIMULATION_HEIGHT = /** int ( 0, 1024 ] **/ 480 /** endint **/;
+
+color STROKE_COLOR       = /** color **/ color(0, 0, 0, 48) /** endcolor **/;
+static int STROKE_WEIGHT = /** float [ 0, 10 ] **/ 1.0 /** endfloat **/;
 
 HilbertSystem system;
 int counter, depth;
@@ -36,10 +45,6 @@ void reset() {
 }
 
 void draw() {
-    update();
-}
-
-void update() {
     if (done) {
         if (depth < 8) {
             system.generate(depth++);
@@ -53,8 +58,8 @@ void update() {
 }
 
 void mouseClicked() {
-    system.invert_color();
-    //reset();
+    //system.invert_color();
+    reset();
 }
 
 class HilbertSystem {
@@ -64,25 +69,27 @@ class HilbertSystem {
     int COLOR_NONE       = 1;
     
     private String _axiom;
+    
     // any chars which are not in _rules are considered to be constants
     private String _rules;
     
-    private color STROKE_COLOR = color(0, 0, 0, 48);
     private float _x, _y;
     private float _theta;
-    private String _result;
-    private int _horizLength, _vertLength;
     private float _angle;
-    private int _depth;
+    
+    private String _result;
+    
+    private int _horizLength, _vertLength;
     private int _variation, _color;
+    private int _depth;
     
     HilbertSystem() {
         _rules = "LR";
         _axiom = "L";
         
-        _angle      = PI / 2; // 90 degree turns
-        _variation  = /** int [ 0, 1 ] **/ 0 /** endint **/;
-        _color      = /** int [ 0, 1 ] **/ 0 /** endint **/;
+        _angle      = /** float [ 0, 3.1416 ] **/ HALF_PI /** endfloat **/; // default to 90 degree turns
+        _variation  = /** int [ 0, 1 ]        **/ 0       /** endint **/;
+        _color      = /** int [ 0, 1 ]        **/ 0       /** endint **/;
     }
     
     void invert_color() {
@@ -97,8 +104,8 @@ class HilbertSystem {
         return this.process(_axiom, maxDepth);
     }
     
-    String process(String state, int depth) {
-        if (depth <= 0) {
+    String process(String state, int aDepth) {
+        if (aDepth <= 0) {
             return state;
         }
         
@@ -114,50 +121,46 @@ class HilbertSystem {
             }
         }
         
-        return this.process(nextState, depth - 1);
+        return this.process(nextState, aDepth - 1);
     }
     
     String process_rule(char rule) {
         String replacement = "";
         
-        if (rule == 'L') {
+        if (rule == "L") {
             replacement = "+RF-LFL-FR+";
-        } else if (rule == 'R') {
+        } else if (rule == "R") {
             replacement = "-LF+RFR+FL-";
         }
         
         return replacement;
     }
 
-    void generate(int depth) {
+    void generate(int aDepth) {
         _theta = 0;
         _x = 0; _y = height - 1;
         
-        _depth  = depth;
-        _result = this.process_system(depth);
+        _depth  = aDepth;
+        _result = this.process_system(aDepth);
         
         _horizLength = width;
         _vertLength  = height;
         
-        for(int i = 0; i < depth; i++) {
+        for(int i = 0; i < aDepth; i++) {
             _horizLength = int(_horizLength / 2);
             _vertLength  = int(_vertLength  / 2);
         }
     }
 
-    color random_color(int alpha) {
+    color random_color(int a) {
         if (_color == COLOR_DEFAULT) {
-            int[] palette = HILBERT_PALETTE;
+            // select a random color from within a predefined color palette
+            int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
             
-            // Select a random color from within a predefined color palette
-            int offset = 3 * int(random(0, (palette.length - 1) / 3));
-            return color(palette[offset],  
-                         palette[offset + 1], 
-                         palette[offset + 2], 
-                         alpha);
+            return color(PALETTE[offset],  PALETTE[offset + 1], PALETTE[offset + 2], a);
         }
         
-        return color(0, 0, 0, random(10, 150));
+        return color(0, 0, 0, a);
     }
     
     boolean update(int i) {
@@ -167,35 +170,35 @@ class HilbertSystem {
         
         char cur = _result.charAt(i);
         
-        if (cur == 'F') {
+        if (cur == "F") {
             float new_x = round(_x + _horizLength * cos(_theta));
             float new_y = round(_y + _vertLength  * sin(_theta));
             
             stroke(STROKE_COLOR);
-            strokeWeight(1.0);
+            strokeWeight(STROKE_WEIGHT);
             line(_x, _y, new_x, new_y);
             
-            float width = random(3.0, _horizLength + 3);
-            float half  = (width / 2);
+            float length = random(3.0, _horizLength + 3);
+            float half   = (length / 2);
             
             strokeWeight(7.0 - this._depth);
             stroke(this.random_color(int(random(10, 150))));
-            fill(0, 0, 0, 0);
+            noFill();
             
             // randomly switch between rects and circles
             //_variation = (random(0.0, 1.0) > 0.5 ? VARIATION_RECT : VARIATION_CIRCLE);
             
             if (_variation == VARIATION_RECT) {
-                rect(_x, _y, width, width);
+                rect(_x, _y, length, length);
             } else if (_variation == VARIATION_CIRCLE) {
-                ellipse(_x, _y, width, width);
+                ellipse(_x, _y, length, length);
             }
             
             _x = new_x;
             _y = new_y;
-        } else if (cur == '-') {
+        } else if (cur == "-") {
             _theta += _angle;
-        } else if (cur == '+') {
+        } else if (cur == "+") {
             _theta -= _angle;
         }
         
@@ -204,7 +207,7 @@ class HilbertSystem {
 }
 
 // color palette extracted from a seed image
-static int[] HILBERT_PALETTE = {
+static int[] PALETTE = {
     71, 49, 19, 108, 63, 16, 99, 100, 68, 71, 125, 105, 82, 138, 113, 
     115, 148, 131, 108, 150, 148, 125, 148, 128, 174, 15, 68, 
     175, 77, 71, 195, 62, 69, 205, 91, 71, 176, 144, 94, 

@@ -26,13 +26,13 @@
      </head>
      
      <div class="clearfix">
-       <canvas id="rrt" 
-               data-processing-sources="{{STAMPED_STATIC_URL}}pde/rrt/rrt.pde"
-               data-processing-abstraction-editor="rrt-editor">
+       <canvas id="processing" 
+               data-processing-sources="{{STAMPED_STATIC_URL}}{% if PROCESSING_SKETCH %}pde/{{PROCESSING_SKETCH}}/{{PROCESSING_SKETCH}}.pde{% else %}pde/rrt/rrt.pde{% endif %}"
+               data-processing-abstraction-editor="processing-editor">
        </canvas>
        
        <div class="abstraction-editor">
-           <pre id="rrt-editor"></pre>
+           <pre id="processing-editor"></pre>
         </div>
     </div>
 {% endblock main %}

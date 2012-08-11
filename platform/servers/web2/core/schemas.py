@@ -162,3 +162,14 @@ class HTTPUpdateSettingsSchema(Schema):
         cls.addProperty('alerts_actions_apns',              bool)
         cls.addProperty('alerts_actions_email',             bool)
 
+class HTTPTestSchema(Schema):
+    
+    def __init__(self, *args, **kwargs):
+        Schema.__init__(self, *args, **kwargs)
+        self.mobile = False
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('sketch',                           basestring)
+        cls.addProperty('mobile',                           bool)
+

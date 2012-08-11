@@ -130,14 +130,13 @@ class Body {
         _dY = 0.0;
         
         _size   = mass;
-        _weight = random(/** float [ .2, 5 ] **/ 1.0 /** endfloat **/, 
-                         /** float [ 1,  6 ] **/ 3.0 /** endfloat **/);
+        _weight = random(/** float [ .2, 5 ] **/ 1.0 /** endfloat **/, /** float [ 1,  6 ] **/ 3.0 /** endfloat **/);
         
         // select a random color from within a predefined color palette
         int offset = 3 * int(random(0.0, (PALETTE.length - 1) / 3.0));
         _fill      = color(PALETTE[offset], 
                            PALETTE[offset + 1], 
-                           PALETTE[offset + 2], 48);
+                           PALETTE[offset + 2], /** int [ 0, 255 ] **/ 48 /** endint **/);
         
         resetMass();
     }

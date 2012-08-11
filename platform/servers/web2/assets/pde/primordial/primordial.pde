@@ -8,7 +8,7 @@
 static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
 static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
-static int NUM_ORGANISMS        = /** int [ 1, 100 ]  **/ 20  /** endint **/;
+static int NUM_ORGANISMS        = /** int [ 1, 100 ]  **/ 15  /** endint **/;
 
 Particle[] _particles;
 
@@ -18,7 +18,7 @@ boolean _octopi;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(32);
+    frameRate(24);
     loop();
     
     _singleCelled = /** boolean **/ false /** endboolean **/;
@@ -184,11 +184,14 @@ class Cell implements Particle {
         _size  = size / 2;
         _girth = girth;
         
-        // friction with water
-        _viscosity = /** float [ 0, 10 ] **/ 0.9 /** endfloat **/ + random(0.0, /** float [ 0, 2 ] **/ 0.1 /** endfloat **/);
+        // viscosity = friction with water
+        float viscosity_base = /** float [ 0, 10 ] **/ 0.9 /** endfloat **/;
+        float viscosity_rand = /** float [ 0, 2  ] **/ 0.1 /** endfloat **/;
         
-        _minRotationalVelocity = /** float [ -0.1 0 ] **/ -0.06 /** endfloat **/;
-        _maxRotationalVelocity = /** float [ 0, 0.1 ] **/  0.06 /** endfloat **/;
+        _viscosity = viscosity_base + random(0.0, viscosity_rand);
+        
+        _minRotationalVelocity = /** float [ -0.1, 0 ] **/ -0.06 /** endfloat **/;
+        _maxRotationalVelocity = /** float [ 0, 0.1  ] **/  0.06 /** endfloat **/;
         
         _minSpeed = /** float [ 0, 5 ]  **/ 2  /** endfloat **/;
         _maxSpeed = /** float [ 5, 25 ] **/ 10 /** endfloat **/;

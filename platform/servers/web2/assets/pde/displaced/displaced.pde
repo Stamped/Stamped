@@ -5,7 +5,7 @@
  * @port:   August 2012 to processing
  */
 
-/* @pjs preload="displaced1.jpeg"; */
+/* @pjs preload="/assets/pde/displaced/displaced1.jpeg"; */
 
 static int SIMULATION_WIDTH  = /** int ( 0, 1024 ] **/ 640 /** endint **/;
 static int SIMULATION_HEIGHT = /** int ( 0, 1024 ] **/ 480 /** endint **/;
@@ -23,7 +23,7 @@ color[] _back;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(32);
+    frameRate(12);
     loop();
     
     _rippleRadius   = /** int [ 2, 4 ] **/ 3 /** endint **/;
@@ -40,7 +40,7 @@ void reset() {
     _map0 = new int[width * height];
     _map1 = new int[width * height];
     
-    loadBackground(loadImage("displaced1.jpeg"));
+    loadBackground(loadImage("/assets/pde/displaced/displaced1.jpeg"));
 }
 
 void draw() {
@@ -51,15 +51,16 @@ void draw() {
 
 void update() {
     int[] temp = _map0;
+    int index  = 0;
     
     _map0 = _map1;
     _map1 = temp;
     
     if (_automaticWaves) {
-        this.disturb(int(random(1, width - 2)), int(random(1, height - 2)));
+        disturb(int(random(1, width - 2)), int(random(1, height - 2)));
     }
     
-    for(int index = 0, int j = 0; j < height; j++) {
+    for(int j = 0; j < height; j++) {
         int a = (j <= 0 ? 0 : width);
         int b = (j >= height - 1 ? 0 : width);
         
@@ -102,10 +103,12 @@ void loadBackground(PImage image) {
     
     _back = new color[image.width * image.height];
     
-    for(int a = 0, j = 0; j < image.height; j++) {
+    int index = 0;
+    
+    for(j = 0; j < image.height; j++) {
         for(int i = 0; i < image.width; i++) {
-            color temp = image.get(i, j);
-            _back[a++] = temp;
+            color temp     = image.get(i, j);
+            _back[index++] = temp;
             
             _offscreen.set(i, j, temp);
         }
@@ -136,10 +139,10 @@ void disturb(int x, int y) {
 }
 
 void mousePressed() {
-    this.disturb(mouseX, mouseY);
+    disturb(mouseX, mouseY);
 }
 
 void mouseDragged() {
-    this.disturb(mouseX, mouseY);
+    disturb(mouseX, mouseY);
 }
 

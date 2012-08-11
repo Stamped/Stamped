@@ -17920,6 +17920,11 @@
         
         var default_value = parse_value(value);
         
+        if (isNaN(default_value)) {
+          // possibly a variable or some expression parse_value couldn't handle
+          default_value = value;
+        }
+        
         if (!!constraints) {
           var re = /([\(\[])\s*([^,]+),\s*([^\]\)]+)\s*([\]\)])/;
           var m  = re.exec(constraints);
@@ -18413,7 +18418,7 @@
     }
     
     p.rerender = function() {
-      var attributes = p.abstraction_model.attributes;
+      /*var attributes = p.abstraction_model.attributes;
       var variables  = p.abstraction_variables;
       
       for (var key in attributes) {
@@ -18421,8 +18426,8 @@
         var value    = attributes[key];
         
         console.debug(variable);
-        console.debug(value);
-      }
+        //console.debug(value);
+      }*/
       
       var result = p.render();
       //console.debug("PDE:");

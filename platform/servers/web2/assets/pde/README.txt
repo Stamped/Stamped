@@ -1,4 +1,9 @@
 
+TODO:
+    * get hilbert working on the web
+    * get tenebrous working on the web
+
+
 TEMPLATES:
     NOTE: all control-flow logic belongs in the processing code itself!
     

@@ -366,12 +366,14 @@ def popup_following(request, schema, **kwargs):
         'users'       : users, 
     })
 
-@stamped_view()
-def test_view(request, **kwargs):
-    #user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
-    #stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
+@stamped_view(schema=HTTPTestSchema)
+def test_view(request, schema, **kwargs):
+    params = {}
     
-    return stamped_render(request, 'test.html', { })
+    if (schema.sketch is not None):
+        params['PROCESSING_SKETCH'] = schema.sketch
+    
+    return stamped_render(request, 'test.html', params)
 
 @stamped_view()
 def temp_view(request, **kwargs):
