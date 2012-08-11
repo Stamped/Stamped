@@ -5,14 +5,13 @@
  * @port:   August 2012 to processing
  */
 
-static int SIMULATION_WIDTH             = 640;
-static int SIMULATION_HEIGHT            = 480;
+static int SIMULATION_WIDTH         = /** int ( 0, 1024 ] **/ 640 /** endint **/;
+static int SIMULATION_HEIGHT        = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
-static int DEFAULT_GRAVITY_SPEED        = 900;
-static int MAX_GRAVITY_SPEED            = 1000;
+static int DEFAULT_GRAVITY_SPEED    = /** int [ 300, 1000 ] **/ 900 /** endint **/;
+static int MAX_GRAVITY_SPEED        = 1000;
 
-static int DEFAULT_GRAVITY_NO_PARTICLES = 150;
-static int MAX_GRAVITY_NO_PARTICLES     = 300;
+static int NUMBER_OF_PARTICLES      = /** int [ 12, 300 ] **/ 150 /** endint **/;
 
 // scaling factor that affects the mass of the bodies, effectively scaling the 
 // overall gravity strength of the system.
@@ -30,9 +29,9 @@ void setup() {
     smooth();
     loop();
     
-    bodies          = new Body[DEFAULT_GRAVITY_NO_PARTICLES];
+    bodies          = new Body[NUMBER_OF_PARTICLES];
     simulationSpeed = DEFAULT_GRAVITY_SPEED;
-    initialState    = 0;
+    initialState    = /** int [ 0, 1 ] **/ 0 /** endint **/;
     
     reset();
 }
@@ -62,7 +61,7 @@ void reset() {
 }
 
 void draw() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     update();
     
     for(int i = 0; i < bodies.length; i++) {
@@ -131,11 +130,14 @@ class Body {
         _dY = 0.0;
         
         _size   = mass;
-        _weight = random(1.0, 3.0);
+        _weight = random(/** float [ .2, 5 ] **/ 1.0 /** endfloat **/, 
+                         /** float [ 1,  6 ] **/ 3.0 /** endfloat **/);
         
         // select a random color from within a predefined color palette
-        int offset = 3 * int(random(0.0, (SUBSTRATE_COLORS.length - 1) / 3.0));
-        _fill      = color(SUBSTRATE_COLORS[offset], SUBSTRATE_COLORS[offset + 1], SUBSTRATE_COLORS[offset + 2], 48);
+        int offset = 3 * int(random(0.0, (PALETTE.length - 1) / 3.0));
+        _fill      = color(PALETTE[offset], 
+                           PALETTE[offset + 1], 
+                           PALETTE[offset + 2], 48);
         
         resetMass();
     }
@@ -160,9 +162,9 @@ class Body {
     boolean intersects(Body body) {
         float radius = (_size / 2);
         float rad    = (body._size / 2);
-        float xDif = body._x - _x;
-        float yDif = body._y - _y;
-        float dist = sqrt(xDif * xDif + yDif * yDif);
+        float xDif   = body._x - _x;
+        float yDif   = body._y - _y;
+        float dist   = sqrt(xDif * xDif + yDif * yDif);
         
         // reject if dist btwn circles is greater than their radii combined
         if (dist > radius + rad) {
@@ -175,14 +177,15 @@ class Body {
     
     void draw() {
         fill(_fill);
-        stroke(0, 0, 0, 78);
+        stroke(/** color **/ color(0, 0, 0, 78) /** endcolor **/);
         strokeWeight(_weight);
         
         ellipse(_x, _y, _size, _size);
     }
 }
 
-static int[] SUBSTRATE_COLORS = {
+// color palette extracted from a seed image
+static int[] PALETTE = {
     0, 0, 0, 0, 16, 0, 104, 104,
     112, 104, 112, 120, 104, 88, 88, 112, 128, 128, 120, 120, 128, 128,
     88, 0, 144, 104, 72, 144, 80, 72, 144, 88, 24, 144, 96, 112, 152,

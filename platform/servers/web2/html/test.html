@@ -5,6 +5,10 @@
 {% block head %}
     {{ block.super }}
     
+    <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/styles.css">
+    <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}js/libs/syntaxhighlighter/SyntaxHighlighter.css"></script>
+    <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/processing.abstraction.css"></script>
+    <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.minicolors.css"></script>
     <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/test.css">
 {% endblock head %}
 
@@ -20,23 +24,29 @@
         <br />
         
      </head>
-     <body>
-       <canvas id="tenebrous" data-processing-sources="{{STAMPED_STATIC_URL}}pde/intersection/intersection.pde"></canvas>
+     
+     <div class="clearfix">
+       <canvas id="rrt" 
+               data-processing-sources="{{STAMPED_STATIC_URL}}pde/rrt/rrt.pde"
+               data-processing-abstraction-editor="rrt-editor">
+       </canvas>
        
-        <!--
-        <div id="collage">
-            <img crossOrigin="anonymous" id="collage_img" src="http://static.stamped.com/collages/collage-travis-music-940x256.jpg" width="940" height="256" />
+       <div class="abstraction-editor">
+           <pre id="rrt-editor"></pre>
         </div>
-        -->
     </div>
 {% endblock main %}
 
 {% block scripts %}
     {{ block.super }}
      
-    <script type="text/javascript" src="/assets/js/libs/processing-1.4.0.js"></script>
-    <script src="{{ STAMPED_STATIC_URL }}js/test.js"></script>
+    <script type="text/javascript" src="/assets/js/libs/underscore.js"></script>
+    <script type="text/javascript" src="/assets/js/libs/backbone.js"></script>
+    <script type="text/javascript" src="/assets/js/libs/jquery.minicolors.js"></script>
+    <script type="text/javascript" src="/assets/js/libs/syntaxhighlighter/shCore.js"></script>
     
-    {% ssi STAMPED_TEMPLATE_FILE %}
+    <script type="text/javascript" src="/assets/pde/processing.abstraction.js"></script>
+    
+    <script src="{{ STAMPED_STATIC_URL }}js/test.js"></script>
 {% endblock scripts %}
 

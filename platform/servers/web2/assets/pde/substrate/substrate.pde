@@ -8,19 +8,16 @@
  * @see http://www.complexification.net/
  */
 
-static int SIMULATION_WIDTH     = 640;
-static int SIMULATION_HEIGHT    = 480;
+static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
+static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
-static int MAX_ACTIVE_CRACKS    = 100;
+static int MAX_ACTIVE_CRACKS    = /** int [ 12, 1024 ] **/ 100 /** endint **/;
 static int SPAWN_LINEAR         = 0;
-static int SPAWN_RADIAL         = 1;
-static int DEFAULT_GROWTH       = 5;
-static int MAX_GROWTH           = 8;
 
 static float FUZZ               = 0.25;
 static float TWICE_FUZZ         = FUZZ * 2.0;
 
-int[][] _setCracks = new int[SIMULATION_WIDTH + 1][SIMULATION_HEIGHT + 1];
+int[][] _setCracks;
 PImage  _offscreen;
 
 ArrayList _activeCracks;
@@ -44,14 +41,16 @@ void setup() {
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     
-    _noInitialLines = 4;
+    _setCracks = new int[width + 1][height + 1];
+    
+    _noInitialLines = /** int [ 1, 32 ] **/ 4 /** endint **/;
     _activeCracks   = new ArrayList();
     _inactiveCracks = new ArrayList();
     
-    _spawnType      = SPAWN_LINEAR;
-    _growth         = DEFAULT_GROWTH;
+    _spawnType      = /** int [ 0, 1 ]  **/ 0 /** endint **/;
+    _growth         = /** int [ 0, 10 ] **/ 5 /** endint **/;
     
     _dragged        = false;
     
@@ -63,7 +62,7 @@ void reset() {
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {
             _setCracks[i][j] = 1000;
-            _offscreen.set(i, j, #FFFFFF);
+            _offscreen.set(i, j, /** color **/ #FFFFFF /** endcolor **/);
         }
     }
     
@@ -118,7 +117,7 @@ void update() {
             boolean exp = true;
             
             for(int j = 0; j < _growth; j++) {
-                exp = (random(0.0, 1.0) > 0.5);
+                exp = (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.5 /** endfloat **/);
                 
                 if (!exp) {
                     break;
@@ -232,13 +231,13 @@ void addInputCrack(float theta) {
 }
 
 class Crack {
-    float _chanceOfCurved = 0;
+    float _chanceOfCurved = /** float [ 0, 1 ] **/ 0 /** endfloat **/;
     
-    // Position
+    // position
     float _x, _initialX;
     float _y, _initialY;
     
-    // Direction specified in degrees
+    // direction specified in degrees
     int _theta;
     float _dx, _dy;
     
@@ -250,13 +249,12 @@ class Crack {
     
     // initializes a completely randomized Crack
     Crack() {
-        this(random(0, width), random(0, height), 
-             random(0, 359));
+        this(random(0, width), random(0, height), random(0, 359));
     }
     
     // initializes a given Crack with a random color
     Crack(float x, float y, float theta) {
-        // Initialize geometric data
+        // initialize geometric data
         _initialX   = x;
         _initialY   = y;
         _x          = x;
@@ -282,8 +280,11 @@ class Crack {
         }
         
         // Initialize Crack to have a pseudo-random color within the predefined color scheme
-        int offset = 3 * int(random(0, (SUBSTRATE_COLORS.length - 1) / 3));
-        _color = color(SUBSTRATE_COLORS[offset], SUBSTRATE_COLORS[offset + 1], SUBSTRATE_COLORS[offset + 2], 255);
+        int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
+        _color = color(PALETTE[offset], 
+                       PALETTE[offset + 1], 
+                       PALETTE[offset + 2], 
+                       /** int [ 0, 255 ] **/ 255 /** endint **/);
     }
     
     boolean update() {
@@ -316,7 +317,7 @@ class Crack {
         this.paintSand(x, y, dX, dY);
         _setCracks[x][y] = _theta;
         
-        _offscreen.set(x, y, #000000);
+        _offscreen.set(x, y, /** color **/ #000000 /** endcolor **/);
         _setCracks[realX][realY] = _theta;
         
         return true;
@@ -352,9 +353,11 @@ class Crack {
         sandY = (sandY + sandDy - _y);
         
         // Modulate length of sand
-        float modulation = 0.01 + (abs(sandX)) * (1.0 / (50 * width)) + (abs(sandY)) * (1.0 / (50*height));
+        float sand_const = /** float [ 1, 100 ] **/ 50 /** endfloat **/
+        float modulation = 0.01 + (abs(sandX)) * (1.0 / (sand_const * width)) + 
+                                  (abs(sandY)) * (1.0 / (sand_const * height));
         
-        _sandRand += modulation - random(0.0, 1.0) * modulation * 2; // 0.02
+        _sandRand += modulation - random(0.0, 1.0) * modulation * /** float [ 0.1, 10 ] **/ 2 /** endfloat **/;
         
         // Cap length of sand
         if (_sandRand < 0.3) {
@@ -441,7 +444,8 @@ class Crack {
     }
 }
 
-static int[] SUBSTRATE_COLORS = {
+// color palette extracted from a seed image
+static int[] PALETTE = {
     0, 0, 0, 0, 16, 0, 104, 104,
     112, 104, 112, 120, 104, 88, 88, 112, 128, 128, 120, 120, 128, 128,
     88, 0, 144, 104, 72, 144, 80, 72, 144, 88, 24, 144, 96, 112, 152,

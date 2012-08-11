@@ -5,13 +5,14 @@
  * @port:   August 2012 to processing
  */
 
-static int SIMULATION_WIDTH  = 640;
-static int SIMULATION_HEIGHT = 480;
+static int SIMULATION_WIDTH     = /** int ( 0, 1024 ]   **/ 640  /** endint **/;
+static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ]   **/ 480  /** endint **/;
 
-static int NO_INITIAL_TREES = 5;
-static int MAX_TREE_SIZE    = 60;
-static float MIN_TREE_SIZE  = 0.9; //(FULL_SCREEN ? 1.5 : 0.9);
-static float DEFAULT_SPEED  = 3.33f;
+static int NO_INITIAL_TREES     = /** int [ 1, 32 ]     **/ 5    /** endint **/;
+
+static float MAX_TREE_SIZE      = /** float [ 10, 180 ] **/ 60   /** endfloat **/;
+static float MIN_TREE_SIZE      = /** float [ 0.5, 5  ] **/ 0.9  /** endfloat **/;
+static float PARTICLE_SPEED     = /** float [ 0.1, 20 ] **/ 3.33 /** endfloat **/;
 
 ArrayList particles;
 
@@ -25,7 +26,8 @@ void setup() {
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
+    
     particles = new ArrayList();
     
     for (int i = 0; i < NO_INITIAL_TREES; i++) {
@@ -34,7 +36,6 @@ void reset() {
 }
 
 void draw() {
-    //background(#33aadd);
     update();
     
     for(int i = 0; i < particles.size(); i++) {
@@ -111,23 +112,28 @@ class Particle {
     
     private void _reset_color() {
         // 50% of the time, make the particle black
-        if (random(0.0, 1.0) > 0.5) {
-            _fill = color(0, 0, 0, 200);
+        if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.5 /** endfloat **/) {
+            _fill = /** color **/ color(0, 0, 0, 200) /** endcolor **/;
         } else {
             // 50% of the time, give the particle a random color from within a predefined color palette
-            int offset   = 3 * int(random(0.0, (TENEBROUS_PALETTE.length - 1) / 3.0));
-            _fill  = color(TENEBROUS_PALETTE[offset], TENEBROUS_PALETTE[offset + 1], TENEBROUS_PALETTE[offset + 2], 255);
+            int offset = 3 * int(random(0.0, (PALETTE.length - 1) / 3.0));
+            
+            _fill  = color(PALETTE[offset], 
+                           PALETTE[offset + 1], 
+                           PALETTE[offset + 2], 
+                           /** int [ 0, 255 ] **/ 255 /** endint **/);
         }
     }
     
     private void _reset_length() {
-        this._length = int(random(10, 100));
+        this._length = int(random(/** int [ 5, 50 ]   **/ 10  /** endint **/, 
+                                  /** int [ 50, 300 ] **/ 100 /** endint **/));
     }
     
     boolean update() {
         // update particle direction and size
         this._theta += this._dTheta;
-        this._size  -= (this._size / (MAX_TREE_SIZE * 16.0));
+        this._size  -= (this._size / (MAX_TREE_SIZE * /** float [ 1, 128 ] **/ 16.0 /** endfloat **/));
         
         // kill particle if it grows too small
         if (this._size <= MIN_TREE_SIZE) {
@@ -135,8 +141,8 @@ class Particle {
         }
         
         // update particle's position
-        this._x += DEFAULT_SPEED * cos(this._theta);
-        this._y += DEFAULT_SPEED * sin(this._theta);
+        this._x += PARTICLE_SPEED * cos(this._theta);
+        this._y += PARTICLE_SPEED * sin(this._theta);
         
         float radius = this._size / 2.0;
         
@@ -156,13 +162,13 @@ class Particle {
         } else {
             float rand = random(0.0, 1.0);
             
-            if (rand < 0.005) {
+            if (rand < /** float [ 0, 0.1 ] **/ 0.005 /** endfloat **/) {
                 // split into two branches and stop this particle's growth
                 particles.add(new Particle(this, true));
                 particles.add(new Particle(this, false));
                 
                 return false;
-            } else if (rand > 0.99) {
+            } else if (rand > /** float [ 0.9, 1 ] **/ 0.99 /** endfloat **/) {
                 // possible to change direction
                 this._dTheta = -this._dTheta;
             }
@@ -175,8 +181,8 @@ class Particle {
         float radius = this._size / 2.0;
         
         fill(this._fill);
-        stroke(color(127, 127, 127, 50));
-        strokeWeight(1.0);
+        stroke(/** color **/ color(127, 127, 127, 50) /** endcolor **/);
+        strokeWeight(/** int [ 0, 10 ] **/ 1.0 /** endint **/);
         
         ellipse(this._x, this._y, radius, radius);
     }
@@ -186,7 +192,7 @@ class Particle {
  * taken from "Images/shiftingLinesPalette.png"
  * (mainly blue and green hues)
  */
-static int[] TENEBROUS_PALETTE = {
+static int[] PALETTE = {
     59, 70, 76, 69, 88, 90, 75, 90, 91, 84, 93, 99, 83, 100, 99, 
     79, 104, 102, 84, 108, 116, 85, 112, 117, 94, 120, 107, 92, 115, 114, 
     98, 114, 114, 99, 122, 115, 104, 118, 121, 99, 122, 122, 99, 123, 130, 

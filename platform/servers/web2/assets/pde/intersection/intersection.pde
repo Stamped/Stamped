@@ -16,12 +16,12 @@
  * @see http://www.complexification.net/gallery/machines/interAggregate/index.php
  */
 
-static int SIMULATION_WIDTH         = 640;
-static int SIMULATION_HEIGHT        = 480;
+static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
+static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
-static int MIN_CIRCLE_RADIUS        = 10;
-static int MAX_CIRCLE_RADIUS        = 70;
-static int DEFAULT_CIRCLE_RADIUS    = 30;
+static int CIRCLE_RADIUS        = /** int [ 10, 70 ]  **/ 30  /** endint **/;
+static int MIN_CIRCLE_RADIUS    = /** int [ 0, 70 ]   **/ 10  /** endint **/;
+static int MAX_CIRCLE_RADIUS    = /** int [ 10, 140 ] **/ 70  /** endint **/;
 
 Circle[] _circles;
 
@@ -41,18 +41,18 @@ void setup() {
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     
-    _noCircles = 100;
-    _radius    = DEFAULT_CIRCLE_RADIUS;
-    _randomRadius = true;
-    _variation = 0;
-    _movement  = 0;
+    _radius       = CIRCLE_RADIUS;
+    _noCircles    = /** int [ 1, 200 ] **/ 100 /** endint **/;
+    _randomRadius = /** boolean **/ true /** endboolean **/;
+    _variation    = /** int [ 0, 2 ] **/ 0 /** endint **/;
+    _movement     = /** int [ 0, 2 ] **/ 0 /** endint **/;
     
     Circle[] circles = new Circle[_noCircles];
     
     for(int i = 0; i < circles.length; i++) {
-        int x = int(random(0, width - 1));
+        int x = int(random(0, width  - 1));
         int y = int(random(0, height - 1));
         int radius = _radius;
         
@@ -60,8 +60,11 @@ void reset() {
             radius = int(random(MIN_CIRCLE_RADIUS, MAX_CIRCLE_RADIUS));
         }
         
-        int offset = 3 * int(random(0, (INTERSECTION_PALETTE.length - 1) / 3));
-        color c = color(INTERSECTION_PALETTE[offset], INTERSECTION_PALETTE[offset + 1], INTERSECTION_PALETTE[offset + 2], 255);
+        int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
+        color c = color(PALETTE[offset], 
+                        PALETTE[offset + 1], 
+                        PALETTE[offset + 2], 
+                        /** int [ 0, 255 ] **/ 255 /** endint **/);
         
         circles[i] = new Circle(x, y, radius, c, _movement);
     }
@@ -71,21 +74,21 @@ void reset() {
 
 void draw() {
     if (_variation == 2) {
-        background(#FFFFFF);
+        background(/** color **/ #FFFFFF /** endcolor **/);
     }
     
     update();
     
     if (_variation == 2) {
-        stroke(#666666);
-        fill(color(0, 0, 0, 24));
+        stroke(/** color **/ #666666 /** endcolor **/);
+        fill(  /** color **/ color(0, 0, 0, 24) /** endcolor **/);
         
         for(int i = 0; i < _circles.length; i++) {
             _circles[i].draw();
         }
         
-        fill(#000000);
-        stroke(#000000);
+        stroke(/** color **/ #000000 /** endcolor **/);
+        fill(  /** color **/ #000000 /** endcolor **/);
         
         int size = 4;
         
@@ -173,55 +176,12 @@ void mouseClicked() {
     reset();
 }
 
-void setRadius(int radius) {
-    if (_randomRadius || _radius != radius) {
-        _randomRadius = false;
-        _radius = radius;
-        
-        this.resetRadii();
-    }
-}
-
-void setRandomRadius() {
-    if (!_randomRadius) {
-        _randomRadius = true;
-        
-        this.resetRadii();
-    }
-}
-
-void resetRadii() {
-    if (_randomRadius) {
-        for(int i = 0; i < _circles.length; i++) {
-            _circles[i].setRadius(int(random(MIN_CIRCLE_RADIUS, MAX_CIRCLE_RADIUS)));
-        }
-    } else {
-        for(int i = 0; i < _circles.length; i++) {
-            _circles[i].setRadius(_radius);
-        }
-    }
-}
-
-void setVariation(int variation) {
-    if (_variation != variation) {
-        _variation = variation;
-    }
-}
-
-void setMovement(int movement) {
-    if (_movement != movement) {
-        _movement = movement;
-        
-        for(int i = 0; i < _circles.length; i++) {
-            _circles[i].setMovement(_movement);
-        }
-    }
-}
-
 class Circle {
     int _radius, _radiusSquared, _diameter;
+    
     float _x, _y;
     float _dX, _dY;
+    
     color _color;
     
     Circle() {
@@ -368,7 +328,7 @@ class Circle {
 /* RGB triples constituting a list of predefined colors
  * taken from "intersectionPalette.png"
  */
-static int INTERSECTION_PALETTE[] = {
+static int PALETTE[] = {
     255,255,255, 255,255,255, 255,255,255, 
     37, 29, 23, 51, 45, 39, 57, 49, 41, 71, 57, 42, 90, 74, 52, 
     100, 76, 55, 90, 85, 73, 104, 97, 77, 116, 104, 88, 123, 122, 119, 

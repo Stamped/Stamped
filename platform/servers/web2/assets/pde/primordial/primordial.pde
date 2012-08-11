@@ -5,9 +5,10 @@
  * @port:   August 2012 to processing
  */
 
-static int SIMULATION_WIDTH     = 640;
-static int SIMULATION_HEIGHT    = 480;
-static int NUM_ORGANISMS        = 20;
+static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
+static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
+
+static int NUM_ORGANISMS        = /** int [ 1, 100 ]  **/ 20  /** endint **/;
 
 Particle[] _particles;
 
@@ -20,9 +21,9 @@ void setup() {
     frameRate(32);
     loop();
     
-    _singleCelled = false;
-    _flagella     = true;
-    _octopi       = true;
+    _singleCelled = /** boolean **/ false /** endboolean **/;
+    _flagella     = /** boolean **/ true  /** endboolean **/;
+    _octopi       = /** boolean **/ true  /** endboolean **/;
     
     reset();
 }
@@ -115,7 +116,7 @@ void reset() {
 }
 
 void draw() {
-    background(#ffffff);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     update();
     
     for(int i = 0; i < _particles.length; i++) {
@@ -184,18 +185,18 @@ class Cell implements Particle {
         _girth = girth;
         
         // friction with water
-        _viscosity = 0.9 + 0.1 * random(0.0, 1.0);
+        _viscosity = /** float [ 0, 10 ] **/ 0.9 /** endfloat **/ + random(0.0, /** float [ 0, 2 ] **/ 0.1 /** endfloat **/);
         
-        _minRotationalVelocity = -0.06;
-        _maxRotationalVelocity =  0.06;
+        _minRotationalVelocity = /** float [ -0.1 0 ] **/ -0.06 /** endfloat **/;
+        _maxRotationalVelocity = /** float [ 0, 0.1 ] **/  0.06 /** endfloat **/;
         
-        _minSpeed = 2;
-        _maxSpeed = 10;
+        _minSpeed = /** float [ 0, 5 ]  **/ 2  /** endfloat **/;
+        _maxSpeed = /** float [ 5, 25 ] **/ 10 /** endfloat **/;
         
         _speed = 0;//random(_minSpeed, _maxSpeed);
         _theta = random(0.0, TWO_PI);
         
-        _fill  = color(127, 127, 127, 58);
+        _fill  = /** color **/ color(127, 127, 127, 58) /** endcolor **/;
     }
     
     boolean update() {
@@ -205,8 +206,10 @@ class Cell implements Particle {
         // ensure organism doesn't move too fast
         _speed = this.cap(_speed, _minSpeed, _maxSpeed);
         
+        float constant = /** float [ 0, 0.08 ] **/ 0.015 /** endfloat **/;
+        
         // randomly update direction of organism
-        _rotationalVelocity += 0.015 - 2 * 0.015 * random(0.0, 1.0);
+        _rotationalVelocity += constant - 2 * constant * random(0.0, 1.0);
         
         // ensure organism doesn't turn too fast
         _rotationalVelocity = this.cap(_rotationalVelocity, _minRotationalVelocity, 
@@ -271,8 +274,8 @@ class Cell implements Particle {
     
     void draw() {
         fill(_fill);
-        strokeWeight(0);
-        stroke(color(255, 255, 255, 0));
+        strokeWeight(/** float [ 0, 10 ] **/ 0 /** endfloat **/);
+        stroke(/** color **/ color(255, 255, 255, 0) /** endcolor **/);
         
         float x = _x;
         float y = _y;
@@ -356,7 +359,7 @@ class Flagellum implements Particle {
         }
         
         // make head of organism light purple
-        _cells[1].setFill(color(164, 0, 164, 18));
+        _cells[1].setFill(/** color **/ color(164, 0, 164, 18) /** endcolor **/);
     }
     
     boolean update() {
@@ -411,7 +414,7 @@ class Octopus implements Particle {
         // initialize the head / root cell
         _head = new Cell(x, y, size);
         _head.setSpeedBounds(length);
-        _head.setFill(color(164, 0, 164, 48));
+        _head.setFill(/** color **/ color(164, 0, 164, 48) /** endcolor **/);
         
         // create and initialize all of the tentacles
         _flagella = new Flagellum[int(random(7, 24))];

@@ -7,8 +7,8 @@
 
 /* @pjs preload="displaced1.jpeg"; */
 
-static int SIMULATION_WIDTH  = 640;
-static int SIMULATION_HEIGHT = 480;
+static int SIMULATION_WIDTH  = /** int ( 0, 1024 ] **/ 640 /** endint **/;
+static int SIMULATION_HEIGHT = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
 boolean _automaticWaves;
 
@@ -26,16 +26,16 @@ void setup() {
     frameRate(32);
     loop();
     
-    _rippleRadius   = 3; // 2 to 3 works well
-    _strength       = 4; // 3 to 9 works well
-    _automaticWaves = true;
+    _rippleRadius   = /** int [ 2, 4 ] **/ 3 /** endint **/;
+    _strength       = /** int [ 3, 9 ] **/ 4 /** endint **/;
+    _automaticWaves = /** boolean **/ true /** endboolean **/;
     _offscreen      = createImage(width, height, RGB);
     
     reset();
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     
     _map0 = new int[width * height];
     _map1 = new int[width * height];

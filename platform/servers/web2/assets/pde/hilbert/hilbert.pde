@@ -10,8 +10,8 @@
  * @see: http://en.wikipedia.org/wiki/Hilbert_curve
  */
 
-static int SIMULATION_WIDTH  = 640;
-static int SIMULATION_HEIGHT = 480;
+static int SIMULATION_WIDTH  = /** int ( 0, 1024 ] **/ 640 /** endint **/;
+static int SIMULATION_HEIGHT = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
 HilbertSystem system;
 int counter, depth;
@@ -27,12 +27,12 @@ void setup() {
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     
     system  = new HilbertSystem();
     done    = true;
     counter = 0;
-    depth   = 1;
+    depth   = /** int [ 1, 7 ] **/ 1 /** endint **/;
 }
 
 void draw() {
@@ -54,7 +54,6 @@ void update() {
 
 void mouseClicked() {
     system.invert_color();
-    
     //reset();
 }
 
@@ -82,8 +81,8 @@ class HilbertSystem {
         _axiom = "L";
         
         _angle      = PI / 2; // 90 degree turns
-        _variation  = VARIATION_CIRCLE;
-        _color      = COLOR_DEFAULT;
+        _variation  = /** int [ 0, 1 ] **/ 0 /** endint **/;
+        _color      = /** int [ 0, 1 ] **/ 0 /** endint **/;
     }
     
     void invert_color() {

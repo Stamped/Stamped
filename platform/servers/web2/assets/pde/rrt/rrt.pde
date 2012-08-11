@@ -6,16 +6,23 @@
  * Exploration of rapidly exploring random trees (RTTs) in the form of generative art.
  * 
  * @see: http://en.wikipedia.org/wiki/Rapidly_exploring_random_tree
+ * 
+ * @todo:
+ *      * experiment with different non-uniform sampling methods for choosing rand vertex
+ *      * rethink visual treatment
  */
 
-static int SIMULATION_WIDTH         = 640;
-static int SIMULATION_HEIGHT        = 480;
+static int SIMULATION_WIDTH     = /** int ( 0, 1024 ]  **/ 640  /** endint   **/;
+static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ]  **/ 480  /** endint   **/;
 
-static int   DEFAULT_NUM_VERTICES   = 1;
-static float DEFAULT_CURVE          = 2.0;
-static float DEFAULT_INV_DISTANCE   = 40.0;
+static int   NUM_VERTICES       = /** int   [ 1, 128 ] **/ 1    /** endint   **/;
+static float CURVATURE          = /** float [ 0, 10  ] **/ 2.0  /** endfloat **/;
+static float INV_DISTANCE       = /** float [ 5, 200 ] **/ 40.0 /** endfloat **/;
 
 RRTree tree;
+
+float _distance;
+float _curvature;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
@@ -27,7 +34,10 @@ void setup() {
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
+    
+    _distance  = (width + height) / (2.0 * INV_DISTANCE);
+    _curvature = CURVATURE;
     
     tree = new RRTree();
 }
@@ -42,19 +52,13 @@ void mouseClicked() {
 
 class RRTree {
     ArrayList _vertices;
-    float _distance;
-    float _curve;
     
     RRTree() {
-        this(DEFAULT_NUM_VERTICES, 
-             (width + height) / (2.0 * DEFAULT_INV_DISTANCE), 
-             DEFAULT_CURVE);
+        this(NUM_VERTICES);
     }
     
-    RRTree(int num_vertices, float distance, float curve) {
-        _vertices = new ArrayList(num_vertices * 16);
-        _distance = distance;
-        _curve    = curve;
+    RRTree(int num_vertices) {
+        _vertices = new ArrayList(num_vertices);
         
         for (int i = 0; i < num_vertices; i++) {
             _vertices.add(new PVector(random(0, width - 1), random(0, height - 1)));
@@ -64,11 +68,14 @@ class RRTree {
     color random_color(int alpha) {
         int[] palette = PALETTE;
         
-        // select a random color from within a predefined color palette
-        int offset = 3 * int(random(0, (palette.length - 1) / 3));
-        return color(palette[offset],  palette[offset + 1], palette[offset + 2], alpha);
-        
-        //return color(0, 0, 0, alpha);
+        if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.0 /** endfloat **/) {
+            // select a random color from within a predefined color palette
+            int offset = 3 * int(random(0, (palette.length - 1) / 3));
+            
+            return color(palette[offset],  palette[offset + 1], palette[offset + 2], alpha);
+        } else {
+            return /** color **/ color(0, 0, 0, alpha) /** endcolor **/;
+        }
     }
     
     boolean update() {
@@ -76,14 +83,17 @@ class RRTree {
         float min_dist = 999999;
         int min_i = -1;
         
-        // find closest existing vertex to existing vertices
+        // find closest vertex to randomly chosen vertex
         for (int i = 0; i < _vertices.size(); i++) {
-            PVector v      = ((PVector) _vertices.get(i));
-            float cur_dist = rand.dist(v);
+            PVector v = ((PVector) _vertices.get(i));
             
-            if (cur_dist < min_dist) {
-                min_i = i;
-                min_dist = cur_dist;
+            if (v != null) {
+                float cur_dist = rand.dist(v);
+                
+                if (cur_dist < min_dist) {
+                    min_i = i;
+                    min_dist = cur_dist;
+                }
             }
         }
         
@@ -95,7 +105,9 @@ class RRTree {
         PVector offset  = rand;
         offset.sub(closest);
         
-        float distance = random(_distance * 0.75, _distance * 1.25);
+        float distance = random(_distance * /** float **/ 0.75 /** endfloat **/, 
+                                _distance * /** float **/ 1.25 /** endfloat **/);
+        
         offset.normalize();
         offset.mult(distance);
         
@@ -103,18 +115,18 @@ class RRTree {
         newV.add(closest);
         _vertices.add(newV);
         
-        stroke(color(0, 0, 0, 180));
-        strokeWeight(2.0);
+        stroke(/** color **/ color(0, 0, 0, 180) /** endcolor **/);
+        strokeWeight(/** float [ 0, 16 ] **/ 2.0 /** endfloat **/);
         
-        if (_curve <= 0) {
+        if (_curvature <= 0) {
             line(closest.x, closest.y, newV.x, newV.y);
         } else {
-            float curve  = distance * _curve;
-            PVector dir  = new PVector();
-            PVector ctx0 = new PVector(closest.x + random(-curve, curve), 
-                                       closest.y + random(-curve, curve));
-            PVector ctx1 = new PVector(newV.x + random(-curve, curve), 
-                                       newV.y + random(-curve, curve));
+            float curve_dist = distance * _curvature;
+            
+            PVector ctx0 = new PVector(closest.x + random(-curve_dist, curve_dist), 
+                                       closest.y + random(-curve_dist, curve_dist));
+            PVector ctx1 = new PVector(newV.x    + random(-curve_dist, curve_dist), 
+                                       newV.y    + random(-curve_dist, curve_dist));
             
             bezier(closest.x, closest.y, 
                    ctx0.x, ctx0.y, 
@@ -122,8 +134,18 @@ class RRTree {
                    newV.x, newV.y);
         }
         
-        stroke(255, 255, 255, 48);
-        fill(random_color(int(random(10, 150))));
+        stroke(/** color **/ color(255, 255, 255, 48) /** endcolor **/);
+        
+        int alpha0 = /** int [ 0, 255 ] **/ 10  /** endint **/;
+        int alpha1 = /** int [ 0, 255 ] **/ 150 /** endint **/;
+        
+        if (alpha0 > alpha1) {
+            int temp = alpha0;
+            alpha0   = alpha1;
+            alpha1   = temp;
+        }
+        
+        fill(random_color(int(random(alpha0, alpha1))));
         ellipse(newV.x, newV.y, distance, distance);
         
         return true;

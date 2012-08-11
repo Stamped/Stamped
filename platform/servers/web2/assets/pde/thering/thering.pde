@@ -8,17 +8,20 @@
  * <a href="http://www.complexification.net/gallery/machines/binaryRing/">Complexification</a>
  */
 
-static int SIMULATION_WIDTH  = 640;
-static int SIMULATION_HEIGHT = 480;
+static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
+static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
-color BLOOD_COLOR = color(0xBF, 0x21, 0x07, 0x18); // dark red
+static int PARTICLE_MAX_AGE     = /** int [ 10, 500 ] **/ 200 /** endint **/;
+static int PARTICLE_ALPHA       = /** int [ 10, 255 ] **/ 24  /** endint **/;
+
+color BLOOD_COLOR = /** color **/ color(0xBF, 0x21, 0x07, 0x18) /** endcolor **/; // dark red
 
 int _noRingParticles;
 int _originRadius;
 
 ArrayList _ringParticles;
 
-// Color that new particles will be drawn when respawned
+// controls newly spawned particle color
 boolean _blackout;
 
 void setup() {
@@ -31,12 +34,13 @@ void setup() {
 }
 
 void reset() {
-    background(#000000);
+    background(/** color **/ #000000 /** endcolor **/);
     
-    _noRingParticles = 5000;
-    _originRadius    = 50;
+    _noRingParticles = /** int [ 50, 50000 ] **/ 5000  /** endint **/;
+    _originRadius    = /** int [ 0, 250 ]    **/ 50    /** endint **/;
+    _blackout        = /** boolean **/           false /** endboolean **/;
+    
     _ringParticles   = new ArrayList(_noRingParticles);
-    _blackout        = false;
     
     float theta = TWO_PI * random(0.0, 1.0);
     float thetaAdd = (random(0.0, 1.0) * 4 + TWO_PI) / _noRingParticles;
@@ -59,7 +63,7 @@ void draw() {
     }
     
     // Randomly switch between blackout periods
-    if (random(0.0, 1.0) > 0.995) {
+    if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.995 /** endfloat **/) {
         _blackout = !_blackout;
     }
 }
@@ -90,11 +94,9 @@ class RingParticle {
         _dX = 2 * cos(theta);
         _dY = 2 * sin(theta);
         
-        int alpha = 24;
-        
         // transparent black or white
-        _color = (_blackout ? color(0, 0, 0, alpha) : color(255, 255, 255, alpha));
-        _age   = int(random(0, 200));
+        _color = (_blackout ? color(0, 0, 0, PARTICLE_ALPHA) : color(255, 255, 255, PARTICLE_ALPHA));
+        _age   = int(random(0, PARTICLE_MAX_AGE));
     }
     
     void update() {
@@ -106,8 +108,8 @@ class RingParticle {
         _y += _dY;
         
         // apply slight, random changes to Particle's Velocity
-        _dX += (random(0.0, 1.0) - random(0.0, 1.0)) * 0.5f;
-        _dY += (random(0.0, 1.0) - random(0.0, 1.0)) * 0.5f;
+        _dX += (random(0.0, 1.0) - random(0.0, 1.0)) * 0.5;
+        _dY += (random(0.0, 1.0) - random(0.0, 1.0)) * 0.5;
         
         if (oldX != (int)_x || oldY != (int)_y) {
             // randomly intersperse blood color with Black
@@ -120,7 +122,7 @@ class RingParticle {
             // draw a line connecting old particle's Position to new Position
             line(oldX, oldY, _x, _y);
             
-            if (_x < 0 || _x >= width || _y < 0 || _y >= height || ++_age > 200) {
+            if (_x < 0 || _x >= width || _y < 0 || _y >= height || ++_age > PARTICLE_MAX_AGE) {
                 this.respawn();
             }
         }
@@ -138,10 +140,8 @@ class RingParticle {
         _dX = 0;
         _dY = 0;
         
-        int alpha = 24;
-        
         _age   = 0;
-        _color = (_blackout ? color(0, 0, 0, alpha) : color(255, 255, 255, alpha));
+        _color = (_blackout ? color(0, 0, 0, PARTICLE_ALPHA) : color(255, 255, 255, PARTICLE_ALPHA));
     }
 }
 
