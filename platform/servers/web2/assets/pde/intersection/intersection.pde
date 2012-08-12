@@ -64,7 +64,7 @@ void reset() {
         color c = color(PALETTE[offset], 
                         PALETTE[offset + 1], 
                         PALETTE[offset + 2], 
-                        /** int [ 0, 255 ] **/ 255 /** endint **/);
+                        /** int [ 0, 255 ] **/ 48 /** endint **/);
         
         circles[i] = new Circle(x, y, radius, c, _movement);
     }

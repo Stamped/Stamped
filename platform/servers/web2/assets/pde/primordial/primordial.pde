@@ -9,6 +9,7 @@ static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
 static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
 static int NUM_ORGANISMS        = /** int [ 1, 100 ]  **/ 15  /** endint **/;
+static int MAX_NUM_OCTOPI       = /** int [ 0, 100 ]  **/ 3   /** endint **/;
 
 Particle[] _particles;
 
@@ -105,7 +106,7 @@ void reset() {
             }
         }
         
-        if (o != null && is_octopus && ++noOctopi > 3) {
+        if (o != null && is_octopus && ++noOctopi > MAX_NUM_OCTOPI) {
             o = null;
         }
         

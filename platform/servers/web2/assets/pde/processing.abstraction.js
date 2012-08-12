@@ -17895,7 +17895,16 @@
         } else if (type === "char") {
           parse_value = parseInt;
         } else if (type === "boolean") {
-          parse_value = Boolean;
+          parse_value = function(v) {
+            v = v.toLowerCase();
+            if (v === "true") {
+              return true;
+            } else if (v === "false") {
+              return false;
+            }
+            
+            return new Boolean(v);
+          };
         } else if (type === "string") {
           parse_value = eval;
         } else if (type === "color") {
@@ -18232,6 +18241,13 @@
                 $this.removeClass("abstraction-variable-invalid");
               } else {
                 $this.addClass("abstraction-variable-invalid");
+              }
+            });
+            
+            // submit variable changes on enter
+            $input.bind("keypress", function(event) {
+              if (event.which === 13) { // enter
+                close_variable_editor($var_editor, true);
               }
             });
           }
