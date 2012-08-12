@@ -54,14 +54,16 @@
             <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
             <script src="http://jqueryui.com/themeroller/themeswitchertool/"></script>
             
-            <script type="text/javascript" src="/assets/js/libs/underscore.js"></script>
-            <script type="text/javascript" src="/assets/js/libs/backbone.js"></script>
-            <script type="text/javascript" src="/assets/js/libs/jquery.colorpicker.js"></script>
-            <script type="text/javascript" src="/assets/js/libs/syntaxhighlighter/shCore.js"></script>
+            <script src="{{ STAMPED_STATIC_URL }}js/libs/history/jquery.history.js"></script>
             
-            <script type="text/javascript" src="/assets/pde/processing.abstraction.js"></script>
+            <script src="{{ STAMPED_STATIC_URL }}js/libs/underscore.js"></script>
+            <script src="{{ STAMPED_STATIC_URL }}js/libs/backbone.js"></script>
+            <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.colorpicker.js"></script>
+            <script src="{{ STAMPED_STATIC_URL }}js/libs/syntaxhighlighter/shCore.js"></script>
+            
+            <script src="{{ STAMPED_STATIC_URL }}pde/processing.abstraction.js"></script>
             <script src="{{ STAMPED_STATIC_URL }}js/test.js"></script>
-
+            
             <script>
                 var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];
                     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];

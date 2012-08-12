@@ -18185,8 +18185,11 @@
         
         var $var_editor = $("<div class='abstraction-variable-editor'></div>");
         var numerical   = true;
+        var $slider     = null;
         
-        if (type !== "color") {
+        if (type === "color") {
+          numerical = false;
+        } else {
           if (type === "int") {
           } else if (type === "float") {
           } else if (type === "char") {
@@ -18230,7 +18233,7 @@
             return true;
           };
           
-          var $input = $("<input type='text' class='abstraction-variable-input' value='" + value + "'></input>");
+          var $input  = $("<input type='text' class='abstraction-variable-input' value='" + value + "'></input>");
           
           if (numerical) {
             $input.bind("keyup change", function(event) {
@@ -18239,6 +18242,14 @@
               
               if (is_valid(val)) {
                 $this.removeClass("abstraction-variable-invalid");
+                
+                if (!!$slider) {
+                  var v = variable.parse_value(val);
+                  
+                  if (!!$slider.slider) {
+                    $slider.slider("value", v);
+                  }
+                }
               } else {
                 $this.addClass("abstraction-variable-invalid");
               }
@@ -18252,9 +18263,13 @@
             });
           }
           
-          $var_editor
-            .append($input)
-            .addClass("abstraction-variable-numeric-editor");
+          $var_editor.append($input).addClass("abstraction-variable-numeric-editor");
+          
+          if (numerical) {
+            $slider = $("<div class='abstraction-variable-slider'></div>");
+            
+            $var_editor.append($slider)
+          }
         }
         
         $var_editor.data("index", index);
@@ -18300,6 +18315,42 @@
           $var_editor.colorpicker(params);
         } else {
           $input.focus().select();
+          
+          if (numerical && !!$slider) {
+            var params = {
+              range : false, 
+              slide : function(event, ui) {
+                $input.val(ui.value);
+              }
+            };
+            
+            if (!isNaN(value0)) {
+              params.value = value0;
+            }
+            
+            var constraints = variable.constraints;
+            
+            if (!!constraints) {
+              params.min = constraints.min_value;
+              params.max = constraints.max_value;
+            }
+            
+            if (type === "float") {
+              params.step = 0.0001;
+              
+              if (!!constraints) {
+                var step = (params.max - params.min) / 1000.0;
+                
+                if (!isNaN(params.step)) {
+                  params.step = step;
+                }
+              }
+            }
+            
+            if (!!$slider.slider) {
+              $slider.slider(params);
+            }
+          }
         }
         
         return false;
@@ -18339,6 +18390,7 @@
         if ($var_editors.length > 0) {
           if (!!event) {
             var $t = $(event.target);
+            
             if ($t.hasClass("abstraction-variable-editor") || 
                 $t.parents(".abstraction-variable-editor").length === 1) {
               return;

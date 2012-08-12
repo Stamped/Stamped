@@ -366,7 +366,7 @@ def popup_following(request, schema, **kwargs):
         'users'       : users, 
     })
 
-@stamped_view(schema=HTTPTestSchema)
+@stamped_view(schema=HTTPTestSchema, ignore_extra_params=True)
 def test_view(request, schema, **kwargs):
     params = {}
     

@@ -1,12 +1,27 @@
 
+TODO:
+    * integrate current list of modified variables into page URL via History.js 
+    * create gallery page containing an overview of all sketches
+    * be able to toggle between code view and description / walkthrough.
+    * pass through sketches for a round of cleanup
+        * consistency across sketches
+        * verbose comments
+        * consider abstracted variables very carefully
+            * implement new constraint: select between several string options
+        * possibly be able to specify color palette?
+    * be able to collapse & expand code sections [-] and [+] via /** directive **/
+
+
 TEMPLATES:
-    NOTE: all control-flow logic belongs in the processing code itself!
+    NOTE: all control-flow logic belongs in the processing code itself
     
     /** auto <type> **/
     /** auto color  **/
     
     /** restart_on_edit  **/
     /** no_restart_on_edit  **/
+    
+    /** range [ 0, 30 ] **/ /** endrange **/
     
     /** string  **/ /** endstring  **/
     /** color   **/ /** endcolor   **/
