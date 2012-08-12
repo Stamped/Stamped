@@ -34,7 +34,7 @@ int _radius;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(32);
+    frameRate(/** int [ 1, 60 ] **/ 30 /** endint **/);
     loop();
     
     reset();

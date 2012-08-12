@@ -296,7 +296,7 @@ dp.sh.Highlighter.prototype.AddBit = function(str, css)
 		}
 		else
 		{
-			span.className = css;
+            span.className = css;
 			span.innerHTML = str;
 			this.div.appendChild(span);
 		}

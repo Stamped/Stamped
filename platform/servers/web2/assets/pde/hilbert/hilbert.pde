@@ -13,7 +13,7 @@
  * simulation won't run as a standalone processing program (the difference 
  * between the two being that charAt comparisons need to use double-quotes 
  * in processing.js, whereas they should be using single quotes in standard 
- * processing as well as Java in general.
+ * processing as well as Java in general).
  */
 
 static int SIMULATION_WIDTH  = /** int ( 0, 1024 ] **/ 640 /** endint **/;

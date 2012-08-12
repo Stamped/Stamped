@@ -23,7 +23,7 @@ color[] _back;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(12);
+    frameRate(/** int [ 1, 60 ] **/ 12 /** endint **/);
     loop();
     
     _rippleRadius   = /** int [ 2, 4 ] **/ 3 /** endint **/;

@@ -8607,7 +8607,7 @@
       clearInterval(looping);
       curSketch.onPause();
     };
-
+    
     /**
     * Causes Processing to continuously execute the code within draw(). If noLoop() is called,
     * the code in draw() stops executing.
@@ -8634,6 +8634,7 @@
           throw e_loop;
         }
       }, curMsPerFrame);
+      
       doLoop = true;
       loopStarted = true;
       curSketch.onLoop();
@@ -17899,6 +17900,10 @@
           parse_value = eval;
         } else if (type === "color") {
           parse_value = function(v) {
+            v = v.replace(/#([0-9A-Fa-f]{8})\b/g, function(all, digits) {
+              return "0x" + digits;
+            });
+            
             v = v.replace(/#([0-9A-Fa-f]{6})\b/g, function(all, digits) {
               return "0xFF" + digits;
             });
@@ -17989,6 +17994,8 @@
           default_value   : default_value, 
           value           : default_value, 
           
+          parse_value     : parse_value, 
+          
           toString        : function(v, html) {
             if (typeof(value) === "undefined") {
               v = default_value;
@@ -18043,9 +18050,9 @@
         matches.push(match);
       }
       
-      /*for (var i = 0; i < matches.length; ++i) {
-        console.debug(matches[i]);
-      }*/
+      //for (var i = 0; i < matches.length; ++i) {
+      //  console.debug(matches[i]);
+      //}
       
       var attributes = { };
       var variables  = { };
@@ -18085,20 +18092,9 @@
         var length0   = variable.length;
         
         var value1    = variable.toString(value, false);
-        var value2    = "<span class='abstraction-variable abstraction-variable-" + variable.type         + "' " + 
-                               "data-abstraction-default-value='" + variable.default_value                + "' " + 
-                               "data-abstraction-type='"          + variable.type                         + "' " + 
-                               "data-abstraction-index='"         + variable.index                        + "' " + 
-                               "data-abstraction-length='"        + variable.length                       + "' ";
-        
-        if (!!variable.constraints) {
-          value2     +=        "data-abstraction-min-inclusive='" + variable.constraints.min_inclusive    + "' " + 
-                               "data-abstraction-max-inclusive='" + variable.constraints.max_inclusive    + "' " + 
-                               "data-abstraction-min-value='"     + variable.constraints.max_value        + "' " + 
-                               "data-abstraction-max-value='"     + variable.constraints.max_value        + "' ";
-        }
-        
-        value2       +=        ">" + variable.toString(value, true) + "</span>";
+        var value2    = "<span class='abstraction-variable abstraction-variable-" + variable.type + "' " + 
+                               "data-abstraction-index='" + variable.index + "' " + 
+                        ">" + variable.toString(value, true) + "</span>";
         
         pre           = output_pde.slice(0, index1);
         post          = output_pde.slice(index1 + length0);
@@ -18125,7 +18121,11 @@
     p.abstraction_variables = parsed_abstraction.variables;
     
     p.abstraction_model.on("change", function() {
+      clearInterval(looping);
+      loopStarted = false;
+      
       p.rerender();
+      executeSketch(p);
     });
     
     var post_process_editor = function() {
@@ -18162,6 +18162,188 @@
     
     if (aEditor !== undef) {
       p.editor = document.getElementById(aEditor);
+      
+      // initialize live editing of abstraction variables
+      $(p.editor).parent().on("click", ".abstraction-variable", function(event) {
+        event.preventDefault();
+        
+        var $this       = $(this);
+        var index       = $this.data("abstraction-index");
+        var variable    = p.abstraction_variables[index];
+        var value0      = p.abstraction_model.attributes[index];
+        var value       = variable.toString(value0, true);
+        var type        = variable.type;
+        
+        var $var_editor = $("<div class='abstraction-variable-editor'></div>");
+        var numerical   = true;
+        
+        if (type !== "color") {
+          if (type === "int") {
+          } else if (type === "float") {
+          } else if (type === "char") {
+          } else if (type === "boolean") {
+            numerical = false;
+          } else if (type === "string") {
+            numerical = false;
+          }
+          
+          var is_valid = function(val) {
+            var v = variable.parse_value(val);
+            var c = variable.constraints;
+            
+            if (isNaN(v) || v === null || typeof(v) === "undefined") {
+              return false;
+            }
+            
+            // validate constraints
+            if (!!c) {
+              if (c.min_inclusive) {
+                if (v < c.min_value) {
+                  return false;
+                }
+              } else {
+                if (v <= c.min_value) {
+                  return false;
+                }
+              }
+              
+              if (c.max_inclusive) {
+                if (v > c.max_value) {
+                  return false;
+                }
+              } else {
+                if (v >= c.max_value) {
+                  return false;
+                }
+              }
+            }
+            
+            return true;
+          };
+          
+          var $input = $("<input type='text' class='abstraction-variable-input' value='" + value + "'></input>");
+          
+          if (numerical) {
+            $input.bind("keyup change", function(event) {
+              var $this = $(this);
+              var val   = $this.val().trim();
+              
+              if (is_valid(val)) {
+                $this.removeClass("abstraction-variable-invalid");
+              } else {
+                $this.addClass("abstraction-variable-invalid");
+              }
+            });
+          }
+          
+          $var_editor
+            .append($input)
+            .addClass("abstraction-variable-numeric-editor");
+        }
+        
+        $var_editor.data("index", index);
+        var pos = $this.position();
+        
+        $var_editor.css({
+          left : pos.left + $this.width() / 2, 
+          top  : pos.top + $this.height() + 8
+        });
+        
+        $var_editor.insertBefore($this);
+        
+        if (type === "color") {
+          var update = function(e, d, retain_changes) {
+            if (retain_changes) {
+              var c = d.formatted;
+              var v = variable.parse_value(c);
+              
+              p.abstraction_model.set(index, v);
+              $var_editor.remove();
+            }
+          };
+          
+          var params = {
+            parts             : 'popup', 
+            showOn            : 'both', 
+            colorFormat       : "color(rd, gd, bd, ad)", 
+            showCancelButton  : true, 
+            buttonColorize    : true, 
+            closeOnEscape     : true, 
+            closeOnOutside    : true, 
+            alpha             : true, 
+            //select            : function(e, d) { return update(e, d, false); }, 
+            close             : function(e, d) { return update(e, d, true);  }
+          };
+          
+          /*if (typeof(value0) === "number") {
+            var v = value0;
+            
+            //params.color = "color(" + (v & 0xff) + ", " + ((v & 0xff00) >> 8) + ", " + ((v & 0xff0000) >> 16) + ", " + ((v & 0xff000000) >> 24) + ")";
+          }*/
+          
+          $var_editor.colorpicker(params);
+        } else {
+          $input.focus().select();
+        }
+        
+        return false;
+      });
+      
+      var close_variable_editor = function($elem, retain_changes) {
+        if (retain_changes) {
+          try {
+            var index     = $elem.data("index");
+            var variable  = p.abstraction_variables[index];
+            
+            if (variable.type === "color") {
+              return;
+            } else {
+              var $input    = $elem.find(".abstraction-variable-input");
+              var val       = $input.val().trim();
+              
+              if (!!variable && index && !$input.hasClass("abstraction-variable-invalid")) {
+                var value   = variable.toString(p.abstraction_model.attributes[index], true);
+                
+                if (val != value) {
+                  var v = variable.parse_value(val);
+                  
+                  p.abstraction_model.set(index, v);
+                }
+              }
+            }
+          } catch (e) { }
+        }
+        
+        $elem.remove();
+      };
+      
+      var try_close_variable_editor = function(event, retain_changes) {
+        var $var_editors = $(".abstraction-variable-editor");
+        
+        if ($var_editors.length > 0) {
+          if (!!event) {
+            var $t = $(event.target);
+            if ($t.hasClass("abstraction-variable-editor") || 
+                $t.parents(".abstraction-variable-editor").length === 1) {
+              return;
+            }
+          }
+          
+          $var_editors.each(function(i, elem) {
+            close_variable_editor($(elem), retain_changes);
+          });
+        }
+      };
+      
+      $(document).bind("click", function(e) {
+        try_close_variable_editor(e, true);
+      });
+      
+      $(document).bind('keydown', function(e) {
+        if (e.which === 27) { // ESC
+          try_close_variable_editor(e, false);
+        }
+      });
       
       dp.sh.Brushes.processing = function()
       {
@@ -18448,7 +18630,7 @@
       
       p.externals.sketch = curSketch;
     };
-    
+
     // Send aCode Processing syntax to be converted to JavaScript
     if (!pgraphicsMode) {
       if (aCode instanceof Processing.Sketch) {
@@ -18473,7 +18655,7 @@
       p.externals.sketch = curSketch;
 
       wireDimensionalFunctions();
-
+      
       // the onfocus and onblur events are handled in two parts.
       // 1) the p.focused property is handled per sketch
       curElement.onfocus = function() {
@@ -18482,6 +18664,7 @@
 
       curElement.onblur = function() {
         p.focused = false;
+        
         if (!curSketch.options.globalKeyEvents) {
           resetKeyPressed();
         }
@@ -18510,7 +18693,7 @@
       attachEventHandler(keyTrigger, "keydown", handleKeydown);
       attachEventHandler(keyTrigger, "keypress", handleKeypress);
       attachEventHandler(keyTrigger, "keyup", handleKeyup);
-
+      
       // Step through the libraries that were attached at doc load...
       for (var i in Processing.lib) {
         if (Processing.lib.hasOwnProperty(i)) {
@@ -18523,11 +18706,11 @@
           }
         }
       }
-
+      
       // sketch execute test interval, used to reschedule
       // an execute when preloads have not yet finished.
       var retryInterval = 100;
-
+      
       var executeSketch = function(processing) {
         // Don't start until all specified images and fonts in the cache are preloaded
         if (!(curSketch.imageCache.pending || PFont.preloading.pending(retryInterval))) {

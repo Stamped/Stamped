@@ -26,7 +26,7 @@ boolean _blackout;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(60);
+    frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     smooth();
     loop();
     

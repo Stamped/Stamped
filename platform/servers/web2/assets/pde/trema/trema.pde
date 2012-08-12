@@ -16,7 +16,7 @@ float _dimLog;
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
     smooth();
-    frameRate(60);
+    frameRate(/** int [ 1, 60 ] **/ 60 /** endint **/);
     loop();
     
     reset();

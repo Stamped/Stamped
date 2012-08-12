@@ -8,12 +8,27 @@
 
 @import "libs/elements.less";
 
-#main-content {
-    text-align: center;
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.editor-column {
+    position: relative;
+    width: 50%;
 }
 
 canvas {
-    margin: 0 auto;
+    position: fixed;
+    z-index: 1000;
+    right: 24px;
+    top: 50%;
+    
+    margin-top: -240px;
+    min-width:  100px;
+    min-height: 100px;
+    
     @c0: rgba(50, 50, 50, 0.25);
     border: 1px solid @c0;
     
@@ -24,9 +39,8 @@ canvas {
 }
 
 .abstraction-editor {
-    width: 80%;
-    margin: 0 auto;
-    padding-bottom: 24px;
+    width:  100%;
+    margin: 0 24px 24px 0;
     text-align: left;
 }
 

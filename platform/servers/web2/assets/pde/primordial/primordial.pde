@@ -18,7 +18,7 @@ boolean _octopi;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(24);
+    frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     loop();
     
     _singleCelled = /** boolean **/ false /** endboolean **/;

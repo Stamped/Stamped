@@ -22,7 +22,7 @@ int age;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(24);
+    frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     smooth();
     loop();
     

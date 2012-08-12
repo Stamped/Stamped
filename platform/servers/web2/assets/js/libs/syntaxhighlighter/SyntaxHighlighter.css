@@ -12,7 +12,7 @@
 /* clear styles */
 .dp-highlighter ol,
 .dp-highlighter ol li,
-.dp-highlighter ol li span 
+.dp-highlighter ol li .dp-span 
 {
 	margin: 0;
 	padding: 0;
@@ -93,7 +93,7 @@
 	color: inherit;
 }
 
-.dp-highlighter ol li span
+.dp-highlighter ol li .dp-span
 {
 	color: black;
 	background-color: inherit;

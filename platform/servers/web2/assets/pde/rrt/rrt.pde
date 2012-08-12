@@ -26,7 +26,7 @@ float _curvature;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(60);
+    frameRate(/** int [ 1, 60 ] **/ 60 /** endint **/);
     smooth();
     loop();
     

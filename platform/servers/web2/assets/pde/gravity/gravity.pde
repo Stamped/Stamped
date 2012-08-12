@@ -25,7 +25,7 @@ Body[] bodies;
 
 void setup() {
     size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(30);
+    frameRate(/** int [ 1, 60 ] **/ 30 /** endint **/);
     smooth();
     loop();
     
