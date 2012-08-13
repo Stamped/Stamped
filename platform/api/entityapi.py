@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -25,6 +27,8 @@ from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex
 from resolve.merge import Merge
 
 from api.helpers import APIObject
+
+from api.activityapi import ActivityAPI
 
 class EntityAPI(APIObject):
 
@@ -55,6 +59,10 @@ class EntityAPI(APIObject):
     @lazyProperty
     def _friendshipDB(self):
         return FriendshipDB()
+
+    @lazyProperty
+    def _activity_api(self):
+        return ActivityAPI()
 
     @lazyProperty
     def _merge(self):
@@ -402,7 +410,7 @@ class EntityAPI(APIObject):
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
             if action in actions and authUserId != stamp.user.user_id:
-                self._addActionCompleteActivity(authUserId, action, source, stamp.stamp_id, stamp.user.user_id)
+                self._activity_api.addActionCompleteActivity(authUserId, action, source, stamp.stamp_id, stamp.user.user_id)
 
         return True
 
@@ -487,7 +495,9 @@ class EntityAPI(APIObject):
             allStampIds = self._stampDB.getStampIdsForEntity(entityId)
             for stampId in allStampIds:
                 if stampId not in popularStampIds:
-                    stat = self.updateStampStatsAsync(stampId)
+                    ### RESTRUCTURE TODO: Figure out async tasks...
+                    pass
+                    # stat = self.updateStampStatsAsync(stampId)
             popularStampIds = self._stampDB.getPopularStampIds(entityId=entityId, limit=1000)
 
         popularStamps = self._stampDB.getStamps(popularStampIds)

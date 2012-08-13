@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -24,6 +26,8 @@ from db.commentdb import CommentDB
 from db.activitydb import ActivityDB
 from db.friendshipdb import FriendshipDB
 
+from api.utils import enrich_stamp_objects
+
 from utils import lazyProperty, LoggingThreadPool
 
 from api.helpers import APIObject
@@ -46,7 +50,7 @@ class ActivityAPI(APIObject):
     
     @lazyProperty
     def _stampDB(self):
-        return StampeDB()
+        return StampDB()
 
     @lazyProperty
     def _entityDB(self):
@@ -281,7 +285,7 @@ class ActivityAPI(APIObject):
         # Enrich stamps
         stamps = self._stampDB.getStamps(stampIds.keys())
 
-        stamps = self._enrichStampObjects(stamps, authUserId=authUserId, mini=True)
+        stamps = enrich_stamp_objects(stamps, authUserId=authUserId, mini=True)
         for stamp in stamps:
             stampIds[str(stamp.stamp_id)] = stamp
 

@@ -38,7 +38,7 @@ class TodoDB(object):
         return self.__todo_collection.addTodo(todo)
 
     def removeTodo(self, userId, entityId):
-        return self.__todo_collection.removeTodo(todo)
+        return self.__todo_collection.removeTodo(userId, entityId)
 
     def getTodo(self, userId, entityId):
         return self.__todo_collection.getTodo(userId, entityId)

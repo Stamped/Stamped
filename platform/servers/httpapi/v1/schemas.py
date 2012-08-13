@@ -226,7 +226,7 @@ def convertPhoneToInt(string):
         logs.warning("Unable to convert phone number to int (%s): %s" % (string, e))
         return None
 
-def _convertViewport(string):
+def convertViewport(string):
     try:
         viewportData            = string.split(',')
 
@@ -2291,7 +2291,7 @@ class HTTPTimeSlice(Schema):
             slc.types = list(Entity.mapCategoryToTypes(self.category))
 
         if self.viewport is not None:
-            slc.viewport = _convertViewport(self.viewport)
+            slc.viewport = convertViewport(self.viewport)
 
         return slc
 
@@ -2346,7 +2346,7 @@ class HTTPSearchSlice(Schema):
             slc.types = list(Entity.mapCategoryToTypes(self.category))
 
         if self.viewport is not None:
-            slc.viewport = _convertViewport(self.viewport)
+            slc.viewport = convertViewport(self.viewport)
 
         return slc
 
@@ -2392,7 +2392,7 @@ class HTTPRelevanceSlice(Schema):
             slc.types = list(Entity.mapCategoryToTypes(self.category))
 
         if self.viewport is not None:
-            slc.viewport = _convertViewport(self.viewport)
+            slc.viewport = convertViewport(self.viewport)
 
         return slc
 
@@ -2473,7 +2473,7 @@ class HTTPGuideRequest(Schema):
         guideRequest.dataImport(data)
 
         if self.viewport is not None:
-            guideRequest.viewport = _convertViewport(self.viewport)
+            guideRequest.viewport = convertViewport(self.viewport)
 
         return guideRequest
 
@@ -2493,7 +2493,7 @@ class HTTPGuideSearchRequest(HTTPGuideRequest):
         guideSearchRequest.dataImport(data)
 
         if self.viewport is not None:
-            guideSearchRequest.viewport = _convertViewport(self.viewport)
+            guideSearchRequest.viewport = convertViewport(self.viewport)
 
         return guideSearchRequest
 

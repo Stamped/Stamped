@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -30,6 +32,7 @@ from api.entityapi import EntityAPI
 from api.accountapi import AccountAPI
 from api.linkedaccountapi import LinkedAccountAPI
 
+from api.utils import enrich_stamp_objects
 
 LIKE_BENEFIT    = 1 # Per like
 
@@ -78,7 +81,7 @@ class LikeAPI(APIObject):
 
     def create(self, auth_user_id, stamp_id):
         stamp = self._stampDB.getStamp(stamp_id)
-        stamp = self._stamps.enrichStampObjects(stamp, authUserId=auth_user_id)
+        stamp = enrich_stamp_objects(stamp, authUserId=auth_user_id)
 
         # Check to verify that user hasn't already liked stamp
         if self._likeDB.check(auth_user_id, stamp_id):
@@ -154,11 +157,11 @@ class LikeAPI(APIObject):
         if not self._likeDB.remove(auth_user_id, stamp_id):
             logs.info('Like does not exist')
             stamp = self._stampDB.getStamp(stamp_id)
-            return self._stamps.enrichStampObjects(stamp, authUserId=auth_user_id)
+            return enrich_stamp_objects(stamp, authUserId=auth_user_id)
 
         # Get stamp object
         stamp = self._stampDB.getStamp(stamp_id)
-        stamp = self._stamps.enrichStampObjects(stamp, authUserId=auth_user_id)
+        stamp = enrich_stamp_objects(stamp, authUserId=auth_user_id)
 
         # Decrement user stats by one
         self._userDB.updateUserStats(stamp.user.user_id, 'num_likes',    increment=-1)

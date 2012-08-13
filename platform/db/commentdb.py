@@ -28,7 +28,7 @@ class CommentDB(object):
         return self.__comment_collection.addComment(comment)
     
     def removeComment(self, commentId):
-        return self.__comment_collection.removeComment(comment)
+        return self.__comment_collection.removeComment(commentId)
     
     def getComment(self, commentId):
         return self.__comment_collection.getComment(commentId)

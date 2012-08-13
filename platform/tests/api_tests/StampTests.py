@@ -51,7 +51,6 @@ class StampedAPIStampLikesHttpTest(AStampedAPIHttpTestCase):
         self.deleteAccount(self.tokenB)
 
 # CREATE STAMP
-'''
 class StampedAPIStampCreate(StampedAPIStampCreateHttpTest):
     def _validate_basic_stamp(self, result):
         # Verify stamp object has all necessary attributes
@@ -502,7 +501,6 @@ class StampedAPIStampsCreditShow(StampedAPIStampCreditHttpTest):
         self.assertTrue(len(result['credits']) == 1)
         self.assertTrue(result['credits'][0]['user']['screen_name'] == self.stampData['credits'])
         self.assertTrue(result['credits'][0]['stamp_id'] == self.stampA['stamp_id'])
-'''
 
 class StampedAPILikesPass(StampedAPIStampLikesHttpTest):
     def test_like(self):
@@ -615,7 +613,6 @@ class StampedAPILikesIdempotent(StampedAPIStampLikesHttpTest):
             }
             result = self.handlePOST(path, data)
 
-'''
 class StampedAPIEntitiesStampedBy(StampedAPIStampConsumeHttpTest):
     def test_stampedby_nogroup(self):
         # User B queries the entity User A created and Stamped
@@ -634,7 +631,6 @@ class StampedAPIEntitiesStampedBy(StampedAPIStampConsumeHttpTest):
 #        import time
 #        time.sleep(100000)
 
-'''
 
 if __name__ == '__main__':
     main()
