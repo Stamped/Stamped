@@ -6,6 +6,28 @@
 //  Copyright 2011 Stamped, Inc. All rights reserved.
 //
 
+/*
+ Global utility functions
+ 
+ Notes:
+ This class has become quite bloated both with useful and legacy methods.
+ In fact, its implementation is the single largest file in the project*.
+ Its use is extremely common throughout the application, and some of its
+ methods are among the most re-used, leveraged abstractions in the entire
+ project. Considering the scope and variability of method use and importance,
+ this header contains function specific documentation.
+ 
+ TODOs:
+ Divide up
+ Document all
+ 
+ 2012-08-10
+ -Landon
+ 
+ *STStampedAPI is the second largest
+ 
+ */
+
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "STAction.h"
@@ -22,6 +44,7 @@
 #import "STStampedAPI.h"
 #import "STActivityReference.h"
 #import <CoreText/CoreText.h>
+#import <MessageUI/MFMailComposeViewController.h>
 
 // Constants from Twitter's developer console.
 extern NSString* const kTwitterConsumerKey;
@@ -83,8 +106,8 @@ typedef enum STGradientStyle {
 + (NSString*)truncateTitleForBackButton:(NSString*)title;
 + (NSString*)truncateTitleForNavBar:(NSString*)title;
 
-+ (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame;
-+ (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame;
++ (UIView*)imageViewWithURL:(NSURL*)url andFrame:(CGRect)frame __attribute__ ((deprecated));
++ (UIView*)imageViewWithImage:(UIImage*)image andFrame:(CGRect)frame __attribute__ ((deprecated));
 
 + (UILabel*)viewWithText:(NSString*)text font:(UIFont*)font color:(UIColor*)color mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
 + (CGSize)sizeWithText:(NSString*)text font:(UIFont*)font mode:(UILineBreakMode)mode andMaxSize:(CGSize)size;
@@ -94,16 +117,15 @@ typedef enum STGradientStyle {
                    color:(UIColor*)color
               lineHeight:(CGFloat)lineHeight
                     mode:(UILineBreakMode)mode 
-              andMaxSize:(CGSize)size;
+              andMaxSize:(CGSize)size __attribute__ ((deprecated));
 
 + (CGSize)sizeWithText:(NSString*)text 
                   font:(UIFont*)font 
             lineHeight:(CGFloat)lineHeight 
                   mode:(UILineBreakMode)mode 
-            andMaxSize:(CGSize)size;
+            andMaxSize:(CGSize)size __attribute__ ((deprecated));
 
 + (NSString*)titleForCategory:(NSString*)category;
-
 
 + (UIView*)tapViewWithFrame:(CGRect)frame target:(id)target selector:(SEL)selector andMessage:(id)message;
 + (UIView*)tapViewWithFrame:(CGRect)frame andCallback:(STCallback)callback;
@@ -115,7 +137,7 @@ typedef enum STGradientStyle {
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible animated:(BOOL)animated withBackground:(UIColor*)color;
 + (void)setFullScreenPopUp:(UIView*)view dismissible:(BOOL)dismissible withBackground:(UIColor*)color;
 
-+ (CGFloat)legacyImageScale;
++ (CGFloat)legacyImageScale __attribute__ ((deprecated));
 
 + (CGFloat)imageScale;
 
@@ -125,15 +147,15 @@ typedef enum STGradientStyle {
 
 + (void)runOperationAsynchronously:(NSOperation*)operation;
 
-+ (UINavigationController*)sharedNavigationController;
++ (UINavigationController*)sharedNavigationController __attribute__ ((deprecated));
 
-+ (void)globalLoadingLock;
++ (void)globalLoadingLock __attribute__ ((deprecated));
 
-+ (void)globalLoadingUnlock;
++ (void)globalLoadingUnlock __attribute__ ((deprecated));
 
-+ (void)globalInteractionLock;
++ (void)globalInteractionLock __attribute__ ((deprecated));
 
-+ (void)globalInteractionUnlock;
++ (void)globalInteractionUnlock __attribute__ ((deprecated));
 
 + (void)executeAsync:(void(^)(void))block;
 
@@ -200,9 +222,9 @@ typedef enum STGradientStyle {
 
 + (NSString*)largeProfileImageURLWithUser:(id<STUser>)user;
 
-+ (NSArray*)categories;
++ (NSArray*)categories __attribute__ ((deprecated));
 
-+ (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail;
++ (NSString*)entityImageURLForEntityDetail:(id<STEntityDetail>)entityDetail __attribute__ ((deprecated));
 
 + (NSString*)entityImageURLForEntity:(id<STEntity>)entity;
 
@@ -309,5 +331,11 @@ typedef enum STGradientStyle {
 + (CGRect)originRectWithRect:(CGRect)rect;
 
 + (void)showTweetComposerFromController:(UIViewController*)controller withInitialText:(NSString*)text;
+
++ (void)shareToTwitterFromController:(UIViewController*)controller withStamp:(id<STStamp>)stamp;
+
++ (MFMailComposeViewController*)mailComposeViewControllerForStamp:(id<STStamp>)stamp;
+
++ (void)shareToInstagramFromController:(UIViewController*)controller withImage:(UIImage*)image;
 
 @end

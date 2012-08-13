@@ -241,11 +241,6 @@
         CGRect imageBounds = CGRectMake(70, self.imageYOffset, 180, self.imageHeight);
         UIImageView* imageView = [[[UIImageView alloc] initWithImage:image] autorelease];
         imageView.frame = CGRectMake(0, 0, image.size.width * 4, image.size.height * 4);
-        BOOL shouldShrink = YES;
-        if (shouldShrink) {
-            CGSize newSize = [Util size:imageView.frame.size withScale:[Util legacyImageScale]];
-            imageView.frame = CGRectMake(0, 0, newSize.width, newSize.height);
-        }
         [self.activityView stopAnimating];
         self.activityView.hidden = YES;
         imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:imageBounds];

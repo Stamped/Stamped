@@ -15,8 +15,8 @@
 + (STRdio*)sharedRdio;
 
 - (void)ensureLoginWithCompletionBlock:(void(^)(void))block;
-- (void)startPlayback:(NSString*)rdioID;
-- (void)stopPlayback;
+- (void)startPlayback:(NSString*)rdioID __attribute__ ((deprecated));
+- (void)stopPlayback __attribute__ ((deprecated));
 
 - (void)logout;
 

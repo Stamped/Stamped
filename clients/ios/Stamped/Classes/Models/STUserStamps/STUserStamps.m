@@ -79,7 +79,12 @@
      _cancellation = [[[STStampedAPI sharedInstance] stampsWithUserID:self.userIdentifier date:[NSDate date] limit:kStampLimit offset:_page andCallback:^(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation) {
      */
     
-    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path post:NO authenticated:YES params:params mapping:[STSimpleStamp mapping] andCallback:^(NSArray* stamps, NSError* error, STCancellation* cancellation) {
+    _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path 
+                                                               post:NO 
+                                                        authPolicy:STRestKitAuthPolicyOptional 
+                                                             params:params 
+                                                            mapping:[STSimpleStamp mapping] 
+                                                        andCallback:^(NSArray* stamps, NSError* error, STCancellation* cancellation) {
         
         _moreData = NO;
         if (stamps) {

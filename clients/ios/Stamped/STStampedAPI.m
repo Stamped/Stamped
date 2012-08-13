@@ -770,9 +770,11 @@ static STStampedAPI* _sharedInstance;
                                                   if (cache) {
                                                       [cache dirty];
                                                   }
-                                                  [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIFollowNotification object:userID];
                                                   STSimpleUserDetail* user = result;
                                                   user.following = [NSNumber numberWithBool:YES];
+                                                  STSimpleUser* simpleUser = [STSimpleUser userFromUser:user];
+                                                  [self cacheUser:simpleUser];
+                                                  [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIFollowNotification object:userID];
                                               }
                                               block(result, error);
                                           }];
@@ -792,9 +794,11 @@ static STStampedAPI* _sharedInstance;
                                                   if (cache) {
                                                       [cache dirty];
                                                   }
-                                                  [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUnfollowNotification object:userID];
                                                   STSimpleUserDetail* user = result;
                                                   user.following = [NSNumber numberWithBool:NO];
+                                                  STSimpleUser* simpleUser = [STSimpleUser userFromUser:user];
+                                                  [self cacheUser:simpleUser];
+                                                  [[NSNotificationCenter defaultCenter] postNotificationName:STStampedAPIUnfollowNotification object:userID];
                                               }
                                               block(result, error);
                                           }];
