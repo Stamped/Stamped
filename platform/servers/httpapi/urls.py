@@ -122,12 +122,12 @@ urlpatterns = patterns('',
     (r'v1/actions/complete.json',                           'v1.entities.action.run'),
 
     ### STAMPS
-    (r'v1/stamps/create.json',                              'v0.functions.stamps.create'),
-    (r'v1/stamps/share/facebook.json',                      'v0.functions.stamps.share', { 'service_name' : 'facebook' }),
-    (r'v1/stamps/show.json',                                'v0.functions.stamps.show'),
-    (r'v1/stamps/remove.json',                              'v0.functions.stamps.remove'),
-    (r'v1/stamps/collection.json',                          'v0.functions.stamps.collection'),
-    (r'v1/stamps/search.json',                              'v0.functions.stamps.search'),
+    (r'v1/stamps/create.json',                              'v1.stamps.create.run'),
+    (r'v1/stamps/show.json',                                'v1.stamps.show.run'),
+    (r'v1/stamps/remove.json',                              'v1.stamps.remove.run'),
+    (r'v1/stamps/share/facebook.json',                      'v1.stamps.share.run', { 'service_name' : 'facebook' }),
+    (r'v1/stamps/collection.json',                          'v1.stamps.collection.run'),
+    (r'v1/stamps/search.json',                              'v1.stamps.search.run'),
     
     ### LIKES
     (r'v1/stamps/likes/create.json',                        'v1.likes.create.run'),

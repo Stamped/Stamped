@@ -237,7 +237,7 @@ def buildEntity(data=None, kind=None, mini=False):
     try:
         if data is not None:
             if 'schema_version' not in data:
-                data = upgradeEntityData(data).dataExport()
+                data = upgradeEntityData(data).data_export()
             if '_id' in data:
                 data['entity_id'] = data['_id']
                 del(data['_id'])
@@ -249,7 +249,7 @@ def buildEntity(data=None, kind=None, mini=False):
         else:
             new = getEntityObjectFromKind(kind)
         if data is not None:
-            return new().dataImport(data, overflow=True)
+            return new().data_import(data, overflow=True)
     except Exception as e:
         logs.info(e)
         raise
@@ -361,7 +361,7 @@ def upgradeEntityData(entityData):
     new.schema_version      = 0
     new.entity_id           = old.pop('entity_id', None)
     new.title               = old.pop('title', None)
-    new.timestamp           = BasicTimestamp().dataImport(timestamp)
+    new.timestamp           = BasicTimestamp().data_import(timestamp)
 
     # Images
     netflixImages = netflix.pop('images', {})
@@ -461,7 +461,7 @@ def upgradeEntityData(entityData):
     if kind == 'place':
         coordinates = old.pop('coordinates', None)
         if coordinates is not None:
-            new.coordinates = Coordinates().dataImport(coordinates)
+            new.coordinates = Coordinates().data_import(coordinates)
 
         addressComponents = ['locality', 'postcode', 'region', 'street', 'street_ext']
         setBasicGroup(place, new, 'address', 'address', oldSuffix='country', newSuffix='country', additionalSuffixes=addressComponents, seed=False)
@@ -469,7 +469,7 @@ def upgradeEntityData(entityData):
 
         setBasicGroup(place, new, 'address', 'formatted_address')
         if 'hours' in place:
-            place['hours'] = TimesSchema().dataImport(place['hours'], overflow=True)
+            place['hours'] = TimesSchema().data_import(place['hours'], overflow=True)
         setBasicGroup(place, new, 'hours', seed=False)
         setBasicGroup(restaurant, new, 'menu', seed=False)
         setBasicGroup(restaurant, new, 'price_range', seed=False)
@@ -611,7 +611,7 @@ def fast_id_dedupe(entities, seen=None):
     output = []
     for entity in entities:
 
-        sources = entity.sources.dataExport()
+        sources = entity.sources.data_export()
         keys = [ k for k in sources if k.endswith('_id') ]
         keep = True
         

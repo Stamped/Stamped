@@ -11,30 +11,28 @@ __license__   = "TODO"
 import logs
 
 from schema import Schema
-from api.entityapi import EntityAPI
+from api.stampapi import StampAPI
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
-from servers.httpapi.v1.schemas import HTTPStampedBy
-from servers.httpapi.v1.entities.errors import entity_exceptions
+from servers.httpapi.v1.schemas import HTTPEntity
+from servers.httpapi.v1.stamps.errors import stamp_exceptions
 
 # APIs
-entity_api = EntityAPI()
+stamp_api = StampAPI()
 
 # Define input form as schema object
 class HTTPForm(Schema):
     @classmethod
     def setSchema(cls):
-        cls.addProperty('entity_id', basestring, required=True)
+        cls.addProperty('stamp_id', basestring, required=True)
 
 # Set exceptions as list of exceptions 
-exceptions = entity_exceptions
+exceptions = stamp_exceptions
 
-@require_http_methods(["GET"])
-@stamped_http_api_request(requires_auth=False, form=HTTPForm, exceptions=exceptions)
+@require_http_methods(["POST"])
+@stamped_http_api_request(form=HTTPForm, exceptions=exceptions)
 def run(request, auth_user_id, form, **kwargs):
-    stamped_by = entity_api.entityStampedBy(form.entity_id, auth_user_id)
+    stamp_api.removeStamp(auth_user_id, form.stamp_id)
 
-    result = HTTPStampedBy().importStampedBy(stamped_by).dataExport()
-
-    return json_response(result)
+    return json_response(True)
 
