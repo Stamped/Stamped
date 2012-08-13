@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.83
+ASSET_VERSION_NUMBER        = 1.1.84
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -43,9 +43,9 @@ TEMPLATE_BASE_DIR		    = templates
 HTML_PAGES					= base profile index map about jobs legal base-mobile sdetail-mobile retina fonts password password_reset settings test
 TEMPLATE_PROG				= bin/process_templates.py
 
-GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
-GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^[ \t]*stylesheet:[ \t]*' $1 | sed 's/[ \t]*stylesheet:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
-GET_TEMPLATE_DEPENDENCIES	= $(foreach FILE,$(shell grep '^[ \t]*template:[ \t]*' $1 | sed 's/[ \t]*template:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(TEMPLATE_BASE_DIR)/$(FILE))
+GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^ *script: *' $1 | sed 's/ *script: *\([\w.\/-]*\) */\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
+GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^ *stylesheet: *' $1 | sed 's/ *stylesheet: *\([\w.\/-]*\) */\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
+GET_TEMPLATE_DEPENDENCIES	= $(foreach FILE,$(shell grep '^ *template: *' $1 | sed 's/ *template: *\([\w.\/-]*\) */\1/g' | tr '\n' ' '),$(TEMPLATE_BASE_DIR)/$(FILE))
 
 JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(GENERATED_JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)
 CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(GENERATED_CSS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).css)
