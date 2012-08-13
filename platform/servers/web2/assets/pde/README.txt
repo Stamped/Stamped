@@ -11,6 +11,8 @@ TODO:
         * possibly be able to specify color palette?
     * be able to collapse & expand code sections [-] and [+] via /** directive **/
 
+    * hover over keywords => inline documentation from:
+        * http://processingjs.org/reference/textAlign_/
 
 TEMPLATES:
     NOTE: all control-flow logic belongs in the processing code itself

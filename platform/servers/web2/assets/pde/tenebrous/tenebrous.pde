@@ -3,25 +3,24 @@
  * @author: Travis Fischer
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing
+ * 
+ * Recursive "tree" branches.
  */
 
-static int SIMULATION_WIDTH     = /** int ( 0, 1024 ]   **/ 640  /** endint **/;
-static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ]   **/ 480  /** endint **/;
-
 static int NUM_INITIAL_TREES    = /** int [ 1,  32  ]   **/ 5    /** endint **/;
-static int MAX_SIMULATION_AGE   = /** int [ 10, inf ]   **/ 800  /** endint **/;
 
 static float MAX_TREE_SIZE      = /** float [ 10, 180 ] **/ 60   /** endfloat **/;
 static float MIN_TREE_SIZE      = /** float [ 0.5, 5  ] **/ 1.5  /** endfloat **/;
 static float PARTICLE_SPEED     = /** float [ 0.1, 20 ] **/ 3.33 /** endfloat **/;
 
+static int MAX_SIMULATION_AGE   = /** int [ 10, inf ]   **/ 800  /** endint **/;
 
 ArrayList particles;
 
 int age;
 
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
     frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     smooth();
     loop();

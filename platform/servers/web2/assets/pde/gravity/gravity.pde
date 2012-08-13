@@ -3,35 +3,31 @@
  * @author: Travis Fischer
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing
+ * 
+ * Exploration of a simple n-body gravity system, in which every body is attracted 
+ * to every other body dependent on mass, proximity, etc.
  */
 
-static int SIMULATION_WIDTH         = /** int ( 0, 1024 ] **/ 640 /** endint **/;
-static int SIMULATION_HEIGHT        = /** int ( 0, 1024 ] **/ 480 /** endint **/;
-
-static int DEFAULT_GRAVITY_SPEED    = /** int [ 300, 1000 ] **/ 900 /** endint **/;
-static int MAX_GRAVITY_SPEED        = 1000;
-
-static int NUMBER_OF_PARTICLES      = /** int [ 12, 300 ] **/ 150 /** endint **/;
+static int NUM_PARTICLES     = /** int [ 12, 300 ]   **/ 150 /** endint **/;
 
 // scaling factor that affects the mass of the bodies, effectively scaling the 
-// overall gravity strength of the system.
-int simulationSpeed;
+// overall gravity strength of the system
+static int GRAVITY_SPEED     = /** int [ 300, 1000 ] **/ 900 /** endint **/;
+static int MAX_GRAVITY_SPEED = 1000;
 
 // bodies in the system are spawned in either a radial or random fashion
-int initialState;
+static int INITIAL_STATE     = /** int [ 0, 1 ]      **/ 0   /** endint **/;
 
 // global array of body particles in the simulation
 Body[] bodies;
 
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
     frameRate(/** int [ 1, 60 ] **/ 30 /** endint **/);
     smooth();
     loop();
     
-    bodies          = new Body[NUMBER_OF_PARTICLES];
-    simulationSpeed = DEFAULT_GRAVITY_SPEED;
-    initialState    = /** int [ 0, 1 ] **/ 0 /** endint **/;
+    bodies = new Body[NUM_PARTICLES];
     
     reset();
 }
@@ -39,7 +35,7 @@ void setup() {
 void reset() {
     int num_particles = bodies.length;
     
-    if (initialState == 1) {
+    if (INITIAL_STATE == 1) {
         // initial state of bodies arranged randomly
         for(int i = 0; i < num_particles; i++) {
             bodies[i] = new Body();
@@ -47,7 +43,7 @@ void reset() {
     } else {
         float x0 = width  / 2.0;
         float y0 = height / 2.0;
-        float r0 = sqrt(width * width + height * height) / 4.5;
+        float r0 = sqrt(width * width + height * height) / /** float [ 0.5, 50 ] **/ 4.5 /** endfloat **/;
         
         // initial state of bodies arranged in a circular fashion
         for(int i = 0; i < num_particles; i++) {
@@ -142,7 +138,7 @@ class Body {
     }
     
     void resetMass() {
-        _mass = _size / (MAX_GRAVITY_SPEED - simulationSpeed);
+        _mass = _size / (MAX_GRAVITY_SPEED - GRAVITY_SPEED);
     }
     
     void addAcceleration(float accelX, float accelY) {

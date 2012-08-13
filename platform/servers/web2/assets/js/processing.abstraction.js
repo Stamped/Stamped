@@ -18169,12 +18169,14 @@
       });
     };
     
-    if (aEditor !== undef) {
+    if (!!aEditor) {
       p.editor = document.getElementById(aEditor);
       
       // initialize live editing of abstraction variables
       $(p.editor).parent().on("click", ".abstraction-variable", function(event) {
         event.preventDefault();
+        
+        try_close_variable_editor(null, true);
         
         var $this       = $(this);
         var index       = $this.data("abstraction-index");
@@ -18296,7 +18298,7 @@
           var params = {
             parts             : 'popup', 
             showOn            : 'both', 
-            colorFormat       : "color(rd, gd, bd, ad)", 
+            colorFormat       : "color(rd,gd,bd,ad)", 
             showCancelButton  : true, 
             buttonColorize    : true, 
             closeOnEscape     : true, 
@@ -18423,19 +18425,52 @@
           'short static super switch this true ' + 
           'void while';
         
-        // processing builtins and keywords
+        // processing-specific keywords
+        keywords += 
+          // environment
+          'focused frameCount height online screen width ' + 
+          
+          // data
+            // composite
+            'Array ArrayList HashMap Object String XMLElement ' + 
+          
+          // shapes
+          'PShape ' + 
+          
+          // input
+            // mouse
+            'mouseButton mouseX mouseY pmouseX pmouseY ' + 
+            // keyboard
+            'key keyCode ' + 
+          
+          // output
+            // files
+            'PrintWriter ' + 
+          
+          // image
+          'PImage ' + 
+          
+          // rendering
+          'PGraphics ' + 
+          
+          // typography
+          'PFont ' + 
+          
+          // math
+          'PVector ' + 
+          
+          // constants
+          'HALF_PI PI QUARTER_PI TWO_PI';
+
+        // processing builtins
         builtins = 
           // structure
           'draw exit loop noLoop popStyle redraw setup size ' + 
           
           // environment
-          'cursor focused frameCount frameRate height noCursor online screen width ' + 
+          'cursor frameRate noCursor ' + 
           
           // data
-            // primitive
-            'width height online screen ' + 
-            // composite
-            'Array ArrayList HashMap Object String XMLElement ' + 
             // conversion
             'binary hex str unbinary unhex ' + 
             // string functions
@@ -18444,7 +18479,6 @@
             'append appendCopy concat expand reverse shorten soft splice subset ' + 
           
           // shapes
-          'PShape ' + 
             // 2D primitives
             'arc ellipse line point quad rect triangle ' + 
             // curves
@@ -18460,9 +18494,9 @@
           
           // input
             // mouse
-            'mouseButton mouseClicked mouseDragged mouseMoved mouseOut mouseOver mousePressed mousePressed mouseReleased mouseX mouseY pmouseX pmouseY ' + 
+            'mouseClicked mouseDragged mouseMoved mouseOut mouseOver mousePressed mouseReleased ' + 
             // keyboard
-            'key keyCode keyPressed keyPressed keyReleased keyTyped ' + 
+            'keyPressed keyPressed keyReleased keyTyped ' + 
             // files
             'createInput loadBytes loadStrings open selectFolder selectInput ' + 
             // web
@@ -18476,7 +18510,7 @@
             // image
             'save saveFrame ' + 
             // files
-            'PrintWriter beginRaw beginRecord createOutput createReader createWriter endRaw endRecord saveBytes saveStream saveStrings selectOutput ' + 
+            'beginRaw beginRecord createOutput createReader createWriter endRaw endRecord saveBytes saveStream saveStrings selectOutput ' + 
           
           // transforms
           'applyMatrix popMatrix printMatrix pushMatrix resetMatrix rotate rotateX rotateY rotateZ scale translate ' + 
@@ -18498,17 +18532,16 @@
             'alpha blendColor blue brightness color green hue lerpColor red saturation ' + 
           
           // image
-          'PImage createImage ' + 
+          'createImage ' + 
             // loading & displaying
             'image imageMode loadImage noTint requestImage tint ' + 
             // pixels
             'blend copy filter get loadPixels pixels set updatePixels ' + 
           
           // rendering
-          'PGraphics createGraphics hint ' + 
+          'createGraphics hint ' + 
           
           // typography
-          'PFont ' + 
             // loading & displaying
             'createFont loadFont text textFont ' + 
             // attributes
@@ -18517,16 +18550,12 @@
             'textAscent textDescent ' + 
           
           // math
-          'PVector ' + 
             // calculation
             'abs ceil constrain dist exp floor lerp log mag map max min norm pow round sq sqrt ' + 
             // trigonometry
             'acos asin atan atan2 cos degrees radians sin tan ' + 
             // random
-            'noise noiseDetail noiseSeed random randomSeed ' + 
-          
-          // constants
-          'HALF_PI PI QUARTER_PI TWO_PI';
+            'noise noiseDetail noiseSeed random randomSeed';
         
         this.regexList = [
           { regex: dp.sh.RegexLib.SingleLineCComments,              css: 'comment' }, // one line comments

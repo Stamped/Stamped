@@ -16,8 +16,10 @@
  * processing as well as Java in general).
  */
 
-static int SIMULATION_WIDTH  = /** int ( 0, 1024 ] **/ 640 /** endint **/;
-static int SIMULATION_HEIGHT = /** int ( 0, 1024 ] **/ 480 /** endint **/;
+static int VARIATION_CIRCLE = 0;
+static int VARIATION_RECT   = 1;
+static int COLOR_DEFAULT    = 0;
+static int COLOR_NONE       = 1;
 
 color STROKE_COLOR       = /** color **/ color(0, 0, 0, 48) /** endcolor **/;
 static int STROKE_WEIGHT = /** float [ 0, 10 ] **/ 1.0 /** endfloat **/;
@@ -27,8 +29,8 @@ int counter, depth;
 boolean done;
 
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(60);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
+    frameRate(/** int [ 1, 60 ] **/ 60 /** endint **/);
     smooth();
     loop();
     
@@ -51,7 +53,8 @@ void draw() {
         }
         
         counter = 0;
-        done = false;
+        done  = false;
+        depth = 0;
     } else {
         done = !system.update(counter++);
     }
@@ -63,11 +66,6 @@ void mouseClicked() {
 }
 
 class HilbertSystem {
-    int VARIATION_CIRCLE = 0;
-    int VARIATION_RECT   = 1;
-    int COLOR_DEFAULT    = 0;
-    int COLOR_NONE       = 1;
-    
     private String _axiom;
     
     // any chars which are not in _rules are considered to be constants
@@ -88,8 +86,8 @@ class HilbertSystem {
         _axiom = "L";
         
         _angle      = /** float [ 0, 3.1416 ] **/ HALF_PI /** endfloat **/; // default to 90 degree turns
-        _variation  = /** int [ 0, 1 ]        **/ 0       /** endint **/;
-        _color      = /** int [ 0, 1 ]        **/ 0       /** endint **/;
+        _variation  = /** int [ 0, 1 ]        **/ 0       /** endint   **/;
+        _color      = /** int [ 0, 1 ]        **/ 0       /** endint   **/;
     }
     
     void invert_color() {
@@ -160,7 +158,7 @@ class HilbertSystem {
             return color(PALETTE[offset],  PALETTE[offset + 1], PALETTE[offset + 2], a);
         }
         
-        return color(0, 0, 0, a);
+        return /** color **/ color(0, 0, 0, a) /** endcolor **/;
     }
     
     boolean update(int i) {

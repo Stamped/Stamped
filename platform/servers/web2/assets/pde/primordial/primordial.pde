@@ -3,28 +3,23 @@
  * @author: Travis Fischer
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing
+ * 
+ * Petri dish simulation with comprised of several types of hierarchical organisms.
  */
-
-static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
-static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
 
 static int NUM_ORGANISMS        = /** int [ 1, 100 ]  **/ 15  /** endint **/;
 static int MAX_NUM_OCTOPI       = /** int [ 0, 100 ]  **/ 3   /** endint **/;
 
+static boolean SINGLE_CELLED    = /** boolean **/ false /** endboolean **/;
+static boolean FLAGELLA         = /** boolean **/ true  /** endboolean **/;
+static boolean OCTOPI           = /** boolean **/ true  /** endboolean **/;
+
 Particle[] _particles;
 
-boolean _singleCelled;
-boolean _flagella;
-boolean _octopi;
-
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
     frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     loop();
-    
-    _singleCelled = /** boolean **/ false /** endboolean **/;
-    _flagella     = /** boolean **/ true  /** endboolean **/;
-    _octopi       = /** boolean **/ true  /** endboolean **/;
     
     reset();
 }
@@ -37,19 +32,19 @@ void reset() {
     int chanceOfFlagellum  = 92  - chanceOfSingle;
     int chanceOfOctopus    = 100 - chanceOfFlagellum;
     
-    if (!_singleCelled) {
+    if (!SINGLE_CELLED) {
         chanceOfSingle     = -1000;
         chanceOfFlagellum += 9;
         chanceOfOctopus   += 9;
     }
     
-    if (!_flagella) {
+    if (!FLAGELLA) {
         chanceOfFlagellum  = -1000;
         chanceOfSingle    += 64;
         chanceOfOctopus   += 10;
     }
     
-    if (!_octopi) {
+    if (!OCTOPI) {
         chanceOfOctopus    = -1000;
         chanceOfSingle    += 3;
         chanceOfFlagellum += 7; 
@@ -93,14 +88,14 @@ void reset() {
         } else if (rand < chanceOfOctopus) {
             o = new Octopus(x, y);
             is_octopus = true;
-        } else if (_flagella) {
+        } else if (FLAGELLA) {
             o = new Flagellum(x, y);
         } else {
-            boolean rand2 = (_singleCelled && _octopi) ? (random(0.0, 1.0) > 0.5) : true;
+            boolean rand2 = (SINGLE_CELLED && OCTOPI) ? (random(0.0, 1.0) > 0.5) : true;
             
-            if (_singleCelled && rand2) {
+            if (SINGLE_CELLED && rand2) {
                 o = new Cell(x, y);
-            } else if (_octopi && rand2) {
+            } else if (OCTOPI && rand2) {
                 o = new Octopus(x, y);
                 is_octopus = true;
             }

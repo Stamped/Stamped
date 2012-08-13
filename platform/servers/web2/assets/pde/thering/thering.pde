@@ -4,20 +4,20 @@
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing.js
  * 
- * Original concept and code by J. Tarbell
+ * Alternating black and white rings comprised of thousands of particles, all moving 
+ * with respect to <a href='http://en.wikipedia.org/wiki/Brownian_motion'>Brownian motion</a>.
+ * 
+ * Original concept and implementation by J. Tarbell
  * <a href="http://www.complexification.net/gallery/machines/binaryRing/">Complexification</a>
  */
 
-static int SIMULATION_WIDTH     = /** int ( 0, 1024 ] **/ 640 /** endint **/;
-static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ] **/ 480 /** endint **/;
+static int NUM_PARTICLES        = /** int [ 50, 50000 ] **/ 5000 /** endint **/;
+static int ORIGIN_RADIUS        = /** int [ 0, 250 ]    **/ 50   /** endint **/;
 
-static int PARTICLE_MAX_AGE     = /** int [ 10, 500 ] **/ 200 /** endint **/;
-static int PARTICLE_ALPHA       = /** int [ 10, 255 ] **/ 24  /** endint **/;
+static int PARTICLE_MAX_AGE     = /** int [ 10, 500 ]   **/ 200  /** endint **/;
+static int PARTICLE_ALPHA       = /** int [ 10, 255 ]   **/ 24   /** endint **/;
 
 color BLOOD_COLOR = /** color **/ color(0xBF, 0x21, 0x07, 0x18) /** endcolor **/; // dark red
-
-int _noRingParticles;
-int _originRadius;
 
 ArrayList _ringParticles;
 
@@ -25,7 +25,7 @@ ArrayList _ringParticles;
 boolean _blackout;
 
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
     frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     smooth();
     loop();
@@ -36,20 +36,16 @@ void setup() {
 void reset() {
     background(/** color **/ #000000 /** endcolor **/);
     
-    _noRingParticles = /** int [ 50, 50000 ] **/ 5000  /** endint     **/;
-    _originRadius    = /** int [ 0, 250 ]    **/ 50    /** endint     **/;
-    _blackout        = /** boolean           **/ false /** endboolean **/;
-    
-    _ringParticles   = new ArrayList(_noRingParticles);
+    _ringParticles = new ArrayList(NUM_PARTICLES);
+    _blackout      = false;
     
     float theta = TWO_PI * random(0.0, 1.0);
-    float thetaAdd = (random(0.0, 1.0) * 4 + TWO_PI) / _noRingParticles;
-    _ringParticles.clear();
+    float thetaAdd = (random(0.0, 1.0) * 4 + TWO_PI) / NUM_PARTICLES;
     
     // initial particles sling-shot around ring origin
-    for(int i = 0; i < _noRingParticles; i++, theta += thetaAdd) {
-        float emitX = (width  / 2) + _originRadius * sin(theta);
-        float emitY = (height / 2) + _originRadius * cos(theta);
+    for(int i = 0; i < NUM_PARTICLES; i++, theta += thetaAdd) {
+        float emitX = (width  / 2) + ORIGIN_RADIUS * sin(theta);
+        float emitY = (height / 2) + ORIGIN_RADIUS * cos(theta);
         
         _ringParticles.add(new RingParticle(emitX, emitY, theta / 2));
     }
@@ -74,7 +70,7 @@ void mouseClicked() {
 
 void setOriginRadius(int newRadius) {
     if (newRadius > 0) {
-        _originRadius = newRadius;
+        ORIGIN_RADIUS = newRadius;
     }
 }
 
@@ -133,8 +129,8 @@ class RingParticle {
         float theta = TWO_PI * random(0.0, 1.0);
         
         // initial position of new particle on radius of origin
-        _x = (width  / 2) + _originRadius * sin(theta);
-        _y = (height / 2) + _originRadius * cos(theta);
+        _x = (width  / 2) + ORIGIN_RADIUS * sin(theta);
+        _y = (height / 2) + ORIGIN_RADIUS * cos(theta);
         
         // reset initial velocity to zero
         _dX = 0;

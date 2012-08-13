@@ -12,20 +12,15 @@
  *      * rethink visual treatment
  */
 
-static int SIMULATION_WIDTH     = /** int ( 0, 1024 ]  **/ 640  /** endint   **/;
-static int SIMULATION_HEIGHT    = /** int ( 0, 1024 ]  **/ 480  /** endint   **/;
-
-static int   NUM_VERTICES       = /** int   [ 1, 128 ] **/ 1    /** endint   **/;
-static float CURVATURE          = /** float [ 0, 10  ] **/ 2.0  /** endfloat **/;
-static float INV_DISTANCE       = /** float [ 5, 200 ] **/ 40.0 /** endfloat **/;
-
-RRTree tree;
+static int   NUM_VERTICES = /** int   [ 1, 128 ] **/ 1    /** endint   **/;
+static float CURVATURE    = /** float [ 0, 10  ] **/ 2.0  /** endfloat **/;
+static float INV_DISTANCE = /** float [ 5, 200 ] **/ 40.0 /** endfloat **/;
 
 float _distance;
-float _curvature;
+RRTree _tree;
 
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
     frameRate(/** int [ 1, 60 ] **/ 60 /** endint **/);
     smooth();
     loop();
@@ -36,14 +31,12 @@ void setup() {
 void reset() {
     background(/** color **/ #FFFFFF /** endcolor **/);
     
-    _distance  = (width + height) / (2.0 * INV_DISTANCE);
-    _curvature = CURVATURE;
-    
-    tree = new RRTree();
+    _distance = (width + height) / (2.0 * INV_DISTANCE);
+    _tree = new RRTree();
 }
 
 void draw() {
-    tree.update();
+    _tree.update();
 }
 
 void mouseClicked() {
@@ -65,16 +58,14 @@ class RRTree {
         }
     }
     
-    color random_color(int alpha) {
-        int[] palette = PALETTE;
-        
+    color random_color(int a) {
         if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.0 /** endfloat **/) {
             // select a random color from within a predefined color palette
-            int offset = 3 * int(random(0, (palette.length - 1) / 3));
+            int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
             
-            return color(palette[offset],  palette[offset + 1], palette[offset + 2], alpha);
+            return color(PALETTE[offset],  PALETTE[offset + 1], PALETTE[offset + 2], a);
         } else {
-            return /** color **/ color(0, 0, 0, alpha) /** endcolor **/;
+            return /** color **/ color(0, 0, 0, a) /** endcolor **/;
         }
     }
     
@@ -118,10 +109,10 @@ class RRTree {
         stroke(/** color **/ color(0, 0, 0, 180) /** endcolor **/);
         strokeWeight(/** float [ 0, 16 ] **/ 2.0 /** endfloat **/);
         
-        if (_curvature <= 0) {
+        if (CURVATURE <= 0) {
             line(closest.x, closest.y, newV.x, newV.y);
         } else {
-            float curve_dist = distance * _curvature;
+            float curve_dist = distance * CURVATURE;
             
             PVector ctx0 = new PVector(closest.x + random(-curve_dist, curve_dist), 
                                        closest.y + random(-curve_dist, curve_dist));

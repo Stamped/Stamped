@@ -4,20 +4,24 @@
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing.js
  * 
+ * Recursive line particles.
+ * 
  * Original concept and code by J. Tarbell
  * @see http://www.complexification.net/
  */
 
-static int SIMULATION_WIDTH     = /** int ( 0,  1024 ] **/ 640  /** endint   **/;
-static int SIMULATION_HEIGHT    = /** int ( 0,  1024 ] **/ 480  /** endint   **/;
-
+static int NUM_INITIAL_CRACKS   = /** int [ 1, 32 ]    **/ 4    /** endint   **/;
 static int MAX_ACTIVE_CRACKS    = /** int [ 12, 1024 ] **/ 100  /** endint   **/;
-static int SPAWN_LINEAR         = 0;
 
 static float CURVATURE          = /** float [ 0, 1 ]   **/ 0    /** endfloat **/;
 
+static int SPAWN_TYPE           = /** int [ 0, 1 ]     **/ 0    /** endint   **/;
+static int SPAWN_PERPENDICULAR  = 0;
+
 static float FUZZ               = /** float [ 0, 4 ]   **/ 0.25 /** endfloat **/;
 static float TWICE_FUZZ         = FUZZ * 2.0;
+
+static int GROWTH_RATE_COEFF    = /** int [ 0, 10 ]    **/ 5    /** endint   **/;
 
 int[][] _setCracks;
 PImage  _offscreen;
@@ -31,11 +35,9 @@ int _mouseDownX;
 int _mouseDownY;
 
 int _activeLength, _inactiveLength;
-int _spawnType, _growth;
-int _noInitialLines;
 
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
     frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     loop();
     
@@ -45,14 +47,10 @@ void setup() {
 void reset() {
     background(/** color **/ #FFFFFF /** endcolor **/);
     
-    _setCracks = new int[width + 1][height + 1];
+    _setCracks      = new int[width + 1][height + 1];
     
-    _noInitialLines = /** int [ 1, 32 ] **/ 4 /** endint **/;
     _activeCracks   = new ArrayList();
     _inactiveCracks = new ArrayList();
-    
-    _spawnType      = /** int [ 0, 1 ]  **/ 0 /** endint **/;
-    _growth         = /** int [ 0, 10 ] **/ 5 /** endint **/;
     
     _dragged        = false;
     
@@ -69,7 +67,7 @@ void reset() {
     }
     
     // create and initialize default cracks
-    for(int i = 0; i < _noInitialLines; i++) {
+    for(int i = 0; i < NUM_INITIAL_CRACKS; i++) {
         Crack newCrack = new Crack();
         
         _activeCracks.add(newCrack);
@@ -118,7 +116,7 @@ void update() {
             
             boolean exp = true;
             
-            for(int j = 0; j < _growth; j++) {
+            for(int j = 0; j < GROWTH_RATE_COEFF; j++) {
                 exp = (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.5 /** endfloat **/);
                 
                 if (!exp) {
@@ -156,7 +154,7 @@ Crack spawnNewCrack() {
             
             length += cur.getLength();
             if (length > randomCrack) {
-                return cur.spawnNewCrack(_spawnType);
+                return cur.spawnNewCrack(SPAWN_TYPE);
             }
         }
         
@@ -170,7 +168,7 @@ Crack spawnNewCrack() {
         
         length += cur.getLength();
         if (length > randomCrack) {
-            return cur.spawnNewCrack(_spawnType);
+            return cur.spawnNewCrack(SPAWN_TYPE);
         }
     }
     
@@ -429,7 +427,7 @@ class Crack {
             newY += t * _dy;
         }
         
-        if (spawnType == SPAWN_LINEAR) {
+        if (spawnType == SPAWN_PERPENDICULAR) {
             newTheta += (randBoolean ? 90 : 270);
         } else {
             newTheta += (randBoolean ? random(5, 174) : random(185, 354));
