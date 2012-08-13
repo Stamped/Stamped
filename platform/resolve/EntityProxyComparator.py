@@ -258,6 +258,7 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
 
     @classmethod
     def compare_proxies(self, movie1, movie2):
+        has_additional_info = False
         sim_score = titleComparison(movie1.name, movie2.name, movieSimplify)        
         if logComparisonLogic:
             print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
@@ -289,6 +290,7 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
                 print 'demoting to', sim_score, 'for ending numbers'
 
         if movie1.release_date and movie2.release_date:
+            has_additional_info = True
             time_difference = abs(movie1.release_date - movie2.release_date)
             # TODO: Smooth this.
             if time_difference < timedelta(30):
@@ -308,6 +310,7 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
 
 
         if movie1.length and movie2.length:
+            has_additional_info = True
             movie_length_odds = None
             if movie1.length == movie2.length and movie1.length % 60 != 0:
                 movie_length_odds = 2.0
@@ -322,8 +325,9 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
                 print 'changing to', sim_score, 'for movie lengths'
 
         if logComparisonLogic:
-            print 'final score:', sim_score, '\n'
-        if sim_score > 0.99:
+            print 'final score:', sim_score
+            print 'comparison made based on more than just title:', has_additional_info, '\n'
+        if sim_score > 0.99 and has_additional_info:
             return CompareResult.match(sim_score)
         elif sim_score < 0.5:
             return CompareResult.definitely_not_match()
