@@ -156,7 +156,7 @@ static const CGFloat kReloadHeight = 60.0;
         if (self.navigationController) {
             [self.navigationController setNavigationBarHidden:YES];
         } else {
-            [[Util sharedNavigationController] setNavigationBarHidden:YES];
+            [[Util currentNavigationController] setNavigationBarHidden:YES];
         }
     }
 }
@@ -170,7 +170,7 @@ static const CGFloat kReloadHeight = 60.0;
         if (self.navigationController) {
             [self.navigationController setNavigationBarHidden:NO];
         } else {
-            [[Util sharedNavigationController] setNavigationBarHidden:NO];
+            [[Util currentNavigationController] setNavigationBarHidden:NO];
         }
     }
 }

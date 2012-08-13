@@ -43,14 +43,14 @@ extern NSString* const STRestKitErrorIDKey;
                   authenticated:(BOOL)authenticated
                          params:(NSDictionary*)params 
                         mapping:(RKObjectMapping*)mapping 
-                    andCallback:(void(^)(NSArray* results, NSError* error, STCancellation* cancellation))block;
+                    andCallback:(void(^)(NSArray* results, NSError* error, STCancellation* cancellation))block __attribute__ ((deprecated));
 
 - (STCancellation*)loadOneWithPath:(NSString*)path
                               post:(BOOL)post 
                      authenticated:(BOOL)authenticated
                             params:(NSDictionary*)params 
                            mapping:(RKObjectMapping*)mapping 
-                       andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block;
+                       andCallback:(void(^)(id result, NSError* error, STCancellation* cancellation))block __attribute__ ((deprecated));
 
 - (STCancellation*)loadWithPath:(NSString*)path
                            post:(BOOL)post

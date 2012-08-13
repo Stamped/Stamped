@@ -6,11 +6,22 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ Common Stamped fonts and font factories.
+ 
+ Notes:
+ This is a very successful category used pervasively throughout the application.
+ 
+ TODOs:
+ Extend this category to use the new limited font palette that Anthony developed.
+ 
+ 2012-08-10
+ -Landon
+ */
+
 #import <UIKit/UIKit.h>
 
 @interface UIFont (Stamped)
-
-
 
 + (UIFont*)stampedTitleFont;
 + (UIFont*)stampedTitleLightFont;

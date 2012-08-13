@@ -16,7 +16,6 @@
 #import "STActionManager.h"
 #import "STUserViewController.h"
 #import "STPhotoViewController.h"
-#import "STCreateStampViewController.h"
 #import "CreateStampViewController.h"
 #import "STImageCache.h"
 #import "STConfirmationView.h"
@@ -62,7 +61,7 @@ static STStampedActions* _sharedInstance;
             handled = YES;
             if (flag) {
                 EntityDetailViewController* detailViewController = [[[EntityDetailViewController alloc] initWithEntityID:source.sourceID] autorelease] ;
-                [[Util sharedNavigationController] pushViewController:detailViewController animated:YES];
+                [Util pushController:detailViewController modal:NO animated:YES];
             }
         }
         else if ([action isEqualToString:@"stamped_view_stamp"] && source.sourceID != nil) {
@@ -81,8 +80,9 @@ static STStampedActions* _sharedInstance;
                         BOOL unlocked = [STActionManager unlock];
                         if (unlocked) {
                             if (stamp) {
-                                [[Util sharedNavigationController] pushViewController:[[[STStampDetailViewController alloc] initWithStamp:stamp] autorelease]
-                                                                             animated:YES];
+                                [Util pushController:[[[STStampDetailViewController alloc] initWithStamp:stamp] autorelease]
+                                               modal:NO
+                                            animated:YES];
                             }
                             else {
                                 [Util warnWithAPIError:error andBlock:nil];
@@ -92,7 +92,7 @@ static STStampedActions* _sharedInstance;
                 }
             }
             if (controller) {
-                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                [Util pushController:controller modal:NO animated:YES];
             }
         }
         else if ([action isEqualToString:@"stamped_view_user"] && source.sourceID != nil) {
@@ -132,7 +132,7 @@ static STStampedActions* _sharedInstance;
                 }
                 
                 if (controller) {
-                    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                    [Util pushController:controller modal:NO animated:YES];
                 }
                 else {
                     [STActionManager lock];
@@ -140,8 +140,9 @@ static STStampedActions* _sharedInstance;
                         BOOL unlocked = [STActionManager unlock];
                         if (unlocked) {
                             if (userDetail) {
-                                [[Util sharedNavigationController] pushViewController:[[[STUserViewController alloc] initWithUser:userDetail] autorelease] 
-                                                                             animated:YES];
+                                [Util pushController:[[[STUserViewController alloc] initWithUser:userDetail] autorelease]
+                                               modal:NO
+                                            animated:YES];
                             }
                             else {
                                 [Util warnWithAPIError:error andBlock:nil];
@@ -222,7 +223,7 @@ static STStampedActions* _sharedInstance;
             handled = YES;
             if (flag) {
                 STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:source.sourceID]] autorelease];
-                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                [Util pushController:controller modal:NO animated:YES];
             }
         }
         else if ([action isEqualToString:@"stamped_view_user_image"] && context.user) {
@@ -230,7 +231,7 @@ static STStampedActions* _sharedInstance;
             if (flag) {
                 
                 STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:context.user.imageURL]] autorelease];
-                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                [Util pushController:controller modal:NO animated:YES];
             }
         }
         else if ([action isEqualToString:@"stamped_confirm"] && source.sourceData != nil) {
@@ -255,7 +256,7 @@ static STStampedActions* _sharedInstance;
             if (flag) {
                 CreateStampViewController* controller = [[[CreateStampViewController alloc] initWithEntity:context.entity] autorelease];
                 controller.creditUsers = context.creditedUsers;
-                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                [Util pushController:controller modal:NO animated:YES];
             }
         }
         else if ([action isEqualToString:@"stamped_facebook_auth"]) {

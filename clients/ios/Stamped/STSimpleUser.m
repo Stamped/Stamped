@@ -72,6 +72,24 @@
     [encoder encodeObject:self.following forKey:@"following"];
 }
 
++ (STSimpleUser*)userFromUser:(id<STUser>)user {
+    STSimpleUser* copy = [[[STSimpleUser alloc] init] autorelease];
+    NSArray* properties = [NSArray arrayWithObjects:
+                           @"name",
+                           @"userID",
+                           @"screenName",
+                           @"primaryColor",
+                           @"secondaryColor",
+                           @"privacy",
+                           @"imageURL",
+                           @"following",
+                           nil];
+    for (NSString* key in properties) {
+        [copy setValue:[(id)user valueForKey:key] forKey:key];
+    }
+    return copy;
+}
+
 + (RKObjectMapping*)mapping {
     RKObjectMapping* mapping = [RKObjectMapping mappingForClass:[STSimpleUser class]];
     

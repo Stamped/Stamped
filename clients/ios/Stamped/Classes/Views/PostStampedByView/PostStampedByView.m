@@ -10,11 +10,17 @@
 #import "STTableViewSectionBackground.h"
 #import "STAvatarView.h"
 #import "STStampedAPI.h"
+#import "Util.h"
 
 #define kPostStampedByMaxHeight 100.0f
 #define kStampedByCellWidth 39.0f
 
+@interface PostStampedByView ()
+
+@end
+
 @implementation PostStampedByView
+
 @synthesize stampedBy=_stampedBy;
 @synthesize titleLabel=_titleLabel;
 @synthesize delegate;
@@ -80,28 +86,36 @@
 
 }
 
-- (id)initWithFrame:(CGRect)frame entityIdentifier:(NSString*)entityIdentifier {
-    if ((self = [super initWithFrame:frame])) {
-        [self commonInit];
-        [[STStampedAPI sharedInstance] stampedByForEntityID:entityIdentifier andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
-            self.stampedBy = stampedBy;
+//- (id)initWithFrame:(CGRect)frame entityIdentifier:(NSString*)entityIdentifier {
+//    if ((self = [super initWithFrame:frame])) {
+//        [self commonInit];
+//        [[STStampedAPI sharedInstance] stampedByForEntityID:entityIdentifier andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
+//            self.stampedBy = stampedBy;
+//
+//        }];
+//    }
+//    return self;
+//    
+//}
+//
+//- (id)initWithFrame:(CGRect)frame stampedBy:(id<STStampedBy>)stampedBy {
+//    if ((self = [super initWithFrame:frame])) {
+//        [self commonInit];
+//        self.stampedBy = stampedBy;
+//    }
+//    return self;
+//}
+//
+//- (id)initWithFrame:(CGRect)frame {
+//    if ((self = [super initWithFrame:frame])) {
+//        [self commonInit];
+//    }
+//    return self;
+//}
 
-        }];
-    }
-    return self;
-    
-}
-
-- (id)initWithFrame:(CGRect)frame stampedBy:(id<STStampedBy>)stampedBy {
-    if ((self = [super initWithFrame:frame])) {
-        [self commonInit];
-        self.stampedBy = stampedBy;
-    }
-    return self;
-}
-
-- (id)initWithFrame:(CGRect)frame {
-    if ((self = [super initWithFrame:frame])) {
+- (id)init {
+    self = [super initWithFrame:CGRectMake(0.0f, 0., [Util fullscreenFrame].size.width, 85.0f)];
+    if (self) {
         [self commonInit];
     }
     return self;

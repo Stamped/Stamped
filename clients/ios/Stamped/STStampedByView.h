@@ -14,4 +14,10 @@
 
 - (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist entityID:(NSString*)entityID andDelegate:(id<STViewDelegate>)delegate;
 
+- (id)initWithStampedBy:(id<STStampedBy>)stampedBy
+              blacklist:(NSSet*)blacklist 
+               entityID:(NSString*)entityID 
+         includeFriends:(BOOL)includeFriends 
+            andDelegate:(id<STViewDelegate>)delegate;
+
 @end

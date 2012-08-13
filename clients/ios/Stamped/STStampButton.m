@@ -75,7 +75,7 @@
     
     if (self.entity) {
         CreateStampViewController *controller = [[[CreateStampViewController alloc] initWithEntity:self.entity] autorelease];
-        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+        [Util pushController:controller modal:NO animated:YES];
         if (self.user) {
             controller.creditUsers = [NSArray arrayWithObject:self.user];
         }

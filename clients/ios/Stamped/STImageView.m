@@ -10,7 +10,6 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-#import "Notifications.h"
 
 @interface STImageView ()
 - (void)initialize;

@@ -56,7 +56,7 @@
             
     _cancellation = [[[STRestKitLoader sharedInstance] loadWithPath:path 
                                                                post:(params!=nil) 
-                                                      authenticated:YES 
+                                                         authPolicy:STRestKitAuthPolicyOptional 
                                                              params:(params==nil) ? [NSDictionary dictionary] : params mapping:[STSimpleUser mapping]
                                                         andCallback:^(NSArray *users, NSError *error, STCancellation *cancellation) {
 
