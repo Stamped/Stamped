@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.84
+ASSET_VERSION_NUMBER        = 1.1.85
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -35,6 +35,7 @@ LESS_CSS_TARGETS            = $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$
 GENERATED_BASE_DIR			= assets/generated
 GENERATED_JS_BASE_DIR		= $(GENERATED_BASE_DIR)/js
 GENERATED_CSS_BASE_DIR		= $(GENERATED_BASE_DIR)/css
+GENERATED_PDE_BASE_DIR		= $(GENERATED_BASE_DIR)/pde
 JS_BASE_DIR					= assets/js
 CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
@@ -102,6 +103,8 @@ css_targets: $(LESS_CSS_TARGETS);
 
 deploy: $(ALL_TARGETS)
 	mkdir -p $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
+	mkdir -p $(GENERATED_PDE_BASE_DIR)/$(ASSET_VERSION_NUMBER)
+	cp -rf assets/pde/* $(GENERATED_PDE_BASE_DIR)/$(ASSET_VERSION_NUMBER)
 	cp -rf assets/css/ie/* $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
 	cp -rf assets/css/mobile $(GENERATED_CSS_BASE_DIR)/
 	cd bin && python deploy_assets.py
