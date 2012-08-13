@@ -6,7 +6,7 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import os, sys
+import argparse, os, sys
 from utils import AttributeDict, Singleton, get_db_config
 from bson import json_util
 import json
@@ -15,13 +15,7 @@ from libs import MongoCache
 import functools
 from tests.StampedTestUtils import *
 
-class FixtureTestRuntimeSettings(Singleton):
-    def __init__(self):
-        self.useDbFixture = True
-        self.useCacheFixture = True
-        self.writeFixtureFiles = False
-        self.liveCallsOnCacheMiss = False
-
+__fixture_test_flags = None
 
 def defaultFixtureFilename(testCaseInstance, testFn, fixtureType):
     testClassModuleName = testCaseInstance.__class__.__module__
@@ -94,9 +88,9 @@ def fixtureTest(useLocalDb=False,
     def decoratorFn(testFn):
         @functools.wraps(testFn)
         def runTest(self, *args, **kwargs):
-            useDbFixture = FixtureTestRuntimeSettings.getInstance().useDbFixture
-            useCacheFixture = FixtureTestRuntimeSettings.getInstance().useCacheFixture
-            writeFixtureFiles = FixtureTestRuntimeSettings.getInstance().writeFixtureFiles
+            useDbFixture = __fixture_test_flags.use_db_fixture
+            useCacheFixture = __fixture_test_flags.use_cache_fixture
+            writeFixtureFiles = __fixture_test_flags.write_fixture_files
 
             dbFixtureFilename = defaultFixtureFilename(self, testFn, 'dbfixture')
             cacheFixtureFilename = defaultFixtureFilename(self, testFn, 'cachefixture')
@@ -155,7 +149,7 @@ def fixtureTest(useLocalDb=False,
                     issueQueries(generateLocalDbQueries)
 
             if useCacheFixture:
-                MongoCache.exceptionOnCacheMiss = not FixtureTestRuntimeSettings.getInstance().liveCallsOnCacheMiss
+                MongoCache.exceptionOnCacheMiss = not __fixture_test_flags.live_calls_on_cache_miss
 
             # The actual DB fixtures we want to snapshot before the function runs, because we don't want to incorporate
             # anything written during the function. But the third-party calls cache we want to snapshot after the
@@ -194,32 +188,15 @@ def main():
     # Here's the awkward part -- we want to parse options from the command-line, but there's also option parsing done
     # in unittest2.main(). So we need to do something unobtrusive here.
 
-    argv = sys.argv
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--use_live_db_results', action='store_false', default=True, dest='use_db_fixture')
+    parser.add_argument('--use_live_api_calls', action='store_false', default=True, dest='use_cache_fixture')
+    parser.add_argument('--write_fixture_files', action='store_true', default=False)
+    parser.add_argument('--live_calls_on_cache_miss',action='store_true', default=False)
 
-    # Generate live DB data rather than using saved fixtures.
-    liveDbResultsFlag = '--use_live_db_results'
-    if liveDbResultsFlag in argv:
-        del argv[argv.index(liveDbResultsFlag)]
-        print "Skipping DB fixture"
-        FixtureTestRuntimeSettings.getInstance().useDbFixture = False
-
-    # Get live results from third-party APIs rather than using saved fixtures.
-    liveApiCallsFlag = "--use_live_api_calls"
-    if liveApiCallsFlag in argv:
-        del argv[argv.index(liveApiCallsFlag)]
-        print "Skipping cache fixture"
-        FixtureTestRuntimeSettings.getInstance().useCacheFixture = False
-
-    # Regenerate fixture files.
-    writeFixtureFilesFlag = '--write_fixture_files'
-    if writeFixtureFilesFlag in argv:
-        del argv[argv.index(writeFixtureFilesFlag)]
-        FixtureTestRuntimeSettings.getInstance().writeFixtureFiles = True
-
-    liveCallsOnCacheMissFlag = '--live_calls_on_cache_miss'
-    if liveCallsOnCacheMissFlag in argv:
-        del argv[argv.index(liveCallsOnCacheMissFlag)]
-        FixtureTestRuntimeSettings.getInstance().liveCallsOnCacheMiss = True
+    global __fixture_test_flags
+    __fixture_test_flags, new_argv = parser.parse_known_args(sys.argv)
+    sys.argv[:] = new_argv[:]
 
     StampedTestRunner().run()
 

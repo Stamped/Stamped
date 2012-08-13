@@ -89,7 +89,7 @@ header {
         height: 100px;
     }
     
-    .download-the-app {
+    .get-the-free-app-button {
         float: right;
         margin: 12px 8px;
     }
@@ -146,14 +146,6 @@ footer {
     display: block;
     width:  102px;
     height: 103px;
-}
-
-#retina {
-    .made-in-nyc-logo {
-        background: url(/assets/img/proudlymadeinnyc@2x.png) no-repeat;
-        width:  204px;
-        height: 205px;
-    }
 }
 
 
@@ -276,66 +268,6 @@ footer {
     color: #262626;
 }
 
-.download-the-app {
-    display: block;
-    width:  120px;
-    height: 31px;
-    
-    background: url(/assets/img/gettheapp_btn_sprite.png) no-repeat;
-    
-    &:hover {
-        background-position: -122px 0;
-    }
-    
-    &:active {
-        background-position: -224px 0;
-    }
-}
-
-#retina {
-    .download-the-app {
-        display: block;
-        width:  244px;
-        height: 62px;
-        
-        background: url(/assets/img/gettheapp_btn_sprite@2x.png) no-repeat;
-        
-        &:hover {
-            background-position: -246px 0;
-        }
-        
-        &:active {
-            background-position: -492px 0;
-        }
-    }
-}
-
-.app-store-button {
-    display: block;
-    width:  183px;
-    height: 65px;
-    
-    background: url(/assets/img/appstore_btn_sprite.png) no-repeat;
-    
-    &:hover, &:active {
-        background-position: -185px 0;
-    }
-}
-
-#retina {
-    .app-store-button {
-        display: block;
-        width:  365px;
-        height: 132px;
-        
-        background: url(/assets/img/appstore_btn_sprite@2x.png) no-repeat;
-        
-        &:hover, &:active {
-            background-position: -369px 0;
-        }
-    }
-}
-
 
 /* **************************************************************************
                                 POPUP VIEWS
@@ -449,4 +381,269 @@ footer {
 
 .stamp-subcategory-app .icon                { background-position: -200px -20px; }
 .stamp-subcategory-app .dark-icon           { background-position: -200px 0; }
+
+
+/* **************************************************************************
+                                POPUP VIEWS
+   ************************************************************************** */
+
+
+@popup-padding:  24px;
+
+#popup-signup, #popup-ios {
+    display: none;
+}
+
+.popup {
+    position: relative;
+    background-color: #fff;
+    
+    .popup-header {
+        padding: (@popup-padding / 4) @popup-padding;
+        white-space: nowrap;
+    }
+    
+    .popup-body {
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+.popup-large {
+    position: relative;
+    text-align: center;
+    width: 100%;
+    
+    .stamped-logo {
+        top:  -160px;
+        left: 50%;
+        
+        margin-left: -92px;
+    }
+    
+    .popup-header {
+        .pronounced-title {
+            line-height: 100%;
+            padding-top: 15px;
+            padding-bottom: 0;
+            white-space: normal;
+            margin-bottom: 24px;
+        }
+    }
+    
+    .popup-body {
+        padding: 0 @popup-padding;
+        font-size: 85%;
+        color: #999;
+        margin-bottom: 15px;
+        
+        p {
+            margin: .5em 0;
+        }
+        
+        .learn-more {
+            margin: 24px 0 0;
+        }
+        
+        .download-desc {
+            margin: 1.5em 0 .5em;
+            font-weight: 700;
+        }
+        
+        .sms {
+            position: relative;
+            border: 1px solid #bfbfbf;
+            margin: 0 auto;
+            width: 90%;
+            line-height: 31px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+            white-space: nowrap;
+            
+            padding: 6px 12px;
+            .rounded(4px);
+            
+            input {
+                text-align: center;
+                font-weight: 200;
+                font-size: 140%;
+                max-width: 75%;
+                
+                margin-left: 0;
+                margin-top: 8px;
+                
+                border: 0 none;
+                outline: none;
+                
+                &:focus {
+                    border: 0 none;
+                    outline: none;
+                    color: #498ff2;
+                }
+            }
+            
+            .send-button {
+                position: relative;
+                top: 4px;
+                
+                float: right;
+                opacity: .3;
+                
+                border: 0 none;
+                outline: none;
+                
+                .transition(opacity, .3s, linear);
+            }
+            
+            .active { opacity: 1.0; }
+        }
+        
+        .active {
+            border-color: #498ff2;
+        }
+        
+        .error {
+            border-color: #d54042;
+            color: #d54042;
+        }
+        
+        .or {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            
+            .dotted-left, .dotted-right {
+                position: relative;
+                top: 4px;
+                
+                display: inline-block;
+                width: 125px;
+                height: 1em;
+            }
+            
+            .dotted-left {
+                background: url(/assets/img/dottedline.png) repeat-x top right;
+                margin-right: 1em;
+            }
+            
+            .dotted-right {
+                background: url(/assets/img/dottedline.png) repeat-x top left;
+                margin-left: 1em;
+            }
+        }
+        
+        .active-link {
+            font-family: sans-serif !important;
+            font-size: 14pt !important;
+        }
+    }
+    
+    .app-store-button {
+        position: absolute;
+        left: 50%;
+        bottom: -60px;
+        margin-left: -64px;
+    }
+}
+
+
+.popup-ios {
+    text-align: center;
+    
+    .ribbon-wrapper {
+        background: #1B6CD9 !important;
+        height: 7px !important;
+        
+        .ribbon-bottom, .ribbon-top {
+            height: 7px !important;
+            background-position: 0 -5px;
+        }
+    }
+    
+    .pronounced-title {
+        font-size: 2.8em;
+        color: #262626;
+    }
+    
+    .launcher-icon-button {
+        margin: 12px auto 0;
+        float: none;
+    }
+    
+    .desc {
+        color: #AAA;
+    }
+    
+    .get-the-free-app-button {
+        margin: 12px auto;
+    }
+}
+
+.launcher-icon-button {
+    background: url(/assets/img/index/launchericon_sprite.png) no-repeat;
+    display: block;
+    
+    width:  64px;
+    height: 64px;
+    
+    &:hover, &:active {
+        background-position: -66px 0;
+    }
+}
+
+.download-the-app-button {
+    background: url(/assets/img/index/downloadbtn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  200px;
+    height: 32px;
+    
+    &:hover  { background-position: -202px 0; }
+    &:active { background-position: -404px 0; }
+}
+
+.download-the-app {
+    background: url(/assets/img/gettheapp_btn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  120px;
+    height: 31px;
+    
+    &:hover  { background-position: -122px 0; }
+    &:active { background-position: -244px 0; }
+}
+
+.download-the-free-app-button {
+    background: url(/assets/img/downloadthefreeapp_btn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  198px;
+    height: 42px;
+    
+    &:hover  { background-position: -200px 0; }
+    &:active { background-position: -400px 0; }
+}
+
+.get-the-free-app-button {
+    background: url(/assets/img/downloadthefreeapp_mobilesprite@2x.png) no-repeat;
+    display: block;
+    
+    .background-size(140px * 3, 30px);
+    width:  140px;
+    height: 30px;
+    
+    &:hover  { background-position: -142px 0; }
+    &:active { background-position: -284px 0; }
+}
+
+.app-store-button-blue {
+    background: url(/assets/img/appstore_btn_sprite.png) no-repeat;
+    display: block;
+    
+    width:  183px;
+    height: 65px;
+    
+    &:hover, &:active {
+        background-position: -185px 0;
+    }
+}
 

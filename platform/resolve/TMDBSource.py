@@ -266,21 +266,18 @@ class TMDBSource(GenericSource):
 
     def movieSource(self, query):
         def gen():
-            try:
-                results = self.__tmdb.movie_search(query.name, priority='low', timeout=MERGE_TIMEOUT)
-                if results is None:
-                    return
-                for movie in results['results']:
-                    yield movie
-                pages = results['total_pages']
+            results = self.__tmdb.movie_search(query.name, priority='low', timeout=MERGE_TIMEOUT)
+            if results is None:
+                return
+            for movie in results['results']:
+                yield movie
+            pages = results['total_pages']
 
-                if pages > 1:
-                    for p in range(1,pages):
-                        results = self.__tmdb.movie_search(query.name, page=p+1, priority='low', timeout=MERGE_TIMEOUT)
-                        for movie in results['results']:
-                            yield movie
-            except GeneratorExit:
-                pass
+            if pages > 1:
+                for p in range(1,pages):
+                    results = self.__tmdb.movie_search(query.name, page=p+1, priority='low', timeout=MERGE_TIMEOUT)
+                    for movie in results['results']:
+                        yield movie
         return self.generatorSource(gen(), constructor=lambda x: TMDBMovie(x['id'], x, 0))
 
     def __pareOutResultsFarInFuture(self, resolverObjects):

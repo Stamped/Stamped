@@ -23,17 +23,9 @@ APP_ID          = get_api_key('facebook', 'app_id')
 APP_SECRET      = get_api_key('facebook', 'app_secret')
 APP_NAMESPACE   = get_api_key('facebook', 'app_namespace')
 
-USER_ID = '100003940534060'
-ACCESS_TOKEN = 'AAAEOIZBBUXisBAO4BgIokl8sBOlrBCpgyeo8NAp4NZCvQxuAEUYJzc2U7vIZC7hBcUhJmLES0u32kJFzNXffl3fK3AOHMpdlKe3ZBnlrMlpqI3GrIRcc'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBABDTY6Tu1lbjCn5NKSlc3LmjrINERhegr83XvoTvXNPN4hpPTPoZChXyxyBRU55MKZCHVeQk42qJbusvp9jknH830l3QZDZD'
-#ACCESS_TOKEN = 'AAAEOIZBBUXisBACXZB77U7QEInB7dQ1VPN7cv5kNpFnvaLK1eBeZBxfBHZBPL6aZBTTa32xp2zHrdnjYBQH02VfP7qZCpDSWtqjvUgBv1UKPKbdyIWZAZCcv'
-
-AUTH_USER_ID = '4ecab825112dea0cfe000293' # Mike's stamped user id
-
+ACCESS_TOKEN = 'AAAEOIZBBUXisBAFC4pEYEpUYJlzM7FPq9m77m7k2k5wIrcZCmXSZC0TT1ri6VcMWV5acLBZAs6lHzdkFJrWHZASY4XbKTqUQZD'
 USER_ID = '1337040065'
-#ACCESS_TOKEN = 'BAAEOIZBBUXisBAHnrWWvBGFOLHQYaubpSMZAUZAakJeVgiMiHu4LylwOpeMBG7XznbnEdRHNZA5AmMhVcnUedsHNqniyQw1FMZCjmZBWPumPZCc4fFjoV1iy0eZBrTZCHUqtmyM0pIZC791Q61m7d94SRi'
-ACCESS_TOKEN = 'BAAEOIZBBUXisBANU2ZC0ZCIagEIZCZBMYb8GORccZC6dZCjFPM96lihWsGTm1q37gBgKTtGpaKbXjGFDPlXW23fQl9xXhIant5PqtccDCEHg3OzMsNPr8S382TxYmLUv28ZD'
+CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
 
 DEFAULT_TIMEOUT = 15
 
@@ -132,10 +124,13 @@ class Facebook(object):
     def getUserPermissions(self, access_token, user_id='me'):
         path = '%s/permissions' % user_id
         result = self._get(access_token, path)
-        if 'data' in result and len(result['data'] > 0):
-            return result['data'][0]
-        else:
-            return []
+        try:
+            if 'data' in result and len(result['data']) > 0:
+                return result['data'][0]
+        except Exception as e:
+            logs.warning("Unable to read result: %s (%s)" % (result, e))
+
+        return []
 
     def getFriendIds(self, access_token):
         path = 'me/friends'
@@ -238,8 +233,7 @@ class Facebook(object):
         r = re.search(r'expires=([^&]*)', result)
         expires = None
         if r is not None:
-            expires = r.group(1)
-            expires = datetime.fromtimestamp(time.time() + int(expires))
+            expires = int(r.group(1))
         return token, expires
 
 
@@ -359,12 +353,12 @@ class Facebook(object):
             **params
         )
 
-    def getLoginUrl(self, authUserId, callbackToken):
-#        callback_url = utils.getDomain() + ('account/linked/facebook/login_callback.json?secret=%s&stamped_oauth_token=%s' %
-#                                            (token_info['oauth_token_secret'].encode('ascii'), stamped_oauth_token))
+    def getLoginUrl(self, callbackToken):
+        """
+
+        """
         callback_url = utils.getDomain() + 'account/linked/facebook/login_callback.json'
         permissions = 'user_about_me,user_location,email,publish_stream,publish_actions'
-        #unique = datetime.now().strftime("%H:%M:%S.%f")
         path = "https://www.facebook.com/dialog/oauth?" \
                "client_id=%s" \
                "&redirect_uri=%s" \
@@ -373,11 +367,6 @@ class Facebook(object):
                (APP_ID, callback_url, permissions, callbackToken)
 
         return path
-#        print path
-#        response, content = service_request('facebook', 'GET', path)
-#        print(response)
-#        print(content)
-#        return content
 
 
 __globalFacebook = None
@@ -391,14 +380,15 @@ def globalFacebook():
     return __globalFacebook
 
 
-CODE = 'AQCKon1gU-jv8gYtZnXHYjjK-tG63ZbW9EFo-Vk5AAGgPfYua4Rr_g_Z2BTqUOMeqpt1wja1pCJL-dg5Fogo6VIWcJeHiBoNVqUSsHMok-fjXXogJ2qyANmw8xqWw51qz5XJdPHqCAgRCXYgRA5HC8vnQHw8AojNyudbKKdGOxCuudgXDbpAv2E0Nl9jlzpc2RnH1M_Ixcdy622-QNUYX2Sw'
-
 def demo(method, user_id=USER_ID, access_token=ACCESS_TOKEN, **params):
     from pprint import pprint
     facebook = Facebook()
 
     if 'getUserInfo' in methods:            pprint(facebook.getUserInfo(access_token))
-    if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl(AUTH_USER_ID))
+
+    # Using string '12345' as a demo to fake the token
+    if 'getLoginUrl' in methods:            pprint(facebook.getLoginUrl('12345'))
+
     if 'extendAccessToken' in methods:      pprint(facebook.extendAccessToken(access_token))
     if 'getUserAccessToken' in methods:     pprint(facebook.getUserAccessToken(CODE))
     if 'getUserPermissions' in methods:     pprint(facebook.getUserPermissions(access_token))

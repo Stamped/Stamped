@@ -75,46 +75,38 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                 groups = source.getGroups(entity)
                 targetGroups = set()
                 for group in groups:
-                    if self.shouldEnrich(group, source.sourceName, entity, self.now):
+                    if self.shouldEnrich(group, source.sourceName, entity):
                         targetGroups.add(group)
                 if not targetGroups:
                     continue
 
                 #  We have groups that are eligible for enrichment.  We'll modify a deep-copy of the entity
                 copy = buildEntity(entity.dataExport())
-                # timestamps - { GROUP - timestamp }
-                # empty, single-use timestamps map for specifying failed attempts,
-                # assignment regardless of current value,
-                # and stale data (rare)
-                # output dictionaries for source.enrichEntity for optional special cases
-                # timestamps is used for specifying stale data, failed lookups, and UNOBSERVABLE changes (same value)
-                timestamps = {} # { GROUP : TIMESTAMP ... } optional
+                # timestamps is passed down to the source. If the source enriches a group, a mapping is added from the
+                # group name to the time it was enriched (now, essentially). When the data we get from external source
+                # is identical to what we already have, presence of the group in this map is the only way we can tell
+                # that we received fresh data.
+                # TODO: This is a dictionary for legacy reasons, it should really be a set.
+                timestamps = {}
                 localDecorations = {} # opaque decorations, for group object based extensions (i.e. Menus)
-                #logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
+                logs.debug("Enriching with '%s' for groups %s" % (source.sourceName, sorted(targetGroups) ))
                 groupObjs = [self.getGroup(group) for group in targetGroups]
                 try:
                     enriched = source.enrichEntity(copy, groupObjs, self, localDecorations, timestamps)
                     if enriched:
-                        for group in targetGroups:
-                            localTimestamp = self.now
-                            if group in timestamps:
-                                localTimestamp = timestamps[group]
-                            if self.shouldEnrich(group, source.sourceName, entity, localTimestamp):
-                                groupObj = self.getGroup(group)
-                                fieldsChanged = groupObj.syncFields(copy, entity)
-                                decorationsChanged = groupObj.syncDecorations(localDecorations, decorations)
-                                if fieldsChanged or group in timestamps or decorationsChanged:
-                                    groupObj.setTimestamp(entity, localTimestamp)
-                                    groupObj.setSource(entity, source.sourceName)
-                                    modified = True
+                        for groupObj in groupObjs:
+                            fieldsChanged = groupObj.syncFields(copy, entity)
+                            decorationsChanged = groupObj.syncDecorations(localDecorations, decorations)
+                            if fieldsChanged or groupObj.groupName in timestamps or decorationsChanged:
+                                groupObj.setTimestamp(entity, self.now)
+                                groupObj.setSource(entity, source.sourceName)
+                                modified = True
                 except Exception as e:
                     report()
             modified_total |= modified
         return modified_total
 
-    def shouldEnrich(self, group, source, entity, timestamp=None):
-        timestamp = timestamp or self.now
-
+    def shouldEnrich(self, group, source, entity):
         if group not in self.__groups:
             return False
 
@@ -133,11 +125,6 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         if priority < currentPriority:
             return False
 
-        maxAge = self.getMaxAge(group, source)
-        if self.now - timestamp > maxAge:
-            # This is actually correct! This line says "if the data we get from the source is marked
-            # stale, don't update the actual entity with the deep copy.
-            return False
         currentMaxAge = self.getMaxAge(group, currentSource)
         currentTimestamp = groupObj.getTimestamp(entity)
         if currentTimestamp is None:

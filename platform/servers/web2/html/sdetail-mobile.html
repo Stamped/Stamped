@@ -17,6 +17,7 @@
         script: libs/jquery.emoji.js
         script: libs/jquery-easing.js
         script: libs/jquery.fancybox.js
+        script: libs/jquery.cookie.js
         script: libs/jquery.mousewheel.js
         script: libs/jquery.jscrollpane.js
     
@@ -25,6 +26,7 @@
     
     Core stamped dependencies:
         script: utils.js
+        script: fancybox_utils.js
         script: mobile/sdetail.js
 -->
 
@@ -112,23 +114,21 @@
                             {% endif %}
                         {% endfor %}
                         
+                        {% if stamp.contents.0.images.0.sizes.0.url %}
+                            {% handlebars_template "stamp-card-image-sdetail-mobile" stamp %}
+                        {% endif %}
+                        
                         <div class='social-feedback-expanded'>
                             {% handlebars_template "social-feedback" stamp %}
                             
                             {% if stamp.previews and feedback_users and feedback_users|length > 0 %}
                                 <div class='user-previews clearfix'>
-                                    {% for user_mini in feedback_users|slice:":13" %}
+                                    {% for user_mini in feedback_users|slice:":14" %}
                                         <div class='user-preview {{user_mini.preview_type}}'>
                                             {% handlebars_template "profile-image-tiny" user_mini %}
                                             <div class='user-preview-icon'></div>
                                         </div>
                                     {% endfor %}
-                                    
-                                    {% if feedback_users|length > 13 %}
-                                        <a class="user-preview expand-popup" href="/popups/sdetail-social?stamp_id={{stamp.stamp_id}}">
-                                            <div class="context-popup">Expand list...</div>
-                                        </a>
-                                    {% endif %}
                                 </div>
                             {% endif %}
                         </div>
@@ -221,12 +221,12 @@
                                                                 <div class='lhs'>
                                                                     <div class='stopped'>
                                                                         <div class='action-icon action-icon-{{action.type}}'></div>
-                                                                        <div class='action-name'>Play preview via iTunes</div>
+                                                                        <div class='action-name'>Play preview</div>
                                                                     </div>
                                                                     
                                                                     <div class='playing'>
                                                                         <div class='action-icon action-icon-playing'></div>
-                                                                        <div class='action-name'>Pause iTunes preview</div>
+                                                                        <div class='action-name'>Pause preview</div>
                                                                     </div>
                                                                 </div>
                                                                 
@@ -352,7 +352,7 @@
             <div id="stamped-intro">
                 <div class="separator"></div>
                 <div id="stamped-desc" class="replaced">Stamped is a new way to declare your favorite things and discover new ones!</div>
-                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button"></a>
+                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="app-store-button-blue"></a>
             </div>
         </div>
     </div>
@@ -361,16 +361,18 @@
 {% block scripts %}
     {{ block.super }}
      
-    {% if DEBUG %}
+    {% if STAMPED_DEBUG %}
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.emoji.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.cookie.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.mousewheel.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.jscrollpane.js"></script>
         
         <script src="{{ STAMPED_STATIC_URL }}js/libs/jplayer/jquery.jplayer.js"></script>
         
         <script src="{{ STAMPED_STATIC_URL }}js/utils.js"></script>
+        <script src="{{ STAMPED_STATIC_URL }}js/fancybox_utils.js"></script>
         <script src="{{ STAMPED_STATIC_URL }}js/mobile/sdetail.js"></script>
     {% else %}
         <script src="{{ STAMPED_STATIC_URL }}js/sdetail-mobile.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>

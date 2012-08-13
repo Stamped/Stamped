@@ -83,8 +83,8 @@
             {% endblock pre_header %}
             
             {% block header %}
-                <a href="/{{user.screen_name}}" class="user-logo-large"></a>
-                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="download-the-app"></a>
+                <a href="/" class="user-logo-large"></a>
+                <a href="{{ STAMPED_DOWNLOAD_APP_LINK }}" class="get-the-free-app-button"></a>
             {% endblock header %}
             
             {% block post_header %}
@@ -94,6 +94,12 @@
         {% block pre_main %}
         <div id="main-page-content" class="main">
             {% endblock pre_main %}
+            
+            {% block popup-ios %}
+                <div id="popup-ios">
+                    {% include "popup-ios.html" %}
+                </div>
+            {% endblock popup-ios %}
             
             {% block main %}
             {% endblock main %}
@@ -134,8 +140,8 @@
             
             {% block scripts %}
             <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
-            <!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>-->
-            <script>window.jQuery || document.write('<script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="/assets/js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
             
             <script>
                 var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];

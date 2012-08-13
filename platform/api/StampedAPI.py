@@ -1045,7 +1045,13 @@ class StampedAPI(AStampedAPI):
 
         facebookToken, expires = self._facebook.extendAccessToken(facebookToken)
         linked.token = facebookToken
-        linked.token_expiration = expires
+
+        if expires is not None:
+            expires = datetime.fromtimestamp(time.time() + expires)
+            linked.token_expiration = expires
+        else:
+            logs.warning("NO EXPIRATION FOR USER %s: %s" % (authUserId, facebookToken))
+
         linked.extended_timestamp = datetime.utcnow()
         self._accountDB.updateLinkedAccount(authUserId, linked)
         return True
@@ -1158,6 +1164,13 @@ class StampedAPI(AStampedAPI):
 
         return self.addToNetflixInstant(nf_user_id, nf_token, nf_secret, netflixId)
 
+    @API_CALL
+    def addCallbackToken(self, user_id):
+        return self._callbackTokenDB.addUserId(user_id)
+
+    @API_CALL
+    def getCallbackToken(self, oid):
+        return self._callbackTokenDB.getUserId(oid)
 
     """
     #     #
@@ -1529,7 +1542,7 @@ class StampedAPI(AStampedAPI):
 
         # If either account is private, make sure authUserId is friend
         if userA.privacy == True and authUserId != userA.user_id:
-            check                   = Friendship()
+            friendship              = Friendship()
             friendship.user_id      = authUserId
             friendship.friend_id    = userA.user_id
 
@@ -1537,7 +1550,7 @@ class StampedAPI(AStampedAPI):
                 raise StampedFriendshipCheckPermissionsError("Insufficient privileges to check friendship")
 
         if userB.privacy == True and authUserId != userB.user_id:
-            check                   = Friendship()
+            friendship              = Friendship()
             friendship.user_id      = authUserId
             friendship.friend_id    = userB.user_id
 
@@ -1888,8 +1901,7 @@ class StampedAPI(AStampedAPI):
         gevent.spawn_later(delay, loadIndexFromS3).link(setIndex)
 
     def updateAutoCompleteIndexAsync(self):
-        return
-        # pushNewIndexToS3()
+        pushNewIndexToS3()
 
     @API_CALL
     def getSuggestedEntities(self, authUserId, category, subcategory=None, coordinates=None, limit=10):
@@ -1904,67 +1916,57 @@ class StampedAPI(AStampedAPI):
 
         if category == 'book':
             entityIds = [
-                '4e57b45941ad8514cb00013b', # Steve Jobs 
-                '4e57aca741ad85147e00153f', # A Game of Thrones 
-                '4e57ac5841ad85147e000425', # The Hunger Games 
-                '4fff6529967d717a14000041', # Bared to You 
+                '4e57b45941ad8514cb00013b', # Steve Jobs
                 '4ecaf331fc905f14cc000005', # Fifty Shades of Grey 
                 '4fe3342e9713961a5e000b5b', # Gone Girl 
+                '4fff6529967d717a14000041', # Bared to You 
                 '5010b4a67b815764dee6d0b1', # Wild 
-                '5010b4cd7b815764e0e6d0b3', # Amateur 
-                '50103a4353b48c49b7d380e0', # Criminal 
-                '5010b4fd7b815764dee6d0ba', # The Next Best Thing 
+                '4e57ac4a41ad85147e00007a', # Unbroken 
+                '4e57aca741ad85147e00153f', # A Game of Thrones
+                '4e57ac5841ad85147e000425', # The Hunger Games
             ]
             groups.append(('Suggestions', entityIds))
 
         elif category == 'film':
             entityIds = [
-
                 '500dd5fe7b81571916b7b258', # Dark Knight Rises 
+                '501c520a7b81574f65c592b9', # Total Recall 
                 '4e9cbd8cfe4a1d7bd2000070', # Game of Thrones 
-                '4ffa194a64c7940d380005f5', # Ted 
-                '4f835f34d56d835c6e000572', # 21 Jump Street 
+                '5010504453b48c4c5a103cf9', # The Bourne Legacy 
                 '4e9fb96dfe4a1d1cbe0000f5', # Breaking Bad 
-                '4fff6507967d717a13000018', # The Amazing Spider Man 
-                '4f60dd2cd56d836764000ad6', # Moonrise Kingdom 
-                '4fff6519967d717a1300003a', # To Rome With Love 
-                '4fff650c967d717a13000022', # Brave 
-                '4eb1c60941ad8531d2000f0b', # Dexter 
-                '4eb2159b41ad8531d2004a3e', # The Big Bang Theory 
+                '4f835f34d56d835c6e000572', # 21 Jump Street 
+                '5010504d81353510f980b0f6', # The Campaign 
+                '4ea269a3fe4a1d2a4100027e', # Modern Family 
             ]
             groups.append(('Suggestions', entityIds))
 
         elif category == 'music':
             # Songs
             entityIds = [
-                '5002b96bd56d83100d00089b', # wide awake - katy perry 
-                '501046af7b8157477c65e488', # call me maybe - carly rae jepsen 
-                '5010466c7b8157477c65e47b', # whistle - flo rida 
-                '501041a253b48c49b7d38263', # sweet life - frank ocean
-                '501036e37b815745eabbd6d9', # boyfriend - justin bieber 
-                '4f9f0b3c591fa478c30006ac', # Starships - Nikki minaj 
-                '4f16c9316e334372cf000f25', # Somebody that I used to know - gotye 
+                '5018ab0753b48c16ab87aa8d', # Home by Phillip Phillips 
+                '5010466c7b8157477c65e47b', # Whistle Flo Rida 
+                '5023e56403666c43872de48b', # I Will Wait by Mumford and Sons 
+                '50103afb53b48c49b7d3813d', # Some Nights by Fun. 
+                '501041a253b48c49b7d38263', # Sweetlife by Frank Ocean
             ]
             groups.append(('Songs', entityIds))
 
             # Albums
             entityIds = [
-                '4faa7152591fa4535a0009c2', # Some nights - Fun 
-                '4fb4fe40591fa462ec0000c5', # Believe - Justin Bieber 
-                '500f52c47b815738449589ec', # Gossamer - Passion Pit 
-                '4fe30253591fa41b4e0008f8', # Overexposed - Maroon 5 
-                '4ed5418d4820c5450400079a', # Bon Iver - Bon Iver 
+                '5023e59f03666c43822de3e4', # Babel by Mumford and Sons 
+                '4faa7152591fa4535a0009c2', # Some Nights by Fun. 
+                '4fb4fe40591fa462ec0000c5', # Believe by Justin Bieber 
+                '500f52c47b815738449589ec', # Gossamer by Passion Pit 
             ]
             groups.append(('Albums', entityIds))
 
             # Artists
             entityIds = [
+                '4ecad83f4820c5024c00049e', # Mumford and Sons 
                 '4eb3001b41ad855d53000ac8', # Katy Perry 
-                '4ecb6893fc905f1561000f96', # Bon Iver 
-                '4eb8700441ad850b6200004f', # Maroon 5 
                 '4ee0233c54533e75460010e1', # Justin Bieber 
-                '4eb300e941ad855d53000c36', # Kanye West 
-                '4f593804d56d835b3e000543', # Fun 
+                '4eb8700441ad850b6200004f', # Maroon 5 
+                '4f0d595b06007d1bb700001f', # The Wanted 
             ]
             groups.append(('Artists', entityIds))
 
@@ -1976,16 +1978,15 @@ class StampedAPI(AStampedAPI):
                 '4edac5d1e32a3a08d400000b', # Temple Run 
                 '4ed44c9482750f30b70002fd', # Pinterest 
                 '4ed44c3f82750f30b7000196', # Spotify 
-                '4f45e36c591fa43214000195', # Clear 
             ]
             groups.append(('Free', entityIds))
 
             # Paid
             entityIds = [
                 '4ed480e456f86859c20023bd', # Words with Friends 
-                '4fea8b5b64c794370b000222', # Temple Run: Brave 
                 '4f13f96f54533e5c89001a5c', # Instapaper 
                 '4edad3d7e32a3a08d4000048', # The Sims 3 
+                '5010c8a47b81576a00657433', # Where’s my Perry 
             ]
             groups.append(('Paid', entityIds))
 
@@ -2568,7 +2569,7 @@ class StampedAPI(AStampedAPI):
                                 try:
                                     comment.user = userIds[str(comment.user.user_id)]
                                 except KeyError:
-                                    logs.warning("Key error for user (user_id = %s)" % userId)
+                                    logs.warning("Key error for user (user_id = %s)" % comment.user.user_id)
                                     raise
                                 commentPreviews.append(comment)
                             except KeyError:
@@ -4484,209 +4485,6 @@ class StampedAPI(AStampedAPI):
         return guide
 
 
-    def _testUserGuide(self, authUserId, coeffs):
-        user = self.getUser({'user_id': authUserId})
-        now = datetime.utcnow()
-
-        t0 = time.time()
-
-        stampIds = self._collectionDB.getInboxStampIds(user.user_id)
-        stamps = self._stampDB.getStamps(stampIds)
-        stampStats = self._stampStatsDB.getStatsForStamps(stampIds)
-        entityIds = list(set(map(lambda x: x.entity.entity_id, stamps)))
-        entities = self._entityDB.getEntities(entityIds)
-        todos = set(self._todoDB.getTodoEntityIds(user.user_id))
-        friendIds = self._friendshipDB.getFriends(user.user_id)
-
-        stampMap = {} # Map entityId to stamps
-        statsMap = {} # Map stampId to stats
-        todosMap = {} # Map entityId to userIds
-
-        t1 = time.time()
-
-        sections = {}
-        for entity in entities:
-            section = entity.category
-            if section == 'place':
-                if entity.isType('restaurant') or entity.isType('bar') or entity.isType('cafe'):
-                    section = 'food'
-                else:
-                    section = 'other'
-            if section not in sections:
-                sections[section] = set()
-            sections[section].add(entity)
-
-        def entityScore(**kwargs):
-            section = kwargs.pop('section', None)
-            avgQuality = kwargs.pop('aggQuality', [])
-            avgPopularity = kwargs.pop('aggPopularity', [])
-            timestamps = kwargs.pop('timestamps', [])
-            result = 0
-            
-            #Remove personal stamp from timestamps if it exists
-            try:
-                personal_timestamp = (time.mktime(now.timetuple()) - timestamps.pop(authUserId)) / 60 / 60 / 24
-            except KeyError:
-                personal_timestamp = None
-                
-            #timestamps is now a list of each friends' most recent stamp time in terms of days since stamped 
-            timestamps = map((lambda x: (time.mktime(now.timetuple()) - x) / 60 / 60 / 24), timestamps.values())
-            
-            #stamp_score
-            stamp_score = 0
-            personal_stamp_score = 0
-            for t in timestamps:
-                if t < 10:
-                    stamp_score += 1 - (.05 / 10 * t)
-                elif t < 90:
-                    stamp_score += 1.03125 - (.65 / 80 * t)
-                elif t < 290:
-                    stamp_score += .435 - (.3 / 200 * t)
-            
-            #Personal stamp score - higher is worse
-            if personal_timestamp is not None:
-                if personal_timestamp < 10:
-                    personal_stamp_score = 1 - (.05 / 10 * personal_timestamp)
-                elif personal_timestamp < 90:
-                    personal_stamp_score = 1.03125 - (.65 / 80 * personal_timestamp)
-                elif personal_timestamp < 290:
-                    personal_stamp_score = .435 - (.3 / 200 * personal_timestamp)
-            
-            section_coefs = {
-                            'food': 0,
-                            'music': 1.0,
-                            'film': 0.5,
-                            'book': 10,
-                            'app': 10
-                            }
-            
-            #Magnify personal stamp score by number of stamps by other friends
-            try:
-                personal_stamp_score = coeffs[section] * personal_stamp_score * len(timestamps)
-            except KeyError:
-                personal_stamp_score = personal_stamp_score * len(timestamps)
-                
-            ### PERSONAL TODO LIST
-            personal_todo_score = 0
-            if entity.entity_id in todos:
-                personal_todo_score = 1
-            
-            if len(timestamps) > 0:
-                avgQuality = avgQuality / len(timestamps)
-                avgPopularity = avgPopularity / len(timestamps)
-            
-            image_score = 1
-            if entity.images is None:
-                image_score = 0.01
-            
-            result = ( (coeffs['stamp'] * stamp_score) 
-                        - (coeffs['personal_stamp'] * personal_stamp_score) 
-                        + (coeffs['todo'] * personal_todo_score) 
-                        + (coeffs['qual'] * avgQuality) 
-                        + (coeffs['pop'] * avgPopularity) ) * (image_score)
-            
-            return result
-
-        # Build stampMap
-        for stamp in stamps:
-            if stamp.entity.entity_id not in stampMap:
-                stampMap[stamp.entity.entity_id] = set()
-            stampMap[stamp.entity.entity_id].add(stamp)
-                    
-        # Build statsMap and todoMap
-        for stat in stampStats:
-            statsMap[stat.stamp_id] = stat
-            if stat.preview_todos is not None:
-                if stat.entity_id not in todosMap:
-                    todosMap[stat.entity_id] = set()
-                for userId in stat.preview_todos:
-                    if userId in friendIds:
-                        todosMap[stat.entity_id].add(userId)
-
-        guide = GuideCache()
-        guide.user_id = user.user_id
-        guide.updated = now
-        
-        for section, entities in sections.items():
-            r = []
-            for entity in entities:
-                aggQuality = 0
-                aggPopularity = 0
-                timestamps = {}
-                for stamp in stampMap[entity.entity_id]:
-                    if stamp.stamp_id in statsMap:
-                        stat = statsMap[stamp.stamp_id]
-                        if stat.quality is not None:
-                            aggQuality += stat.quality
-                        if stat.popularity is not None:
-                            aggPopularity += min(10,stat.popularity)
-                    else:
-                        # TEMP: Use embedded stats for backwards compatibility
-                        if stamp.stats.quality is not None:
-                            aggQuality += stamp.stats.quality
-                        if stamp.stats.popularity is not None:
-                            aggPopularity += min(10,stamp.stats.popularity)
-                    if stamp.timestamp.stamped is not None:
-                        t = time.mktime(stamp.timestamp.stamped.timetuple())
-                        try:
-                            if t > timestamps[stamp.user.user_id]:
-                                timestamps[stamp.user.user_id] = t
-                        except KeyError:
-                            timestamps[stamp.user.user_id] = t
-                    elif stamp.timestamp.created is not None:
-                        t = time.mktime(stamp.timestamp.created.timetuple())
-                        try:
-                            if t > timestamps[stamp.user.user_id]:
-                                timestamps[stamp.user.user_id] = t
-                        except KeyError:
-                            timestamps[stamp.user.user_id] = t
-                
-                score = entityScore(section=section,aggQuality=aggQuality,aggPopularity=aggPopularity, timestamps=timestamps)
-                coordinates = None
-                if hasattr(entity, 'coordinates'):
-                    coordinates = entity.coordinates
-                r.append((entity.entity_id, score, entity.types, coordinates))
-                if entity.entity_id in todos:
-                    if entity.entity_id not in todosMap:
-                        todosMap[entity.entity_id] = set()
-                    todosMap[entity.entity_id].add(user.user_id)
-
-            r.sort(key=itemgetter(1))
-            r.reverse()
-            cache = []
-            for result in r[:1000]:
-                item = GuideCacheItem()
-                item.entity_id = result[0]
-                item.score = result[1]
-                item.tags = result[2]
-                if result[3] is not None:
-                    item.coordinates = result[3]
-                if len(stampMap[result[0]]) > 0:
-                    preview = []
-                    for stamp in stampMap[result[0]]:
-                        stampPreview = StampPreview()
-                        stampPreview.stamp_id = stamp.stamp_id
-                        userPreview = UserMini()
-                        userPreview.user_id = stamp.user.user_id
-                        stampPreview.user = userPreview
-                        preview.append(stampPreview)
-                    if len(preview) > 0:
-                        item.stamps = preview
-                if result[0] in todosMap:
-                    userIds = list(todosMap[result[0]])
-                    if len(userIds) > 0:
-                        item.todo_user_ids = userIds
-                cache.append(item)
-            setattr(guide, section, cache)
-            
-        
-        logs.info("Time to build guide: %s seconds" % (time.time() - t0))
-
-        self._guideDB.updateGuide(guide)
-            
-        return guide
-
-
     """
      #######
         #     ####  #####   ####   ####
@@ -5105,7 +4903,6 @@ class StampedAPI(AStampedAPI):
                                            requireRecipient = True)
 
     def _addMentionActivity(self, userId, recipientIds, stampId=None, commentId=None):
-        objects = ActivityObjectIds()
         if stampId is None and commentId is None:
             raise Exception('Mention activity must include either a stampId or commentId')
         objects = ActivityObjectIds()
@@ -5167,12 +4964,12 @@ class StampedAPI(AStampedAPI):
     def _addFBLoginActivity(self, recipientId):
         objects = ActivityObjectIds()
         objects.user_ids = [ recipientId ]
-        body = "Connect to Facebook"
+        body = 'Tap here to share your stamps and activity with friends. You can always change preferences in "Settings."'
         self._activityDB.addActivity(verb           = 'notification_fb_login',
                                      recipientIds   = [ recipientId ],
                                      objects        = objects,
                                      body           = body,
-                                     unique         = False)
+                                     unique         = True)
 
     def _addActivity(self, verb,
                            userId,

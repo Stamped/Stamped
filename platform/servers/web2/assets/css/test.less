@@ -8,10 +8,185 @@
 
 
 /* **************************************************************************
-                                    IMPORTS
+                                  BASE SETUP
    ************************************************************************** */
 
 
 @import "libs/elements.less";
 
+@outline: rgba(50, 50, 50, 0.25);
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    padding: 24px;
+}
+
+
+/* **************************************************************************
+                                 OVERVIEW PAGE
+   ************************************************************************** */
+
+.clear {
+    clear: both;
+}
+
+.sketch {
+    margin: 0 auto 24px;
+    padding-bottom: 24px;
+    width: 720px;
+    
+    border-bottom: 1px solid #595959;
+    
+    p {
+        margin:  0;
+        padding: 0;
+    }
+    
+    .lhs {
+        float: left;
+        max-width: 720px - 160px - 24px;
+        
+        .title {
+            font-size: 1.8em;
+        }
+        
+        .desc, .attr {
+            margin-top: .5em;
+            font-family: 'helvetica', sans-serif;
+            font-weight: 200;
+            color: #595959;    
+            line-height: 140%;
+            letter-spacing: 0.02em;
+        }
+        
+        .attr {
+            font-size: 90%;
+        }
+        
+        a {
+            color: #498FF2;
+            
+            &:hover {
+                color: #67ADFF;
+            }
+            
+            &:active {
+                color: darken(#498FF2, 15%);
+            }
+        }
+    }
+    
+    .rhs {
+        float: right;
+        width: 160px;
+    }
+}
+
+.preview-sketch {
+    display: block;
+    
+    width:  160px;
+    height: 110px;
+    
+    border: 1px solid @outline;
+    .box-shadow(0, 0, 6px, @outline);
+}
+
+#preview-sketch-displaced {
+    background: url(/assets/img/test/displaced0.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-gravity {
+    background: url(/assets/img/test/gravity0.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-hilbert {
+    background: url(/assets/img/test/hilbert0.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-intersection {
+    background: url(/assets/img/test/intersection0.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-primordial {
+    background: url(/assets/img/test/primordial0.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-rrt {
+    background: url(/assets/img/test/rrt0.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-substrate {
+    background: url(/assets/img/test/substrate0.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-tenebrous {
+    background: url(/assets/img/test/tenebrous0.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-thering {
+    background: url(/assets/img/test/thering0.jpg) no-repeat;
+    background-size: 100% 100%;
+}
+
+#preview-sketch-trema {
+    background: url(/assets/img/test/trema0.png) no-repeat;
+    background-size: 100% 100%;
+}
+
+
+/* **************************************************************************
+                                  SKETCH PAGE
+   ************************************************************************** */
+
+
+.editor-column {
+    position: relative;
+    width: 50%;
+}
+
+#processing {
+    position: fixed;
+    z-index: 1000;
+    right: 24px;
+    top: 50%;
+    
+    margin-top: -240px;
+    min-width:  100px;
+    min-height: 100px;
+    
+    border: 1px solid @outline;
+    .box-shadow(0, 0, 12px, @outline);
+}
+
+canvas:focus {
+    outline: none;
+}
+
+.abstraction-editor {
+    width:  100%;
+    margin: 0 24px 24px 0;
+    text-align: left;
+}
+
+.dp-j {
+    .keyword, .builtin {
+        &:hover, &:active {
+            cursor: help;
+        }
+    }
+}
 

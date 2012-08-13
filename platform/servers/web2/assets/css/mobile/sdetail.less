@@ -127,7 +127,7 @@
             }
             
             .user-header {
-                margin:10px 0px 12px 0px;
+                margin: 8px 0 12px;
                 clear: both;
                 
                 .name {
@@ -145,51 +145,12 @@
             .normal_blurb {
                 display: block;
                 margin-bottom: 1em;
+                left: 0;
             }
             
-            .social-feedback {
-                font-size: 80%;
-                
-                .social-feedback-item {
-                    display: inline;
-                }
-                
-                .social-feedback-image(@l, @t) {
-                    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
-                    background-position: @l @t;
-                    
-                    display: inline-block;
-                    width:  17px;
-                    height: 17px;
-                    z-index: 100;
-                }
-                
-                .count {
-                    position: relative;
-                    top: -4px;
-                    margin: 0px 7px 0px 0px;
-                }
-                
-                .social-feedback-like {
-                    .social-feedback-image(0, 0);
-                }
-                .count_0 .social-feedback-like {
-                    background-position:   0 -20px;
-                }
-                
-                .social-feedback-todo {
-                    .social-feedback-image(-19px, 0);
-                }
-                .count_0 .social-feedback-todo {
-                    background-position:   -19px -20px;
-                }
-                
-                .social-feedback-comments {
-                    .social-feedback-image(-38px, 0);
-                }
-                .count_0 .social-feedback-comments {
-                    background-position:   -38px -20px;
-                }
+            .stamp-preview, .stamp-preview-raw {
+                display: block;
+                margin: 0 auto;
             }
             
             .social-feedback-expanded {
@@ -232,18 +193,25 @@
             
             .credits {
                 border-top: 1px solid #bbb;
-                padding: .5em @space;
+                padding: 12px 0;
                 margin: 0;
+                font-size: 80%;
                 
                 position: relative;
                 z-index: 2;
                 
                 .stamp_0 {
+                    position: relative;
+                    top: -2px;
+                    
                     display: inline-block;
                     width:  18px;
                     height: 18px;
                 }
                 .stamp_1 {
+                    position: relative;
+                    top: -2px;
+                    
                     display: inline-block;
                     margin: 0 0 0 -9px;
                     width:  18px;
@@ -252,6 +220,10 @@
                 
                 .credits-detail {
                     display: none;
+                }
+                
+                .screen-name {
+                    font-size: inherit;
                 }
             }
             
@@ -326,7 +298,8 @@
                             }
                             
                             p.normal_blurb {
-                                color: #595959
+                                color: #595959;
+                                left: 0;
                             }
                         }
                     }
@@ -373,6 +346,35 @@
         @c0: #ededed;
         @c1: #f8f8f8;
         
+        .pin {
+            background: url(/assets/img/pin_shadow.png) no-repeat;
+            
+            position: absolute;
+            top:  50%;
+            left: 50%;
+            margin: -7px auto auto 0;
+            
+            display: inline-block;
+            width:  24px;
+            height: 18px;
+            
+            &:hover {
+                cursor: pointer;
+            }
+            
+            .pin-inner {
+                background: url(/assets/img/pin.png) no-repeat;
+                
+                position: relative;
+                top:  -16px;
+                left: -8px;
+                
+                display: block;
+                width:  26px;
+                height: 36px;
+            }
+        }
+        
         .entity-data {
             font-size: 80%;
             
@@ -399,6 +401,7 @@
                 
                 .action {
                     .entity-padding();
+                    white-space: nowrap;
                     
                     line-height: 125%;
                     
@@ -408,7 +411,7 @@
                     }
                     
                     .action-icon {
-                        background: url(/assets/img/edetail-sprite.png) no-repeat;
+                        background: url(/assets/img/edetail-sprite.1.png) no-repeat;
                         display: inline-block;
                         
                         width:  18px;
@@ -469,6 +472,10 @@
                         .action-icon-image(180px);
                     }
                     
+                    .action-icon-phone {
+                        .action-icon-image(200px);
+                    }
+                    
                     &:hover {
                         .action-icon-reserve {
                             .action-icon-image-hover(0);
@@ -501,6 +508,10 @@
                         .action-icon-playing {
                             .action-icon-image-hover(180px);
                         }
+                        
+                        .action-icon-phone {
+                            .action-icon-image-hover(200px);
+                        }
                     }
                     
                     .lhs {
@@ -518,7 +529,7 @@
                         float: right;
                         
                         .source {
-                            background: url(/assets/img/edetail-sprite.png) no-repeat;
+                            background: url(/assets/img/edetail-sprite.1.png) no-repeat;
                             display: none;
                             
                             width:  18px;
@@ -560,7 +571,6 @@
                             .source-image(100px);
                         }
                     }
-                    
                 }
             }
             
@@ -801,6 +811,51 @@
     }
 }
 
+.social-feedback {
+    font-size: 80%;
+    
+    .social-feedback-item {
+        display: inline;
+    }
+    
+    .social-feedback-image(@l, @t) {
+        background: url(/assets/img/feedbackicons_sprite_large.1.png) no-repeat;
+        background-position: @l @t;
+        
+        display: inline-block;
+        width:  17px;
+        height: 17px;
+        z-index: 100;
+    }
+    
+    .count {
+        position: relative;
+        top: -4px;
+        margin: 0px 7px 0px 0px;
+    }
+    
+    .social-feedback-like {
+        .social-feedback-image(0, 0);
+    }
+    .count_0 .social-feedback-like {
+        background-position:   0 -20px;
+    }
+    
+    .social-feedback-todo {
+        .social-feedback-image(-19px, 0);
+    }
+    .count_0 .social-feedback-todo {
+        background-position:   -19px -20px;
+    }
+    
+    .social-feedback-comments {
+        .social-feedback-image(-38px, 0);
+    }
+    .count_0 .social-feedback-comments {
+        background-position:   -38px -20px;
+    }
+}
+
 @preview-width: 140px;
 @preview-wrapper-width: @preview-width + 8px;
 
@@ -935,13 +990,13 @@
         border-bottom: 1px solid #f2f2f2;
     }
     
-    .app-store-button {
+    .app-store-button-blue {
         margin: 24px auto;
     }
 }
 
 #stamped-desc {
-    background: url(/assets/img/stamped_is_sprite.png) no-repeat;
+    background: url(/assets/img/stamped_is_sprite.1.png) no-repeat;
     width:  215px;
     height: 86px;
     margin: 0 auto;
@@ -949,18 +1004,6 @@
 
 .badass {
     background-position: -217px 0 !important;
-}
-
-#retina {
-    #stamped-desc {
-        background: url(/assets/img/stamped_is_sprite@2x.png) no-repeat;
-        width:  430px;
-        height: 172px;
-    }
-    
-    .badass {
-        background-position: -434px 0 !important;
-    }
 }
 
 
@@ -1141,7 +1184,7 @@
 }
 
 .user-preview-icon {
-    background: url(/assets/img/feedbackicons_sprite_large.png) no-repeat;
+    background: url(/assets/img/feedbackicons_sprite_large.1.png) no-repeat;
     position: absolute;
     z-index: 26;
     

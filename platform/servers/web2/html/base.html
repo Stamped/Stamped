@@ -122,11 +122,25 @@
         {% block pre_main %}
         <div id="main-page-content" class="main">
             <div id='main-page-content-body' class='main-page-content-body'>
-                {% block popup-signup %}
-                <div id="popup-signup">
-                    {% include "popup-signup.html" %}
-                </div>
-                {% endblock popup-signup %}
+                {% block popups %}
+                    {% block popup-signup %}
+                    <div id="popup-signup">
+                        {% include "popup-signup.html" %}
+                    </div>
+                    {% endblock popup-signup %}
+                    
+                    {% block popup-intro %}
+                    <div id="popup-intro">
+                        {% include "popup-intro.html" %}
+                    </div>
+                    {% endblock popup-intro %}
+                    
+                    {% block popup-ios %}
+                    <div id="popup-ios">
+                        {% include "popup-ios.html" %}
+                    </div>
+                    {% endblock popup-ios %}
+                {% endblock popups %}
                 
                 {% endblock pre_main %}
                 
