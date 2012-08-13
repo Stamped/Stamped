@@ -36,9 +36,10 @@ class FullResolveContainer(BasicSourceContainer):
         self.setGlobalPriority('itunes', 1)
         self.setGlobalPriority('netflix',0)
 
-        self.setGroupPriority('amazon', 'tracks', -1)
-        self.setGroupPriority('amazon', 'albums', -1)
-        self.setGroupPriority('amazon', 'artists', -1)
+        self.setGroupPriority('tracks', 'amazon', -1)
+        self.setGroupPriority('albums', 'amazon', -1)
+        self.setGroupPriority('artists', 'amazon', -1)
+        self.setGroupPriority('cast', 'netflix', 2)
 
         # Allow itunes and GooglePlaces to overwrite seed for for their own id, because they
         # deprecate sometimes.
