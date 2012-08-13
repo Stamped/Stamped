@@ -227,7 +227,7 @@ def augmentPlaceDataQualityOnBasicAttributePresence(placeSearchResult):
         placeSearchResult.dataQuality *= 1 - penalty
         placeSearchResult.addDataQualityComponentDebugInfo("penalty for missing street address", penalty)
     else:
-        (number, street) = tryToSplitStreetAddress(streetAddress)
+        number, _ = tryToSplitStreetAddress(streetAddress)
         if number:
             boost = 0.2
             placeSearchResult.dataQuality *= 1 + boost

@@ -19,7 +19,7 @@ import pprint
 import random
 import shutil
 import sys
-import EntitiesSxSTemplates
+import search.EntitiesSxSTemplates
 from search.DataQualityUtils import MIN_RESULT_DATA_QUALITY_TO_INCLUDE
 
 # We need the import(s) in the following section because they are referenced by
@@ -105,7 +105,7 @@ def getProxySummary(proxy):
     return ('%s, %s:%s' % (title, proxy.source, str(proxy.key)[:15]))
 
 
-def getClusteringDifference(cellId, oldCluster, newCluster):
+def getClusteringDifference(oldCluster, newCluster):
     def makeProxyDict(cluster):
         proxyDict = {}
         for result in cluster.results:
@@ -151,7 +151,7 @@ def getClusteringDifference(cellId, oldCluster, newCluster):
     return summary, majorChange
 
 
-def getSingleClusterSummary(cellId, cluster):
+def getSingleClusterSummary(cluster):
     summary = '<h3>Cluster component summary</h3><ul>'
     for result in cluster.results:
         proxy = result.resolverObject
@@ -192,7 +192,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
             writeCompareEntity(entity, newEntity, outputDir, diffFileName)
 
             cellId = "diff" + str(i)
-            summary, changeMajor = getClusteringDifference(cellId, entity[2], newEntity[2])
+            summary, changeMajor = getClusteringDifference(entity[2], newEntity[2])
             majorChangeIcon = '<img src="major_change_icon.jpg" style="max-height:40;max-width:40;float:left" />' if changeMajor else ''
             anchorTextTpl = '%s<a href="%s">%s%%s</a></td>' % (makeHighlightingTableCell(cellId), diffFileName, majorChangeIcon)
             linksLeft.append(anchorTextTpl % extractLinkText(entity))
@@ -202,7 +202,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
         else:
             cellId = 'l%d' % i
             linksLeft.append(writeSingleEntity(entity, outputDir, '%s-l%d.html' % (filenameBase, i), cellId))
-            clusterSummariesLeft.append(getSingleClusterSummary(cellId, entity[2]))
+            clusterSummariesLeft.append(getSingleClusterSummary(entity[2]))
 
     linksRight = []
     clusterSummariesRight = []
@@ -213,7 +213,7 @@ def compareSingleSearch(query, oldResults, newResults, outputDir, diffThreshold)
         else:
             cellId = 'r%d' % i
             linksRight.append(writeSingleEntity(entity, outputDir, '%s-r%d.html' % (filenameBase, i), cellId))
-            clusterSummariesRight.append(getSingleClusterSummary(cellId, entity[2]))
+            clusterSummariesRight.append(getSingleClusterSummary(entity[2]))
 
     summaries = list(itertools.izip_longest(clusterSummariesLeft, clusterSummariesRight, fillvalue=''))
     fileContent = [EntitiesSxSTemplates.COMPARE_HEADER % (query, query)]

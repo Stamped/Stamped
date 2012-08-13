@@ -5,8 +5,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-from copy import deepcopy
-from utils import indentText, basicNestedObjectToString, normalize
+from utils import indentText
 
 class SearchResult(object):
     """

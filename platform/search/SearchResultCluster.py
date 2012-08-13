@@ -6,9 +6,6 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import datetime
-import math
-import re
 from utils import indentText
 from search.SearchResult import SearchResult
 from resolve.EntityProxyComparator import *
@@ -74,7 +71,7 @@ class SearchResultCluster(object):
         for result in self.__results:
             relevance_scores_by_source.setdefault(result.resolverObject.source, []).append(result.relevance)
         composite_scores = []
-        for (source, source_scores) in relevance_scores_by_source.items():
+        for source_scores in relevance_scores_by_source.values():
             source_scores.sort(reverse=True)
             source_score = source_scores[0]
             for (score_idx, secondary_score) in list(enumerate(source_scores))[1:]:

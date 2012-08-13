@@ -6,12 +6,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import sys, datetime, logs, gevent, utils, math
+import datetime, logs, gevent, utils, math
 from api_old import Constants
 from db.mongodb.MongoEntityCollection import MongoEntityCollection, MongoEntityStatsCollection
 from resolve.AmazonSource import AmazonSource
 from resolve.EntityProxyContainer import EntityProxyContainer
-from resolve.EntityProxySource import EntityProxySource
 from resolve.FactualSource import FactualSource
 from resolve.GooglePlacesSource import GooglePlacesSource
 from resolve.RdioSource import RdioSource
@@ -197,7 +196,7 @@ class EntitySearch(object):
             #pool.spawn(self.__terminateWaiting, pool, datetime.datetime.now(), category, results)
             pool.spawn(termWaiting)
 
-        for (source, priority) in self.__categories_to_sources_and_priorities[category]:
+        for source, priority in self.__categories_to_sources_and_priorities[category]:
             # TODO: Handing the exact same timeout down to the inner call is probably wrong because we end up in this
             # situation where outer pools and inner pools are using the same timeout and possibly the outer pool will
             # nix the whole thing before the inner pool cancels out, which is what we'd prefer so that it's handled
@@ -215,7 +214,6 @@ class EntitySearch(object):
                 logSourceResultsData("\nRESULTS FROM SOURCE " + source.sourceName + " TIME ELAPSED: " + str(times[source]) + "\n\n")
                 for result in results[source]:
                     logSourceResultsData(utils.normalize(repr(result)))
-                    pass
 
         beforeDeduping = datetime.datetime.now()
         dedupedResults = SearchResultDeduper().dedupeResults(category, results.values())
@@ -284,7 +282,7 @@ class EntitySearch(object):
     def rescoreFinalResults(self, entityAndClusterList):
         def isTempEntity(entity):
             return entity.entity_id is None
-        realEntityIds = [ entity.entity_id for (entity, cluster) in entityAndClusterList if not isTempEntity(entity) ]
+        realEntityIds = [ entity.entity_id for entity, _ in entityAndClusterList if not isTempEntity(entity) ]
         entityStats = self.__stats_collection.getStatsForEntities(realEntityIds)
         statsByEntityId = dict([(stats.entity_id, stats) for stats in entityStats])
 
@@ -309,7 +307,6 @@ class EntitySearch(object):
     def searchEntitiesAndClusters(self, category, text, timeout=SEARCH_TIMEOUT, limit=10, coords=None):
         clusters = self.search(category, text, timeout=timeout, limit=limit, coords=coords)
         searchDoneTime = datetime.datetime.now()
-        entityResults = []
 
         entityIdsToNewClusterIdxs = {}
         entitiesAndClusters = []

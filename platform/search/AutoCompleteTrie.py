@@ -85,13 +85,13 @@ class CompressedNode(object):
         return []
 
     def applyScoringFn(self, scoringFn):
-        for k, child in self.children:
+        for _, child in self.children:
             child.applyScoringFn(scoringFn)
             self.data.extend(child.data)
         self.data.sort(key=scoringFn, reverse=True)
 
     def extractAndDedupe(self, extractionFn, nodeLimit):
-        for k, child in self.children:
+        for _, child in self.children:
             child.extractAndDedupe(extractionFn, nodeLimit)
         originalData = self.data
         self.data = []

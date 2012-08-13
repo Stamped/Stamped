@@ -9,7 +9,6 @@ import Globals
 import pickle
 import re
 from boto.s3.connection import S3Connection
-from boto.s3.key import Key
 from collections import namedtuple
 from contextlib import closing
 from datetime import datetime, timedelta
