@@ -420,8 +420,7 @@ static BOOL _friendsHasMore = YES;
 - (void)noDataAction:(id)sender {
     
     FindFriendsViewController *controller = [[[FindFriendsViewController alloc] init] autorelease];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
-    
+    [Util pushController:controller modal:NO animated:YES];    
 }
 
 - (void)setupNoDataView:(NoDataView*)view {

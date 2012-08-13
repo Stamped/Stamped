@@ -6,6 +6,53 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ The client interface to StampedAPI
+ 
+ Before I describe anything about StampedAPI, it's important to
+ understand the data model system that it uses. API return types
+ (define by interface in the Protocol group and defined by implementation
+ in the Simple Models group)
+ 
+ This class encapsulates the majority of Stamped API calls with an
+ implementation agnostic interface. In general, methods are presented
+ as asynchronous, cancellable, callback-based methods. Internally, 
+ this class maps these methods into REST API calls with parameter and
+ result conversion/unpacking as necessary. In addition to hiding the
+ networking details of the implementation, this class also provides
+ substantial caching, notification, and local modification systems.
+ Currently, the following data structures are cached:
+ 
+ entityDetails
+ stamps
+ users
+ entities
+ stampedBy
+ menus
+ stampPreviews
+ 
+ The exact rules of caching are beyond the scope of this comment.
+ The local modification system is also a bit complex to describe here, but
+ in short, things like comments and likes are added locally to new copies of
+ models (in this case stamps) and the new object replaces the old one in the cache.
+ Notifications are posted for a number of actions. See the notification
+ declarations for more info (the names are fairly self-explanatory).
+ 
+ Notes:
+ This class has become quite large. At time of writing, this
+ class has the second longest implementation of any file in the project*.
+ 
+ TODOs:
+ Make methods consistent (all cancellable, standard callback format, naming, etc.)
+ Reduce import statements
+ 
+ 2012-08-10
+ -Landon 
+ 
+ *Util is the largest.
+ 
+ */
+
 #import <Foundation/Foundation.h>
 #import "STEntity.h"
 #import "STEntityDetail.h"
@@ -316,8 +363,6 @@ extern NSString* const STStampedAPIUnfollowNotification;
 + (void)logError:(NSString*)message;
 
 @property (nonatomic, readwrite, retain) UIImage* currentUserImage;
-
-- (void)clearEntityCache;
 
 @end
 

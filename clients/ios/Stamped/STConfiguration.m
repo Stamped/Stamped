@@ -269,7 +269,7 @@ static STConfiguration* _sharedInstance;
 
 - (void)rightButtonClicked:(id)notImportant {
     STDebugDatumViewController* controller = [[[STDebugDatumViewController alloc] initWithString:[self modificationReport]] autorelease];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    [Util pushController:controller modal:NO animated:YES];
 }
 
 - (UIViewController*)controller {
@@ -321,7 +321,7 @@ static STConfiguration* _sharedInstance;
     NSString* section = [self.orderedSections objectAtIndex:indexPath.row];
     
     STTableViewController* controller = [[[STConfigurationSectionController alloc] initWithSection:section] autorelease];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    [Util pushController:controller modal:NO animated:YES];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {

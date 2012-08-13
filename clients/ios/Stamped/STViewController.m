@@ -28,7 +28,7 @@
   if ([super navigationController])
     return [super navigationController];
   
-  return [Util sharedNavigationController];
+  return [Util currentNavigationController];
 }
 
 #pragma mark - UIScrollView delegate methods

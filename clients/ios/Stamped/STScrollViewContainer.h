@@ -13,9 +13,9 @@
 
 - (id)initWithDelegate:(id<STViewDelegate>)delegate andFrame:(CGRect)frame;
 - (void)appendChildView:(UIView*)child;
-- (void)removeChildView:(UIView*)view withAnimation:(BOOL)animation;
+- (void)removeChildView:(UIView*)view withAnimation:(BOOL)animation __attribute__ ((deprecated));
 - (void)reloadStampedData;
-- (void)updateContentSize;
+- (void)updateContentSize __attribute__ ((deprecated));
 
 @property (nonatomic, readwrite, assign) id<UIScrollViewDelegate> scrollDelegate;
 

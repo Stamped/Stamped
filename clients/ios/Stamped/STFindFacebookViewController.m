@@ -94,6 +94,8 @@ static const CGFloat _batchSize = 100;
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFinished];
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookAuthFailed];
     [STEvents addObserver:self selector:@selector(facebookAuthChanged:) event:EventTypeFacebookLoggedOut];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(followingStatusChanged:) name:STStampedAPIFollowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(followingStatusChanged:) name:STStampedAPIUnfollowNotification object:nil];
     if ([STFacebook sharedInstance].facebook.isSessionValid) {      
         [self loadMore];
     }
@@ -165,7 +167,7 @@ static const CGFloat _batchSize = 100;
                                                    @"http://stamped.com", @"link",
                                                    @"Stamped", @"name", nil];
                     [params setObject:[self stampedLogoImageURL] forKey:@"picture"];
-                    [params setObject:[NSString stringWithFormat:@"Hey %@, I think you have good taste, so join me on Stamped to share and discover great things.", contact.name]
+                    [params setObject:@"I think you'd like Stamped - check it out at www.stamped.com/download"
                                forKey:@"message"];
                     
                     [fb requestWithGraphPath:[contact.facebookID stringByAppendingString:@"/feed"]
@@ -466,6 +468,13 @@ static const CGFloat _batchSize = 100;
                 }
             }];
         }
+    }
+}
+
+- (void)followingStatusChanged:(NSNotification*)notification {
+    NSString* userID = notification.object;
+    for (NSInteger i = 0; i < self.matchUsers.count; i++) {
+        id<STUser> user = [self.matchUsers objectAtIndex:i];
     }
 }
 

@@ -332,8 +332,6 @@
 		034BDFAC1562F6980008F160 /* KeyChainItemWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC1C64F13F456FE0070CE6D /* KeyChainItemWrapper.m */; };
 		034BDFAE1562F6980008F160 /* UIColor+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */; };
 		034BDFAF1562F6980008F160 /* STSearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE482EB13FAA41400359EEA /* STSearchField.m */; };
-		034BDFB31562F6980008F160 /* Notifications.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3909351401975C00910F98 /* Notifications.m */; };
-		034BDFB41562F6980008F160 /* STTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5EB262140C0535007D164F /* STTextField.m */; };
 		034BDFB61562F6980008F160 /* STImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0A87B61416CBDB0013AC4D /* STImageView.m */; };
 		034BDFC11562F6980008F160 /* NSAttributedString+Attributes.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E81144F462400D7847F /* NSAttributedString+Attributes.m */; };
 		034BDFC21562F6980008F160 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E83144F462400D7847F /* TTTAttributedLabel.m */; };
@@ -429,9 +427,7 @@
 		034BE0381562F6980008F160 /* STSimpleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6AA152E2B8900579369 /* STSimpleImage.m */; };
 		034BE03A1562F6980008F160 /* STStampsView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E5E6BF152E48A300579369 /* STStampsView.m */; };
 		034BE03C1562F6980008F160 /* STPlaylistViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A649891532668E001D9314 /* STPlaylistViewFactory.m */; };
-		034BE03F1562F6980008F160 /* STPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FA15347856007AD006 /* STPlaylistPopUp.m */; };
 		034BE0401562F6980008F160 /* STTablePopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FE153478DE007AD006 /* STTablePopUp.m */; };
-		034BE0411562F6980008F160 /* STRdioPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */; };
 		034BE0421562F6980008F160 /* STAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2532C1534CD5A007AD006 /* STAppDelegate.m */; };
 		034BE0431562F6980008F160 /* STRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253301534CFEF007AD006 /* STRootViewController.m */; };
 		034BE0441562F6980008F160 /* STConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253381535C67D007AD006 /* STConfiguration.m */; };
@@ -445,7 +441,6 @@
 		034BE04D1562F6980008F160 /* STSimpleStampedBy.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF4C15387101009E1C06 /* STSimpleStampedBy.m */; };
 		034BE04E1562F6980008F160 /* STSimpleStampedByGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF50153871B7009E1C06 /* STSimpleStampedByGroup.m */; };
 		034BE04F1562F6980008F160 /* STSimpleUserDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26B1153884FF00391F15 /* STSimpleUserDetail.m */; };
-		034BE0501562F6980008F160 /* STPostStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26B71538AA9F00391F15 /* STPostStampViewController.m */; };
 		034BE0511562F6980008F160 /* STRippleBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26BF1538BF2500391F15 /* STRippleBar.m */; };
 		034BE0521562F6980008F160 /* STRippleViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26C31538C1FD00391F15 /* STRippleViewContainer.m */; };
 		034BE0531562F6980008F160 /* STSimpleBadge.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26C81538D08900391F15 /* STSimpleBadge.m */; };
@@ -454,34 +449,27 @@
 		034BE0561562F6980008F160 /* STStampedByView.m in Sources */ = {isa = PBXBuildFile; fileRef = 634BA4B8153CA8BD003F96AB /* STStampedByView.m */; };
 		034BE0581562F6980008F160 /* STEntitySearchController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E28A153DE32B00D84915 /* STEntitySearchController.m */; };
 		034BE0591562F6980008F160 /* STTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63A6E291153DE43600D84915 /* STTableViewController.m */; };
-		034BE05A1562F6980008F160 /* CALayer+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B595153F078D00BB8C82 /* CALayer+Stamped.m */; };
 		034BE05B1562F6980008F160 /* STButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B599153F099E00BB8C82 /* STButton.m */; };
 		034BE05C1562F6980008F160 /* STEntitySuggested.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B59D153F172D00BB8C82 /* STEntitySuggested.m */; };
 		034BE05D1562F6980008F160 /* STSimpleEntitySearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */; };
-		034BE05E1562F6980008F160 /* STProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A6153F417900BB8C82 /* STProfileViewController.m */; };
 		034BE05F1562F6980008F160 /* STEntitySearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AA153F478F00BB8C82 /* STEntitySearch.m */; };
 		034BE0601562F6980008F160 /* STSimpleEntitySearchSection.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */; };
 		034BE0611562F6980008F160 /* STUniversalNewsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */; };
 		034BE0621562F6980008F160 /* STSimpleActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D1153F9E2800BB8C82 /* STSimpleActivity.m */; };
 		034BE0631562F6980008F160 /* STSimpleActivityObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D5153FA69B00BB8C82 /* STSimpleActivityObjects.m */; };
 		034BE0641562F6980008F160 /* STSimpleActivityReference.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5D9153FA80900BB8C82 /* STSimpleActivityReference.m */; };
-		034BE0651562F6980008F160 /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA461C1540515500CCDD2A /* STCreateStampViewController.m */; };
 		034BE0661562F6980008F160 /* STImageUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA46351540699E00CCDD2A /* STImageUpload.m */; };
 		034BE0671562F6980008F160 /* STStampedParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463915406A3D00CCDD2A /* STStampedParameter.m */; };
 		034BE0681562F6980008F160 /* STStampNew.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463D15406B6700CCDD2A /* STStampNew.m */; };
 		034BE0691562F6980008F160 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
-		034BE06B1562F6980008F160 /* UserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C6D1540D1CF00C8F7D3 /* UserCell.m */; };
 		034BE06D1562F6980008F160 /* STDebugViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A11541B5A600423E98 /* STDebugViewController.m */; };
 		034BE06E1562F6980008F160 /* STDebug.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A51541B61800423E98 /* STDebug.m */; };
 		034BE06F1562F6980008F160 /* STDebugDatumViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067A91541C25500423E98 /* STDebugDatumViewController.m */; };
 		034BE0701562F6980008F160 /* STDebugDatum.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067AD1541CDF000423E98 /* STDebugDatum.m */; };
 		034BE0711562F6980008F160 /* STUsersViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 638067B61541F3B000423E98 /* STUsersViewController.m */; };
 		034BE0721562F6980008F160 /* STUserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC7C1541F7AE00817EC5 /* STUserCell.m */; };
-		034BE0731562F6980008F160 /* STRootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC9515435B7C00817EC5 /* STRootScrollView.m */; };
 		034BE0761562F6980008F160 /* STLeftMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 636961B51543682B00993C4F /* STLeftMenuViewController.m */; };
-		034BE0771562F6980008F160 /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		034BE0781562F6980008F160 /* STRightMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A891544E959008E75DD /* STRightMenuViewController.m */; };
-		034BE0791562F6980008F160 /* STProfileSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA769F1545A2AA00EE95DA /* STProfileSource.m */; };
 		034BE07A1562F6980008F160 /* STToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */; };
 		034BE07B1562F6980008F160 /* STSimpleContentItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A571547415400EE95DA /* STSimpleContentItem.m */; };
 		034BE07C1562F6980008F160 /* STSimplePreviews.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A5D1547478D00EE95DA /* STSimplePreviews.m */; };
@@ -1360,8 +1348,6 @@
 		631563F61577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
 		631563F71577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
 		631563F91577F27D00849CB2 /* STSimpleStampPreview.m in Sources */ = {isa = PBXBuildFile; fileRef = 631563F51577F27D00849CB2 /* STSimpleStampPreview.m */; };
-		63159A861544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
-		63159A871544A9A5008E75DD /* STActivityCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A851544A9A5008E75DD /* STActivityCell.m */; };
 		63159A8A1544E95A008E75DD /* STRightMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A891544E959008E75DD /* STRightMenuViewController.m */; };
 		63159A8B1544E95A008E75DD /* STRightMenuViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63159A891544E959008E75DD /* STRightMenuViewController.m */; };
 		63168DA515810ABF00F47E99 /* STChunksView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63168DA415810ABF00F47E99 /* STChunksView.m */; };
@@ -1596,10 +1582,23 @@
 		63313534156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
 		63313535156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
 		63313537156C273300BF9B8D /* STSimpleLoginResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 63313533156C273300BF9B8D /* STSimpleLoginResponse.m */; };
+		6331378315D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378215D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png */; };
+		6331378415D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378215D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png */; };
+		6331378515D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378215D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png */; };
+		6331378915D97BEB00DEFB16 /* post_stamp_share_email@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378615D97BEB00DEFB16 /* post_stamp_share_email@2x.png */; };
+		6331378A15D97BEB00DEFB16 /* post_stamp_share_email@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378615D97BEB00DEFB16 /* post_stamp_share_email@2x.png */; };
+		6331378B15D97BEB00DEFB16 /* post_stamp_share_email@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378615D97BEB00DEFB16 /* post_stamp_share_email@2x.png */; };
+		6331378C15D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378715D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png */; };
+		6331378D15D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378715D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png */; };
+		6331378E15D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378715D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png */; };
+		6331378F15D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378815D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png */; };
+		6331379015D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378815D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png */; };
+		6331379115D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 6331378815D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png */; };
+		6331379315D9AA7600DEFB16 /* instagram_sample.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 6331379215D9AA7600DEFB16 /* instagram_sample.jpeg */; };
+		6331379415D9AA7600DEFB16 /* instagram_sample.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 6331379215D9AA7600DEFB16 /* instagram_sample.jpeg */; };
+		6331379515D9AA7600DEFB16 /* instagram_sample.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 6331379215D9AA7600DEFB16 /* instagram_sample.jpeg */; };
 		63323C641540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
 		63323C651540C1A400C8F7D3 /* STTodoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C631540C1A400C8F7D3 /* STTodoViewController.m */; };
-		63323C6E1540D1CF00C8F7D3 /* UserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C6D1540D1CF00C8F7D3 /* UserCell.m */; };
-		63323C6F1540D1CF00C8F7D3 /* UserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63323C6D1540D1CF00C8F7D3 /* UserCell.m */; };
 		6333E6FE154DF58F0019B450 /* STLoadingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6333E6FD154DF58F0019B450 /* STLoadingCell.m */; };
 		6333E6FF154DF58F0019B450 /* STLoadingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6333E6FD154DF58F0019B450 /* STLoadingCell.m */; };
 		6333E703154E0DB30019B450 /* STSingleViewSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 6333E702154E0DB30019B450 /* STSingleViewSource.m */; };
@@ -1613,6 +1612,9 @@
 		633476C615C314E100560EA3 /* UIImage+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 633476C515C314E100560EA3 /* UIImage+Stamped.m */; };
 		633476C715C314E100560EA3 /* UIImage+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 633476C515C314E100560EA3 /* UIImage+Stamped.m */; };
 		633476C815C314E100560EA3 /* UIImage+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 633476C515C314E100560EA3 /* UIImage+Stamped.m */; };
+		633CB6C815D5B737007B664C /* README in Resources */ = {isa = PBXBuildFile; fileRef = 633CB6C715D5B734007B664C /* README */; };
+		633CB6C915D5B737007B664C /* README in Resources */ = {isa = PBXBuildFile; fileRef = 633CB6C715D5B734007B664C /* README */; };
+		633CB6CA15D5B737007B664C /* README in Resources */ = {isa = PBXBuildFile; fileRef = 633CB6C715D5B734007B664C /* README */; };
 		633CEF231535E2FB009E1C06 /* STSuggestedSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF221535E2FB009E1C06 /* STSuggestedSource.m */; };
 		633CEF241535E2FB009E1C06 /* STSuggestedSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF221535E2FB009E1C06 /* STSuggestedSource.m */; };
 		633CEF271535E371009E1C06 /* STFriendsOfFriendsSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF261535E371009E1C06 /* STFriendsOfFriendsSource.m */; };
@@ -1627,8 +1629,6 @@
 		633CEF52153871C9009E1C06 /* STSimpleStampedByGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 633CEF50153871B7009E1C06 /* STSimpleStampedByGroup.m */; };
 		633F26B2153884FF00391F15 /* STSimpleUserDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26B1153884FF00391F15 /* STSimpleUserDetail.m */; };
 		633F26B3153884FF00391F15 /* STSimpleUserDetail.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26B1153884FF00391F15 /* STSimpleUserDetail.m */; };
-		633F26B81538AA9F00391F15 /* STPostStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26B71538AA9F00391F15 /* STPostStampViewController.m */; };
-		633F26B91538AA9F00391F15 /* STPostStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26B71538AA9F00391F15 /* STPostStampViewController.m */; };
 		633F26C01538BF2500391F15 /* STRippleBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26BF1538BF2500391F15 /* STRippleBar.m */; };
 		633F26C11538BF2500391F15 /* STRippleBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26BF1538BF2500391F15 /* STRippleBar.m */; };
 		633F26C41538C1FD00391F15 /* STRippleViewContainer.m in Sources */ = {isa = PBXBuildFile; fileRef = 633F26C31538C1FD00391F15 /* STRippleViewContainer.m */; };
@@ -2144,16 +2144,12 @@
 		635EAAD715238F9000D0378D /* 3rd_icon_rdio.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD415238F9000D0378D /* 3rd_icon_rdio.png */; };
 		635EAAD915238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */; };
 		635EAADA15238F9000D0378D /* 3rd_icon_rdio@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */; };
-		6360B596153F078D00BB8C82 /* CALayer+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B595153F078D00BB8C82 /* CALayer+Stamped.m */; };
-		6360B597153F078D00BB8C82 /* CALayer+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B595153F078D00BB8C82 /* CALayer+Stamped.m */; };
 		6360B59A153F099E00BB8C82 /* STButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B599153F099E00BB8C82 /* STButton.m */; };
 		6360B59B153F099E00BB8C82 /* STButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B599153F099E00BB8C82 /* STButton.m */; };
 		6360B59E153F172E00BB8C82 /* STEntitySuggested.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B59D153F172D00BB8C82 /* STEntitySuggested.m */; };
 		6360B59F153F172E00BB8C82 /* STEntitySuggested.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B59D153F172D00BB8C82 /* STEntitySuggested.m */; };
 		6360B5A3153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */; };
 		6360B5A4153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */; };
-		6360B5A7153F417900BB8C82 /* STProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A6153F417900BB8C82 /* STProfileViewController.m */; };
-		6360B5A8153F417900BB8C82 /* STProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5A6153F417900BB8C82 /* STProfileViewController.m */; };
 		6360B5AB153F478F00BB8C82 /* STEntitySearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AA153F478F00BB8C82 /* STEntitySearch.m */; };
 		6360B5AC153F478F00BB8C82 /* STEntitySearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AA153F478F00BB8C82 /* STEntitySearch.m */; };
 		6360B5B0153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */ = {isa = PBXBuildFile; fileRef = 6360B5AF153F502A00BB8C82 /* STSimpleEntitySearchSection.m */; };
@@ -2567,8 +2563,6 @@
 		63B4F68D1554540800C52C28 /* TEMP_play_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63B4F68B1554540800C52C28 /* TEMP_play_button@2x.png */; };
 		63B4F6911554628900C52C28 /* STConsumptionSlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 63B4F6901554628800C52C28 /* STConsumptionSlice.m */; };
 		63B4F6921554628900C52C28 /* STConsumptionSlice.m in Sources */ = {isa = PBXBuildFile; fileRef = 63B4F6901554628800C52C28 /* STConsumptionSlice.m */; };
-		63BA76A01545A2AA00EE95DA /* STProfileSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA769F1545A2AA00EE95DA /* STProfileSource.m */; };
-		63BA76A11545A2AA00EE95DA /* STProfileSource.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA769F1545A2AA00EE95DA /* STProfileSource.m */; };
 		63BA7A181546FB3C00EE95DA /* dots@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63BA7A171546FB3C00EE95DA /* dots@2x.png */; };
 		63BA7A191546FB3C00EE95DA /* dots@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 63BA7A171546FB3C00EE95DA /* dots@2x.png */; };
 		63BA7A1D1546FF6B00EE95DA /* STToggleButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */; };
@@ -2612,8 +2606,6 @@
 		63BC667F1522634300DA2579 /* STRdio.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BC667D1522634300DA2579 /* STRdio.m */; };
 		63BFCC7D1541F7AE00817EC5 /* STUserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC7C1541F7AE00817EC5 /* STUserCell.m */; };
 		63BFCC7E1541F7AE00817EC5 /* STUserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC7C1541F7AE00817EC5 /* STUserCell.m */; };
-		63BFCC9615435B7C00817EC5 /* STRootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC9515435B7C00817EC5 /* STRootScrollView.m */; };
-		63BFCC9715435B7C00817EC5 /* STRootScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 63BFCC9515435B7C00817EC5 /* STRootScrollView.m */; };
 		63C4843615A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
 		63C4843715A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
 		63C4843815A387AC00CE8F25 /* STStampsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C4843515A387AC00CE8F25 /* STStampsViewController.m */; };
@@ -2670,8 +2662,6 @@
 		63C9841A154DDD59000180DC /* STGenericLazyList.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C98418154DDD58000180DC /* STGenericLazyList.m */; };
 		63C9841E154DDF82000180DC /* STUserDetailLazyList.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C9841D154DDF81000180DC /* STUserDetailLazyList.m */; };
 		63C9841F154DDF82000180DC /* STUserDetailLazyList.m in Sources */ = {isa = PBXBuildFile; fileRef = 63C9841D154DDF81000180DC /* STUserDetailLazyList.m */; };
-		63CA461D1540515500CCDD2A /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA461C1540515500CCDD2A /* STCreateStampViewController.m */; };
-		63CA461E1540515500CCDD2A /* STCreateStampViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA461C1540515500CCDD2A /* STCreateStampViewController.m */; };
 		63CA46361540699E00CCDD2A /* STImageUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA46351540699E00CCDD2A /* STImageUpload.m */; };
 		63CA46371540699E00CCDD2A /* STImageUpload.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA46351540699E00CCDD2A /* STImageUpload.m */; };
 		63CA463A15406A3E00CCDD2A /* STStampedParameter.m in Sources */ = {isa = PBXBuildFile; fileRef = 63CA463915406A3D00CCDD2A /* STStampedParameter.m */; };
@@ -2715,12 +2705,8 @@
 		63DCED6215C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63DCED6115C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf */; };
 		63DCED6315C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63DCED6115C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf */; };
 		63DCED6415C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 63DCED6115C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf */; };
-		63E252FB15347856007AD006 /* STPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FA15347856007AD006 /* STPlaylistPopUp.m */; };
-		63E252FC15347856007AD006 /* STPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FA15347856007AD006 /* STPlaylistPopUp.m */; };
 		63E252FF153478DE007AD006 /* STTablePopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FE153478DE007AD006 /* STTablePopUp.m */; };
 		63E25300153478DE007AD006 /* STTablePopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E252FE153478DE007AD006 /* STTablePopUp.m */; };
-		63E253031534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */; };
-		63E253041534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */; };
 		63E2532D1534CD5A007AD006 /* STAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2532C1534CD5A007AD006 /* STAppDelegate.m */; };
 		63E2532E1534CD5A007AD006 /* STAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E2532C1534CD5A007AD006 /* STAppDelegate.m */; };
 		63E253311534CFF0007AD006 /* STRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 63E253301534CFEF007AD006 /* STRootViewController.m */; };
@@ -2884,7 +2870,6 @@
 		7E303F7A13F0BB7700C1F794 /* gradient_background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E303F7813F0BB7700C1F794 /* gradient_background.png */; };
 		7E303F7B13F0BB7700C1F794 /* gradient_background@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E303F7913F0BB7700C1F794 /* gradient_background@2x.png */; };
 		7E35A72B13DB9267008F856F /* search_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E35A72A13DB9267008F856F /* search_icon@2x.png */; };
-		7E3909361401975D00910F98 /* Notifications.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3909351401975C00910F98 /* Notifications.m */; };
 		7E3B6D7A13D7509600FBE958 /* Util.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3B6D7913D7509600FBE958 /* Util.m */; };
 		7E407E84144F462400D7847F /* NSAttributedString+Attributes.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E81144F462400D7847F /* NSAttributedString+Attributes.m */; };
 		7E407E85144F462400D7847F /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E83144F462400D7847F /* TTTAttributedLabel.m */; };
@@ -2938,8 +2923,6 @@
 		7E5893D2147C468B002268C4 /* KeyChainItemWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EC1C64F13F456FE0070CE6D /* KeyChainItemWrapper.m */; };
 		7E5893D5147C468B002268C4 /* UIColor+Stamped.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */; };
 		7E5893D6147C468B002268C4 /* STSearchField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7EE482EB13FAA41400359EEA /* STSearchField.m */; };
-		7E5893DD147C468B002268C4 /* Notifications.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E3909351401975C00910F98 /* Notifications.m */; };
-		7E5893E0147C468B002268C4 /* STTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5EB262140C0535007D164F /* STTextField.m */; };
 		7E5893E4147C468B002268C4 /* STImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E0A87B61416CBDB0013AC4D /* STImageView.m */; };
 		7E589409147C468B002268C4 /* NSAttributedString+Attributes.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E81144F462400D7847F /* NSAttributedString+Attributes.m */; };
 		7E58940A147C468B002268C4 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E407E83144F462400D7847F /* TTTAttributedLabel.m */; };
@@ -3039,7 +3022,6 @@
 		7E589645147C468B002268C4 /* icon_dev@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5893AF147C4628002268C4 /* icon_dev@2x.png */; };
 		7E5D9E9814B3C0DD00C340CA /* STScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5D9E9714B3C0DD00C340CA /* STScrollView.m */; };
 		7E5D9E9914B3C0DD00C340CA /* STScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5D9E9714B3C0DD00C340CA /* STScrollView.m */; };
-		7E5EB263140C0535007D164F /* STTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = 7E5EB262140C0535007D164F /* STTextField.m */; };
 		7E5FEED913D0C497008BCA48 /* nav_bar_ripple@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */; };
 		7E6318DF14A2900700B591E6 /* credit_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6318DE14A2900700B591E6 /* credit_icon@2x.png */; };
 		7E6318E014A2900700B591E6 /* credit_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7E6318DE14A2900700B591E6 /* credit_icon@2x.png */; };
@@ -3824,8 +3806,6 @@
 		631563F31577F22100849CB2 /* STStampPreview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampPreview.h; sourceTree = "<group>"; };
 		631563F41577F27D00849CB2 /* STSimpleStampPreview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleStampPreview.h; sourceTree = "<group>"; };
 		631563F51577F27D00849CB2 /* STSimpleStampPreview.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleStampPreview.m; sourceTree = "<group>"; };
-		63159A841544A9A5008E75DD /* STActivityCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STActivityCell.h; sourceTree = "<group>"; };
-		63159A851544A9A5008E75DD /* STActivityCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STActivityCell.m; sourceTree = "<group>"; };
 		63159A881544E959008E75DD /* STRightMenuViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRightMenuViewController.h; sourceTree = "<group>"; };
 		63159A891544E959008E75DD /* STRightMenuViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRightMenuViewController.m; sourceTree = "<group>"; };
 		63168DA315810ABF00F47E99 /* STChunksView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STChunksView.h; sourceTree = "<group>"; };
@@ -3976,10 +3956,13 @@
 		63313531156C268C00BF9B8D /* STLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoginResponse.h; sourceTree = "<group>"; };
 		63313532156C273300BF9B8D /* STSimpleLoginResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleLoginResponse.h; sourceTree = "<group>"; };
 		63313533156C273300BF9B8D /* STSimpleLoginResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleLoginResponse.m; sourceTree = "<group>"; };
+		6331378215D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "post_stamp_share_twitter@2x.png"; sourceTree = "<group>"; };
+		6331378615D97BEB00DEFB16 /* post_stamp_share_email@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "post_stamp_share_email@2x.png"; sourceTree = "<group>"; };
+		6331378715D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "post_stamp_share_facebook@2x.png"; sourceTree = "<group>"; };
+		6331378815D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "post_stamp_share_instagram@2x.png"; sourceTree = "<group>"; };
+		6331379215D9AA7600DEFB16 /* instagram_sample.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = instagram_sample.jpeg; sourceTree = "<group>"; };
 		63323C621540C1A400C8F7D3 /* STTodoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTodoViewController.h; sourceTree = "<group>"; };
 		63323C631540C1A400C8F7D3 /* STTodoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTodoViewController.m; sourceTree = "<group>"; };
-		63323C6C1540D1CF00C8F7D3 /* UserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserCell.h; sourceTree = "<group>"; };
-		63323C6D1540D1CF00C8F7D3 /* UserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserCell.m; sourceTree = "<group>"; };
 		6333E6FC154DF58F0019B450 /* STLoadingCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STLoadingCell.h; sourceTree = "<group>"; };
 		6333E6FD154DF58F0019B450 /* STLoadingCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STLoadingCell.m; sourceTree = "<group>"; };
 		6333E701154E0DB30019B450 /* STSingleViewSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSingleViewSource.h; sourceTree = "<group>"; };
@@ -3992,6 +3975,7 @@
 		6333E711154ED1D20019B450 /* STConsumptionCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConsumptionCell.m; sourceTree = "<group>"; };
 		633476C415C314E100560EA3 /* UIImage+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Stamped.h"; sourceTree = "<group>"; };
 		633476C515C314E100560EA3 /* UIImage+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Stamped.m"; sourceTree = "<group>"; };
+		633CB6C715D5B734007B664C /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		633CEF211535E2FB009E1C06 /* STSuggestedSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSuggestedSource.h; sourceTree = "<group>"; };
 		633CEF221535E2FB009E1C06 /* STSuggestedSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSuggestedSource.m; sourceTree = "<group>"; };
 		633CEF251535E371009E1C06 /* STFriendsOfFriendsSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STFriendsOfFriendsSource.h; sourceTree = "<group>"; };
@@ -4010,8 +3994,6 @@
 		633F26AF153883DF00391F15 /* STUserDetail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserDetail.h; sourceTree = "<group>"; };
 		633F26B0153884FF00391F15 /* STSimpleUserDetail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleUserDetail.h; sourceTree = "<group>"; };
 		633F26B1153884FF00391F15 /* STSimpleUserDetail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleUserDetail.m; sourceTree = "<group>"; };
-		633F26B61538AA9F00391F15 /* STPostStampViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPostStampViewController.h; sourceTree = "<group>"; };
-		633F26B71538AA9F00391F15 /* STPostStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPostStampViewController.m; sourceTree = "<group>"; };
 		633F26BE1538BF2500391F15 /* STRippleBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRippleBar.h; sourceTree = "<group>"; };
 		633F26BF1538BF2500391F15 /* STRippleBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRippleBar.m; sourceTree = "<group>"; };
 		633F26C21538C1FD00391F15 /* STRippleViewContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRippleViewContainer.h; sourceTree = "<group>"; };
@@ -4220,8 +4202,6 @@
 		635EAAD015238D5F00D0378D /* STConfirmationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConfirmationView.m; sourceTree = "<group>"; };
 		635EAAD415238F9000D0378D /* 3rd_icon_rdio.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = 3rd_icon_rdio.png; sourceTree = "<group>"; };
 		635EAAD515238F9000D0378D /* 3rd_icon_rdio@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "3rd_icon_rdio@2x.png"; sourceTree = "<group>"; };
-		6360B594153F078D00BB8C82 /* CALayer+Stamped.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CALayer+Stamped.h"; sourceTree = "<group>"; };
-		6360B595153F078D00BB8C82 /* CALayer+Stamped.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CALayer+Stamped.m"; sourceTree = "<group>"; };
 		6360B598153F099E00BB8C82 /* STButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STButton.h; sourceTree = "<group>"; };
 		6360B599153F099E00BB8C82 /* STButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STButton.m; sourceTree = "<group>"; };
 		6360B59C153F172D00BB8C82 /* STEntitySuggested.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySuggested.h; sourceTree = "<group>"; };
@@ -4229,8 +4209,6 @@
 		6360B5A0153F1B2B00BB8C82 /* STEntitySearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySearchResult.h; sourceTree = "<group>"; };
 		6360B5A1153F1B7B00BB8C82 /* STSimpleEntitySearchResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STSimpleEntitySearchResult.h; sourceTree = "<group>"; };
 		6360B5A2153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STSimpleEntitySearchResult.m; sourceTree = "<group>"; };
-		6360B5A5153F417900BB8C82 /* STProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STProfileViewController.h; sourceTree = "<group>"; };
-		6360B5A6153F417900BB8C82 /* STProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STProfileViewController.m; sourceTree = "<group>"; };
 		6360B5A9153F478E00BB8C82 /* STEntitySearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySearch.h; sourceTree = "<group>"; };
 		6360B5AA153F478F00BB8C82 /* STEntitySearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STEntitySearch.m; sourceTree = "<group>"; };
 		6360B5AD153F4EEA00BB8C82 /* STEntitySearchSection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STEntitySearchSection.h; sourceTree = "<group>"; };
@@ -4492,8 +4470,6 @@
 		63B4F68B1554540800C52C28 /* TEMP_play_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "TEMP_play_button@2x.png"; sourceTree = "<group>"; };
 		63B4F68F1554628800C52C28 /* STConsumptionSlice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STConsumptionSlice.h; sourceTree = "<group>"; };
 		63B4F6901554628800C52C28 /* STConsumptionSlice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STConsumptionSlice.m; sourceTree = "<group>"; };
-		63BA769E1545A2AA00EE95DA /* STProfileSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STProfileSource.h; sourceTree = "<group>"; };
-		63BA769F1545A2AA00EE95DA /* STProfileSource.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STProfileSource.m; sourceTree = "<group>"; };
 		63BA7A171546FB3C00EE95DA /* dots@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dots@2x.png"; sourceTree = "<group>"; };
 		63BA7A1B1546FF6A00EE95DA /* STToggleButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STToggleButton.h; sourceTree = "<group>"; };
 		63BA7A1C1546FF6A00EE95DA /* STToggleButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STToggleButton.m; sourceTree = "<group>"; };
@@ -4519,8 +4495,6 @@
 		63BC667D1522634300DA2579 /* STRdio.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdio.m; sourceTree = "<group>"; };
 		63BFCC7B1541F7AE00817EC5 /* STUserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserCell.h; sourceTree = "<group>"; };
 		63BFCC7C1541F7AE00817EC5 /* STUserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUserCell.m; sourceTree = "<group>"; };
-		63BFCC9415435B7C00817EC5 /* STRootScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRootScrollView.h; sourceTree = "<group>"; };
-		63BFCC9515435B7C00817EC5 /* STRootScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRootScrollView.m; sourceTree = "<group>"; };
 		63C4843415A387AC00CE8F25 /* STStampsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampsViewController.h; sourceTree = "<group>"; };
 		63C4843515A387AC00CE8F25 /* STStampsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampsViewController.m; sourceTree = "<group>"; };
 		63C4843A15A38CA900CE8F25 /* STCreditPageSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreditPageSource.h; sourceTree = "<group>"; };
@@ -4571,8 +4545,6 @@
 		63C98418154DDD58000180DC /* STGenericLazyList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STGenericLazyList.m; sourceTree = "<group>"; };
 		63C9841C154DDF80000180DC /* STUserDetailLazyList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STUserDetailLazyList.h; sourceTree = "<group>"; };
 		63C9841D154DDF81000180DC /* STUserDetailLazyList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STUserDetailLazyList.m; sourceTree = "<group>"; };
-		63CA461B1540515500CCDD2A /* STCreateStampViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STCreateStampViewController.h; sourceTree = "<group>"; };
-		63CA461C1540515500CCDD2A /* STCreateStampViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STCreateStampViewController.m; sourceTree = "<group>"; };
 		63CA46341540699E00CCDD2A /* STImageUpload.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STImageUpload.h; sourceTree = "<group>"; };
 		63CA46351540699E00CCDD2A /* STImageUpload.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STImageUpload.m; sourceTree = "<group>"; };
 		63CA463815406A3D00CCDD2A /* STStampedParameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STStampedParameter.h; sourceTree = "<group>"; };
@@ -4603,12 +4575,8 @@
 		63DC7B55152E1867001BA610 /* STStampButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STStampButton.m; sourceTree = "<group>"; };
 		63DCED5D15C6E86800C5A290 /* fbDWeRlKQCgbrziKfMsl.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = fbDWeRlKQCgbrziKfMsl.ttf; sourceTree = "<group>"; };
 		63DCED6115C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TitlingGothicFB-StandSky.ttf"; sourceTree = "<group>"; };
-		63E252F915347856007AD006 /* STPlaylistPopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STPlaylistPopUp.h; sourceTree = "<group>"; };
-		63E252FA15347856007AD006 /* STPlaylistPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STPlaylistPopUp.m; sourceTree = "<group>"; };
 		63E252FD153478DE007AD006 /* STTablePopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTablePopUp.h; sourceTree = "<group>"; };
 		63E252FE153478DE007AD006 /* STTablePopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTablePopUp.m; sourceTree = "<group>"; };
-		63E253011534B8D2007AD006 /* STRdioPlaylistPopUp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRdioPlaylistPopUp.h; sourceTree = "<group>"; };
-		63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STRdioPlaylistPopUp.m; sourceTree = "<group>"; };
 		63E2532B1534CD59007AD006 /* STAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STAppDelegate.h; sourceTree = "<group>"; };
 		63E2532C1534CD5A007AD006 /* STAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STAppDelegate.m; sourceTree = "<group>"; };
 		63E2532F1534CFEF007AD006 /* STRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STRootViewController.h; sourceTree = "<group>"; };
@@ -4739,8 +4707,6 @@
 		7E303F7813F0BB7700C1F794 /* gradient_background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gradient_background.png; sourceTree = "<group>"; };
 		7E303F7913F0BB7700C1F794 /* gradient_background@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gradient_background@2x.png"; sourceTree = "<group>"; };
 		7E35A72A13DB9267008F856F /* search_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "search_icon@2x.png"; sourceTree = "<group>"; };
-		7E3909341401975C00910F98 /* Notifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Notifications.h; sourceTree = "<group>"; };
-		7E3909351401975C00910F98 /* Notifications.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Notifications.m; sourceTree = "<group>"; };
 		7E3B6D7813D7509600FBE958 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
 		7E3B6D7913D7509600FBE958 /* Util.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Util.m; sourceTree = "<group>"; };
 		7E407E80144F462400D7847F /* NSAttributedString+Attributes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSAttributedString+Attributes.h"; sourceTree = "<group>"; };
@@ -4788,8 +4754,6 @@
 		7E58964A147C468B002268C4 /* Stamped copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Stamped copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E5D9E9614B3C0DC00C340CA /* STScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STScrollView.h; sourceTree = "<group>"; };
 		7E5D9E9714B3C0DD00C340CA /* STScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STScrollView.m; sourceTree = "<group>"; };
-		7E5EB261140C0535007D164F /* STTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = STTextField.h; sourceTree = "<group>"; };
-		7E5EB262140C0535007D164F /* STTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = STTextField.m; sourceTree = "<group>"; };
 		7E5FEED713D0C497008BCA48 /* nav_bar_ripple@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "nav_bar_ripple@2x.png"; sourceTree = "<group>"; };
 		7E6318DE14A2900700B591E6 /* credit_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "credit_icon@2x.png"; sourceTree = "<group>"; };
 		7E6BAC281489571C000A77FE /* cat_icon_eSearch_other.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cat_icon_eSearch_other.png; sourceTree = "<group>"; };
@@ -6339,18 +6303,11 @@
 			name = "Table Delegates";
 			sourceTree = "<group>";
 		};
-		633F26B51538AA5800391F15 /* Post Stamp */ = {
-			isa = PBXGroup;
-			children = (
-				633F26B61538AA9F00391F15 /* STPostStampViewController.h */,
-				633F26B71538AA9F00391F15 /* STPostStampViewController.m */,
-			);
-			name = "Post Stamp";
-			sourceTree = "<group>";
-		};
 		633FACD415AF6900001F937F /* V1 Settings Port */ = {
 			isa = PBXGroup;
 			children = (
+				7E0D4EE814662BEB00F81CEC /* STViewController.h */,
+				7E0D4EE914662BEC00F81CEC /* STViewController.m */,
 				633FACE715AF693A001F937F /* WebViewController.h */,
 				633FACE815AF693A001F937F /* WebViewController.m */,
 				633FACE915AF693A001F937F /* WebViewController.xib */,
@@ -6531,8 +6488,6 @@
 			children = (
 				6360B5C8153F604900BB8C82 /* STUniversalNewsController.h */,
 				6360B5C9153F604900BB8C82 /* STUniversalNewsController.m */,
-				63159A841544A9A5008E75DD /* STActivityCell.h */,
-				63159A851544A9A5008E75DD /* STActivityCell.m */,
 				6375898E15928C7C0049A0AA /* STFastActivityCell.h */,
 				6375898F15928C7C0049A0AA /* STFastActivityCell.m */,
 			);
@@ -6838,8 +6793,6 @@
 				7E9F80EA13F88FA4003D7185 /* UIColor+Stamped.m */,
 				7E260F8914BB77BB00D9F7F0 /* UIButton+Stamped.h */,
 				7E260F8A14BB77BB00D9F7F0 /* UIButton+Stamped.m */,
-				6360B594153F078D00BB8C82 /* CALayer+Stamped.h */,
-				6360B595153F078D00BB8C82 /* CALayer+Stamped.m */,
 				6380A76015066EAD003087EF /* STPageControl.h */,
 				6380A76115066EAD003087EF /* STPageControl.m */,
 				63E2532B1534CD59007AD006 /* STAppDelegate.h */,
@@ -6848,8 +6801,6 @@
 				63E253301534CFEF007AD006 /* STRootViewController.m */,
 				63E253371535C67B007AD006 /* STConfiguration.h */,
 				63E253381535C67D007AD006 /* STConfiguration.m */,
-				63BFCC9415435B7C00817EC5 /* STRootScrollView.h */,
-				63BFCC9515435B7C00817EC5 /* STRootScrollView.m */,
 				636961B41543682B00993C4F /* STLeftMenuViewController.h */,
 				636961B51543682B00993C4F /* STLeftMenuViewController.m */,
 				63159A881544E959008E75DD /* STRightMenuViewController.h */,
@@ -6991,19 +6942,6 @@
 			name = "Stamped API";
 			sourceTree = "<group>";
 		};
-		63A6E287153DDFB200D84915 /* Profile View */ = {
-			isa = PBXGroup;
-			children = (
-				6360B5A5153F417900BB8C82 /* STProfileViewController.h */,
-				6360B5A6153F417900BB8C82 /* STProfileViewController.m */,
-				63323C6C1540D1CF00C8F7D3 /* UserCell.h */,
-				63323C6D1540D1CF00C8F7D3 /* UserCell.m */,
-				63BA769E1545A2AA00EE95DA /* STProfileSource.h */,
-				63BA769F1545A2AA00EE95DA /* STProfileSource.m */,
-			);
-			name = "Profile View";
-			sourceTree = "<group>";
-		};
 		63A6E288153DDFD900D84915 /* Entities Search */ = {
 			isa = PBXGroup;
 			children = (
@@ -7133,15 +7071,6 @@
 			name = "Cell Factories";
 			sourceTree = "<group>";
 		};
-		63CA461A154050B900CCDD2A /* Create Stamp */ = {
-			isa = PBXGroup;
-			children = (
-				63CA461B1540515500CCDD2A /* STCreateStampViewController.h */,
-				63CA461C1540515500CCDD2A /* STCreateStampViewController.m */,
-			);
-			name = "Create Stamp";
-			sourceTree = "<group>";
-		};
 		63CB0E291587C6DE000A4832 /* Check soon */ = {
 			isa = PBXGroup;
 			children = (
@@ -7245,12 +7174,6 @@
 		63CC4436152CFBB80026BB25 /* Legacy */ = {
 			isa = PBXGroup;
 			children = (
-				7E3909341401975C00910F98 /* Notifications.h */,
-				7E3909351401975C00910F98 /* Notifications.m */,
-				7E0D4EE814662BEB00F81CEC /* STViewController.h */,
-				7E0D4EE914662BEC00F81CEC /* STViewController.m */,
-				7E5EB261140C0535007D164F /* STTextField.h */,
-				7E5EB262140C0535007D164F /* STTextField.m */,
 				7EDE38CE13C4D9A7003AEE52 /* STNavigationBar.h */,
 				7EDE38CF13C4D9A7003AEE52 /* STNavigationBar.m */,
 				7EE7E35D13CCB3D100FA3B3A /* UserImageView.h */,
@@ -7322,14 +7245,10 @@
 				637E748E155AFBF60022CD2E /* STShareButton.m */,
 				63E5E6BE152E48A300579369 /* STStampsView.h */,
 				63E5E6BF152E48A300579369 /* STStampsView.m */,
-				63E252F915347856007AD006 /* STPlaylistPopUp.h */,
-				63E252FA15347856007AD006 /* STPlaylistPopUp.m */,
 				63BBFA081599F28D006B8099 /* STPlayerPopUp.h */,
 				63BBFA091599F28D006B8099 /* STPlayerPopUp.m */,
 				63E252FD153478DE007AD006 /* STTablePopUp.h */,
 				63E252FE153478DE007AD006 /* STTablePopUp.m */,
-				63E253011534B8D2007AD006 /* STRdioPlaylistPopUp.h */,
-				63E253021534B8D3007AD006 /* STRdioPlaylistPopUp.m */,
 				633F26BE1538BF2500391F15 /* STRippleBar.h */,
 				633F26BF1538BF2500391F15 /* STRippleBar.m */,
 				633F26C21538C1FD00391F15 /* STRippleViewContainer.h */,
@@ -7780,6 +7699,11 @@
 		7EC6B4A413C6036500CE83DD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				6331379215D9AA7600DEFB16 /* instagram_sample.jpeg */,
+				6331378615D97BEB00DEFB16 /* post_stamp_share_email@2x.png */,
+				6331378715D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png */,
+				6331378815D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png */,
+				6331378215D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png */,
 				63DBEEDD15BCD0ED00A694DD /* small_location_icon_purple@2x.png */,
 				63DBEED915BCD0BB00A694DD /* small_location_icon@2x.png */,
 				632343A015B9D58F00D3955C /* eSearch_location_button.png */,
@@ -8146,6 +8070,7 @@
 		7EFE8FC813C4D8E300324F34 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				633CB6C715D5B734007B664C /* README */,
 				633FACD415AF6900001F937F /* V1 Settings Port */,
 				63026A1815ADD06B007B87B1 /* No Data */,
 				634DAC90158100600004946C /* Layout */,
@@ -8164,11 +8089,8 @@
 				638067B41541F39A00423E98 /* Users View */,
 				6380679F1541B58A00423E98 /* Debug */,
 				63323C611540C15B00C8F7D3 /* Todo */,
-				63CA461A154050B900CCDD2A /* Create Stamp */,
 				6360B5C7153F5FB600BB8C82 /* Universal News */,
 				63A6E288153DDFD900D84915 /* Entities Search */,
-				63A6E287153DDFB200D84915 /* Profile View */,
-				633F26B51538AA5800391F15 /* Post Stamp */,
 				633CEF201535E2BD009E1C06 /* Table Delegates */,
 				63F016BE152CC6200069B930 /* View Components */,
 				638D7725152B4F76006E4988 /* Stamped API */,
@@ -9069,6 +8991,12 @@
 				63DBEEE015BCD0ED00A694DD /* small_location_icon_purple@2x.png in Resources */,
 				63DCED6015C6E86800C5A290 /* fbDWeRlKQCgbrziKfMsl.ttf in Resources */,
 				63DCED6415C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf in Resources */,
+				633CB6CA15D5B737007B664C /* README in Resources */,
+				6331378515D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png in Resources */,
+				6331378B15D97BEB00DEFB16 /* post_stamp_share_email@2x.png in Resources */,
+				6331378E15D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png in Resources */,
+				6331379115D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png in Resources */,
+				6331379515D9AA7600DEFB16 /* instagram_sample.jpeg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9779,6 +9707,12 @@
 				63DBEEDF15BCD0ED00A694DD /* small_location_icon_purple@2x.png in Resources */,
 				63DCED5F15C6E86800C5A290 /* fbDWeRlKQCgbrziKfMsl.ttf in Resources */,
 				63DCED6315C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf in Resources */,
+				633CB6C915D5B737007B664C /* README in Resources */,
+				6331378415D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png in Resources */,
+				6331378A15D97BEB00DEFB16 /* post_stamp_share_email@2x.png in Resources */,
+				6331378D15D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png in Resources */,
+				6331379015D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png in Resources */,
+				6331379415D9AA7600DEFB16 /* instagram_sample.jpeg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10490,6 +10424,12 @@
 				63DBEEDE15BCD0ED00A694DD /* small_location_icon_purple@2x.png in Resources */,
 				63DCED5E15C6E86800C5A290 /* fbDWeRlKQCgbrziKfMsl.ttf in Resources */,
 				63DCED6215C6E86F00C5A290 /* TitlingGothicFB-StandSky.ttf in Resources */,
+				633CB6C815D5B737007B664C /* README in Resources */,
+				6331378315D97A5A00DEFB16 /* post_stamp_share_twitter@2x.png in Resources */,
+				6331378915D97BEB00DEFB16 /* post_stamp_share_email@2x.png in Resources */,
+				6331378C15D97BEB00DEFB16 /* post_stamp_share_facebook@2x.png in Resources */,
+				6331378F15D97BEB00DEFB16 /* post_stamp_share_instagram@2x.png in Resources */,
+				6331379315D9AA7600DEFB16 /* instagram_sample.jpeg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -10511,8 +10451,6 @@
 				034BDFAC1562F6980008F160 /* KeyChainItemWrapper.m in Sources */,
 				034BDFAE1562F6980008F160 /* UIColor+Stamped.m in Sources */,
 				034BDFAF1562F6980008F160 /* STSearchField.m in Sources */,
-				034BDFB31562F6980008F160 /* Notifications.m in Sources */,
-				034BDFB41562F6980008F160 /* STTextField.m in Sources */,
 				034BDFB61562F6980008F160 /* STImageView.m in Sources */,
 				034BDFC11562F6980008F160 /* NSAttributedString+Attributes.m in Sources */,
 				034BDFC21562F6980008F160 /* TTTAttributedLabel.m in Sources */,
@@ -10608,9 +10546,7 @@
 				034BE0381562F6980008F160 /* STSimpleImage.m in Sources */,
 				034BE03A1562F6980008F160 /* STStampsView.m in Sources */,
 				034BE03C1562F6980008F160 /* STPlaylistViewFactory.m in Sources */,
-				034BE03F1562F6980008F160 /* STPlaylistPopUp.m in Sources */,
 				034BE0401562F6980008F160 /* STTablePopUp.m in Sources */,
-				034BE0411562F6980008F160 /* STRdioPlaylistPopUp.m in Sources */,
 				034BE0421562F6980008F160 /* STAppDelegate.m in Sources */,
 				034BE0431562F6980008F160 /* STRootViewController.m in Sources */,
 				034BE0441562F6980008F160 /* STConfiguration.m in Sources */,
@@ -10624,7 +10560,6 @@
 				034BE04D1562F6980008F160 /* STSimpleStampedBy.m in Sources */,
 				034BE04E1562F6980008F160 /* STSimpleStampedByGroup.m in Sources */,
 				034BE04F1562F6980008F160 /* STSimpleUserDetail.m in Sources */,
-				034BE0501562F6980008F160 /* STPostStampViewController.m in Sources */,
 				034BE0511562F6980008F160 /* STRippleBar.m in Sources */,
 				034BE0521562F6980008F160 /* STRippleViewContainer.m in Sources */,
 				034BE0531562F6980008F160 /* STSimpleBadge.m in Sources */,
@@ -10633,34 +10568,27 @@
 				034BE0561562F6980008F160 /* STStampedByView.m in Sources */,
 				034BE0581562F6980008F160 /* STEntitySearchController.m in Sources */,
 				034BE0591562F6980008F160 /* STTableViewController.m in Sources */,
-				034BE05A1562F6980008F160 /* CALayer+Stamped.m in Sources */,
 				034BE05B1562F6980008F160 /* STButton.m in Sources */,
 				034BE05C1562F6980008F160 /* STEntitySuggested.m in Sources */,
 				034BE05D1562F6980008F160 /* STSimpleEntitySearchResult.m in Sources */,
-				034BE05E1562F6980008F160 /* STProfileViewController.m in Sources */,
 				034BE05F1562F6980008F160 /* STEntitySearch.m in Sources */,
 				034BE0601562F6980008F160 /* STSimpleEntitySearchSection.m in Sources */,
 				034BE0611562F6980008F160 /* STUniversalNewsController.m in Sources */,
 				034BE0621562F6980008F160 /* STSimpleActivity.m in Sources */,
 				034BE0631562F6980008F160 /* STSimpleActivityObjects.m in Sources */,
 				034BE0641562F6980008F160 /* STSimpleActivityReference.m in Sources */,
-				034BE0651562F6980008F160 /* STCreateStampViewController.m in Sources */,
 				034BE0661562F6980008F160 /* STImageUpload.m in Sources */,
 				034BE0671562F6980008F160 /* STStampedParameter.m in Sources */,
 				034BE0681562F6980008F160 /* STStampNew.m in Sources */,
 				034BE0691562F6980008F160 /* STTodoViewController.m in Sources */,
-				034BE06B1562F6980008F160 /* UserCell.m in Sources */,
 				034BE06D1562F6980008F160 /* STDebugViewController.m in Sources */,
 				034BE06E1562F6980008F160 /* STDebug.m in Sources */,
 				034BE06F1562F6980008F160 /* STDebugDatumViewController.m in Sources */,
 				034BE0701562F6980008F160 /* STDebugDatum.m in Sources */,
 				034BE0711562F6980008F160 /* STUsersViewController.m in Sources */,
 				034BE0721562F6980008F160 /* STUserCell.m in Sources */,
-				034BE0731562F6980008F160 /* STRootScrollView.m in Sources */,
 				034BE0761562F6980008F160 /* STLeftMenuViewController.m in Sources */,
-				034BE0771562F6980008F160 /* STActivityCell.m in Sources */,
 				034BE0781562F6980008F160 /* STRightMenuViewController.m in Sources */,
-				034BE0791562F6980008F160 /* STProfileSource.m in Sources */,
 				034BE07A1562F6980008F160 /* STToggleButton.m in Sources */,
 				034BE07B1562F6980008F160 /* STSimpleContentItem.m in Sources */,
 				034BE07C1562F6980008F160 /* STSimplePreviews.m in Sources */,
@@ -10875,8 +10803,6 @@
 				7E5893D2147C468B002268C4 /* KeyChainItemWrapper.m in Sources */,
 				7E5893D5147C468B002268C4 /* UIColor+Stamped.m in Sources */,
 				7E5893D6147C468B002268C4 /* STSearchField.m in Sources */,
-				7E5893DD147C468B002268C4 /* Notifications.m in Sources */,
-				7E5893E0147C468B002268C4 /* STTextField.m in Sources */,
 				7E5893E4147C468B002268C4 /* STImageView.m in Sources */,
 				7E589409147C468B002268C4 /* NSAttributedString+Attributes.m in Sources */,
 				7E58940A147C468B002268C4 /* TTTAttributedLabel.m in Sources */,
@@ -10972,9 +10898,7 @@
 				63E5E6AC152E2B8900579369 /* STSimpleImage.m in Sources */,
 				63E5E6C1152E48A300579369 /* STStampsView.m in Sources */,
 				63A6498B1532668F001D9314 /* STPlaylistViewFactory.m in Sources */,
-				63E252FC15347856007AD006 /* STPlaylistPopUp.m in Sources */,
 				63E25300153478DE007AD006 /* STTablePopUp.m in Sources */,
-				63E253041534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */,
 				63E2532E1534CD5A007AD006 /* STAppDelegate.m in Sources */,
 				63E253321534CFF0007AD006 /* STRootViewController.m in Sources */,
 				63E2533A1535C67F007AD006 /* STConfiguration.m in Sources */,
@@ -10988,7 +10912,6 @@
 				633CEF4E15387111009E1C06 /* STSimpleStampedBy.m in Sources */,
 				633CEF52153871C9009E1C06 /* STSimpleStampedByGroup.m in Sources */,
 				633F26B3153884FF00391F15 /* STSimpleUserDetail.m in Sources */,
-				633F26B91538AA9F00391F15 /* STPostStampViewController.m in Sources */,
 				633F26C11538BF2500391F15 /* STRippleBar.m in Sources */,
 				633F26C51538C1FD00391F15 /* STRippleViewContainer.m in Sources */,
 				633F26CA1538D08A00391F15 /* STSimpleBadge.m in Sources */,
@@ -10997,34 +10920,27 @@
 				634BA4BA153CA8BE003F96AB /* STStampedByView.m in Sources */,
 				63A6E28C153DE32B00D84915 /* STEntitySearchController.m in Sources */,
 				63A6E293153DE43600D84915 /* STTableViewController.m in Sources */,
-				6360B597153F078D00BB8C82 /* CALayer+Stamped.m in Sources */,
 				6360B59B153F099E00BB8C82 /* STButton.m in Sources */,
 				6360B59F153F172E00BB8C82 /* STEntitySuggested.m in Sources */,
 				6360B5A4153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */,
-				6360B5A8153F417900BB8C82 /* STProfileViewController.m in Sources */,
 				6360B5AC153F478F00BB8C82 /* STEntitySearch.m in Sources */,
 				6360B5B1153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */,
 				6360B5CB153F604900BB8C82 /* STUniversalNewsController.m in Sources */,
 				6360B5D3153F9E2800BB8C82 /* STSimpleActivity.m in Sources */,
 				6360B5D7153FA69B00BB8C82 /* STSimpleActivityObjects.m in Sources */,
 				6360B5DB153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */,
-				63CA461E1540515500CCDD2A /* STCreateStampViewController.m in Sources */,
 				63CA46371540699E00CCDD2A /* STImageUpload.m in Sources */,
 				63CA463B15406A3E00CCDD2A /* STStampedParameter.m in Sources */,
 				63CA463F15406B6800CCDD2A /* STStampNew.m in Sources */,
 				63323C651540C1A400C8F7D3 /* STTodoViewController.m in Sources */,
-				63323C6F1540D1CF00C8F7D3 /* UserCell.m in Sources */,
 				638067A31541B5A600423E98 /* STDebugViewController.m in Sources */,
 				638067A71541B61800423E98 /* STDebug.m in Sources */,
 				638067AB1541C25500423E98 /* STDebugDatumViewController.m in Sources */,
 				638067AF1541CDF000423E98 /* STDebugDatum.m in Sources */,
 				638067B81541F3B000423E98 /* STUsersViewController.m in Sources */,
 				63BFCC7E1541F7AE00817EC5 /* STUserCell.m in Sources */,
-				63BFCC9715435B7C00817EC5 /* STRootScrollView.m in Sources */,
 				636961B71543682B00993C4F /* STLeftMenuViewController.m in Sources */,
-				63159A871544A9A5008E75DD /* STActivityCell.m in Sources */,
 				63159A8B1544E95A008E75DD /* STRightMenuViewController.m in Sources */,
-				63BA76A11545A2AA00EE95DA /* STProfileSource.m in Sources */,
 				63BA7A1E1546FF6B00EE95DA /* STToggleButton.m in Sources */,
 				63BA7A591547415400EE95DA /* STSimpleContentItem.m in Sources */,
 				63BA7A5F1547478E00EE95DA /* STSimplePreviews.m in Sources */,
@@ -11241,8 +11157,6 @@
 				7EC1C65013F456FE0070CE6D /* KeyChainItemWrapper.m in Sources */,
 				7E9F80EB13F88FA4003D7185 /* UIColor+Stamped.m in Sources */,
 				7EE482EC13FAA41400359EEA /* STSearchField.m in Sources */,
-				7E3909361401975D00910F98 /* Notifications.m in Sources */,
-				7E5EB263140C0535007D164F /* STTextField.m in Sources */,
 				7E0A87B71416CBDB0013AC4D /* STImageView.m in Sources */,
 				7E407E84144F462400D7847F /* NSAttributedString+Attributes.m in Sources */,
 				7E407E85144F462400D7847F /* TTTAttributedLabel.m in Sources */,
@@ -11338,9 +11252,7 @@
 				63E5E6AB152E2B8900579369 /* STSimpleImage.m in Sources */,
 				63E5E6C0152E48A300579369 /* STStampsView.m in Sources */,
 				63A6498A1532668F001D9314 /* STPlaylistViewFactory.m in Sources */,
-				63E252FB15347856007AD006 /* STPlaylistPopUp.m in Sources */,
 				63E252FF153478DE007AD006 /* STTablePopUp.m in Sources */,
-				63E253031534B8D4007AD006 /* STRdioPlaylistPopUp.m in Sources */,
 				63E2532D1534CD5A007AD006 /* STAppDelegate.m in Sources */,
 				63E253311534CFF0007AD006 /* STRootViewController.m in Sources */,
 				63E253391535C67F007AD006 /* STConfiguration.m in Sources */,
@@ -11354,7 +11266,6 @@
 				633CEF4D15387111009E1C06 /* STSimpleStampedBy.m in Sources */,
 				633CEF51153871C9009E1C06 /* STSimpleStampedByGroup.m in Sources */,
 				633F26B2153884FF00391F15 /* STSimpleUserDetail.m in Sources */,
-				633F26B81538AA9F00391F15 /* STPostStampViewController.m in Sources */,
 				633F26C01538BF2500391F15 /* STRippleBar.m in Sources */,
 				633F26C41538C1FD00391F15 /* STRippleViewContainer.m in Sources */,
 				633F26C91538D08A00391F15 /* STSimpleBadge.m in Sources */,
@@ -11363,34 +11274,27 @@
 				634BA4B9153CA8BE003F96AB /* STStampedByView.m in Sources */,
 				63A6E28B153DE32B00D84915 /* STEntitySearchController.m in Sources */,
 				63A6E292153DE43600D84915 /* STTableViewController.m in Sources */,
-				6360B596153F078D00BB8C82 /* CALayer+Stamped.m in Sources */,
 				6360B59A153F099E00BB8C82 /* STButton.m in Sources */,
 				6360B59E153F172E00BB8C82 /* STEntitySuggested.m in Sources */,
 				6360B5A3153F1B7B00BB8C82 /* STSimpleEntitySearchResult.m in Sources */,
-				6360B5A7153F417900BB8C82 /* STProfileViewController.m in Sources */,
 				6360B5AB153F478F00BB8C82 /* STEntitySearch.m in Sources */,
 				6360B5B0153F502A00BB8C82 /* STSimpleEntitySearchSection.m in Sources */,
 				6360B5CA153F604900BB8C82 /* STUniversalNewsController.m in Sources */,
 				6360B5D2153F9E2800BB8C82 /* STSimpleActivity.m in Sources */,
 				6360B5D6153FA69B00BB8C82 /* STSimpleActivityObjects.m in Sources */,
 				6360B5DA153FA80A00BB8C82 /* STSimpleActivityReference.m in Sources */,
-				63CA461D1540515500CCDD2A /* STCreateStampViewController.m in Sources */,
 				63CA46361540699E00CCDD2A /* STImageUpload.m in Sources */,
 				63CA463A15406A3E00CCDD2A /* STStampedParameter.m in Sources */,
 				63CA463E15406B6800CCDD2A /* STStampNew.m in Sources */,
 				63323C641540C1A400C8F7D3 /* STTodoViewController.m in Sources */,
-				63323C6E1540D1CF00C8F7D3 /* UserCell.m in Sources */,
 				638067A21541B5A600423E98 /* STDebugViewController.m in Sources */,
 				638067A61541B61800423E98 /* STDebug.m in Sources */,
 				638067AA1541C25500423E98 /* STDebugDatumViewController.m in Sources */,
 				638067AE1541CDF000423E98 /* STDebugDatum.m in Sources */,
 				638067B71541F3B000423E98 /* STUsersViewController.m in Sources */,
 				63BFCC7D1541F7AE00817EC5 /* STUserCell.m in Sources */,
-				63BFCC9615435B7C00817EC5 /* STRootScrollView.m in Sources */,
 				636961B61543682B00993C4F /* STLeftMenuViewController.m in Sources */,
-				63159A861544A9A5008E75DD /* STActivityCell.m in Sources */,
 				63159A8A1544E95A008E75DD /* STRightMenuViewController.m in Sources */,
-				63BA76A01545A2AA00EE95DA /* STProfileSource.m in Sources */,
 				63BA7A1D1546FF6B00EE95DA /* STToggleButton.m in Sources */,
 				63BA7A581547415400EE95DA /* STSimpleContentItem.m in Sources */,
 				63BA7A5E1547478E00EE95DA /* STSimplePreviews.m in Sources */,

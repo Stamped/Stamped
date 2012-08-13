@@ -19,12 +19,16 @@
 #import "Util.h"
 #import "QuartzUtils.h"
 
-@interface SignupViewController ()
+@interface SignupViewController () <UITextFieldDelegate>
+
+@property (nonatomic, readonly, retain) NSMutableDictionary* accountValues;
 
 @end
 
 @implementation SignupViewController
 @synthesize delegate;
+
+@synthesize accountValues = _accountValues;
 
 - (id)init {
     if (self = [super initWithStyle:UITableViewStyleGrouped]) {
@@ -34,7 +38,7 @@
        
         [STEvents addObserver:self selector:@selector(signupFinished:) event:EventTypeSignupFinished];
         [STEvents addObserver:self selector:@selector(signupFailed:) event:EventTypeSignupFailed];
-
+        _accountValues = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
@@ -99,6 +103,7 @@
 
 - (void)dealloc {
     [_dataSource release];
+    [_accountValues release];
     [STEvents removeObserver:self];
     [super dealloc];
 }
@@ -326,6 +331,13 @@
         cell.titleLabel.textColor = [UIColor colorWithWhite:0.6f alpha:1.0f];
         cell.titleLabel.textAlignment = UITextAlignmentRight;
     }
+    cell.textField.tag = indexPath.row;
+    NSString* key = [_dataSource objectAtIndex:indexPath.row];
+    NSString* value = [self.accountValues objectForKey:key];
+    if (!value) {
+        value = @"";
+    }
+    cell.textField.text = value;
     
     cell.textField.returnKeyType = (indexPath.row == [_dataSource count]-1) ? UIReturnKeyDone : UIReturnKeyNext;
     cell.titleLabel.text = [_dataSource objectAtIndex:indexPath.row];
@@ -368,6 +380,11 @@
     
     return YES;
 
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    NSString* key = [_dataSource objectAtIndex:textField.tag];
+    [self.accountValues setObject:textField.text forKey:key];
 }
 
 

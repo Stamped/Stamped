@@ -26,6 +26,7 @@
                        scope:(STStampedAPIScope)scope 
                    blacklist:(NSSet*)blacklist
                     entityID:(NSString*)entityID
+                   postStamp:(BOOL)postStamp
                  andDelegate:(id<STViewDelegate>)delegate;
 
 @property (nonatomic, readonly, assign) BOOL hasImages;
@@ -49,10 +50,11 @@
 }
 
 - (id)initWithStampedByGroup:(id<STStampedByGroup>)group 
-               imagesEnabled:(BOOL)imagesEnabled 
+               imagesEnabled:(BOOL)imagesEnabled
                        scope:(STStampedAPIScope)scope 
-                   blacklist:(NSSet*)blacklist 
+                   blacklist:(NSSet*)blacklist
                     entityID:(NSString*)entityID
+                   postStamp:(BOOL)postStamp
                  andDelegate:(id<STViewDelegate>)delegate {
     self = [super initWithFrame:CGRectMake(0, 0, 290, 0)];
     if (self) {
@@ -168,7 +170,7 @@
     }
     STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
     controller.userIDToStampID = mapping;
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    [Util pushController:controller modal:NO animated:YES];
 }
 
 @end
@@ -176,18 +178,27 @@
 @implementation STStampedByView
 
 - (id)initWithStampedBy:(id<STStampedBy>)stampedBy blacklist:(NSSet*)blacklist entityID:(NSString*)entityID andDelegate:(id<STViewDelegate>)delegate {
+    return [self initWithStampedBy:stampedBy blacklist:blacklist entityID:entityID includeFriends:YES andDelegate:delegate];
+}
+
+- (id)initWithStampedBy:(id<STStampedBy>)stampedBy
+              blacklist:(NSSet*)blacklist 
+               entityID:(NSString*)entityID 
+         includeFriends:(BOOL)includeFriends 
+            andDelegate:(id<STViewDelegate>)delegate {
     self = [super initWithDelegate:delegate andFrame:CGRectMake(15, 0, 290, 0)];
     if (self) {
         //self.clipsToBounds = YES;
         NSMutableArray* array = [NSMutableArray array];
         //TODO determine hasImages purpose or remove
         BOOL hasImages = NO;
-        if (stampedBy.friends.count.integerValue) {
+        if (stampedBy.friends.count.integerValue && includeFriends) {
             STStampedByViewCell* child = [[[STStampedByViewCell alloc] initWithStampedByGroup:stampedBy.friends 
                                                                                 imagesEnabled:YES
                                                                                         scope:STStampedAPIScopeFriends
                                                                                     blacklist:blacklist 
                                                                                      entityID:entityID
+                                                                                    postStamp:!includeFriends
                                                                                   andDelegate:self] autorelease];
             [array addObject:child];
             hasImages = hasImages | child.hasImages;
@@ -198,20 +209,23 @@
                                                                                         scope:STStampedAPIScopeEveryone
                                                                                     blacklist:blacklist
                                                                                      entityID:entityID
+                                                                                    postStamp:!includeFriends
                                                                                   andDelegate:self] autorelease];
             [array addObject:child];
             hasImages = hasImages | child.hasImages;
         }
         //15, 25
         if (array.count) {
-            UILabel* header = [Util viewWithText:@"Stamped By"
-                                            font:[UIFont stampedBoldFontWithSize:12]
-                                           color:[UIColor stampedDarkGrayColor]
-                                            mode:UILineBreakModeClip
-                                      andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-            [Util reframeView:header withDeltas:CGRectMake(15, 9, 0, 10)];
-            [self appendChildView:header];
-            [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, -6.5)];
+            if (includeFriends) {
+                UILabel* header = [Util viewWithText:@"Stamped By"
+                                                font:[UIFont stampedBoldFontWithSize:12]
+                                               color:[UIColor stampedDarkGrayColor]
+                                                mode:UILineBreakModeClip
+                                          andMaxSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+                [Util reframeView:header withDeltas:CGRectMake(15, 9, 0, 10)];
+                [self appendChildView:header];
+                [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, -6.5)];
+            }
             BOOL first = YES;
             UIImage* image = [UIImage imageNamed:@"eDetailBox_line"];
             for (STStampedByViewCell* cell in array) {

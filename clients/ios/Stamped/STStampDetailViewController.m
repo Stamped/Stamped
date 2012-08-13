@@ -21,7 +21,6 @@
 #import "STStampedActions.h"
 #import "STStampedAPI.h"
 #import "STStampDetailCommentsView.h"
-#import "STToolbarView.h"
 #import "STLikeButton.h"
 #import "STTodoButton.h"
 #import "STStampButton.h"
@@ -324,7 +323,7 @@ typedef enum {
         
         if ([MFMailComposeViewController canSendMail])
             [sheet addButtonWithTitle:NSLocalizedString(@"Email stamp", nil)];
-//        [sheet addButtonWithTitle:@"Share to Instagram"];
+        [sheet addButtonWithTitle:@"Share to Instagram"];
         [sheet addButtonWithTitle:@"Copy link"];
         sheet.cancelButtonIndex = [sheet addButtonWithTitle:@"Cancel"];
         sheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
@@ -432,7 +431,7 @@ typedef enum {
         if (confirmed) {
             STActionContext* context = [STActionContext contextWithCompletionBlock:^(id success, NSError *error) {
                 if (!error) {
-                    [[Util sharedNavigationController] popViewControllerAnimated:YES];
+                    [Util compareAndPopController:self animated:YES];
                 }
             }];
             id<STAction> action = [STStampedActions actionDeleteStamp:self.stamp.stampID withOutputContext:context];
@@ -531,7 +530,8 @@ typedef enum {
         frame.origin.y = offsetY;
         self.commentView.frame = frame;
         
-    } else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled) {
+    } 
+    else if (gesture.state == UIGestureRecognizerStateEnded || gesture.state == UIGestureRecognizerStateCancelled) {
         
         // max this animation would move in pts
         CGFloat maxOffsetY = ((self.view.superview.bounds.size.height) - CGRectGetMaxY(commentBeginFrame));
@@ -547,7 +547,8 @@ typedef enum {
                 self.commentView.frame = commentBeginFrame;
             }];
             
-        } else {
+        } 
+        else {
             
             CGFloat diff = ((self.view.superview.bounds.size.height) - CGRectGetMaxY(self.commentView.frame)) + 50.0f;
             float duration = (.3/maxOffsetY)*diff;
@@ -716,9 +717,9 @@ typedef enum {
     else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Email stamp", nil)]) {
         [self showEmailViewController];
     } 
-//    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
-//        [self shareToInstagram];
-//    }
+    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:NSLocalizedString(@"Share to Instagram", nil)]) {
+        [self shareToInstagram];
+    }
 }
 
 static CATransform3D MakePerspetiveTransform() { 
@@ -727,61 +728,85 @@ static CATransform3D MakePerspetiveTransform() {
     return perspective;
 }
 
-//- (void)shareToInstagramWithStamp:(id<STStamp>)stamp 
-//                        heroImage:(UIImage*)image  
-//                         andBlurb:(NSString*)blurb {
-//    CGSize size = CGSizeMake(612, 612);
-//    UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
-//    CGContextRef context = UIGraphicsGetCurrentContext();
-//    
-//    [[UIColor redColor] setStroke];
-//    UIFont* titleFont = [UIFont stampedTitleFontWithSize:80];
-//    [stamp.entity.title drawAtPoint:CGPointMake(42, 110 - titleFont.leading) withFont:titleFont];
-//    
-//    UIImage* categoryImage = [Util categoryIconForCategory:stamp.entity.category
-//                                               subcategory:stamp.entity.subcategory 
-//                                                    filter:nil
-//                                                   andSize:STCategoryIconSize15];
-//    categoryImage = [Util gradientImage:categoryImage withPrimaryColor:@"999999" secondary:@"999999"];
-//    
-//    [categoryImage drawInRect:CGRectMake(26, 124, categoryImage.size.width, categoryImage.size.height)];
-//    
-//    UIFont* subtitleFont = [UIFont stampedFontWithSize:24];
-//    [stamp.entity.subtitle drawAtPoint:CGPointMake(50, 140 - subtitleFont.leading) withFont:subtitleFont];
-//    
-//    CALayer* layer = [[[CALayer alloc] init] autorelease];
-//    [layer setContents:image.CGImage];
-//    [layer drawInContext:context];
-//    
-//    UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
-//    UIGraphicsEndImageContext();
-//    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
-//    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-//    NSString* cacheString = [paths objectAtIndex:0];
-//    NSURL* cacheDir = [NSURL fileURLWithPath:cacheString];
-//    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.ig"];
-//    BOOL success = [UIImageJPEGRepresentation(finalImage, 1.0) writeToURL:igImageHookFile atomically:YES];
-//    
-//    UIDocumentInteractionController *interactionController = [[UIDocumentInteractionController interactionControllerWithURL:igImageHookFile] retain];
-//    interactionController.UTI = @"com.instagram.photo";
-//    interactionController.delegate = self;
-//    if (blurb) {
-//        interactionController.annotation = [NSDictionary dictionaryWithObject:blurb forKey:@"InstagramCaption"];
-//    }
-//    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
-//}
+const CGFloat kSize = 100.;
 
-//- (void)shareToInstagram {
-//    NSString* blurb = nil;
-//    if (self.stamp.contents.count) {
-//        id<STContentItem> contentItem = [self.stamp.contents objectAtIndex:0];
-//        blurb = contentItem.blurb;
-//    }
-//    NSString* entityImageURL = [Util entityImageURLForEntity:self.stamp.entity];
-//    [[STImageCache sharedInstance] imageForImageURL:entityImageURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
-//        [self shareToInstagramWithStamp:self.stamp heroImage:image andBlurb:blurb];
-//    }];
-//}
+- (void)shareToInstagramWithStamp:(id<STStamp>)stamp 
+                        heroImage:(UIImage*)image  
+                         andBlurb:(NSString*)blurb {
+    CGSize size = CGSizeMake(612, 612);
+    UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    [[UIColor redColor] setStroke];
+    UIFont* titleFont = [UIFont stampedTitleFontWithSize:80];
+    [stamp.entity.title drawAtPoint:CGPointMake(42, 110 - titleFont.leading) withFont:titleFont];
+    
+    UIImage* categoryImage = [Util categoryIconForCategory:stamp.entity.category
+                                               subcategory:stamp.entity.subcategory 
+                                                    filter:nil
+                                                   andSize:STCategoryIconSize15];
+    categoryImage = [Util gradientImage:categoryImage withPrimaryColor:@"999999" secondary:@"999999"];
+    
+    [categoryImage drawInRect:CGRectMake(26, 124, categoryImage.size.width, categoryImage.size.height)];
+    
+    UIFont* subtitleFont = [UIFont stampedFontWithSize:24];
+    [stamp.entity.subtitle drawAtPoint:CGPointMake(50, 140 - subtitleFont.leading) withFont:subtitleFont];
+    
+    CATransformLayer* topLayer = [[[CATransformLayer alloc] init] autorelease];
+    topLayer.frame = CGRectMake(0, 0, size.width, size.height);
+    
+    CALayer* layer = [[[CALayer alloc] init] autorelease];
+    layer.frame = CGRectMake(0, 0, image.size.width, image.size.height);
+    [layer setContents:image.CGImage];
+    CATransform3D transform = CATransform3DMakeTranslation(0, -kSize/2, 0);
+    transform = CATransform3DRotate(transform, M_PI_2 * .75, 1, 0, 0);
+    layer.transform = transform;
+    layer.position = CGPointMake(size.width / 2., size.height / 2.);
+    topLayer.sublayerTransform = MakePerspetiveTransform();
+    [topLayer addSublayer:layer];
+    [topLayer renderInContext:context];
+
+//    UIView* container = [[[UIView alloc] initWithFrame:layer.frame] autorelease];
+//    [container.layer addSublayer:layer];
+    
+    UIImage* finalImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+//
+//    UIViewController* controller = [[[UIViewController alloc] init] autorelease];
+//    controller.view.backgroundColor = [UIColor blackColor];
+//    UIImageView* imageView = [[[UIImageView alloc] initWithImage:finalImage] autorelease];
+//    imageView.frame = [Util centeredAndBounded:imageView.frame.size inFrame:CGRectMake(0, 40, 320, 320)];
+//    imageView.backgroundColor = [UIColor whiteColor];
+//    [controller.view.layer addSublayer:topLayer];
+//    //[controller.view addSubview:imageView];
+//    [Util compareAndPushOnto:self withController:controller modal:NO animated:YES];
+    //    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
+    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString* cacheString = [paths objectAtIndex:0];
+    NSURL* cacheDir = [NSURL fileURLWithPath:cacheString];
+    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.ig"];
+    BOOL success = [UIImageJPEGRepresentation(finalImage, 1.0) writeToURL:igImageHookFile atomically:YES];
+    
+    UIDocumentInteractionController *interactionController = [[UIDocumentInteractionController interactionControllerWithURL:igImageHookFile] retain];
+    interactionController.UTI = @"com.instagram.photo";
+    interactionController.delegate = self;
+    if (blurb) {
+        interactionController.annotation = [NSDictionary dictionaryWithObject:blurb forKey:@"InstagramCaption"];
+    }
+    [interactionController presentOpenInMenuFromRect:self.view.frame inView:self.view animated:YES];
+}
+
+- (void)shareToInstagram {
+    NSString* blurb = nil;
+    if (self.stamp.contents.count) {
+        id<STContentItem> contentItem = [self.stamp.contents objectAtIndex:0];
+        blurb = contentItem.blurb;
+    }
+    NSString* entityImageURL = [Util entityImageURLForEntity:self.stamp.entity];
+    [[STImageCache sharedInstance] imageForImageURL:entityImageURL andCallback:^(UIImage *image, NSError *error, STCancellation *cancellation) {
+        [self shareToInstagramWithStamp:self.stamp heroImage:image andBlurb:blurb];
+    }];
+}
 
 -(void)documentInteractionController:(UIDocumentInteractionController *)controller 
        willBeginSendingToApplication:(NSString *)application {

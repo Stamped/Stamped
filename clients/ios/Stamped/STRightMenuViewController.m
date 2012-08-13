@@ -288,12 +288,8 @@
     NSString *category = [self.categories objectAtIndex:button.tag];
     //Map to BE category strings
     category = [self.categoryMapping objectForKey:category];
-    STEntitySearchController *controller = [[STEntitySearchController alloc] initWithCategory:category andQuery:nil];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
-    //STRootViewController *navController = [[STRootViewController alloc] initWithRootViewController:controller];
-    //[menuController presentModalViewController:navController animated:YES];
-    //[navController release];
-    [controller release];
+    STEntitySearchController *controller = [[[STEntitySearchController alloc] initWithCategory:category andQuery:nil] autorelease];
+    [Util pushController:controller modal:NO animated:YES];
     [menuController showRootController:YES];
     
 }

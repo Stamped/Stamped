@@ -165,7 +165,7 @@ static const CGFloat _standardLatLongSpan = 600.0f / 111000.0f;
             [view addSubview:imageView];
             UIView* imageButtom = [Util tapViewWithFrame:imageView.frame andCallback:^{
                 STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:[Util entityImageURLForEntity:entity]]] autorelease];
-                [[Util sharedNavigationController] pushViewController:controller animated:YES];
+                [[Util currentNavigationController] pushViewController:controller animated:YES];
             }];
             [view addSubview:imageButtom];
         }

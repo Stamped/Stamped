@@ -1,0 +1,53 @@
+Stamped V2
+
+by Landon Judkins
+
+with contributions from:
+Andrew Bonventre - V1 author
+Devin Doty - V2 consultant
+Jake Zien - V1 contributor
+
+designed by:
+Anthony Cafaro - V2 designer
+Ed Kim - V1 & V2 designer
+
+property of:
+Stamped, Inc.
+
+-----------------------------------------------------------
+
+Summary:
+    Version 2 of Stamped (V2) was basically a complete rewrite of version 1. 
+From a user perspective, V2 differs from V1 in both UI design and feature set. 
+Feature expansion centered around the provision of more useful content (i.e. metadata,
+actions, etc.), better social signalling (passive sharing, also stamped by, tastemakers),
+and a limited logged out user experience. From a design perspective, most views across
+the app were tweaked or redesigned entirely, and the structure of the app changed from
+a five pane tab-based system to a hidden root menu system with more extensive cross
+linking between views. From a data perspective, v2 also shifted from a strict local
+storage model to a weak caching model wherein data is cached opportunistically across
+the application, but very little data is guaranteed to be available and up to date locally.
+
+    V2 was essentially written mostly by myself with some additions by Devin Doty, a
+temporary consultant. With a background in systems programming, I found the iOS platform
+particularly challenging. The conventions and idioms of iOS are derived from decades of
+iteration with the support of fast deprecation when necessary. As the project progressed
+and I gained more experience, my coding strategies changed to take advantage of that
+experience. This document is intended for developers who need to modify and extend this
+project. In addition to tradition documentation, TODOs, and commentary, I also have made
+an effort to provide situational context to why code was written as it was written. I
+imagine that an understanding of the context will be as useful as the other documentation
+in providing the knowledge to properly leverage existing functionality while avoiding or
+replacing weak-spots.
+
+    This project was not documented as it was written. Virtually all of the documentation
+was added after V2 launch. The use of inline comments is unfortunately rare. In general,
+header files contain comments (and in some cases, references to more detailed comments)
+proportional to their importance and/or complexity.
+
+Groups 
+
+
+
+2012-08-10
+-Landon 

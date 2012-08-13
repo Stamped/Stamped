@@ -192,7 +192,7 @@ static const CGFloat _batchSize = 100;
         if (success) {
             NSMutableArray* tweets = [NSMutableArray array];
             for (STContact* contact in contacts) {
-                [tweets addObject:[NSString stringWithFormat:@"@%@ I’m using @stampedapp to record and share my favorite things. Join me! www.stamped.com", contact.twitterUsername]];
+                [tweets addObject:[NSString stringWithFormat:@"@%@ I think you'd like Stamped - check it out at www.stamped.com/download", contact.twitterUsername]];
             }
             self.loadingLocked = YES;
             self.sendCancellation = [[STTwitter sharedInstance] sendTweets:tweets withCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {

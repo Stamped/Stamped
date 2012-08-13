@@ -213,7 +213,6 @@ static STRestKitLoader* _sharedInstance;
         _authToken = [[STSimpleOAuthToken alloc] init];
         
         _objectManager = [[RKObjectManager objectManagerWithBaseURL:_baseURL] retain];
-        
         _objectManager.requestQueue.delegate = self;
         _objectManager.requestQueue.concurrentRequestsLimit = 1;
         [_objectManager.requestQueue start];
@@ -223,6 +222,7 @@ static STRestKitLoader* _sharedInstance;
         _authRequestQueue.concurrentRequestsLimit = 1;
         _authRequestQueue.requestTimeout = 35;
         [RKClient sharedClient].requestQueue.requestTimeout = 35;
+//        [RKClient sharedClient].disableCertificateValidation = YES;
         [_authRequestQueue start];
         
         NSAssert1(_authRequestQueue != _objectManager.requestQueue, @"Auth queue should not be equal to normal queue %@", _authRequestQueue);
@@ -389,6 +389,14 @@ static STRestKitLoader* _sharedInstance;
             NSAssert1(helper.policy == STRestKitAuthPolicyStampedAuth, @"bad policy, should be Auth was %2", helper.policy);
             if ([helper.path isEqualToString:_refreshPath]) {
                 //fail so login can be handled
+                [self tryRelogin:^(BOOL success, NSError *error, STCancellation *cancellation) {
+                    if (!success) {
+                        [self clearAuthState];
+                        [Util warnWithAPIError:error andBlock:^{
+                            
+                        }];
+                    }
+                }];
             }
             else {
                 [STStampedAPI logError:[NSString stringWithFormat:@"Unknown auth op\npath=%@\nparams=%@", helper.path, helper.params]];
@@ -677,7 +685,7 @@ static STRestKitLoader* _sharedInstance;
                                 nil];
         return [self loadOneWithPath:path
                                 post:YES
-                       authenticated:NO
+                          authPolicy:STRestKitAuthPolicyStampedAuth
                               params:params
                              mapping:[STSimpleOAuthToken mapping]
                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -725,7 +733,7 @@ static STRestKitLoader* _sharedInstance;
     [paramCopy setObject:_clientSecret forKey:@"client_secret"];
     return [self loadOneWithPath:path
                             post:YES
-                   authenticated:NO
+                      authPolicy:STRestKitAuthPolicyStampedAuth
                           params:paramCopy
                          mapping:[STSimpleLoginResponse mapping]
                      andCallback:^(id result, NSError *error, STCancellation *cancellation) {
