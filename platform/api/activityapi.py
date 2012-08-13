@@ -50,7 +50,7 @@ class ActivityAPI(APIObject):
     
     @lazyProperty
     def _stampDB(self):
-        return StampeDB()
+        return StampDB()
 
     @lazyProperty
     def _entityDB(self):

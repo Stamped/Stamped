@@ -41,7 +41,7 @@ def run(request, auth_user_id, form, **kwargs):
     for k, v in form.dataExport().items():
         data[str(k)] = v
     
-    result = entity_api.completeAction(authUserId, **data)
+    result = entity_api.completeAction(auth_user_id, **data)
 
     ### TODO: Convert result into standardized output
 

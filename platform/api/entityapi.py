@@ -28,6 +28,8 @@ from resolve.merge import Merge
 
 from api.helpers import APIObject
 
+from api.activityapi import ActivityAPI
+
 class EntityAPI(APIObject):
 
     def __init__(self):
@@ -57,6 +59,10 @@ class EntityAPI(APIObject):
     @lazyProperty
     def _friendshipDB(self):
         return FriendshipDB()
+
+    @lazyProperty
+    def _activity_api(self):
+        return ActivityAPI()
 
     @lazyProperty
     def _merge(self):
@@ -404,7 +410,7 @@ class EntityAPI(APIObject):
             entity  = self._entityDB.getEntity(stamp.entity.entity_id)
 
             if action in actions and authUserId != stamp.user.user_id:
-                self._addActionCompleteActivity(authUserId, action, source, stamp.stamp_id, stamp.user.user_id)
+                self._activity_api.addActionCompleteActivity(authUserId, action, source, stamp.stamp_id, stamp.user.user_id)
 
         return True
 
