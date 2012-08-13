@@ -411,7 +411,8 @@ def main():
         subtitle = result.subtitle
         if isinstance(result, PlaceEntity) and result.formatAddress():
             subtitle = result.formatAddress()
-        print "SUBTITLE", format_for_print(subtitle)
+        print "SUBTITLE:", format_for_print(subtitle)
+        print "SEARCH ID:", result.search_id
         print result
 
     from libs.CountedFunction import printFunctionCounts
