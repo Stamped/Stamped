@@ -53,8 +53,7 @@ void draw() {
         }
         
         counter = 0;
-        done  = false;
-        depth = 0;
+        done    = false;
     } else {
         done = !system.update(counter++);
     }
