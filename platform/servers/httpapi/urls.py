@@ -134,6 +134,7 @@ urlpatterns = patterns('',
     ### STAMPS
     (r'v1/stamps/create.json',                              'v0.functions.stamps.create'),
     (r'v1/stamps/share/facebook.json',                      'v0.functions.stamps.share', { 'service_name' : 'facebook' }),
+    (r'v1/stamps/share/instagram.json',                     'v0.functions.stamps.shareInstagram')
     (r'v1/stamps/show.json',                                'v0.functions.stamps.show'),
     (r'v1/stamps/remove.json',                              'v0.functions.stamps.remove'),
     (r'v1/stamps/collection.json',                          'v0.functions.stamps.collection'),

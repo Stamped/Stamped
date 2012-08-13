@@ -69,10 +69,11 @@ try:
     # situations, but in general, this is very bad practice.
 
     from libs.Netflix               import *
-    from libs.Facebook                   import *
-    from libs.Twitter                    import *
-    from libs.GooglePlaces               import *
-    from libs.Rdio                       import *
+    from libs.Facebook              import *
+    from libs.Twitter               import *
+    from libs.GooglePlaces          import *
+    from libs.Rdio                  import *
+    from libs.Instagram             import globalInstagram
 
     from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
@@ -112,6 +113,10 @@ class StampedAPI(AStampedAPI):
     @lazyProperty
     def _googlePlaces(self):
         return globalGooglePlaces()
+
+    @lazyProperty
+    def _instagram(self):
+        return globalInstagram()
 
     @lazyProperty
     def _rdio(self):
@@ -2985,6 +2990,40 @@ class StampedAPI(AStampedAPI):
         contents[contentsKey].images = [ image ] # Note: assumes only one image can exist
         stamp.contents = contents
         self._stampDB.updateStamp(stamp)
+
+    def addInstagramStampImage(self, stampId):
+        stamp = self.getStamp(stampId)
+        user = stamp.user
+        entity = stamp.entity
+        primary_color = user.color_primary
+        secondary_color = user.color_secondary
+        user_name = user.screen_name
+        category = entity.category
+        title = entity.title
+        subtitle = entity.subtitle
+
+        entity_img_url = None
+        if len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
+            entity_img_url = stamp.entity.images[0].sizes[0].url
+
+        img = self._instagram.createInstagramImage(entity_img_url, primary_color, secondary_color, user_name,
+            category, title, subtitle)
+
+        filename = '%s-%s-%s' % (stampId, primary_color.upper(), secondary_color.upper())
+        generate = False
+        try:
+            generate = not self._imageDB.bucket.get_key("instagram/%s.png" % filename)
+        except Exception:
+            generate = True
+            utils.printException()
+
+        if generate:
+            image = self._instagram.createInstagramImage(entity_img_url, primary_color, secondary_color, user_name,
+                category, title, subtitle)
+            self._imageDB.addImage('instagram/%s' % filename, image)
+
+        url = 'https://s3.amazonaws.com/stamped.com.static.images/instagram/%s.png' % filename
+        return url
 
 
     @API_CALL

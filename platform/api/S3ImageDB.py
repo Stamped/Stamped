@@ -290,7 +290,7 @@ class S3ImageDB(AImageDB):
         
         if image.format == 'JPG':
             return self._addJPG(prefix, image, optimize=jpeg_optimize, quality=jpeg_quality)
-        elif image.format == 'PNG':
+        elif image.format == 'PNG' or image.format is None:
             return self._addPNG(prefix, image)
         else:
             raise Exception("unsupported image type: '" + suffix + "'")
@@ -417,8 +417,31 @@ class S3ImageDB(AImageDB):
         template = Template(source)
         return template.render(params)
 
-
     def generateStamp(self, primary_color, secondary_color):
+        output = [
+            (195, 195, 'stamped_logo_mask.png',   'logo'),
+            (36,  36,  'stamped_email_mask.png',  'email'),
+            (18,  18,  'stamped_credit_mask.png', 'credit'),
+        ]
+
+        for width, height, mask, suffix in output:
+            filename = '%s-%s-%s-%sx%s' % (primary_color.upper(),
+                                           secondary_color.upper(), suffix, width, height)
+
+            generate = False
+            try:
+                generate = not self.bucket.get_key("logos/%s.png" % filename)
+            except Exception:
+                generate = True
+                utils.printException()
+
+            if generate:
+                image = self.generate_gradient_images(primary_color, secondary_color, width, height, mask)
+                self._addPNG('logos/%s' % filename, image)
+
+
+
+    def generate_gradient_images(self, primary_color, secondary_color, width, height, mask):
         def output_chunk(out, chunk_type, data):
             out.write(struct.pack("!I", len(data)))
             out.write(chunk_type)
@@ -465,7 +488,7 @@ class S3ImageDB(AImageDB):
             split = (c[0:2], c[2:4], c[4:6])
             return [int(x, 16) for x in split]
 
-        def generateImage(filename, mask, width, height, rgb_func):
+        def generateImage(mask, width, height, rgb_func):
             out = StringIO()
             out.write(struct.pack("8B", 137, 80, 78, 71, 13, 10, 26, 10))
             output_chunk(out, "IHDR", struct.pack("!2I5B", width, height, 8, 2, 0, 0, 0))
@@ -479,27 +502,9 @@ class S3ImageDB(AImageDB):
             mask = Image.open(filepath).convert('RGBA').split()[3]
             image.putalpha(mask)
             
-            self._addPNG('logos/%s' % filename, image)
-        
-        output = [
-            (195, 195, 'stamped_logo_mask.png',   'logo'),
-            (36,  36,  'stamped_email_mask.png',  'email'),
-            (18,  18,  'stamped_credit_mask.png', 'credit'),
-        ]
-        
-        for width, height, mask, suffix in output:
-            filename = '%s-%s-%s-%sx%s' % (primary_color.upper(), 
-                secondary_color.upper(), suffix, width, height)
-            
-            generate = False
-            try:
-                generate = not self.bucket.get_key("logos/%s.png" % filename)
-            except Exception:
-                generate = True
-                utils.printException()
-            
-            if generate:
-                generateImage(filename, mask, width, height, gradient([
-                    (2.0, rgb(primary_color), rgb(secondary_color)),
-                ]))
+            return image
+
+        return generateImage(mask, width, height, gradient([
+            (2.0, rgb(primary_color), rgb(secondary_color)),
+        ]))
 

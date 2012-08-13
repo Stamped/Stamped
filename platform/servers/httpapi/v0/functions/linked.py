@@ -319,5 +319,3 @@ def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs
     #TODO throw status codes on error
     #TODO return an HTTPAction
     return transformOutput(response.dataExport())
-
-
