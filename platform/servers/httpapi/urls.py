@@ -109,20 +109,17 @@ urlpatterns = patterns('',
     (r'v1/friendships/invite.json',                         'v1.friendships.invite.run'),
     
     ### ENTITIES
-    (r'v1/entities/create.json',                            'v0.functions.entities.create'),
-    (r'v1/entities/show.json',                              'v0.functions.entities.show'),
-    (r'v1/entities/update.json',                            'v0.functions.entities.update'),
-    (r'v1/entities/remove.json',                            'v0.functions.entities.remove'),
-    (r'v1/entities/autosuggest.json',                       'v0.functions.entities.autosuggest'),
-    (r'v1/entities/search.json',                            'v0.functions.entities.search'),
-    (r'v1/entities/suggested.json',                         'v0.functions.entities.suggested'),
-    (r'v1/entities/menu.json',                              'v0.functions.entities.menu'),
-    (r'v1/entities/stamped_by.json',                        'v0.functions.entities.stampedBy'),
-    (r'v1/entities/edit.html',                              'v0.functions.entities.edit'),
-    (r'v1/entities/update.html',                            'v0.functions.entities.update'),
+    (r'v1/entities/create.json',                            'v1.entities.create.run'),
+    (r'v1/entities/show.json',                              'v1.entities.show.run'),
+    (r'v1/entities/remove.json',                            'v1.entities.remove.run'),
+    (r'v1/entities/autosuggest.json',                       'v1.entities.autosuggest.run'),
+    (r'v1/entities/search.json',                            'v1.entities.search.run'),
+    (r'v1/entities/suggested.json',                         'v1.entities.suggested.run'),
+    (r'v1/entities/menu.json',                              'v1.entities.menu.run'),
+    (r'v1/entities/stamped_by.json',                        'v1.entities.stamped_by.run'),
     
     ### ACTIONS
-    (r'v1/actions/complete.json',                           'v0.functions.entities.completeAction'),
+    (r'v1/actions/complete.json',                           'v1.entities.action.run'),
 
     ### STAMPS
     (r'v1/stamps/create.json',                              'v0.functions.stamps.create'),
@@ -169,5 +166,9 @@ urlpatterns = patterns('',
     
     ### CLIENT LOGGING
     (r'v1/private/logs/create.json',                        'v0.functions.logs.create'),
+
+    ### CUSTOM
+    (r'v1/entities/edit.html',                              'v0.functions.entities.edit'),
+    (r'v1/entities/update.html',                            'v0.functions.entities.update'),
 
 )
