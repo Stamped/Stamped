@@ -19,7 +19,7 @@ try:
     from resolve.GenericSource      import GenericSource, MERGE_TIMEOUT, SEARCH_TIMEOUT
     from utils                      import lazyProperty
     from gevent.pool                import Pool
-    from pprint                     import pformat
+    from pprint                     import pformat, pprint
     from datetime                   import datetime
     from resolve.Resolver           import *
     from resolve.ResolverObject     import *
@@ -122,26 +122,18 @@ class _NetflixObject(object):
             return []
 
 
-    # Netflix only returns the release year.  Since the API can't distinguish exact dates from years, this is
-    #  excluded.  Also, the dateWeight function is only checking for exact matches anyway.
-#    @lazyProperty
-#    def release_date(self):
-#        try:
-#            return datetime(self._titleObj['release_year'], 1, 1)
-#        except KeyError:
-#            return None
-
     @lazyProperty
-    def url(self):
+    def release_date(self):
         try:
-            webpage = filter(lambda link :  link['title'] ==  u'web page',  self._titleObj['category'])[0]
-            return webpage['href']
+            return datetime(self._titleObj['release_year'], 1, 1)
         except KeyError:
             return None
 
+    @lazyProperty
+    def url(self):
+        return self.key
 
     def __repr__(self):
-#        return "<%s %s %s>" % (self.source, self.type, self.name)
         return pformat( self._titleObj )
 
 class NetflixMovie(_NetflixObject, ResolverMediaItem):
@@ -163,22 +155,10 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
     def directors(self):
         try:
             directors = filter(lambda link : link['title'] ==  u'directors',  self._titleObj['link'])[0]['people']['link']
-            # api returns either a dict or a list of dicts depending on len > 1
-            if isinstance(directors, list):
-                return [
-                    {
-                    'name':         entry['title'],
-                    'source':       self.source,
-                    }
-                        for entry in directors
-                ]
-            else:
-                return [
-                    {
-                    'name':         directors['title'],
-                    'source':       self.source
-                    }
-                ]
+            return [{
+                        'name':         entry['title'],
+                        'source':       self.source,
+                    } for entry in self._asList(directors)]
         except Exception:
             return []
 
@@ -192,7 +172,7 @@ class NetflixMovie(_NetflixObject, ResolverMediaItem):
     @lazyProperty
     def mpaa_rating(self):
         try:
-            ratings = filter(lambda link : '/mpaa_ratings' in link['scheme'],  self._titleObj['category'])
+            ratings = filter(lambda link : '/mpaa_ratings' in link['scheme'],  self._asList(self._titleObj['category']))
             if ratings:
                 return ratings[0]['label']
         except KeyError:
