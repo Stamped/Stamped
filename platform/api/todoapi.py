@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -30,6 +32,7 @@ from api.accountapi import AccountAPI
 from api.entityapi import EntityAPI
 from api.linkedaccountapi import LinkedAccountAPI
 
+from api.utils import enrich_stamp_objects
 
 class TodoAPI(APIObject):
 
@@ -242,7 +245,7 @@ class TodoAPI(APIObject):
         if sourceStamps is None and rawTodo.source_stamp_ids is not None:
             # Enrich stamps
             sourceStamps = self._stampDB.getStamps(rawTodo.source_stamp_ids)
-            sourceStamps = self._stamps.enrichStampObjects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId, mini=True)
+            sourceStamps = enrich_stamp_objects(sourceStamps, entityIds={ entity.entity_id : entity }, authUserId=authUserId, mini=True)
 
         # If Stamp is completed, check if the user has stamped it to populate todo.stamp_id value.
         # this is necessary only for backward compatability.  The new RawTodo schema includes the stamp_id val

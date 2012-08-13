@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -26,6 +28,8 @@ from utils import lazyProperty, LoggingThreadPool
 from api.helpers import APIObject
 from api.stampapi import StampAPI
 from api.activityapi import ActivityAPI
+
+from api.utils import enrich_stamp_objects
 
 
 class CommentAPI(APIObject):
@@ -65,7 +69,7 @@ class CommentAPI(APIObject):
     def addComment(self, authUserId, stampId, blurb):
         user    = self._userDB.getUser(authUserId)
         stamp   = self._stampDB.getStamp(stampId)
-        stamp   = self._stamps.enrichStampObjects(stamp, authUserId=authUserId)
+        stamp   = enrich_stamp_objects(stamp, authUserId=authUserId)
 
         # Verify user has the ability to comment on the stamp
         friendship              = Friendship()
@@ -116,7 +120,7 @@ class CommentAPI(APIObject):
             try:
                 comment = self._commentDB.getComment(commentId)
                 stamp   = self._stampDB.getStamp(stampId)
-                stamp   = self._stamps.enrichStampObjects(stamp, authUserId=authUserId)
+                stamp   = enrich_stamp_objects(stamp, authUserId=authUserId)
                 break
             except StampedDocumentNotFoundError:
                 if delay > 60:

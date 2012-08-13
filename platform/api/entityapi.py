@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 __author__    = "Stamped (dev@stamped.com)"
 __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
@@ -487,7 +489,9 @@ class EntityAPI(APIObject):
             allStampIds = self._stampDB.getStampIdsForEntity(entityId)
             for stampId in allStampIds:
                 if stampId not in popularStampIds:
-                    stat = self.updateStampStatsAsync(stampId)
+                    ### RESTRUCTURE TODO: Figure out async tasks...
+                    pass
+                    # stat = self.updateStampStatsAsync(stampId)
             popularStampIds = self._stampDB.getPopularStampIds(entityId=entityId, limit=1000)
 
         popularStamps = self._stampDB.getStamps(popularStampIds)

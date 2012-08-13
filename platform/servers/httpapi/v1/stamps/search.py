@@ -21,7 +21,7 @@ stamp_api = StampAPI()
 exceptions = stamp_exceptions
 
 @require_http_methods(["GET"])
-@stamped_http_api_request(requires_auth=False, form=HTTPSearchSlice, conversion=HTTPSearchSlice.exportTimeSlice, 
+@stamped_http_api_request(requires_auth=False, form=HTTPSearchSlice, conversion=HTTPSearchSlice.exportSearchSlice, 
     exceptions=exceptions)
 def run(request, auth_user_id, schema, **kwargs):
 

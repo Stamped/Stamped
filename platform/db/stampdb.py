@@ -103,7 +103,7 @@ class StampDB(object):
         return self.__stamp_collection.getStampsForEntity(entityId, limit=limit)
 
     def getStampIdsForEntity(self, entityId, limit=None):
-        return self.__stamp_collection.getStampIdsForEntity(entityid, limit=limit)
+        return self.__stamp_collection.getStampIdsForEntity(entityId, limit=limit)
     
     def getStampFromUserStampNum(self, userId, stampNum):
         return self.__stamp_collection.getStampFromUserStampNum(userId, stampNum)
