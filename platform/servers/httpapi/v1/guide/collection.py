@@ -8,10 +8,13 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
+import logs
+
 from errors import StampedInputError
 from schema import Schema
 from api.guideapi import GuideAPI
 from api_old.Schemas import GuideRequest
+from api_old.SchemaValidation import validateViewport
 from django.views.decorators.http import require_http_methods
 from servers.httpapi.v1.helpers import stamped_http_api_request, json_response
 from servers.httpapi.v1.schemas import convertViewport, HTTPEntity
@@ -59,7 +62,7 @@ class HTTPForm(Schema):
         cls.addProperty('viewport',                         basestring, cast=validateViewport)
         cls.addProperty('scope',                            basestring, required=True, cast=validateScope)
 
-    def exportGuideRequest(self):
+    def export_guide_request(self):
         data = self.dataExport()
         if 'viewport' in data:
             del(data['viewport'])

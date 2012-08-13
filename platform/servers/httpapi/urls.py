@@ -148,8 +148,8 @@ urlpatterns = patterns('',
     (r'v1/todos/collection.json',                           'v0.functions.todos.collection'),
 
     ### GUIDE
-    (r'v1/guide/collection.json',                           'v0.functions.stamps.guide'),
-    (r'v1/guide/search.json',                               'v0.functions.stamps.searchGuide'),
+    (r'v1/guide/collection.json',                           'v1.guide.collection.run'),
+    (r'v1/guide/search.json',                               'v1.guide.search.run'),
     
     ### ACTIVITY
     (r'v1/activity/collection.json',                        'v0.functions.activity.collection'),
