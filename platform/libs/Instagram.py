@@ -185,7 +185,7 @@ class Instagram(object):
         def getCategoryIcon(category):
             categoryIcons = Image.open(self.__basepath + 'categoryicons18px.png')
             #icon = Image.new('RGBA', (18,18), (255,255,255,0))
-            categories = ('restaurant', 'bar', 'cafe', 'establishment', 'album', 'song', 'artist', 'film', 'tv_show',
+            categories = ('restaurant', 'bar', 'cafe', 'place', 'album', 'song', 'artist', 'film', 'tv_show',
                           'book', 'app', 'other')
             if category not in categories:
                 categoryIndex = len(categories)-1
@@ -249,9 +249,9 @@ class Instagram(object):
         size = 612,612
         img = Image.new('RGBA', size, (255,255,255,255))
 
-#        entityImg = Image.open(entity_img_url)
         if entity_img_url is not None:
-            entityImg = utils.getWebImage(entity_img_url)
+            entityImg = Image.open(entity_img_url)
+            #entityImg = utils.getWebImage(entity_img_url)
             entityImg = transformEntityImage(entityImg, stamp, a,b,c,d,e,f,g,h,x,y)
 
             albumOffset = 7, 166
