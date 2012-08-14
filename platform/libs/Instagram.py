@@ -197,24 +197,23 @@ class Instagram(object):
             return icon
 
         def getInstagramTextImg(user_name, category, title, subtitle):
-            textImg = Image.new('RGBA', (612,195), (255,255,255,255))
+            textImg = Image.new('RGBA', (612*2,195*2), (255,255,255,255))
             draw = ImageDraw.Draw(textImg)
-            titling_gothic = ImageFont.truetype(self.__basepath +"TitlingGothicFB.ttf", 80)
-            helvetica_neue_bold = ImageFont.truetype(self.__basepath +"HelveticaNeue-Bold.ttf", 24)
-            helvetica_neue = ImageFont.truetype(self.__basepath + "HelveticaNeue.ttf", 24)
+            titling_gothic = ImageFont.truetype(self.__basepath +"TitlingGothicFB.ttf", 80*2)
+            helvetica_neue_bold = ImageFont.truetype(self.__basepath +"HelveticaNeue-Bold.ttf", 24*2)
+            helvetica_neue = ImageFont.truetype(self.__basepath + "HelveticaNeue.ttf", 24*2)
             header_nameW, header_nameH = draw.textsize(user_name, font=helvetica_neue_bold)
             header = ' stamped a %s' % category
             headerW, headerH = draw.textsize(header, font=helvetica_neue)
             titleW, titleH = draw.textsize(title, font=titling_gothic)
             subtitleW, subtitleH = draw.textsize(subtitle, font=helvetica_neue)
-            draw.text(((612/2)-((headerW+header_nameW)/2),0), user_name, font=helvetica_neue_bold, fill='#939393')
-            draw.text(((612/2)-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill='#939393')
-            draw.text(((612/2)-(titleW/2),40), title, font=titling_gothic, fill='#000000')
-            draw.line((165, 134, 612-165, 134), fill='#e0e0e0')
-            #draw.line((165, 134, 165+129, 134), fill='#dddddd')
-            #draw.line((165+129+18, 134, 165+129+18+129, 134), fill='#dddddd')
-            draw.text(((612/2)-(subtitleW/2),134+20), subtitle, font=helvetica_neue, fill='#939393')
+            draw.text((612-((headerW+header_nameW)/2),0), user_name, font=helvetica_neue_bold, fill='#939393')
+            draw.text((612-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill='#939393')
+            draw.text((612-(titleW/2),40*2), title, font=titling_gothic, fill='#000000')
+            draw.line((165*2, 134*2, (612-165)*2, 134*2), fill='#e0e0e0')
+            draw.text(((612*2/2)-(subtitleW/2),(134+20)*2), subtitle, font=helvetica_neue, fill='#939393')
             del draw
+            textImg = textImg.resize((612, 195), Image.ANTIALIAS)
             icon = getCategoryIcon(category)
             textImg.paste(icon, ((612/2)-(18/2), 124))
             return textImg
