@@ -220,9 +220,9 @@ class Instagram(object):
             return textImg
 
         masks = [
-                    (270, 270, 'temp/stamp_mask2.png'),
-                    (612,  9,  'temp/ribbon-top.png'),
-                    (612,  9,  'temp/ribbon-bottom.png'),
+                    (270, 270, 'instagram/stamp_mask.png'),
+                    (612,  9,  'instagram/ribbon-top.png'),
+                    (612,  9,  'instagram/ribbon-bottom.png'),
                 ]
 
         gradientImgs = [self.__imageDB.generate_gradient_images(primary_color, secondary_color, x[0], x[1], x[2])
@@ -230,7 +230,7 @@ class Instagram(object):
         stamp = gradientImgs[0]
         ribbon_top = gradientImgs[1]
         ribbon_bot = gradientImgs[2]
-        shadow_top = Image.open('temp/shadow-top3.png')
+        shadow_top = Image.open('instagram/shadow-top.png')
         shadow_bot = shadow_top.transpose(Image.FLIP_TOP_BOTTOM)
 
         a =  1.77
