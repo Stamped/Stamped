@@ -32,6 +32,7 @@ try:
     from libs.APIKeys       import get_api_key
     from S3ImageDB          import S3ImageDB
     import utils
+    import inspect, os
     import PIL, Image, ImageFile, ImageFilter, ImageFont, ImageDraw, ImageChops
 except:
     report()
@@ -219,14 +220,12 @@ class Instagram(object):
             textImg.paste(icon, ((612/2)-(18/2), 124))
             return textImg
 
-        import inspect, os
-        logs.info(inspect.getfile(inspect.currentframe())) # script filename (usually with path)
-        logs.info(os.path.dirname(inspect.getfile(inspect.currentframe()))) # script directory
+        basepath = os.path.dirname(inspect.getfile(inspect.currentframe())) + '/instagram/'
 
         masks = [
-                    (270, 270, 'instagram/stamp_mask.png'),
-                    (612,  9,  'instagram/ribbon-top.png'),
-                    (612,  9,  'instagram/ribbon-bottom.png'),
+                    (270, 270, basepath + 'stamp_mask.png'),
+                    (612,  9,  basepath + 'ribbon-top.png'),
+                    (612,  9,  basepath + 'ribbon-bottom.png'),
                 ]
 
         gradientImgs = [self.__imageDB.generate_gradient_images(primary_color, secondary_color, x[0], x[1], x[2])
@@ -234,7 +233,7 @@ class Instagram(object):
         stamp = gradientImgs[0]
         ribbon_top = gradientImgs[1]
         ribbon_bot = gradientImgs[2]
-        shadow_top = Image.open('instagram/shadow-top.png')
+        shadow_top = Image.open(basepath + 'shadow-top.png')
         shadow_bot = shadow_top.transpose(Image.FLIP_TOP_BOTTOM)
 
         a =  1.77
