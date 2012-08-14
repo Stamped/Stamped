@@ -160,9 +160,7 @@ class Instagram(object):
             size2x = 612*2, 612*2
             shadowOffset = x, y
 
-            transparent = (255,255,255,0)
-
-            buf2 = Image.new(mode, size2x, transparent)
+            buf2 = Image.new(mode, size2x, (255,255,255,255))
 
             mask = Image.new('1', albumSize, 1)
             shadowmask = Image.new('1', shadowSize, 1)
@@ -199,7 +197,7 @@ class Instagram(object):
             return icon
 
         def getInstagramTextImg(user_name, category, title, subtitle):
-            textImg = Image.new('RGBA', (612,195), (255,255,255,0))
+            textImg = Image.new('RGBA', (612,195), (255,255,255,255))
             draw = ImageDraw.Draw(textImg)
             titling_gothic = ImageFont.truetype(self.__basepath +"TitlingGothicFB.ttf", 80)
             helvetica_neue_bold = ImageFont.truetype(self.__basepath +"HelveticaNeue-Bold.ttf", 24)
@@ -264,7 +262,7 @@ class Instagram(object):
         img.paste(ribbon_top, (0, 0))
         img.paste(shadow_top, (0, ribbon_top.size[1]))
         img.paste(ribbon_bot, (0, 612-ribbon_bot.size[1]))
-        img.paste(shadow_bot, (0, 612-ribbon_top.size[1]-shadow_bot.size[1]))
+        img.paste(shadow_bot, (0, 612-ribbon_top.size[1]-shadow_bot.size[1]), shadow_bot)
 
         return img
 
