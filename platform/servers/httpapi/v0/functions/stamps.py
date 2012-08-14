@@ -80,7 +80,8 @@ def share(request, authUserId, http_schema, data, **kwargs):
     return transformOutput(stamp.dataExport())
 
 @require_http_methods(["GET"])
-@handleHTTPRequest(http_schema=HTTPStampId,
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPStampId,
                    exceptions=stampExceptions)
 def shareInstagram(request, authUserId, http_schema, data, **kwargs):
     url = stampedAPI.addInstagramStampImage(http_schema.stamp_id)
