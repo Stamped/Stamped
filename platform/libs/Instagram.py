@@ -188,7 +188,7 @@ class Instagram(object):
             categories = ('restaurant', 'bar', 'cafe', 'establishment', 'album', 'song', 'artist', 'film', 'tv_show',
                           'book', 'app', 'other')
             if category not in categories:
-                categoryIndex = categories[-1]
+                categoryIndex = len(categories)-1
             else:
                 categoryIndex = categories.index(category)
             print categoryIndex
