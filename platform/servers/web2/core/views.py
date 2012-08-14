@@ -375,9 +375,14 @@ def test_view(request, schema, **kwargs):
     else:
         params['PROCESSING_SKETCHES'] = [
             {
+                'name'  : 'not_found', 
+                'hname' : '404 Page Experiment v0', 
+                'desc'  : "404 page utilizing rapidly exploring random trees (<a href='http://en.wikipedia.org/wiki/Rapidly_exploring_random_tree'>RTTs</a>).", 
+            }, 
+            {
                 'name'  : 'rrt', 
                 'hname' : 'Rapidly Exploring Random Trees', 
-                'desc'  : "Exploration of rapidly exploring random trees (RTTs) in the form of generative art (<a href='http://en.wikipedia.org/wiki/Rapidly_exploring_random_tree'>more info</a>).", 
+                'desc'  : "Exploration of rapidly exploring random trees (<a href='http://en.wikipedia.org/wiki/Rapidly_exploring_random_tree'>RTTs</a>) in the form of generative art.", 
             }, 
             {
                 'name'  : 'hilbert', 
