@@ -19,7 +19,7 @@ import pprint
 import random
 import shutil
 import sys
-import search.EntitiesSxSTemplates
+from search import EntitiesSxSTemplates
 from search.DataQualityUtils import MIN_RESULT_DATA_QUALITY_TO_INCLUDE
 
 # We need the import(s) in the following section because they are referenced by
