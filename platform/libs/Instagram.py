@@ -245,15 +245,20 @@ class Instagram(object):
         h =  0.00215
         x = -44
         y = 1
-#        entityImg = Image.open(entity_img_url)
-        entityImg = utils.getWebImage(entity_img_url)
-        entityImg = transformEntityImage(entityImg, stamp, a,b,c,d,e,f,g,h,x,y)
-
-        albumOffset = 7, 166
 
         size = 612,612
         img = Image.new('RGBA', size, (255,255,255,255))
-        img.paste(entityImg, albumOffset)
+
+#        entityImg = Image.open(entity_img_url)
+        if entity_img_url is not None:
+            entityImg = utils.getWebImage(entity_img_url)
+            entityImg = transformEntityImage(entityImg, stamp, a,b,c,d,e,f,g,h,x,y)
+
+            albumOffset = 7, 166
+
+            img.paste(entityImg, albumOffset)
+        else:
+            pass
         textImg = getInstagramTextImg(user_name, category, title, subtitle)
         img.paste(textImg, (0, 40))
         img.paste(ribbon_top, (0, 0))

@@ -3003,7 +3003,7 @@ class StampedAPI(AStampedAPI):
         subtitle = entity.subtitle
 
         entity_img_url = None
-        if len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
+        if stamp.entity.images is not None and len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
             entity_img_url = stamp.entity.images[0].sizes[0].url
 
         logs.info(os.getcwd())
