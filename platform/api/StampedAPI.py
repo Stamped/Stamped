@@ -3004,7 +3004,7 @@ class StampedAPI(AStampedAPI):
 
         entity_img_url = None
         if self._imageDB.checkStampImage(stampId):
-            entity_img_url = 'https://s3.amazonaws.com/stamped.com.static.images/instagram/%s.png' % filename
+            entity_img_url = 'https://s3.amazonaws.com/stamped.com.static.images/stamps/%s.jpg' % stampId
         elif stamp.entity.images is not None and len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
             entity_img_url = stamp.entity.images[0].sizes[0].url
 
