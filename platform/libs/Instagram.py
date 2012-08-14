@@ -50,8 +50,9 @@ class Instagram(object):
         self.__consumer = oauth.OAuthConsumer(self.__client_id, self.__client_secret)
         self.__signature_method_hmac_sha1 = oauth.OAuthSignatureMethod_HMAC_SHA1()
         self.__imageDB = S3ImageDB()
+        self.__basepath = os.path.dirname(inspect.getfile(inspect.currentframe())) + '/instagram/'
 
-    #def place_search(self, **kwargs):
+#def place_search(self, **kwargs):
     #    return self.__instagram('locations/search', **kwargs)
 
     def place_search(self, foursquare_id, priority='low', timeout=None):
@@ -200,9 +201,9 @@ class Instagram(object):
         def getInstagramTextImg(user_name, category, title, subtitle):
             textImg = Image.new('RGBA', (612,195), (255,255,255,0))
             draw = ImageDraw.Draw(textImg)
-            titling_gothic = ImageFont.truetype("TitlingGothicFB.ttf", 80)
-            helvetica_neue_bold = ImageFont.truetype("HelveticaNeue-Bold.ttf", 24)
-            helvetica_neue = ImageFont.truetype("HelveticaNeue.ttf", 24)
+            titling_gothic = ImageFont.truetype(self.__basepath +"TitlingGothicFB.ttf", 80)
+            helvetica_neue_bold = ImageFont.truetype(self.__basepath +"HelveticaNeue-Bold.ttf", 24)
+            helvetica_neue = ImageFont.truetype(self.__basepath + "HelveticaNeue.ttf", 24)
             header_nameW, header_nameH = draw.textsize(user_name, font=helvetica_neue_bold)
             header = ' stamped a %s' % category
             headerW, headerH = draw.textsize(header, font=helvetica_neue)
@@ -220,12 +221,10 @@ class Instagram(object):
             textImg.paste(icon, ((612/2)-(18/2), 124))
             return textImg
 
-        basepath = os.path.dirname(inspect.getfile(inspect.currentframe())) + '/instagram/'
-
         masks = [
-                    (270, 270, basepath + 'stamp_mask.png'),
-                    (612,  9,  basepath + 'ribbon-top.png'),
-                    (612,  9,  basepath + 'ribbon-bottom.png'),
+                    (270, 270, self.__basepath + 'stamp_mask.png'),
+                    (612,  9,  self.__basepath + 'ribbon-top.png'),
+                    (612,  9,  self.__basepath + 'ribbon-bottom.png'),
                 ]
 
         gradientImgs = [self.__imageDB.generate_gradient_images(primary_color, secondary_color, x[0], x[1], x[2])
@@ -233,7 +232,7 @@ class Instagram(object):
         stamp = gradientImgs[0]
         ribbon_top = gradientImgs[1]
         ribbon_bot = gradientImgs[2]
-        shadow_top = Image.open(basepath + 'shadow-top.png')
+        shadow_top = Image.open(self.__basepath + 'shadow-top.png')
         shadow_bot = shadow_top.transpose(Image.FLIP_TOP_BOTTOM)
 
         a =  1.77
