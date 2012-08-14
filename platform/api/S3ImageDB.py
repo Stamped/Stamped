@@ -184,6 +184,14 @@ class S3ImageDB(AImageDB):
         # Add images in all sizes
         self._addImageSizes(prefix, image, max_size)
         return url
+
+    def checkStampImage(self, stampId):
+        user_image_exists = False
+        try:
+            user_image_exists = self._imageDB.bucket.get_key('stamps/%s.jpg' % stampId) is not None
+        except Exception:
+            user_image_exists = False
+        return user_image_exists
     
     def addResizedStampImages(self, sourceUrl, imageId, maxSize, sizes):
         image    = utils.getWebImage(sourceUrl, "stamp")

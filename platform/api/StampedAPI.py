@@ -3003,11 +3003,10 @@ class StampedAPI(AStampedAPI):
         subtitle = entity.subtitle
 
         entity_img_url = None
-        if stamp.entity.images is not None and len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
+        if self._imageDB.checkStampImage(stampId):
+            entity_img_url = 'https://s3.amazonaws.com/stamped.com.static.images/instagram/%s.png' % filename
+        elif stamp.entity.images is not None and len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
             entity_img_url = stamp.entity.images[0].sizes[0].url
-
-#        img = self._instagram.createInstagramImage(entity_img_url, primary_color, secondary_color, user_name,
-#            category, title, subtitle)
 
         filename = '%s-%s-%s' % (stampId, primary_color.upper(), secondary_color.upper())
         generate = False
