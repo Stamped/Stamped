@@ -79,7 +79,7 @@ endef
 define ADD_CSS_TARGET
 $(GENERATED_CSS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) css_targets $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@mkdir -p $(GENERATED_CSS_BASE_DIR)
-	cat $$(call REST,$$(call REST,$$^)) | java -jar bin/compressor.jar --type css --line-break $(GENERATED_LINE_LENGTH) > $$@
+	cat $$(if $$(call ISNULL,$$(strip $$(call REST,$$(call REST,$$^)))),/dev/null,$$(call REST,$$(call REST,$$^))) | java -jar bin/compressor.jar --type css --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef
 
