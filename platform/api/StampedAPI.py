@@ -3006,7 +3006,7 @@ class StampedAPI(AStampedAPI):
         if len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
             entity_img_url = stamp.entity.images[0].sizes[0].url
 
-        print os.getcwd()
+        logs.info(os.getcwd())
         img = self._instagram.createInstagramImage(entity_img_url, primary_color, secondary_color, user_name,
             category, title, subtitle)
 
