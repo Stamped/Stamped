@@ -37,6 +37,11 @@ void setup() {
     }
     
     _mask = loadImage(mask_path);
+    
+    if (_mask.width != width || _mask.height != height) {
+        _mask.resize(width, height);
+    }
+    
     _masked = new ArrayList();
     
     for (int i = 0; i < _mask.height; i++) {

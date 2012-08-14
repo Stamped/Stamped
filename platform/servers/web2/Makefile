@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.86
+ASSET_VERSION_NUMBER        = 1.1.87
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -41,7 +41,7 @@ CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 TEMPLATE_BASE_DIR		    = templates
-HTML_PAGES					= base profile index map about jobs legal base-mobile sdetail-mobile retina fonts password password_reset settings test
+HTML_PAGES					= base profile index map about jobs legal base-mobile sdetail-mobile retina fonts password password_reset settings test 404
 TEMPLATE_PROG				= bin/process_templates.py
 
 GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^ *script: *' $1 | sed 's/ *script: *\([\w.\/-]*\) */\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))

@@ -291,7 +291,12 @@
             if (g_page === "legal" || g_page === "faq" || g_page === "terms-of-service" || g_page === "privacy-policy" || g_page === "licenses" || g_page === "settings") {
                 offset = 180;
             }
-            //console.log("height: " + height + "; offset: " + offset);
+            
+            if (g_page === "404") {
+                offset = 280;
+            }
+            
+            console.log("page: " + g_page + "; height: " + height + "; offset: " + offset);
             
             if (typeof(noop) !== 'boolean' || !noop) {
                 $main.css('top', offset + "px");
