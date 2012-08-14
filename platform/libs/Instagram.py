@@ -219,6 +219,10 @@ class Instagram(object):
             textImg.paste(icon, ((612/2)-(18/2), 124))
             return textImg
 
+        import inspect, os
+        logs.info(inspect.getfile(inspect.currentframe())) # script filename (usually with path)
+        logs.info(os.path.dirname(inspect.getfile(inspect.currentframe()))) # script directory
+
         masks = [
                     (270, 270, 'instagram/stamp_mask.png'),
                     (612,  9,  'instagram/ribbon-top.png'),
