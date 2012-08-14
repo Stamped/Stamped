@@ -183,7 +183,7 @@ class Instagram(object):
             return albumArtImg
 
         def getCategoryIcon(category):
-            categoryIcons = Image.open('categoryicons18px.png')
+            categoryIcons = Image.open(self.__basepath + 'categoryicons18px.png')
             #icon = Image.new('RGBA', (18,18), (255,255,255,0))
             categories = ('restaurant', 'bar', 'cafe', 'establishment', 'album', 'song', 'artist', 'film', 'tv_show',
                           'book', 'app', 'other')
