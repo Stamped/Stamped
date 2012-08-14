@@ -188,7 +188,7 @@ class S3ImageDB(AImageDB):
     def checkStampImage(self, stampId):
         user_image_exists = False
         try:
-            user_image_exists = self._imageDB.bucket.get_key('stamps/%s.jpg' % stampId) is not None
+            user_image_exists = self.bucket.get_key('stamps/%s.jpg' % stampId) is not None
         except Exception:
             user_image_exists = False
         return user_image_exists
