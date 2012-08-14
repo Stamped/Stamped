@@ -252,7 +252,7 @@ class Instagram(object):
         albumOffset = 7, 166
 
         size = 612,612
-        img = Image.new('RGBA', size)
+        img = Image.new('RGBA', size, (255,255,255,255))
         img.paste(entityImg, albumOffset)
         textImg = getInstagramTextImg(user_name, category, title, subtitle)
         img.paste(textImg, (0, 40))
