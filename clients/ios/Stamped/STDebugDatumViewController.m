@@ -94,14 +94,14 @@
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
-  [[Util sharedNavigationController] setNavigationBarHidden:YES animated:YES];
+  [[Util currentNavigationController] setNavigationBarHidden:YES animated:YES];
 }
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
 }
 
 - (BOOL)textViewShouldEndEditing:(UITextView *)textView {
-  [[Util sharedNavigationController] setNavigationBarHidden:NO animated:YES];
+  [[Util currentNavigationController] setNavigationBarHidden:NO animated:YES];
   [textView resignFirstResponder];
   return YES;
 }

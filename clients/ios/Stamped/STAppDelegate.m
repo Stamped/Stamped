@@ -13,7 +13,6 @@
 #import "STNavigationBar.h"
 #import "STDebug.h"
 #import "Util.h"
-#import "STRootScrollView.h"
 #import "STLeftMenuViewController.h"
 #import "STRightMenuViewController.h"
 #import "STConfiguration.h"
@@ -41,7 +40,6 @@
 #import "STConfirmationView.h"
 #import "STUniversalNewsController.h"
 
-#import "STCreateStampViewController.h"
 #import "FindFriendsViewController.h"
 #import "STUserViewController.h"
 #import "STPlayer.h"
@@ -244,7 +242,6 @@
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-    NSLog(@"url:%@", url.absoluteString);
     if ([[url host] isEqualToString:@"twitter"] && [url query].length > 0) {
         [[STTwitter sharedInstance] handleOpenURL:url];
 	}  
@@ -292,7 +289,7 @@
     [STStampedAPI sharedInstance].currentUserLocation = nil;
     [[STUnreadActivity sharedInstance] update];
     if ([STFacebook sharedInstance].connected) {
-        [[STFacebook sharedInstance].facebook extendAccessTokenIfNeeded];
+        [[STFacebook sharedInstance].facebook extendAccessToken];
     }
 }
 
@@ -454,13 +451,6 @@
     
     //I Want to
     [STIWantToViewController setupConfigurations];
-    
-    //Stamp Cell
-    //[STStampCell setupConfigurations];
-    //[STStampCell setupConfigurations];
-    
-    //Create Stamp
-    [STCreateStampViewController setupConfigurations];
     
     //Actions
     [STActionManager setupConfigurations];

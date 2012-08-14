@@ -6,6 +6,19 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ Definitions of globally used enumerations and types.
+ 
+ Notes:
+ This header is intended to be a leaf that imports no other Stamped specific headers.
+ 
+ TODOs:
+ Remove deprecated FriendsOfFriends scope
+ 
+ 2012-08-10
+ -Landon
+ */
+
 #import <Foundation/Foundation.h>
 
 typedef void (^STCallback)(void);

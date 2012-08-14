@@ -71,7 +71,7 @@
 #pragma mark - Actions
 
 - (void)rightButtonClicked:(id)button {
-    [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
+    [Util compareAndPushOnto:self withController:[STConfiguration sharedInstance].controller modal:NO animated:YES];
 }
 
 
@@ -96,7 +96,10 @@
 - (void)tableView:(UITableView*)tableView didSelectRowAtIndexPath:(NSIndexPath*)indexPath {
     STDebugDatum* datum = [[STDebug sharedInstance] logItemAtIndex:([STDebug sharedInstance].logCount - (indexPath.row + 1))];
     NSString* string = [NSString stringWithFormat:@"%@\n%@", datum.object, datum.created];
-    [[Util sharedNavigationController] pushViewController:[[[STDebugDatumViewController alloc] initWithString:string] autorelease] animated:YES];
+    [Util compareAndPushOnto:self 
+              withController:[[[STDebugDatumViewController alloc] initWithString:string] autorelease]
+                       modal:NO
+                    animated:YES];
 }
 
 - (void)reloadStampedData {

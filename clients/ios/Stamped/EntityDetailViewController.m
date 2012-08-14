@@ -12,7 +12,6 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "UIColor+Stamped.h"
-#import "Notifications.h"
 #import "STSimpleEntityDetail.h"
 #import "STStampedAPI.h"
 #import "STHeaderViewFactory.h"
@@ -24,7 +23,6 @@
 #import "STSynchronousWrapper.h"
 #import "STRdio.h"
 #import "STScrollViewContainer.h"
-#import "STToolbarView.h"
 #import "STLikeButton.h"
 #import "STTodoButton.h"
 #import "STStampButton.h"
@@ -82,7 +80,6 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
 }
 
 - (void)viewDidLoad {
-    //STToolbarView* toolbar = [[[STToolbarView alloc] init] autorelease];
     //_toolbar = toolbar;
     [super viewDidLoad];
     self.loadingView = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
@@ -136,8 +133,6 @@ static NSString* const kEntityLookupPath = @"/entities/show.json";
     [super dealloc];
 }
 
-static BOOL _addedStampButton = NO;
-
 - (void)setEntityDetail:(id<STEntityDetail>)anEntityDetail {
     [self.entityDetailCancellation cancel];
     self.entityDetailCancellation = nil;
@@ -159,15 +154,6 @@ static BOOL _addedStampButton = NO;
                                                                       andStyle:@"EntityDetail" 
                                                                       delegate:self.scrollView];
         [self.scrollView appendChildView:self.synchronousWrapper];
-        NSMutableArray* views = [NSMutableArray arrayWithObjects:
-                                 [[[STStampButton alloc] initWithEntity:anEntityDetail] autorelease],
-                                 nil];
-        if (!_addedStampButton) {
-            STToolbarView* toolbar = (STToolbarView*) self.toolbar;
-            [toolbar packViews:views];
-            [toolbar addSubview:[views objectAtIndex:0]];
-            [toolbar setNeedsLayout];
-        }
     }
 }
 

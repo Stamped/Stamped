@@ -6,6 +6,27 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ A generic configuration system that supports in app modification and change exporting.
+ 
+ The configuration system supports convenient registration and access to named values,
+ with a number of convenience methods for particular types of values like flags, colors, fonts, etc.
+ In addition, the configuration system provides a controller hiearchy for modifying these values
+ from inside of an app session. In many cases, value access is also written to support dynamic loading
+ of these updated values for rapid experimentation by non-iOS staff. The system also features, change
+ summarization and email based export for reporting change requests.
+ 
+ Notes:
+ This system has seen mixed success. Mostly, its use was disgarded in many places by Devin, and
+ in the rush of v2 preparations I didn't use it much in new views. Also, non-iOS staff use was limited
+ and many features were discovered late or not at all. I'm sure that I ever received a change-list email.
+ I would consider cutting or deprecating this system based on lack of use in practice. However, it
+ could be handy if used, especially with BE driven configuration.
+ 
+ 2012-08-10
+ -Landon
+ */
+
 #import <Foundation/Foundation.h>
 
 extern NSString* const STConfigurationValueDidChangeNotification;

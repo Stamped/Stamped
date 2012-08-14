@@ -6,6 +6,15 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ Legacy category
+ 
+ I suggest deprecation and removal.
+ 
+ 2012-08-10
+ -Landon
+ */
+
 #import <Foundation/Foundation.h>
 
 @interface UIButton (Stamped)

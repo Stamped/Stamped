@@ -10,9 +10,7 @@
 #import <Rdio/Rdio.h>
 #import "Util.h"
 #import "STConfirmationView.h"
-#import "STPlaylistPopUp.h"
 #import "STSimpleAction.h"
-#import "STRdioPlaylistPopUp.h"
 #import "STPlayer.h"
 #import "STPlayerPopUp.h"
 #import "STSimplePlaylistItem.h"
@@ -228,30 +226,6 @@ static STRdio* _sharedInstance;
 - (BOOL)didChooseSource:(id<STSource>)source forAction:(NSString*)action withContext:(STActionContext*)context shouldExecute:(BOOL)flag {
     BOOL handled = NO;
     if ([source.source isEqualToString:@"rdio"]) {
-//        if ([action isEqualToString:@"listen"] && source.sourceID != nil ) {
-//            handled = TRUE;
-//            if (flag) {
-//                //NSLog(@"playing song:%@",context.entityDetail);
-//                [self ensureLoginWithCompletionBlock:^{
-//                    if (self.loggedIn) {
-//                        BOOL revert = [STConfiguration flag:STPlayerRevertKey];
-//                        if (revert) {
-//                            //[STPlayer sharedInstance] addPlaylistItem:<#(id<STPlaylistItem>)#> atIndex:<#(NSInteger)#>
-//                            [Util setFullScreenPopUp:[[[STRdioPlaylistPopUp alloc] initWithSource:source action:action andContext:context] autorelease] 
-//                                         dismissible:NO 
-//                                      withBackground:[UIColor colorWithWhite:0 alpha:.3]];
-//                            
-//                        }
-//                        else {
-//                            NSArray<STPlaylistItem>* items = [self itemsForSource:source forAction:action withContext:context];
-//                            [STPlayerPopUp presentWithItems:items clear:![STConfiguration flag:STPlayerCummulativeKey]];
-//                            
-//                        }
-//                    }
-//                }];
-//                //[self startPlayback:source.sourceID];
-//            }
-//        }
         if ([action isEqualToString:@"playlist"] && source.sourceID != nil) {
             handled = TRUE;
             if (flag) {

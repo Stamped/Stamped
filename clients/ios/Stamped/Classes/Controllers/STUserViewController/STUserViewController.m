@@ -510,10 +510,8 @@ static NSString* const _shareOptionTwitter = @"Share to Twitter";
 
 - (void)stUserHeaderViewAvatarTapped:(STUserHeaderView*)view {
     
-    STPhotoViewController *controller = [[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:[Util largeProfileImageURLWithUser:self.user]]];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
-    [controller release];
-    
+    STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:[Util largeProfileImageURLWithUser:self.user]]] autorelease];
+    [Util pushController:controller modal:NO animated:YES];
 }
 
 - (void)stUserHeaderView:(STUserHeaderView*)view selectedTab:(STUserHeaderTab)tab {

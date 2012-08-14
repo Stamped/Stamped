@@ -406,7 +406,7 @@ static const CGFloat _headerHeight = _cellHeight;
     if (!self.netflixCancellation) {
         self.netflixCancellation = [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/netflix/login.json"
                                                                                 post:NO
-                                                                       authenticated:YES
+                                                                          authPolicy:STRestKitAuthPolicyWait
                                                                               params:[NSDictionary dictionary]
                                                                              mapping:[STSimpleEndpointResponse mapping]
                                                                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -414,6 +414,7 @@ static const CGFloat _headerHeight = _cellHeight;
                                                                              if (result) {
                                                                                  id<STEndpointResponse> response = result;
                                                                                  if (response.action) {
+                                                                                     self.netflixEndpointPending = YES;
                                                                                      [[STActionManager sharedActionManager] didChooseAction:response.action withContext:[STActionContext context]];
                                                                                  }
                                                                                  else {
@@ -431,7 +432,7 @@ static const CGFloat _headerHeight = _cellHeight;
     if (!self.netflixCancellation) {
         self.netflixCancellation = [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/netflix/remove.json"
                                                                                 post:YES
-                                                                       authenticated:YES
+                                                                          authPolicy:STRestKitAuthPolicyWait
                                                                               params:[NSDictionary dictionaryWithObject:@"netflix" forKey:@"service_name"]
                                                                              mapping:[STSimpleBooleanResponse mapping]
                                                                          andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -476,7 +477,7 @@ static const CGFloat _headerHeight = _cellHeight;
     //    [params setObject:@"twitter" forKey:@"service_name"];
     [[STRestKitLoader sharedInstance] loadOneWithPath:@"/account/linked/twitter/add.json"
                                                  post:YES
-                                        authenticated:YES
+                                           authPolicy:STRestKitAuthPolicyWait
                                                params:params
                                               mapping:[STSimpleBooleanResponse mapping]
                                           andCallback:^(id result, NSError *error, STCancellation *cancellation) {
@@ -576,6 +577,9 @@ static const CGFloat _headerHeight = _cellHeight;
                                                       self.openGraphCancellation = nil;
                                                       [self.openGraphValues removeAllObjects];
                                                       self.openGraphItems = [NSArray array];
+                                                  }
+                                                  else {
+                                                      [Util warnWithAPIError:error andBlock:nil];
                                                   }
                                               }];
     }
@@ -808,7 +812,7 @@ static const CGFloat _headerHeight = _cellHeight;
                                 nil];
         self.openGraphCancellation = [[STRestKitLoader sharedInstance] loadWithPath:@"/account/linked/facebook/settings/update.json"
                                                                                post:YES
-                                                                      authenticated:YES
+                                                                         authPolicy:STRestKitAuthPolicyWait
                                                                              params:params
                                                                             mapping:[STSimpleAlertItem mapping]
                                                                         andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {
@@ -821,7 +825,7 @@ static const CGFloat _headerHeight = _cellHeight;
     if (!self.openGraphCancellation) {
         self.openGraphCancellation = [[STRestKitLoader sharedInstance] loadWithPath:@"/account/linked/facebook/settings/show.json"
                                                                                post:NO
-                                                                      authenticated:YES
+                                                                         authPolicy:STRestKitAuthPolicyWait
                                                                              params:[NSDictionary dictionaryWithObject:@"facebook" forKey:@"service_name"]
                                                                             mapping:[STSimpleAlertItem mapping]
                                                                         andCallback:^(NSArray *results, NSError *error, STCancellation *cancellation) {

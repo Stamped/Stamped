@@ -103,12 +103,13 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         _titleView.textColor = [UIColor stampedBlackColor];
         _titleView.textAlignment = UITextAlignmentLeft;
         _titleView.lineBreakMode = UILineBreakModeTailTruncation;
+        _titleView.highlightedTextColor = [UIColor whiteColor];
         
         _crossOutLine = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 2)];
         _crossOutLine.backgroundColor = [UIColor colorWithWhite:191./255. alpha:1];
         
         CGFloat yOffset = 39;
-        _categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(xOffset, yOffset, 10, 10)];
+        _categoryImageView = [[UIImageView alloc] initWithFrame:CGRectMake(xOffset, yOffset + 1.5, 10, 10)];
         
         UIView* tapButton = [Util tapViewWithFrame:_checkView.frame target:self selector:@selector(iconClicked:) andMessage:nil];
         _subtitleView = [[UILabel alloc] initWithFrame:CGRectMake(82, yOffset - 1, 0, 0)];
@@ -116,6 +117,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         _subtitleView.textColor = [UIColor stampedGrayColor];
         _subtitleView.textAlignment = UITextAlignmentLeft;
         _subtitleView.lineBreakMode = UILineBreakModeTailTruncation;
+        _subtitleView.highlightedTextColor = [UIColor whiteColor];
         
         _stampImage = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, STStampImageSize18, STStampImageSize18)];
         
@@ -143,7 +145,7 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         [self.contentView addSubview:_subtitleView];
         [self.contentView addSubview:_todoDots];
         [self.contentView addSubview:_previews];
-        [self.contentView addSubview:tapButton];
+        [self addSubview:tapButton];
     }
     return self;
 }   
@@ -198,7 +200,12 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
         frame.size.width = 200;
         _subtitleView.frame = frame;
     }
-    _categoryImageView.image = [Util imageForCategory:entity.category];
+    UIImage* rawImage = [Util categoryIconForCategory:entity.category subcategory:entity.subcategory filter:nil andSize:STCategoryIconSize9];
+    UIImage* categoryImage = [Util gradientImage:rawImage withPrimaryColor:@"b2b2b2" secondary:@"b2b2b2" andStyle:STGradientStyleVertical];
+    _categoryImageView.image = categoryImage;
+    CGRect imageFrame = _categoryImageView.frame;
+    imageFrame.size = categoryImage.size;
+    _categoryImageView.frame = imageFrame;
     NSString* imageName = nil;
     STTodoState state = [STTodoViewController todoState:todo];
     _stampImage.hidden = YES;
@@ -452,7 +459,6 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)loadNextPage {
-    NSLog(@"loadNextPage");
     [self.cache refreshAtIndex:self.snapshot.count force:NO];
 }
 
@@ -461,7 +467,6 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 }
 
 - (void)reloadDataSource {
-    NSLog(@"reloading");
     if (self.dirty) {
         [self.cache updateAllWithAccellerator:[STStampedAPI sharedInstance]];
     }
@@ -555,38 +560,38 @@ static NSString* const _todoReuseIdentifier = @"todo-cell";
 #pragma mark - STTodoCellDelegate
 
 - (void)clickedImageForTodo:(id<STTodo>)todo {
-    //    self.actionSheetTodo = todo;
-    //    
-    //    NSArray* otherButtonTitles = nil;
-    //    STTodoState state = [STTodoViewController todoState:todo];
-    //    if (state == STTodoStateDone) {
-    //        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as undone", @"Stamp it", nil];
-    //    }
-    //    else if (state == STTodoStateStamped) {
-    //        otherButtonTitles = [NSArray arrayWithObject:@"View stamp"];
-    //    }
-    //    else {
-    //        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as done", @"Stamp it", nil];
-    //    }
-    //    
-    //    UIActionSheet *actionSheet = nil;
-    //    if (otherButtonTitles.count == 1) {
-    //        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-    //                                                  delegate:self 
-    //                                         cancelButtonTitle:@"Cancel" 
-    //                                    destructiveButtonTitle:nil 
-    //                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], nil];
-    //    }
-    //    else {
-    //        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-    //                                                  delegate:self 
-    //                                         cancelButtonTitle:@"Cancel" 
-    //                                    destructiveButtonTitle:nil 
-    //                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], [otherButtonTitles objectAtIndex:1], nil];
-    //    }
-    //    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
-    //    [actionSheet showInView:self.view];
-    //    [actionSheet release];
+    self.actionSheetTodo = todo;
+    
+    NSArray* otherButtonTitles = nil;
+    STTodoState state = [STTodoViewController todoState:todo];
+    if (state == STTodoStateDone) {
+        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as undone", @"Stamp it", nil];
+    }
+    else if (state == STTodoStateStamped) {
+        otherButtonTitles = [NSArray arrayWithObject:@"View stamp"];
+    }
+    else {
+        otherButtonTitles = [NSArray arrayWithObjects:@"Mark as done", @"Stamp it", nil];
+    }
+    
+    UIActionSheet *actionSheet = nil;
+    if (otherButtonTitles.count == 1) {
+        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                  delegate:self 
+                                         cancelButtonTitle:@"Cancel" 
+                                    destructiveButtonTitle:nil 
+                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], nil];
+    }
+    else {
+        actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                  delegate:self 
+                                         cancelButtonTitle:@"Cancel" 
+                                    destructiveButtonTitle:nil 
+                                         otherButtonTitles:[otherButtonTitles objectAtIndex:0], [otherButtonTitles objectAtIndex:1], nil];
+    }
+    actionSheet.actionSheetStyle = UIActionSheetStyleBlackOpaque;
+    [actionSheet showInView:self.view];
+    [actionSheet release];
 }
 
 @end

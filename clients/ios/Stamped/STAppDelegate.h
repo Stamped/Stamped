@@ -6,6 +6,10 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ NEEDSDOC
+ */
+
 #import <Foundation/Foundation.h>
 
 @class DDMenuController, STMenuController;

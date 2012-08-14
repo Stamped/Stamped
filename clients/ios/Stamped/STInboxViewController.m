@@ -7,7 +7,6 @@
 //
 
 #import "STInboxViewController.h"
-#import "STToolbarView.h"
 #import "STUserStampsSliceList.h"
 #import "STGenericTableDelegate.h"
 #import "STYouStampsList.h"
@@ -639,7 +638,7 @@ static STStampedAPIScope _lastScope = STStampedAPIScopeFriends;
     } else {
         
         FindFriendsViewController *controller = [[[FindFriendsViewController alloc] init] autorelease];
-        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+        [Util compareAndPushOnto:self withController:controller modal:NO animated:YES];
     }
     
 }

@@ -6,6 +6,15 @@
 //  Copyright (c) 2012 Stamped, Inc. All rights reserved.
 //
 
+/*
+ Custom PageControl-like control which lets the user specify various attributes of the control.
+ 
+ This element does not page manipulation, just page observation.
+ 
+ 2012-08-10
+ -Landon
+ */
+
 #import <UIKit/UIKit.h>
 
 @interface STPageControl : UIControl

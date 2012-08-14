@@ -24,6 +24,7 @@
 @property(nonatomic,readonly,getter = isLoading) BOOL loading;
 
 + (RKObjectMapping*)mapping;
-- (void)toggleFollowing;
++ (STSimpleUser*)userFromUser:(id<STUser>)user;
+- (void)toggleFollowing __attribute__((deprecated));
 
 @end

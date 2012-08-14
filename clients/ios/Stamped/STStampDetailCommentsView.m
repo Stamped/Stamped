@@ -130,7 +130,7 @@ static const CGFloat _bodyWidth = 214;
 
 - (void)viewURL:(NSString*)url {
     STPhotoViewController *controller = [[[STPhotoViewController alloc] initWithURL:[NSURL URLWithString:url]] autorelease];
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    [Util pushController:controller modal:NO animated:YES];
 }
 
 - (void)userImageClicked:(id<STUser>)user {
@@ -514,41 +514,18 @@ static const CGFloat _bodyWidth = 214;
     if (creditView) {
         [Util appendView:creditView toParentView:view];
     }
-    //NSLog(@"ChunkHeight:%f",view.frame.size.height);
-    //    if (creditCount) {
-    //        CGFloat y = bodyChunk ? CGRectGetMaxY(bodyChunk.frame) : CGRectGetMaxY(userChunk.frame);
-    //        CGRect creditFrame = CGRectMake(0, y, width, view.frame.size.height - y);
-    //        UIView* creditButton = [Util tapViewWithFrame:creditFrame andCallback:^{
-    //            if (credits.count == 1) {
-    //                id<STStampPreview> first = [credits objectAtIndex:0];
-    //                [[STStampedActions sharedInstance] viewStampWithStampID:first.stampID];
-    //            }
-    //            else {
-    //                NSMutableArray* userIDs = [NSMutableArray array];
-    //                NSMutableDictionary* mapping = [NSMutableDictionary dictionary];
-    //                for (id<STStampPreview> preview in credits) {
-    //                    NSString* userID = preview.user.userID;
-    //                    if (userID) {
-    //                        [userIDs addObject:userID];
-    //                        if (preview.stampID) {
-    //                            [mapping setObject:preview.stampID forKey:userID];
-    //                        }
-    //                    }
-    //                }
-    //                STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
-    //                controller.userIDToStampID = mapping;
-    //                [[Util sharedNavigationController] pushViewController:controller animated:YES];
-    //            }
-    //        }];
-    //        [view addSubview:creditButton];
-    //    }
     return view;
 }
 
 + (void)creditsClicked:(NSArray<STStampPreview>*)credits {
     if (credits.count == 1) {
         id<STStampPreview> first = [credits objectAtIndex:0];
-        [[STStampedActions sharedInstance] viewStampWithStampID:first.stampID];
+        if (first.stampID) {
+            [[STStampedActions sharedInstance] viewStampWithStampID:first.stampID];
+        }
+        else {
+            [[STStampedActions sharedInstance] viewUserWithUserID:first.user.userID];
+        }
     }
     else {
         NSMutableArray* userIDs = [NSMutableArray array];
@@ -564,7 +541,7 @@ static const CGFloat _bodyWidth = 214;
         }
         STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
         controller.userIDToStampID = mapping;
-        [[Util sharedNavigationController] pushViewController:controller animated:YES];
+        [Util pushController:controller modal:NO animated:YES];
     }
 }
 

@@ -16,34 +16,35 @@
 
 - (STCancellation*)makeStampedAPICallWithSlice:(STGenericCollectionSlice*)slice 
                                    andCallback:(void (^)(NSArray<STStamp>* stamps, NSError* error, STCancellation* cancellation))block {
-  return [[STStampedAPI sharedInstance] stampsForSuggestedSlice:slice andCallback:block];
+    return [[STStampedAPI sharedInstance] stampsForSuggestedSlice:slice andCallback:block];
 }
 
 - (NSString *)lastCellText {
-  if (!self.slice.query) {
-    return @"No Stamps available right now";
-  }
-  else {
-    return [NSString stringWithFormat:@"Search for %@", self.slice.query];
-  }
+    if (!self.slice.query) {
+        return @"No Stamps available right now";
+    }
+    else {
+        return [NSString stringWithFormat:@"Search for %@", self.slice.query];
+    }
 }
 
 - (NSString *)noStampsText {
-  return self.lastCellText;
+    return self.lastCellText;
 }
 
 - (void)selectedLastCell {
-  if (!self.slice.query) {
-  }
-  else {
-    UINavigationController* controller = [Util sharedNavigationController];
-    [controller pushViewController:[[[STEntitySearchController alloc] initWithCategory:self.slice.category andQuery:self.slice.query] autorelease]
-                          animated:YES];
-  }
+    if (!self.slice.query) {
+    }
+    else {
+        [Util pushController:[[[STEntitySearchController alloc] initWithCategory:self.slice.category
+                                                                        andQuery:self.slice.query] autorelease]
+                       modal:NO
+                    animated:YES];
+    }
 }
 
 - (void)selectedNoStampsCell {
-  [self selectedLastCell];
+    [self selectedLastCell];
 }
 
 @end
