@@ -137,9 +137,9 @@ urlpatterns = patterns('',
     (r'v1/stamps/todos/show.json',                          'v0.functions.likes.todosShow'),
     
     ### COMMENTS
-    (r'v1/comments/create.json',                            'v0.functions.comments.create'),
-    (r'v1/comments/remove.json',                            'v0.functions.comments.remove'),
-    (r'v1/comments/collection.json',                        'v0.functions.comments.collection'),
+    (r'v1/comments/create.json',                            'v1.comments.create.run'),
+    (r'v1/comments/remove.json',                            'v1.comments.remove.run'),
+    (r'v1/comments/collection.json',                        'v1.comments.collection.run'),
     
     ### TODOS
     (r'v1/todos/create.json',                               'v0.functions.todos.create'),
