@@ -175,7 +175,7 @@
                 'bostonglobe'       : true
             };
             
-            if (likely_tweet && (screen_name in callout_users)) {
+            if (likely_tweet && (screen_name_lower in callout_users)) {
                 var key = "stamped.v1.cookies.popups.intro";
                 
                 setTimeout(function() {

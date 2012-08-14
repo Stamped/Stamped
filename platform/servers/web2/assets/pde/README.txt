@@ -10,9 +10,19 @@ TODO:
             * implement new constraint: select between several string options
         * possibly be able to specify color palette?
     * be able to collapse & expand code sections [-] and [+] via /** directive **/
-
+    * add global ability to processing canvas' to:
+        * pause
+        * restart
+        * copy URL
+        * copy screenshot to clipboard
+    
     * hover over keywords => inline documentation from:
         * http://processingjs.org/reference/textAlign_/
+
+SKETCH IDEAS:
+    * 404 page w/ rrt generating the letters!
+    * metropolis sampler visualization!
+    * play around with different sampling methods
 
 TEMPLATES:
     NOTE: all control-flow logic belongs in the processing code itself

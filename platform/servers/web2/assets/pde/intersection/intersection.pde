@@ -125,7 +125,7 @@ void update() {
                     if (intersections != null && intersections.length == 2) {
                         float difX      = intersections[1].x - intersections[0].x;
                         float difY      = intersections[1].y - intersections[0].y;
-                        int dist        = int(sqrt(difX * difX + difY * difY));
+                        int distance    = int(sqrt(difX * difX + difY * difY));
                         int diameter2   = _circles[j].getDiameter(); 
                         
                         // want the smaller of the two diameters
@@ -133,9 +133,9 @@ void update() {
                         
                         int a;
                         if (VARIATION == 0) {
-                            a = 32 - ((dist << 5) / d);
+                            a = 32 - ((distance << 5) / d);
                         } else {
-                            a = 128 - (int)((dist << 8) / d);
+                            a = 128 - (int)((distance << 8) / d);
                         }
                         
                         if (a > 255) {
@@ -258,15 +258,15 @@ class Circle {
         int rad    = circle.getRadius();
         float xDif = circle.getX() - _x;
         float yDif = circle.getY() - _y;
-        float dist = sqrt(xDif * xDif + yDif * yDif);
+        float d    = sqrt(xDif * xDif + yDif * yDif);
         
-        // reject if dist btwn circles is greater than their radii combined
-        if (dist > _radius + rad) {
+        // reject if distance btwn circles is greater than their radii combined
+        if (d > _radius + rad) {
             return false;
         }
         
         // reject if one circle is inside of the other
-        return (dist >= abs(rad - _radius));
+        return (d >= abs(rad - _radius));
     }
     
     PVector[] getIntersection(Circle circle) {
@@ -276,23 +276,23 @@ class Circle {
         float xDif  = cirX - _x;
         float yDif  = cirY - _y;
         float dist2 = xDif * xDif + yDif * yDif;
-        float dist  = sqrt(dist2);
+        float d     = sqrt(dist2);
         
-        // reject if dist btwn circles is greater than their radii combined
-        if (dist > _radius + rad) {
+        // reject if distance btwn circles is greater than their radii combined
+        if (d > _radius + rad) {
             return null;
         }
         
         // reject if one circle is inside of the other
-        if (dist < abs(rad - _radius)) {
+        if (d < abs(rad - _radius)) {
             return null;
         }
         
-        xDif /= dist;
-        yDif /= dist;
+        xDif /= d;
+        yDif /= d;
         
         // distance from this circle to line cutting through intersections
-        float a = (_radiusSquared - circle.getRadiusSquared() + dist2) / (2 * dist);
+        float a = (_radiusSquared - circle.getRadiusSquared() + dist2) / (2 * d);
         
         // coordinates of midpoint of intersection
         float pX = _x + a * xDif; 

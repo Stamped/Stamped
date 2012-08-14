@@ -28,9 +28,17 @@ void setup() {
     frameRate(/** int [ 1, 60 ] **/ 12 /** endint **/);
     loop();
     
+    String path;
+    
+    if (online) {
+        path = "/assets/pde/displaced/
+    } else {
+        path = "";
+    }
+    
     BACKGROUND_IMAGES = new String[2];
-    BACKGROUND_IMAGES[0] = "/assets/pde/displaced/displaced0.jpeg";
-    BACKGROUND_IMAGES[1] = "/assets/pde/displaced/displaced1.jpeg";
+    BACKGROUND_IMAGES[0] = path + "displaced0.jpeg";
+    BACKGROUND_IMAGES[1] = path + "displaced1.jpeg";
     
     reset();
 }
