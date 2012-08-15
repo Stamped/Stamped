@@ -2995,7 +2995,11 @@ class StampedAPI(AStampedAPI):
         stamp = self.getStamp(stampId)
         user = stamp.user
         entity = stamp.entity
-        coordinates = entity.coordinates
+        coordinates = None
+        try:
+            coordinates = "%s,%s" % (entity.coordinates.lat, entity.coordinates.lng)
+        except AttributeError:
+            pass
         primary_color = user.color_primary
         secondary_color = user.color_secondary
         user_name = user.screen_name
