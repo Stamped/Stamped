@@ -3005,7 +3005,7 @@ class StampedAPI(AStampedAPI):
         entity_img_url = None
         user_generated = False
         try:
-            entity_img_url = stamp.contents.images.sizes[0].url
+            entity_img_url = stamp.contents[-1].images[0].sizes[0].url
             user_generated = True
         except AttributeError:
             pass
