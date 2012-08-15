@@ -3025,9 +3025,7 @@ class StampedAPI(AStampedAPI):
             utils.printException()
 
         if generate:
-            logs.info('%s %s %s %s %s %s %s %s %s %s' % (entity_img_url, coordinates, user_generated, primary_color,
-                                                         secondary_color, user_name, category, types, title, subtitle))
-            image = self._instagram.createInstagramImage(entity_img_url, coordinates, user_generated, primary_color,
+            image = self._instagram.createInstagramImage(entity_img_url, user_generated, coordinates, primary_color,
                 secondary_color, user_name, category, types, title, subtitle)
             self._imageDB.addImage('instagram/%s' % filename, image)
 
