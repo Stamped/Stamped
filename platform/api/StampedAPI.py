@@ -3006,10 +3006,7 @@ class StampedAPI(AStampedAPI):
         category = entity.category
         types = entity.types
         title = entity.title
-
-        httpentity = HTTPEntity()
-        httpentity.importEntity(entity)
-        subtitle = httpentity.caption
+        subtitle = entity.subtitle
 
         entity_img_url = None
         user_generated = False
