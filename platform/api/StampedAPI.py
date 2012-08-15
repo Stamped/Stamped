@@ -2996,7 +2996,6 @@ class StampedAPI(AStampedAPI):
         user = stamp.user
         entity = stamp.entity
         coordinates = entity.coordinates
-        print coordinates
         primary_color = user.color_primary
         secondary_color = user.color_secondary
         user_name = user.screen_name

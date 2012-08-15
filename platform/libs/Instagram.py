@@ -95,8 +95,7 @@ class Instagram(object):
 
 
     def createInstagramImage(self, entity_img_url, user_generated, coordinates, primary_color, secondary_color,
-                             user_name, category, types, title, subtitle,
-                             a,b,c,d,e,f,g,h):
+                             user_name, category, types, title, subtitle):
         def dropShadow(image, offset=(5,5), background=0xffffff, shadow=0x444444,
                         border=8, iterations=3):
             """
@@ -213,9 +212,9 @@ class Instagram(object):
             buf2.paste(stampImg, (412,-100), stampImg)
             entityImg = buf2.resize(size, Image.ANTIALIAS)
 
-            if pin:
-                pinImg = Image.open(self.__basepath + 'pin.png')
-                entityImg.paste(pinImg, (278,200), pinImg)
+#            if pin:
+#                pinImg = Image.open(self.__basepath + 'pin.png')
+#                entityImg.paste(pinImg, (278,200), pinImg)
 
             return entityImg
 
@@ -308,8 +307,8 @@ class Instagram(object):
             entity_img_url = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=18&sensor=false&scale=1&format=png&maptype=roadmap&size=600x600&key=AIzaSyAEjlMEfxmlCBQeyw_82jjobQAFjYx-Las" % coordinates
 
         if entity_img_url is not None:
-            entityImg = Image.open(entity_img_url)
-            #entityImg = utils.getWebImage(entity_img_url)
+            #entityImg = Image.open(entity_img_url)
+            entityImg = utils.getWebImage(entity_img_url)
             if user_generated:
                 boxW = 612
                 boxH = 612-195-40-30
