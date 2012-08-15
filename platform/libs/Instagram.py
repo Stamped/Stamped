@@ -96,7 +96,7 @@ class Instagram(object):
 
     def createInstagramImage(self, entity_img_url, user_generated, coordinates, primary_color, secondary_color,
                              user_name, category, types, title, subtitle):
-        def dropShadow(image, offset=(5,5), background=0xffffff, shadow=0x444444,
+        def dropShadow(image, rounded, offset=(5,5), background=0xffffff, shadow=0x444444,
                         border=8, iterations=3):
             """
             Add a gaussian blur drop shadow to an image.
@@ -117,6 +117,11 @@ class Instagram(object):
             totalWidth = image.size[0] + abs(offset[0]) + 2*border
             totalHeight = image.size[1] + abs(offset[1]) + 2*border
             back = Image.new('RGB', (totalWidth, totalHeight), background)
+            if rounded:
+                roundedsquare = Image.open(self.__basepath + 'roundedsquare.png')
+                roundedsquare = roundedsquare.resize((totalWidth, totalHeight), Image.ANTIALIAS)
+                roundedsquare.paste(back, (0, 0), roundedsquare)
+                back = roundedsquare
 
             # Place the shadow, taking into account the offset from the image
             shadowLeft = border + max(offset[0], 0)
@@ -175,8 +180,7 @@ class Instagram(object):
                 #buf2.paste(shadow, (0,0), roundedsquare)
                 entityImg = buf
                 #shadow = buf2
-
-            shadow = dropShadow(entityImg, background=0xffffff, shadow=0xd0d0d0, offset=(0,0), border=20)#.show()
+            shadow = dropShadow(entityImg, False, background=0xffffff, shadow=0xd0d0d0, offset=(0,0), border=20)#.show()
             shadowSize = shadow.size
 
             adjust = (((entityImgSize[1]/float(entityImgSize[0]))-1.0) * 0.2) + 1.0
@@ -207,7 +211,8 @@ class Instagram(object):
 
             stampImg = stampImg.filter(ImageFilter.GaussianBlur)
             stampImg = stampImg.resize((1000,1000), Image.ANTIALIAS)
-            buf2.paste(shadow, shadowOffset, shadowmask)
+            if not rounded:
+                buf2.paste(shadow, shadowOffset, shadowmask)
             buf2.paste(entityImg, (0, 0), mask)
             buf2.paste(stampImg, (412,-100), stampImg)
             entityImg = buf2.resize(size, Image.ANTIALIAS)
