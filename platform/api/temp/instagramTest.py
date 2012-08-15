@@ -60,7 +60,7 @@ font = pygame.font.Font(None, 24)
 clock = pygame.time.Clock()
 
 
-img = instagram.createInstagramImage('purplerain.jpg', False, None, 'FF0000', '0000FF', 'ml', 'film', ['movie_theater'], 'The Dark Knight Keeps on Rising and BLAAARGH', '2012')
+img = instagram.createInstagramImage(None, False, '39.2883155,-76.6005512', 'FF0000', '0000FF', 'ml', 'place', ('restaurant',), 'The Dark Knight Keeps on Rising and BLAAARGH', '2012')
 img.save('instagramtest.png')
 
 key = 0
