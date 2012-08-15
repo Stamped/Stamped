@@ -51,27 +51,21 @@ class _iTunesObject(object):
         """
         Takes a artworkUrl100 url and returns the highest res url
         """
-        size400url = url.replace('100x100', '400x400')
-        size200url = url.replace('100x100', '200x200')
+        largeUrls = [
+            url.replace('100x100', '600x600'),
+            url.replace('100x100', '400x400'),
+            url.replace('100x100', '200x200'),
+        ]
 
-        try:
-            self.countLookupCall('image')
-            urllib2.urlopen(size400url)
-            return size400url
-        except urllib2.HTTPError:
-            pass
-        except LookupRequiredError:
-            pass
-
-        try:
-            self.countLookupCall('image')
-            urllib2.urlopen(size200url)
-            return size200url
-        except urllib2.HTTPError:
-            pass
-        except LookupRequiredError:
-            pass
-
+        for largeUrl in largeUrls:
+            try:
+                self.countLookupCall('image')
+                urllib2.urlopen(largeUrl)
+                return largeUrl
+            except urllib2.HTTPError:
+                pass
+            except LookupRequiredError:
+                return url
         return url
 
 
