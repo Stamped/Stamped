@@ -3007,7 +3007,7 @@ class StampedAPI(AStampedAPI):
         try:
             entity_img_url = stamp.contents[-1].images[0].sizes[0].url
             user_generated = True
-        except AttributeError:
+        except (AttributeError, TypeError):
             pass
 
 #        if self._imageDB.checkStampImage(stampId):502c0eb864c7946c841f3a9a
