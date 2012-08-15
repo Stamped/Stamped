@@ -42,7 +42,7 @@ x = -44
 y = 1
 
 ball = pygame.image.load("instagramtest.png")
-#background = pygame.image.load("background2.jpg")
+background = pygame.image.load("background3.png")
 ballrect = ball.get_rect()
 
 #imgs = generate_gradient_images('ff0000', '0000ff')
@@ -60,6 +60,9 @@ font = pygame.font.Font(None, 24)
 clock = pygame.time.Clock()
 
 
+img = instagram.createInstagramImage('purplerain.jpg', False, None, 'FF0000', '0000FF', 'ml', 'film', ['movie_theater'], 'The Dark Knight Keeps on Rising and BLAAARGH', '2012',
+    a,b,c,d,e,f,g,h)
+img.save('instagramtest.png')
 
 key = 0
 
@@ -107,12 +110,10 @@ while 1:
         g = g*(1.0+factor)
         h = h*(1.0+factor)
     if pressed[pygame.K_p]:
-        file = "purplerain.jpg"
+        file = "batman.jpg"
     else:
-        file = 'batman.jpg'
+        file = 'purplerain.jpg'
 
-    img = instagram.createInstagramImage(file, 'FF0000', '0000FF', 'ml', 'film', 'The Dark Knight Rises', '2012')
-    img.save('instagramtest.png')
     ball = pygame.image.load("instagramtest.png")
 
     ballrect = ball.get_rect()

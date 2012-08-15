@@ -2995,16 +2995,21 @@ class StampedAPI(AStampedAPI):
         stamp = self.getStamp(stampId)
         user = stamp.user
         entity = stamp.entity
+        coordinates = entity.coordinates
+        print coordinates
         primary_color = user.color_primary
         secondary_color = user.color_secondary
         user_name = user.screen_name
         category = entity.category
+        types = entity.types
         title = entity.title
         subtitle = entity.subtitle
 
         entity_img_url = None
+        user_generated = False
         if self._imageDB.checkStampImage(stampId):
             entity_img_url = 'https://s3.amazonaws.com/stamped.com.static.images/stamps/%s.jpg' % stampId
+            user_generated = True
         elif stamp.entity.images is not None and len(stamp.entity.images) > 0 and len(stamp.entity.images[0].sizes) > 0:
             entity_img_url = stamp.entity.images[0].sizes[0].url
 
@@ -3017,8 +3022,8 @@ class StampedAPI(AStampedAPI):
             utils.printException()
 
         if generate:
-            image = self._instagram.createInstagramImage(entity_img_url, primary_color, secondary_color, user_name,
-                category, title, subtitle)
+            image = self._instagram.createInstagramImage(entity_img_url, coordinates, user_generated, primary_color,
+                secondary_color, user_name, category, types, title, subtitle)
             self._imageDB.addImage('instagram/%s' % filename, image)
 
         url = 'https://s3.amazonaws.com/stamped.com.static.images/instagram/%s.png' % filename
