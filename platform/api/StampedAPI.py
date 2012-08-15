@@ -72,6 +72,7 @@ try:
     from libs.Twitter                    import *
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
+    from libs.Instagram             import globalInstagram
 
     from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
