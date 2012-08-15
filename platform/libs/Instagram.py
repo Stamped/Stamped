@@ -135,7 +135,6 @@ class Instagram(object):
             # Paste the input image onto the shadow backdrop
             imageLeft = border - min(offset[0], 0)
             imageTop = border - min(offset[1], 0)
-            #back.paste(image, (imageLeft, imageTop))
 
             return back
 
@@ -161,21 +160,12 @@ class Instagram(object):
             entityImg = entityImg.resize((600, int(origAlbumSize[1]/xResize)), Image.ANTIALIAS)
             entityImgSize = entityImg.size
 
-            #            draw = ImageDraw.Draw(entityImg)
-            #            draw.line((entityImg.size[0]/2, 0, entityImg.size[0]/2, entityImg.size[1]), fill='#000000')
-            #            draw.line((0, entityImg.size[1]/2, entityImg.size[0], entityImg.size[1]/2), fill='#000000')
             if rounded:
                 buf = Image.new('RGBA', entityImgSize, (255,255,255,0))
-                #buf2 = Image.new('RGBA', shadowSize, (255,255,255,0))
                 roundedsquare = Image.open(self.__basepath + 'roundedsquare.png')
                 entityImg = entityImg.resize((600,600), Image.ANTIALIAS)
-                #shadow = shadow.resize((600,600), Image.ANTIALIAS)
-                #roundedEntitySquare = roundedsquare.resize(entityImgSize, Image.ANTIALIAS)
-                #roundedShadowSquare = roundedsquare.resize(shadowSize, Image.ANTIALIAS)
                 buf.paste(entityImg, (0,0), roundedsquare)
-                #buf2.paste(shadow, (0,0), roundedsquare)
                 entityImg = buf
-                #shadow = buf2
             shadow = dropShadow(entityImg, False, background=0xffffff, shadow=0xd0d0d0, offset=(0,0), border=20)#.show()
             shadowSize = shadow.size
 
@@ -221,8 +211,6 @@ class Instagram(object):
 
         def getCategoryIcon(category):
             categoryIcons = Image.open(self.__basepath + 'categoryicons18px.png')
-            #icon = Image.new('RGBA', (18,18), (255,255,255,0))
-
             categories = ('restaurant', 'bar', 'cafe', 'place', 'album', 'song', 'artist', 'film', 'tv_show',
                           'book', 'software', 'other')
             if category not in categories:
@@ -233,7 +221,6 @@ class Instagram(object):
 
             icon = ImageChops.offset(categoryIcons, -20*categoryIndex, 20)
             icon = icon.crop((0, 0, 18, 18))
-            #icon.paste(categoryIcons, (20*categoryIndex, 20, (20*categoryIndex)+18, 38))
             return icon
 
         def getInstagramTextImg(user_name, category, types, title, subtitle):
@@ -308,7 +295,6 @@ class Instagram(object):
             entity_img_url = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=18&sensor=false&scale=1&format=png&maptype=roadmap&size=600x600&key=AIzaSyAEjlMEfxmlCBQeyw_82jjobQAFjYx-Las" % coordinates
 
         if entity_img_url is not None:
-            #entityImg = Image.open(entity_img_url)
             entityImg = utils.getWebImage(entity_img_url)
             if user_generated:
                 boxW = 612
