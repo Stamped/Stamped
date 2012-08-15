@@ -116,6 +116,10 @@ class StampedAPI(AStampedAPI):
     def _rdio(self):
         return globalRdio()
 
+    @lazyProperty
+    def _instagram(self):
+        return globalInstagram()
+
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
         self.lite_mode = kwargs.pop('lite_mode', False)
