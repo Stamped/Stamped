@@ -3005,7 +3005,7 @@ class StampedAPI(AStampedAPI):
         user_generated = False
         try:
             for content in reversed(stamp.contents):
-                if content.images is not None and len(content.images) > 0 and len(content.images.sizes) > 0:
+                if content.images is not None and len(content.images) > 0 and len(content.images[0].sizes) > 0:
                     entity_img_url = content.images[0].sizes[0].url
                     user_generated = True
                     break
