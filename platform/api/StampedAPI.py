@@ -3003,11 +3003,14 @@ class StampedAPI(AStampedAPI):
 
         entity_img_url = None
         user_generated = False
+        contentIndex = None
         try:
-            for content in reversed(stamp.contents):
+            for i in reversed(range(len(stamp.contents))):
+                content = stamp.contents[i]
                 if content.images is not None and len(content.images) > 0 and len(content.images[0].sizes) > 0:
                     entity_img_url = content.images[0].sizes[0].url
                     user_generated = True
+                    contentIndex = i
                     break
         except (AttributeError, TypeError):
             pass
@@ -3019,7 +3022,8 @@ class StampedAPI(AStampedAPI):
             and len(stamp.entity.images[0].sizes) > 0:
             entity_img_url = stamp.entity.images[0].sizes[0].url
 
-        filename = '%s-%s-%s' % (stampId, primary_color.upper(), secondary_color.upper())
+        filename = '%s-%s-%s%s' % (stampId, primary_color.upper(), secondary_color.upper(),
+                                   '' if contentIndex is None else contentIndex)
         generate = False
         try:
             generate = not self._imageDB.bucket.get_key("instagram/%s.png" % filename)
