@@ -237,9 +237,14 @@ class Instagram(object):
             type = types[0].replace('_', ' ')
             if type == 'tv':
                 type = 'TV show'
+            if type == 'other':
+                prefix = type = ""
+            if type == 'music':
+                type = 'song'
 
 
             header = ' stamped %s %s' % (prefix, type)
+            header.rstrip()
             headerW, headerH = draw.textsize(header, font=helvetica_neue)
 
             # truncate title text if necessary.  Allow ten pixels of padding on each side and append ellipsis
