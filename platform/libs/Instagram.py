@@ -311,6 +311,8 @@ class Instagram(object):
                 offsetY = (boxH - h)/2 + 195+40
                 img.paste(entityImg, (offsetX, offsetY))
                 img.paste(textImg, (0, 40), textImg)
+                stamp = stamp.resize((100,100), Image.ANTIALIAS)
+                img.paste(stamp, (offsetX+entityImg.size[0]-40, offsetY-50), stamp)
             else:
                 entityImg = transformEntityImage(entityImg, stamp, 'app' in types, coordinates is not None,
                     a,b,c,d,e,f,g,h,x,y)
