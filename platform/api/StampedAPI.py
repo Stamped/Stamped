@@ -3004,8 +3004,11 @@ class StampedAPI(AStampedAPI):
         entity_img_url = None
         user_generated = False
         try:
-            entity_img_url = stamp.contents[-1].images[0].sizes[0].url
-            user_generated = True
+            for content in reversed(stamp.contents):
+                if content.images is not None and len(content.images) > 0 and len(content.images.sizes) > 0:
+                    entity_img_url = content.images[0].sizes[0].url
+                    user_generated = True
+                    break
         except (AttributeError, TypeError):
             pass
 
@@ -3026,7 +3029,7 @@ class StampedAPI(AStampedAPI):
 
         cache = user.timestamp.image_cache
         if cache is not None:
-            profile_img_url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s-96x96?%s' % \
+            profile_img_url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s-96x96.jpg?%s' % \
                               (user.screen_name, int(time.mktime(cache.timetuple())))
         else:
             profile_img_url = 'http://stamped.com.static.images.s3.amazonaws.com/users/default-96x96.jpg'
