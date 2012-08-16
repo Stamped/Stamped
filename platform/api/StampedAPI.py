@@ -3024,9 +3024,17 @@ class StampedAPI(AStampedAPI):
             generate = True
             utils.printException()
 
+        cache = user.timestamp.image_cache
+        if cache is not None:
+            profile_img_url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s-96x96?%s' % \
+                              (user.screen_name, int(time.mktime(cache.timetuple())))
+        else:
+            profile_img_url = 'http://stamped.com.static.images.s3.amazonaws.com/users/default-96x96.jpg'
+        stamp_url = 'stamped.com/%s/s/%s' % (user.screen_name, stamp.stats.stamp_num)
+
         if generate:
-            image = self._instagram.createInstagramImage(entity_img_url, user_generated, coordinates, primary_color,
-                secondary_color, user_name, category, types, title, subtitle)
+            image = self._instagram.createInstagramImage(entity_img_url, stamp_url, profile_img_url, user_generated,
+                coordinates, primary_color, secondary_color, user_name, category, types, title, subtitle)
             self._imageDB.addImage('instagram/%s' % filename, image)
 
         url = 'https://s3.amazonaws.com/stamped.com.static.images/instagram/%s.png' % filename

@@ -90,8 +90,8 @@ class Instagram(object):
 
 
 
-    def createInstagramImage(self, entity_img_url, user_generated, coordinates, primary_color, secondary_color,
-                             user_name, category, types, title, subtitle):
+    def createInstagramImage(self, entity_img_url, stamp_url, profile_img_url, user_generated, coordinates,
+                             primary_color, secondary_color, user_name, category, types, title, subtitle):
         def dropShadow(image, rounded, offset=(5,5), background=0xffffff, shadow=0x444444,
                        border=8, iterations=3):
             """
@@ -256,7 +256,7 @@ class Instagram(object):
             draw.text((612-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill='#939393')
             draw.text((612-(titleW/2),40*2), final_title, font=titling_gothic, fill='#000000')
             draw.line((165*2, 134*2, (612-165)*2, 134*2), fill='#e0e0e0')
-            draw.text(((612*2/2)-(subtitleW/2),(134+20)*2), subtitle, font=helvetica_neue, fill='#939393')
+            draw.text(((612*2/2)-(subtitleW/2),(134+22)*2), subtitle, font=helvetica_neue, fill='#939393')
             del draw
             textImg = textImg.resize((612, 195), Image.ANTIALIAS)
             icon = getCategoryIcon(category)
@@ -294,6 +294,7 @@ class Instagram(object):
         if coordinates is not None and user_generated == False:
             entity_img_url = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=18&sensor=false&scale=1&format=png&maptype=roadmap&size=600x600&key=AIzaSyAEjlMEfxmlCBQeyw_82jjobQAFjYx-Las" % coordinates
 
+        textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
         if entity_img_url is not None:
             entityImg = utils.getWebImage(entity_img_url)
             if user_generated:
@@ -304,14 +305,36 @@ class Instagram(object):
                 offsetX = (boxW - w)/2
                 offsetY = (boxH - h)/2 + 195+40
                 img.paste(entityImg, (offsetX, offsetY))
+                img.paste(textImg, (0, 40), textImg)
             else:
                 entityImg = transformEntityImage(entityImg, stamp, 'app' in types, coordinates is not None,
                     a,b,c,d,e,f,g,h,x,y)
                 img.paste(entityImg, (7,166))
-        else:
-            pass
-        textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
-        img.paste(textImg, (0, 40), textImg)
+                img.paste(textImg, (0, 40), textImg)
+        elif profile_img_url is not None:
+            # Get the user profile image and give it a little popout/shadow effect
+            profileImg = utils.getWebImage(profile_img_url)
+            back = Image.new('RGBA', (102,102), (255,255,255,255))
+            back.paste(profileImg, (3, 3))
+            profileShadow = dropShadow(back, False, offset=(0,0), background=0xffffff, shadow=0xd0d0d0,
+                border=5, iterations=3)
+            img.paste(profileShadow, (612/2 - 102/2 - 5, 128-5))
+            img.paste(back, (612/2 - 102/2, 128))
+            img.paste(profileImg, (612/2 - 96/2, 130))
+
+            # Draw the standard header/title/subtitle text
+            img.paste(textImg, (0, 248), textImg)
+
+            # Write the stamp url at the bottom
+            helvetica_neue = ImageFont.truetype(self.__basepath + "HelveticaNeue.ttf", 17*2)
+            urlBack = Image.new('RGBA', (612*2,100), (255,255,255,255))
+            draw = ImageDraw.Draw(urlBack)
+            urlW, urlH = draw.textsize(stamp_url, font=helvetica_neue)
+            draw.text((612-(urlW/2),0), stamp_url, font=helvetica_neue, fill='#3b97e4')
+            del draw
+            urlBack = urlBack.resize((612,50), Image.ANTIALIAS)
+            img.paste(urlBack, (0, 496))
+
         img.paste(ribbon_top, (0, 0))
         img.paste(shadow_top, (0, ribbon_top.size[1]))
         img.paste(ribbon_bot, (0, 612-ribbon_bot.size[1]))
