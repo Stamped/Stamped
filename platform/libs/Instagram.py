@@ -219,8 +219,8 @@ class Instagram(object):
                 categoryIndex = categories.index(category)
             print categoryIndex
 
-            icon = ImageChops.offset(categoryIcons, -20*categoryIndex, 20)
-            icon = icon.crop((0, 0, 18, 18))
+            icon = ImageChops.offset(categoryIcons, -28*categoryIndex, 0)
+            icon = icon.crop((0, 0, 28, 28))
             return icon
 
         def getInstagramTextImg(user_name, category, types, title, subtitle):
@@ -260,7 +260,7 @@ class Instagram(object):
             del draw
             textImg = textImg.resize((612, 195), Image.ANTIALIAS)
             icon = getCategoryIcon(category)
-            textImg.paste(icon, ((612/2)-(18/2), 124))
+            textImg.paste(icon, ((612/2)-(18/2), 122))
             return textImg
 
         masks = [
