@@ -7,102 +7,88 @@ __license__   = "TODO"
 
 #Imports
 import Globals
-import sys
-import datetime
-import calendar
-import pprint
-import pymongo
-import keys.aws, logs, utils
-from api.MongoStampedAPI import MongoStampedAPI
-from boto.sdb.connection    import SDBConnection
-from boto.exception         import SDBResponseError
-from api.db.mongodb.MongoStatsCollection            import MongoStatsCollection
-from bson.code import Code
-from bson.objectid import ObjectId
-from analytics_utils import *
 
-#This file contains all analytics queries supported by the Stats.py module
+import keys.aws, logs, utils, pymongo
 
+from datetime                               import timedelta
+from utils                                  import lazyProperty
+from api.MongoStampedAPI                    import MongoStampedAPI
+from bson.objectid                          import ObjectId
+from AnalyticsUtils                         import v1_init, v2_init, now
 
+# Class containing most popular and useful mongodb queries 
+# This module is dependent on the stack from which it is run
 class mongoQuery(object):
     
-    def __init__(self,api=None):
-        # utils.init_db_config('peach.db3')
+    def __init__(self, api=MongoStampedAPI()):
         self.api = api
-        if self.api is None:
-            self.api = MongoStampedAPI()
+        
+    # Mongo Collections
+    @lazyProperty
+    def stamp_collection(self):
+        return self.api._stampDB._collection
     
-    def totalFriends(self):
-        collection = self.api._userDB._collection
-        map = Code("function () {"
-                   "if (this.stats.num_friends) {"
-                   "emit(1,this.stats.num_friends)} "
-                   ";}")
-        
-        reduce = Code("function (key,values) {"
-                      "  var total = 0;"
-                      "  for (var i = 0; i < values.length; i++) {"
-                      "    total += values[i];"
-                      "  }"
-                      "  return total;"
-                      "}")
-        
-        result = collection.inline_map_reduce(map, reduce)
-        return result
+    @lazyProperty
+    def user_collection(self):
+        return self.api._userDB._collection
     
-        
-    def newStamps(self,t0,t1):
-        collection = self.api._stampDB._collection
+    @lazyProperty
+    def friends_collection(self):
+        return self.api._friendshipDB.friends_collection._collection
+    
+    @lazyProperty
+    def entity_collection(self):
+        return self.api._entityDB._collection
+    
+    @lazyProperty
+    def todo_collection(self):
+        return self.api._todoDB._collection
+
+    # Functions
+    def newStamps(self, bgn, end):
+        collection = self.stamp_collection
         field = 'timestamp.created'
-        return collection.find({field: {"$gte": t0,"$lte": t1 }}).count()
+        return collection.find({field: {"$gte": bgn,"$lte": end }}).count()
     
-    def newAccounts(self,t0,t1):
-        collection = self.api._userDB._collection
+    def newAccounts(self, bgn, end):
+        collection = self.user_collection
         field = "timestamp.created"
-        return collection.find({field: {"$gte": t0,"$lte": t1 }}).count()
+        return collection.find({field: {"$gte": bgn,"$lte": end }}).count()
     
-    def topUsers(self,limit):
-        top_followed = self.api._userDB._collection.find().sort('stats.num_followers', pymongo.DESCENDING).limit(limit)
+    def topUsers(self, limit):
+        top_followed = self.user_collection.find().sort('stats.num_followers', pymongo.DESCENDING).limit(limit)
         results = []
         for user in top_followed:
             results.append((str(user['screen_name']), str(user['stats']['num_followers'])))
         return results
     
-    def customQuery(self,t0,t1,collection,field,types=None):
-        if types is None:
-            return collection.find({field: {"$gte": t0, "$lte": t1}}).count()
-        else:
-            output = []
-            for type in types:
-                output.append(collection.find({field: {"$gte": t0, "$lte": t1}, 'entity.types': type }).count())
-                return output
-            
-    def countMutualRelationships(self, version="v2"):
+    # Counts the number of users with at least one mutual relationship on stamped      
+    def usersWithMutualRelationships(self, version="v2"):
         if version not in ["v1","v2"]:
             return 0
+        
         if version == "v2":
-            ids = self.api._userDB._collection.find({'timestamp.created': {'$gte': v2_init()}})
+            ids = self.user_collection.find({'timestamp.created': {'$gte': v2_init()}})
         else:
-            ids = self.api._userDB._collection.find({'timestamp.created': {'$lt': v2_init()}})
+            ids = self.user_collection.find({'timestamp.created': {'$lt': v2_init()}})
         
         user_ids = map(lambda x: str(x['_id']), ids)
                                                           
         count = 0
         for user_id in user_ids:
-            friends = self.api._friendshipDB.getFriends(user_id)
-            followers = self.api._friendshipDB.getFollowers(user_id)
-            for friend in friends:
-                if friend in followers:
-                    count += 1
-                    break
-        
+            friends = set(self.api._friendshipDB.getFriends(user_id))
+            followers = set(self.api._friendshipDB.getFollowers(user_id))
+            if len(set.intersection(friends,followers)) > 0:
+                count += 1
+                
         return count
     
+    # Returns the number of users following somebody not on the suggested users list
     def usersFollowingNonSuggested(self,version="v2"):
         if version not in ["v1","v2"]:
             return 0
-        # All users following at least one person who is not a suggested user
-        users = self.api._friendshipDB.friends_collection._collection.find({'ref_ids': {'$elemMatch': {'$nin': ['4ff72c599713965571000984',
+        
+        non_suggested_users = self.friends_collection.find({'ref_ids': {'$elemMatch': {'$nin': ['4ff72c599713965571000984',
                                                                                                                '4ff2279797139655710004bb',
                                                                                                                '4ff72cd097139667e50001c8',
                                                                                                                '4ff72d3a9713960355000509',
@@ -122,28 +108,30 @@ class mongoQuery(object):
                                                                                                                '4e8dfef6967ed34b3e00086c',
                                                                                                                '4e985cc7fe4a1d2fc4000220',
                                                                                                                '4f5279b5591fa45c3700053b']}}})
-        user_ids = map(lambda x: ObjectId(x['_id']), users)
+        non_suggested_user_ids = map(lambda x: ObjectId(x['_id']), users)
         
         if version == "v1":
-            result = self.api._userDB._collection.find({'timestamp.created': {'$lt': v2_init()}, '_id': {'$in': user_ids}}).count()
+            result = self.user_collection.find({'timestamp.created': {'$lt': v2_init()}, '_id': {'$in': non_suggested_user_ids}}).count()
         else:
-            result = self.api._userDB._collection.find({'timestamp.created': {'$gte': v2_init()}, '_id': {'$in': user_ids}}).count()
+            result = self.user_collection.find({'timestamp.created': {'$gte': v2_init()}, '_id': {'$in': non_suggested_user_ids}}).count()
 
         return result
     
-    # td0 and td1 are timedeltas representing time from account creation
-    def stampDistributionByAccountTime(self, td0, td1, version="v2"):
+    
+    # Calculates the number of stamps created in a certain time window after its user's account creation
+    # bgn and end are integers representing the number of hours after account creation
+    def stampDistributionByAccountTime(self, bgn, end, version="v2"):
         if version not in ["v1","v2"]:
             return 0
         
         count = 0
         
         if version == "v2":
-            stamps = self.api._stampDB._collection.find({'timestamp.created' : {'$gte' : v2_init()}})
+            all_stamps = self.stamp_collection.find({'timestamp.created' : {'$gte' : v2_init()}})
         else:
-            stamps = self.api._stampDB._collection.find({'timestamp.created' : {'$lt' : v2_init()}})
+            all_stamps = self.stamp_collection.find({'timestamp.created' : {'$lt' : v2_init()}})
         
-        for stamp in stamps:
+        for stamp in all_stamps:
             
             userId = str(stamp['user']['user_id'])
             stamp_time = stamp['timestamp']['created']
@@ -155,38 +143,40 @@ class mongoQuery(object):
             
             user_time = user.timestamp.created
             
-            if stamp_time > user_time + td0 and stamp_time <= user_time + td1:
+            if stamp_time > user_time + timedelta(hours=bgn) and stamp_time <= user_time + timedelta(hours=end):
                 count += 1
                 
         return count
     
-    
-    def launchDayStampRetention(self, version="v2"):
-    
+    # Number of users who stamped something in the first n days after launch and returned to stamp something again
+    def launchDayStampRetention(self, version="v2", days=2):
         
         if version == "v2":
-            init = v2_init()
+            bgn = v2_init()
             end = now()
         else:
-            init = v1_init()
+            bgn = v1_init()
             end = v2_init()
             
-        launch_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init, '$lt': init + timedelta(days=2)}})
+        cutoff = bgn + timedelta(days=days)
+            
+        launch_stamps = self.stamp_collection.find({'timestamp.created': {'$gte': bgn, '$lt': cutoff}})
         
         launch_user_ids = set()
         for stamp in launch_stamps:
             launch_user_ids.add(str(stamp['user']['user_id']))
-        
-        launch_users = len(launch_user_ids)
 
-        new_stamps = self.api._stampDB._collection.find({'timestamp.created': {'$gte': init + timedelta(days=2), '$lt': end}})
+        new_stamps = self.stamp_collection.find({'timestamp.created': {'$gte': cutoff, '$lt': end}})
 
         new_user_ids = map(lambda x: str(x['user']['user_id']), new_stamps)
         
         returning_users = set(filter(lambda x: x in launch_user_ids,new_user_ids))
         
-        return "Users stamping in first 2 days: %s\nUsers stamping again more recently:%s" % (launch_users, len(returning_users))
+        rate = float(len(returning_users)) / len(launch_user_ids)
         
+        print "Users stamping in first %s days: %s" % (days, len(launch_user_ids))
+        print "Users stamping again more recently: %s" % (len(returning_users))
+        print "Retention rate: %.3f" % (rate * 100.0)        
         
         
         

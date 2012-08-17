@@ -1,34 +1,34 @@
-# Create your views here.
+#!/usr/bin/env python
+
+__author__    = "Stamped (dev@stamped.com)"
+__version__   = "1.0"
+__copyright__ = "Copyright (c) 2011-2012 Stamped.com"
+__license__   = "TODO"
+
 
 import Globals
-import keys.aws, logs, utils, time
+import logs, utils, time
 
-from datetime                               import datetime,timedelta
-
-from boto.sdb.connection                    import SDBConnection
-from boto.exception                         import SDBResponseError
-
-from gevent.pool                            import Pool
+from libs.ec2_utils                         import get_stack
+from datetime                               import datetime, timedelta
 
 from django                                 import forms
 from django.http                            import HttpResponse
 from django.template                        import Context, loader
-from django.contrib.auth                    import authenticate, login
 from django.contrib.auth.decorators         import login_required
 
-from servers.analytics.core                 import Stats
-from servers.analytics.core.Dashboard       import Dashboard
-from servers.analytics.core.topStamped      import getTopStamped
-from servers.analytics.core.Enrichment      import getEnrichmentStats
 from servers.analytics.core.logsQuery       import logsQuery
-from servers.analytics.core.weeklyScore     import weeklyScore
 from servers.analytics.core.mongoQuery      import mongoQuery
-from servers.analytics.core.analytics_utils import *
-from libs.ec2_utils                         import get_stack
-from Latency                                import LatencyReport
 
-from api.MongoStampedAPI                    import MongoStampedAPI
-from api.db.mongodb.MongoStatsCollection    import MongoStatsCollection
+from servers.analytics.core.Dashboard       import Dashboard
+from servers.analytics.core.Latency         import LatencyReport
+from servers.analytics.core.Enrichment      import EnrichmentReport
+from servers.analytics.core.Custom          import CustomStatFinder
+from servers.analytics.core.Trending        import getTopStamped
+from servers.analytics.core.Segmentation    import SegmentationReport
+
+from servers.analytics.core.AnalyticsUtils  import est, estMidnight, now, weekBefore, monthBefore, v1_init
+
 
 stack = get_stack()
 
@@ -38,28 +38,24 @@ if stack is None:
 else:
     stack_name = str(stack['instance']['stack'])
 
-api = MongoStampedAPI()
-stamp_collection = api._stampDB._collection
-acct_collection = api._userDB._collection
-entity_collection = api._entityDB._collection
-todo_collection = api._todoDB._collection
+mongoQ = mongoQuery()
 logsQ = logsQuery(stack_name)
-dash = Dashboard(api,logsQ)
-latencyReport = LatencyReport(logsQ)
 
-
+# Calculates stats for the Daily Overview window
 @login_required
 def index(request):
-    today_stamps_hourly,todayStamps,yest_stamps_hourly,yestStamps,week_stamps_hourly,weekStamps,deltaStampsDay,deltaStampsWeek = dash.newStamps()
+    dash = Dashboard(mongoQ, logsQ)
+    
+    today_stamps_hourly, todayStamps, yest_stamps_hourly, yestStamps, week_stamps_hourly, weekStamps, deltaStampsDay, deltaStampsWeek = dash.newStamps()
 
-    today_accts_hourly,todayAccts,yest_accts_hourly,yestAccts,week_accts_hourly,weekAccts,deltaAcctsDay,deltaAcctsWeek = dash.newAccounts()
+    today_accts_hourly, todayAccts, yest_accts_hourly, yestAccts, week_accts_hourly, weekAccts, deltaAcctsDay, deltaAcctsWeek = dash.newAccounts()
 
-    today_users_hourly,todayUsers,yest_users_hourly,yestUsers,week_users_hourly,weekUsers,deltaUsersDay,deltaUsersWeek = dash.returningUsers()
+    today_users_hourly, todayUsers, yest_users_hourly, yestUsers, week_users_hourly, weekUsers, deltaUsersDay, deltaUsersWeek = dash.returningUsers()
 
     
-    stamp_graph = [today_stamps_hourly,yest_stamps_hourly,week_stamps_hourly]
-    acct_graph = [today_accts_hourly,yest_accts_hourly,week_accts_hourly]
-    users_graph = [today_users_hourly,yest_users_hourly,week_users_hourly]
+    stamp_graph = [today_stamps_hourly, yest_stamps_hourly, week_stamps_hourly]
+    acct_graph = [today_accts_hourly, yest_accts_hourly, week_accts_hourly]
+    users_graph = [today_users_hourly, yest_users_hourly, week_users_hourly]
     
     hours = []
     for i in range (0,24):
@@ -75,10 +71,10 @@ def index(request):
         else:
             return "%spm" % (hour - 12)
         
-    times = map(clock,hours)
+    times = map(clock, hours)
     
-    total_stamps = stamp_collection.count()
-    total_accts = acct_collection.count()
+    total_stamps = mongoQ.stamp_collection.count()
+    total_accts = mongoQ.user_collection.count()
     
     t = loader.get_template('../html/index.html')
     c = Context({
@@ -112,11 +108,19 @@ def index(request):
     })
     return HttpResponse(t.render(c))
 
+
+# Calculates stats for the Enrichment window
 @login_required
 def enrichment(request):
     
+    enrichReport = EnrichmentReport(mongoQ)
+    
     class enrichForm(forms.Form):
-        subsets =[("media_items","Media Items"),("media_colls","Media Collections"),("places","Places"),("people","People"),("software","Software")]
+        subsets =[("media_items", "Media Items"), 
+                  ("media_colls", "Media Collections"),
+                  ("places",      "Places"),
+                  ("people",      "People"),
+                  ("software",    "Software")]
         type = forms.CharField(max_length=30,
                 widget=forms.Select(choices=subsets))
     
@@ -128,8 +132,8 @@ def enrichment(request):
         form = enrichForm(request.GET)
         if form.is_valid():
             subset = form.cleaned_data['type']
-            unattempted, attempted, breakdown = getEnrichmentStats(entity_collection,subset)
-            percentage = "%.2f" % (float(attempted)/(unattempted+attempted) *100)
+            unattempted, attempted, breakdown = enrichReport.getEnrichmentStats(subset)
+            percentage = "%.2f" % (float(attempted) / (unattempted + attempted) * 100)
     else:
         form = enrichForm()         
     
@@ -147,8 +151,11 @@ def enrichment(request):
     })
     return HttpResponse(t.render(c))
 
+# Calculates stats for the Latency window
 @login_required
 def latency(request):
+    
+    latencyReport = LatencyReport(logsQ)
     
     class latencyForm(forms.Form):
         uri = forms.CharField(max_length=30)
@@ -170,7 +177,7 @@ def latency(request):
             if end is None:
                 end = now()
             
-            customResults = latencyReport.dailyLatencySplits(uri,bgn,end,blacklist,whitelist)
+            customResults = latencyReport.dailyLatencySplits(uri, bgn, end, blacklist, whitelist)
             
         else: form = latencyForm()
     else: form = latencyForm()
@@ -188,6 +195,7 @@ def latency(request):
     })
     return HttpResponse(t.render(c))
 
+# Calculates stats for the stress window
 @login_required
 def stress(request):
     
@@ -212,7 +220,7 @@ def stress(request):
             window = int(form.cleaned_data['window'])
             interval = int(form.cleaned_data['interval'])
             
-            count_report,mean_report = query.qpsReport(now(),interval,window)
+            count_report, mean_report = query.qpsReport(now(), interval, window)
             
             headers = map(lambda x: (now() - timedelta(seconds=(interval * x))), range(window / interval))
             
@@ -233,39 +241,40 @@ def stress(request):
     })
     return HttpResponse(t.render(c))
 
+# Calculates stats for user segmentation window
 @login_required
 def segmentation(request):
     
-    powerT,activeT,irregularT,dormantT = [],[],[],[]
+    segmentationReport = SegmentationReport()
+    
+    powerT, activeT, irregularT, dormantT = [],[],[],[]
     dates = []
-    date = today()
-    for i in range (0,4):
+    date = estMidnight()
+    for i in range (4):
         dates.append(date)
-        date = weekAgo(date)
-            
-    scorer = weeklyScore(api)
+        date = weekBefore(date)
     
     
     for i in range (3,-1,-1):
-        users,power,active,irregular,dormant,mean_score = scorer.segmentationReport(weekAgo(dates[i]),dates[i],False)
+        users, power, active, irregular, dormant, mean_score = segmentationReport.weeklySegmentationReport(weekBefore(dates[i]), dates[i])
         powerT.append(power)
         activeT.append(active)
         irregularT.append(irregular)
         dormantT.append(dormant)
     
     def format(date):
-        return "%s/%s" % (date.month,date.day)
+        return "%s/%s" % (date.month, date.day)
             
     dates = map(format, reversed(dates))
-    usersM,powerM,avgM,lurkerM,dormantM,mean_scoreM = scorer.segmentationReport(monthAgo(today()),now(),True)
+    usersM, powerM, avgM, lurkerM, dormantM, mean_scoreM = segmentationReport.weeklySegmentationReport(monthBefore(estMidnight()), now(), monthly=True)
     
     t = loader.get_template('../html/segmentation.html')
     c = Context({
                  'hour': est().hour,
                  'minute': est().minute,
                  'stack': stack_name,
-                 'monthAgo': monthAgo(today()),
-                 'weekAgo': weekAgo(today()),
+                 'monthAgo': monthBefore(estMidnight()),
+                 'weekAgo': weekBefore(estMidnight()),
                  'usersM': '%s' % usersM,
                  'powerM': '%.2f' % powerM,
                  'avgM': '%.2f' % avgM,
@@ -299,8 +308,8 @@ def trending(request):
                 widget=forms.Select(choices=verticals))
  
     
-    bgn = today().isoformat()  
-    kinds=None
+    bgn = estMidnight().isoformat()  
+    kinds = None
     quant = 25
     scope = 'today'
     stat = 'stamped'
@@ -314,39 +323,37 @@ def trending(request):
             quant = form.cleaned_data['quantity']
             
             if stat == 'stamped':    
-                collection = stamp_collection
+                collection = mongoQ.stamp_collection
             elif stat == 'todod':
-                collection = todo_collection
+                collection = mongoQ.todo_collection
             
             if kinds == 'all':
                 kinds = None
             
             bgns = {
-                    'today': today().isoformat(),
-                    'week': weekAgo(today()).isoformat(),
-                    'month': monthAgo(today()).isoformat(),
-                    'all-time':v1_init().isoformat()
+                    'today': estMidnight().isoformat(),
+                    'week': weekBefore(estMidnight()).isoformat(),
+                    'month': monthBefore(estMidnight()).isoformat(),
+                    'all-time': v1_init().isoformat()
                     }
             quant = int(quant)
             bgn = bgns[scope]
-            results = getTopStamped(kinds,bgn,collection)
+            results = getTopStamped(kinds, bgn, collection)
             results = results[0:quant]
     
     else: 
         form = trendForm()
-        results = getTopStamped(kinds,today().isoformat(),stamp_collection)
-        results = results[0:quant]
+        results = []
         
-        mongo = mongoQuery(api)
-        topUsers = mongo.topUsers(limit=50)
+        topUsers = mongoQ.topUsers(limit=50)
     
     t = loader.get_template('../html/trending.html')
     c = Context({
-                 'hour': now().hour,
-                 'minute': now().minute,
+                 'hour': est().hour,
+                 'minute': est().minute,
                  'stack': stack_name,
-                 'monthAgo': monthAgo,
-                 'weekAgo': weekAgo(today()),
+                 'monthAgo': monthBefore(estMidnight()),
+                 'weekAgo': weekBefore(estMidnight()),
                  'results': results,
                  'form': form,
                  'bgn': bgn.split('T')[0],
@@ -360,6 +367,8 @@ def trending(request):
 
 @login_required
 def custom(request):
+
+    finder = CustomStatFinder()
 
     class inputForm(forms.Form):
         stat_choices =[("stamps","Stamps Created"),("agg_stamps","Aggregate Stamps"),
@@ -389,15 +398,15 @@ def custom(request):
             per = form.cleaned_data['filter']
             end = form.cleaned_data['end_date']
             
-            bgn = today(bgn) + timedelta(days=1)
+            bgn = estMidnight(bgn) + timedelta(days=1)
             if end is not None and end > now():
                 end = now()
-            stats = Stats.Stats()
             perUser = False
             if per == "true":
                 perUser = True
-            output = stats.query(scope, stat, bgn, end, perUser)
-            bgns,ends,values,base = stats.setupGraph(output)
+            output = finder.query(scope, stat, bgn, end, perUser)
+            print output
+            bgns,ends,values,base = finder.setupGraph(output)
             
             
     else: form = inputForm()

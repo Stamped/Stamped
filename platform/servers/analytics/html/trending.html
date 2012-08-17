@@ -24,12 +24,14 @@
 			{% endif %}
 			
 			<div class="trending_content">
-				<h2>Top {{quantity}} {% if stat == 'stamped' %}Stamped{% else %}Todo'd {%endif%} 
-					{% if scope == 'today' %}Today{% else %} {%if scope == 'all-time' %}Overall 
-					{% else %}in the past {{scope}} (Since {{bgn}}) {% endif %} {% endif %}: </h2>
-				{% for i in results %}
-					{{forloop.counter}}) {{i.items.0.1}}  ({{i.items.1.1}} {% if stat == 'stamped' %}stamps{% else %}todos{%endif%}) <br>
-				{% endfor %} 
+				{% if results|length > 0 %}
+					<h2>Top {{quantity}} {% if stat == 'stamped' %}Stamped{% else %}Todo'd {%endif%} 
+						{% if scope == 'today' %}Today{% else %} {%if scope == 'all-time' %}Overall 
+						{% else %}in the past {{scope}} (Since {{bgn}}) {% endif %} {% endif %}: </h2>
+					{% for i in results %}
+						{{forloop.counter}}) {{i.items.0.1}}  ({{i.items.1.1}} {% if stat == 'stamped' %}stamps{% else %}todos{%endif%}) <br>
+					{% endfor %} 
+				{% endif %}
 			</div>
 		</div>
 	{% endblock content %}

@@ -8,257 +8,176 @@ __license__   = "TODO"
 #Imports
 import Globals
 
-import calendar, pprint, datetime, sys, math
-import keys.aws, logs, utils
+import keys.aws, logs, time
 
-from api.MongoStampedAPI                        import MongoStampedAPI
-from boto.sdb.connection                        import SDBConnection
-from boto.exception                             import SDBResponseError
-from gevent.pool                                import Pool
-from analytics_utils                            import *
+from datetime                                   import timedelta
+from utils                                      import lazyProperty
+from servers.analytics.core.SimpleDBConnection  import SimpleDBConnection, SimpleDBCacheConnection
+from servers.analytics.core.AnalyticsUtils      import v1_init, v2_init, now, percentile, estMidnight
 
-
-
-def percentile(numList,p):
-    #Assumes numList is sorted
-    k = (len(numList)-1) * p
-    f = math.floor(k)
-    c = math.ceil(k)
-    if f == c:
-        return numList[int(k)]
-    d0 = numList[int(f)] * (c-k)
-    d1 = numList[int(c)] * (k-f)
-    return d0+d1
-    
-
+# Class containing the most useful and common queries to simpledb
+# This module is independent of the stack from which it is run
 class logsQuery(object):
     
-    def __init__(self,domain_name=None):
-        self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
-        self.domains = {}
-        self.statSet  = set()
-        self.statDict = {}
-        self.errDict = {}
-        self.statCount = 0
-        self.statCountByNode = {}
-        self.statTimeByNode = {}
-
-        if domain_name is None:
-            domain_name = 'bowser'
-            
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            self.domains[suffix] = self.conn.get_domain('%s_%s' % (domain_name,suffix))
-            
-            
-
-    def performQuery(self,domain,fields,uri,t0,t1,byNode=False,form_dict={},logged_out=False):
+    def __init__(self, domain_name='bowser'):   
+        self.conn = SimpleDBConnection(domain_name)
         
-        if uri is not None:
-            query = 'select %s from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, uri, t0.isoformat(), t1.isoformat())
+        
+    @lazyProperty
+    def _customCache(self):
+        return SimpleDBCacheConnection('custom')    
+    
+    # Number of active users in a given time period
+    # Counts the number of users in the time window that have triggered an unread activity api call indicating their usage of the app
+    # Optionally can return a list of users instead of a count (last kwarg)
+    def activeUsers(self, bgn, end, list=False):
+
+        users = self.conn.queryForUserSet(params=['uri="/v1/activity/unread.json"'], bgn=bgn, end=end)
+        
+        if list:
+            return users
         else:
-            query = 'select %s from `%s` where bgn >= "%s" and bgn <= "%s"' % (fields, domain.name, t0.isoformat(), t1.isoformat())
+            return len(users)
+    
+    # Number of users who opened the guide (or a particular section of the guide) within the given time window
+    def guideUsers(self, bgn, end, section=None, list=False):
+        
+        params = ['uri="/v1/guide/collection.json"']
+        
+        if section is not None:
+            params.append('frm_section="%s"' % section)
 
+        users = self.conn.queryForUserSet(params=params, bgn=bgn, end=end)
         
-        for key, value in form_dict.items():
-            query = '%s and frm_%s = "%s"' % (query, key, value)
-            
-        stats = domain.select(query)
-        
-        for stat in stats:
-            
-            if fields == 'count(*)':
-                self.statCount += int(stat['Count'])
-            elif byNode:
-                bgn = stat['bgn'].split('T')
-                end = stat['end'].split('T')
-                if end[0] == bgn[0]:
-                    bgn = bgn[1].split(':')
-                    end = end[1].split(':')
-                    hours = float(end[0]) - float(bgn[0])
-                    minutes = float(end[1]) - float(bgn[1])
-                    seconds = float(end[2]) - float(bgn[2])
-                    diff = seconds + 60*(minutes + 60*hours)
-                
-                try:
-                    self.statCountByNode[stat['nde']] += 1
-                    self.statTimeByNode[stat['nde']] += diff
-                except KeyError:
-                    self.statCountByNode[stat['nde']] = 1
-                    self.statTimeByNode[stat['nde']] = diff
-            elif logged_out and 'uid' not in stat:
-                self.statCount += 1
-                print stat
-            else:
-                try:
-                    self.statSet.add(stat[fields])
-                except KeyError:
-                    pass
-        
-        
-    def activeUsers(self,t0, t1):
-        self.statSet = set()
-        
-        pool = Pool(16)
-        
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            #Just use collections inbox for speed
-            pool.spawn(self.performQuery,self.domains[suffix],'uid',"/v1/activity/unread.json",t0,t1)
-        
-        pool.join()
-        
-        return len(self.statSet)
+        if list:
+            return users
+        else:
+            return len(users)
     
-    # Guide Users
-    def guideReport(self, t0, t1, section=None):
-        self.statSet = set()
-        self.statCount = 0
+    # Number of users who viewed universal news in the given time window
+    def universalNewsUsers(self, bgn, end, list=False):
+
+        users = self.conn.queryForUserSet(params=['uri="/v1/activity/collection.json"', 'frm_scope="friends"'], bgn=bgn, end=end)
         
-        pool = Pool(16)
-        
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            if section is not None:
-                pool.spawn(self.performQuery,self.domains[suffix],'count(*)',"/v1/guide/collection.json",t0,t1, form_dict={'section': section})
-            else:
-                pool.spawn(self.performQuery,self.domains[suffix],'uid',"/v1/guide/collection.json",t0,t1)
-        
-        pool.join()
-        
-        return self.statCount
+        if list:
+            return users
+        else:
+            return len(users)
     
-    # Universal news users
-    def newsUsers(self, t0, t1):
-        self.statSet = set()
+    # Number of users who took an action on an entity in the given time window
+    def entityActionUsers(self, bgn, end, source=None, action=None, list=False):
         
-        pool = Pool(16)
-        
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            pool.spawn(self.performQuery, self.domains[suffix], 'uid', "/v1/activity/collection.json", t0, t1, form_dict={'scope': 'friends'})
-        
-        pool.join()
-        
-        return len(self.statSet)
-    
-    def entityActionUsers(self, t0, t1, source=None, action=None):
-        self.statSet = set()
-        
-        form = {}
+        params = ['uri="/v1/actions/complete.json"']
         
         if source is not None:
-            form['source'] = source
-        
-        if action is not None:
-            form['action'] = action
+            params.append('frm_source="%s"' % source)
             
-        pool = Pool(16)
-        
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            pool.spawn(self.performQuery, self.domains[suffix], 'uid', "/v1/actions/complete.json", t0, t1, form_dict=form)
-        
-        pool.join()
-        
-        return len(self.statSet)
+        if action is not None:
+            params.append('frm_action="%s"' % action)
+
+        users = self.conn.queryForUserSet(params=params, bgn=bgn, end=end)
+
+        if list:
+            return users
+        else:
+            return len(users)
     
-    def launchDayFollowRetention(self, version="v2"):
-    
+    # Check the number of users who followed somebody within n days of launch and returned to follow another user later on
+    def launchDayFollowRetention(self, version="v2", days=2):
         
         if version == "v2":
-            init = v2_init()
+            bgn = v2_init()
             end = now()
         else:
-            init = v1_init()
+            bgn = v1_init()
             end = v2_init()
             
-        launch_followers = self.customQuery(init,init+timedelta(days=2),'uid','/v1/friendships/create.json',user_list=True)
-
-        new_followers = self.customQuery(init+timedelta(days=2),end,'uid','/v1/friendships/create.json',user_list=True)
+        cutoff = bgn + timedelta(days=days)
+        
+        launch_followers = self.conn.queryForUserSet(params=['uri="/v1/friendships/create.json"'], bgn=bgn, end=cutoff)
+        new_followers = self.conn.queryForUserSet(params=['uri="/v1/friendships/create.json"'], bgn=cutoff, end=end)
         
         returning_followers = set.intersection(launch_followers,new_followers)
+        rate = float(len(returning_followers)) / len(launch_followers)
         
-        return "Users following in first 2 days: %s\nUsers stamping again more recently:%s" % (len(launch_followers), len(returning_followers))
+        print "Users adding freinds in first %s days: %s" % (days, len(launch_followers))
+        print "Users adding friends again more recently: %s" % len(returning_followers)
+        print "Retention Rate: %.3f%%" % (rate * 100)
+        
+        return len(launch_followers), len(returning_followers), rate
     
-    
+    # Number of users who opened the guide once and came back to open it again a different day
     def guideReturnRate(self):
         
         previous_users = set()
         returning_users = set()
-        start = v2_init()
+        bgn = v2_init()
         end = v2_init() + timedelta(days=1)
+        
         while end < now():
-            days_users = self.customQuery(start, end, 'uid', '/v1/guide/collection.json', user_list=True)
-            start += timedelta(days=1)
+            days_users = self.conn.queryForUserSet(params=['uri="/v1/guide/collection.json"'], bgn=bgn, end=end)
+            returning_users.update(set.intersection(previous_users, days_users))
+            previous_users.update(days_users)
+            
+            bgn += timedelta(days=1)
             end += timedelta(days=1)
-            for user in days_users:
-                if user in previous_users:
-                    returning_users.add(user)
-                else:
-                    previous_users.add(user)
         
-        return "Number of guide users: %s \n Number of returning users %s" % (len(previous_users),len(returning_users))
+        rate = float(len(returning_users)) / len(previous_users)
+        
+        print "Number of guide users: %s" % len(previous_users)
+        print "Number of returning guide users %s" % len(returning_users)
+        print "Retention rate: %.3f%%" % (rate * 100)
 
-    
-    
-    def latencyQuery(self,domain,t0,t1,uri,blacklist,whitelist,include_scope=False):
-        if uri is None:
-            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri like "/v1/%%" and bgn >= "%s" and bgn <= "%s"' % (domain.name,t0.isoformat(),t1.isoformat())
-        else:
-            query = 'select uri,frm_scope,bgn,end,cde,uid from `%s` where uri = "%s" and bgn >= "%s" and bgn <= "%s"' % (domain.name,uri,t0.isoformat(),t1.isoformat())
-        stats = domain.select(query)
+    # Latency analysis for all or a single uri
+    def latencyReport(self, bgn, end, uri=None, blacklist=[], whitelist=[], include_scope=True):
+        statDict = {}
+        errDict = {}
         
-        for stat in stats:
-            if 'uid' in stat and stat['uid'] in blacklist:
+        # Build the query 
+        params = []
+        if uri is not None:
+            params.append('uri="%s"' % uri)
+        else:
+            params.append('uri like "/v1/%"')
+        
+        if len(whitelist) > 0:
+            # Convert whitelist into a string representation of a tuple sans trailing comma
+            w = str(tuple(whitelist)).replace(',)',')')
+            params.append('uid in %s' % w)
+        else:
+            for blacklistedId in blacklist:
+                params.append('uid != "%s"' % blacklistedId)
+        
+        data = self.conn.query(params=params, bgn=bgn, end=end, fields=['uri','dur','frm_scope','cde'])
+        
+        # Convert the results into a dictionary with different uris as keys
+        for stat in data:
+            if 'dur' not in stat:
                 continue
-            elif len(blacklist) == 0 and len(whitelist) > 0 and 'uid' in stat and stat['uid'] not in whitelist:
-                continue
-            bgn = stat['bgn'].split('T')
-            end = stat['end'].split('T')
-            if end[0] == bgn[0]:
-                bgn = bgn[1].split(':')
-                end = end[1].split(':')
-                hours = float(end[0]) - float(bgn[0])
-                minutes = float(end[1]) - float(bgn[1])
-                seconds = float(end[2]) - float(bgn[2])
-                diff = seconds + 60*(minutes + 60*hours)
+            else:
+                diff = stat['dur'] / 1000000.0
                 key = stat['uri']
 
                 if 'frm_scope' in stat and include_scope:
-                    key = "%s?scope=%s" % (stat['uri'], stat['frm_scope'])
+                    key += "?scope=%s" % stat['frm_scope']
                 
                 if 'cde' in stat:
                     errType = stat['cde'][0]
                     if errType != "4" and errType != "5":
-                        print stat
                         continue
                     try:
-                        self.errDict['%s-%s' % (key,errType)] += 1
+                        errDict['%s-%s' % (key,errType)] += 1
                     except KeyError:
-                        self.errDict['%s-%s' % (key,errType)] = 1
+                        errDict['%s-%s' % (key,errType)] = 1
                 else:
                     try:
-                        self.statDict[key].append(diff)
+                        statDict[key].append(diff)
                     except KeyError:
-                        self.statDict[key] = [diff]
-
-
-    def latencyReport(self,t0,t1,uri=None,blacklist=[],whitelist=[],include_scope=False):
-        self.statDict = {}
-        self.errDict = {}
+                        statDict[key] = [diff]
         
-        pool = Pool(16)
-        
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            pool.spawn(self.latencyQuery,self.domains[suffix],t0,t1,uri,blacklist,whitelist,include_scope)
-            
-        pool.join()
-        
+        # Iterate through the dictionary of uris and diffs to calculate stats that we care about
         output = {}
-        
-        for uri, diffs in self.statDict.items():
+        for uri, diffs in statDict.items():
             agg = sum(diffs)
             n = len(diffs)
             mean = float(agg) / n
@@ -272,10 +191,10 @@ class logsQuery(object):
             
             errors4 = 0
             errors5 = 0
-            if uri+'-4' in self.errDict:
-                errors4 = self.errDict[uri+'-4']
-            if uri+'-5' in self.errDict:
-                errors5 = self.errDict[uri+'-5']
+            if uri+'-4' in errDict:
+                errors4 = errDict[uri+'-4']
+            if uri+'-5' in errDict:
+                errors5 = errDict[uri+'-5']
             
             output[uri] = {'mean' : mean,
                            'median' : median,
@@ -288,77 +207,93 @@ class logsQuery(object):
                            }
             
         return output
-              
-    def qpsReport(self,time,interval,total_seconds):
-        blacklist=[]
-        whitelist=[]
-        
 
+    # Interval-based report on the stress level of the Stamped prod stack
+    def qpsReport(self, time, interval, total_seconds):        
         count_report = {}
         mean_report = {}
-        t0 = time - timedelta(0,total_seconds)
-        for i in range (0,total_seconds/interval):
-            self.statCountByNode = {}
-            self.statTimeByNode = {}
-            
-            t1 = t0 + timedelta(0,i*interval)
-            t2 = t0 + timedelta(0,(i+1)*interval)
-            
-            pool = Pool(32)
         
-            for j in range (0,16):
-                suffix = '0'+hex(j)[2]
-                
-                pool.spawn(self.performQuery,self.domains[suffix],'nde,bgn,end',None,t1,t2,byNode=True)
-    
-            pool.join()
+        base_time = time - timedelta(seconds=total_seconds)
+        for i in range(total_seconds/interval):
+            statCountByNode = {}
+            statTimeByNode = {}
             
+            bgn = base_time + timedelta(seconds=i*interval)
+            end = base_time + timedelta(seconds=(i+1)*interval)
+            
+            data = self.conn.query(bgn=bgn, end=end, fields=['nde','dur'])
+            
+            for stat in data:
+                if 'dur' not in stat or 'nde' not in stat:
+                    continue
+                else:
+                    diff = stat['dur'] / 1000000.0
+                    try:
+                        statCountByNode[stat['nde']] += 1
+                        statTimeByNode[stat['nde']] += diff
+                    except KeyError:
+                        statCountByNode[stat['nde']] = 1
+                        statTimeByNode[stat['nde']] = diff
 
-            for node in self.statCountByNode:
-                count = self.statCountByNode[node]
-                mean = float(self.statTimeByNode[node])/count
+            for node, count in statCountByNode.items():
+                mean = float(statTimeByNode[node]) / count
                 try:
+                    # Pad with zeros until the current position
                     while len(count_report[node]) < i:
                         count_report[node].insert(0,0)
                         mean_report[node].insert(0,0)
-                    count_report[node].insert(0,"%.3f" % (float(count)/interval))
+                    count_report[node].insert(0,"%.3f" % (float(count) / interval))
                     mean_report[node].insert(0,"%.3f" % (mean))
                 except KeyError:
                     count_report[node] = [0]*i
                     mean_report[node] = [0]*i
-                    count_report[node].insert(0,"%.3f" % (float(count)/interval))
+                    count_report[node].insert(0,"%.3f" % (float(count) / interval))
                     mean_report[node].insert(0,"%.3f" % (mean))
-                    
+        
+        # Pad with zeros to reach appropriate length            
         for node in count_report:
             while len(count_report[node]) < total_seconds/interval:
                 count_report[node].insert(0,0)
                 mean_report[node].insert(0,0)
         
-        return count_report,mean_report
+        return count_report, mean_report
+    
+    # Used for looking up custom stats and checking for cached values
+    def customQuery(self, stat_name, params, bgn, end):
         
-    def customQuery(self,t0,t1,fields,uri,form={},logged_out=False,user_list=False):
+        key = "%s-%s" % (stat_name, bgn.date().isoformat())
         
-        if fields == 'count(*)':
-            self.statCount = 0
-        else:
-            self.statSet = set()
+        cached = None
+        # Only lookup from the cache for a daily number (haven't set up for storing months or weeks yet
+        if end - bgn == timedelta(days=1):
+            cached = self._customCache.lookup(key)
         
-        pool = Pool(16)
+        if cached is not None:
+            return int(cached['data'])
         
-        for i in range (0,16):
-            suffix = '0'+hex(i)[2]
-            
-            pool.spawn(self.performQuery,self.domains[suffix],fields,uri,t0,t1,form_dict=form,logged_out=logged_out)
-
-        pool.join()
+        elif stat_name == 'users':
+            data = self.activeUsers(bgn, end)
+        else: 
+            data = self.conn.count(params=params, bgn=bgn, end=end)
         
-        if fields == 'count(*)':
-            return self.statCount
-        elif user_list:
-            return self.statSet
-        else:
-            return len(self.statSet)
-
+        if bgn.date() < estMidnight().date():
+            cache_dict = {'data' : data}
+            self._customCache.store(key, cache_dict)
+        
+        return data
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
         
         

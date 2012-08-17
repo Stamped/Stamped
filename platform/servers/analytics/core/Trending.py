@@ -7,30 +7,28 @@ __license__   = "TODO"
 
 
 import Globals
-import keys.aws, logs, utils
+import logs, utils
 
-from api.MongoStampedAPI    import MongoStampedAPI
-from boto.sdb.connection    import SDBConnection
-from boto.exception         import SDBResponseError
 from bson.code              import Code
 
 
-#Not backwards compatible for pre-v2 yet
-def getTopStamped(kinds,date,collection):
+# Takes a list of kinds, a start date and a collection and gets the most stamped or todo'd entities from the start date until now
+# Not backwards compatible for pre-v2 yet
+def getTopStamped(kinds, bgn, collection):
     
     if kinds == None:
         query = """function () {
                        if (this.timestamp.created > ISODate("%s")){
                            emit(this.entity.title, 1);
                        }
-                  } """ % (date)
+                  } """ % (bgn)
     else:
         kinds = kinds.split(',')
         query = """function () {
-                       if (this.timestamp.created > ISODate("%s") && (this.entity.types == "%s" """ % (date,kinds[0])
+                       if (this.timestamp.created > ISODate("%s") && (this.entity.types == "%s" """ % (bgn, kinds[0])
                        
         for kind in kinds[1:]:
-            query = """ %s || this.entity.types == "%s" """ % (query,kind)
+            query = """ %s || this.entity.types == "%s" """ % (query, kind)
         
         query = """%s)){
                            emit(this.entity.title, 1);
