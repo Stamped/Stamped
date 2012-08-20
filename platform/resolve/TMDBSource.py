@@ -315,35 +315,6 @@ class TMDBSource(GenericSource):
         # TMDB is clever enough to handle that for us.
         return search_results
 
-    def searchAllSource(self, query, timeout=None):
-        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
-            return self.emptySource
-
-        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
-            logs.debug('Skipping %s (types: %s)' % (self.sourceName, query.types))
-            return self.emptySource
-
-        logs.debug('Searching %s...' % self.sourceName)
-            
-        def gen():
-            try:    
-                results = self.__tmdb.movie_search(query.query_string, priority='high', timeout=SEARCH_TIMEOUT)
-                if results is None:
-                    return 
-                for movie in results['results']:
-                    yield movie
-                pages = results['total_pages']
-
-                if pages > 1:
-                    for p in range(1,pages):
-                        results = self.__tmdb.movie_search(query.query_string, page=p+1, priority='high', timeout=SEARCH_TIMEOUT)
-                        for movie in results['results']:
-                            yield movie
-            except GeneratorExit:
-                pass
-        return self.generatorSource(gen(), constructor=lambda x: TMDBSearchAll(TMDBMovie(x['id'], x, 0)))
-
     def __release_date(self, movie):
         result = None
         if 'release_date' in movie:
