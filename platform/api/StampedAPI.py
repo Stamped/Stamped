@@ -3334,6 +3334,8 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
+            elif 'cafe' in types:
+                return 'cafe'
             # place type is broken for some reason. We'll use establishment for now
             return 'establishment'
             #return 'place'
