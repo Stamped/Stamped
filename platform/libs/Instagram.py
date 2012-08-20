@@ -92,14 +92,12 @@ class Instagram(object):
 
     def createInstagramImage(self, entity_img_url, stamp_url, profile_img_url, user_generated, coordinates,
                              primary_color, secondary_color, user_name, category, types, title, subtitle):
-        def dropShadow(image, rounded, offset=(5,5), background=0xffffff, shadow=0x444444,
+        def dropShadow(rounded, size, background=0xffffff, shadow=0x444444,
                        border=8, iterations=3):
             """
-            Add a gaussian blur drop shadow to an image.
+            Create a gaussian blur drop shadow
 
-            image       - The image to overlay on top of the shadow.
-            offset      - Offset of the shadow from the image as an (x,y) tuple.  Can be
-                          positive or negative.
+            size        - Dimensions of the shadow
             background  - Background colour behind the image.
             shadow      - Shadow colour (darkness).
             border      - Width of the border around the image.  This must be wide
@@ -107,23 +105,16 @@ class Instagram(object):
             iterations  - Number of times to apply the filter.  More iterations
                           produce a more blurred shadow, but increase processing time.
             """
-
-            # Create the backdrop image -- a box in the background colour with a
-            # shadow on it.
-            totalWidth = image.size[0] + abs(offset[0]) + 2*border
-            totalHeight = image.size[1] + abs(offset[1]) + 2*border
+            totalWidth = size[0] + 2*border
+            totalHeight = size[1] + 2*border
             back = Image.new('RGB', (totalWidth, totalHeight), background)
+            shadow = Image.new('RGB', (size[0], size[1]), shadow)
             if rounded:
                 roundedsquare = Image.open(self.__basepath + 'roundedsquare.png')
-                roundedsquare = roundedsquare.resize((totalWidth, totalHeight), Image.ANTIALIAS)
-                roundedsquare.paste(back, (0, 0), roundedsquare)
-                back = roundedsquare
-
-            # Place the shadow, taking into account the offset from the image
-            shadowLeft = border + max(offset[0], 0)
-            shadowTop = border + max(offset[1], 0)
-            back.paste(shadow, (shadowLeft, shadowTop, shadowLeft + image.size[0],
-                                shadowTop + image.size[1]) )
+                roundedsquare = roundedsquare.resize((size[0], size[1]), Image.ANTIALIAS)
+                back.paste(shadow, (border, border), roundedsquare)
+            else:
+                back.paste(shadow, (border, border))
 
             # Apply the filter to blur the edges of the shadow.  Since a small kernel
             # is used, the filter must be applied repeatedly to get a decent blur.
@@ -131,10 +122,6 @@ class Instagram(object):
             while n < iterations:
                 back = back.filter(ImageFilter.BLUR)
                 n += 1
-
-            # Paste the input image onto the shadow backdrop
-            imageLeft = border - min(offset[0], 0)
-            imageTop = border - min(offset[1], 0)
 
             return back
 
@@ -166,7 +153,7 @@ class Instagram(object):
                 entityImg = entityImg.resize((600,600), Image.ANTIALIAS)
                 buf.paste(entityImg, (0,0), roundedsquare)
                 entityImg = buf
-            shadow = dropShadow(entityImg, False, background=0xffffff, shadow=0xd0d0d0, offset=(0,0), border=20)#.show()
+            shadow = dropShadow(rounded, entityImgSize, background=0xffffff, shadow=0xd0d0d0, border=20)#.show()
             shadowSize = shadow.size
 
             adjust = (((entityImgSize[1]/float(entityImgSize[0]))-1.0) * 0.2) + 1.0
@@ -184,9 +171,13 @@ class Instagram(object):
             shadowsize2x = 660*2, 660*2
             shadowOffset = x, y
 
-            buf2 = Image.new(mode, size2x, (255,255,255,255))
+            buf = Image.new(mode, size2x, (255,255,255,255))
 
-            mask = Image.new('1', entityImgSize, 1)
+            if rounded:
+                mask = Image.new('1', entityImgSize, 0)
+                mask.paste(1, (0,0), roundedsquare)
+            else:
+                mask = Image.new('1', entityImgSize, 1)
             shadowmask = Image.new('1', shadowSize, 1)
 
             stampImg = stampImg.transform(size2x, Image.PERSPECTIVE, (a,-2.30/2,c,1.006/2,e,f,g,h), Image.BICUBIC)
@@ -197,11 +188,10 @@ class Instagram(object):
 
             stampImg = stampImg.filter(ImageFilter.GaussianBlur)
             stampImg = stampImg.resize((1000,1000), Image.ANTIALIAS)
-            if not rounded:
-                buf2.paste(shadow, shadowOffset, shadowmask)
-            buf2.paste(entityImg, (0, 0), mask)
-            buf2.paste(stampImg, (412,-100), stampImg)
-            entityImg = buf2.resize(size, Image.ANTIALIAS)
+            buf.paste(shadow, shadowOffset, shadowmask)
+            buf.paste(entityImg, (0, 0), mask)
+            buf.paste(stampImg, (412,-100), stampImg)
+            entityImg = buf.resize(size, Image.ANTIALIAS)
 
             #            if pin:
             #                pinImg = Image.open(self.__basepath + 'pin.png')
@@ -323,7 +313,7 @@ class Instagram(object):
             profileImg = utils.getWebImage(profile_img_url)
             back = Image.new('RGBA', (102,102), (255,255,255,255))
             back.paste(profileImg, (3, 3))
-            profileShadow = dropShadow(back, False, offset=(0,0), background=0xffffff, shadow=0xd0d0d0,
+            profileShadow = dropShadow(False, size = back.size, offset=(0,0), background=0xffffff, shadow=0xd0d0d0,
                 border=5, iterations=3)
             img.paste(profileShadow, (612/2 - 102/2 - 5, 128-5))
             img.paste(back, (612/2 - 102/2, 128))
