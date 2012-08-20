@@ -148,39 +148,35 @@ class GenericSource(BasicSource):
     def getId(self, entity):
         return getattr(entity.sources, self.idField)
 
-    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
-        proxy = None
-        results = None
-
-        if self.getId(entity) is None and controller.shouldEnrich(self.idName, self.sourceName, entity):
+    def getProxiesForEntity(self, entity):
+        source_id = self.getId(entity)
+        if source_id is None:
             try:
                 query = self.stamped.proxyFromEntity(entity)
-                timestamps[self.idName] = controller.now
                 results = self.resolve(query)
-                if len(results) != 0:
-                    best = results[0]
-                    if best[0]['resolved']:
-                        setattr(entity.sources, self.idField, best[1].key)            
-                        if self.urlField is not None and best[1].url is not None:
-                            setattr(entity.sources, self.urlField, best[1].url)
-                        proxy = best[1]
+                return [result[1] for result in results if result[0]['resolved']]
             except ValueError:
                 logs.report()
+                return []
 
-        source_id = self.getId(entity)
-        if source_id is not None:
-            if proxy is None:
-                proxy = self.entityProxyFromKey(source_id, entity=entity)
-            timestamps[self.idName] = controller.now
+        return [self.entityProxyFromKey(source_id, entity=entity)]
+
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
+        timestamps[self.idName] = controller.now
+        proxies = self.getProxiesForEntity(entity)
+        if proxies:
+            proxy = proxies[0]
+            setattr(entity.sources, self.idField, proxy.key)
+            if self.urlField is not None and proxy.url is not None:
+                setattr(entity.sources, self.urlField, proxy.url)
             for group in groups:
                 if group.enrichEntityWithEntityProxy(entity, proxy):
                     timestamps[group.groupName] = controller.now
 
-        # Haaaaaaaack.
-        if results and self.sourceName != 'stamped':
-            for result in results:
-                if result[0]['resolved']:
-                    entity.addThirdPartyId(self.sourceName, result[1].key)
+            # Haaaaaaaack.
+            if proxies and self.sourceName != 'stamped':
+                for proxy in proxies:
+                    entity.addThirdPartyId(self.sourceName, proxy.key)
 
         return True
 
