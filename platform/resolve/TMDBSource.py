@@ -357,57 +357,6 @@ class TMDBSource(GenericSource):
                         pass
         return result
 
-    # def enrichEntity(self, entity, controller, decorations, timestamps):
-    #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-    #     title = entity['title']
-    #     if title is not None:
-    #         tmdb_id = entity['tmdb_id']
-    #         if tmdb_id is not None:
-    #             movie = TMDBMovie(tmdb_id)
-    #             try:
-    #                 casts = self.__tmdb.movie_casts(tmdb_id)
-    #                 if 'cast' in casts:
-    #                     cast = casts['cast']
-    #                     cast_order = {}
-    #                     for entry in cast:
-    #                         name = entry['name']
-    #                         order = int(entry['order'])
-    #                         cast_order[order] = name
-    #                     sorted_cast = [ cast_order[k] for k in sorted(cast_order.keys()) ]
-    #                     if len( sorted_cast ) > self.__max_cast:
-    #                         sorted_cast = sorted_cast[:self.__max_cast]
-    #                     cast_string = ', '.join(sorted_cast)
-    #                     if entity['cast'] == None:
-    #                         entity['cast'] = cast_string
-    #                 if 'crew' in casts:
-    #                     crew = casts['crew']
-    #                     director = None
-    #                     for entry in crew:
-    #                         name = entry['name']
-    #                         job = entry['job']
-    #                         if job == 'Director':
-    #                             director = name
-    #                     if director is not None:
-    #                         entity['director'] = director
-                        
-    #             except Exception:
-    #                 pass
-    #             info = movie.info
-    #             if 'tagline' in info:
-    #                 tagline = info['tagline']
-    #                 if tagline is not None and tagline != '':
-    #                     entity['short_description'] = tagline
-    #             if 'overview' in info:
-    #                 overview = info['overview']
-    #                 if overview is not None and overview != '':
-    #                     entity['desc'] = overview
-
-    #             if movie.imdb is not None:
-    #                 entity['imdb_id'] = movie.imdb;
-    #             if len(movie.genres) > 0:
-    #                 entity['genres'] = list(movie.genres)
-        
-    #     return True
 
 if __name__ == '__main__':
     demo(TMDBSource(), 'Avatar')
