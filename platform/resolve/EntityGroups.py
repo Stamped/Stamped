@@ -88,6 +88,18 @@ class StampedTombstoneGroup(BasicFieldGroup):
         return True
 
 
+class StampedNemesesGroup(BasicFieldGroup):
+    def __init__(self):
+        BasicFieldGroup.__init__(self, 'nemeses',
+            source_path=['sources', 'nemesis_source'], 
+            timestamp_path=['sources', 'nemesis_timestamp']
+        )
+        self.addField(['sources', 'nemesis_ids'])
+
+    def eligible(self, entity):
+        return True
+
+
 class FactualGroup(APlaceGroup):
     def __init__(self):
         APlaceGroup.__init__(self, 'factual', 
