@@ -45,7 +45,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
             self.addGroup(group())
         self.setGlobalPriority('seed', 100)
         self.setGlobalPriority('manual', 10000)
-        self.setGlobalPriority('derived',-100)
+        self.setGlobalPriority('derived', -100)
     
     def enrichEntity(self, entity, decorations, max_iterations=None, timestamp=None):
         """
@@ -58,7 +58,7 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
         self.setNow(timestamp)
         max_iterations = max_iterations or self.__default_max_iterations
         modified_total = False
-        #logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
+        logs.debug("Begin enrichment: %s (%s)" % (entity.title, entity.entity_id))
 
         # We will loop through all sources multiple times, because as data is enriched, previous unresolvable sources
         # may become resolvable and can enrich in turn.  If no fields are modified by any source in a given iteration,
@@ -103,6 +103,8 @@ class BasicSourceContainer(ASourceContainer,ASourceController):
                                 modified = True
                 except Exception as e:
                     report()
+            if not modified:
+                break
             modified_total |= modified
         return modified_total
 

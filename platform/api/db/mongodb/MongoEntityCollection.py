@@ -41,10 +41,12 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
         AEntityDB.__init__(self)
 
         fast_resolve_fields = ('sources.amazon_id', 'sources.spotify_id', 'sources.rdio_id',
-                'sources.opentable_id', 'sources.tmdb_id', 'sources.factual_id',
-                'sources.instagram_id', 'sources.singleplatform_id', 'sources.foursquare_id',
-                'sources.fandango_id', 'sources.googleplaces_id', 'sources.itunes_id',
-                'sources.netflix_id', 'sources.thetvdb_id', 'sources.nytimes_id', 'sources.umdmusic_id')
+                'sources.opentable_id', 'sources.tmdb_id', 'sources.factual_id', 'sources.instagram_id',
+                'sources.singleplatform_id', 'sources.foursquare_id', 'sources.fandango_id', 'sources.googleplaces_id',
+                'sources.itunes_id', 'sources.netflix_id', 'sources.thetvdb_id', 'sources.nytimes_id',
+                'sources.umdmusic_id', 'sources.tombstone_id')
+        for field in fast_resolve_fields:
+            self._collection.ensure_index(field)
 
         self._collection.ensure_index([
                                     ('search_tokens',               pymongo.ASCENDING),
@@ -52,9 +54,6 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
                                     ('sources.tombstone_id',        pymongo.ASCENDING),
                                 ])
 
-
-        for field in fast_resolve_fields:
-            self._collection.ensure_index(field)
         self._collection.ensure_index('search_tokens')
         self._collection.ensure_index('titlel')
         self._collection.ensure_index('albums.title')
@@ -494,6 +493,9 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
 
     def getEntitiesByQuery(self, queryDict):
         return (self._convertFromMongo(item) for item in self._collection.find(queryDict))
+
+    def getEntitiesByTombstoneId(self, tombstoneId):
+        return self.getEntitiesByQuery({'sources.tombstone_id' : tombstoneId})
 
     def updateEntity(self, entity):
         document = self._convertToMongo(entity)

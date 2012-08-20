@@ -15,6 +15,7 @@ try:
     import re
     import urlparse
     from api.Schemas            import *
+    from resolve.EntityReviver import *
 except:
     raise
 
@@ -117,7 +118,9 @@ def extraInfo(entity):
     return ''.join(extra)
 
 def _quickLink(key, value):
-    if value is None or value == '' or value == _invalidPlaceholder or value.find('http') == -1:
+    if key == 'tombstone_id' and value:
+        value = 'v1/entities/edit.html?secret=supersmash&entity_id=' + value
+    elif value is None or value == '' or value == _invalidPlaceholder or value.find('http') == -1:
         return ""
     return """
 <a href="%s">%s</a>
@@ -227,6 +230,9 @@ def formForEntity(entity_id, **hidden_params):
             fandango_url = entity.sources.fandango_url
         fields['fandango_url'] = fandango_url
     fields['image_url'] = primaryImageURL(entity)
+    fields['tombstone_id'] = getattr(entity.sources, 'tombstone_id', None)
+    nemesis_ids = getattr(entity.sources, 'nemesis_ids')
+    fields['nemesis_ids'] = ', '.join(nemesis_ids) if nemesis_ids else ''
     hidden_params['entity_id'] = entity_id
     html = []
     desc = entity.desc
@@ -244,9 +250,15 @@ desc:<textarea name="desc" style="width:300pt; height:100pt;">%s</textarea><br/>
  """ % (entity.title, entity.title, desc))
     if entity.isType('album') or entity.isType('artist'):
         html.append("""
-<input type="checkbox" name="purge_tracks"/> Purge Tracks<br/>
+<input type="checkbox" name="purge_tracks"/>Purge Tracks<br/>
             """)
 
+    html.append("""
+<input type="checkbox" name="purge_tombstone"/>Purge Tombstone<br/>
+            """)
+    html.append("""
+<input type="checkbox" name="break_cluster"/>Break Cluster<br/>
+            """)
     html.append("""
 <input type="checkbox" name="purge_image"/>Purge Image<br/>
             """)
@@ -439,6 +451,23 @@ def update(updates):
         del entity.tracks
         del entity.tracks_timestamp
         del entity.tracks_source
+
+    tombstone_id = updates.tombstone_id
+    if tombstone_id is not None and tombstone_id not in bad_versions:
+        entity.sources.tombstone_id = tombstone_id
+        entity.sources.tombstone_source = 'manual'
+        entity.sources.tombstone_timestamp = now
+    nemesis_ids = updates.nemesis_ids
+    if nemesis_ids is not None and nemesis_ids not in bad_versions:
+        entity.sources.nemesis_ids = [item.strip() for item in nemesis_ids.split(',')]
+        entity.sources.nemesis_source = 'manual'
+        entity.sources.nemesis_timestamp = now
+    if updates.purge_tombstone == 'on':
+        del entity.sources.tombstone_id
+        del entity.sources.tombstone_timestamp
+        del entity.sources.tombstone_source
+    if updates.break_cluster == 'on':
+        revive_tombstoned_entities(entity.entity_id)
     for k in simple_fields:
         v = getattr(updates, k)
         if v == '':

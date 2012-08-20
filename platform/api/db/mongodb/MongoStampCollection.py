@@ -29,8 +29,8 @@ from libs.Memcache                                      import globalMemcache, g
 
 class MongoStampCollection(AMongoCollectionView, AStampDB):
     
-    def __init__(self):
-        AMongoCollectionView.__init__(self, collection='stamps', primary_key='stamp_id', obj=Stamp, overflow=True)
+    def __init__(self, collection='stamps'):
+        AMongoCollectionView.__init__(self, collection=collection, primary_key='stamp_id', obj=Stamp, overflow=True)
         AStampDB.__init__(self)
         
         self._collection.ensure_index([('timestamp.modified', pymongo.ASCENDING)])
@@ -65,6 +65,9 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
                                         ('entity.coordinates.lat', pymongo.ASCENDING), 
                                         ('timestamp.stamped', pymongo.DESCENDING) ])
 
+    @lazyProperty
+    def __seed_collection(self):
+        return MongoSeedStampCollection()
 
     def _upgradeDocument(self, document):
         if document is None:
@@ -315,6 +318,7 @@ class MongoStampCollection(AMongoCollectionView, AStampDB):
         return MongoWhitelistedTastemakerStampIdsCollection()
     
     def addStamp(self, stamp):
+        self.__seed_collection.addStamp(stamp)
         return self._addObject(stamp)
     
     def getStamp(self, stampId):
@@ -843,6 +847,13 @@ class MongoStampStatsCollection(AMongoCollection):
 
         return map(self._convertFromMongo, documents)
 
+
+class MongoSeedStampCollection(MongoStampCollection):
+    def __init__(self):
+        super(MongoSeedStampCollection, self).__init__('seedstamps')
+
+    def addStamp(self, stamp):
+        return self._addObject(stamp)
 
 
 class MongoWhitelistedTastemakerStampIdsCollection(AMongoCollection):
