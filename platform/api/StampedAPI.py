@@ -48,7 +48,6 @@ try:
     from crawler.RssFeedScraper     import RssFeedScraper
 
     #resolve classes
-    from resolve.EntitySource       import EntitySource
     from resolve.EntityProxySource  import EntityProxySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
     from resolve.BasicSourceContainer import BasicSourceContainer
@@ -5281,15 +5280,27 @@ class StampedAPI(AStampedAPI):
         def _getSuccessor(tombstoneId):
             logs.info("Get successor: %s" % tombstoneId)
             successor_id = tombstoneId
-            successor    = self._entityDB.getEntity(successor_id)
+            successor = self._entityDB.getEntity(successor_id)
             assert successor is not None and successor.entity_id == successor_id
 
-            merger = FullResolveContainer.FullResolveContainer()
-            merger.addSource(EntitySource(entity, merger.groups))
-            successor_decorations = {}
-            modified_successor = merger.enrichEntity(successor, successor_decorations)
-            self.__handleDecorations(successor, successor_decorations)
+            modified_successor = False
+            for group in self.__full_resolve.groups:
+                if group.groupName == 'tombstone':
+                    continue
+                source = group.getSource(entity)
+                entity_timestamp = group.getTimestamp(entity)
+                if group.groupName == 'nemeses':
+                    # Discard the nemesis ids timestamp, because we want to copy them no matter now old they are.
+                    entity_timestamp = None
+                if (self.__full_resolve.shouldEnrich(group.groupName, source, successor, entity_timestamp)
+                        and group.syncFields(entity, successor)):
+                    group.setSource(successor, source)
+                    group.setTimestamp(successor, entity_timestamp)
+                    modified_successor = True
 
+            successor_decorations = {}
+            modified_successor |= self.__full_resolve.enrichEntity(successor, successor_decorations)
+            self.__handleDecorations(successor, successor_decorations)
             return successor, modified_successor
 
         try:
