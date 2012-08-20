@@ -320,9 +320,7 @@ class Resolver(object):
 
     def __finish(self, query, results, options):
         for result in results:
-            result[0]['resolved'] = False
-        if len(results) > 0 and results[0][0]['total'] > options['resolvedComparison']:
-            results[0][0]['resolved'] = True
+            result[0]['resolved'] = result[0]['total'] > options['resolvedComparison']
         return results
 
 def demo(generic_source, default_title, subcategory=None):
