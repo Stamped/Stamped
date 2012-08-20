@@ -13,7 +13,6 @@ from api.Schemas import *
 from pprint import pprint
 from api import Entity
 
-from resolve.EntitySource   import EntitySource
 from resolve                import FullResolveContainer
 from resolve.AmazonSource           import AmazonSource
 from resolve.FactualSource          import FactualSource
