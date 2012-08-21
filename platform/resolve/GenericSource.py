@@ -161,9 +161,9 @@ class GenericSource(BasicSource):
 
         return [self.entityProxyFromKey(source_id, entity=entity)]
 
-    def enrichEntity(self, entity, groups, controller, decorations, timestamps):
+    def enrichEntity(self, entity, groups, controller, decorations, timestamps, proxies=None):
         timestamps[self.idName] = controller.now
-        proxies = self.getProxiesForEntity(entity)
+        proxies = proxies if proxies is not None else self.getProxiesForEntity(entity)
         if proxies:
             proxy = proxies[0]
             setattr(entity.sources, self.idField, proxy.key)
