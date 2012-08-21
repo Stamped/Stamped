@@ -1488,7 +1488,8 @@ class StampedAPI(AStampedAPI):
                     token = acct.linked.facebook.token
                     friend_info = self._facebook.getUserInfo(token, friend_fb_id)
                     friend_linked = friendAcct.linked.facebook
-                    friend_linked.third_party_id = friend_info['third_party_id']
+                    if friend_info != False:
+                        friend_linked.third_party_id = friend_info['third_party_id']
                     self._accountDB.updateLinkedAccount(userId, friend_linked)
                 payload = {
                     'authUserId': authUserId,

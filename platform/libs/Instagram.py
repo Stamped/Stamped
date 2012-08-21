@@ -92,8 +92,7 @@ class Instagram(object):
 
     def createInstagramImage(self, entity_img_url, stamp_url, profile_img_url, user_generated, coordinates,
                              primary_color, secondary_color, user_name, category, types, title, subtitle):
-        def dropShadow(rounded, size, background=0xffffff, shadow=0x444444,
-                       border=8, iterations=3):
+        def dropShadow(rounded, size, background=0xffffff, shadow=0x444444, border=8, iterations=3):
             """
             Create a gaussian blur drop shadow
 
@@ -128,17 +127,12 @@ class Instagram(object):
         def fitImg(entityImg, width, height):
             aspect_ratio = width/float(height)
             w, h = entityImg.size
-            print("aspect ratio: %s   w/h:%s" % (aspect_ratio, w/float(h)))
-
-            print( w/float(h))
 
             if w/float(h) >= aspect_ratio:
                 new_height = int( h / (w/float(width)))
-                print ('width: %s  new_height: %s' % (width, new_height))
                 return entityImg.resize((width, new_height), Image.ANTIALIAS)
             else:
                 new_width = int( w / (h/float(height)))
-                print ('new_width: %s  height: %s' % (new_width, height))
                 return entityImg.resize((new_width, height), Image.ANTIALIAS)
 
         def transformEntityImage(entityImg, stampImg, rounded, pin, a,b,c,d,e,f,g,h, x, y):
