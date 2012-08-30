@@ -325,18 +325,16 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
                 print 'changing to', sim_score, 'for movie lengths'
 
         # We only do cast comparison if we're desparate, since it involves an additional third-party call for TMDB.
-        # TODO: Maybe we should always do this?
+        # Also movies in a series tend to share cast members, so this signal isn't too accurate.
         if not has_additional_info and movie1.cast and movie2.cast:
             has_additional_info = True
             cast1 = set([member['name'] for member in movie1.cast])
             cast2 = set([member['name'] for member in movie2.cast])
-            if cast1 == cast2:
-                cast_odds = 2.0
-            elif cast1 > cast2 or cast2 > cast1:
+            if cast1 == cast2 or cast1 > cast2 or cast2 > cast1:
                 cast_odds = 1.5
             else:
                 common_members = cast1 & cast2
-                cast_odds = 0.5 + len(common_members) / min(len(cast1), len(cast2))
+                cast_odds = 1 + len(common_members) / min(len(cast1), len(cast2)) * 0.5
             sim_score *= cast_odds
             if logComparisonLogic:
                 print 'changing to', sim_score, 'for cast comparison'
