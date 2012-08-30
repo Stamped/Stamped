@@ -431,12 +431,9 @@ class iTunesMovie(_iTunesObject, ResolverMediaItem):
 
     @property
     def release_date(self):
-        # iTunes movie release dates are LIES. If there's something in a title in parens, we can trust it. Otherwise,
-        # throw it out.
-        year = getFilmReleaseYearFromTitle(self.raw_name)
-        if year is not None:
-            return datetime.datetime(year, 1, 1)
-        else:
+        try:
+            return parseDateString(self.data['releaseDate'])
+        except KeyError:
             return None
 
     @property
@@ -515,10 +512,9 @@ class iTunesTVShow(_iTunesObject, ResolverMediaCollection):
 
     @property
     def release_date(self):
-        year = getFilmReleaseYearFromTitle(self.raw_name)
-        if year is not None:
-            return datetime.datetime(year, 1, 1)
-        else:
+        try:
+            return parseDateString(self.data['releaseDate'])
+        except KeyError:
             return None
 
     @property
