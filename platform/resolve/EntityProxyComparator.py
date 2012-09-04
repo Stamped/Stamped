@@ -297,7 +297,7 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
                 release_date_odds = 2.5
             elif time_difference < timedelta(365):
                 release_date_odds = 1.8
-            elif time_difference < timedelta(750):
+            elif time_difference < timedelta(500):
                 release_date_odds = 1.4
             elif movie1.source != 'stamped' and movie2.source != 'stamped' and time_difference > timedelta(365*5):
                 release_date_odds = 0.3
