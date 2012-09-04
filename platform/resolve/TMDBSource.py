@@ -215,12 +215,6 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
             return []
 
 
-class TMDBSearchAll(ResolverProxy, ResolverSearchAll):
-
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
 class TMDBSource(GenericSource):
     """
     """
@@ -259,8 +253,6 @@ class TMDBSource(GenericSource):
     def matchSource(self, query):
         if query.isType('movie'):
             return self.movieSource(query)
-        if query.kind == 'search':
-            return self.searchAllSource(query)
         
         return self.emptySource
 
@@ -278,7 +270,7 @@ class TMDBSource(GenericSource):
                     results = self.__tmdb.movie_search(query.name, page=p+1, priority='low', timeout=MERGE_TIMEOUT)
                     for movie in results['results']:
                         yield movie
-        return self.generatorSource(gen(), constructor=lambda x: TMDBMovie(x['id'], x, 0))
+        return self.generatorSource(gen(), constructor=lambda x: TMDBMovie(x['id']))
 
     def __pareOutResultsFarInFuture(self, resolverObjects):
         """
@@ -314,19 +306,6 @@ class TMDBSource(GenericSource):
         # TODO: We could incorporate release date recency or popularity into our ranking, but for now will assume that
         # TMDB is clever enough to handle that for us.
         return search_results
-
-    def __release_date(self, movie):
-        result = None
-        if 'release_date' in movie:
-            date_string = movie['release_date']
-            if date_string is not None:
-                match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)$',date_string)
-                if match is not None:
-                    try:
-                        result = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-                    except ValueError:
-                        pass
-        return result
 
 
 if __name__ == '__main__':
