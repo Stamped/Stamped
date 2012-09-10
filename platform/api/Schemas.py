@@ -594,6 +594,12 @@ class EntitySources(Schema):
         cls.addProperty('tombstone_source',                 basestring)
         cls.addProperty('tombstone_timestamp',              datetime)
 
+        # Nemesis ids are ids of entities that we should never tombstone to. These are manually added when we know for
+        # certain that the two entities are different, but somehow clustering code isn't able to distinguish.
+        cls.addPropertyList('nemesis_ids',                  basestring)
+        cls.addProperty('nemesis_source',                   basestring)
+        cls.addProperty('nemesis_timestamp',                datetime)
+
         cls.addProperty('user_generated_id',                basestring)
         cls.addProperty('user_generated_subtitle',          basestring)
         cls.addProperty('user_generated_timestamp',         datetime)

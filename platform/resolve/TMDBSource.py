@@ -215,12 +215,6 @@ class TMDBMovie(_TMDBObject, ResolverMediaItem):
             return []
 
 
-class TMDBSearchAll(ResolverProxy, ResolverSearchAll):
-
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
 class TMDBSource(GenericSource):
     """
     """
@@ -259,8 +253,6 @@ class TMDBSource(GenericSource):
     def matchSource(self, query):
         if query.isType('movie'):
             return self.movieSource(query)
-        if query.kind == 'search':
-            return self.searchAllSource(query)
         
         return self.emptySource
 
@@ -278,7 +270,7 @@ class TMDBSource(GenericSource):
                     results = self.__tmdb.movie_search(query.name, page=p+1, priority='low', timeout=MERGE_TIMEOUT)
                     for movie in results['results']:
                         yield movie
-        return self.generatorSource(gen(), constructor=lambda x: TMDBMovie(x['id'], x, 0))
+        return self.generatorSource(gen(), constructor=lambda x: TMDBMovie(x['id']))
 
     def __pareOutResultsFarInFuture(self, resolverObjects):
         """
@@ -315,99 +307,6 @@ class TMDBSource(GenericSource):
         # TMDB is clever enough to handle that for us.
         return search_results
 
-    def searchAllSource(self, query, timeout=None):
-        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
-            return self.emptySource
-
-        if query.types is not None and len(query.types) > 0 and len(self.types.intersection(query.types)) == 0:
-            logs.debug('Skipping %s (types: %s)' % (self.sourceName, query.types))
-            return self.emptySource
-
-        logs.debug('Searching %s...' % self.sourceName)
-            
-        def gen():
-            try:    
-                results = self.__tmdb.movie_search(query.query_string, priority='high', timeout=SEARCH_TIMEOUT)
-                if results is None:
-                    return 
-                for movie in results['results']:
-                    yield movie
-                pages = results['total_pages']
-
-                if pages > 1:
-                    for p in range(1,pages):
-                        results = self.__tmdb.movie_search(query.query_string, page=p+1, priority='high', timeout=SEARCH_TIMEOUT)
-                        for movie in results['results']:
-                            yield movie
-            except GeneratorExit:
-                pass
-        return self.generatorSource(gen(), constructor=lambda x: TMDBSearchAll(TMDBMovie(x['id'], x, 0)))
-
-    def __release_date(self, movie):
-        result = None
-        if 'release_date' in movie:
-            date_string = movie['release_date']
-            if date_string is not None:
-                match = re.match(r'^(\d\d\d\d)-(\d\d)-(\d\d)$',date_string)
-                if match is not None:
-                    try:
-                        result = datetime(int(match.group(1)),int(match.group(2)),int(match.group(3)))
-                    except ValueError:
-                        pass
-        return result
-
-    # def enrichEntity(self, entity, controller, decorations, timestamps):
-    #     GenericSource.enrichEntity(self, entity, controller, decorations, timestamps)
-    #     title = entity['title']
-    #     if title is not None:
-    #         tmdb_id = entity['tmdb_id']
-    #         if tmdb_id is not None:
-    #             movie = TMDBMovie(tmdb_id)
-    #             try:
-    #                 casts = self.__tmdb.movie_casts(tmdb_id)
-    #                 if 'cast' in casts:
-    #                     cast = casts['cast']
-    #                     cast_order = {}
-    #                     for entry in cast:
-    #                         name = entry['name']
-    #                         order = int(entry['order'])
-    #                         cast_order[order] = name
-    #                     sorted_cast = [ cast_order[k] for k in sorted(cast_order.keys()) ]
-    #                     if len( sorted_cast ) > self.__max_cast:
-    #                         sorted_cast = sorted_cast[:self.__max_cast]
-    #                     cast_string = ', '.join(sorted_cast)
-    #                     if entity['cast'] == None:
-    #                         entity['cast'] = cast_string
-    #                 if 'crew' in casts:
-    #                     crew = casts['crew']
-    #                     director = None
-    #                     for entry in crew:
-    #                         name = entry['name']
-    #                         job = entry['job']
-    #                         if job == 'Director':
-    #                             director = name
-    #                     if director is not None:
-    #                         entity['director'] = director
-                        
-    #             except Exception:
-    #                 pass
-    #             info = movie.info
-    #             if 'tagline' in info:
-    #                 tagline = info['tagline']
-    #                 if tagline is not None and tagline != '':
-    #                     entity['short_description'] = tagline
-    #             if 'overview' in info:
-    #                 overview = info['overview']
-    #                 if overview is not None and overview != '':
-    #                     entity['desc'] = overview
-
-    #             if movie.imdb is not None:
-    #                 entity['imdb_id'] = movie.imdb;
-    #             if len(movie.genres) > 0:
-    #                 entity['genres'] = list(movie.genres)
-        
-    #     return True
 
 if __name__ == '__main__':
     demo(TMDBSource(), 'Avatar')

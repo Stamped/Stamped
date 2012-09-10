@@ -31,7 +31,6 @@ from api.db.mongodb.MongoUserTodosEntitiesCollection import MongoUserTodosEntiti
 from api.db.mongodb.MongoActivityCollection         import MongoActivityCollection
 from api.db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
 from api.db.mongodb.MongoMenuCollection             import MongoMenuCollection
-from api.db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
 from api.db.mongodb.MongoLogsCollection             import MongoLogsCollection
 from api.db.mongodb.MongoStatsCollection            import MongoStatsCollection
 from api.db.mongodb.MongoGuideCollection            import MongoGuideCollection
@@ -130,14 +129,6 @@ class MongoStampedAPI(StampedAPI):
     def _menuDB(self):
         return MongoMenuCollection()
 
-    @lazyProperty
-    def _searchEntityDB(self):
-        return MongoSearchEntityCollection()
-    
-    @lazyProperty
-    def _searchCacheDB(self):
-        return MongoSearchCacheCollection()
-    
     @lazyProperty
     def _notificationHandler(self):
         return StampedNotificationHandler()

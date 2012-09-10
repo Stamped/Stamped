@@ -282,13 +282,6 @@ class GooglePlacesAutocompletePlace(ResolverPlace):
         return string.joinfields(address_components, ', ')
 
 
-class GooglePlacesSearchAll(ResolverProxy, ResolverSearchAll):
-
-    def __init__(self, target):
-        ResolverProxy.__init__(self, target)
-        ResolverSearchAll.__init__(self)
-
-
 class GooglePlacesSource(GenericSource):
     """
     Data-Source proxy for Google Places.
@@ -322,78 +315,18 @@ class GooglePlacesSource(GenericSource):
     
     def placeSource(self, query):
         def gen():
-            try:
-                params = {
-                    'radius': 20000,
-                    'name': query.name
-                }
-                gdata = self.__places.getSearchResultsByLatLng(query.coordinates, params)
-                if gdata is not None:
-                    for gdatum in gdata:
-                        if 'reference' in gdatum:
-                            ref = gdatum['reference']
-                            details = self.__places.getPlaceDetails(ref)
-                            details['reference'] = ref
-                            yield GooglePlacesPlace(details)
-            except GeneratorExit:
-                pass
-        
-        return self.generatorSource(gen())
-
-    def searchAllSource(self, query, timeout=None):
-        if query.kinds is not None and len(query.kinds) > 0 and len(self.kinds.intersection(query.kinds)) == 0:
-            logs.debug('Skipping %s (kinds: %s)' % (self.sourceName, query.kinds))
-            return self.emptySource
-
-        logs.debug('Searching %s...' % self.sourceName)
-        
-        def gen():
-            try:
-                raw_results = []
-                
-                def getGooglePlacesSearch(q):
-                    # Hacky conversion
-                    params  = {'name': q.query_string, 'radius': 20000}
-                    results = self.__places.getEntityResultsByLatLng(q.coordinates, params)
-                    
-                    if results is None:
-                        return self.emptySource
-                    
-                    for result in results:
-                        data = {}
-                        data['reference']       = result.sources.googleplaces_reference
-                        data['name']            = result.title
-                        data['latitude']        = result.coordinates.lat
-                        data['longitude']       = result.coordinates.lng
-                        data['address_string']  = result.neighborhood
-                        data['type']            = result.subcategory
-                        
-                        raw_results.append(data)
-                
-                def getGoogleNationalSearch(q):
-                    results = self.__places.getEntityAutocompleteResults(q.query_string, q.coordinates)
-                    
-                    for result in results:
-                        # Hacky conversion
-                        data = {}
-                        data['reference']       = result.sources.googleplaces_reference
-                        data['name']            = result.title
-                        data['address_string']  = result.formatted_address
-                        raw_results.append(data)
-                
-                if query.coordinates is not None:
-                    pool = Pool(2)
-                    pool.spawn(getGooglePlacesSearch, query)
-                    pool.spawn(getGoogleNationalSearch, query)
-                    pool.join(timeout=timeout)
-                else:
-                    getGoogleNationalSearch(query)
-                
-                for result in raw_results:
-                    yield GooglePlacesSearchAll(GooglePlacesPlace(result))
-            except GeneratorExit:
-                pass
-        
+            params = {
+                'radius': 20000,
+                'name': query.name
+            }
+            gdata = self.__places.getSearchResultsByLatLng(query.coordinates, params)
+            if gdata is not None:
+                for gdatum in gdata:
+                    if 'reference' in gdatum:
+                        ref = gdatum['reference']
+                        details = self.__places.getPlaceDetails(ref)
+                        details['reference'] = ref
+                        yield GooglePlacesPlace(details)
         return self.generatorSource(gen())
 
     def searchLite(self, queryCategory, queryText, timeout=None, coords=None, logRawResults=None):
