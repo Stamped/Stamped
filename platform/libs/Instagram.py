@@ -29,7 +29,7 @@ try:
     from S3ImageDB          import S3ImageDB
     import utils
     import inspect, os
-    import PIL, Image, ImageFile, ImageFilter, ImageFont, ImageDraw, ImageChops
+    import PIL, Image, ImageFile, ImageFilter, ImageFont, ImageDraw, ImageChops, ImageEnhance
 except:
     report()
     raise
@@ -135,6 +135,46 @@ class Instagram(object):
                 new_width = int( w / (h/float(height)))
                 return entityImg.resize((new_width, height), Image.ANTIALIAS)
 
+        def black_to_transparent(img):
+            pixdata = img.load()
+
+            for y in xrange(img.size[1]):
+                for x in xrange(img.size[0]):
+                    pix = pixdata[x, y]
+                    pixdata[x, y] = (0, 0, 0, 255-pix[0])
+
+
+        def invert_to_transparent(img):
+            pixdata = img.load()
+
+            for y in xrange(img.size[1]):
+                for x in xrange(img.size[0]):
+                    pix = pixdata[x, y]
+                    if pix == (255, 255, 255, 255):
+                        pixdata[x,y] = (255, 255, 255, 0)
+                    else:
+                        pixdata[x,y] = (255, 255, 255, 255)
+#                    pixdata[x, y] = (255, 255, 255, 255-pix[0])
+
+
+        def fill_img(entityImg):
+            w, h = entityImg.size
+            m = min([w,h])
+            if h > w:
+                y = (h - w) / 2
+                entityImg = entityImg.crop((0, y, w, w+y))
+            else:
+                x = (w - h) / 2
+                entityImg = entityImg.crop((0, y, w, w+y))
+            img = Image.new('RGBA', (m, m), (255,255,255,128))
+            entityImg.paste(img, img)
+            entityImg = entityImg.resize((612, 612))
+            entityImg = entityImg.filter(ImageFilter.BLUR)
+
+            return entityImg
+                #newImg.paste(entityImg, )
+
+
         def transformEntityImage(entityImg, stampImg, rounded, pin, a,b,c,d,e,f,g,h, x, y):
             origAlbumSize = entityImg.size
             xResize = float(origAlbumSize[0])/600
@@ -187,9 +227,9 @@ class Instagram(object):
             buf.paste(stampImg, (412,-100), stampImg)
             entityImg = buf.resize(size, Image.ANTIALIAS)
 
-            #            if pin:
-            #                pinImg = Image.open(self.__basepath + 'pin.png')
-            #                entityImg.paste(pinImg, (278,200), pinImg)
+            if pin:
+                pinImg = Image.open(self.__basepath + 'pin.png')
+                entityImg.paste(pinImg, (231,147), pinImg)
 
             return entityImg
 
@@ -207,8 +247,8 @@ class Instagram(object):
             icon = icon.crop((0, 0, 28, 28))
             return icon
 
-        def getInstagramTextImg(user_name, category, types, title, subtitle):
-            textImg = Image.new('RGBA', (612*2,195*2), (255,255,255,255))
+        def getInstagramTextImg(user_name, category, types, title, subtitle, stamp=None, color=None, rule='dark'):
+            textImg = Image.new('RGBA', (612*2,195*2), (255,255,255,0))
             draw = ImageDraw.Draw(textImg)
             titling_gothic = ImageFont.truetype(self.__basepath +"TitlingGothicFB.ttf", 80*2)
             helvetica_neue_bold = ImageFont.truetype(self.__basepath +"HelveticaNeue-Bold.ttf", 24*2)
@@ -241,16 +281,60 @@ class Instagram(object):
                 break
             subtitleW, subtitleH = draw.textsize(subtitle, font=helvetica_neue)
 
-            draw.text((612-((headerW+header_nameW)/2),0), user_name, font=helvetica_neue_bold, fill='#939393')
-            draw.text((612-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill='#939393')
-            draw.text((612-(titleW/2),40*2), final_title, font=titling_gothic, fill='#000000')
-            draw.line((165*2, 134*2, (612-165)*2, 134*2), fill='#e0e0e0')
-            draw.text(((612*2/2)-(subtitleW/2),(134+22)*2), subtitle, font=helvetica_neue, fill='#939393')
+            if color is not None:
+                fill_clr = color
+                line_clr = color
+                title_clr = color
+            else:
+                fill_clr = '#939393'
+                line_clr = '#e0e0e0'
+                title_clr = '#000000'
+
+
+
+            draw.text((612-((headerW+header_nameW)/2),0), user_name, font=helvetica_neue_bold, fill=fill_clr)
+            draw.text((612-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill=fill_clr)
+            draw.text((612-(titleW/2),40*2), final_title, font=titling_gothic, fill=title_clr)
+            if stamp:
+                stampImg = stamp.resize((38*2,38*2))
+                mask = Image.new('1', (38*2, 38*2), 0)
+                mask.paste(1, (0,0), stampImg)
+                textImg.paste(stampImg,((612-(titleW/2) + titleW-30), 36*2), mask)
+
+            draw.text(((612*2/2)-(subtitleW/2),(134+22)*2), subtitle, font=helvetica_neue, fill=fill_clr)
             del draw
             textImg = textImg.resize((612, 195), Image.ANTIALIAS)
             icon = getCategoryIcon(category)
-            textImg.paste(icon, ((612/2)-(18/2), 122))
+            icon = icon.convert('RGBA')
+            if color is not None:
+                invert_to_transparent(icon)
+            textImg.paste(icon, ((612-28)/2-2, 122), icon)
+
+            if rule:
+                if rule == 'light':
+                    ruleImg = Image.open(self.__basepath + 'rule-light.png')
+                else:
+                    ruleImg = Image.open(self.__basepath + 'rule-dark.png')
+                textImg.paste(ruleImg, ((612-300)/2,134), ruleImg)
+
+
+
             return textImg
+
+        def profile_img_popout(profile_img_url, img, y):
+            # Get the user profile image and give it a little popout/shadow effect
+            profileImg = utils.getWebImage(profile_img_url)
+            back = Image.new('RGBA', (102,102), (255,255,255,255))
+            #back.paste(profileImg, (3, 3))
+            profileShadow = dropShadow(False, size = back.size, background=0xffffff, shadow=0x808080,
+                border=5, iterations=3)
+            profileShadow = profileShadow.convert('RGBA')
+            black_to_transparent(profileShadow)
+            img.paste(profileShadow, ((612-112)/2, y), profileShadow)
+            img.paste(back, ((612-112)/2 + 5, y+5))
+            img.paste(profileImg, ((612-112)/2 + 8, y+8))
+
+
 
         masks = [
             (270, 270, self.__basepath + 'stamp_mask.png'),
@@ -283,37 +367,30 @@ class Instagram(object):
         if coordinates is not None and user_generated == False:
             entity_img_url = "https://maps.googleapis.com/maps/api/staticmap?center=%s&zoom=18&sensor=false&scale=1&format=png&maptype=roadmap&size=600x600&key=AIzaSyAEjlMEfxmlCBQeyw_82jjobQAFjYx-Las" % coordinates
 
-        textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
+
         if entity_img_url is not None:
             entityImg = utils.getWebImage(entity_img_url)
             if user_generated:
-                boxW = 612
-                boxH = 612-195-40-30
-                entityImg = fitImg(entityImg, boxW, boxH)
-                w, h = entityImg.size
-                offsetX = (boxW - w)/2
-                offsetY = (boxH - h)/2 + 195+40
-                img.paste(entityImg, (offsetX, offsetY))
-                img.paste(textImg, (0, 40), textImg)
-                stamp = stamp.resize((100,100), Image.ANTIALIAS)
-                img.paste(stamp, (offsetX+entityImg.size[0]-40, offsetY-50), stamp)
+
+                textImg = getInstagramTextImg(user_name, category, types, title, subtitle, stamp, '#ffffff', 'light')
+                textImgShadow = getInstagramTextImg(user_name, category, types, title, subtitle, None, '#000000', False)
+                for i in range(1):
+                    textImgShadow = textImgShadow.filter(ImageFilter.BLUR)
+                black_to_transparent(textImgShadow)
+                entityImg = fill_img(entityImg)
+                img.paste(entityImg, (0, 0))
+                profile_img_popout(profile_img_url, img, 128)
+                img.paste(textImgShadow, (-1,249), textImgShadow)
+                img.paste(textImg, (0, 248), textImg)
             else:
+                textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
                 entityImg = transformEntityImage(entityImg, stamp, 'app' in types, coordinates is not None,
                     a,b,c,d,e,f,g,h,x,y)
                 img.paste(entityImg, (7,166))
                 img.paste(textImg, (0, 40), textImg)
         elif profile_img_url is not None:
-            # Get the user profile image and give it a little popout/shadow effect
-            profileImg = utils.getWebImage(profile_img_url)
-            back = Image.new('RGBA', (102,102), (255,255,255,255))
-            back.paste(profileImg, (3, 3))
-            profileShadow = dropShadow(False, size = back.size, offset=(0,0), background=0xffffff, shadow=0xd0d0d0,
-                border=5, iterations=3)
-            img.paste(profileShadow, (612/2 - 102/2 - 5, 128-5))
-            img.paste(back, (612/2 - 102/2, 128))
-            img.paste(profileImg, (612/2 - 96/2, 130))
-
-            # Draw the standard header/title/subtitle text
+            textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
+            profile_img_popout(profile_img_url, img, 128)
             img.paste(textImg, (0, 248), textImg)
 
             # Write the stamp url at the bottom
@@ -327,7 +404,7 @@ class Instagram(object):
             img.paste(urlBack, (0, 496))
 
         img.paste(ribbon_top, (0, 0))
-        img.paste(shadow_top, (0, ribbon_top.size[1]))
+        img.paste(shadow_top, (0, ribbon_top.size[1]), shadow_top)
         img.paste(ribbon_bot, (0, 612-ribbon_bot.size[1]))
         img.paste(shadow_bot, (0, 612-ribbon_top.size[1]-shadow_bot.size[1]), shadow_bot)
 
