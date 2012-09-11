@@ -3009,9 +3009,6 @@ class StampedAPI(AStampedAPI):
         except (AttributeError, TypeError):
             pass
 
-#        if self._imageDB.checkStampImage(stampId):502c0eb864c7946c841f3a9a
-#            entity_img_url = 'https://s3.amazonaws.com/stamped.com.static.images/stamps/%s.jpg' % stampId
-#            user_generated = True
         if entity_img_url is None and stamp.entity.images is not None and len(stamp.entity.images) > 0 \
             and len(stamp.entity.images[0].sizes) > 0:
             entity_img_url = stamp.entity.images[0].sizes[0].url

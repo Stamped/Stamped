@@ -332,7 +332,7 @@ class Instagram(object):
             (612,  9,  self.__basepath + 'ribbon-bottom.png'),
         ]
 
-        gradientImgs = [self.__imageDB.generate_gradient_images(primary_color, secondary_color, x[0], x[1], x[2])
+        gradientImgs = [self.__imageDB.generate_gradient_image(primary_color, secondary_color, x[0], x[1], x[2])
                         for x in masks]
         stamp = gradientImgs[0]
         ribbon_top = gradientImgs[1]

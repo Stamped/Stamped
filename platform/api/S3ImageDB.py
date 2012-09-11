@@ -184,14 +184,6 @@ class S3ImageDB(AImageDB):
         self._addImageSizes(prefix, image, max_size)
         return url
 
-    def checkStampImage(self, stampId):
-        user_image_exists = False
-        try:
-            user_image_exists = self.bucket.get_key('stamps/%s.jpg' % stampId) is not None
-        except Exception:
-            user_image_exists = False
-        return user_image_exists
-
     def addResizedStampImages(self, sourceUrl, imageId, maxSize, sizes):
         image    = utils.getWebImage(sourceUrl, "stamp")
         prefix   = 'stamps/%s' % imageId
@@ -251,7 +243,6 @@ class S3ImageDB(AImageDB):
         # Save original
         if original_url is None or original_url.lower() != ("%s.jpg" % prefix).lower():
             original = resizeImage(image, max_size)
-            print ('### prefix: %s' % prefix)
             url = self._addJPG(prefix, original)
             output = ImageSizeSchema()
             output.width = original.size[0]
@@ -264,7 +255,6 @@ class S3ImageDB(AImageDB):
             for name, size in sizes.iteritems():
                 resized = resizeImage(image, size)
                 name = '%s-%s' % (prefix, name)
-                print ('### name: %s' % name)
                 url = self._addJPG(name, resized)
                 output = ImageSizeSchema()
                 output.width = resized.size[0]
@@ -443,12 +433,12 @@ class S3ImageDB(AImageDB):
                 utils.printException()
 
             if generate:
-                image = self.generate_gradient_images(primary_color, secondary_color, width, height, mask)
+                image = self.generate_gradient_image(primary_color, secondary_color, width, height, mask)
                 self._addPNG('logos/%s' % filename, image)
 
 
 
-    def generate_gradient_images(self, primary_color, secondary_color, width, height, mask):
+    def generate_gradient_image(self, primary_color, secondary_color, width, height, mask):
         def output_chunk(out, chunk_type, data):
             out.write(struct.pack("!I", len(data)))
             out.write(chunk_type)
