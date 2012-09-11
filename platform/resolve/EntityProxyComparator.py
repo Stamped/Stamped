@@ -241,21 +241,6 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
 
 
 class MovieEntityProxyComparator(AEntityProxyComparator):
-    ENDING_NUMBER_RE = re.compile(r'(\d+)\s*(:|$)')
-    @classmethod
-    def _endsInDifferentNumbers(cls, title1, title2):
-        title1 = convertRomanNumerals(title1)
-        title2 = convertRomanNumerals(title2)
-        match1 = cls.ENDING_NUMBER_RE.search(title1)
-        match2 = cls.ENDING_NUMBER_RE.search(title2)
-        if match1 and match2 and match1.group(1) != match2.group(1):
-            return True
-        if match1 and not match2 and int(match1.group(1)) != 1:
-            return True
-        if match2 and not match1 and int(match2.group(1)) != 1:
-            return True
-        return False
-
     @classmethod
     def compare_proxies(self, movie1, movie2):
         has_additional_info = False
@@ -284,7 +269,7 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
             if logComparisonLogic:
                 print 'demoting to', sim_score, 'for double tmdb IDs'
 
-        if self._endsInDifferentNumbers(movie1.name, movie2.name):
+        if endsInDifferentNumbers(movie1.name, movie2.name):
             sim_score *= 0.4
             if logComparisonLogic:
                 print 'demoting to', sim_score, 'for ending numbers'

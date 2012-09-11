@@ -143,6 +143,21 @@ def convertRomanNumerals(title):
     return title
 
 
+ENDING_NUMBER_RE = re.compile(r'(\d+)\s*(:|$)')
+def endsInDifferentNumbers(title1, title2):
+    title1 = convertRomanNumerals(title1)
+    title2 = convertRomanNumerals(title2)
+    match1 = ENDING_NUMBER_RE.search(title1)
+    match2 = ENDING_NUMBER_RE.search(title2)
+    if match1 and match2 and match1.group(1) != match2.group(1):
+        return True
+    if match1 and not match2 and int(match1.group(1)) != 1:
+        return True
+    if match2 and not match1 and int(match2.group(1)) != 1:
+        return True
+    return False
+
+
 def __stripPrefix(a, b):
     longer, shorter = (a, b) if len(a) > len(b) else (b, a)
     if longer.startswith(shorter):
