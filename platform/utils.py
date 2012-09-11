@@ -1110,7 +1110,7 @@ def getWebImage(url, desc=None):
                 memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
     except urllib2.HTTPError:
         desc = ("%s " % desc if desc is not None else "")
-        logs.warning("unable to download %s `image from '%s'" % (url, desc))
+        logs.warning("unable to download %s image from '%s'" % (url, desc))
         raise
 
     return getImage(data)

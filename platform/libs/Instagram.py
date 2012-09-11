@@ -29,7 +29,7 @@ try:
     from S3ImageDB          import S3ImageDB
     import utils
     import inspect, os
-    import PIL, Image, ImageFile, ImageFilter, ImageFont, ImageDraw, ImageChops, ImageEnhance
+    import PIL, Image, ImageFile, ImageFilter, ImageFont, ImageDraw, ImageChops
 except:
     report()
     raise
@@ -154,7 +154,6 @@ class Instagram(object):
                         pixdata[x,y] = (255, 255, 255, 0)
                     else:
                         pixdata[x,y] = (255, 255, 255, 255)
-#                    pixdata[x, y] = (255, 255, 255, 255-pix[0])
 
 
         def fill_img(entityImg):
@@ -172,8 +171,6 @@ class Instagram(object):
             entityImg = entityImg.filter(ImageFilter.BLUR)
 
             return entityImg
-                #newImg.paste(entityImg, )
-
 
         def transformEntityImage(entityImg, stampImg, rounded, pin, a,b,c,d,e,f,g,h, x, y):
             origAlbumSize = entityImg.size
@@ -283,14 +280,10 @@ class Instagram(object):
 
             if color is not None:
                 fill_clr = color
-                line_clr = color
                 title_clr = color
             else:
                 fill_clr = '#939393'
-                line_clr = '#e0e0e0'
                 title_clr = '#000000'
-
-
 
             draw.text((612-((headerW+header_nameW)/2),0), user_name, font=helvetica_neue_bold, fill=fill_clr)
             draw.text((612-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill=fill_clr)
@@ -310,22 +303,19 @@ class Instagram(object):
                 invert_to_transparent(icon)
             textImg.paste(icon, ((612-28)/2-2, 122), icon)
 
+            # add rule lines
             if rule:
                 if rule == 'light':
                     ruleImg = Image.open(self.__basepath + 'rule-light.png')
                 else:
                     ruleImg = Image.open(self.__basepath + 'rule-dark.png')
                 textImg.paste(ruleImg, ((612-300)/2,134), ruleImg)
-
-
-
             return textImg
 
         def profile_img_popout(profile_img_url, img, y):
             # Get the user profile image and give it a little popout/shadow effect
             profileImg = utils.getWebImage(profile_img_url)
             back = Image.new('RGBA', (102,102), (255,255,255,255))
-            #back.paste(profileImg, (3, 3))
             profileShadow = dropShadow(False, size = back.size, background=0xffffff, shadow=0x808080,
                 border=5, iterations=3)
             profileShadow = profileShadow.convert('RGBA')
@@ -388,7 +378,7 @@ class Instagram(object):
                     a,b,c,d,e,f,g,h,x,y)
                 img.paste(entityImg, (7,166))
                 img.paste(textImg, (0, 40), textImg)
-        elif profile_img_url is not None:
+        else:
             textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
             profile_img_popout(profile_img_url, img, 128)
             img.paste(textImg, (0, 248), textImg)
