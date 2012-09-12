@@ -2990,7 +2990,7 @@ class StampedAPI(AStampedAPI):
         primary_color = user.color_primary
         secondary_color = user.color_secondary
         user_name = user.screen_name
-        category = entity.category
+        kind = entity.kind
         types = entity.types
         title = entity.title
         subtitle = entity.subtitle
@@ -3032,7 +3032,7 @@ class StampedAPI(AStampedAPI):
 
         if generate:
             image = self._instagram.createInstagramImage(entity_img_url, stamp_url, profile_img_url, user_generated,
-                coordinates, primary_color, secondary_color, user_name, category, types, title, subtitle)
+                coordinates, primary_color, secondary_color, user_name, kind, types, title, subtitle)
             self._imageDB.addImage('instagram/%s' % filename, image)
 
         url = 'https://s3.amazonaws.com/stamped.com.static.images/instagram/%s.png' % filename

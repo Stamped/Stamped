@@ -279,7 +279,7 @@ class Instagram(object):
             icon = icon.crop((0, 0, 28, 28))
             return icon
 
-        def getInstagramTextImg(user_name, category, types, title, subtitle, stamp=None, light=True):
+        def getInstagramTextImg(user_name, kind, types, title, subtitle, stamp=None, light=True):
             textImg = Image.new('RGBA', (612*2,195*2), (255,255,255,0))
             draw = ImageDraw.Draw(textImg)
             titling_gothic = ImageFont.truetype(self.__basepath +"TitlingGothicFB.ttf", 80*2)
@@ -404,7 +404,7 @@ class Instagram(object):
             entityImg = utils.getWebImage(entity_img_url)
             if user_generated:
 
-                textImg = getInstagramTextImg(user_name, category, types, title, subtitle, stamp, False)
+                textImg = getInstagramTextImg(user_name, kind, types, title, subtitle, stamp, False)
                 #textImgShadow = getInstagramTextImg(user_name, category, types, title, subtitle, None, '#000000', False)
                 #for i in range(1):
                 #    textImgShadow = textImgShadow.filter(ImageFilter.BLUR)
@@ -415,13 +415,13 @@ class Instagram(object):
                 #img.paste(textImgShadow, (0,250), textImgShadow)
                 img.paste(textImg, (0, 248), textImg)
             else:
-                textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
+                textImg = getInstagramTextImg(user_name, kind, types, title, subtitle)
                 entityImg = transformEntityImage(entityImg, stamp, 'app' in types, coordinates is not None,
                     a,b,c,d,e,f,g,h,x,y)
                 img.paste(entityImg, (7,166))
                 img.paste(textImg, (0, 40), textImg)
         else:
-            textImg = getInstagramTextImg(user_name, category, types, title, subtitle)
+            textImg = getInstagramTextImg(user_name, kind, types, title, subtitle)
             profile_img_popout(profile_img_url, img, 126)
             img.paste(textImg, (0, 248), textImg)
 
