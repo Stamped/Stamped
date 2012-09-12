@@ -2981,7 +2981,7 @@ class StampedAPI(AStampedAPI):
     def addInstagramStampImage(self, stampId):
         stamp = self.getStamp(stampId)
         user = stamp.user
-        entity = stamp.entity
+        entity = self._getEntity(stamp.entity.entity_id)
         coordinates = None
         try:
             coordinates = "%s,%s" % (entity.coordinates.lat, entity.coordinates.lng)
