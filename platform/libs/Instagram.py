@@ -91,7 +91,7 @@ class Instagram(object):
 
 
     def createInstagramImage(self, entity_img_url, stamp_url, profile_img_url, user_generated, coordinates,
-                             primary_color, secondary_color, user_name, category, types, title, subtitle):
+                             primary_color, secondary_color, user_name, kind, types, title, subtitle):
         def dropShadow(rounded, size, background=0xffffff, shadow=0x444444, border=8, iterations=3):
             """
             Create a gaussian blur drop shadow
@@ -238,18 +238,42 @@ class Instagram(object):
 
             return entityImg
 
-        def getCategoryIcon(category, light=True):
+        def getCategoryIcon(kind, types, light=True):
             if light:
                 categoryIcons = Image.open(self.__basepath + 'categoryicons-light.png')
             else:
                 categoryIcons = Image.open(self.__basepath + 'categoryicons-dark.png')
-            categories = ('restaurant', 'bar', 'cafe', 'place', 'album', 'song', 'artist', 'film', 'tv_show',
-                          'book', 'software', 'other')
-            if category not in categories:
-                categoryIndex = len(categories)-1
-            else:
-                categoryIndex = categories.index(category)
-            print categoryIndex
+            categories = ('restaurant', 'bar', 'cafe', 'place', 'album', 'track', 'artist', 'movie', 'tv',
+                          'book', 'app', 'other')
+            categoryIndex = -1
+            if kind == 'place':
+                if 'restaurant' in types:
+                    categoryIndex = 0
+                elif 'bar' in types:
+                    categoryIndex = 1
+                elif 'cafe' in types:
+                    categoryIndex = 2
+                else:
+                    categoryIndex = 3
+            elif kind == 'media_collection':
+                if 'album' in types:
+                    categoryIndex = 4
+                elif 'tv' in types:
+                    categoryIndex = 8
+            elif kind == 'media_item':
+                if 'track' in types or 'song' in types:
+                    categoryIndex = 5
+                elif 'movie' in types:
+                    categoryIndex = 7
+                elif 'book' in types:
+                    categoryIndex = 9
+            elif kind == 'person':
+                categoryIndex = 6
+            elif kind == 'software':
+                if 'app' in types:
+                    categoryIndex = 10
+            if categoryIndex == -1:
+                categoryIndex = 11
 
             icon = ImageChops.offset(categoryIcons, -(30*categoryIndex)+2, 0)
             icon = icon.crop((0, 0, 28, 28))
@@ -304,7 +328,7 @@ class Instagram(object):
             del draw
             textImg = textImg.resize((612, 195), Image.ANTIALIAS)
             black_to_transparent(textImg)
-            icon = getCategoryIcon(category, light)
+            icon = getCategoryIcon(kind, types, light)
             icon = icon.convert('RGBA')
             #if light:
             #    invert_to_transparent(icon)
