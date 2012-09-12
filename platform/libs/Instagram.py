@@ -91,8 +91,7 @@ class Instagram(object):
 
 
     def createInstagramImage(self, entity_img_url, stamp_url, profile_img_url, user_generated, coordinates,
-                             primary_color, secondary_color, user_name, category, types, title, subtitle,
-                             a,b,c,d,e,f,g,h):
+                             primary_color, secondary_color, user_name, category, types, title, subtitle):
         def dropShadow(rounded, size, background=0xffffff, shadow=0x444444, border=8, iterations=3):
             """
             Create a gaussian blur drop shadow
@@ -359,14 +358,14 @@ class Instagram(object):
         shadow_top = Image.open(self.__basepath + 'ribbon-shadow.png')
         shadow_bot = shadow_top.transpose(Image.FLIP_TOP_BOTTOM)
 
-#        a =  1.77
-#        b =  -1.61
-#        c =  298
-#        d =  1.074
-#        e =  4.11
-#        f =  -820
-#        g =  -0.0001
-#        h =  0.00215
+        a =  1.77
+        b =  -1.61
+        c =  298
+        d =  1.074
+        e =  4.11
+        f =  -820
+        g =  -0.0001
+        h =  0.00215
         x = -44
         y = 1
 
