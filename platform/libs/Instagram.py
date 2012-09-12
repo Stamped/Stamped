@@ -225,8 +225,7 @@ class Instagram(object):
             mask = mask.transform(size2x, Image.PERSPECTIVE, (a,b,c,d,e,f,g,h), Image.BICUBIC)
             shadowmask = shadowmask.transform(shadowsize2x, Image.PERSPECTIVE, (a,b,c,d,e,f,g,h), Image.BICUBIC)
 
-            stampImg = stampImg.filter(ImageFilter.GaussianBlur)
-            stampImg = stampImg.resize((1000,1000), Image.ANTIALIAS)
+            stampImg = stampImg.resize((1000,1000))
             buf.paste(shadow, shadowOffset, shadowmask)
             buf.paste(entityImg, (0, 0), mask)
             buf.paste(stampImg, (412,-100), stampImg)
