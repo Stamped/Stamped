@@ -310,7 +310,8 @@ class Instagram(object):
                     final_title = final_title[:-2] + u"\u2026"
                     continue
                 break
-            subtitleW, subtitleH = draw.textsize(subtitle, font=helvetica_neue)
+            if subtitle:
+                subtitleW, subtitleH = draw.textsize(subtitle, font=helvetica_neue)
 
             if light:
                 fill_clr = '#939393'
@@ -323,7 +324,8 @@ class Instagram(object):
             draw.text((612-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill=fill_clr)
             draw.text((612-(titleW/2),40*2), final_title, font=titling_gothic, fill=title_clr)
 
-            draw.text(((612*2/2)-(subtitleW/2),(134+22)*2), subtitle, font=helvetica_neue, fill=fill_clr)
+            if subtitle:
+                draw.text(((612*2/2)-(subtitleW/2),(134+22)*2), subtitle, font=helvetica_neue, fill=fill_clr)
             del draw
             textImg = textImg.resize((612, 195), Image.ANTIALIAS)
             black_to_transparent(textImg)
