@@ -310,6 +310,7 @@ class Instagram(object):
                     final_title = final_title[:-2] + u"\u2026"
                     continue
                 break
+            logs.info('subtitle: %s' % subtitle)
             if subtitle:
                 subtitleW, subtitleH = draw.textsize(subtitle, font=helvetica_neue)
 
