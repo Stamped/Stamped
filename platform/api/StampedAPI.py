@@ -3003,13 +3003,13 @@ class StampedAPI(AStampedAPI):
                 subtitle = ', '.join(unicode(i.title) for i in entity.networks)
         elif entity.isType('movie'):
             if entity.release_date is not None:
-                subtitle = entity.release_date.year
+                subtitle = str(entity.release_date.year)
         elif entity.isType('book') or entity.isType('app'):
             if entity.authors is not None and len(entity.authors) > 0:
                 subtitle = ', '.join(unicode(i.title) for i in entity.authors)
         elif entity.isType('video_game'):
             if entity.platform:
-                subtitle = entity.platform
+                subtitle = str(entity.platform)
         elif entity.kind == 'place':
             subtitle = entity.subtitle
 
