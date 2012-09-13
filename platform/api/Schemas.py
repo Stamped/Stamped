@@ -1128,22 +1128,22 @@ class PlaceEntity(BasicEntity):
         if self.address_country is not None and self.address_locality is not None:
             if self.address_country.upper() == 'US':
                 if self.address_region is not None:
-                    return "%s, %s" % (self.address_locality, self.address_region)
+                    return u"%s, %s" % (self.address_locality, self.address_region)
             else:
                 countries = libs.CountryData.countries
                 country = self.address_country
                 if self.address_country.upper() in countries:
-                    country = countries[self.address_country.upper()]
-                return "%s, %s" % (self.address_locality, country)
+                    country = countries[self.address_country.upper()].decode('utf-8')
+                return u"%s, %s" % (self.address_locality, country)
 
         # Extract city / state with regex as fallback
         if self.formatted_address is not None:
             match = city_state_re.match(self.formatted_address)
             if match is not None:
-                return "%s, %s" % match.groups()
+                return u"%s, %s" % match.groups()
             match = place_tolerant_re.match(self.formatted_address)
             if match is not None and match.group(2) in geography.ALL_MAJOR_NAMES:
-                return "%s, %s" % match.groups()
+                return u"%s, %s" % match.groups()
 
         # Fallback to generic
         return self._genericSubtitle()
