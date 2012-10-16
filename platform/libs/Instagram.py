@@ -228,7 +228,7 @@ class Instagram(object):
             stampImg = stampImg.resize((1000,1000))
             buf.paste(shadow, shadowOffset, shadowmask)
             buf.paste(entityImg, (0, 0), mask)
-            buf.paste(stampImg, (412,-100), stampImg)
+            buf.paste(stampImg, (412,-70), stampImg)
             entityImg = buf.resize(size, Image.ANTIALIAS)
 
             if pin:
@@ -279,11 +279,12 @@ class Instagram(object):
             return icon
 
         def getInstagramTextImg(user_name, kind, types, title, subtitle, stamp=None, light=True):
-            textImg = Image.new('RGBA', (612*2,195*2), (255,255,255,0))
+            textImg = Image.new('RGBA', (612*2,235*2), (255,255,255,0))
             draw = ImageDraw.Draw(textImg)
             titling_gothic = ImageFont.truetype(self.__basepath +"TitlingGothicFB.ttf", 80*2)
-            helvetica_neue_bold = ImageFont.truetype(self.__basepath +"HelveticaNeue-Bold.ttf", 24*2)
-            helvetica_neue = ImageFont.truetype(self.__basepath + "HelveticaNeue.ttf", 24*2)
+            helvetica_neue_bold = ImageFont.truetype(self.__basepath +"HelveticaNeue-Bold.ttf", 20*2)
+            helvetica_neue = ImageFont.truetype(self.__basepath + "HelveticaNeue.ttf", 20*2)
+            helvetica_neue_24 = ImageFont.truetype(self.__basepath + "HelveticaNeue.ttf", 24*2)
             header_nameW, header_nameH = draw.textsize(user_name, font=helvetica_neue_bold)
 
             prefix = 'a'
@@ -315,14 +316,14 @@ class Instagram(object):
                 subtitleW, subtitleH = draw.textsize(subtitle, font=helvetica_neue)
 
             if light:
-                fill_clr = '#939393'
-                title_clr = '#000000'
+                fill_clr = '#999999'
+                title_clr = '#595959'
             else:
                 fill_clr = '#000000'
                 title_clr = '#000000'
 
-            draw.text((612-((headerW+header_nameW)/2),-1), user_name, font=helvetica_neue_bold, fill=fill_clr)
-            draw.text((612-((headerW+header_nameW)/2)+header_nameW,0), header, font=helvetica_neue, fill=fill_clr)
+            draw.text((612-((header_nameW)/2),0), user_name, font=helvetica_neue_bold, fill=title_clr)
+            draw.text((612-(headerW/2),24), header, font=helvetica_neue, fill=fill_clr)
             draw.text((612-(titleW/2),40*2), final_title, font=titling_gothic, fill=title_clr)
 
             if subtitle:
