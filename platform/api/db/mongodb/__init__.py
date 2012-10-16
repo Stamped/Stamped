@@ -21,6 +21,5 @@ import MongoUserTodosEntitiesCollection
 import MongoUserStampsCollection
 # import MongoEntitySearcher
 import MongoCollectionProxy
-import MongoSearchCacheCollection
 # import MongoSuggestedEntities
 

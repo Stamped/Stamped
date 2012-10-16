@@ -241,23 +241,9 @@ class TrackEntityProxyComparator(AEntityProxyComparator):
 
 
 class MovieEntityProxyComparator(AEntityProxyComparator):
-    ENDING_NUMBER_RE = re.compile(r'(\d+)\s*(:|$)')
-    @classmethod
-    def _endsInDifferentNumbers(cls, title1, title2):
-        title1 = convertRomanNumerals(title1)
-        title2 = convertRomanNumerals(title2)
-        match1 = cls.ENDING_NUMBER_RE.search(title1)
-        match2 = cls.ENDING_NUMBER_RE.search(title2)
-        if match1 and match2 and match1.group(1) != match2.group(1):
-            return True
-        if match1 and not match2 and int(match1.group(1)) != 1:
-            return True
-        if match2 and not match1 and int(match2.group(1)) != 1:
-            return True
-        return False
-
     @classmethod
     def compare_proxies(self, movie1, movie2):
+        has_additional_info = False
         sim_score = titleComparison(movie1.name, movie2.name, movieSimplify)        
         if logComparisonLogic:
             print '\n\nCOMPARING %s (%s:%s) WITH %s (%s:%s)\n' % (
@@ -283,19 +269,20 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
             if logComparisonLogic:
                 print 'demoting to', sim_score, 'for double tmdb IDs'
 
-        if self._endsInDifferentNumbers(movie1.name, movie2.name):
+        if endsInDifferentNumbers(movie1.name, movie2.name):
             sim_score *= 0.4
             if logComparisonLogic:
                 print 'demoting to', sim_score, 'for ending numbers'
 
         if movie1.release_date and movie2.release_date:
+            has_additional_info = True
             time_difference = abs(movie1.release_date - movie2.release_date)
             # TODO: Smooth this.
             if time_difference < timedelta(30):
                 release_date_odds = 2.5
             elif time_difference < timedelta(365):
                 release_date_odds = 1.8
-            elif time_difference < timedelta(750):
+            elif time_difference < timedelta(500):
                 release_date_odds = 1.4
             elif movie1.source != 'stamped' and movie2.source != 'stamped' and time_difference > timedelta(365*5):
                 release_date_odds = 0.3
@@ -308,6 +295,7 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
 
 
         if movie1.length and movie2.length:
+            has_additional_info = True
             movie_length_odds = None
             if movie1.length == movie2.length and movie1.length % 60 != 0:
                 movie_length_odds = 2.0
@@ -321,9 +309,25 @@ class MovieEntityProxyComparator(AEntityProxyComparator):
             if logComparisonLogic:
                 print 'changing to', sim_score, 'for movie lengths'
 
+        # We only do cast comparison if we're desparate, since it involves an additional third-party call for TMDB.
+        # Also movies in a series tend to share cast members, so this signal isn't too accurate.
+        if not has_additional_info and movie1.cast and movie2.cast:
+            has_additional_info = True
+            cast1 = set([member['name'] for member in movie1.cast])
+            cast2 = set([member['name'] for member in movie2.cast])
+            if cast1 == cast2 or cast1 > cast2 or cast2 > cast1:
+                cast_odds = 1.5
+            else:
+                common_members = cast1 & cast2
+                cast_odds = 1 + len(common_members) / min(len(cast1), len(cast2)) * 0.5
+            sim_score *= cast_odds
+            if logComparisonLogic:
+                print 'changing to', sim_score, 'for cast comparison'
+
         if logComparisonLogic:
-            print 'final score:', sim_score, '\n'
-        if sim_score > 0.99:
+            print 'final score:', sim_score
+            print 'comparison made based on more than just title:', has_additional_info, '\n'
+        if sim_score > 0.99 and has_additional_info:
             return CompareResult.match(sim_score)
         elif sim_score < 0.5:
             return CompareResult.definitely_not_match()

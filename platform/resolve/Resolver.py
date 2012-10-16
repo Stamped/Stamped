@@ -154,10 +154,10 @@ class Resolver(object):
             augmentAppDataQualityOnBasicAttributePresence(search_result_fuckfuckfuck_hack)
             applyAppTitleDataQualityTests(search_result_fuckfuckfuck_hack, query.name)
 
-        comparison_result = search_result_fuckfuckfuck_hack.dataQuality > 0.6 and \
-                            comparator.compare_proxies(query, match).is_match()
+        match_result = comparator.compare_proxies(query, match)
+        comparison_result = search_result_fuckfuckfuck_hack.dataQuality > 0.6 and match_result.is_match()
 
-        similarity = 100 if comparison_result else 0
+        similarity = 100 + match_result.score if comparison_result else 0
         similarities = {'total': similarity}
 
         result = (similarities, match)
@@ -320,9 +320,7 @@ class Resolver(object):
 
     def __finish(self, query, results, options):
         for result in results:
-            result[0]['resolved'] = False
-        if len(results) > 0 and results[0][0]['total'] > options['resolvedComparison']:
-            results[0][0]['resolved'] = True
+            result[0]['resolved'] = result[0]['total'] > options['resolvedComparison']
         return results
 
 def demo(generic_source, default_title, subcategory=None):
