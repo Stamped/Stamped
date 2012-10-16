@@ -51,7 +51,7 @@ def transformStamps(stamps):
                    exceptions=stampExceptions)
 def create(request, authUserId, data, **kwargs):
 
-    raise StampedHTTPError(410, 'deprecated', 'Service is no longer available')
+    raise StampedDeprecatedError()
 
 
     entityRequest = {
