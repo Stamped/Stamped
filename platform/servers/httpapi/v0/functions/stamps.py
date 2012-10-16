@@ -53,41 +53,46 @@ def create(request, authUserId, data, **kwargs):
 
     raise StampedDeprecatedError()
 
-
-    entityRequest = {
-        'entity_id' : data.pop('entity_id', None),
-        'search_id' : data.pop('search_id', None),
-    }
-    
-    if 'credits' in data and data['credits'] is not None:
-        data['credits'] = data['credits'].split(',')
-    
-    stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
-    stamp = HTTPStamp().importStamp(stamp)
-    
-    return transformOutput(stamp.dataExport())
+#    entityRequest = {
+#        'entity_id' : data.pop('entity_id', None),
+#        'search_id' : data.pop('search_id', None),
+#    }
+#
+#    if 'credits' in data and data['credits'] is not None:
+#        data['credits'] = data['credits'].split(',')
+#
+#    stamp = stampedAPI.addStamp(authUserId, entityRequest, data)
+#    stamp = HTTPStamp().importStamp(stamp)
+#
+#    return transformOutput(stamp.dataExport())
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPStampShare,
                    exceptions=stampShareExceptions)
 def share(request, authUserId, http_schema, data, **kwargs):
-    if http_schema.service_name is None:
-        if 'service_name' not in kwargs:
-            raise StampedMissingParametersError("Missing linked account service_name parameter")
-        else:
-            http_schema.service_name = kwargs['service_name']
 
-    stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
-    stamp = HTTPStamp().importStamp(stamp)
-    return transformOutput(stamp.dataExport())
+    raise StampedDeprecatedError()
+
+#    if http_schema.service_name is None:
+#        if 'service_name' not in kwargs:
+#            raise StampedMissingParametersError("Missing linked account service_name parameter")
+#        else:
+#            http_schema.service_name = kwargs['service_name']
+#
+#    stamp = stampedAPI.shareStamp(authUserId, http_schema.stamp_id, http_schema.service_name, http_schema.temp_image_url)
+#    stamp = HTTPStamp().importStamp(stamp)
+#    return transformOutput(stamp.dataExport())
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPStampId, exceptions=stampExceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
-    return transformOutput(True)
+
+    raise StampedDeprecatedError()
+
+#    stampedAPI.removeStamp(authUserId, http_schema.stamp_id)
+#    return transformOutput(True)
 
 
 @require_http_methods(["GET"])
@@ -242,20 +247,26 @@ def searchGuide(request, authUserId, http_schema, schema, uri, **kwargs):
 @handleHTTPRequest(http_schema=HTTPStampId,
                    exceptions=stampExceptions)
 def likesCreate(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.addLike(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importStamp(stamp)
 
-    return transformOutput(stamp.dataExport())
+    raise StampedDeprecatedError()
+
+#    stamp = stampedAPI.addLike(authUserId, http_schema.stamp_id)
+#    stamp = HTTPStamp().importStamp(stamp)
+#
+#    return transformOutput(stamp.dataExport())
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPStampId,
                    exceptions=stampExceptions)
 def likesRemove(request, authUserId, http_schema, **kwargs):
-    stamp = stampedAPI.removeLike(authUserId, http_schema.stamp_id)
-    stamp = HTTPStamp().importStamp(stamp)
-    
-    return transformOutput(stamp.dataExport())
+
+    raise StampedDeprecatedError()
+
+#    stamp = stampedAPI.removeLike(authUserId, http_schema.stamp_id)
+#    stamp = HTTPStamp().importStamp(stamp)
+#
+#    return transformOutput(stamp.dataExport())
 
 
 @require_http_methods(["GET"])
