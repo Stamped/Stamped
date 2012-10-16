@@ -39,7 +39,6 @@ from api.db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshToken
 from api.db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 from api.db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
 from api.db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
-from api.db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
 from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
 from api.db.mongodb.MongoCallbackTokenCollection  import MongoCallbackTokenCollection
