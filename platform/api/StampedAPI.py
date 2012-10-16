@@ -71,6 +71,7 @@ try:
     from libs.Twitter                    import *
     from libs.GooglePlaces               import *
     from libs.Rdio                       import *
+    from libs.Instagram             import globalInstagram
 
     from search.AutoCompleteIndex import normalizeTitle, loadIndexFromS3, emptyIndex, pushNewIndexToS3
     
@@ -115,6 +116,10 @@ class StampedAPI(AStampedAPI):
     def _rdio(self):
         return globalRdio()
 
+    @lazyProperty
+    def _instagram(self):
+        return globalInstagram()
+
     def __init__(self, desc, **kwargs):
         AStampedAPI.__init__(self, desc)
         self.lite_mode = kwargs.pop('lite_mode', False)
@@ -144,7 +149,6 @@ class StampedAPI(AStampedAPI):
         except Exception:
             logs.warning('is_prod_stack threw an exception; defaulting to True',exc_info=1)
             self.__is_prod = True
-        self.__is_prod = True
 
         self.__version = 0
         if 'version' in kwargs:
@@ -1483,7 +1487,8 @@ class StampedAPI(AStampedAPI):
                     token = acct.linked.facebook.token
                     friend_info = self._facebook.getUserInfo(token, friend_fb_id)
                     friend_linked = friendAcct.linked.facebook
-                    friend_linked.third_party_id = friend_info['third_party_id']
+                    if friend_info != False:
+                        friend_linked.third_party_id = friend_info['third_party_id']
                     self._accountDB.updateLinkedAccount(userId, friend_linked)
                 payload = {
                     'authUserId': authUserId,
@@ -2973,6 +2978,84 @@ class StampedAPI(AStampedAPI):
         stamp.contents = contents
         self._stampDB.updateStamp(stamp)
 
+    def addInstagramStampImage(self, stampId):
+        stamp = self.getStamp(stampId)
+        user = stamp.user
+        entity = self._getEntity(stamp.entity.entity_id)
+        coordinates = None
+        try:
+            coordinates = "%s,%s" % (entity.coordinates.lat, entity.coordinates.lng)
+        except AttributeError:
+            pass
+        primary_color = user.color_primary
+        secondary_color = user.color_secondary
+        user_name = user.screen_name
+        kind = entity.kind
+        types = entity.types
+        title = entity.title
+
+        subtitle = ""
+        if entity.isType('album') or entity.isType('track'):
+            if entity.artists is not None and len(entity.artists) > 0:
+                subtitle = ', '.join(unicode(i.title) for i in entity.artists)
+        elif entity.isType('tv'):
+            if entity.networks is not None and len(entity.networks) > 0:
+                subtitle = ', '.join(unicode(i.title) for i in entity.networks)
+        elif entity.isType('movie'):
+            if entity.release_date is not None:
+                subtitle = str(entity.release_date.year)
+        elif entity.isType('book') or entity.isType('app'):
+            if entity.authors is not None and len(entity.authors) > 0:
+                subtitle = ', '.join(unicode(i.title) for i in entity.authors)
+        elif entity.isType('video_game'):
+            if entity.platform:
+                subtitle = str(entity.platform)
+        elif entity.kind == 'place':
+            subtitle = entity.subtitle
+
+        entity_img_url = None
+        user_generated = False
+        contentIndex = None
+        try:
+            for i in reversed(range(len(stamp.contents))):
+                content = stamp.contents[i]
+                if content.images is not None and len(content.images) > 0 and len(content.images[0].sizes) > 0:
+                    entity_img_url = content.images[0].sizes[0].url
+                    user_generated = True
+                    contentIndex = i
+                    break
+        except (AttributeError, TypeError):
+            pass
+
+        if entity_img_url is None and stamp.entity.images is not None and len(stamp.entity.images) > 0 \
+            and len(stamp.entity.images[0].sizes) > 0:
+            entity_img_url = stamp.entity.images[0].sizes[0].url
+
+        filename = '%s-%s-%s%s' % (stampId, primary_color.upper(), secondary_color.upper(),
+                                   '' if contentIndex is None else contentIndex)
+        generate = False
+        try:
+            generate = not self._imageDB.bucket.get_key("instagram/%s.png" % filename)
+        except Exception:
+            generate = True
+            utils.printException()
+
+        cache = user.timestamp.image_cache
+        if cache is not None:
+            profile_img_url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s-96x96.jpg?%s' % \
+                              (user.screen_name, int(time.mktime(cache.timetuple())))
+        else:
+            profile_img_url = 'http://stamped.com.static.images.s3.amazonaws.com/users/default-96x96.jpg'
+        stamp_url = 'stamped.com/%s/s/%s' % (user.screen_name, stamp.stats.stamp_num)
+
+        if generate:
+            image = self._instagram.createInstagramImage(entity_img_url, stamp_url, profile_img_url, user_generated,
+                coordinates, primary_color, secondary_color, user_name, kind, types, title, subtitle)
+            self._imageDB.addImage('instagram/%s' % filename, image)
+
+        url = 'https://s3.amazonaws.com/stamped.com.static.images/instagram/%s.png' % filename
+        return url
+
 
     @API_CALL
     def shareStamp(self, authUserId, stampId, serviceName, imageUrl):
@@ -3260,6 +3343,8 @@ class StampedAPI(AStampedAPI):
                 return 'bar'
             elif 'restaurant' in types:
                 return 'restaurant'
+            elif 'cafe' in types:
+                return 'cafe'
             # place type is broken for some reason. We'll use establishment for now
             return 'establishment'
             #return 'place'
