@@ -50,6 +50,10 @@ def transformStamps(stamps):
 @handleHTTPRequest(http_schema=HTTPStampNew,
                    exceptions=stampExceptions)
 def create(request, authUserId, data, **kwargs):
+
+    raise StampedHTTPError(410, 'deprecated', 'Service is no longer available')
+
+
     entityRequest = {
         'entity_id' : data.pop('entity_id', None),
         'search_id' : data.pop('search_id', None),
