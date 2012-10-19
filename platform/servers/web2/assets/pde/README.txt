@@ -1,7 +1,8 @@
 
 TODO:
-    * integrate current list of modified variables into page URL via History.js 
-    * create gallery page containing an overview of all sketches
+    * move abstraction.js to its own repo independent of stamped
+
+TODO:
     * be able to toggle between code view and description / walkthrough.
     * pass through sketches for a round of cleanup
         * consistency across sketches
@@ -15,12 +16,9 @@ TODO:
         * restart
         * copy URL
         * copy screenshot to clipboard
-    
-    * hover over keywords => inline documentation from:
-        * http://processingjs.org/reference/textAlign_/
 
 SKETCH IDEAS:
-    * 404 page w/ rrt generating the letters!
+    * 
     * metropolis sampler visualization!
     * play around with different sampling methods
 
@@ -59,6 +57,12 @@ TODO:
 
 
 OLD:
+    * integrate current list of modified variables into page URL via History.js 
+    * create basic gallery page containing an overview of all sketches
+    * 404 page w/ rrt generating the letters
+    * click on over keywords => inline documentation from:
+        * http://processingjs.org/reference/textAlign_/
+
     /** switch **/
         /** case test0 }
             { break **/

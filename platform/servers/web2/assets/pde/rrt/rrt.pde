@@ -15,6 +15,7 @@
 static int   NUM_VERTICES = /** int   [ 1, 128 ] **/ 1    /** endint   **/;
 static float CURVATURE    = /** float [ 0, 10  ] **/ 2.0  /** endfloat **/;
 static float INV_DISTANCE = /** float [ 5, 200 ] **/ 40.0 /** endfloat **/;
+static int   SAMPLER      = /** int   [ 0, 2 ]   **/ 0    /** endint   **/;
 
 float _distance;
 RRTree _tree;
@@ -54,23 +55,12 @@ class RRTree {
         _vertices = new ArrayList(num_vertices);
         
         for (int i = 0; i < num_vertices; i++) {
-            _vertices.add(new PVector(random(0, width - 1), random(0, height - 1)));
-        }
-    }
-    
-    color random_color(int a) {
-        if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.0 /** endfloat **/) {
-            // select a random color from within a predefined color palette
-            int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
-            
-            return color(PALETTE[offset],  PALETTE[offset + 1], PALETTE[offset + 2], a);
-        } else {
-            return /** color **/ color(0, 0, 0, a) /** endcolor **/;
+            _vertices.add(random_point());
         }
     }
     
     boolean update() {
-        PVector rand = new PVector(random(0, width - 1), random(0, height - 1));
+        PVector rand = random_point();
         float min_dist = 999999;
         int min_i = -1;
         
@@ -136,10 +126,31 @@ class RRTree {
             alpha1   = temp;
         }
         
-        fill(random_color(int(random(alpha0, alpha1))));
+        fill(sample_color(int(random(alpha0, alpha1))));
         ellipse(newV.x, newV.y, distance, distance);
         
         return true;
+    }
+    
+    color random_color(int a) {
+        if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.0 /** endfloat **/) {
+            // select a random color from within a predefined color palette
+            int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
+            
+            return color(PALETTE[offset],  PALETTE[offset + 1], PALETTE[offset + 2], a);
+        } else {
+            return /** color **/ color(0, 0, 0, a) /** endcolor **/;
+        }
+    }
+    
+    PVector random_point() { 
+        if (SAMPLER == 0) { // uniform sampler
+            return new PVector(random(0, width - 1), random(0, height - 1));
+        } else if (SAMPLER == 1) { // normal distribution
+            
+            // TODO
+            //return new PVector(random(0, width - 1), random(0, height - 1));
+        }
     }
 }
 

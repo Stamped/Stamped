@@ -12,7 +12,9 @@ from django.conf.urls.defaults  import patterns, include, url
 from django.core.exceptions     import ImproperlyConfigured
 
 urlpatterns = patterns('',
-    url(r'^test$',                                      'core.views.test_view'), 
+    url(r'^test$',                                      'travis.views.test_view'), 
+    url(r'^travis-blog$',                               'travis.views.travis_blog'), 
+    
     
     # --------------------------------------------------------------------------
     # ------------------------------ MOBILE ------------------------------------

@@ -4,7 +4,7 @@
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing
  * 
- * Petri dish simulation with comprised of several types of hierarchical organisms.
+ * Petri dish simulation comprised of several types of hierarchical organisms.
  */
 
 static int NUM_ORGANISMS        = /** int [ 1, 100 ]  **/ 15  /** endint **/;
