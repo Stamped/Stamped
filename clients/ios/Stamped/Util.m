@@ -29,6 +29,8 @@
 #import "STRootViewController.h"
 #import "STStampedAPI.h"
 #import "STNavigationBar.h"
+#import <Twitter/Twitter.h>
+#import "STTwitter.h"
 
 NSString* const kTwitterConsumerKey = @"kn1DLi7xqC6mb5PPwyXw";
 NSString* const kTwitterConsumerSecret = @"AdfyB0oMQqdImMYUif0jGdvJ8nUh6bR1ZKopbwiCmyU";
@@ -811,7 +813,7 @@ static STPopUpView* volatile _currentPopUp = nil;
 
 + (void)reloadStampedData {
     if ([NSThread isMainThread]) {
-        UINavigationController* controller = [Util sharedNavigationController];
+        UINavigationController* controller = [Util currentNavigationController];
         id viewController = controller.topViewController;
         if ([viewController respondsToSelector:@selector(reloadStampedData)]) {
             [viewController reloadStampedData];
@@ -1105,7 +1107,7 @@ static STPopUpView* volatile _currentPopUp = nil;
 
 + (CGRect)navigatedViewFrame {
     CGRect almostFullscreen = [Util fullscreenFrameAdjustedForStatusBar];
-    CGFloat height = [Util sharedNavigationController].navigationBar.frame.size.height;
+    CGFloat height = [Util currentNavigationController].navigationBar.frame.size.height;
     almostFullscreen.size.height -= height;
     almostFullscreen.origin.y += height;
     return almostFullscreen;
@@ -1209,7 +1211,7 @@ static STPopUpView* volatile _currentPopUp = nil;
 }
 
 + (void)setTitle:(NSString*)title forController:(UIViewController*)controller {
-    STNavigationBar* bar = (id)[Util sharedNavigationController].navigationBar;
+    STNavigationBar* bar = (id)[Util currentNavigationController].navigationBar;
     bar.title = title;
 }
 
@@ -1296,7 +1298,7 @@ static STPopUpView* volatile _currentPopUp = nil;
 }
 
 + (void)_configurationButtonClicked:(id)notImportant {
-    [[Util sharedNavigationController] pushViewController:[STConfiguration sharedInstance].controller animated:YES];
+    [Util pushController:[STConfiguration sharedInstance].controller modal:NO animated:YES];
 }
 
 + (void)addConfigurationButtonToController:(UIViewController*)controller {
@@ -1605,7 +1607,7 @@ static STPopUpView* volatile _currentPopUp = nil;
     }
     else if ([string isEqualToString:@"establishment"]) {
         noun = @"place";
-        article = @"an";
+        article = @"a";
     }
     else if ([string isEqualToString:@"other"]) {
         noun = @"thing";
@@ -1768,8 +1770,139 @@ static STPopUpView* volatile _currentPopUp = nil;
     return _currentPopUp != nil;
 }
 
+
++ (void)_showTweetComposerFromController:(UIViewController*)controller withInitialText:(NSString*)text {
+    TWTweetComposeViewController* twitter = [[[TWTweetComposeViewController alloc] init] autorelease];
+    [twitter setInitialText:text];
+    
+    if ([TWTweetComposeViewController canSendTweet]) {
+        [controller presentViewController:twitter animated:YES completion:nil];
+    }
+    
+    twitter.completionHandler = ^(TWTweetComposeViewControllerResult result) {
+        [controller dismissModalViewControllerAnimated:YES];
+    };
+}
+
 + (void)showTweetComposerFromController:(UIViewController*)controller withInitialText:(NSString*)text {
     
+    if (![[STTwitter sharedInstance] isSessionValid]) {
+        [[STTwitter sharedInstance] fullTwitterAuthWithAddAccount:YES andCallback:^(BOOL success, NSError *error, STCancellation *cancellation) {
+            if (success) {
+                [self _showTweetComposerFromController:controller withInitialText:text];
+            }
+            else {
+                [Util warnWithAPIError:error andBlock:nil];
+            }
+        }];
+    }
+    else {
+        [self _showTweetComposerFromController:controller withInitialText:text];
+    }
+}
+
+
++ (NSString*)_shareTaglineWithLimit:(NSInteger)limit andStamp:(id<STStamp>)stamp {
+    NSString* subcategory = [Util userStringWithBackendType:stamp.entity.subcategory andArticle:NO];
+    NSString* subcategoryPart = @" ";
+    if (subcategory && ![subcategory isEqualToString:@""]) {
+        subcategoryPart = [NSString stringWithFormat:@" the %@, ", subcategory];
+    }
+    NSString* base = [NSString stringWithFormat:@"I just stamped%@", subcategoryPart];
+    NSInteger titleLimit = limit - base.length;
+    NSString* title = stamp.entity.title;
+    NSString* truncTitle = title;
+    if (titleLimit < title.length) {
+        truncTitle = [title substringToIndex:titleLimit - 3];
+        if (truncTitle.length > 1) {
+            if ([[truncTitle substringWithRange:NSMakeRange(truncTitle.length-2, 1)] isEqualToString:@" "]) {
+                truncTitle = [truncTitle substringToIndex:truncTitle.length - 2];
+            }
+        }
+        truncTitle = [NSString stringWithFormat:@"%@...", truncTitle];
+    }
+    return [NSString stringWithFormat:@"%@%@", base, truncTitle];
+}
+
++ (void)shareToTwitterFromController:(UIViewController*)controller withStamp:(id<STStamp>)stamp {
+    NSString* suffix = [NSString stringWithFormat:@" (via @stampedapp) %@", stamp.URL];
+    NSInteger taglineLimit = 142 - suffix.length;
+    NSString* tagline = [self _shareTaglineWithLimit:taglineLimit andStamp:stamp];
+    NSString* text = [NSString stringWithFormat:@"%@%@", tagline, suffix];
+    [self showTweetComposerFromController:controller withInitialText:text];
+}
+
++ (MFMailComposeViewController*)mailComposeViewControllerForStamp:(id<STStamp>)stamp {
+    
+    MFMailComposeViewController* vc = [[[MFMailComposeViewController alloc] init] autorelease];
+    NSString* body = @""
+    @"<table>"
+    @"<tr>"
+    @"<td>"
+    @"<img src='%@'/>"
+    @"</td>"
+    @"<td>"
+    @"I just stamped %@ <b>%@</b> on the iPhone app Stamped."
+    @"</td>"
+    @"</tr>"
+    @"</table>"
+    @"Take a look: <a href='%@'>%@</a>.";
+    NSString* kindString = @"";
+    NSString* subcategory = [Util userStringWithBackendType:stamp.entity.subcategory andArticle:NO];
+    if (subcategory && ![subcategory isEqualToString:@""]) {
+        kindString = [NSString stringWithFormat:@"the %@,", subcategory];
+    }
+    body = [NSString stringWithFormat:body,
+            [Util profileImageURLForUser:stamp.user withSize:STProfileImageSize96],
+            kindString,
+            stamp.entity.title,
+            stamp.URL,
+            stamp.URL];
+    [vc setMessageBody:body
+                isHTML:YES];
+    [vc setSubject:[NSString stringWithFormat:@"%@ sent you a stamp.", stamp.user.name]];
+    return vc;
+}
+
+
++ (void)shareToInstagramFromController:(UIViewController*)controller withImage:(UIImage*)image {
+    NSLog(@"image:%@", image);
+    // URL TO THE IMAGE FOR THE DOCUMENT INTERACTION
+    NSArray* paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString* cacheString = [paths objectAtIndex:0];
+    NSURL* cacheDir = [NSURL fileURLWithPath:cacheString];
+    NSURL* igImageHookFile = [cacheDir URLByAppendingPathComponent:@"instagram.ig"];
+    [[NSFileManager defaultManager] removeItemAtURL:igImageHookFile error:nil];
+    NSData* data = UIImageJPEGRepresentation(image, 1.0);
+    BOOL success = [data writeToURL:igImageHookFile atomically:NO];
+    if (success) {
+    UIDocumentInteractionController *interactionController = [[UIDocumentInteractionController interactionControllerWithURL:igImageHookFile] retain];
+    interactionController.UTI = @"com.instagram.photo";
+    interactionController.delegate = self;
+//    if (blurb) {
+//        interactionController.annotation = [NSDictionary dictionaryWithObject:blurb forKey:@"InstagramCaption"];
+//    }
+    [interactionController presentOpenInMenuFromRect:controller.view.frame inView:controller.view animated:YES];
+    }
+    else {
+        [Util warnWithMessage:[NSString stringWithFormat:@"image saving failed for %@, %@, %@", igImageHookFile, [Util cacheDirectory], image] andBlock:nil];
+    }
+}
+
+
++(void)documentInteractionController:(UIDocumentInteractionController *)controller 
+       willBeginSendingToApplication:(NSString *)application {
+    NSLog(@"will start sending to %@", application);
+}
+
++(void)documentInteractionController:(UIDocumentInteractionController *)controller 
+          didEndSendingToApplication:(NSString *)application {
+    NSLog(@"did end sending to %@", application);
+}
+
++(void)documentInteractionControllerDidDismissOpenInMenu:(UIDocumentInteractionController *)controller {
+    NSLog(@"did dismiss");
+    //[controller autorelease];
 }
 
 @end

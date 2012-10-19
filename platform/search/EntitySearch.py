@@ -314,6 +314,7 @@ class EntitySearch(object):
         entityIdsToNewClusterIdxs = {}
         entitiesAndClusters = []
         for cluster in clusters:
+            # TODO: make use of nemesis ids here.
             entityId = self.__getEntityIdForCluster(cluster)
             if not entityId:
                 # One more layer of filtering here -- clusters that don't overall hit our quality minimum get
@@ -411,7 +412,8 @@ def main():
         subtitle = result.subtitle
         if isinstance(result, PlaceEntity) and result.formatAddress():
             subtitle = result.formatAddress()
-        print "SUBTITLE", format_for_print(subtitle)
+        print "SUBTITLE:", format_for_print(subtitle)
+        print "SEARCH ID:", result.search_id
         print result
 
     from libs.CountedFunction import printFunctionCounts

@@ -31,7 +31,6 @@ from api.db.mongodb.MongoUserTodosEntitiesCollection import MongoUserTodosEntiti
 from api.db.mongodb.MongoActivityCollection         import MongoActivityCollection
 from api.db.mongodb.MongoInvitationCollection       import MongoInvitationCollection
 from api.db.mongodb.MongoMenuCollection             import MongoMenuCollection
-from api.db.mongodb.MongoSearchCacheCollection      import MongoSearchCacheCollection
 from api.db.mongodb.MongoLogsCollection             import MongoLogsCollection
 from api.db.mongodb.MongoStatsCollection            import MongoStatsCollection
 from api.db.mongodb.MongoGuideCollection            import MongoGuideCollection
@@ -40,7 +39,6 @@ from api.db.mongodb.MongoAuthRefreshTokenCollection import MongoAuthRefreshToken
 from api.db.mongodb.MongoAuthEmailAlertsCollection  import MongoAuthEmailAlertsCollection
 from api.db.mongodb.MongoClientLogsCollection       import MongoClientLogsCollection
 from api.db.mongodb.MongoSuggestedEntities          import MongoSuggestedEntities
-from api.db.mongodb.MongoSearchEntityCollection     import MongoSearchEntityCollection
 
 from api.db.mongodb.MongoAsyncTasksCollection       import MongoAsyncTasksCollection
 from api.db.mongodb.MongoCallbackTokenCollection  import MongoCallbackTokenCollection
@@ -130,14 +128,6 @@ class MongoStampedAPI(StampedAPI):
     def _menuDB(self):
         return MongoMenuCollection()
 
-    @lazyProperty
-    def _searchEntityDB(self):
-        return MongoSearchEntityCollection()
-    
-    @lazyProperty
-    def _searchCacheDB(self):
-        return MongoSearchCacheCollection()
-    
     @lazyProperty
     def _notificationHandler(self):
         return StampedNotificationHandler()

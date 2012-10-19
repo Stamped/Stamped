@@ -16,35 +16,6 @@
                                       '---'             `---`    `----'    '---'         
 
 
- @@@@@@   @@@@@@@   @@@@@@   @@@@@@@@@@   @@@@@@@   @@@@@@@@  @@@@@@@   
-@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@@@@@  @@@@@@@@  @@@@@@@@  @@@@@@@@  
-!@@         @@!    @@!  @@@  @@! @@! @@!  @@!  @@@  @@!       @@!  @@@  
-!@!         !@!    !@!  @!@  !@! !@! !@!  !@!  @!@  !@!       !@!  @!@  
-!!@@!!      @!!    @!@!@!@!  @!! !!@ @!@  @!@@!@!   @!!!:!    @!@  !@!  
- !!@!!!     !!!    !!!@!!!!  !@!   ! !@!  !!@!!!    !!!!!:    !@!  !!!  
-     !:!    !!:    !!:  !!!  !!:     !!:  !!:       !!:       !!:  !!!  
-    !:!     :!:    :!:  !:!  :!:     :!:  :!:       :!:       :!:  !:!  
-:::: ::      ::    ::   :::  :::     ::    ::        :: ::::   :::: ::  
-:: : :       :      :   : :   :      :     :        : :: ::   :: :  :   
-
-
-  ___   _____    _    _   _  ____   ___   ___  
- (  _( )__ __(  )_\  ) \_/ ()  _)\ ) __( \   \ 
- _) \    | |   /( )\ |  _  || '__/ | _)  | ) ( 
-)____)   )_(  )_/ \_()_( )_()_(    )___( /___/ 
-
-
- ____ ____ ____ ____ ____ ____ ____ 
-||S |||T |||A |||M |||P |||E |||D ||
-||__|||__|||__|||__|||__|||__|||__||
-|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
-
-
-
-* Mobile sDetail issues: 
-    * 2x assets
-    * fix action links
-
 TODO:
     * find better way of invoking lessc without creating jenky temporary files
     * better versioning at directory level
@@ -53,8 +24,6 @@ TODO:
     * cleanup JS to be OO and better organized
     * remove unnecessary dependencies:
         * modernizr
-        * jQuery imagesLoaded plugin
-        * DONE - rdio jquery library
     * reuse backbone for client-side updating logic
     
     * HIGH PRIORITY:
@@ -296,6 +265,10 @@ OLD:
     * DONE - Broken profile page when coming in after closing sDetail
     * DONE - Animation looks off now on all sDetail pages
     * DONE - Mobile 'change notifications' page looks broken
+    * DONE - Mobile sDetail issues: 
+        * DONE - 2x assets
+        * DONE - fix action links
+
 
 ChangeList 6/8/2012:
 -------------------
@@ -344,4 +317,30 @@ ChangeList 6/22/2012:
         * Opening sDetail and closing now properly remembers the window's scroll offset
 
 rickroll: http://www.youtube.com/watch?v=ZL_Q4jBTh_8
+
+
+
+ @@@@@@   @@@@@@@   @@@@@@   @@@@@@@@@@   @@@@@@@   @@@@@@@@  @@@@@@@   
+@@@@@@@   @@@@@@@  @@@@@@@@  @@@@@@@@@@@  @@@@@@@@  @@@@@@@@  @@@@@@@@  
+!@@         @@!    @@!  @@@  @@! @@! @@!  @@!  @@@  @@!       @@!  @@@  
+!@!         !@!    !@!  @!@  !@! !@! !@!  !@!  @!@  !@!       !@!  @!@  
+!!@@!!      @!!    @!@!@!@!  @!! !!@ @!@  @!@@!@!   @!!!:!    @!@  !@!  
+ !!@!!!     !!!    !!!@!!!!  !@!   ! !@!  !!@!!!    !!!!!:    !@!  !!!  
+     !:!    !!:    !!:  !!!  !!:     !!:  !!:       !!:       !!:  !!!  
+    !:!     :!:    :!:  !:!  :!:     :!:  :!:       :!:       :!:  !:!  
+:::: ::      ::    ::   :::  :::     ::    ::        :: ::::   :::: ::  
+:: : :       :      :   : :   :      :     :        : :: ::   :: :  :   
+
+
+  ___   _____    _    _   _  ____   ___   ___  
+ (  _( )__ __(  )_\  ) \_/ ()  _)\ ) __( \   \ 
+ _) \    | |   /( )\ |  _  || '__/ | _)  | ) ( 
+)____)   )_(  )_/ \_()_( )_()_(    )___( /___/ 
+
+
+ ____ ____ ____ ____ ____ ____ ____ 
+||S |||T |||A |||M |||P |||E |||D ||
+||__|||__|||__|||__|||__|||__|||__||
+|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
+
 

@@ -25,35 +25,60 @@
 #import "QuartzUtils.h"
 #import "STNavigationItem.h"
 #import "STTwitter.h"
+#import "STStampedByView.h"
+#import "STTextChunk.h"
+#import "STChunksView.h"
+#import "UIFont+Stamped.h"
+#import "UIColor+Stamped.h"
+#import <MessageUI/MFMailComposeViewController.h>
 
-@interface PostStampViewController ()
+@interface PostStampFooterView : UIView
+
+- (id)initWithStamp:(id<STStamp>)stamp stampedBy:(id<STStampedBy>)stampedBy andController:(PostStampViewController*)controller;
+
+@property (nonatomic, readonly, retain) id<STStamp> stamp;
+@property (nonatomic, readonly, retain) id<STStampedBy> stampedBy;
+
+@end
+
+@interface PostStampViewController () <MFMailComposeViewControllerDelegate>
+
 @property(nonatomic,strong) PostStampHeaderView *headerView;
 @property(nonatomic,strong) PostStampGraphView *graphView;
-@property(nonatomic,strong) PostStampedByView *stampedByView;
+@property(nonatomic,strong) PostStampedByView *oldStampedByView;
 @property(nonatomic,strong) id<STStamp> stamp;
 @property(nonatomic,strong) id<STUserDetail> user;
-@property(nonatomic,strong) id<STStampedBy> stampedBy;
+@property(nonatomic,strong) id<STStampedBy> oldStampedBy;
 @property(nonatomic,strong) NSArray *badges;
 @property(nonatomic,assign) BOOL firstBadge;
 
 @property (nonatomic, readwrite, assign) BOOL animatedAlready;
+
+@property (nonatomic, readonly, retain) id<STStampedBy> stampedBy;
+@property (nonatomic, readwrite, retain) STCancellation* stampedByCancellation;
+@property (nonatomic, readonly, retain) PostStampFooterView* footerView;
+
 @end
 
 @implementation PostStampViewController
+
 @synthesize graphView=_graphView;
 @synthesize headerView=_headerView;
 @synthesize stamp=_stamp;
 @synthesize user=_user;
-@synthesize stampedByView=_stampedByView;
+@synthesize oldStampedByView=_oldStampedByView;
 @synthesize badges=_badges;
 @synthesize firstBadge;
-@synthesize stampedBy = _stampedBy;
+@synthesize oldStampedBy = _oldStampedBy;
 @synthesize animatedAlready = _animatedAlready;
+
+@synthesize stampedBy = _stampedBy;
+@synthesize stampedByCancellation = _stampedByCancellation;
+@synthesize footerView = _footerView;
 
 
 - (id)initWithStamp:(id<STStamp>)stamp {
     if ((self = [super initWithStyle:UITableViewStylePlain])) {
-//        self.title = NSLocalizedString(@"Your Stamp", @"Your Stamp");
         _stamp = [stamp retain];
         
         if (_stamp.badges.count) {
@@ -82,12 +107,17 @@
 }
 
 - (void)dealloc {
+    [self.stampedByCancellation cancel];
+    self.stampedByCancellation = nil;
+    [_stampedBy release];
+    [_footerView release];
+    
     self.headerView = nil;
     self.graphView = nil;
     self.user = nil;
     self.stamp = nil;
-    self.stampedBy = nil;
-    self.stampedByView = nil;
+    self.oldStampedBy = nil;
+    self.oldStampedByView = nil;
     self.badges = nil;
     [super dealloc];
 }
@@ -117,12 +147,25 @@
         [view release];
     }
     
-    if (!_stampedByView) {
-        PostStampedByView *view = [[PostStampedByView alloc] initWithFrame:CGRectMake(0.0f, 20.0f, self.tableView.bounds.size.width, 85.0f)];
-        view.delegate = (id<PostStampedByViewDelegate>)self;
-        self.stampedByView = view;
-        [view release];        
-    }
+    //    if (!_footerView && !self.stampedByCancellation) {
+    //        self.stampedByCancellation = [[STStampedAPI sharedInstance] stampedByForEntityID:self.stamp.entity.entityID 
+    //                                                                             andCallback:^(id<STStampedBy> stampedBy, NSError *error, STCancellation *cancellation) {
+    //                                                                                 _stampedBy = [stampedBy retain];
+    //                                                                                 if (stampedBy) {
+    //                                                                                     [self createFooter];
+    //                                                                                 }
+    //                                                                                 else {
+    //                                                                                     [Util warnWithAPIError:error andBlock:nil];
+    //                                                                                 }
+    //                                                                             }];
+    //    }
+    //    
+    //    if (!_oldStampedByView) {
+    //        PostStampedByView *view = [[PostStampedByView alloc] init];
+    //        view.delegate = (id<PostStampedByViewDelegate>)self;
+    //        self.oldStampedByView = view;
+    //        [view release];        
+    //    }
     
     
     STNavigationItem *button = [[STNavigationItem alloc] initWithTitle:NSLocalizedString(@"Done", @"Done") style:UIBarButtonItemStyleDone target:self action:@selector(done:)];
@@ -132,9 +175,18 @@
     
 }
 
+- (void)createFooter {
+    _footerView = [[PostStampFooterView alloc] initWithStamp:self.stamp stampedBy:self.stampedBy andController:self];
+    self.tableView.tableFooterView = _footerView;
+}
+
 - (void)viewDidUnload {
-    self.stampedByView = nil;
+    self.oldStampedByView = nil;
     self.graphView = nil;
+    [_footerView release];
+    _footerView = nil;
+    [self.stampedByCancellation cancel];
+    self.stampedByCancellation = nil;
     [super viewDidUnload];
 }
 
@@ -172,7 +224,7 @@
 #pragma mark - Actions
 
 - (void)done:(id)sender {
-    [[Util sharedNavigationController] popToRootViewControllerAnimated:YES];
+    [[Util currentNavigationController] popToRootViewControllerAnimated:YES];
     
 }
 
@@ -212,7 +264,7 @@
     
     NSInteger count = self.badges.count + 1;
     
-    if (self.stampedBy) {
+    if (self.oldStampedBy) {
         count+=1;
     }
     
@@ -276,7 +328,7 @@
     }
     
     [cell showShadow:(indexPath.row==1)];
-    [cell setupWithStampedBy:self.stampedBy andStamp:self.stamp];
+    [cell setupWithStampedBy:self.oldStampedBy andStamp:self.stamp];
     
     return cell;
     
@@ -391,32 +443,152 @@
         
         if (stampedBy) {
             
-            self.stampedBy = stampedBy;
-            
-            if (_stampedByView && _stampedBy.everyone.count.integerValue > 0) {
-                UIView *container = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.tableView.bounds.size.width, 110.0f)];
-                container.backgroundColor = [UIColor clearColor];
-                self.tableView.tableFooterView = container;
-                [container addSubview:self.stampedByView];
-                [container release];
-                self.stampedByView.stampedBy = stampedBy;
-            } 
-            
+            self.oldStampedBy = stampedBy;
+            _stampedBy = [stampedBy retain];
             [self.tableView beginUpdates];
             [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:[NSIndexPath indexPathForRow:self.badges.count+1 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
             [self resetContainer];
             [self.tableView endUpdates];
             [self resetContainer];
+            [Util executeWithDelay:.5 onMainThread:^{
+                [self createFooter]; 
+            }];
             
-            self.stampedBy = stampedBy;
+            self.oldStampedBy = stampedBy;
             
         }
     }];
     
 }
 
+- (void)shareToInstagram:(id)notImportant {
+    [Util shareToInstagramFromController:self withImage:[UIImage imageNamed:@"instagram_sample.jpeg"]];
+}
+
+- (void)shareToTwitter:(id)notImportant {
+    [Util shareToTwitterFromController:self withStamp:self.stamp];
+}
+
+- (void)shareToFacebook:(id)notImportant {
+    
+}
+
+- (void)shareToEmail:(id)notImportant {
+    MFMailComposeViewController* vc = [Util mailComposeViewControllerForStamp:self.stamp];
+    vc.mailComposeDelegate = self;
+    [self presentModalViewController:vc animated:YES];
+}
 
 
+- (void)mailComposeController:(MFMailComposeViewController*)controller 
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError*)error {
+    if (error) {
+        [Util warnWithMessage:@"Couldn't send email" andBlock:^{
+            [self dismissModalViewControllerAnimated:YES];
+        }];
+    }
+    else {
+        [self dismissModalViewControllerAnimated:YES];
+    }
+}
 
 
 @end
+
+
+@implementation PostStampFooterView
+
+@synthesize stamp = _stamp;
+@synthesize stampedBy = _stampedBy;
+
+- (id)initWithStamp:(id<STStamp>)stamp stampedBy:(id<STStampedBy>)stampedBy andController:(PostStampViewController*)controller {
+    self = [super initWithFrame:CGRectMake(0, 0, 320, 10)];
+    if (self) {
+        _stamp = [stamp retain];
+        _stampedBy = [stampedBy retain];
+        
+        NSMutableArray* chunks = [NSMutableArray array];
+        STChunk* shareStart = [STChunk chunkWithLineHeight:16 andWidth:290];
+        STTextChunk* sharedHeader = [[[STTextChunk alloc] initWithPrev:shareStart
+                                                                  text:@"Share your stamp"
+                                                                  font:[UIFont stampedBoldFontWithSize:12]
+                                                                 color:[UIColor stampedGrayColor]] autorelease];
+        STChunk* sharedBodyStart = [STChunk newlineChunkWithPrev:shareStart];
+        STTextChunk* sharedBody = [[[STTextChunk alloc] initWithPrev:sharedBodyStart
+                                                                text:@"There's several unique ways to do so."
+                                                                font:[UIFont stampedFontWithSize:12]
+                                                               color:[UIColor stampedGrayColor]] autorelease];
+        [chunks addObject:sharedHeader];
+        [chunks addObject:sharedBody];
+        STChunksView* chunksView = [[[STChunksView alloc] initWithChunks:chunks] autorelease];
+        chunksView.frame = [Util centeredAndBounded:chunksView.frame.size inFrame:CGRectMake(0, 0, self.frame.size.width, chunksView.frame.size.height)];
+        [Util appendView:chunksView toParentView:self];
+        [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 5)];
+        CGFloat xOffset = 15;
+        CGFloat yOffset = self.frame.size.height;
+        NSMutableArray* services = [NSMutableArray arrayWithObjects:
+                                    @"instagram",
+                                    @"twitter",
+                                    @"facebook",
+                                    @"email",
+                                    nil];
+        for (NSString* service in services) {
+            SEL action = nil;
+            if ([service isEqualToString:@"instagram"]) {
+                action = @selector(shareToInstagram:);
+            }
+            else if ([service isEqualToString:@"twitter"]) {
+                if ([TWTweetComposeViewController canSendTweet]) {
+                    action = @selector(shareToTwitter:);
+                }
+            }
+            else if ([service isEqualToString:@"facebook"]) {
+                action = @selector(shareToFacebook:);
+            }
+            else if ([service isEqualToString:@"email"]) {
+                action = @selector(shareToEmail:);
+            }
+            if (action) {
+                UIButton* shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
+                UIImage* shareImage = [UIImage imageNamed:[NSString stringWithFormat:@"post_stamp_share_%@", service]];
+                [shareButton setImage:shareImage forState:UIControlStateNormal];
+                [shareButton addTarget:controller action:action forControlEvents:UIControlEventTouchUpInside];
+                shareButton.frame = CGRectMake(xOffset, yOffset, shareImage.size.width, shareImage.size.height);
+                [self addSubview:shareButton];
+                xOffset = CGRectGetMaxX(shareButton.frame) + 7;
+            }
+        }
+        
+        [Util reframeView:self withDeltas:CGRectMake(0, 0, 0, 50)];
+        
+        STStampedByView* stampedByView = [[[STStampedByView alloc] initWithStampedBy:stampedBy
+                                                                           blacklist:[NSSet setWithObject:stamp.user.userID]
+                                                                            entityID:stamp.entity.entityID
+                                                                      includeFriends:NO
+                                                                         andDelegate:nil] autorelease];
+        //        [self addSubview:stampedByView];
+        [Util appendView:stampedByView toParentView:self];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_stamp release];
+    [_stampedBy release];
+    [super dealloc];
+}
+
+@end
+
+
+
+
+
+
+
+
+
+
+

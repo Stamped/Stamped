@@ -17,7 +17,7 @@ TODO:
 * prune national outliers when location hinting is turned on
     * e.g., maybe just prune results more than N threshold miles away
 * create test html / js web client
-    * create stamped.js client library :)
+    * create stamped.js client library
 * refresh autocomplete
 * autocomplete cron job
 * suggested users => generic news items

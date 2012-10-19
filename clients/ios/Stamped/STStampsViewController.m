@@ -7,7 +7,6 @@
 //
 
 #import "STStampsViewController.h"
-#import "STToolbarView.h"
 #import "STUserStampsSliceList.h"
 #import "STGenericTableDelegate.h"
 #import "STYouStampsList.h"

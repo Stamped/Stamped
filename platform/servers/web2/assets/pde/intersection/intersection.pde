@@ -4,7 +4,7 @@
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing.js
  * 
- * Original concept from Casey Reas (http://reas.com/)
+ * Original concept by Casey Reas (http://reas.com/)
  * 
  * A surface filled with 100 medium to small sized circles.
  * Each circle has a different size and direction, but moves 
@@ -16,77 +16,68 @@
  * @see http://www.complexification.net/gallery/machines/interAggregate/index.php
  */
 
-static int SIMULATION_WIDTH         = 640;
-static int SIMULATION_HEIGHT        = 480;
+static int VARIATION            = /** int [ 0, 2 ]    **/ 0    /** endint     **/;
+static int NUM_CIRCLES          = /** int [ 1, 200 ]  **/ 100  /** endint     **/;
+static int CIRCLE_MOVEMENT      = /** int [ 0, 2 ]    **/ 0    /** endint     **/;
 
-static int MIN_CIRCLE_RADIUS        = 10;
-static int MAX_CIRCLE_RADIUS        = 70;
-static int DEFAULT_CIRCLE_RADIUS    = 30;
+static int CIRCLE_RADIUS        = /** int [ 10, 70 ]  **/ 30   /** endint     **/;
+static int MIN_CIRCLE_RADIUS    = /** int [ 0, 70 ]   **/ 10   /** endint     **/;
+static int MAX_CIRCLE_RADIUS    = /** int [ 10, 140 ] **/ 70   /** endint     **/;
+static boolean RANDOM_RADIUS    = /** boolean         **/ true /** endboolean **/;
 
 Circle[] _circles;
 
-boolean _randomRadius;
-
-int _noCircles;
-int _variation;
-int _movement;
-int _radius;
-
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(32);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
+    frameRate(/** int [ 1, 60 ] **/ 30 /** endint **/);
     loop();
     
     reset();
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     
-    _noCircles = 100;
-    _radius    = DEFAULT_CIRCLE_RADIUS;
-    _randomRadius = true;
-    _variation = 0;
-    _movement  = 0;
-    
-    Circle[] circles = new Circle[_noCircles];
+    Circle[] circles = new Circle[NUM_CIRCLES];
     
     for(int i = 0; i < circles.length; i++) {
-        int x = int(random(0, width - 1));
+        int x = int(random(0, width  - 1));
         int y = int(random(0, height - 1));
-        int radius = _radius;
+        int radius = CIRCLE_RADIUS;
         
-        if (_randomRadius) {
+        if (RANDOM_RADIUS) {
             radius = int(random(MIN_CIRCLE_RADIUS, MAX_CIRCLE_RADIUS));
         }
         
-        int offset = 3 * int(random(0, (INTERSECTION_PALETTE.length - 1) / 3));
-        color c = color(INTERSECTION_PALETTE[offset], INTERSECTION_PALETTE[offset + 1], INTERSECTION_PALETTE[offset + 2], 255);
+        int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
+        color c = color(PALETTE[offset], 
+                        PALETTE[offset + 1], 
+                        PALETTE[offset + 2], 
+                        /** int [ 0, 255 ] **/ 48 /** endint **/);
         
-        circles[i] = new Circle(x, y, radius, c, _movement);
+        circles[i] = new Circle(x, y, radius, c);
     }
     
     _circles = circles;
 }
 
 void draw() {
-    if (_variation == 2) {
-        background(#FFFFFF);
+    if (VARIATION == 2) {
+        background(/** color **/ #FFFFFF /** endcolor **/);
     }
     
     update();
     
-    if (_variation == 2) {
-        
-        stroke(#666666);
-        fill(color(0, 0, 0, 24));
+    if (VARIATION == 2) {
+        stroke(/** color **/ #666666 /** endcolor **/);
+        fill  (/** color **/ color(0, 0, 0, 24) /** endcolor **/);
         
         for(int i = 0; i < _circles.length; i++) {
             _circles[i].draw();
         }
         
-        fill(#000000);
-        stroke(#000000);
+        stroke(/** color **/ #000000 /** endcolor **/);
+        fill  (/** color **/ #000000 /** endcolor **/);
         
         int size = 4;
         
@@ -98,12 +89,16 @@ void draw() {
                 if (intersections != null) {
                     // draw a line connecting the two points of intersection
                     if (intersections.length == 2) {
-                        line(intersections[0].x, intersections[0].y, intersections[1].x, intersections[1].y);
+                        line(intersections[0].x, 
+                             intersections[0].y, 
+                             intersections[1].x, 
+                             intersections[1].y);
                     }
                     
                     // draw the actual point(s) of intersection
                     for(int a = 0; a < intersections.length; a++) {
-                        ellipse(intersections[0].x, intersections[0].y, size, size);
+                        ellipse(intersections[0].x, intersections[0].y, 
+                                size, size);
                     }
                 }
             }
@@ -116,54 +111,61 @@ void update() {
         _circles[i].update();
     }
     
-    if (_variation != 2) {
-        // O(N^2)  TODO:  Optimize to O(NlogN)
+    if (VARIATION != 2) {
+        // O(N^2)  TODO:  optimize to O(NlogN)
         for(int i = 0; i < _circles.length - 1; i++) {
             int diameter = _circles[i].getDiameter();
             
             for(int j = i + 1; j < _circles.length; j++) {
                 color c = _circles[i].getColor();
                 
-                if (_variation != 1) {
+                if (VARIATION != 1) {
                     PVector[] intersections = _circles[i].getIntersection(_circles[j]);
                     
                     if (intersections != null && intersections.length == 2) {
                         float difX      = intersections[1].x - intersections[0].x;
                         float difY      = intersections[1].y - intersections[0].y;
-                        int dist        = int(sqrt(difX * difX + difY * difY));
+                        int distance    = int(sqrt(difX * difX + difY * difY));
                         int diameter2   = _circles[j].getDiameter(); 
                         
                         // want the smaller of the two diameters
                         int d = (diameter > diameter2 ? diameter2 : diameter);
                         
-                        int alpha;
-                        if (_variation == 0) {
-                            alpha = 32 - ((dist << 5) / d);
+                        int a;
+                        if (VARIATION == 0) {
+                            a = 32 - ((distance << 5) / d);
                         } else {
-                            alpha = 128 - (int)((dist << 8) / d);
+                            a = 128 - (int)((distance << 8) / d);
                         }
                         
-                        if (alpha > 255) {
-                            alpha = 255;
-                        } else if (alpha < 0) {
-                            alpha = 255 + alpha;
+                        if (a > 255) {
+                            a = 255;
+                        } else if (a < 0) {
+                            a = 255 + a;
                         }
                         
-                        if (_variation == 0) {
-                            c = color(red(c), green(c), blue(c), alpha);
+                        if (VARIATION == 0) {
+                            c = color(red(c), green(c), blue(c), a);
                         } else {
                             c = color(red(c), green(c), blue(c), 24);
                         }
                         
                         // draw a line between the two points of intersection
                         stroke(c);
-                        line(intersections[0].x, intersections[0].y, intersections[1].x, intersections[1].y);
+                        line(intersections[0].x, 
+                             intersections[0].y, 
+                             intersections[1].x, 
+                             intersections[1].y);
                     }
                 } else if (_circles[i].intersects(_circles[j])) {
                     // draw a line connecting the centers of the two 
-                    // intersecting circles (_variation == 1)
+                    // intersecting circles (VARIATION == 1)
                     stroke(c);
-                    line(_circles[i].getX(), _circles[i].getY(), _circles[j].getX(), _circles[j].getY());
+                    
+                    line(_circles[i].getX(), 
+                         _circles[i].getY(), 
+                         _circles[j].getX(), 
+                         _circles[j].getY());
                 }
             }
         }
@@ -173,56 +175,12 @@ void update() {
 void mouseClicked() {
     reset();
 }
-
-void setRadius(int radius) {
-    if (_randomRadius || _radius != radius) {
-        _randomRadius = false;
-        _radius = radius;
-        
-        this.resetRadii();
-    }
-}
-
-void setRandomRadius() {
-    if (!_randomRadius) {
-        _randomRadius = true;
-        
-        this.resetRadii();
-    }
-}
-
-void resetRadii() {
-    if (_randomRadius) {
-        for(int i = 0; i < _circles.length; i++) {
-            _circles[i].setRadius(int(random(MIN_CIRCLE_RADIUS, MAX_CIRCLE_RADIUS)));
-        }
-    } else {
-        for(int i = 0; i < _circles.length; i++) {
-            _circles[i].setRadius(_radius);
-        }
-    }
-}
-
-void setVariation(int variation) {
-    if (_variation != variation) {
-        _variation = variation;
-    }
-}
-
-void setMovement(int movement) {
-    if (_movement != movement) {
-        _movement = movement;
-        
-        for(int i = 0; i < _circles.length; i++) {
-            _circles[i].setMovement(_movement);
-        }
-    }
-}
-
 class Circle {
     int _radius, _radiusSquared, _diameter;
+    
     float _x, _y;
     float _dX, _dY;
+    
     color _color;
     
     Circle() {
@@ -237,15 +195,13 @@ class Circle {
         this(x, y, radius, color(255, 255, 255, 18), 0);
     }
     
-    Circle(int x, int y, int radius, color c, int movement) {
-        super();
-        
+    Circle(int x, int y, int radius, color c) {
         _x = x;
         _y = y;
         _color = c;
         
         this.setRadius(radius);
-        this.setMovement(movement);
+        this.setMovement(CIRCLE_MOVEMENT);
     }
     
     void setRadius(int radius) {
@@ -275,7 +231,7 @@ class Circle {
         _x += _dX;
         _y += _dY;
         
-        // Wrap circle around the edge of the Simulation
+        // wrap circle around the edge of the simulation
         if (_x + _radius < 0 && _dX < 0) {
             _x = width + _radius + rand;
         } else if (_x - _radius >= width && _dX > 0) {
@@ -301,41 +257,41 @@ class Circle {
         int rad    = circle.getRadius();
         float xDif = circle.getX() - _x;
         float yDif = circle.getY() - _y;
-        float dist = sqrt(xDif * xDif + yDif * yDif);
+        float d    = sqrt(xDif * xDif + yDif * yDif);
         
-        // Reject if dist btwn circles is greater than their radii combined
-        if (dist > _radius + rad) {
+        // reject if distance btwn circles is greater than their radii combined
+        if (d > _radius + rad) {
             return false;
         }
         
-        // Reject if one circle is inside of the other
-        return (dist >= abs(rad - _radius));
+        // reject if one circle is inside of the other
+        return (d >= abs(rad - _radius));
     }
     
     PVector[] getIntersection(Circle circle) {
-        int rad  = circle.getRadius();
-        float cirX = circle.getX();
-        float cirY = circle.getY();
-        float xDif = cirX - _x;
-        float yDif = cirY - _y;
-        float distSquared = xDif * xDif + yDif * yDif;
-        float dist = sqrt(distSquared);
+        int rad     = circle.getRadius();
+        float cirX  = circle.getX();
+        float cirY  = circle.getY();
+        float xDif  = cirX - _x;
+        float yDif  = cirY - _y;
+        float dist2 = xDif * xDif + yDif * yDif;
+        float d     = sqrt(dist2);
         
-        // reject if dist btwn circles is greater than their radii combined
-        if (dist > _radius + rad) {
+        // reject if distance btwn circles is greater than their radii combined
+        if (d > _radius + rad) {
             return null;
         }
         
-        // jeject if one circle is inside of the other
-        if (dist < abs(rad - _radius)) {
+        // reject if one circle is inside of the other
+        if (d < abs(rad - _radius)) {
             return null;
         }
         
-        xDif /= dist;
-        yDif /= dist;
+        xDif /= d;
+        yDif /= d;
         
         // distance from this circle to line cutting through intersections
-        float a = (_radiusSquared - circle.getRadiusSquared() + distSquared) / (2 * dist);
+        float a = (_radiusSquared - circle.getRadiusSquared() + dist2) / (2 * d);
         
         // coordinates of midpoint of intersection
         float pX = _x + a * xDif; 
@@ -352,11 +308,11 @@ class Circle {
         xDif *= h;
         yDif *= h;
         
-        int x1 = (int)(pX + yDif);
-        int y1 = (int)(pY - xDif);
-        int x2 = (int)(pX - yDif);
-        int y2 = (int)(pY + xDif);
-        
+        float x1 = (pX + yDif);
+        float y1 = (pY - xDif);
+        float x2 = (pX - yDif);
+        float y2 = (pY + xDif);
+       
         // there are (at least) two intersections
         return new PVector[] { new PVector(x1, y1), new PVector(x2, y2) };
     }
@@ -366,10 +322,8 @@ class Circle {
     }
 }
 
-/* RGB triples constituting a list of predefined colors
- * taken from "Images/intersectionPalette.png"
- */
-static int INTERSECTION_PALETTE[] = {
+// color palette extracted from a seed image
+static int PALETTE[] = {
     255,255,255, 255,255,255, 255,255,255, 
     37, 29, 23, 51, 45, 39, 57, 49, 41, 71, 57, 42, 90, 74, 52, 
     100, 76, 55, 90, 85, 73, 104, 97, 77, 116, 104, 88, 123, 122, 119, 

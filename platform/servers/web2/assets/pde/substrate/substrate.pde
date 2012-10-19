@@ -4,23 +4,26 @@
  * @date:   December 2008 (Java)
  * @port:   August 2012 to processing.js
  * 
+ * Recursive line particles.
+ * 
  * Original concept and code by J. Tarbell
  * @see http://www.complexification.net/
  */
 
-static int SIMULATION_WIDTH     = 640;
-static int SIMULATION_HEIGHT    = 480;
+static int NUM_INITIAL_CRACKS   = /** int [ 1, 32 ]    **/ 4    /** endint   **/;
+static int MAX_ACTIVE_CRACKS    = /** int [ 12, 1024 ] **/ 100  /** endint   **/;
 
-static int MAX_ACTIVE_CRACKS    = 100;
-static int SPAWN_LINEAR         = 0;
-static int SPAWN_RADIAL         = 1;
-static int DEFAULT_GROWTH       = 5;
-static int MAX_GROWTH           = 8;
+static float CURVATURE          = /** float [ 0, 1 ]   **/ 0    /** endfloat **/;
 
-static float FUZZ               = 0.25;
+static int SPAWN_TYPE           = /** int [ 0, 1 ]     **/ 0    /** endint   **/;
+static int SPAWN_PERPENDICULAR  = 0;
+
+static float FUZZ               = /** float [ 0, 4 ]   **/ 0.25 /** endfloat **/;
 static float TWICE_FUZZ         = FUZZ * 2.0;
 
-int[][] _setCracks = new int[SIMULATION_WIDTH + 1][SIMULATION_HEIGHT + 1];
+static int GROWTH_RATE_COEFF    = /** int [ 0, 10 ]    **/ 5    /** endint   **/;
+
+int[][] _setCracks;
 PImage  _offscreen;
 
 ArrayList _activeCracks;
@@ -32,26 +35,22 @@ int _mouseDownX;
 int _mouseDownY;
 
 int _activeLength, _inactiveLength;
-int _spawnType, _growth;
-int _noInitialLines;
 
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(32);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
+    frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     loop();
     
     reset();
 }
 
 void reset() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     
-    _noInitialLines = 4;
+    _setCracks      = new int[width + 1][height + 1];
+    
     _activeCracks   = new ArrayList();
     _inactiveCracks = new ArrayList();
-    
-    _spawnType      = SPAWN_LINEAR;
-    _growth         = DEFAULT_GROWTH;
     
     _dragged        = false;
     
@@ -63,12 +62,12 @@ void reset() {
     for(int i = 0; i < width; i++) {
         for(int j = 0; j < height; j++) {
             _setCracks[i][j] = 1000;
-            _offscreen.set(i, j, #FFFFFF);
+            _offscreen.set(i, j, /** color **/ #FFFFFF /** endcolor **/);
         }
     }
     
-    // Create and initialize default cracks
-    for(int i = 0; i < _noInitialLines; i++) {
+    // create and initialize default cracks
+    for(int i = 0; i < NUM_INITIAL_CRACKS; i++) {
         Crack newCrack = new Crack();
         
         _activeCracks.add(newCrack);
@@ -79,12 +78,12 @@ void draw() {
     update();
     image(_offscreen, 0, 0);
     
-    // If user is dragging mouse, show a preview-line
+    // if user is dragging mouse, show a preview-line
     if (_dragged) {
         float newX  = mouseX;
         float newY  = mouseY;
         
-        // If shift is pressed, align preview-line to 90 degree increments
+        // if shift is pressed, align preview-line to 90 degree increments
         if (keyCode == SHIFT) {
             int dx  = mouseX - _mouseDownX;
             int dy  = mouseY - _mouseDownY;
@@ -96,7 +95,7 @@ void draw() {
             newY    = _mouseDownY + dist * sin(theta);
         }
         
-        // Draw a variable-length line in direction new Crack would go in
+        // draw a variable-length line in direction new crack would go in
         stroke(color(0, 0, 0, 127));
         line(_mouseDownX, _mouseDownY, newX, newY);
     }
@@ -107,7 +106,7 @@ void update() {
         Crack cur = ((Crack) _activeCracks.get(i));
         int oldLength = cur.getLength();
         
-        // Update the position of the current Crack and cleanup if it becomes inactive
+        // update the position of the current crack and cleanup if it becomes inactive
         if (!cur.update()) {
             _activeLength -= cur.getLength();
             _activeCracks.remove(i);
@@ -117,8 +116,8 @@ void update() {
             
             boolean exp = true;
             
-            for(int j = 0; j < _growth; j++) {
-                exp = (random(0.0, 1.0) > 0.5);
+            for(int j = 0; j < GROWTH_RATE_COEFF; j++) {
+                exp = (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.5 /** endfloat **/);
                 
                 if (!exp) {
                     break;
@@ -128,7 +127,7 @@ void update() {
             int stop = (exp ? 2 : 1);
             
             for(int k = 0; k < stop; k++) {
-                Crack newCrack = this.spawnNewCrack();
+                Crack newCrack = spawnNewCrack();
                 
                 if (newCrack != null) {
                     _activeLength += newCrack.getLength();
@@ -155,7 +154,7 @@ Crack spawnNewCrack() {
             
             length += cur.getLength();
             if (length > randomCrack) {
-                return cur.spawnNewCrack(_spawnType);
+                return cur.spawnNewCrack(SPAWN_TYPE);
             }
         }
         
@@ -169,7 +168,7 @@ Crack spawnNewCrack() {
         
         length += cur.getLength();
         if (length > randomCrack) {
-            return cur.spawnNewCrack(_spawnType);
+            return cur.spawnNewCrack(SPAWN_TYPE);
         }
     }
     
@@ -232,13 +231,11 @@ void addInputCrack(float theta) {
 }
 
 class Crack {
-    float _chanceOfCurved = 0;
-    
-    // Position
+    // position
     float _x, _initialX;
     float _y, _initialY;
     
-    // Direction specified in degrees
+    // direction specified in degrees
     int _theta;
     float _dx, _dy;
     
@@ -248,15 +245,14 @@ class Crack {
     color _color;
     int _length;
     
-    // initializes a completely randomized Crack
+    // initializes a completely randomized crack
     Crack() {
-        this(random(0, width), random(0, height), 
-             random(0, 359));
+        this(random(0, width), random(0, height), random(0, 359));
     }
     
-    // initializes a given Crack with a random color
+    // initializes a given crack with a random color
     Crack(float x, float y, float theta) {
-        // Initialize geometric data
+        // initialize geometric data
         _initialX   = x;
         _initialY   = y;
         _x          = x;
@@ -264,32 +260,35 @@ class Crack {
         _length     = 0;
         
         _sandRand   = random(0.0, 0.1);
-        _curved     = (_chanceOfCurved > random(0.0, 1.0));
+        _curved     = (CURVATURE > random(0.0, 1.0));
         
         if (_curved) {
-            // Make particle's path elliptical instead of circular
+            // make particle's path elliptical instead of circular
             _scale  = PI * random(0.0, 1.0) / 4.0;
             
-            // Make particle curve slowly/gradually
+            // make particle curve slowly/gradually
             _radiusScale = (PI / ((180 - 50 + int(random(0, 100))) << 3));
             _dx     = 0.4 * (1 - 2 * random(0.0, 1.0));
             _dy     = 0.4 * (1 - 2 * random(0.0, 1.0));
             _theta  = int(random(-2000000, -1000));
-        } else { // Crack is a line so it's Velocity <_dx, _dy> will be constant
+        } else { // crack is a line so it's velocity will be constant
             _theta     = (int(theta) + 2 - int(random(0, 4))) % 360;
             _dx        = (float)(0.42 * cos(_theta * (PI / 180)));
             _dy        = (float)(0.42 * sin(_theta * (PI / 180)));
         }
         
-        // Initialize Crack to have a pseudo-random color within the predefined color scheme
-        int offset = 3 * int(random(0, (SUBSTRATE_COLORS.length - 1) / 3));
-        _color = color(SUBSTRATE_COLORS[offset], SUBSTRATE_COLORS[offset + 1], SUBSTRATE_COLORS[offset + 2], 255);
+        // initialize crack to have a pseudo-random color within the predefined color scheme
+        int offset = 3 * int(random(0, (PALETTE.length - 1) / 3));
+        _color = color(PALETTE[offset], 
+                       PALETTE[offset + 1], 
+                       PALETTE[offset + 2], 
+                       /** int [ 0, 255 ] **/ 255 /** endint **/);
     }
     
     boolean update() {
         float dX = _dx, dY = _dy;
         
-        // Update velocity of curved particles
+        // update velocity of curved particles
         if (_curved) {
             // _length acts as time
             float angle = _length * _radiusScale;
@@ -297,18 +296,17 @@ class Crack {
             dX = _dx * sin(angle + _scale);
         }
         
-        // Update particle's position
+        // update particle's position
         _x += dX;
         _y += dY;
 
         int realX = round(_x), realY = round(_y);
         
-        // Make line "fuzzy" to prevent the uniform 
-        // aliases which are otherwise produced
+        // make line "fuzzy" to prevent the uniform aliases which are otherwise produced
         int x = (int)(_x + FUZZ - random(0.0, 1.0) * TWICE_FUZZ);
         int y = (int)(_y + FUZZ - random(0.0, 1.0) * TWICE_FUZZ);
         
-        // Check if it's time for this particle to die
+        // check if it's time for this particle to die
         if (!this.isValid(x, y, _length) || !this.isValid(realX, realY, _length++)) {
             return false;
         }
@@ -316,23 +314,23 @@ class Crack {
         this.paintSand(x, y, dX, dY);
         _setCracks[x][y] = _theta;
         
-        _offscreen.set(x, y, #000000);
+        _offscreen.set(x, y, /** color **/ #000000 /** endcolor **/);
         _setCracks[realX][realY] = _theta;
         
         return true;
     }
     
-    // Blends a src ARGB pixel onto a destination RGB pixel
+    // blends a src ARGB pixel onto a destination RGB pixel
     void setPixel(int x, int y, color c) {
         color oldColor = _offscreen.get(x, y);
-        int alpha = int(alpha(c));
+        int a = int(alpha(c));
         
-        // Blend the two colors together, weighting their relative contributions
+        // blend the two colors together, weighting their relative contributions
         // according to the new color's alpha value
-        int k = (255 - alpha);
-        int r = cap(int((alpha * red(c)   + k * red(oldColor))   / 255));
-        int g = cap(int((alpha * green(c) + k * green(oldColor)) / 255));
-        int b = cap(int((alpha * blue(c)  + k * blue(oldColor))  / 255));
+        int k = (255 - a);
+        int r = cap(int((a * red(c)   + k * red(oldColor))   / 255));
+        int g = cap(int((a * green(c) + k * green(oldColor)) / 255));
+        int b = cap(int((a * blue(c)  + k * blue(oldColor))  / 255));
         
         _offscreen.set(x, y, color(r, g, b, 255));
     }
@@ -343,7 +341,7 @@ class Crack {
         int length = -3;
         
         do {
-            // Sand moves perpendicular to Crack
+            // sand moves perpendicular to Crack
             sandX += sandDx;
             sandY -= sandDy;
         } while(isValid((int) sandX, (int) sandY, length++));
@@ -351,12 +349,14 @@ class Crack {
         sandX = (sandX - sandDx - _x);
         sandY = (sandY + sandDy - _y);
         
-        // Modulate length of sand
-        float modulation = 0.01 + (abs(sandX)) * (1.0 / (50 * width)) + (abs(sandY)) * (1.0 / (50*height));
+        // modulate length of sand
+        float sand_const = /** float [ 1, 100 ] **/ 50 /** endfloat **/;
+        float modulation = 0.01 + (abs(sandX)) * (1.0 / (sand_const * width)) + 
+                                  (abs(sandY)) * (1.0 / (sand_const * height));
         
-        _sandRand += modulation - random(0.0, 1.0) * modulation * 2; // 0.02
+        _sandRand += modulation - random(0.0, 1.0) * modulation * /** float [ 0.1, 10 ] **/ 2 /** endfloat **/;
         
-        // Cap length of sand
+        // cap length of sand
         if (_sandRand < 0.3) {
             _sandRand = 0.3;
         }
@@ -367,7 +367,7 @@ class Crack {
         
         int noGrains = 128;
         
-        // Paint sand (pixels w/ varying levels of transparency)
+        // draw sand (pixels w/ varying levels of transparency)
         float wAdd = _sandRand / (noGrains - 1);
         float w    = 0;
         
@@ -381,10 +381,10 @@ class Crack {
             int y = round(startY + sandY * sinSinW);
             
             if (x != oldX || y != oldY) {
-                int alpha = cap(int((16 * (noGrains - i) / denom)));
+                int a = cap(int((16 * (noGrains - i) / denom)));
                 
                 if (x > 0 && y > 0 && x < width && y < height) {
-                    this.setPixel(x, y, color(red(_color), green(_color), blue(_color), alpha));
+                    this.setPixel(x, y, color(red(_color), green(_color), blue(_color), a));
                 }
                 
                 oldX = x;
@@ -418,7 +418,7 @@ class Crack {
                 newY += _dy * sin(angle + _scale);
             }
             
-            // Get angle of curve's tangent vector at spawn point
+            // get angle of curve's tangent vector at spawn point
             newTheta = (int)(angle * (180 / PI));
         } else {
             float t = (random(0.0, 1.0) * _length);
@@ -427,7 +427,7 @@ class Crack {
             newY += t * _dy;
         }
         
-        if (spawnType == SPAWN_LINEAR) {
+        if (spawnType == SPAWN_PERPENDICULAR) {
             newTheta += (randBoolean ? 90 : 270);
         } else {
             newTheta += (randBoolean ? random(5, 174) : random(185, 354));
@@ -441,7 +441,8 @@ class Crack {
     }
 }
 
-static int[] SUBSTRATE_COLORS = {
+// color palette extracted from a seed image
+static int[] PALETTE = {
     0, 0, 0, 0, 16, 0, 104, 104,
     112, 104, 112, 120, 104, 88, 88, 112, 128, 128, 120, 120, 128, 128,
     88, 0, 144, 104, 72, 144, 80, 72, 144, 88, 24, 144, 96, 112, 152,

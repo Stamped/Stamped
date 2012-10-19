@@ -32,8 +32,10 @@ monkey.patch_all()
 #-----------------------------------------------------------
 
 base = os.path.dirname(os.path.abspath(__file__))
-
 sys.path.insert(0, os.path.join(base, "crawler"))
 sys.path.insert(0, os.path.join(base, "api"))
 sys.path.insert(0, base)
+
+import libs.global_flags
+libs.global_flags.parse_global_flags()
 

@@ -1,56 +1,143 @@
-{% extends "base.html" %}
-{% load stamped_tags %}
-{% load ssi from future %}
+<!doctype html>
 
-{% block head %}
-    {{ block.super }}
+<!-- Javascript Dependencies => assets/generated/js/test.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
     
-    <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/test.css">
+    jQuery plugin dependencies:
+        script: libs/history/jquery.history.js
+        script: libs/jquery.fancybox.js
+        script: libs/jquery.colorpicker.js
+        script: libs/underscore.js
     
-<script type="text/javascript" src="{{ STAMPED_STATIC_URL}}js/libs/processing-1.3.6.js"></script>
-{% endblock head %}
+    Third-party library dependencies:
+        script: libs/underscore.js
+        script: libs/backbone.js
+        script: libs/syntaxhighlighter/shCore.js
+    
+    Core stamped dependencies:
+        script: processing.abstraction.js
+        script: test.js
+-->
 
-{% block main %}
-    {{ block.super }}
+<!-- CSS Dependencies => assets/generated/css/test.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
     
-    <div id="main-content" class="fixedwidth">
+    Third-party library dependencies:
+        stylesheet: libs/SyntaxHighlighter.css
+        stylesheet: libs/jquery.fancybox.css
+        stylesheet: libs/jquery.colorpicker.css
+        stylesheet: libs/SyntaxHighlighter.css
+    
+    Core stamped dependencies:
+        stylesheet: processing.abstraction.css
+        stylesheet: styles.css
+        stylesheet: test.css
+-->
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=8" />
         
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
+        <title>Stamped - Lab</title>
         
-     </head>
-     <body>
-       <canvas id="tenebrous" data-processing-sources="{{STAMPED_STATIC_URL}}pde/intersection/intersection.pde"></canvas>
-       
-        <!--
-        <div id="collage">
-            <img crossOrigin="anonymous" id="collage_img" src="http://static.stamped.com/collages/collage-travis-music-940x256.jpg" width="940" height="256" />
-        </div>
-        -->
+        <meta name="author"             content="Stamped, Inc.">
+        <meta name="copyright"          content="Stamped, Inc.">
+        <meta name="robots"             content="index,follow">
         
-        <p>
-            TEST1
+        <meta name="viewport"           content="width=device-width, initial-scale=0.36">
+        <meta name="application-name"   content="Stamped">
+        
+        <link rel="shortcut icon"       href="http://static.stamped.com/assets/img/favicon.ico"/>
+        <link rel="apple-touch-icon"    href="http://static.stamped.com/assets/img/apple-touch-icon.png"/>
+        
+        <meta property="og:image"       content="http://static.stamped.com/assets/img/stamped-logo.png"/>
+        <meta property="og:title"       content="Stamped - Lab"/>
+        <meta property="og:site_name"   content="Stamped"/>
+        <meta property="og:type"        content="website"/>
+        
+		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        
+        {% if STAMPED_DEBUG %}
+            <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/SyntaxHighlighter.css"></script>
+            <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.fancybox.css?v=2.0.6">
+            <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/libs/jquery.colorpicker.css"></script>
             
-            {% with coordinates="40.714728,-73.998672" %}
-                {% handlebars_template "static-map-small" %}
-            {% endwith %}
-        </p>
-    </div>
-{% endblock main %}
-
-{% block scripts %}
-    {{ block.super }}
-     
-     <!-- jQuery plugins -->
-    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.infinitescroll{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.isotope{% if IS_PROD %}.min{% endif %}.js"></script>
-    <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery-easing.js"></script>
+            <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/styles.css">
+            <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/processing.abstraction.css"></script>
+            <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/test.css">
+        {% else %}
+            <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/test.generated.{{ STAMPED_ASSET_VERSION }}.css">
+        {% endif %}
+    </head>
     
-    <script src="{{ STAMPED_STATIC_URL }}js/test.js"></script>
-    
-    {% ssi STAMPED_TEMPLATE_FILE %}
-{% endblock scripts %}
+    <body>
+        {% if PROCESSING_SKETCH %}
+            <div class="canvas-column">
+                <canvas id="processing" 
+                       data-processing-sources="/assets/pde/{{PROCESSING_SKETCH}}/{{PROCESSING_SKETCH}}.pde"
+                       data-processing-abstraction-editor="processing-editor">
+                </canvas>
+            </div>
+            
+            <div class="editor-column">
+                <div class="abstraction-editor">
+                    <pre id="processing-editor"></pre>
+                </div>
+            </div>
+        {% else %}
+            {% for sketch in PROCESSING_SKETCHES %}
+                <div class="sketch">
+                    <div class="lhs">
+                        <p class="title"><a href="/test?sketch={{sketch.name}}">{{ sketch.hname|safe }}</a></p>
+                        <p class="desc">{{ sketch.desc|safe }}</p>
+                        
+                        {% if sketch.attr %}
+                            <p class="attr">{{ sketch.attr|safe }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="rhs">
+                        <a href="/test?sketch={{sketch.name}}" id="preview-sketch-{{sketch.name}}" class="preview-sketch"></a>
+                    </div>
+                    
+                    <div class="clear"></div>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <div id="scripts">
+            <!-- attempt to load jQuery from google's ajax CDN, falling back to our own local version -->
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+            <script>window.jQuery || document.write('<script src="/assets/js/libs/jquery-1.7.2{% if IS_PROD %}.min{% endif %}.js"><\/script>')</script>
+            
+            <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+            <script src="http://jqueryui.com/themeroller/themeswitchertool/"></script>
+            
+            {% if STAMPED_DEBUG %}
+                <script src="{{ STAMPED_STATIC_URL }}js/libs/history/jquery.history.js"></script>
+                <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.fancybox.js"></script>
+                <script src="{{ STAMPED_STATIC_URL }}js/libs/jquery.colorpicker.js"></script>
+                
+                <script src="{{ STAMPED_STATIC_URL }}js/libs/underscore.js"></script>
+                <script src="{{ STAMPED_STATIC_URL }}js/libs/backbone.js"></script>
+                <script src="{{ STAMPED_STATIC_URL }}js/libs/syntaxhighlighter/shCore.js"></script>
+                
+                <script src="{{ STAMPED_STATIC_URL }}js/processing.abstraction.js"></script>
+                <script src="{{ STAMPED_STATIC_URL }}js/test.js"></script>
+            {% else %}
+                <script src="{{ STAMPED_STATIC_URL }}js/test.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+            {% endif %}
+            
+            <script>
+                var _gaq=[['_setAccount','UA-24470954-1'],['_trackPageview']];
+                    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+                    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+                    s.parentNode.insertBefore(g,s)}(document,'script'));
+                
+                {{ STAMPED_PRELOAD_JS|safe }}
+            </script>
+        </div>
+    </body>
+</html>
 

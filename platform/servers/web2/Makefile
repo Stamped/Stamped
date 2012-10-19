@@ -18,7 +18,7 @@ $(if $(shell [ -d $(PROJECT_BASE_LIB) ] && echo "exists"),,                     
 
 include $(PROJECT_BASE_LIB)/defines.mk
 
-ASSET_VERSION_NUMBER        = 1.1.82
+ASSET_VERSION_NUMBER        = 1.1.88
 GENERATED_ASSET_SUFFIX		= .generated.$(ASSET_VERSION_NUMBER)
 ASSET_VERSION_SUFFIX		= .$(ASSET_VERSION_NUMBER)
 GENERATED_LINE_LENGTH		= 512
@@ -35,17 +35,18 @@ LESS_CSS_TARGETS            = $(LESS_CSS_SOURCES:%.$(LESS_CSS_SOURCE_SUFFIX)=%.$
 GENERATED_BASE_DIR			= assets/generated
 GENERATED_JS_BASE_DIR		= $(GENERATED_BASE_DIR)/js
 GENERATED_CSS_BASE_DIR		= $(GENERATED_BASE_DIR)/css
+GENERATED_PDE_BASE_DIR		= $(GENERATED_BASE_DIR)/pde
 JS_BASE_DIR					= assets/js
 CSS_BASE_DIR				= assets/css
 HTML_BASE_DIR				= html
 HTML_SUFFIX					= html
 TEMPLATE_BASE_DIR		    = templates
-HTML_PAGES					= base profile index map about jobs legal base-mobile sdetail-mobile retina fonts password password_reset settings
+HTML_PAGES					= base profile index map about jobs legal base-mobile sdetail-mobile retina fonts password password_reset settings test 404
 TEMPLATE_PROG				= bin/process_templates.py
 
-GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^[ \t]*script:[ \t]*' $1 | sed 's/[ \t]*script:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
-GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^[ \t]*stylesheet:[ \t]*' $1 | sed 's/[ \t]*stylesheet:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
-GET_TEMPLATE_DEPENDENCIES	= $(foreach FILE,$(shell grep '^[ \t]*template:[ \t]*' $1 | sed 's/[ \t]*template:[ \t]*\([\w.\/-]*\)[ \t]*/\1/g' | tr '\n' ' '),$(TEMPLATE_BASE_DIR)/$(FILE))
+GET_JS_DEPENDENCIES			= $(foreach FILE,$(shell grep '^ *script: *' $1 | sed 's/ *script: *\([\w.\/-]*\) */\1/g' | tr '\n' ' '),$(JS_BASE_DIR)/$(FILE))
+GET_CSS_DEPENDENCIES		= $(foreach FILE,$(shell grep '^ *stylesheet: *' $1 | sed 's/ *stylesheet: *\([\w.\/-]*\) */\1/g' | tr '\n' ' '),$(CSS_BASE_DIR)/$(FILE))
+GET_TEMPLATE_DEPENDENCIES	= $(foreach FILE,$(shell grep '^ *template: *' $1 | sed 's/ *template: *\([\w.\/-]*\) */\1/g' | tr '\n' ' '),$(TEMPLATE_BASE_DIR)/$(FILE))
 
 JS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(GENERATED_JS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).js)
 CSS_TARGETS					= $(foreach PAGE,$(HTML_PAGES),$(GENERATED_CSS_BASE_DIR)/$(PAGE)$(GENERATED_ASSET_SUFFIX).css)
@@ -78,7 +79,7 @@ endef
 define ADD_CSS_TARGET
 $(GENERATED_CSS_BASE_DIR)/$1$(GENERATED_ASSET_SUFFIX).css: $(HTML_BASE_DIR)/$1.$(HTML_SUFFIX) css_targets $(call GET_CSS_DEPENDENCIES,$(HTML_BASE_DIR)/$1.$(HTML_SUFFIX))
 	@mkdir -p $(GENERATED_CSS_BASE_DIR)
-	cat $$(call REST,$$(call REST,$$^)) | java -jar bin/compressor.jar --type css --line-break $(GENERATED_LINE_LENGTH) > $$@
+	cat $$(if $$(call ISNULL,$$(strip $$(call REST,$$(call REST,$$^)))),/dev/null,$$(call REST,$$(call REST,$$^))) | java -jar bin/compressor.jar --type css --line-break $(GENERATED_LINE_LENGTH) > $$@
 	@echo
 endef
 
@@ -102,6 +103,8 @@ css_targets: $(LESS_CSS_TARGETS);
 
 deploy: $(ALL_TARGETS)
 	mkdir -p $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
+	mkdir -p $(GENERATED_PDE_BASE_DIR)/$(ASSET_VERSION_NUMBER)
+	cp -rf assets/pde/* $(GENERATED_PDE_BASE_DIR)/$(ASSET_VERSION_NUMBER)
 	cp -rf assets/css/ie/* $(GENERATED_CSS_BASE_DIR)/ie/$(ASSET_VERSION_NUMBER)
 	cp -rf assets/css/mobile $(GENERATED_CSS_BASE_DIR)/
 	cd bin && python deploy_assets.py

@@ -15,6 +15,7 @@ from resolve.iTunesSource import iTunesSource
 from resolve.NetflixSource import NetflixSource
 from resolve.RdioSource import RdioSource
 from resolve.SpotifySource import SpotifySource
+from resolve.StampedSource import StampedSource
 from resolve.TMDBSource import TMDBSource
 from resolve.TheTVDBSource import TheTVDBSource
 from resolve.ResolverObject import *
@@ -29,6 +30,7 @@ SOURCES = {
     'tmdb' : TMDBSource(),
     'thetvdb' : TheTVDBSource(),
     'netflix' : NetflixSource(),
+    'stamped' : StampedSource(),
 }
 
 SOURCE_AND_KEY_RE = re.compile('([a-z_]+):(.*)')

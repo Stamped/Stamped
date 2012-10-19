@@ -2,60 +2,54 @@
  * 
  * @author: Travis Fischer
  * @date:   December 2008 (Java)
- * @port:   August 2012 to processing.js
+ * @port:   August 2012 to processing
+ * 
+ * Exploration of a simple n-body gravity system, in which every body is attracted 
+ * to every other body dependent on mass, proximity, etc.
  */
 
+static int NUM_PARTICLES     = /** int [ 12, 300 ]   **/ 150 /** endint **/;
+
+// scaling factor that affects the mass of the bodies, effectively scaling the 
+// overall gravity strength of the system
+static int GRAVITY_SPEED     = /** int [ 300, 1000 ] **/ 900 /** endint **/;
+static int MAX_GRAVITY_SPEED = 1000;
+
+// bodies in the system are spawned in either a radial or random fashion
+static int INITIAL_STATE     = /** int [ 0, 1 ]      **/ 0   /** endint **/;
+
+// global array of body particles in the simulation
 Body[] bodies;
 
-// Scaling factor that affects the mass of the Bodies, effectively scaling 
-// the force a Body enacts on another Body
-int simulationSpeed;
-
-// Drawing variation (either clean or aggregate)
-int variation;
-
-// Bodies in the system are spawned in either a radial or random fashion
-int initialState;
-
-static int SIMULATION_WIDTH  = 640;
-static int SIMULATION_HEIGHT = 480;
-
-static int PARTICLE_ORIGIN_X = SIMULATION_WIDTH  / 2.0;
-static int PARTICLE_ORIGIN_Y = SIMULATION_HEIGHT / 2.0;
-
-static int DEFAULT_GRAVITY_SPEED        = 900;
-static int MAX_GRAVITY_SPEED            = 1000;
-static int DEFAULT_GRAVITY_NO_PARTICLES = 100;
-static int MAX_GRAVITY_NO_PARTICLES     = 300;
-
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(32);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
+    frameRate(/** int [ 1, 60 ] **/ 30 /** endint **/);
     smooth();
     loop();
     
-    bodies          = new Body[DEFAULT_GRAVITY_NO_PARTICLES];
-    simulationSpeed = DEFAULT_GRAVITY_SPEED;
-    variation       = 0;
-    initialState    = 0;
+    bodies = new Body[NUM_PARTICLES];
     
     reset();
 }
 
 void reset() {
-    int num_particles = bodies.length();
+    int num_particles = bodies.length;
     
-    if (initialState == 1) {
-        // Initial State of Bodies arranged randomly
+    if (INITIAL_STATE == 1) {
+        // initial state of bodies arranged randomly
         for(int i = 0; i < num_particles; i++) {
             bodies[i] = new Body();
         }
     } else {
-        // Initial State of Bodies arranged in a Circular fashion
+        float x0 = width  / 2.0;
+        float y0 = height / 2.0;
+        float r0 = sqrt(width * width + height * height) / /** float [ 0.5, 50 ] **/ 4.5 /** endfloat **/;
+        
+        // initial state of bodies arranged in a circular fashion
         for(int i = 0; i < num_particles; i++) {
             float theta = i * TWO_PI / num_particles;
-            float x = PARTICLE_ORIGIN_X + 150 * cos(theta);
-            float y = PARTICLE_ORIGIN_Y + 150 * sin(theta);
+            float x = x0 + r0 * cos(theta);
+            float y = y0 + r0 * sin(theta);
             
             bodies[i] = new Body(x, y);
         }
@@ -63,42 +57,130 @@ void reset() {
 }
 
 void draw() {
-    background(#FFFFFF);
+    background(/** color **/ #FFFFFF /** endcolor **/);
     update();
     
-    for(int i = 0; i < bodies.length(); i++) {
+    for(int i = 0; i < bodies.length; i++) {
         bodies[i].draw();
     }
 }
 
 void update() {
-    num_particles = bodies.length();
+    int num_particles = bodies.length;
     
-    // For each body in the system, enact a force on every 
-    // other body in the system; Running time O(num_particles ^ 2)
+    // for each body in the system, enact a force on every other body in the system
+    // running time O(num_particles ^ 2)
     for(int i = 0; i < num_particles; i++) {
         for(int j = i + 1; j < num_particles; j++) {
             float xDif = bodies[j]._x - bodies[i]._x;
             float yDif = bodies[j]._y - bodies[i]._y;
             float invDistSquared = 1.0 / (xDif * xDif + yDif * yDif);
             
-            // Force is inversely proportional to the distance squared
+            // force is inversely proportional to the distance squared
             xDif *= invDistSquared;
             yDif *= invDistSquared;
             
-            bodies[i].addAcceleration(xDif * bodies[j]._mass, 
-                                       yDif * bodies[j]._mass);
-            bodies[j].addAcceleration(-xDif * bodies[i]._mass, 
-                                       -yDif * bodies[i]._mass);
+            bodies[i].addAcceleration( xDif * bodies[j]._mass,  yDif * bodies[j]._mass);
+            bodies[j].addAcceleration(-xDif * bodies[i]._mass, -yDif * bodies[i]._mass);
         }
     }
     
-    for(int i = 0; i < bodies.length(); i++) {
+    for(int i = 0; i < bodies.length; i++) {
         bodies[i].update();
     }
 }
 
-static int[] SUBSTRATE_COLORS = {
+class Body {
+    // position
+    float _x;
+    float _y;
+    
+    // velocity vector <_dX, _dY>
+    float _dX, _dY;
+    
+    // affects this body's gravitational pull w.r.t. other bodies
+    float _mass;
+    float _weight;
+    float _size;
+    
+    // fill color of this body
+    color _fill;
+    
+    // creates a body at a random location and random mass
+    Body() {
+        this(random(width  / 4.0, 3 * width  / 4.0), 
+             random(height / 4.0, 3 * height / 4.0));
+    }
+    
+    // creates a body at a given location with a random mass
+    Body(float x, float y) {
+        this(x, y, random(10, 45));
+    }
+    
+    // creates a body at the given location with the given mass
+    Body(float x, float y, float mass) {
+        _x = x;
+        _y = y;
+        
+        _dX = 0.0;
+        _dY = 0.0;
+        
+        _size   = mass;
+        _weight = random(/** float [ .2, 5 ] **/ 1.0 /** endfloat **/, /** float [ 1,  6 ] **/ 3.0 /** endfloat **/);
+        
+        // select a random color from within a predefined color palette
+        int offset = 3 * int(random(0.0, (PALETTE.length - 1) / 3.0));
+        _fill      = color(PALETTE[offset], 
+                           PALETTE[offset + 1], 
+                           PALETTE[offset + 2], /** int [ 0, 255 ] **/ 48 /** endint **/);
+        
+        resetMass();
+    }
+    
+    void resetMass() {
+        _mass = _size / (MAX_GRAVITY_SPEED - GRAVITY_SPEED);
+    }
+    
+    void addAcceleration(float accelX, float accelY) {
+        _dX += accelX;
+        _dY += accelY;
+    }
+    
+    boolean update() {
+        _x += _dX;
+        _y += _dY;
+        
+        return true;
+    }
+    
+    // returns whether or not this body intersects the given body (currently unused)
+    boolean intersects(Body body) {
+        float radius = (_size / 2);
+        float rad    = (body._size / 2);
+        float xDif   = body._x - _x;
+        float yDif   = body._y - _y;
+        float dist   = sqrt(xDif * xDif + yDif * yDif);
+        
+        // reject if dist btwn circles is greater than their radii combined
+        if (dist > radius + rad) {
+            return false;
+        }
+        
+        // reject if one circle is inside of the other
+        return (dist >= abs(rad - radius));
+    }
+    
+    void draw() {
+        fill(_fill);
+        stroke(/** color **/ color(0, 0, 0, 78) /** endcolor **/);
+        strokeWeight(_weight);
+        
+        ellipse(_x, _y, _size, _size);
+    }
+}
+
+// color palette extracted from a seed image
+static int[] PALETTE = {
     0, 0, 0, 0, 16, 0, 104, 104,
     112, 104, 112, 120, 104, 88, 88, 112, 128, 128, 120, 120, 128, 128,
     88, 0, 144, 104, 72, 144, 80, 72, 144, 88, 24, 144, 96, 112, 152,
@@ -143,101 +225,4 @@ static int[] SUBSTRATE_COLORS = {
     104, 88, 104, 88, 88, 40, 0, 88, 80, 72, 88, 88, 56, 96, 112, 112,
     96, 56, 16, 
 };
-
-class Body {
-    // Position
-    float _x;
-    float _y;
-    
-    // Velocity vector <_dX, _dY>
-    float _dX, _dY;
-    float _mass;
-    float _size;
-    
-    color _color;
-    float _weight;
-    
-    /*
-     * Creates a Body at a random location
-     */
-    Body() {
-        this(random(SIMULATION_WIDTH / 4.0, 3 * SIMULATION_WIDTH / 4.0), 
-             random(SIMULATION_HEIGHT / 4.0, 3 * SIMULATION_HEIGHT / 4.0));
-    }
-    
-    /*
-     * Creates a body at a given location with a random mass
-     */
-    Body(float x, float y) {
-        this(x, y, random(10, 45));
-    }
-    
-    /*
-     * Creates a body at the given location with the given mass
-     */
-    Body(float x, float y, float mass) {
-        this._x = x;
-        this._y = y;
-        this._size = mass;
-        
-        this._dX = 0.0;
-        this._dY = 0.0;
-        
-        this.resetMass();
-        
-        int offset   = 3 * int(random(0.0, (SUBSTRATE_COLORS.length() - 1) / 3.0));
-        this._color  = color(SUBSTRATE_COLORS[offset], SUBSTRATE_COLORS[offset + 1], SUBSTRATE_COLORS[offset + 2], 48);
-        this._weight = random(1.0, 3.0);
-    }
-    
-    /* _mass effects how fast bodies will be pulled towards each other, and 
-     * by globally scaling the masses of all of the bodies in the system
-     * (with simulationSpeed), the 'speed' of the simulation can be changed 
-     */ 
-    void resetMass() {
-        this._mass = this._size / (MAX_GRAVITY_SPEED - simulationSpeed);
-    }
-    
-    void addAcceleration(float accelX, float accelY) {
-        this._dX += accelX;
-        this._dY += accelY;
-    }
-    
-    boolean update() {
-        this._x += this._dX;
-        this._y += this._dY;
-        
-        return true;
-    }
-    
-    // Returns whether or not this Body intersects the given Body (currently unused)
-    boolean intersects(Body body) {
-        float radius = (this._size / 2);
-        float rad    = (body._size / 2);
-        float xDif = body._x - _x;
-        float yDif = body._y - _y;
-        float dist = sqrt(xDif * xDif + yDif * yDif);
-        
-        // Reject if dist btwn circles is greater than their radii combined
-        if (dist > radius + rad) {
-            return false;
-        }
-        
-        // Reject if one circle is inside of the other
-        return (dist >= abs(rad - radius));
-    }
-    
-    void draw() {
-        int size = this._size / 2.0;
-        float x = _x - size;
-        float y = _y - size;
-        
-        // Select a random color from within a predefined color palette
-        fill(this._color);
-        stroke(0, 0, 0, 78);
-        strokeWeight(this._weight);
-        
-        ellipse(x, y, this._size, this._size);
-    }
-}
 

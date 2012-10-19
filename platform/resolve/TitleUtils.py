@@ -143,6 +143,21 @@ def convertRomanNumerals(title):
     return title
 
 
+ENDING_NUMBER_RE = re.compile(r'(\d+)\s*(:|$)')
+def endsInDifferentNumbers(title1, title2):
+    title1 = convertRomanNumerals(title1)
+    title2 = convertRomanNumerals(title2)
+    match1 = ENDING_NUMBER_RE.search(title1)
+    match2 = ENDING_NUMBER_RE.search(title2)
+    if match1 and match2 and match1.group(1) != match2.group(1):
+        return True
+    if match1 and not match2 and int(match1.group(1)) != 1:
+        return True
+    if match2 and not match1 and int(match2.group(1)) != 1:
+        return True
+    return False
+
+
 def __stripPrefix(a, b):
     longer, shorter = (a, b) if len(a) > len(b) else (b, a)
     if longer.startswith(shorter):
@@ -352,7 +367,7 @@ def applyArtistTitleDataQualityTests(searchResult, searchQuery):
 ALBUM_AND_TRACK_TITLE_REMOVAL_REGEXPS = (
     re.compile("\s*[,:\[(-]+\s*([a-zA-Z0-9']{3,20}\s+){0,2}remastered[ ,:\])-]*$", re.IGNORECASE),
     re.compile("\s*[,:\[(-]+\s*(uncensored|explicit|single|vinyl|album|ep|lp)[ ,:\])-]*$", re.IGNORECASE),
-    re.compile('\s*[(-\[]+\s*(with|feat\.?|featuring) [a-z0-9_\'-]+(,? [a-z0-9_\'-]+){0,3}\)?]?', re.IGNORECASE)
+    re.compile('\s*[(-\[]+\s*(with|feat\.?|featuring) [a-z0-9_\'-]+(,? [a-z0-9\\&_\'-]+){0,5}\)?]?$', re.IGNORECASE)
 )
 
 def cleanTrackTitle(trackTitle):

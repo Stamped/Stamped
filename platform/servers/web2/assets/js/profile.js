@@ -2037,6 +2037,7 @@ var g_update_stamps = null;
                     
                     // this is a valid playback token for localhost.
                     // but you should go get your own for your own domain.
+                    // TODO: this is a test / localhost-only rdio API key
                     $rdio.rdio('GAlNi78J_____zlyYWs5ZG02N2pkaHlhcWsyOWJtYjkyN2xvY2FsaG9zdEbwl7EHvbylWSWFWYMZwfc=');
                 } else if ($source_itunes.length === 1) {
                     var itunes_initialized = false;

@@ -69,7 +69,7 @@ class CompressedNode(object):
                 yield k + k2, data
 
     def __len__(self):
-        return sum(len(child) for k, child in self.children) + 1
+        return sum(len(child) for _, child in self.children) + 1
 
     def get(self, key):
         if not key:
@@ -106,7 +106,7 @@ class CompressedNode(object):
 
     def modify(self, mutation):
         self.data = map(mutation, self.data)
-        for k, child in self.children:
+        for _, child in self.children:
             child.modify(mutation)
 
     def prune(self, collapseThreshold):

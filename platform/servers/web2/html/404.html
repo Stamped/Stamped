@@ -1,18 +1,25 @@
 {% extends "about.html" %}
 {% load stamped_tags %}
 
+<!-- Javascript Dependencies => assets/generated/js/404.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    Third-party library dependencies:
+        script: libs/processing-1.4.0.js
+-->
+
 {% block styles %}
     {{ block.super }}
     
     <style>
         #main-header { display: none; }
-        .title { text-align: center; }
-        .desc  { margin-top: 16px; font-size: 120% !important; }
+        .pane-body { text-align: center; }
+        .desc { text-align: left; margin-top: 16px; font-size: 120% !important; }
     </style>
 {% endblock styles %}
 
 {% block pane-body %}
-    <div class="title">404 Error</div>
+    <canvas class="canvas" data-processing-sources="/assets/pde/not_found/not_found.pde"></canvas>
     
     <p class="desc">
         Sorry, the page you requested could not be found. Please check to make sure the link is valid and doesn't contain any typos or head back to Stamped's <a href="/">homepage</a>.
@@ -22,4 +29,15 @@
 {% block post-main %}
     <div class="made-in-nyc-logo"></div>
 {% endblock post-main %}
+
+{% block scripts %}
+    {{ block.super }}
+    
+    {% if STAMPED_DEBUG %}
+        <script src="{{ STAMPED_STATIC_URL }}js/libs/processing-1.4.0.js"></script>
+    {% else %}
+        <script src="{{ STAMPED_STATIC_URL }}js/404.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+    {% endif %}
+{% endblock scripts %}
+
 

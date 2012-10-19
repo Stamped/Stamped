@@ -2,22 +2,26 @@
  * 
  * @author: Travis Fischer
  * @date:   December 2008 (Java)
- * @port:   August 2012 to processing.js
+ * @port:   August 2012 to processing
+ * 
+ * Recursive "tree" branches.
  */
 
-static int SIMULATION_WIDTH  = 640;
-static int SIMULATION_HEIGHT = 480;
+static int NUM_INITIAL_TREES    = /** int [ 1,  32  ]   **/ 5    /** endint **/;
 
-static int NO_INITIAL_TREES = 5;
-static int MAX_TREE_SIZE    = 60;
-static float MIN_TREE_SIZE  = 0.9; //(FULL_SCREEN ? 1.5 : 0.9);
-static float DEFAULT_SPEED  = 3.33f;
+static float MAX_TREE_SIZE      = /** float [ 10, 180 ] **/ 60   /** endfloat **/;
+static float MIN_TREE_SIZE      = /** float [ 0.5, 5  ] **/ 1.5  /** endfloat **/;
+static float PARTICLE_SPEED     = /** float [ 0.1, 20 ] **/ 3.33 /** endfloat **/;
+
+static int MAX_SIMULATION_AGE   = /** int [ 10, inf ]   **/ 800  /** endint **/;
 
 ArrayList particles;
 
+int age;
+
 void setup() {
-    size(SIMULATION_WIDTH, SIMULATION_HEIGHT);
-    frameRate(30);
+    size(/** int ( 0, 1024 ] **/ 640 /** endint **/, /** int ( 0, 1024 ] **/ 480 /** endint **/);
+    frameRate(/** int [ 1, 60 ] **/ 24 /** endint **/);
     smooth();
     loop();
     
@@ -25,16 +29,17 @@ void setup() {
 }
 
 void reset() {
-    background(#FFFFFF);
-    particles = new ArrayList();
+    background(/** color **/ #FFFFFF /** endcolor **/);
     
-    for (int i = 0; i < NO_INITIAL_TREES; i++) {
+    particles = new ArrayList();
+    age = 0;
+    
+    for (int i = 0; i < NUM_INITIAL_TREES; i++) {
         particles.add(new Particle());
     }
 }
 
 void draw() {
-    //background(#33aadd);
     update();
     
     for(int i = 0; i < particles.size(); i++) {
@@ -43,6 +48,10 @@ void draw() {
 }
 
 void update() {
+    if (++age > MAX_SIMULATION_AGE) {
+        reset();
+    }
+    
     for(int i = 0; i < particles.size(); i++) {
         Particle particle = ((Particle) particles.get(i));
         
@@ -56,11 +65,142 @@ void mouseClicked() {
     particles.add(new Particle(mouseX, mouseY));
 }
 
+
+class Particle {
+    // position
+    float _x;
+    float _y;
+    
+    // direction
+    float _theta;
+    float _dTheta;
+    
+    // current thickness
+    float _size;
+    
+    // number of frames until this particle will branch next
+    int _length;
+    
+    // particle's fill color
+    color _fill;
+    
+    // creates a particle at a random location and size
+    Particle() {
+        this(random(0.0, width - 1.0), random(0.0, height - 1.0));
+    }
+    
+    // creates a particle with a random size
+    Particle(float x, float y) {
+        this(x, y, random(0.0, TWO_PI), random(30, MAX_TREE_SIZE));
+    }
+    
+    // creates a new particle
+    Particle(float x, float y, float theta, float size) {
+        _x = x;
+        _y = y;
+        
+        _theta  = theta;
+        _dTheta = random(-0.005, 0.005);
+        _size   = size;
+        
+        _reset_color();
+        _reset_length();
+    }
+    
+    // returns a new particle spawned from the given trunk
+    static Particle _spawn(Particle trunk) {
+        return Particle._spawn(trunk, (random(0.0, 1.0) < 0.5));
+    }
+    
+    // returns a new particle spawned from the given trunk
+    static Particle _spawn(Particle trunk, boolean sign) {
+        return new Particle(trunk._x, trunk._y, trunk._theta + (sign ? 1 : -1) * 
+                            (random(10.0, MAX_TREE_SIZE - 10.0)) * 180.0 / PI, 
+                            random(trunk._size * (2.0 / 3.0), trunk._size + log(trunk._size) / 8.0));
+    }
+    
+    private void _reset_color() {
+        // 50% of the time, make the particle black
+        if (random(0.0, 1.0) > /** float [ 0, 1 ] **/ 0.5 /** endfloat **/) {
+            _fill = /** color **/ color(0, 0, 0, 200) /** endcolor **/;
+        } else {
+            // 50% of the time, give the particle a random color from within a predefined color palette
+            int offset = 3 * int(random(0.0, (PALETTE.length - 1) / 3.0));
+            
+            _fill  = color(PALETTE[offset], 
+                           PALETTE[offset + 1], 
+                           PALETTE[offset + 2], 
+                           /** int [ 0, 255 ] **/ 255 /** endint **/);
+        }
+    }
+    
+    private void _reset_length() {
+        _length = int(random(/** int [ 5, 50 ]   **/ 10 /** endint **/, /** int [ 50, 300 ] **/ 100 /** endint **/));
+    }
+    
+    boolean update() {
+        // update particle direction and size
+        _theta += _dTheta;
+        _size  -= (_size / (MAX_TREE_SIZE * /** float [ 1, 128 ] **/ 16.0 /** endfloat **/));
+        
+        // kill particle if it grows too small
+        if (_size <= MIN_TREE_SIZE) {
+            return false;
+        }
+        
+        // update particle's position
+        _x += PARTICLE_SPEED * cos(_theta);
+        _y += PARTICLE_SPEED * sin(_theta);
+        
+        float radius = _size / 2.0;
+        
+        // kill particle if it strays outside the canvas
+        if (_x + radius < 0 || _x - radius >= width || 
+            _y + radius < 0 || _y - radius >= height) {
+            return false;
+        }
+        
+        _length--;
+        
+        if (_length <= 0) {
+            // spawn a new branch
+            particles.add(Particle._spawn(this));
+            
+            _reset_length();
+        } else {
+            float rand = random(0.0, 1.0);
+            
+            if (rand < /** float [ 0, 0.1 ] **/ 0.005 /** endfloat **/) {
+                // split into two branches and stop this particle's growth
+                particles.add(Particle._spawn(this, true));
+                particles.add(Particle._spawn(this, false));
+                
+                return false;
+            } else if (rand > /** float [ 0.9, 1 ] **/ 0.99 /** endfloat **/) {
+                // possible to change direction
+                _dTheta = -_dTheta;
+            }
+        }
+        
+        return true;
+    }
+    
+    void draw() {
+        float radius = _size / 2.0;
+        
+        fill(_fill);
+        stroke(/** color **/ color(127, 127, 127, 50) /** endcolor **/);
+        strokeWeight(/** int [ 0, 10 ] **/ 1.0 /** endint **/);
+        
+        ellipse(_x, _y, radius, radius);
+    }
+}
+
 /* RGB triples constituting a list of predefined colors
  * taken from "Images/shiftingLinesPalette.png"
  * (mainly blue and green hues)
  */
-static int[] TENEBROUS_PALETTE = {
+static int[] PALETTE = {
     59, 70, 76, 69, 88, 90, 75, 90, 91, 84, 93, 99, 83, 100, 99, 
     79, 104, 102, 84, 108, 116, 85, 112, 117, 94, 120, 107, 92, 115, 114, 
     98, 114, 114, 99, 122, 115, 104, 118, 121, 99, 122, 122, 99, 123, 130, 
@@ -113,117 +253,4 @@ static int[] TENEBROUS_PALETTE = {
     102, 123, 152, 113, 132, 138, 114, 139, 141, 118, 152, 149, 115, 144, 162, 
     114, 139, 171, 124, 150, 180, 129, 157, 195, 144, 175, 220,   
 };
-
-class Particle {
-    // position
-    float _x;
-    float _y;
-    
-    // direction
-    float _theta;
-    float _dTheta;
-    
-    // current thickness
-    float _size;
-    
-    // number of frames until this particle will branch next
-    int _length;
-    
-    color _color;
-    
-    // Creates a Particle at a random location and size
-    Particle() {
-        this(random(0.0, width - 1.0), random(0.0, height - 1.0));
-    }
-    
-    Particle(float x, float y) {
-        this(x, y, random(0.0, TWO_PI), random(30, MAX_TREE_SIZE));
-    }
-    
-    Particle(Particle trunk) {
-        this(trunk, (random(0.0, 1.0) < 0.5));
-    }
-    
-    Particle(Particle trunk, boolean sign) {
-        this(trunk._x, trunk._y, trunk._theta + (sign ? 1 : -1) * 
-             (random(10.0, MAX_TREE_SIZE - 10.0)) * 180.0 / PI, 
-             random(trunk._size * (2.0 / 3.0), trunk._size + log(trunk._size) / 8.0));
-    }
-    
-    Particle(float x, float y, float theta, float size) {
-        this._x = x;
-        this._y = y;
-        
-        this._theta  = theta;
-        this._dTheta = random(-0.005, 0.005);
-        this._size   = size;
-        
-        // Select a random color from within a predefined color palette
-        int offset   = 3 * int(random(0.0, (TENEBROUS_PALETTE.length - 1) / 3.0));
-        this._color  = color(TENEBROUS_PALETTE[offset], TENEBROUS_PALETTE[offset + 1], TENEBROUS_PALETTE[offset + 2], 255);
-        
-        if (random(0.0, 1.0) > 0.5) {
-            this._color = color(0, 0, 0, 200);
-        }
-        
-        this._reset_length();
-    }
-    
-    void _reset_length() {
-        this._length = (int) random(10, 100);
-    }
-    
-    boolean update() {
-        this._theta += this._dTheta;
-        this._size  -= (this._size / (MAX_TREE_SIZE * 16.0));
-        
-        // Stop growing if this particle grows too small
-        if (this._size <= MIN_TREE_SIZE) {
-            return false;
-        }
-        
-        this._x += DEFAULT_SPEED * cos(this._theta);
-        this._y += DEFAULT_SPEED * sin(this._theta);
-        
-        float radius = this._size / 2.0;
-        
-        if (this._x + radius < 0 || this._x - radius >= width || 
-            this._y + radius < 0 || this._y - radius >= height) {
-            return false;
-        }
-        
-        this._length--;
-        
-        if (this._length <= 0) { // spawn a new branch
-            particles.add(new Particle(this));
-            
-            this._reset_length();
-        } else {
-            float rand = random(0.0, 1.0);
-            
-            if (rand < 0.005) {
-                // Split into two branches and stop this particle's growth
-                particles.add(new Particle(this, true));
-                particles.add(new Particle(this, false));
-                
-                return false;
-            } else if (rand > 0.99) {
-                // possible to change direction
-                this._dTheta = -this._dTheta;
-            }
-        }
-        
-        return true;
-    }
-    
-    void draw() {
-        float radius = this._size / 2.0;
-        
-        fill(this._color);
-        stroke(color(127, 127, 127, 50));
-        strokeWeight(1.0);
-        
-        ellipse(this._x, this._y, radius, radius);
-    }
-}
 

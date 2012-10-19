@@ -52,6 +52,13 @@ def deploy_assets():
             "headers"       : headers, 
         }, 
         {
+            "path"          : "/assets/generated/pde", 
+            "content_type"  : "application/javascript", 
+            "apply_gzip"    : True, 
+            "ignore"        : [ ], 
+            "headers"       : headers, 
+        }, 
+        {
             "path"          : "/assets/img", 
             "apply_gzip"    : False, 
             "ignore"        : [

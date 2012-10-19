@@ -48,7 +48,6 @@ try:
     from crawler.RssFeedScraper     import RssFeedScraper
 
     #resolve classes
-    from resolve.EntitySource       import EntitySource
     from resolve.EntityProxySource  import EntityProxySource
     from resolve                    import FullResolveContainer, EntityProxyContainer
     from resolve.BasicSourceContainer import BasicSourceContainer
@@ -1829,12 +1828,6 @@ class StampedAPI(AStampedAPI):
         results = []
         numToStore = 5
 
-        if category != 'place':
-            # The 'place' search engines -- especially Google -- return these shitty half-assed results with nowhere
-            # near enough detail to be useful for a user, so we definitely want to do a full lookup on those.
-            for entity in entities[:numToStore]:
-                self._searchEntityDB.writeSearchEntity(entity)
-
         for entity in entities:
             distance = None
             try:
@@ -1916,67 +1909,57 @@ class StampedAPI(AStampedAPI):
 
         if category == 'book':
             entityIds = [
-                '4e57b45941ad8514cb00013b', # Steve Jobs 
-                '4e57aca741ad85147e00153f', # A Game of Thrones 
-                '4e57ac5841ad85147e000425', # The Hunger Games 
-                '4fff6529967d717a14000041', # Bared to You 
+                '4e57b45941ad8514cb00013b', # Steve Jobs
                 '4ecaf331fc905f14cc000005', # Fifty Shades of Grey 
                 '4fe3342e9713961a5e000b5b', # Gone Girl 
+                '4fff6529967d717a14000041', # Bared to You 
                 '5010b4a67b815764dee6d0b1', # Wild 
-                '5010b4cd7b815764e0e6d0b3', # Amateur 
-                '50103a4353b48c49b7d380e0', # Criminal 
-                '5010b4fd7b815764dee6d0ba', # The Next Best Thing 
+                '4e57ac4a41ad85147e00007a', # Unbroken 
+                '4e57aca741ad85147e00153f', # A Game of Thrones
+                '4e57ac5841ad85147e000425', # The Hunger Games
             ]
             groups.append(('Suggestions', entityIds))
 
         elif category == 'film':
             entityIds = [
-
                 '500dd5fe7b81571916b7b258', # Dark Knight Rises 
+                '501c520a7b81574f65c592b9', # Total Recall 
                 '4e9cbd8cfe4a1d7bd2000070', # Game of Thrones 
-                '4ffa194a64c7940d380005f5', # Ted 
-                '4f835f34d56d835c6e000572', # 21 Jump Street 
+                '5010504453b48c4c5a103cf9', # The Bourne Legacy 
                 '4e9fb96dfe4a1d1cbe0000f5', # Breaking Bad 
-                '4fff6507967d717a13000018', # The Amazing Spider Man 
-                '4f60dd2cd56d836764000ad6', # Moonrise Kingdom 
-                '4fff6519967d717a1300003a', # To Rome With Love 
-                '4fff650c967d717a13000022', # Brave 
-                '4eb1c60941ad8531d2000f0b', # Dexter 
-                '4eb2159b41ad8531d2004a3e', # The Big Bang Theory 
+                '4f835f34d56d835c6e000572', # 21 Jump Street 
+                '5010504d81353510f980b0f6', # The Campaign 
+                '4ea269a3fe4a1d2a4100027e', # Modern Family 
             ]
             groups.append(('Suggestions', entityIds))
 
         elif category == 'music':
             # Songs
             entityIds = [
-                '5002b96bd56d83100d00089b', # wide awake - katy perry 
-                '501046af7b8157477c65e488', # call me maybe - carly rae jepsen 
-                '5010466c7b8157477c65e47b', # whistle - flo rida 
-                '501041a253b48c49b7d38263', # sweet life - frank ocean
-                '501036e37b815745eabbd6d9', # boyfriend - justin bieber 
-                '4f9f0b3c591fa478c30006ac', # Starships - Nikki minaj 
-                '4f16c9316e334372cf000f25', # Somebody that I used to know - gotye 
+                '5018ab0753b48c16ab87aa8d', # Home by Phillip Phillips 
+                '5010466c7b8157477c65e47b', # Whistle Flo Rida 
+                '5023e56403666c43872de48b', # I Will Wait by Mumford and Sons 
+                '50103afb53b48c49b7d3813d', # Some Nights by Fun. 
+                '501041a253b48c49b7d38263', # Sweetlife by Frank Ocean
             ]
             groups.append(('Songs', entityIds))
 
             # Albums
             entityIds = [
-                '4faa7152591fa4535a0009c2', # Some nights - Fun 
-                '4fb4fe40591fa462ec0000c5', # Believe - Justin Bieber 
-                '500f52c47b815738449589ec', # Gossamer - Passion Pit 
-                '4fe30253591fa41b4e0008f8', # Overexposed - Maroon 5 
-                '4ed5418d4820c5450400079a', # Bon Iver - Bon Iver 
+                '5023e59f03666c43822de3e4', # Babel by Mumford and Sons 
+                '4faa7152591fa4535a0009c2', # Some Nights by Fun. 
+                '4fb4fe40591fa462ec0000c5', # Believe by Justin Bieber 
+                '500f52c47b815738449589ec', # Gossamer by Passion Pit 
             ]
             groups.append(('Albums', entityIds))
 
             # Artists
             entityIds = [
+                '4ecad83f4820c5024c00049e', # Mumford and Sons 
                 '4eb3001b41ad855d53000ac8', # Katy Perry 
-                '4ecb6893fc905f1561000f96', # Bon Iver 
-                '4eb8700441ad850b6200004f', # Maroon 5 
                 '4ee0233c54533e75460010e1', # Justin Bieber 
-                '4eb300e941ad855d53000c36', # Kanye West 
-                '4f593804d56d835b3e000543', # Fun 
+                '4eb8700441ad850b6200004f', # Maroon 5 
+                '4f0d595b06007d1bb700001f', # The Wanted 
             ]
             groups.append(('Artists', entityIds))
 
@@ -1988,16 +1971,15 @@ class StampedAPI(AStampedAPI):
                 '4edac5d1e32a3a08d400000b', # Temple Run 
                 '4ed44c9482750f30b70002fd', # Pinterest 
                 '4ed44c3f82750f30b7000196', # Spotify 
-                '4f45e36c591fa43214000195', # Clear 
             ]
             groups.append(('Free', entityIds))
 
             # Paid
             entityIds = [
                 '4ed480e456f86859c20023bd', # Words with Friends 
-                '4fea8b5b64c794370b000222', # Temple Run: Brave 
                 '4f13f96f54533e5c89001a5c', # Instapaper 
                 '4edad3d7e32a3a08d4000048', # The Sims 3 
+                '5010c8a47b81576a00657433', # Where’s my Perry 
             ]
             groups.append(('Paid', entityIds))
 
@@ -5298,18 +5280,27 @@ class StampedAPI(AStampedAPI):
         def _getSuccessor(tombstoneId):
             logs.info("Get successor: %s" % tombstoneId)
             successor_id = tombstoneId
-            successor    = self._entityDB.getEntity(successor_id)
+            successor = self._entityDB.getEntity(successor_id)
             assert successor is not None and successor.entity_id == successor_id
 
-            # TODO: Because we create a new FullResolveContainer() here instead of using self.__full_resolve, we are not
-            # reading from or writing to  the joint history about what sources have failed recently and are still
-            # cooling down.
-            merger = FullResolveContainer.FullResolveContainer()
-            merger.addSource(EntitySource(entity, merger.groups))
-            successor_decorations = {}
-            modified_successor = merger.enrichEntity(successor, successor_decorations)
-            self.__handleDecorations(successor, successor_decorations)
+            modified_successor = False
+            for group in self.__full_resolve.groups:
+                if group.groupName == 'tombstone':
+                    continue
+                source = group.getSource(entity)
+                entity_timestamp = group.getTimestamp(entity)
+                if group.groupName == 'nemeses':
+                    # Discard the nemesis ids timestamp, because we want to copy them no matter now old they are.
+                    entity_timestamp = None
+                if (self.__full_resolve.shouldEnrich(group.groupName, source, successor, entity_timestamp)
+                        and group.syncFields(entity, successor)):
+                    group.setSource(successor, source)
+                    group.setTimestamp(successor, entity_timestamp)
+                    modified_successor = True
 
+            successor_decorations = {}
+            modified_successor |= self.__full_resolve.enrichEntity(successor, successor_decorations)
+            self.__handleDecorations(successor, successor_decorations)
             return successor, modified_successor
 
         try:

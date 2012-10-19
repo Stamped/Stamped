@@ -367,13 +367,6 @@ def popup_following(request, schema, **kwargs):
     })
 
 @stamped_view()
-def test_view(request, **kwargs):
-    #user  = stampedAPIProxy.getUser(dict(screen_name='travis'))
-    #stamp = stampedAPIProxy.getStampFromUser(user['user_id'], 10)
-    
-    return stamped_render(request, 'test.html', { })
-
-@stamped_view()
 def temp_view(request, **kwargs):
     return stamped_render(request, 'temp.html', {
         'N' : range(10)

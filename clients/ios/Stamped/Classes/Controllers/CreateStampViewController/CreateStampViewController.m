@@ -13,7 +13,6 @@
 #import "CreateFooterView.h"
 #import "CreateHeaderView.h"
 #import "STStampSwitch.h"
-#import "STPostStampViewController.h"
 #import "STS3Uploader.h"
 #import "STStampContainerView.h"
 #import "CreateEditView.h"
@@ -598,13 +597,24 @@
             
         } completion:^(NSString *path, BOOL finished) {
             //[self.footerView setUploading:NO animated:YES];
-            self.tempImagePath = path;
+            BOOL wasWaiting = self.waiting;
+            self.waiting = NO;
             [self.editView.imageView setUploading:NO];
-            
-            if (self.waiting) {
-                [self postStamp];
+            if (finished) {
+                self.tempImagePath = path;
+                
+                if (wasWaiting) {
+                    [self postStamp];
+                }
             }
-            
+            else {
+                self.tempImagePath = nil;
+                self.savedImage = nil;
+                self.editView.imageView.image = nil;
+                [self.editView updateState];
+                [Util warnWithMessage:@"There was a problem uploading your image. Please try again later." andBlock:nil];
+            }
+                
         }];
         
     }

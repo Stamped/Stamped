@@ -224,7 +224,7 @@ static const NSInteger _cellsPerRow = 7;
     }
     STUsersViewController* controller = [[[STUsersViewController alloc] initWithUserIDs:userIDs] autorelease];
     controller.userIDToStampID = stamps;
-    [[Util sharedNavigationController] pushViewController:controller animated:YES];
+    [Util pushController:controller modal:NO animated:YES];
 }
 
 - (void)setupWithStamp:(id<STStamp>)stamp maxRows:(NSInteger)maxRows {
