@@ -16,6 +16,8 @@ from api import MongoStampedAPI
 from collections import defaultdict
 from reportlab.lib import pagesizes, styles, colors
 from reportlab.platypus import Paragraph, SimpleDocTemplate, PageBreak, KeepTogether, Image, Spacer, Flowable
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 import os
 
@@ -23,6 +25,7 @@ stylesheet = styles.getSampleStyleSheet()
 normal_style = stylesheet['Normal']
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+pdfmetrics.registerFont(TTFont('TitleFont', os.path.join(SCRIPT_DIR, 'titlefont.ttf')))
 
 def categorize_entity(entity):
     # TODO: this is wrong...
@@ -47,6 +50,30 @@ class Separator(Flowable):
         self.canv.line(0, 0, self.width, 0)
 
 
+class StampTitle(Flowable):
+    def __init__(self, text, style):
+        self.paragraph = Paragraph(text, style)
+        self.radius = 3
+        self.stamp_placement = 7
+
+    def wrap(self, *args):
+        w, h = self.paragraph.wrap(*args)
+        self.width = w
+        return w, h
+
+    def draw(self):
+        blPara = self.paragraph.blPara
+        if blPara.kind == 0:
+            remain = blPara.lines[-1][0]
+        else:
+            remain = blPara.lines[-1].extraSpace
+        self.canv.saveState()
+        self.canv.setFillColorRGB(0, 0, 0)
+        self.canv.circle(self.width - remain, self.stamp_placement, self.radius, fill=1)
+        self.paragraph.drawOn(self.canv, 0, 0)
+        self.canv.restoreState()
+
+
 class DataExporter(object):
     def __init__(self, api):
         self.__api = api
@@ -55,7 +82,9 @@ class DataExporter(object):
         self.separator = Separator(40)
         self.title_style = styles.ParagraphStyle(
                 name='title',
-                fontName='Helvetica',
+                fontName='TitleFont',
+                fontSize=24,
+                leading=26,
                 )
         self.subtitle_style = styles.ParagraphStyle(
                 name='subtitle',
@@ -90,7 +119,8 @@ class DataExporter(object):
     def make_stamp_story(self, user_name, ending, stamp, entity):
         # TODO: add picture and style
         story = []
-        story.append(Paragraph(entity.title, self.title_style))
+
+        story.append(StampTitle(entity.title, self.title_style))
         story.append(Paragraph(entity.subtitle, self.subtitle_style))
 
         for content in stamp.contents:
