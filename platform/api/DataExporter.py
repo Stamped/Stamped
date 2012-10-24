@@ -42,10 +42,12 @@ def categorize_entity(entity):
 
 
 def get_image_from_url(url):
+    print url
     suffix = url[-4:]
     assert suffix.lower() in ('.png', '.jpg'), suffix
     tmpfile = NamedTemporaryFile(suffix=suffix, delete=False)
     urllib.urlretrieve(url, tmpfile.name)
+    print tmpfile.name
     return tmpfile.name
 
 
@@ -54,19 +56,28 @@ class Separator(Flowable):
         self.width = width
 
     def wrap(self, *args):
-        return 40, 1
+        return self.width, 1
 
     def draw(self):
-        self.canv.setFillColor(colors.black)
+        self.canv.setStrokeColor(colors.HexColor(0xe5e5e5))
         self.canv.line(0, 0, self.width, 0)
+
+    def getSpaceBefore(self):
+        return 4
+
+
+class NiceSpacer(Spacer):
+    def split(self, width, height):
+        if self.height > height:
+            return [PageBreak()]
+        return [self]
 
 
 class StampTitle(Flowable):
     def __init__(self, text, style, stamp_image):
         self.paragraph = Paragraph(text, style)
-        self.radius = 8
-        self.stamp_placement = 10
-        self.stamp_image = Image(stamp_image, self.radius * 2, self.radius * 2)
+        self.stamp_placement = 36
+        self.stamp_image = Image(stamp_image)
 
     def wrap(self, *args):
         w, h = self.paragraph.wrap(*args)
@@ -80,7 +91,7 @@ class StampTitle(Flowable):
         else:
             remain = blPara.lines[-1].extraSpace
 
-        self.stamp_image.drawOn(self.canv, self.width - remain - self.radius, self.stamp_placement)
+        self.stamp_image.drawOn(self.canv, self.width - remain - 18, self.stamp_placement)
         self.paragraph.drawOn(self.canv, 0, 0)
 
 
@@ -111,23 +122,28 @@ class DataExporter(object):
     def __init__(self, api):
         self.__api = api
 
-        self.spacer = Spacer(10, 20)
-        self.separator = Separator(40)
+        self.spacer = NiceSpacer(1, 20)
+        self.separator = Separator(552)
         self.title_style = styles.ParagraphStyle(
                 name='title',
+                textColor=colors.HexColor(0x262626),
                 fontName='TitleFont',
-                fontSize=24,
-                leading=26,
+                fontSize=72,
+                leading=84,
                 )
         self.subtitle_style = styles.ParagraphStyle(
                 name='subtitle',
+                textColor=colors.HexColor(0x999999),
                 fontName='Helvetica',
-                textColor=colors.gray,
+                fontSize=24,
+                leading=32,
                 )
         self.normal_style = styles.ParagraphStyle(
                 name='normal',
+                textColor=colors.HexColor(0x262626),
                 fontName='Helvetica',
-                textColor=colors.darkgray,
+                fontSize=24,
+                leading=32,
                 )
 
     def make_title_page(self, user):
@@ -150,10 +166,9 @@ class DataExporter(object):
         story.append(PageBreak())
         return story
 
-    def make_stamp_story(self, user, ending, stamp, entity):
+    def make_stamp_story(self, user, ending, stamp_image, stamp, entity):
         # TODO: add picture and style
 
-        stamp_image = get_image_from_url(STAMP_URL_BASE % (user.color_primary, user.color_secondary))
         story = []
 
         story.append(StampTitle(entity.title, self.title_style, stamp_image))
@@ -182,21 +197,20 @@ class DataExporter(object):
                 credit_text += 's'
             story.append(Paragraph(credit_text, self.subtitle_style))
         story.extend(ending)
-        # return [KeepTogether(story)]
-        return story
+        return [KeepTogether(story)]
 
-    def make_section(self, user, stamp_type, stamps):
+    def make_section(self, user, stamp_type, stamps, stamp_image):
         story = []
         story.extend(self.make_section_title_page(user.screen_name, stamp_type, len(stamps)))
 
         divider = [self.spacer, self.separator, self.spacer]
         for stamp in stamps[:-1]:
-            story.extend(self.make_stamp_story(user, divider, *stamp))
-        story.extend(self.make_stamp_story(user, [], *stamps[-1]))
+            story.extend(self.make_stamp_story(user, divider, stamp_image, *stamp))
+        story.extend(self.make_stamp_story(user, [], stamp_image, *stamps[-1]))
         story.append(PageBreak())
         return story
 
-    def export_user_data(self, user_id):
+    def export_user_data(self, user_id, output_file):
         # TODO: TOC
         story = []
 
@@ -226,23 +240,25 @@ class DataExporter(object):
                 ('book', 'Book'),
                 ('app', 'App')]
 
+        stamp_image = get_image_from_url(STAMP_URL_BASE % (user.color_primary, user.color_secondary))
         for category, readable_name in category_names:
             if category in categories:
-                story.extend(self.make_section(user, readable_name, categories[category]))
+                story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
 
         doc_parameters = {
-                'pagesize' : pagesizes.A6,
+                'pagesize' : (640, 960),
                 'leftMargin' : units.inch * 0.5,
                 'rightMargin' : units.inch * 0.5,
                 'topMargin' : units.inch * 0.5,
                 'bottomMargin' : units.inch * 0.5,
                 }
-        doc = SimpleDocTemplate('/tmp/test.pdf', **doc_parameters)
+        doc = SimpleDocTemplate(output_file, **doc_parameters)
         doc.build(story)
     
 
 if __name__ == '__main__':
     api = MongoStampedAPI.MongoStampedAPI()
     data_exporter = DataExporter(api)
-    # data_exporter.export_user_data('4ff5e81f971396609000088a')
-    data_exporter.export_user_data('4e57048accc2175fcd000001')
+    with open('/tmp/test.pdf', 'w') as fout:
+        # data_exporter.export_user_data('4ff5e81f971396609000088a')
+        data_exporter.export_user_data('4e57048accc2175fcd000001', fout)
