@@ -431,7 +431,7 @@ def index(request, schema, **kwargs):
 
 @stamped_view()
 def yahoo_index(request, **kwargs):
-    body_classes = "about"
+    body_classes = "yahoo_index about"
     mobile       = kwargs.get('mobile', False)
     
     return stamped_render(request, 'yahoo_index.html', {
