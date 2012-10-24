@@ -247,3 +247,23 @@ def update_alert_settings(request, schema, **kwargs):
     stampedAPIProxy.updateAlerts(user_id, on, off)
     return transform_output(True)
 
+@stamped_view(schema=HTTPExportStampsSchema)
+@require_http_methods(["POST"])
+def export_stamps(request, schema, **kwargs):
+    login = schema.login
+    
+    try:
+        if "@" in login:
+            account = stampedAPIProxy.getAccountByEmail(login)
+        else:
+            account = stampedAPIProxy.getAccountByScreenName(login)
+    except Exception:
+        account = None
+    
+    if account is None:
+        raise StampedInputError("invalid account")
+    
+    return transform_output({
+        "screen_name" : account['screen_name']
+    })
+

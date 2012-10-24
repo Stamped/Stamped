@@ -13,14 +13,20 @@ from django.core.exceptions     import ImproperlyConfigured
 
 urlpatterns = patterns('',
     url(r'^test$',                                      'travis.views.test_view'), 
-    url(r'^travis-blog$',                               'travis.views.travis_blog'), 
+    
+    url(r'^mobile/download-archive$',                   'mobile.views.download_archive'), 
+    url(r'^download-archive$',                          'core.views.download_archive'), 
+    url(r'^mobile/learn-more$',                         'mobile.views.learn_more'), 
+    url(r'^learn-more$',                                'core.views.learn_more'), 
+    url(r'^export-stamps$',                             'core.appsettings.export_stamps'), 
+    url(r'^mobile/export-stamps$',                      'core.appsettings.export_stamps'), 
     
     
     # --------------------------------------------------------------------------
     # ------------------------------ MOBILE ------------------------------------
     # --------------------------------------------------------------------------
     
-    url(r'^/?mobile/download$',                 'core.views.download'), 
+    url(r'^/?mobile/download$',                         'core.views.download'), 
     
     # ----------------------------- SETTINGS -----------------------------------
     # e.g., stamped.com/mobile/pw/screen_name
@@ -50,9 +56,9 @@ urlpatterns = patterns('',
     
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com/mobile, stamped.com/mobile/index, stamped.com/mobile/index.html
-    url(r'^mobile/index$',                              'mobile.views.index'), 
-    url(r'^mobile/index\.html?$',                       'mobile.views.index'), 
-    url(r'^mobile/?$',                                  'mobile.views.index'), 
+    url(r'^mobile/index$',                              'mobile.views.yahoo_index'), 
+    url(r'^mobile/index\.html?$',                       'mobile.views.yahoo_index'), 
+    url(r'^mobile/?$',                                  'mobile.views.yahoo_index'), 
     
     
     # ------------------------------ ABOUT -------------------------------------
@@ -161,12 +167,12 @@ urlpatterns = patterns('',
     
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com, stamped.com/index, stamped.com/index.html
-    url(r'^index$',                             'core.views.index'), 
-    url(r'^index\.html?$',                      'core.views.index'), 
-    url(r'^/?$',                                'core.views.index'), 
-    url(r'^1$',                                 'core.views.index'), 
-    url(r'^2$',                                 'core.views.index'), 
-    url(r'^3$',                                 'core.views.index'), 
+    url(r'^index$',                             'core.views.yahoo_index'), 
+    url(r'^index\.html?$',                      'core.views.yahoo_index'), 
+    url(r'^/?$',                                'core.views.yahoo_index'), 
+    url(r'^1$',                                 'core.views.yahoo_index'), 
+    url(r'^2$',                                 'core.views.yahoo_index'), 
+    url(r'^3$',                                 'core.views.yahoo_index'), 
     
     
     # ------------------------ APP STORE DOWNLOAD ------------------------------
