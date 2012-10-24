@@ -120,7 +120,7 @@ def privacy(request, authUserId, http_schema, **kwargs):
     return transformOutput(privacy)
 
 
-@require_http_methods(["POST,GET"])
+@require_http_methods(["POST","GET"])
 @handleHTTPRequest(requires_auth=False,
                    http_schema=HTTPFindUser,
                    parse_request_kwargs={'obfuscate':['query']},
