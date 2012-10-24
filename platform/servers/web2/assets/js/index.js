@@ -254,7 +254,7 @@
         }
         
         var update_stamped_logo_layout = function() {
-            if (mobile || g_page === "learn_more") {
+            if (mobile || g_page === "learn_more" || g_page === "yahoo_index" || g_page === "download_archive") {
                 return;
             }
             
