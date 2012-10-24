@@ -1,0 +1,32 @@
+{% extends "yahoo_index.html" %}
+{% load stamped_tags %}
+
+{% block pane-body %}
+    <p class="pane-intro">
+        Export all your stamps, beautifully.
+    </p>
+    
+    <p class="pane-desc2">
+        It's been an honor having you use our product. We hope you enjoyed it. To get a copy of all your stamps, simply enter your Stamped <b>username</b> or <b>email</b>, and we'll send you a PDF when it's ready.
+    </p>
+    
+    <form class="export-form">
+        <input name="login" class="login" value="Your email or username"></input>
+        
+        <button type="submit" class="download-pdf" action="/download-stamp-archive" method="POST"></button>
+    </form>
+{% endblock pane-body %}
+
+{% block post-main %}
+    <div class="download-stamps clearfix">
+        <a class="pdf2" href="/learn-more"></a>
+        
+        <div class="rhs">
+            <p class="bolded">Read about the news.</p>
+            <p style="margin-bottom: 12px; max-width: 244px">Learn more about the acquisition by reading a letter from our founders <a href="learn-more">here</a>.</p>
+            
+            <p><a href="/learn-more">Click here</a></p>
+        </div>
+    </div>
+{% endblock post-main %}
+

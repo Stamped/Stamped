@@ -1,0 +1,62 @@
+{% extends "about.html" %}
+{% load stamped_tags %}
+
+<!-- CSS Dependencies => assets/generated/css/yahoo_index.generated.css
+     - - - - - - - - - - - - - - - - - - - - -
+    
+    Core stamped dependencies:
+        stylesheet: yahoo_index.css
+-->
+
+<!-- Javascript Dependencies => assets/generated/js/yahoo_index.generated.js
+     - - - - - - - - - - - - - - - - - - - - - - - -
+    
+    jQuery plugin dependencies:
+        script: libs/yahoo_index.js
+-->
+
+{% block styles %}
+    {{ block.super }}
+    
+    {% if STAMPED_DEBUG %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/yahoo_index.css">
+    {% else %}
+        <link rel="stylesheet" href="{{ STAMPED_STATIC_URL }}css/yahoo_index.generated.{{ STAMPED_ASSET_VERSION }}.css">
+    {% endif %}
+{% endblock styles %}
+
+{% block pane-body %}
+    <p class="pane-intro">
+        Our team is excited to announce, we've been acquired by
+    </p>
+    
+    <div class="yahoo"></div>
+    
+    <p class="pane-desc">
+        For more about the acquisition, <a href="/learn-more">click here</a>.
+    </p>
+{% endblock pane-body %}
+
+{% block post-main %}
+    <div class="download-stamps clearfix">
+        <a class="pdf" href="/download-archive"></a>
+        
+        <div class="rhs">
+            <p class="bolded">Are you a Stamped user?</p>
+            <p style="margin-bottom: 12px;">Download a PDF copy of all your stamps.</p>
+            
+            <a class="download-archive" href="/download-archive"></a>
+        </div>
+    </div>
+{% endblock post-main %}
+
+{% block scripts %}
+    {{ block.super }}
+    
+    {% if STAMPED_DEBUG %}
+        <script src="{{ STAMPED_STATIC_URL }}js/yahoo_index.js"></script>
+    {% else %}
+        <script src="{{ STAMPED_STATIC_URL }}js/yahoo_index.generated.{{ STAMPED_ASSET_VERSION }}.js"></script>
+    {% endif %}
+{% endblock scripts %}
+

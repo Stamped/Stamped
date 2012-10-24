@@ -110,6 +110,21 @@ class StampedAPIProxy(object):
             return self._handle_get("users/show.json", { 'screen_name' : screen_name })
     
     @CACHED(no_cache=True)
+    def getAccountByEmail(self, email):
+        if self is None:
+            return str("web::getAccountByEmail::%s" % email)
+        
+        if self._ec2:
+            return self._export(self.api.getAccountByEmail(email).dataExport())
+        else:
+            users = self._handle_get("users/find/email.json", { 'query' : email })
+            
+            if len(users) == 1:
+                return users[0]
+            else:
+                return None
+    
+    @CACHED(no_cache=True)
     def getAccount(self, user_id, no_cache=False):
         if self is None:
             return str("web::getAccount::%s" % user_id)

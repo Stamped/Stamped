@@ -120,8 +120,9 @@ def privacy(request, authUserId, http_schema, **kwargs):
     return transformOutput(privacy)
 
 
-@require_http_methods(["POST"])
-@handleHTTPRequest(http_schema=HTTPFindUser,
+@require_http_methods(["POST","GET"])
+@handleHTTPRequest(requires_auth=False,
+                   http_schema=HTTPFindUser,
                    parse_request_kwargs={'obfuscate':['query']},
                    exceptions=userExceptions)
 def findEmail(request, authUserId, http_schema, **kwargs):
