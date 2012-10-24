@@ -14,12 +14,15 @@ from api.db.mongodb import MongoEntityCollection
 from api import MongoStampedAPI
 
 from collections import defaultdict
-from reportlab.lib import pagesizes, styles
-from reportlab.platypus import Paragraph, SimpleDocTemplate, PageBreak, KeepTogether
+from reportlab.lib import pagesizes, styles, colors
+from reportlab.platypus import Paragraph, SimpleDocTemplate, PageBreak, KeepTogether, Image, Spacer, Flowable
+
+import os
 
 stylesheet = styles.getSampleStyleSheet()
 normal_style = stylesheet['Normal']
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def categorize_entity(entity):
     # TODO: this is wrong...
@@ -32,9 +35,38 @@ def categorize_entity(entity):
     return 'other'
 
 
+class Separator(Flowable):
+    def __init__(self, width):
+        self.width = width
+
+    def wrap(self, *args):
+        return 40, 1
+
+    def draw(self):
+        self.canv.setFillColor(colors.black)
+        self.canv.line(0, 0, self.width, 0)
+
+
 class DataExporter(object):
     def __init__(self, api):
         self.__api = api
+
+        self.spacer = Spacer(10, 20)
+        self.separator = Separator(40)
+        self.title_style = styles.ParagraphStyle(
+                name='title',
+                fontName='Helvetica',
+                )
+        self.subtitle_style = styles.ParagraphStyle(
+                name='subtitle',
+                fontName='Helvetica',
+                textColor=colors.gray,
+                )
+        self.normal_style = styles.ParagraphStyle(
+                name='normal',
+                fontName='Helvetica',
+                textColor=colors.darkgray,
+                )
 
     def make_title_page(self, user):
         # TODO: add picture and style
@@ -55,29 +87,40 @@ class DataExporter(object):
         story.append(PageBreak())
         return story
 
-    def make_stamp_story(self, user_name, stamp, entity):
+    def make_stamp_story(self, user_name, ending, stamp, entity):
         # TODO: add picture and style
         story = []
-        story.append(Paragraph(entity.title, normal_style))
-        story.append(Paragraph(entity.subtitle, normal_style))
-        
+        story.append(Paragraph(entity.title, self.title_style))
+        story.append(Paragraph(entity.subtitle, self.subtitle_style))
+
         for content in stamp.contents:
             blurb = content.blurb
             if blurb is not None:
-                story.append(Paragraph(user_name + ' said:', normal_style))
-                story.append(Paragraph(blurb, normal_style))
-
+                story.append(self.spacer)
+                story.append(Paragraph('<b>%s</b> said:' % user_name, self.subtitle_style))
+                story.append(Paragraph(blurb, self.normal_style))
+        
         if stamp.credits is not None:
-            credit_users = (credit.user.screen_name for credit in stamp.credits)
-            story.append(Paragraph('Credit to: ' + ', '.join(credit_users), normal_style))
-
+            story.append(self.spacer)
+            first_credit = stamp.credits[0].user.screen_name
+            credit_text = 'Credit to: <b>%s</b>' % first_credit
+            num_credits = len(stamp.credits)
+            if num_credits > 1:
+                credit_text += ' and %d other' % (num_credits - 1)
+            if num_credits > 2:
+                credit_text += 's'
+            story.append(Paragraph(credit_text, self.subtitle_style))
+        story.extend(ending)
         return [KeepTogether(story)]
 
     def make_section(self, user_name, stamp_type, stamps):
         story = []
         story.extend(self.make_section_title_page(user_name, stamp_type, len(stamps)))
-        for stamp in stamps:
-            story.extend(self.make_stamp_story(user_name, *stamp))
+
+        divider = [self.spacer, self.separator, self.spacer]
+        for stamp in stamps[:-1]:
+            story.extend(self.make_stamp_story(user_name, divider, *stamp))
+        story.extend(self.make_stamp_story(user_name, [], *stamps[-1]))
         story.append(PageBreak())
         return story
 
@@ -115,7 +158,10 @@ class DataExporter(object):
             if category in categories:
                 story.extend(self.make_section(user.screen_name, readable_name, categories[category]))
 
-        doc = SimpleDocTemplate('/tmp/test.pdf', pagesize=pagesizes.A6)
+        doc_parameters = {
+                'pagesize' : pagesizes.A6,
+                }
+        doc = SimpleDocTemplate('/tmp/test.pdf', **doc_parameters)
         doc.build(story)
     
 
