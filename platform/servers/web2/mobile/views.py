@@ -75,6 +75,18 @@ def index(*args, **kwargs):
     kwargs['mobile'] = True
     return views.index(*args, **kwargs)
 
+def yahoo_index(*args, **kwargs):
+    kwargs['mobile'] = True
+    return views.yahoo_index(*args, **kwargs)
+
+def download_archive(*args, **kwargs):
+    kwargs['mobile'] = True
+    return views.download_archive(*args, **kwargs)
+
+def learn_more(*args, **kwargs):
+    kwargs['mobile'] = True
+    return views.learn_more(*args, **kwargs)
+
 def about(*args, **kwargs):
     kwargs['mobile'] = True
     return views.about(*args, **kwargs)
