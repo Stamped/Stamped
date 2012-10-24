@@ -12,15 +12,17 @@ from api.db.mongodb import MongoUserStampsCollection
 from api.db.mongodb import MongoStampCollection
 from api.db.mongodb import MongoEntityCollection
 from api import MongoStampedAPI
+from libs import image_utils
 
-from collections import defaultdict
+from PIL import Image as PILImage
 from reportlab.lib import pagesizes, styles, colors, units
-from reportlab.platypus import Paragraph, SimpleDocTemplate, PageBreak, KeepTogether, Image, Spacer, Flowable
+from reportlab.platypus import *
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 import os
 import urllib
+from collections import defaultdict
 from tempfile import NamedTemporaryFile
 
 stylesheet = styles.getSampleStyleSheet()
@@ -42,12 +44,10 @@ def categorize_entity(entity):
 
 
 def get_image_from_url(url):
-    print url
     suffix = url[-4:]
     assert suffix.lower() in ('.png', '.jpg'), suffix
     tmpfile = NamedTemporaryFile(suffix=suffix, delete=False)
     urllib.urlretrieve(url, tmpfile.name)
-    print tmpfile.name
     return tmpfile.name
 
 
@@ -116,6 +116,55 @@ class ResizableImage(Flowable):
 
     def draw(self):
         Image(self.image_file, self.width, self.height).drawOn(self.canv, 0, 0)
+
+
+def create_doc_template(output_file, user):
+    def create_gradient(width, height):
+        alpha  = 255
+        stops  = [(
+                2.0, 
+                image_utils.parse_rgb(user.color_primary,   alpha), 
+                image_utils.parse_rgb(user.color_secondary, alpha)
+            )]
+        return image_utils.get_gradient_image((width, height), stops)
+
+    band = create_gradient(640, 20)
+    page_decor = PILImage.new("RGBA", (640, 960))
+    page_decor.paste(band, (0, 0))
+    page_decor.paste(band, (0, 940))
+    overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'pagebg.png'))
+    page_decor.paste(overlay, (0, 0), overlay)
+    page_bg = NamedTemporaryFile(suffix='.png', delete=False)
+    page_decor.save(page_bg.name)
+
+    def new_content_page(canvas, doc):
+        canvas.drawImage(page_bg.name, 0, 0)
+
+    title_decor = create_gradient(640, 960)
+    overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
+    title_decor.paste(overlay, (0, 0), overlay)
+    title_bg = NamedTemporaryFile(suffix='.png', delete=False)
+    title_decor.save(title_bg.name)
+
+    def new_cover_page(canvas, doc):
+        canvas.drawImage(title_bg.name, 0, 0)
+
+    doc_parameters = {
+            'pagesize' : (640, 960),
+            'leftMargin' : 54,
+            'rightMargin' : 54,
+            'topMargin' : 54,
+            'bottomMargin' : 54,
+            }
+    doc = BaseDocTemplate(output_file, **doc_parameters)
+
+    full_frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
+    pages = []
+    pages.append(PageTemplate(id='CoverPage', frames=full_frame, onPage=new_cover_page, pagesize=doc.pagesize))
+    pages.append(PageTemplate(id='FullBlank', frames=full_frame, pagesize=doc.pagesize))
+    pages.append(PageTemplate(id='Decorated', frames=full_frame, onPage=new_content_page, pagesize=doc.pagesize))
+    doc.addPageTemplates(pages)
+    return doc
         
 
 class DataExporter(object):
@@ -153,6 +202,7 @@ class DataExporter(object):
         story.append(Paragraph(user.screen_name, normal_style))
         if user.location:
             story.append(Paragraph(user.location, normal_style))
+        story.append(NextPageTemplate('FullBlank'))
         story.append(PageBreak())
         return story
 
@@ -163,6 +213,7 @@ class DataExporter(object):
         story.append(Paragraph(user_name + "'s", normal_style))
         story.append(Paragraph(stamp_type + " Stamps", normal_style))
         story.append(Paragraph(str(count), normal_style))
+        story.append(NextPageTemplate('Decorated'))
         story.append(PageBreak())
         return story
 
@@ -207,11 +258,14 @@ class DataExporter(object):
         for stamp in stamps[:-1]:
             story.extend(self.make_stamp_story(user, divider, stamp_image, *stamp))
         story.extend(self.make_stamp_story(user, [], stamp_image, *stamps[-1]))
+        story.append(NextPageTemplate('FullBlank'))
         story.append(PageBreak())
         return story
 
     def export_user_data(self, user_id, output_file):
         # TODO: TOC
+        # TODO: credit usernames
+        # TODO: a bit at the bottom
         story = []
 
         user_collection = MongoUserCollection.MongoUserCollection(self.__api)
@@ -245,20 +299,13 @@ class DataExporter(object):
             if category in categories:
                 story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
 
-        doc_parameters = {
-                'pagesize' : (640, 960),
-                'leftMargin' : units.inch * 0.5,
-                'rightMargin' : units.inch * 0.5,
-                'topMargin' : units.inch * 0.5,
-                'bottomMargin' : units.inch * 0.5,
-                }
-        doc = SimpleDocTemplate(output_file, **doc_parameters)
-        doc.build(story)
+        create_doc_template(output_file, user).build(story)
     
 
 if __name__ == '__main__':
     api = MongoStampedAPI.MongoStampedAPI()
     data_exporter = DataExporter(api)
     with open('/tmp/test.pdf', 'w') as fout:
-        # data_exporter.export_user_data('4ff5e81f971396609000088a')
-        data_exporter.export_user_data('4e57048accc2175fcd000001', fout)
+        data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
+        # data_exporter.export_user_data('5010c75ac5fc3e08efa2a4ee', fout) # anthony
+        # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
