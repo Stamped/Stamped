@@ -14,6 +14,8 @@ from api.MongoStampedAuth           import MongoStampedAuth
 from django.views.decorators.http   import require_http_methods
 from django.http                    import HttpResponseRedirect
 
+import api.DataExporter
+
 from errors                         import *
 from servers.web2.core.schemas      import *
 from servers.web2.core.helpers      import *
@@ -248,7 +250,7 @@ def update_alert_settings(request, schema, **kwargs):
     return transform_output(True)
 
 @stamped_view(schema=HTTPExportStampsSchema)
-@require_http_methods(["POST"])
+@require_http_methods(["GET"])
 def export_stamps(request, schema, **kwargs):
     login = schema.login
     
@@ -258,12 +260,26 @@ def export_stamps(request, schema, **kwargs):
         else:
             account = stampedAPIProxy.getAccountByScreenName(login)
     except Exception:
+        utils.printException()
         account = None
     
     if account is None:
         raise StampedInputError("invalid account")
     
-    return transform_output({
-        "screen_name" : account['screen_name']
-    })
+    kwargs.setdefault('content_type', 'application/pdf')
+    kwargs.setdefault('mimetype',     'application/pdf')
+    
+    exporter    = api.DataExporter.DataExporter(globalMongoStampedAPI)
+    user_id     = account['user_id']
+    screen_name = account['screen_name']
+    tmpfile     = '/tmp/%s.pdf' % user_id
+    
+    with open(tmpfile, 'w') as fout:
+        exporter.export_user_data(user_id, fout)
+    
+    f = open(file_path, "rb")
+    response = HttpResponse(f, **kwargs)
+    response['Content-Disposition'] = 'attachment; filename="%s_stamps.pdf"' % screen_name
+    
+    return response
 

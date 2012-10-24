@@ -118,7 +118,11 @@ class StampedAPIProxy(object):
             return self._export(self.api.getAccountByEmail(email).dataExport())
         else:
             users = self._handle_get("users/find/email.json", { 'query' : email })
-            utils.log(users)
+            
+            if len(users) == 1:
+                return users[0]
+            else:
+                return None
     
     @CACHED(no_cache=True)
     def getAccount(self, user_id, no_cache=False):
