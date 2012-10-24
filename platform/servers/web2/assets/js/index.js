@@ -296,7 +296,7 @@
                 offset = 280;
             }
             
-            if (g_page === "learn_more") {
+            if (g_page == "learn_more" || g_page == "learn-more") {
                 offset = 300;
             }
             
