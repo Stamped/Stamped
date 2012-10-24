@@ -851,7 +851,10 @@ class StampedAPI(AStampedAPI):
     @API_CALL
     def updateProfileImageAsync(self, screen_name, image_url):
         self._imageDB.addResizedProfileImages(screen_name.lower(), image_url)
-
+    
+    def getAccountByEmail(self, login):
+        return self._accountDB.getAccountByEmail(login)
+    
     def checkAccount(self, login):
         ### TODO: Clean this up (along with HTTP API function)
         valid = False

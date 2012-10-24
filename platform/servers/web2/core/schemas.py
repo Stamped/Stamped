@@ -173,3 +173,10 @@ class HTTPTestSchema(Schema):
         cls.addProperty('sketch',                           basestring)
         cls.addProperty('mobile',                           bool)
 
+class HTTPExportStampsSchema(Schema):
+    
+    @classmethod
+    def setSchema(cls):
+        cls.addProperty('mobile',                           bool)
+        cls.addProperty('login',                            basestring, required=True)
+

@@ -430,6 +430,42 @@ def index(request, schema, **kwargs):
     })
 
 @stamped_view()
+def yahoo_index(request, **kwargs):
+    body_classes = "about"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'yahoo_index.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'yahoo_index', 
+        'title'             : 'Stamped', 
+        'mobile'            : mobile
+    })
+
+@stamped_view()
+def download_archive(request, **kwargs):
+    body_classes = "about"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'download_archive.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'download_archive', 
+        'title'             : 'Stamped', 
+        'mobile'            : mobile
+    })
+
+@stamped_view()
+def learn_more(request, **kwargs):
+    body_classes = "about learn_more"
+    mobile       = kwargs.get('mobile', False)
+    
+    return stamped_render(request, 'learn_more.html', {
+        'body_classes'      : body_classes, 
+        'page'              : 'learn_more', 
+        'title'             : 'Stamped', 
+        'mobile'            : mobile
+    })
+
+@stamped_view()
 def about(request, **kwargs):
     body_classes = "about main main-animating"
     mobile   = kwargs.get('mobile', False)

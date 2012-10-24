@@ -254,7 +254,7 @@
         }
         
         var update_stamped_logo_layout = function() {
-            if (mobile) {
+            if (mobile || g_page === learn_more) {
                 return;
             }
             
@@ -294,6 +294,10 @@
             
             if (g_page === "404") {
                 offset = 280;
+            }
+            
+            if (g_page === "learn_more") {
+                offset = 300;
             }
             
             console.log("page: " + g_page + "; height: " + height + "; offset: " + offset);
