@@ -318,11 +318,16 @@ class DataExporter(object):
         return story
 
     def make_stamp_story(self, user, ending, stamp_image, stamp, entity):
-        # TODO: places address
         story = []
 
         story.append(StampTitle(entity.title, self.title_style, stamp_image))
-        story.append(Paragraph(entity.subtitle, self.subtitle_style))
+
+        subtitle = entity.subtitle
+        if entity.kind == 'place':
+            address = entity.formatted_address
+            if address is not None:
+                subtitle = address
+        story.append(Paragraph(subtitle, self.subtitle_style))
 
         for content in stamp.contents:
             blurb = content.blurb
@@ -433,6 +438,6 @@ if __name__ == '__main__':
     data_exporter = DataExporter(api)
     with open('/tmp/test.pdf', 'w') as fout:
         # data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
-        data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
-        # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
+        # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
+        data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
         # data_exporter.export_user_data('4e57048dccc2175fca000005', fout) # travis
