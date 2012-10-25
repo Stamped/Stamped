@@ -138,7 +138,6 @@ def create_gradient(width, height, user):
 
 
 def create_doc_template(output_file, user):
-    logs.info(">>>create_doc_template 0")
     band = create_gradient(640, 20, user)
     page_decor = PILImage.new("RGBA", (640, 960))
     page_decor.paste(band, (0, 0))
@@ -289,15 +288,6 @@ class DataExporter(object):
 
         story.append(StampTitle(entity.title, self.title_style, stamp_image))
         story.append(Paragraph(entity.subtitle, self.subtitle_style))
-        if stamp.credits is not None:
-            first_credit = stamp.credits[0].user.user_id
-            credit_text = 'Credit to: <b>%s</b>' % self.user_collection.getUser(first_credit).screen_name
-            num_credits = len(stamp.credits)
-            if num_credits > 1:
-                credit_text += ' and %d other' % (num_credits - 1)
-            if num_credits > 2:
-                credit_text += 's'
-            story.append(Paragraph(credit_text, self.subtitle_style))
 
         for content in stamp.contents:
             blurb = content.blurb
@@ -310,6 +300,7 @@ class DataExporter(object):
             if content.images:
                 for image in content.images:
                     img_file = get_image_from_url(image.sizes[0].url)
+                    story.append(Spacer(1, 15))
                     story.append(ResizableImage(img_file))
         
         story.extend(ending)
