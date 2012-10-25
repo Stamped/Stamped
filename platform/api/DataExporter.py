@@ -35,10 +35,14 @@ def categorize_entity(entity):
     # TODO: this is wrong...
     if entity.kind == 'place':
         return 'place'
-    if entity.kind == 'media_item' and 'book' in entity.types:
+    if 'book' in entity.types:
         return 'book'
-    if entity.kind in ('media_item', 'media_collection', 'person'):
+    if entity.isType('track') or entity.isType('album') or entity.isType('artist'):
         return 'music'
+    if entity.isType('movie') or entity.isType('tv'):
+        return 'film'
+    if entity.isType('app'):
+        return 'app'
     return 'other'
 
 
@@ -71,14 +75,14 @@ class Separator(Flowable):
 
     def split(self, width, height):
         if 41 > height:
-            return [PageBreak()]
+            return [Spacer(1, 0.001)]
         return [self]
 
 
 class NiceSpacer(Spacer):
     def split(self, width, height):
         if self.height > height:
-            return [PageBreak()]
+            return [Spacer(1, 0.001)]
         return [self]
 
 
@@ -383,7 +387,8 @@ class DataExporter(object):
                 ('music', 'Music'),
                 ('film', 'Film'),
                 ('book', 'Book'),
-                ('app', 'App')]
+                ('app', 'App'),
+                ('other', 'Other')]
 
         stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
         for category, readable_name in category_names:
@@ -398,5 +403,5 @@ if __name__ == '__main__':
     data_exporter = DataExporter(api)
     with open('/tmp/test.pdf', 'w') as fout:
         # data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
-        data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
-        # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
+        # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
+        data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
