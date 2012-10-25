@@ -70,7 +70,7 @@ class Separator(Flowable):
         return 4
 
     def split(self, width, height):
-        if self.height > height:
+        if 41 > height:
             return [PageBreak()]
         return [self]
 
@@ -397,6 +397,6 @@ if __name__ == '__main__':
     api = MongoStampedAPI.MongoStampedAPI()
     data_exporter = DataExporter(api)
     with open('/tmp/test.pdf', 'w') as fout:
-        data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
-        # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
+        # data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
+        data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
         # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
