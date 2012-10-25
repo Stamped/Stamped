@@ -274,7 +274,7 @@ def export_stamps(request, schema, **kwargs):
     
     logs.info("screen_name: %s" % screen_name)
     
-    exporter    = api.DataExporter.DataExporter(globalMongoStampedAPI)
+    exporter    = api.DataExporter.DataExporter(globalMongoStampedAPI())
     tmpfile     = '/tmp/%s.pdf' % user_id
     
     logs.info("tmpfile: %s" % tmpfile)
