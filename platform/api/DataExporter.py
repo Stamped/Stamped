@@ -7,10 +7,6 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals, logs, utils
-from api.db.mongodb import MongoUserCollection
-from api.db.mongodb import MongoUserStampsCollection
-from api.db.mongodb import MongoStampCollection
-from api.db.mongodb import MongoEntityCollection
 from api import MongoStampedAPI
 from libs import image_utils
 
@@ -224,7 +220,7 @@ class CoverPicture(Flowable):
 class DataExporter(object):
     def __init__(self, api):
         self.__api = api
-        self.user_collection = MongoUserCollection.MongoUserCollection(self.__api)
+        self.user_collection = self.__api._userDB
 
         self.spacer = NiceSpacer(1, 20)
         self.separator = Separator(552)
@@ -376,9 +372,9 @@ class DataExporter(object):
 
         logs.info("before build")
         try:
-            user_stamps_collection = MongoUserStampsCollection.MongoUserStampsCollection()
-            stamp_collection = MongoStampCollection.MongoStampCollection()
-            entity_collection = MongoEntityCollection.MongoEntityCollection()
+            user_stamps_collection = self.__api._stampDB.user_stamps_collection
+            stamp_collection = self.__api._stampDB
+            entity_collection = self.__api._entityDB
 
             user = self.user_collection.getUser(user_id)
             story.extend(self.make_title_page(user))
