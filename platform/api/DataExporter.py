@@ -131,17 +131,18 @@ class ResizableImage(Flowable):
         Image(self.image_file, self.width, self.height).drawOn(self.canv, 0, 0)
 
 
-def create_doc_template(output_file, user):
-    def create_gradient(width, height):
-        alpha  = 255
-        stops  = [(
-                2.0, 
-                image_utils.parse_rgb(user.color_primary,   alpha), 
-                image_utils.parse_rgb(user.color_secondary, alpha)
-            )]
-        return image_utils.get_gradient_image((width, height), stops)
+def create_gradient(width, height, user):
+    alpha  = 255
+    stops  = [(
+            2.0, 
+            image_utils.parse_rgb(user.color_primary,   alpha), 
+            image_utils.parse_rgb(user.color_secondary, alpha)
+        )]
+    return image_utils.get_gradient_image((width, height), stops)
 
-    band = create_gradient(640, 20)
+
+def create_doc_template(output_file, user):
+    band = create_gradient(640, 20, user)
     page_decor = PILImage.new("RGBA", (640, 960))
     page_decor.paste(band, (0, 0))
     page_decor.paste(band, (0, 940))
@@ -153,7 +154,7 @@ def create_doc_template(output_file, user):
     def new_content_page(canvas, doc):
         canvas.drawImage(page_bg.name, 0, 0)
 
-    title_decor = create_gradient(640, 944)
+    title_decor = create_gradient(640, 944, user)
     overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
     title_decor.paste(overlay, (0, 0), overlay)
     title_bg = NamedTemporaryFile(suffix='.png', delete=False)
@@ -205,7 +206,8 @@ class CoverPicture(Flowable):
         Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
 
         if self.logo_image is not None:
-            Image(self.logo_image).drawOn(canvas, 250, 100)
+            Image(self.logo_image, 161, 161).drawOn(canvas, 250, 100)
+            Image(os.path.join(SCRIPT_DIR, 'stamped-type.png'), 161, 161).drawOn(canvas, 250, 100)
 
         canvas.restoreState()
         
