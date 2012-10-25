@@ -282,6 +282,7 @@ def export_stamps(request, schema, **kwargs):
     with open(tmpfile, 'w') as fout:
         exporter.export_user_data(user_id, fout)
     
+    logs.info("resulting tmpfile: %s" % tmpfile)
     f = open(tmpfile, "rb")
     response = HttpResponse(f, **kwargs)
     response['Content-Disposition'] = 'attachment; filename="%s_stamps.pdf"' % screen_name
