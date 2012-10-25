@@ -28,7 +28,6 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 pdfmetrics.registerFont(TTFont('TitleFont', os.path.join(SCRIPT_DIR, 'titlefont.ttf')))
 
 def categorize_entity(entity):
-    # TODO: this is wrong...
     if entity.kind == 'place':
         return 'place'
     if 'book' in entity.types:
@@ -83,9 +82,9 @@ class NiceSpacer(Spacer):
 
 
 class StampTitle(Flowable):
-    def __init__(self, text, style, stamp_image):
+    def __init__(self, text, style, stamp_image, placement=36):
         self.paragraph = Paragraph(text, style)
-        self.stamp_placement = 36
+        self.stamp_placement = placement
         self.stamp_image = Image(stamp_image)
 
     def wrap(self, *args):
@@ -207,6 +206,36 @@ class CoverPicture(Flowable):
             Image(os.path.join(SCRIPT_DIR, 'stamped-type.png'), 161, 161).drawOn(canvas, 250, 100)
 
         canvas.restoreState()
+
+
+class FollowingInfo(Flowable):
+    def __init__(self, following, follower, style):
+        self.following = following
+        self.follower = follower
+        self.style = style
+
+    def wrap(self, *args):
+        w, h = Paragraph('Followers', self.style).wrap(640, 200)
+        return 640, h * 2
+
+    def draw_group(self, group, shift):
+        offset = 0
+        for item in group:
+            w, h = item.wrap(640, 200)
+            item.drawOn(self.canv, shift, offset)
+            offset += h
+
+    def draw(self):
+        follower_story = [
+            Paragraph('Followers', self.style),
+            Paragraph('<b>%d</b>' % self.follower, self.style),
+            ]
+        following_story = [
+            Paragraph('Following', self.style),
+            Paragraph('<b>%d</b>' % self.following, self.style),
+            ]
+        self.draw_group(follower_story, 0)
+        self.draw_group(following_story, 250)
         
 
 class DataExporter(object):
@@ -221,7 +250,7 @@ class DataExporter(object):
                 textColor=colors.HexColor(0x262626),
                 fontName='TitleFont',
                 fontSize=110,
-                leading=140,
+                leading=120,
                 )
         self.stamp_count_style = styles.ParagraphStyle(
                 name='stampcount',
@@ -263,6 +292,7 @@ class DataExporter(object):
         story = []
         story.append(CoverPicture(user, True))
         story.append(Paragraph(align_center(user.name), self.cover_title_style))
+        story.append(Spacer(1, 30))
         story.append(Paragraph(align_center('<b>@%s</b>' % user.screen_name), self.normal_style))
         if user.location:
             story.append(Paragraph(align_center(user.location), self.normal_style))
@@ -276,7 +306,7 @@ class DataExporter(object):
         story.append(Spacer(1, 4))
         story.append(Paragraph(align_center(user.name + "'s"), self.no_leading))
         story.append(Paragraph(align_center(stamp_type + " Stamps"), self.cover_title_style))
-        story.append(Spacer(1, 50))
+        story.append(Spacer(1, 80))
         story.append(Paragraph(align_center(str(count)), self.stamp_count_style))
         story.append(NextPageTemplate('Decorated'))
         story.append(PageBreak())
@@ -296,7 +326,6 @@ class DataExporter(object):
                 story.append(Paragraph('<b>%s</b> said:' % user.screen_name, self.subtitle_style))
                 story.append(Paragraph(blurb, self.normal_style))
 
-            # TODO: multiple images
             if content.images:
                 for image in content.images:
                     img_file = get_image_from_url(image.sizes[0].url)
@@ -334,9 +363,13 @@ class DataExporter(object):
         spacer = NiceSpacer(1, 34)
         story.append(Paragraph("<b>%s's Info" % user.name, self.normal_style))
         story.append(separator)
-        # TODO: add followers number
-        story.append(Paragraph(str(stats.num_stamps), self.cover_title_style))
-        story.append(Paragraph('total stamps', self.normal_style))
+
+        story.append(FollowingInfo(stats.num_friends, stats.num_followers, self.normal_style))
+        story.append(separator)
+
+        stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
+        story.append(StampTitle(str(stats.num_stamps), self.cover_title_style, stamp_image, 76))
+        story.append(Paragraph('Total Stamps', self.normal_style))
         story.append(separator)
         for kind, display in categories:
             count = 0
@@ -345,7 +378,7 @@ class DataExporter(object):
                     count = dist.count
                     break
 
-            story.append(Paragraph('%s / <b>%d</b>' % (display, count), self.normal_style))
+            story.append(Paragraph('%s <font color=#999999>/</font> <b>%d</b>' % (display, count), self.normal_style))
             story.append(spacer)
         story.append(NextPageTemplate('FullBlank'))
         story.append(PageBreak())
