@@ -21,6 +21,15 @@
    ************************************************************************** */
 
 
+a {
+    color: lighten(#2F6FC8, 10%) !important;
+    
+    &:hover  { color: #0855C0 !important; }
+    &:active { color: #000 !important; }
+}
+
+.bolded { color: #595959 !important; }
+
 .yahoo {
     background: url(/assets/img/yahoo.png) no-repeat;
     width:  326px;
@@ -32,7 +41,7 @@
     display: none;
 }
 
-#main-body {
+.yahoo_index #main-body {
     text-align: center;
 }
 
@@ -44,11 +53,14 @@
 .download-stamps {
     position: relative;
     left: 50%;
-    margin: 24px 0 0 -144px;
+    margin: 18px 0 12px -144px;
     
     .pdf {
-        display: block;
+        position: relative;
+        top: -12px;
+        left: -4px;
         
+        display: block;
         background: url(/assets/img/yahoo.png) no-repeat;
         background-position: 0 -220px;
         width:  79px;
@@ -58,8 +70,10 @@
     }
     
     .pdf2 {
-        display: block;
+        position: relative;
+        top: -11px;
         
+        display: block;
         background: url(/assets/img/yahoo.png) no-repeat;
         background-position: -96px -220px;
         width:  79px;
@@ -70,7 +84,7 @@
     
     .rhs {
         float: left;
-        margin-left: 12px;
+        margin-left: 4px;
     }
 }
 
@@ -100,26 +114,32 @@
 
 #main {
     min-width: 470px;
-    .pane-body {
-    }
+    width: 470px !important;
+    margin-left: -235px;
+}
+
+.yahoo_index .pane-intro {
+    width: 280px;
 }
 
 .pane-body {
     .pane-intro {
         .stamped-font();
-        margin-top: 24px;
+        
+        letter-spacing: .04em;
+        margin: 24px auto 0;
         font-size: 2.2em;
     }
     
     .pane-desc  { margin: 24px auto 0; }
-    .pane-desc2 { margin: 24px auto 12px; }
+    .pane-desc2 { margin: 12px auto 18px; }
 }
 
 .export-form {
     input {
         font-weight: 200;
-        font-size: 120%;
-        width: 40%;
+        font-size: 100%;
+        width: 60%;
         color: #bfbfbf;
         
         border: 1px solid #bfbfbf;
@@ -139,7 +159,7 @@
     .download-pdf {
         border: 0 none;
         outline: none;
-        margin: 12px auto 0;
+        margin: 18px 0 0;
     }
 }
 
@@ -148,7 +168,7 @@
     background-position: 0 -176px;
     width:  326px;
     height: 41px;
-    margin: 12px 0 24px;
+    margin: 12px 0 4px;
 }
 
 .learn_more {
@@ -156,5 +176,9 @@
     .pane-body p {
         margin: 12px 0;
     }
+}
+
+.learn_more .download-stamps {
+    margin-bottom: 48px;
 }
 

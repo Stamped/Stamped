@@ -297,7 +297,7 @@
             }
             
             if (g_page == "learn_more" || g_page == "learn-more") {
-                offset = 300;
+                offset = 240;
             }
             
             console.log("page: " + g_page + "; height: " + height + "; offset: " + offset);
