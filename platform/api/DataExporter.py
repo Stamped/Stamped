@@ -363,46 +363,48 @@ class DataExporter(object):
     def export_user_data(self, user_id, output_file):
         story = []
 
-        user_stamps_collection = MongoUserStampsCollection.MongoUserStampsCollection()
-        stamp_collection = MongoStampCollection.MongoStampCollection()
-        entity_collection = MongoEntityCollection.MongoEntityCollection()
-
-        user = self.user_collection.getUser(user_id)
-        story.extend(self.make_title_page(user))
-        story.extend(self.make_toc_page(user))
-
-        stamp_ids = user_stamps_collection.getUserStampIds(user_id)
-        stamps = stamp_collection.getStamps(stamp_ids)
-        stamps_and_entities = []
-        for stamp in stamps:
-            entity = entity_collection.getEntity(stamp.entity.entity_id)
-            stamps_and_entities.append((stamp, entity))
-
-        categories = defaultdict(list)
-        for stamp, entity in stamps_and_entities:
-            categories[categorize_entity(entity)].append((stamp, entity))
-
-        category_names = [
-                ('place', 'Place'),
-                ('music', 'Music'),
-                ('film', 'Film'),
-                ('book', 'Book'),
-                ('app', 'App'),
-                ('other', 'Other')]
-
-        stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
-        for category, readable_name in category_names:
-            if category in categories:
-                story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
-
         logs.info("before build")
         try:
+            user_stamps_collection = MongoUserStampsCollection.MongoUserStampsCollection()
+            stamp_collection = MongoStampCollection.MongoStampCollection()
+            entity_collection = MongoEntityCollection.MongoEntityCollection()
+
+            user = self.user_collection.getUser(user_id)
+            story.extend(self.make_title_page(user))
+            story.extend(self.make_toc_page(user))
+
+            stamp_ids = user_stamps_collection.getUserStampIds(user_id)
+            stamps = stamp_collection.getStamps(stamp_ids)
+            stamps_and_entities = []
+            for stamp in stamps:
+                entity = entity_collection.getEntity(stamp.entity.entity_id)
+                stamps_and_entities.append((stamp, entity))
+
+            categories = defaultdict(list)
+            for stamp, entity in stamps_and_entities:
+                categories[categorize_entity(entity)].append((stamp, entity))
+
+            category_names = [
+                    ('place', 'Place'),
+                    ('music', 'Music'),
+                    ('film', 'Film'),
+                    ('book', 'Book'),
+                    ('app', 'App'),
+                    ('other', 'Other')]
+
+            stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
+            for category, readable_name in category_names:
+                if category in categories:
+                    story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
+            
+            logs.info("before inner build")
             create_doc_template(output_file, user).build(story)
+            logs.info("after inner build")
         except:
             logs.warn(utils.getFormattedException())
         
         logs.info("after build")
-    
+
 
 if __name__ == '__main__':
     api = MongoStampedAPI.MongoStampedAPI()
