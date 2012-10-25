@@ -269,10 +269,15 @@ def export_stamps(request, schema, **kwargs):
     kwargs.setdefault('content_type', 'application/pdf')
     kwargs.setdefault('mimetype',     'application/pdf')
     
-    exporter    = api.DataExporter.DataExporter(globalMongoStampedAPI)
     user_id     = account['user_id']
     screen_name = account['screen_name']
+    
+    logs.info("screen_name: %s" % screen_name)
+    
+    exporter    = api.DataExporter.DataExporter(globalMongoStampedAPI)
     tmpfile     = '/tmp/%s.pdf' % user_id
+    
+    logs.info("tmpfile: %s" % tmpfile)
     
     with open(tmpfile, 'w') as fout:
         exporter.export_user_data(user_id, fout)
