@@ -399,8 +399,11 @@ class DataExporter(object):
                 if category in categories:
                     story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
             
+            logs.info("creating doc template")
+            temp = create_doc_template(output_file, user)
+            
             logs.info("before inner build")
-            create_doc_template(output_file, user).build(story)
+            temp.build(story)
             logs.info("after inner build")
         except:
             logs.warn(utils.getFormattedException())
