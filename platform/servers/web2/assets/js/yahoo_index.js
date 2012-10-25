@@ -53,7 +53,9 @@
             
             console.log(value);
             
+            $(".loading").show();
             window.location = "/export-stamps?login=" + value;
+            
             return false;
         });
     });
