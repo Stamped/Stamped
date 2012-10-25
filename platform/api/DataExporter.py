@@ -157,8 +157,7 @@ def create_doc_template(output_file, user):
         canvas.drawImage(page_bg.name, 0, 0)
 
     logs.info(">>>create_doc_template 2")
-    """
-    title_decor = create_gradient(640, 944, user)
+    title_decor = create_gradient(240, 344, user)
     logs.info(">>>create_doc_template 3")
     overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
     logs.info(">>>create_doc_template 4")
@@ -166,11 +165,10 @@ def create_doc_template(output_file, user):
     title_bg = NamedTemporaryFile(suffix='.png', delete=False)
     logs.info(">>>create_doc_template 5")
     title_decor.save(title_bg.name)
-    """
     logs.info(">>>create_doc_template 6")
 
     def new_cover_page(canvas, doc):
-        pass#canvas.drawImage(title_bg.name, 0, 16)
+        canvas.drawImage(title_bg.name, 0, 16)
 
     doc_parameters = {
             'pagesize' : (640, 960),
