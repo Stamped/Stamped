@@ -201,7 +201,7 @@ class CoverPicture(Flowable):
         Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
 
         if self.logo_image is not None:
-            Image(self.logo_image).drawOn(canvas, 100, 100)
+            Image(self.logo_image).drawOn(canvas, 250, 100)
 
         canvas.restoreState()
         
