@@ -25,10 +25,9 @@ import urllib
 from collections import defaultdict
 from tempfile import NamedTemporaryFile
 
-stylesheet = styles.getSampleStyleSheet()
-normal_style = stylesheet['Normal']
-
-STAMP_URL_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/logos/%s-%s-email-36x36.png'
+STAMP_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/logos/%s-%s-email-36x36.png'
+STAMP_LOGO_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/logos/%s-%s-logo-195x195.png'
+PROFILE_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/users/%s-144x144.jpg'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 pdfmetrics.registerFont(TTFont('TitleFont', os.path.join(SCRIPT_DIR, 'titlefont.ttf')))
 
@@ -49,6 +48,10 @@ def get_image_from_url(url):
     tmpfile = NamedTemporaryFile(suffix=suffix, delete=False)
     urllib.urlretrieve(url, tmpfile.name)
     return tmpfile.name
+
+
+def align_center(text):
+    return '<para align="center">%s</para>' % text
 
 
 class Separator(Flowable):
@@ -107,8 +110,8 @@ class ResizableImage(Flowable):
         if h > mh:
             ratio = mh / h
             w, h = w * ratio, h * ratio
-        w, h = w * 0.95, h * 0.95
-        if w * 3 > mw * 2:
+        w, h = w * 0.99, h * 0.99
+        if w * 2 > mw:
             self.width = w
             self.height = h
             return w, h
@@ -165,6 +168,31 @@ def create_doc_template(output_file, user):
     pages.append(PageTemplate(id='Decorated', frames=full_frame, onPage=new_content_page, pagesize=doc.pagesize))
     doc.addPageTemplates(pages)
     return doc
+
+
+class CoverPicture(Flowable):
+    def __init__(self, user, logo):
+        self.profile_image = get_image_from_url(PROFILE_BASE % user.screen_name)
+        if logo:
+            self.logo_image = get_image_from_url(STAMP_LOGO_BASE % (user.color_primary, user.color_secondary))
+        else:
+            self.logo_image = None
+
+    def wrap(self, mw, mh):
+        return 640, 400
+
+    def draw(self):
+        canvas = self.canv
+        canvas.saveState()
+
+        canvas.setFillColor(colors.HexColor(0xEEEEEE))
+        canvas.rect(0, 0, 160, 160, stroke=0, fill=1)
+        Image(self.profile_image).drawOn(canvas, 8, 8)
+
+        if self.logo_image is not None:
+            Image(self.logo_image).drawOn(canvas, 100, 100)
+
+        canvas.restoreState()
         
 
 class DataExporter(object):
@@ -173,6 +201,13 @@ class DataExporter(object):
 
         self.spacer = NiceSpacer(1, 20)
         self.separator = Separator(552)
+        self.cover_title_style = styles.ParagraphStyle(
+                name='covertitle',
+                textColor=colors.HexColor(0x262626),
+                fontName='TitleFont',
+                fontSize=108,
+                leading=130,
+                )
         self.title_style = styles.ParagraphStyle(
                 name='title',
                 textColor=colors.HexColor(0x262626),
@@ -196,29 +231,29 @@ class DataExporter(object):
                 )
 
     def make_title_page(self, user):
-        # TODO: add picture and style
         story = []
-        story.append(Paragraph(user.name, normal_style))
-        story.append(Paragraph(user.screen_name, normal_style))
+        story.append(CoverPicture(user, True))
+        story.append(Paragraph(align_center(user.name), self.cover_title_style))
+        story.append(Paragraph(align_center('@' + user.screen_name), self.normal_style))
         if user.location:
-            story.append(Paragraph(user.location, normal_style))
+            story.append(Paragraph(align_center(user.location), self.normal_style))
         story.append(NextPageTemplate('FullBlank'))
         story.append(PageBreak())
         return story
 
-    def make_section_title_page(self, user_name, stamp_type, count):
-        # TODO: add picture and style
-        # TODO: don't have first name
+    def make_section_title_page(self, user, stamp_type, count):
         story = []
-        story.append(Paragraph(user_name + "'s", normal_style))
-        story.append(Paragraph(stamp_type + " Stamps", normal_style))
-        story.append(Paragraph(str(count), normal_style))
+        story.append(CoverPicture(user, False))
+        story.append(Paragraph(user.screen_name + "'s", self.normal_style))
+        story.append(Paragraph(stamp_type + " Stamps", self.normal_style))
+        story.append(Paragraph(str(count), self.normal_style))
         story.append(NextPageTemplate('Decorated'))
         story.append(PageBreak())
         return story
 
     def make_stamp_story(self, user, ending, stamp_image, stamp, entity):
-        # TODO: add picture and style
+        # TODO: move credits up
+        # TODO: places address
 
         story = []
 
@@ -232,6 +267,7 @@ class DataExporter(object):
                 story.append(Paragraph('<b>%s</b> said:' % user.screen_name, self.subtitle_style))
                 story.append(Paragraph(blurb, self.normal_style))
 
+            # TODO: multiple images
             if content.images:
                 for image in content.images:
                     img_file = get_image_from_url(image.sizes[0].url)
@@ -252,7 +288,7 @@ class DataExporter(object):
 
     def make_section(self, user, stamp_type, stamps, stamp_image):
         story = []
-        story.extend(self.make_section_title_page(user.screen_name, stamp_type, len(stamps)))
+        story.extend(self.make_section_title_page(user, stamp_type, len(stamps)))
 
         divider = [self.spacer, self.separator, self.spacer]
         for stamp in stamps[:-1]:
@@ -294,7 +330,7 @@ class DataExporter(object):
                 ('book', 'Book'),
                 ('app', 'App')]
 
-        stamp_image = get_image_from_url(STAMP_URL_BASE % (user.color_primary, user.color_secondary))
+        stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
         for category, readable_name in category_names:
             if category in categories:
                 story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
@@ -307,5 +343,5 @@ if __name__ == '__main__':
     data_exporter = DataExporter(api)
     with open('/tmp/test.pdf', 'w') as fout:
         data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
-        # data_exporter.export_user_data('5010c75ac5fc3e08efa2a4ee', fout) # anthony
+        # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
         # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
