@@ -6,7 +6,7 @@ __version__   = "1.0"
 __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
-import Globals
+import Globals, logs
 from api.db.mongodb import MongoUserCollection
 from api.db.mongodb import MongoUserStampsCollection
 from api.db.mongodb import MongoStampCollection
