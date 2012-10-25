@@ -12,21 +12,22 @@ from api.db.mongodb import MongoUserStampsCollection
 from api.db.mongodb import MongoStampCollection
 from api.db.mongodb import MongoEntityCollection
 from api import MongoStampedAPI
+from libs import image_utils
 
-from collections import defaultdict
+from PIL import Image as PILImage
 from reportlab.lib import pagesizes, styles, colors, units
-from reportlab.platypus import Paragraph, SimpleDocTemplate, PageBreak, KeepTogether, Image, Spacer, Flowable
+from reportlab.platypus import *
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 import os
 import urllib
+from collections import defaultdict
 from tempfile import NamedTemporaryFile
 
-stylesheet = styles.getSampleStyleSheet()
-normal_style = stylesheet['Normal']
-
-STAMP_URL_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/logos/%s-%s-email-36x36.png'
+STAMP_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/logos/%s-%s-email-36x36.png'
+STAMP_LOGO_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/logos/%s-%s-logo-195x195.png'
+PROFILE_BASE = 'https://s3.amazonaws.com/stamped.com.static.images/users/%s-144x144.jpg'
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 pdfmetrics.registerFont(TTFont('TitleFont', os.path.join(SCRIPT_DIR, 'titlefont.ttf')))
 
@@ -42,13 +43,15 @@ def categorize_entity(entity):
 
 
 def get_image_from_url(url):
-    print url
     suffix = url[-4:]
     assert suffix.lower() in ('.png', '.jpg'), suffix
     tmpfile = NamedTemporaryFile(suffix=suffix, delete=False)
     urllib.urlretrieve(url, tmpfile.name)
-    print tmpfile.name
     return tmpfile.name
+
+
+def align_center(text):
+    return '<para align="center">%s</para>' % text
 
 
 class Separator(Flowable):
@@ -107,8 +110,8 @@ class ResizableImage(Flowable):
         if h > mh:
             ratio = mh / h
             w, h = w * ratio, h * ratio
-        w, h = w * 0.95, h * 0.95
-        if w * 3 > mw * 2:
+        w, h = w * 0.99, h * 0.99
+        if w * 2 > mw:
             self.width = w
             self.height = h
             return w, h
@@ -116,6 +119,80 @@ class ResizableImage(Flowable):
 
     def draw(self):
         Image(self.image_file, self.width, self.height).drawOn(self.canv, 0, 0)
+
+
+def create_doc_template(output_file, user):
+    def create_gradient(width, height):
+        alpha  = 255
+        stops  = [(
+                2.0, 
+                image_utils.parse_rgb(user.color_primary,   alpha), 
+                image_utils.parse_rgb(user.color_secondary, alpha)
+            )]
+        return image_utils.get_gradient_image((width, height), stops)
+
+    band = create_gradient(640, 20)
+    page_decor = PILImage.new("RGBA", (640, 960))
+    page_decor.paste(band, (0, 0))
+    page_decor.paste(band, (0, 940))
+    overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'pagebg.png'))
+    page_decor.paste(overlay, (0, 0), overlay)
+    page_bg = NamedTemporaryFile(suffix='.png', delete=False)
+    page_decor.save(page_bg.name)
+
+    def new_content_page(canvas, doc):
+        canvas.drawImage(page_bg.name, 0, 0)
+
+    title_decor = create_gradient(640, 960)
+    overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
+    title_decor.paste(overlay, (0, 0), overlay)
+    title_bg = NamedTemporaryFile(suffix='.png', delete=False)
+    title_decor.save(title_bg.name)
+
+    def new_cover_page(canvas, doc):
+        canvas.drawImage(title_bg.name, 0, 0)
+
+    doc_parameters = {
+            'pagesize' : (640, 960),
+            'leftMargin' : 54,
+            'rightMargin' : 54,
+            'topMargin' : 54,
+            'bottomMargin' : 54,
+            }
+    doc = BaseDocTemplate(output_file, **doc_parameters)
+
+    full_frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
+    pages = []
+    pages.append(PageTemplate(id='CoverPage', frames=full_frame, onPage=new_cover_page, pagesize=doc.pagesize))
+    pages.append(PageTemplate(id='FullBlank', frames=full_frame, pagesize=doc.pagesize))
+    pages.append(PageTemplate(id='Decorated', frames=full_frame, onPage=new_content_page, pagesize=doc.pagesize))
+    doc.addPageTemplates(pages)
+    return doc
+
+
+class CoverPicture(Flowable):
+    def __init__(self, user, logo):
+        self.profile_image = get_image_from_url(PROFILE_BASE % user.screen_name)
+        if logo:
+            self.logo_image = get_image_from_url(STAMP_LOGO_BASE % (user.color_primary, user.color_secondary))
+        else:
+            self.logo_image = None
+
+    def wrap(self, mw, mh):
+        return 640, 400
+
+    def draw(self):
+        canvas = self.canv
+        canvas.saveState()
+
+        canvas.setFillColor(colors.HexColor(0xEEEEEE))
+        canvas.rect(0, 0, 160, 160, stroke=0, fill=1)
+        Image(self.profile_image).drawOn(canvas, 8, 8)
+
+        if self.logo_image is not None:
+            Image(self.logo_image).drawOn(canvas, 100, 100)
+
+        canvas.restoreState()
         
 
 class DataExporter(object):
@@ -124,6 +201,13 @@ class DataExporter(object):
 
         self.spacer = NiceSpacer(1, 20)
         self.separator = Separator(552)
+        self.cover_title_style = styles.ParagraphStyle(
+                name='covertitle',
+                textColor=colors.HexColor(0x262626),
+                fontName='TitleFont',
+                fontSize=108,
+                leading=130,
+                )
         self.title_style = styles.ParagraphStyle(
                 name='title',
                 textColor=colors.HexColor(0x262626),
@@ -147,27 +231,29 @@ class DataExporter(object):
                 )
 
     def make_title_page(self, user):
-        # TODO: add picture and style
         story = []
-        story.append(Paragraph(user.name, normal_style))
-        story.append(Paragraph(user.screen_name, normal_style))
+        story.append(CoverPicture(user, True))
+        story.append(Paragraph(align_center(user.name), self.cover_title_style))
+        story.append(Paragraph(align_center('@' + user.screen_name), self.normal_style))
         if user.location:
-            story.append(Paragraph(user.location, normal_style))
+            story.append(Paragraph(align_center(user.location), self.normal_style))
+        story.append(NextPageTemplate('FullBlank'))
         story.append(PageBreak())
         return story
 
-    def make_section_title_page(self, user_name, stamp_type, count):
-        # TODO: add picture and style
-        # TODO: don't have first name
+    def make_section_title_page(self, user, stamp_type, count):
         story = []
-        story.append(Paragraph(user_name + "'s", normal_style))
-        story.append(Paragraph(stamp_type + " Stamps", normal_style))
-        story.append(Paragraph(str(count), normal_style))
+        story.append(CoverPicture(user, False))
+        story.append(Paragraph(user.screen_name + "'s", self.normal_style))
+        story.append(Paragraph(stamp_type + " Stamps", self.normal_style))
+        story.append(Paragraph(str(count), self.normal_style))
+        story.append(NextPageTemplate('Decorated'))
         story.append(PageBreak())
         return story
 
     def make_stamp_story(self, user, ending, stamp_image, stamp, entity):
-        # TODO: add picture and style
+        # TODO: move credits up
+        # TODO: places address
 
         story = []
 
@@ -181,6 +267,7 @@ class DataExporter(object):
                 story.append(Paragraph('<b>%s</b> said:' % user.screen_name, self.subtitle_style))
                 story.append(Paragraph(blurb, self.normal_style))
 
+            # TODO: multiple images
             if content.images:
                 for image in content.images:
                     img_file = get_image_from_url(image.sizes[0].url)
@@ -201,17 +288,20 @@ class DataExporter(object):
 
     def make_section(self, user, stamp_type, stamps, stamp_image):
         story = []
-        story.extend(self.make_section_title_page(user.screen_name, stamp_type, len(stamps)))
+        story.extend(self.make_section_title_page(user, stamp_type, len(stamps)))
 
         divider = [self.spacer, self.separator, self.spacer]
         for stamp in stamps[:-1]:
             story.extend(self.make_stamp_story(user, divider, stamp_image, *stamp))
         story.extend(self.make_stamp_story(user, [], stamp_image, *stamps[-1]))
+        story.append(NextPageTemplate('FullBlank'))
         story.append(PageBreak())
         return story
 
     def export_user_data(self, user_id, output_file):
         # TODO: TOC
+        # TODO: credit usernames
+        # TODO: a bit at the bottom
         story = []
 
         user_collection = MongoUserCollection.MongoUserCollection(self.__api)
@@ -240,25 +330,18 @@ class DataExporter(object):
                 ('book', 'Book'),
                 ('app', 'App')]
 
-        stamp_image = get_image_from_url(STAMP_URL_BASE % (user.color_primary, user.color_secondary))
+        stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
         for category, readable_name in category_names:
             if category in categories:
                 story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
 
-        doc_parameters = {
-                'pagesize' : (640, 960),
-                'leftMargin' : units.inch * 0.5,
-                'rightMargin' : units.inch * 0.5,
-                'topMargin' : units.inch * 0.5,
-                'bottomMargin' : units.inch * 0.5,
-                }
-        doc = SimpleDocTemplate(output_file, **doc_parameters)
-        doc.build(story)
+        create_doc_template(output_file, user).build(story)
     
 
 if __name__ == '__main__':
     api = MongoStampedAPI.MongoStampedAPI()
     data_exporter = DataExporter(api)
     with open('/tmp/test.pdf', 'w') as fout:
-        # data_exporter.export_user_data('4ff5e81f971396609000088a')
-        data_exporter.export_user_data('4e57048accc2175fcd000001', fout)
+        data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
+        # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
+        # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
