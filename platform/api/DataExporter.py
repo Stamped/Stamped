@@ -154,7 +154,7 @@ def create_doc_template(output_file, user):
 
     logs.info(">>>create_doc_template 2")
     title_decor = create_gradient(214, 314, user)
-    title_decor.resize((640, 944))
+    title_decor = title_decor.resize((640, 944))
     logs.info(">>>create_doc_template 3")
     overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
     logs.info(">>>create_doc_template 4")
