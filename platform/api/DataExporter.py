@@ -185,7 +185,13 @@ class CoverPicture(Flowable):
         self.backdrop = Image(os.path.join(SCRIPT_DIR, 'profilepicborder.png'))
         self.profile_image = get_image_from_url(PROFILE_BASE % user.screen_name)
         if logo:
-            self.logo_image = get_image_from_url(STAMP_LOGO_BASE % (user.color_primary, user.color_secondary))
+            logo_file = get_image_from_url(STAMP_LOGO_BASE % (user.color_primary, user.color_secondary))
+            logo = PILImage.open(logo_file).resize((161, 161))
+            words = PILImage.open(os.path.join(SCRIPT_DIR, 'stamped-type.png'))
+            words.paste(logo, (0, 0), logo)
+            logo_file = NamedTemporaryFile(suffix='.png', delete=False)
+            words.save(logo_file.name)
+            self.logo_image = logo_file.name
         else:
             self.logo_image = None
 
@@ -202,8 +208,7 @@ class CoverPicture(Flowable):
         Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
 
         if self.logo_image is not None:
-            Image(self.logo_image, 161, 161).drawOn(canvas, 250, 100)
-            Image(os.path.join(SCRIPT_DIR, 'stamped-type.png'), 161, 161).drawOn(canvas, 250, 100)
+            Image(self.logo_image).drawOn(canvas, 250, 100)
 
         canvas.restoreState()
 
@@ -428,6 +433,6 @@ if __name__ == '__main__':
     data_exporter = DataExporter(api)
     with open('/tmp/test.pdf', 'w') as fout:
         # data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
-        # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
+        data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
         # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
-        data_exporter.export_user_data('4e57048dccc2175fca000005', fout) # travis
+        # data_exporter.export_user_data('4e57048dccc2175fca000005', fout) # travis
