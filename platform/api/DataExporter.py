@@ -57,16 +57,22 @@ def align_center(text):
 class Separator(Flowable):
     def __init__(self, width):
         self.width = width
+        self.hAlign = 'CENTER'
 
     def wrap(self, *args):
-        return self.width, 1
+        return self.width, 41
 
     def draw(self):
         self.canv.setStrokeColor(colors.HexColor(0xe5e5e5))
-        self.canv.line(0, 0, self.width, 0)
+        self.canv.line(0, 21, self.width, 21)
 
     def getSpaceBefore(self):
         return 4
+
+    def split(self, width, height):
+        if self.height > height:
+            return [PageBreak()]
+        return [self]
 
 
 class NiceSpacer(Spacer):
@@ -143,14 +149,14 @@ def create_doc_template(output_file, user):
     def new_content_page(canvas, doc):
         canvas.drawImage(page_bg.name, 0, 0)
 
-    title_decor = create_gradient(640, 960)
+    title_decor = create_gradient(640, 944)
     overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
     title_decor.paste(overlay, (0, 0), overlay)
     title_bg = NamedTemporaryFile(suffix='.png', delete=False)
     title_decor.save(title_bg.name)
 
     def new_cover_page(canvas, doc):
-        canvas.drawImage(title_bg.name, 0, 0)
+        canvas.drawImage(title_bg.name, 0, 16)
 
     doc_parameters = {
             'pagesize' : (640, 960),
@@ -166,12 +172,16 @@ def create_doc_template(output_file, user):
     pages.append(PageTemplate(id='CoverPage', frames=full_frame, onPage=new_cover_page, pagesize=doc.pagesize))
     pages.append(PageTemplate(id='FullBlank', frames=full_frame, pagesize=doc.pagesize))
     pages.append(PageTemplate(id='Decorated', frames=full_frame, onPage=new_content_page, pagesize=doc.pagesize))
+
+    toc_frame = Frame(138, 0, 364, 900, id='toc')
+    pages.append(PageTemplate(id='TOC', frames=toc_frame, pagesize=doc.pagesize))
     doc.addPageTemplates(pages)
     return doc
 
 
 class CoverPicture(Flowable):
     def __init__(self, user, logo):
+        self.backdrop = Image(os.path.join(SCRIPT_DIR, 'profilepicborder.png'))
         self.profile_image = get_image_from_url(PROFILE_BASE % user.screen_name)
         if logo:
             self.logo_image = get_image_from_url(STAMP_LOGO_BASE % (user.color_primary, user.color_secondary))
@@ -179,15 +189,16 @@ class CoverPicture(Flowable):
             self.logo_image = None
 
     def wrap(self, mw, mh):
-        return 640, 400
+        h = 351 if self.logo_image is None else 405
+        return 640, h
 
     def draw(self):
         canvas = self.canv
         canvas.saveState()
 
-        canvas.setFillColor(colors.HexColor(0xEEEEEE))
-        canvas.rect(0, 0, 160, 160, stroke=0, fill=1)
-        Image(self.profile_image).drawOn(canvas, 8, 8)
+        canvas.setFillColor(colors.HexColor(0xFFFFFF))
+        self.backdrop.drawOn(canvas, 185, 0)
+        Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
 
         if self.logo_image is not None:
             Image(self.logo_image).drawOn(canvas, 100, 100)
@@ -198,6 +209,7 @@ class CoverPicture(Flowable):
 class DataExporter(object):
     def __init__(self, api):
         self.__api = api
+        self.user_collection = MongoUserCollection.MongoUserCollection(self.__api)
 
         self.spacer = NiceSpacer(1, 20)
         self.separator = Separator(552)
@@ -205,8 +217,15 @@ class DataExporter(object):
                 name='covertitle',
                 textColor=colors.HexColor(0x262626),
                 fontName='TitleFont',
-                fontSize=108,
-                leading=130,
+                fontSize=110,
+                leading=140,
+                )
+        self.stamp_count_style = styles.ParagraphStyle(
+                name='stampcount',
+                textColor=colors.HexColor(0x999999),
+                fontName='TitleFont',
+                fontSize=110,
+                leading=140,
                 )
         self.title_style = styles.ParagraphStyle(
                 name='title',
@@ -229,36 +248,52 @@ class DataExporter(object):
                 fontSize=24,
                 leading=32,
                 )
+        self.no_leading = styles.ParagraphStyle(
+                name='noleading',
+                textColor=colors.HexColor(0x262626),
+                fontName='Helvetica',
+                fontSize=24,
+                leading=22,
+                )
 
     def make_title_page(self, user):
         story = []
         story.append(CoverPicture(user, True))
         story.append(Paragraph(align_center(user.name), self.cover_title_style))
-        story.append(Paragraph(align_center('@' + user.screen_name), self.normal_style))
+        story.append(Paragraph(align_center('<b>@%s</b>' % user.screen_name), self.normal_style))
         if user.location:
             story.append(Paragraph(align_center(user.location), self.normal_style))
-        story.append(NextPageTemplate('FullBlank'))
+        story.append(NextPageTemplate('TOC'))
         story.append(PageBreak())
         return story
 
     def make_section_title_page(self, user, stamp_type, count):
         story = []
         story.append(CoverPicture(user, False))
-        story.append(Paragraph(user.screen_name + "'s", self.normal_style))
-        story.append(Paragraph(stamp_type + " Stamps", self.normal_style))
-        story.append(Paragraph(str(count), self.normal_style))
+        story.append(Spacer(1, 4))
+        story.append(Paragraph(align_center(user.name + "'s"), self.no_leading))
+        story.append(Paragraph(align_center(stamp_type + " Stamps"), self.cover_title_style))
+        story.append(Spacer(1, 50))
+        story.append(Paragraph(align_center(str(count)), self.stamp_count_style))
         story.append(NextPageTemplate('Decorated'))
         story.append(PageBreak())
         return story
 
     def make_stamp_story(self, user, ending, stamp_image, stamp, entity):
-        # TODO: move credits up
         # TODO: places address
-
         story = []
 
         story.append(StampTitle(entity.title, self.title_style, stamp_image))
         story.append(Paragraph(entity.subtitle, self.subtitle_style))
+        if stamp.credits is not None:
+            first_credit = stamp.credits[0].user.user_id
+            credit_text = 'Credit to: <b>%s</b>' % self.user_collection.getUser(first_credit).screen_name
+            num_credits = len(stamp.credits)
+            if num_credits > 1:
+                credit_text += ' and %d other' % (num_credits - 1)
+            if num_credits > 2:
+                credit_text += 's'
+            story.append(Paragraph(credit_text, self.subtitle_style))
 
         for content in stamp.contents:
             blurb = content.blurb
@@ -273,16 +308,6 @@ class DataExporter(object):
                     img_file = get_image_from_url(image.sizes[0].url)
                     story.append(ResizableImage(img_file))
         
-        if stamp.credits is not None:
-            story.append(self.spacer)
-            first_credit = stamp.credits[0].user.screen_name
-            credit_text = 'Credit to: <b>%s</b>' % first_credit
-            num_credits = len(stamp.credits)
-            if num_credits > 1:
-                credit_text += ' and %d other' % (num_credits - 1)
-            if num_credits > 2:
-                credit_text += 's'
-            story.append(Paragraph(credit_text, self.subtitle_style))
         story.extend(ending)
         return [KeepTogether(story)]
 
@@ -290,7 +315,7 @@ class DataExporter(object):
         story = []
         story.extend(self.make_section_title_page(user, stamp_type, len(stamps)))
 
-        divider = [self.spacer, self.separator, self.spacer]
+        divider = [self.separator]
         for stamp in stamps[:-1]:
             story.extend(self.make_stamp_story(user, divider, stamp_image, *stamp))
         story.extend(self.make_stamp_story(user, [], stamp_image, *stamps[-1]))
@@ -298,19 +323,49 @@ class DataExporter(object):
         story.append(PageBreak())
         return story
 
-    def export_user_data(self, user_id, output_file):
-        # TODO: TOC
-        # TODO: credit usernames
-        # TODO: a bit at the bottom
+    def make_toc_page(self, user):
+        categories = [
+                ('place', 'Places'),
+                ('music', 'Music'),
+                ('film', 'Film & TV'),
+                ('book', 'Books'),
+                ('app', 'Apps'),
+                ('other', 'Other'),
+                ]
+        stats = user.stats
         story = []
 
-        user_collection = MongoUserCollection.MongoUserCollection(self.__api)
+        separator = Separator(404)
+        spacer = NiceSpacer(1, 34)
+        story.append(Paragraph("<b>%s's Info" % user.name, self.normal_style))
+        story.append(separator)
+        # TODO: add followers number
+        story.append(Paragraph(str(stats.num_stamps), self.cover_title_style))
+        story.append(Paragraph('total stamps', self.normal_style))
+        story.append(separator)
+        for kind, display in categories:
+            count = 0
+            for dist in stats.distribution:
+                if dist.category == kind:
+                    count = dist.count
+                    break
+
+            story.append(Paragraph('%s / <b>%d</b>' % (display, count), self.normal_style))
+            story.append(spacer)
+        story.append(NextPageTemplate('FullBlank'))
+        story.append(PageBreak())
+        return story
+
+    def export_user_data(self, user_id, output_file):
+        story = []
+
         user_stamps_collection = MongoUserStampsCollection.MongoUserStampsCollection()
         stamp_collection = MongoStampCollection.MongoStampCollection()
         entity_collection = MongoEntityCollection.MongoEntityCollection()
 
-        user = user_collection.getUser(user_id)
+        user = self.user_collection.getUser(user_id)
         story.extend(self.make_title_page(user))
+        story.extend(self.make_toc_page(user))
 
         stamp_ids = user_stamps_collection.getUserStampIds(user_id)
         stamps = stamp_collection.getStamps(stamp_ids)
