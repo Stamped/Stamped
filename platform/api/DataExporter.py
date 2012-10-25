@@ -395,9 +395,9 @@ class DataExporter(object):
             if category in categories:
                 story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
         
-        temp = create_doc_template(output_file, user)
-        temp.build(story)
 
+        create_doc_template(output_file, user).build(story)
+    
 
 if __name__ == '__main__':
     api = MongoStampedAPI.MongoStampedAPI()
@@ -405,4 +405,5 @@ if __name__ == '__main__':
     with open('/tmp/test.pdf', 'w') as fout:
         # data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
         # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
-        data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
+        # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
+        data_exporter.export_user_data('4e57048dccc2175fca000005', fout) # travis
