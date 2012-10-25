@@ -8,7 +8,7 @@ __license__   = "TODO"
 import Globals
 import utils
 
-from PIL import Image, ImageFilter
+from PIL import Image
 
 def clamp(v):
     return min(255, max(0, int(round(v))))
@@ -20,6 +20,7 @@ def is_valid_image_url(image_url):
 
 __gradient_cache = {}
 def get_gradient_image(size, stops):
+    """
     key = (len(stops), 
            stops[0][1][0], stops[0][1][1], stops[0][1][2], 
            stops[0][2][0], stops[0][2][1], stops[0][2][2])
@@ -38,6 +39,7 @@ def get_gradient_image(size, stops):
                 return image
     except KeyError:
         pass
+    """
     
     image = Image.new("RGBA", size)
     data  = []
@@ -70,6 +72,7 @@ def get_gradient_image(size, stops):
     
     image.putdata(data)
     
+    """
     try:
         sl = __gradient_cache[key]
         s  = sl[0]
@@ -83,6 +86,7 @@ def get_gradient_image(size, stops):
         __gradient_cache[key] = [ s, l ]
     
     s[size] = image
+    """
     return image
 
 def parse_rgb(color, alpha=255):
