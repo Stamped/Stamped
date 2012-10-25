@@ -158,12 +158,15 @@ def create_doc_template(output_file, user):
 
     logs.info(">>>create_doc_template 2")
     title_decor = create_gradient(640, 944, user)
+    logs.info(">>>create_doc_template 3")
     overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
+    logs.info(">>>create_doc_template 4")
     title_decor.paste(overlay, (0, 0), overlay)
     title_bg = NamedTemporaryFile(suffix='.png', delete=False)
+    logs.info(">>>create_doc_template 5")
     title_decor.save(title_bg.name)
+    logs.info(">>>create_doc_template 6")
 
-    logs.info(">>>create_doc_template 3")
     def new_cover_page(canvas, doc):
         canvas.drawImage(title_bg.name, 0, 16)
 
@@ -176,18 +179,16 @@ def create_doc_template(output_file, user):
             }
     doc = BaseDocTemplate(output_file, **doc_parameters)
 
-    logs.info(">>>create_doc_template 4")
     full_frame = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
     pages = []
     pages.append(PageTemplate(id='CoverPage', frames=full_frame, onPage=new_cover_page, pagesize=doc.pagesize))
     pages.append(PageTemplate(id='FullBlank', frames=full_frame, pagesize=doc.pagesize))
     pages.append(PageTemplate(id='Decorated', frames=full_frame, onPage=new_content_page, pagesize=doc.pagesize))
 
-    logs.info(">>>create_doc_template 5")
     toc_frame = Frame(138, 0, 364, 900, id='toc')
     pages.append(PageTemplate(id='TOC', frames=toc_frame, pagesize=doc.pagesize))
     doc.addPageTemplates(pages)
-    logs.info(">>>create_doc_template 6")
+    logs.info(">>>create_doc_template 7")
     return doc
 
 
