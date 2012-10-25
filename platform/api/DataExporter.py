@@ -147,22 +147,16 @@ def create_doc_template(output_file, user):
     page_decor.paste(overlay, (0, 0), overlay)
     page_bg = NamedTemporaryFile(suffix='.png', delete=False)
     page_decor.save(page_bg.name)
-    logs.info(">>>create_doc_template 1")
 
     def new_content_page(canvas, doc):
         canvas.drawImage(page_bg.name, 0, 0)
 
-    logs.info(">>>create_doc_template 2")
     title_decor = create_gradient(214, 314, user)
     title_decor = title_decor.resize((640, 944))
-    logs.info(">>>create_doc_template 3")
     overlay = PILImage.open(os.path.join(SCRIPT_DIR, 'covertexture.png'))
-    logs.info(">>>create_doc_template 4")
     title_decor.paste(overlay, (0, 0), overlay)
     title_bg = NamedTemporaryFile(suffix='.png', delete=False)
-    logs.info(">>>create_doc_template 5")
     title_decor.save(title_bg.name)
-    logs.info(">>>create_doc_template 6")
 
     def new_cover_page(canvas, doc):
         canvas.drawImage(title_bg.name, 0, 16)
@@ -185,7 +179,6 @@ def create_doc_template(output_file, user):
     toc_frame = Frame(138, 0, 364, 900, id='toc')
     pages.append(PageTemplate(id='TOC', frames=toc_frame, pagesize=doc.pagesize))
     doc.addPageTemplates(pages)
-    logs.info(">>>create_doc_template 7")
     return doc
 
 
@@ -370,50 +363,40 @@ class DataExporter(object):
     def export_user_data(self, user_id, output_file):
         story = []
 
-        logs.info("before build")
-        try:
-            user_stamps_collection = self.__api._stampDB.user_stamps_collection
-            stamp_collection = self.__api._stampDB
-            entity_collection = self.__api._entityDB
+        user_stamps_collection = self.__api._stampDB.user_stamps_collection
+        stamp_collection = self.__api._stampDB
+        entity_collection = self.__api._entityDB
 
-            user = self.user_collection.getUser(user_id)
-            story.extend(self.make_title_page(user))
-            story.extend(self.make_toc_page(user))
+        user = self.user_collection.getUser(user_id)
+        story.extend(self.make_title_page(user))
+        story.extend(self.make_toc_page(user))
 
-            stamp_ids = user_stamps_collection.getUserStampIds(user_id)
-            stamps = stamp_collection.getStamps(stamp_ids)
-            stamps_and_entities = []
-            for stamp in stamps:
-                entity = entity_collection.getEntity(stamp.entity.entity_id)
-                stamps_and_entities.append((stamp, entity))
+        stamp_ids = user_stamps_collection.getUserStampIds(user_id)
+        stamps = stamp_collection.getStamps(stamp_ids)
+        stamps_and_entities = []
+        for stamp in stamps:
+            entity = entity_collection.getEntity(stamp.entity.entity_id)
+            stamps_and_entities.append((stamp, entity))
 
-            categories = defaultdict(list)
-            for stamp, entity in stamps_and_entities:
-                categories[categorize_entity(entity)].append((stamp, entity))
+        categories = defaultdict(list)
+        for stamp, entity in stamps_and_entities:
+            categories[categorize_entity(entity)].append((stamp, entity))
 
-            category_names = [
-                    ('place', 'Place'),
-                    ('music', 'Music'),
-                    ('film', 'Film'),
-                    ('book', 'Book'),
-                    ('app', 'App'),
-                    ('other', 'Other')]
+        category_names = [
+                ('place', 'Place'),
+                ('music', 'Music'),
+                ('film', 'Film'),
+                ('book', 'Book'),
+                ('app', 'App'),
+                ('other', 'Other')]
 
-            stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
-            for category, readable_name in category_names:
-                if category in categories:
-                    story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
-            
-            logs.info("creating doc template")
-            temp = create_doc_template(output_file, user)
-            
-            logs.info("before inner build")
-            temp.build(story)
-            logs.info("after inner build")
-        except:
-            logs.warn(utils.getFormattedException())
+        stamp_image = get_image_from_url(STAMP_BASE % (user.color_primary, user.color_secondary))
+        for category, readable_name in category_names:
+            if category in categories:
+                story.extend(self.make_section(user, readable_name, categories[category], stamp_image))
         
-        logs.info("after build")
+        temp = create_doc_template(output_file, user)
+        temp.build(story)
 
 
 if __name__ == '__main__':
