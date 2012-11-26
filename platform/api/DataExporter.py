@@ -124,7 +124,10 @@ class ResizableImage(Flowable):
 
     def draw(self):
         if os.path.exists(self.image_file):
-            Image(self.image_file, self.width, self.height).drawOn(self.canv, 0, 0)
+            try:
+                Image(self.image_file, self.width, self.height).drawOn(self.canv, 0, 0)
+            except Exception:
+                utils.printException()
 
 
 def create_gradient(width, height, user):
@@ -209,11 +212,17 @@ class CoverPicture(Flowable):
         self.backdrop.drawOn(canvas, 185, 0)
         
         if os.path.exists(self.profile_image):
-            Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
+            try:
+                Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
+            except Exception:
+                utils.printException()
         
         if self.logo_image is not None and os.path.exists(self.logo_image):
-            Image(self.logo_image).drawOn(canvas, 250, 100)
-
+            try:
+                Image(self.logo_image).drawOn(canvas, 250, 100)
+            except Exception:
+                utils.printException()
+        
         canvas.restoreState()
 
 

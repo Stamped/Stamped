@@ -113,7 +113,7 @@ class HilbertSystem {
             
             if (_rules.indexOf(cur) >= 0) {
                 nextState += this.process_rule(cur);
-            } else { 
+            } else {
                 nextState += cur;
             }
         }
