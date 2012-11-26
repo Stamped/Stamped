@@ -123,7 +123,8 @@ class ResizableImage(Flowable):
         return mw + 100, mh + 100
 
     def draw(self):
-        Image(self.image_file, self.width, self.height).drawOn(self.canv, 0, 0)
+        if os.path.exists(self.image_file):
+            Image(self.image_file, self.width, self.height).drawOn(self.canv, 0, 0)
 
 
 def create_gradient(width, height, user):
@@ -184,6 +185,7 @@ class CoverPicture(Flowable):
     def __init__(self, user, logo):
         self.backdrop = Image(os.path.join(SCRIPT_DIR, 'profilepicborder.png'))
         self.profile_image = get_image_from_url(PROFILE_BASE % user.screen_name)
+        
         if logo:
             logo_file = get_image_from_url(STAMP_LOGO_BASE % (user.color_primary, user.color_secondary))
             logo = PILImage.open(logo_file).resize((161, 161))
@@ -205,9 +207,11 @@ class CoverPicture(Flowable):
 
         canvas.setFillColor(colors.HexColor(0xFFFFFF))
         self.backdrop.drawOn(canvas, 185, 0)
-        Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
-
-        if self.logo_image is not None:
+        
+        if os.path.exists(self.profile_image):
+            Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
+        
+        if self.logo_image is not None and os.path.exists(self.logo_image):
             Image(self.logo_image).drawOn(canvas, 250, 100)
 
         canvas.restoreState()
