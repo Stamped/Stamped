@@ -394,6 +394,11 @@ class DataExporter(object):
         story.append(StampTitle(str(stats.num_stamps), self.cover_title_style, stamp_image, 76))
         story.append(Paragraph('Total Stamps', self.normal_style))
         story.append(separator)
+        
+        if stats.distribution is None or len(stats.distribution) == 0:
+            distribution = self.__api._getUserStampDistribution(user.user_id)
+            stats.distribution = distribution
+        
         for kind, display in categories:
             count = 0
             for dist in stats.distribution:
