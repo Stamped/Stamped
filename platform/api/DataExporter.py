@@ -246,11 +246,11 @@ class FollowingInfo(Flowable):
     def draw(self):
         follower_story = [
             Paragraph('Followers', self.style),
-            Paragraph('<b>%d</b>' % self.follower if self.follower else 0, self.style),
+            Paragraph(('<b>%d</b>' % self.follower if self.follower else 0), self.style),
             ]
         following_story = [
             Paragraph('Following', self.style),
-            Paragraph('<b>%d</b>' % self.following if self.following else 0, self.style),
+            Paragraph('<b>%d</b>' % (self.following if self.following else 0), self.style),
             ]
         self.draw_group(follower_story, 0)
         self.draw_group(following_story, 250)
