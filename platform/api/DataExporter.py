@@ -211,7 +211,7 @@ class CoverPicture(Flowable):
         canvas.setFillColor(colors.HexColor(0xFFFFFF))
         self.backdrop.drawOn(canvas, 185, 0)
         
-        if os.path.exists(self.profile_image):
+        if self.profile_image is not None and os.path.exists(self.profile_image):
             try:
                 Image(self.profile_image, 132, 132).drawOn(canvas, 194, 9)
             except Exception:
@@ -246,7 +246,7 @@ class FollowingInfo(Flowable):
     def draw(self):
         follower_story = [
             Paragraph('Followers', self.style),
-            Paragraph(('<b>%d</b>' % self.follower if self.follower else 0), self.style),
+            Paragraph('<b>%d</b>' % (self.follower if self.follower else 0), self.style),
             ]
         following_story = [
             Paragraph('Following', self.style),
