@@ -49,15 +49,18 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     screen_name = screen_name.lower()
     url = scope.get('image_url', None)
     
+    """
     try:
         if url is None:
             ts  = scope.get('timestamp', {}).get('image_cache', None)
             url = api.HTTPSchemas._profileImageURL(screen_name, ts, size)
     except Exception:
         pass
+    """
     
     if url is None:
-        url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
+        #url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
+        url = "/assets/img/users/%s-%sx%s.jpg" % (screen_name, size, size)
     
     #if not url.endswith('default.jpg'):
     #    url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)

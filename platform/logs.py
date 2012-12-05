@@ -24,7 +24,7 @@ log.addHandler(stream_handler)
 
 # File handler
 try:
-    log_file = "/stamped/logs/wsgi.log"
+    log_file = "wsgi.log"
     if os.path.exists(os.path.dirname(log_file)):
         file_handler = logging.handlers.WatchedFileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
@@ -37,6 +37,7 @@ import time
 times = []
 
 def timestep():
+    return
     times.append(time.time())
     if len(times) < 1000:
         return
@@ -53,6 +54,7 @@ def timestep():
     warning(message)
 
 def start_timer():
+    return
     import gevent
     def keep_time():
         while True:
@@ -198,6 +200,7 @@ class LoggingContext(object):
 
 
 def _getLoggingContext(forceCreate=False):
+    return
     if not forceCreate:
         return localData.loggingContext
     else:
@@ -208,6 +211,7 @@ def _getLoggingContext(forceCreate=False):
             return localData.loggingContext
 
 def refresh(format=None):
+    return
     localData.loggingContext = LoggingContext(format=format)
     return localData.loggingContext
 
@@ -215,9 +219,11 @@ localData = threading.local()
 refresh()
 
 def _log(level, msg, *args, **kwargs):
+    return
     _getLoggingContext(forceCreate=True).log(level, msg, *args, **kwargs)
 
 def runInOtherLoggingContext(fn, context):
+    return
     oldLoggingContext = _getLoggingContext(forceCreate=True)
     localData.loggingContext = context
     try:
@@ -231,20 +237,29 @@ def formatMessage(msg, fnc):
 
 # Logging Functions
 def debug(msg, *args, **kwargs):
+    print(msg)
+    return
     _log('debug', msg, *args, **kwargs)
 
 def info(msg, *args, **kwargs):
+    print(msg)
+    return
     _log('info', msg, *args, **kwargs)
 
 def warning(msg, *args, **kwargs):
+    print(msg)
+    return
     _log('warning', msg, *args, **kwargs)
 
 # Alternate
 def warn(msg, *args, **kwargs):
+    print(msg)
+    return
     _log('warning', msg, *args, **kwargs)
 
 # HTTP Log Requests
 def begin(**kwargs):
+    return
     loggingContext = refresh(format='object')
     # Pretty hacky.
     loggingContext.saveLog = kwargs.pop('saveLog', None)
@@ -260,6 +275,7 @@ def begin(**kwargs):
         loggingContext.addLogParameter('node', nodeName)
 
 def request(request):
+    return
     loggingContext = _getLoggingContext()
     try:
         loggingContext.addLogParameter('path', request.path)
@@ -269,6 +285,7 @@ def request(request):
         loggingContext.addLogParameter('request', 'FAIL')
 
 def async_request(method, *args, **kwargs):
+    return
     loggingContext = _getLoggingContext()
     try:
         loggingContext.addLogParameter('path', method)
@@ -279,29 +296,37 @@ def async_request(method, *args, **kwargs):
         loggingContext.addLogParameter('request', 'FAIL')
 
 def token(token):
+    return
     _getLoggingContext().addLogParameter('token', token)
 
 def user(user_id):
+    return
     _getLoggingContext().addLogParameter('user_id', user_id)
 
 def client(client_id):
+    return
     _getLoggingContext().addLogParameter('client_id', client_id)
 
 def form(data):
+    return
     _getLoggingContext().addLogParameter('form', data)
 
 def attachment(name, size):
+    return
     loggingContext = _getLoggingContext()
     loggingContext.addLogParameter('file_name', name)
     loggingContext.addLogParameter('file_size', size)
 
 def output(data):
+    return
     _getLoggingContext().addLogParameter('output', data)
 
 def auth(msg):
+    return
     _getLoggingContext().addLogParameter('auth', msg)
 
 def error(code):
+    return
     loggingContext = _getLoggingContext(forceCreate=True)
     loggingContext.addLogParameter('result', code)
     try:
@@ -313,15 +338,19 @@ def error(code):
         loggingContext.addLogParameter('stack_trace', 'FAIL')
 
 def save():
+    return
     _getLoggingContext().save()
 
 def _report(caller,msg='',level=logging.ERROR):
+    return
     caller2 = log.findCaller()
     log.log(level,"REPORT from %s:%s:%s-\t%s\nCALLED by %s:%s:%s",caller2[0],caller2[1],caller2[2],msg,caller[0],caller[1],caller[2],exc_info=True)
 
 def report(*args,**kwargs):
+    return
     _report(log.findCaller(),*args,**kwargs)
 
 def getHtmlFormattedLog():
+    return
     loggingContext = _getLoggingContext()
     return loggingContext.html

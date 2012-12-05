@@ -28,8 +28,8 @@ else:
 class StampedAPIProxy(object):
     
     def __init__(self):
-        self._prod = IS_PROD
-        self._ec2  = utils.is_ec2()
+        self._prod = True #IS_PROD
+        self._ec2  = True #utils.is_ec2()
         
         self.api    = globalMongoStampedAPI()
         self._cache = globalMemcache()

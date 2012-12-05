@@ -7,7 +7,7 @@ coll=${*:2}
 SCRIPT_DIR=$(dirname "$0")
 TEMP_DIR="$SCRIPT_DIR/.temp"
 
-echo "Imports a collections from the mongodb instance running on the given semantic node (e.g., peach.db1)."
+echo "Imports collections from the mongodb instance running on the given semantic node (e.g., peach.db1)."
 echo "usage: $0 node collection+"
 echo "example: $0 peach.db1 stamps users"
 echo ""

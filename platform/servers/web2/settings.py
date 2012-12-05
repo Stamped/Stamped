@@ -83,7 +83,8 @@ SITE_ROOT   = PROJ_ROOT
 if STAMPED_DEBUG:
     STAMPED_STATIC_URL  = STATIC_URL
 else:
-    STAMPED_STATIC_URL  = "%s%sgenerated/" % ("http://static.stamped.com", STATIC_URL)
+    #STAMPED_STATIC_URL  = "%s%sgenerated/" % ("http://static.stamped.com", STATIC_URL)
+    STAMPED_STATIC_URL  = "%sgenerated/" % (STATIC_URL, )
 
 STATIC_DOC_ROOT = os.path.join(SITE_ROOT, 'assets')
 

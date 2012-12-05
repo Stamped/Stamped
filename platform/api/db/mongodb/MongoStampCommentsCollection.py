@@ -48,7 +48,7 @@ class MongoStampCommentsCollection(AMongoCollection):
             
     def removeStampComment(self, stampId, commentId):
         return self._removeRelationship(keyId=stampId, refId=commentId)
-            
+    
     def getStampCommentIds(self, stampId, limit=None):
         ### TODO: Add limit? Add timestamp to slice?
         return self._getRelationships(stampId, limit)

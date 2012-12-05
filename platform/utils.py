@@ -118,9 +118,10 @@ def lazyProperty(undecorated):
 
 def log(s=""):
     s = _formatLog(s) + "\n"
-
-    logs.debug(s)
+    
+    #logs.debug(s)
     sys.stderr.write(s)
+    sys.stdout.write(s)
     sys.stdout.flush()
     sys.stderr.flush()
 
@@ -813,13 +814,16 @@ def shuffle(array):
     return o
 
 def sendEmail(msg, **kwargs):
+    logs.warning("sending emails is disabled in minimal branch")
+    return
+    
     if not validate_email(msg['to']):
         msg = "Invalid email address"
         logs.warning(msg)
         raise Exception(msg)
-
+    
     format = kwargs.pop('format', 'text')
-
+    
     try:
         ses = boto.connect_ses(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         ses.send_email(msg['from'], msg['subject'], msg['body'], msg['to'], format=format)
@@ -919,7 +923,7 @@ def get_basic_stats(collection, key):
         'std' : round_float(std, 4),
         'min' : round_float(min_value, 4),
         'max' : round_float(max_value, 4),
-        }
+    }
 
 def round_float(f, n):
     """ Truncates/pads a float f to n decimal places without rounding """
@@ -1094,25 +1098,8 @@ def getImage(data):
     return im
 
 def getWebImage(url, desc=None):
-    try:
-        memcached = None
-        
-        try:
-            memcached = libs.Memcache.globalMemcache()
-            data = memcached.get(str(url))
-        except Exception as e:
-            logs.warning("Unable to get data from cache: %s" % e)
-            data = None 
-        
-        if data is None:
-            data = getFile(url)
-            if memcached is not None:
-                memcached.set(url, data, time=7*24*60*60, min_compress_len=100)
-    except urllib2.HTTPError:
-        desc = ("%s " % desc if desc is not None else "")
-        logs.warning("unable to download %simage from '%s'" % (url, desc))
-        raise
-
+    data = getFile(url)
+    
     return getImage(data)
 
 def getWebImageSize(url):
@@ -1123,7 +1110,6 @@ def getWebImageSize(url):
         raise
     
     img = getImage(data)
-    
     return img.size[0], img.size[1]
 
 

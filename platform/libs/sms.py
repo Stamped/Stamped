@@ -7,7 +7,10 @@ __license__   = "TODO"
 
 import Globals, utils
 
-from twilio.rest import TwilioRestClient
+try:
+    from twilio.rest import TwilioRestClient
+except:
+    pass
 
 ACCOUNT = "ACf58c6c70f623299adb2aa20ea64d8b5a"
 TOKEN   = "fc27f2652e0e49e2dcf763224e9cb51e"

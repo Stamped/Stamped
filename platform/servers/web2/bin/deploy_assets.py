@@ -24,7 +24,8 @@ STATIC_ROOTS = [
 ]
 
 def get_static_root():
-    return STATIC_ROOTS[random.randint(0, len(STATIC_ROOTS) - 1)]
+    return ""
+    #return STATIC_ROOTS[random.randint(0, len(STATIC_ROOTS) - 1)]
 
 def deploy_assets():
     sink    = S3Utils()

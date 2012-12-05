@@ -12,7 +12,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback, random
+    import os, logs, re, time, urlparse, math, gevent, traceback, random
 
     from api import Blacklist
     import libs.ec2_utils
@@ -122,11 +122,11 @@ class StampedAPI(AStampedAPI):
 
         self.ACTIVITY_CACHE_BLOCK_SIZE = 50
         self.ACTIVITY_CACHE_BUFFER_SIZE = 20
-
+        
         self._activityCache = ActivityCollectionCache(self,
                                                       cacheBlockSize=self.ACTIVITY_CACHE_BLOCK_SIZE,
                                                       cacheBufferSize=self.ACTIVITY_CACHE_BUFFER_SIZE)
-
+        
         # Enable / Disable Functionality
         self._activity = True
         self._rollback = []

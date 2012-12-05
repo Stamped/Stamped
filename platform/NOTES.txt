@@ -230,3 +230,13 @@ mongo stamped --eval "db.dropDatabase()"
 # Mac OS X
 ARCHFLAGS="-arch i386 -arch x86_64" pip install pylibmc==1.2.0
 
+db.friends.find().forEach(function(doc) { if (db.users.findOne({"_id" : ObjectId(doc._id)}) == null) { db.friends.remove({"_id" : doc._id}); }})
+
+db.stamplikes.find().forEach(function(doc) { if (db.stamps.findOne({"_id" : ObjectId(doc._id)}) == null) { db.stamplikes.remove({"_id" : doc._id}); }})
+
+db.stampcomments.find().forEach(function(doc) { if (db.stamps.findOne({"_id" : ObjectId(doc._id)}) == null) { db.stampcomments.remove({"_id" : doc._id}); }})
+
+db.entities.find().forEach(function(doc) {if (!!doc.images && !!doc.images[0] && !!doc.images[0].sizes && !!doc.images[0].sizes[0].url && doc.images[0].sizes[0].url.indexOf("http://static.stamped.com") == 0) { printjson(doc); }})
+
+if (db.users.findOne(p) == null) { db.followers.remove(p); } else { printjson(doc); } })
+

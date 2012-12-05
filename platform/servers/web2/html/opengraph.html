@@ -31,35 +31,35 @@
                     <meta itemprop="image"      content="{{img2}}"/>
                 {% else %}
                     {% if entity.category == "film" %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_movies.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_movies.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_movies.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_movies.jpg"/>
                     {% else %}{% if entity.category == "place" %}
                         {% if entity.subcategory == "restaurant" %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_food.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_food.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_food.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_food.jpg"/>
                         {% else %}{% if entity.subcategory == "bar" %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_bar.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_bar.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_bar.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_bar.jpg"/>
                         {% else %}{% if entity.subcategory == "cafe" %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_cafe.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_cafe.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_cafe.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_cafe.jpg"/>
                         {% else %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_place.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_place.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_place.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_place.jpg"/>
                         {% endif %}{% endif %}{% endif %}
                     {% else %}{% if entity.category == "music" %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_music.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_music.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_music.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_music.jpg"/>
                     {% else %}{% if entity.category == "book" %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_book.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_book.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_book.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_book.jpg"/>
                     {% else %}
                         {% if entity.subcategory == "app" %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped_app.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped_app.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped_app.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped_app.jpg"/>
                         {% else %}
-                            <meta property="og:image"   content="http://static.stamped.com/assets/img/stamped-logo.jpg"/>
-                            <meta itemprop="image"      content="http://static.stamped.com/assets/img/stamped-logo.jpg"/>
+                            <meta property="og:image"   content="/assets/img/stamped-logo.jpg"/>
+                            <meta itemprop="image"      content="/assets/img/stamped-logo.jpg"/>
                         {% endif %}
                     {% endif %}{% endif %}{% endif %}{% endif %}
                 {% endif %}
@@ -135,13 +135,13 @@
     <meta property="og:type"                content="profile"/>
     <meta property="og:title"               content={% if user.name and user.name|length >= 1 %} "{{user.name}}" {% else %} "{{user.screen_name}}" {% endif %}/>
     
-    {% if user.image_url == "http://static.stamped.com/users/default.jpg" %}
-        <meta property="og:image"           content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
+    {% if user.image_url == "/users/default.jpg" %}
+        <meta property="og:image"           content="/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
         
-        <meta itemprop="image"              content="http://static.stamped.com/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
+        <meta itemprop="image"              content="/logos/{{user.color_primary}}-{{user.color_secondary}}-logo-195x195.png"/>
     {% else %}
-        <meta property="og:image"           content="http://static.stamped.com/users/{{user.screen_name}}.jpg"/>
-        <meta itemprop="image"              content="http://static.stamped.com/users/{{user.screen_name}}.jpg"/>
+        <meta property="og:image"           content="/users/{{user.screen_name}}.jpg"/>
+        <meta itemprop="image"              content="/users/{{user.screen_name}}.jpg"/>
     {% endif %}
     
     <meta property="og:description"         content="Check out {{user.screen_name}}'s stamp collection on Stamped! www.stamped.com/{{user.screen_name}}"/>

@@ -6,7 +6,11 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, logs, utils, pylibmc, json, datetime
+import binascii, bson, ec2_utils, functools, logs, utils, json, datetime
+try:
+    import pylibmc
+except:
+    pass
 
 from schema import Schema
 
@@ -46,10 +50,11 @@ class Memcache(object):
                 # running locally so default to localhost
                 memcached_nodes.append('127.0.0.1')
             
-            self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
+            raise
+            #self._client = pylibmc.Client(memcached_nodes, binary=binary, behaviors=behaviors)
             
             # Verify it works
-            self._client.set('test', 'test', time=0)
+            #self._client.set('test', 'test', time=0)
 
         except Exception, e:
             logs.warning("[%s] unable to initialize memcached (%s)" % (self, e))
