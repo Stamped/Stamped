@@ -109,6 +109,10 @@ class ResizableImage(Flowable):
 
     def wrap(self, mw, mh):
         w, h = Image(self.image_file).wrap(mw, mh)
+        if w < mw and h < mh:
+            self.width = w
+            self.height = h
+            return w, h
         if w > mw:
             ratio = mw / w
             w, h = w * ratio, h * ratio
