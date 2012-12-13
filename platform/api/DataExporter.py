@@ -45,8 +45,10 @@ def get_image_from_url(url):
     suffix = url[-4:]
     assert suffix.lower() in ('.png', '.jpg'), suffix
     tmpfile = NamedTemporaryFile(suffix=suffix, delete=False)
-    urllib.urlretrieve(url, tmpfile.name)
-    return tmpfile.name
+    _, header = urllib.urlretrieve(url, tmpfile.name)
+    if 'image' in header['content-type']:
+      return tmpfile.name
+    return ''
 
 
 def align_center(text):
@@ -108,6 +110,8 @@ class ResizableImage(Flowable):
         self.image_file = image_file
 
     def wrap(self, mw, mh):
+        if not self.image_file:
+          return 0, 0
         w, h = Image(self.image_file).wrap(mw, mh)
         if w < mw and h < mh:
             self.width = w
