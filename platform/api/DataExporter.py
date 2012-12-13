@@ -191,7 +191,7 @@ def create_doc_template(output_file, user):
 class CoverPicture(Flowable):
     def __init__(self, user, logo):
         self.backdrop = Image(os.path.join(SCRIPT_DIR, 'profilepicborder.png'))
-        self.profile_image = get_image_from_url(PROFILE_BASE % user.screen_name)
+        self.profile_image = get_image_from_url(PROFILE_BASE % user.screen_name.lower())
         
         if logo:
             logo_file = get_image_from_url(STAMP_LOGO_BASE % (user.color_primary, user.color_secondary))
