@@ -435,7 +435,10 @@ class DataExporter(object):
         stamps = stamp_collection.getStamps(stamp_ids)
         stamps_and_entities = []
         for stamp in stamps:
-            entity = entity_collection.getEntity(stamp.entity.entity_id)
+            try:
+                entity = entity_collection.getEntity(stamp.entity.entity_id)
+            except:
+                continue
             stamps_and_entities.append((stamp, entity))
 
         categories = defaultdict(list)
@@ -465,5 +468,8 @@ if __name__ == '__main__':
     with open('/tmp/test.pdf', 'w') as fout:
         # data_exporter.export_user_data('4ff5e81f971396609000088a', fout) # me
         # data_exporter.export_user_data('4e8382e0d35f732acb000342', fout) # anthony
-        data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
+        # data_exporter.export_user_data('4e57048accc2175fcd000001', fout) # robby
         # data_exporter.export_user_data('4e57048dccc2175fca000005', fout) # travis
+        data_exporter.export_user_data('4eaee847fe4a1d2a41000c3e', fout) # lisa
+        # data_exporter.export_user_data('4e570491ccc2175fcd000004', fout) # andy
+
