@@ -101,7 +101,11 @@ def emptyIndex():
 
 
 def getS3Key(stack_name=None):
-    stack_name = stack_name or ec2_utils.get_stack().instance.stack
+    try:
+        stack_name = stack_name or ec2_utils.get_stack().instance.stack
+    except:
+        stack_name = "local"
+    
     BUCKET_NAME = 'stamped.com.static.images'
     FILE_NAME = 'search/v2/autocomplete/' + stack_name
 
