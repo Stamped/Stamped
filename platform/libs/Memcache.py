@@ -6,9 +6,14 @@ __copyright__ = "Copyright (c) 2011-2012 Stamped.com"
 __license__   = "TODO"
 
 import Globals
-import binascii, bson, ec2_utils, functools, logs, utils, pylibmc, json, datetime
+import binascii, bson, ec2_utils, functools, logs, utils, json, datetime
 
 from schema import Schema
+
+try:
+    import pylibmc
+except ImportError:
+    utils.log("warning: memcached will be disabled; need to install pylibmc!")
 
 """
 NOTE (travis): Manipulating cache items via subscript-style syntax (e.g., cache[key]) 

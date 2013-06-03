@@ -12,7 +12,7 @@ from logs import report
 
 try:
     import utils
-    import os, logs, re, time, urlparse, math, pylibmc, gevent, traceback, random
+    import os, logs, re, time, urlparse, math, gevent, traceback, random
 
     from api import Blacklist
     import libs.ec2_utils
