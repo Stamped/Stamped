@@ -152,7 +152,7 @@ class StampedAPI(AStampedAPI):
 
         self.__autocomplete = emptyIndex()
         self.__autocomplete_last_loaded = datetime.now()
-        if utils.is_ec2():
+        if False: #utils.is_ec2():
             self.reloadAutoCompleteIndex()
 
     def setVersion(self, version):

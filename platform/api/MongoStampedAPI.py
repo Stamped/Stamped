@@ -183,7 +183,7 @@ class MongoStampedAPI(StampedAPI):
         es_port = 9200
         retries = 5
         
-        if libs.ec2_utils.is_ec2():
+        if False: #libs.ec2_utils.is_ec2():
             stack = libs.ec2_utils.get_stack()
             
             if stack is None:
@@ -198,6 +198,8 @@ class MongoStampedAPI(StampedAPI):
                 return None
         else:
             es_servers = "%s:%d" % ('localhost', es_port)
+        
+        return None
         
         while True:
             try:

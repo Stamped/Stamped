@@ -392,7 +392,7 @@ class MongoEntityCollection(AMongoCollection, AEntityDB, ADecorationDB):
             msg = "%s: Re-resolve entity" % key
             # Only run this on EC2 (for now)
             if api is not None:
-                if libs.ec2_utils.is_ec2():
+                if False:#libs.ec2_utils.is_ec2():
                     logs.info(msg)
                     api.mergeEntityId(str(key))
             else:

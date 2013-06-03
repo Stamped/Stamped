@@ -20,8 +20,7 @@ class MongoAsyncTasksCollection(AMongoCollection):
         if stack_name is not None:
             collection = "asynctasks_%s" % stack_name
         elif libs.ec2_utils.is_ec2():
-            stack_info = libs.ec2_utils.get_stack()
-            collection = "asynctasks_%s" % stack_info.instance.stack
+            collection = "asynctasks_%s" % "local"
 
         AMongoCollection.__init__(self, collection=collection, logger=True)
 

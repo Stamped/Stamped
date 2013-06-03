@@ -27,7 +27,7 @@ def cachedFn(ttl=ONE_WEEK, memberFn=True, schemaClasses=[]):
       for instance, you might decorate a function with @cachedFn(schemaClasses=[User,Entity]) if you expected it to
       return a user and a list of entities on their to-do list.
     """
-    if utils.is_ec2():
+    if False: #utils.is_ec2():
         return memcached_function(time=ttl)
     else:
         return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=schemaClasses)
@@ -38,7 +38,7 @@ def devOnlyCachedFn(memberFn=True, schemaClasses=[]):
 
     Meanings of memberFn and schemaClasses are as with cachedFn decorator above.
     """
-    if utils.is_ec2():
+    if False: #utils.is_ec2():
         return lambda wrappedFn: wrappedFn
     else:
         return mongoCachedFn(maxStaleness=datetime.timedelta(0, ttl), memberFn=memberFn, schemaClasses=schemaClasses)

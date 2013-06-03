@@ -19,11 +19,7 @@ class MongoLogsCollection(AMongoCollection):
         if stack_name is not None:
             collection = "logs_%s" % stack_name
         elif libs.ec2_utils.is_ec2():
-            try:
-                stack_info = libs.ec2_utils.get_stack()
-                collection = "logs_%s" % stack_info.instance.stack
-            except:
-                collection = "local"
+            collection = "logs_local"
         
         AMongoCollection.__init__(self, collection=collection, logger=True, isCapped=True)
 

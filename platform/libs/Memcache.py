@@ -37,9 +37,10 @@ class Memcache(object):
     def init(self, binary=False, behaviors=None):
         try:
             memcached_nodes = []
+            raise Exception("")
             dir(pylibmc)
             
-            if utils.is_ec2():
+            if False: #utils.is_ec2():
                 stack = ec2_utils.get_stack()
                 
                 for node in stack.nodes:

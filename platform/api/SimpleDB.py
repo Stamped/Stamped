@@ -24,13 +24,7 @@ class SimpleDB(object):
         self.domains = {}
         
         if domain is None and is_ec2():
-            try:
-                stack = get_stack()
-                stack_name = str(stack['instance']['stack'])
-                domain = stack_name
-            except:
-                domain = "test"
-                pass
+            domain = "test"
         
         if domain is not None:
             self.domain_name = domain

@@ -67,7 +67,7 @@ class RateLimiterState(object):
             # use a semaphore here because if two requests come in immediately, we might instantiate two services
             self.__service_init_semaphore.acquire()
             if self.__local_rlservice is None:
-                if self.__is_ec2:
+                if False: #self.__is_ec2:
                     self.__local_rlservice = StampedRateLimiterService(throttle=True)
                 else:
                     self.__local_rlservice = StampedRateLimiterService(throttle=False)
@@ -164,7 +164,7 @@ class RateLimiterState(object):
 
             logs.error('RPC server request FAIL THRESHOLD REACHED')
             # Email dev if a fail limit was reached
-            if self.__is_ec2:
+            if False: #self.__is_ec2:
                 if self.__last_email_time is not None and (time.time() - self.__last_email_time) > EMAIL_WAIT:
                     self.sendFailLogEmail()
                     self.__last_email_time = time.time()
@@ -208,7 +208,8 @@ class RateLimiterState(object):
         return response, content
 
     def request(self, service, method, url, body, header, priority, timeout):
-        if not self.__is_ec2 or self._isBlackout():
+        #if not self.__is_ec2 or self._isBlackout():
+        if True or self._isBlackout():
             return self._local_service_request(service, method.upper(), url, body, header, priority, timeout)
         try:
             logs.info('### attempting rpc service request')

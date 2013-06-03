@@ -41,7 +41,7 @@ class StampedElasticMongo(AElasticMongo):
         servers = [ ]
         port = 9200
         
-        if utils.is_ec2():
+        if False: #utils.is_ec2():
             stack = ec2_utils.get_stack()
             
             for node in stack.nodes:

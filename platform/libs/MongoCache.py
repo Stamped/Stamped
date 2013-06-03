@@ -182,8 +182,6 @@ class CacheMissException(Exception):
 ONE_WEEK = datetime.timedelta(7)
 def mongoCachedFn(maxStaleness=ONE_WEEK, memberFn=True, schemaClasses=[]):
     # Don't use Mongo caching in production.
-    assert(not utils.is_ec2())
-
     schemaClassesMap = {}
     for schemaClass in schemaClasses:
         schemaClassesMap[schemaClass.__name__] = schemaClass

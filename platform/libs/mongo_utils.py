@@ -9,7 +9,7 @@ import Globals
 import utils
 
 def get_db_instances():
-    if utils.is_ec2():
+    if False: #utils.is_ec2():
         stack = ec2_utils.get_stack()
         members = filter(lambda m: 'db' in m.roles, stack.members)
 
