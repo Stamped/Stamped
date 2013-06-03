@@ -117,6 +117,7 @@ def get_stack(stack=None):
     return info
 
 def get_db_nodes(stack=None):
+    return None
     if stack is None and not is_ec2():
         return None 
     
@@ -186,6 +187,7 @@ def get_db_nodes(stack=None):
     return list(dbNodes)
 
 def get_nodes(tag):
+    return None
     if not is_ec2():
         return None
 
@@ -249,6 +251,7 @@ def get_nodes(tag):
 
 
 def get_api_elb(stack=None):
+    return None
     if not is_ec2():
         return None
     
@@ -270,6 +273,7 @@ def get_api_elb(stack=None):
     return None
 
 def is_prod_stack():
+    return False
     try:
         if not is_ec2():
             return False
@@ -285,6 +289,7 @@ def is_prod_stack():
     return False
 
 def get_prod_stacks():
+    return None
     if not is_ec2():
         return None
     
