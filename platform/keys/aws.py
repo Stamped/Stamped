@@ -1,6 +1,6 @@
 
-AWS_ACCESS_KEY_ID = 'AKIAIXLZZZT4DMTKZBDQ'
-AWS_SECRET_KEY    = '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'
+AWS_ACCESS_KEY_ID = 'AKIAIZXJFA4AWUHES4OA'
+AWS_SECRET_KEY    = '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'
 
 if __name__ == '__main__':
     from boto.ec2.elb import ELBConnection
