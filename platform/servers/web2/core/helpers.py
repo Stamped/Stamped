@@ -75,7 +75,6 @@ def stamped_view(schema=None,
                     expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
                     cache_control = 'no-cache'
                 elif utils.is_ec2():
-                    logs.info("End request: zero")
                     expires = (dt.datetime.utcnow() + dt.timedelta(minutes=0000)).ctime()
                     cache_control = 'max-age=60000'
                 else:
@@ -83,11 +82,8 @@ def stamped_view(schema=None,
                     expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
                     cache_control = 'max-age=0'
                 
-                logs.info("End request: one")
                 response['Expires'] = expires
                 response['Cache-Control'] = cache_control
-                
-                logs.info("End request: two")
                 
                 return response
             

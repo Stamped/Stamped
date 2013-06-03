@@ -27,6 +27,7 @@ def error_404(request, **kwargs):
 @stamped_view()
 def error_500(request, **kwargs):
     body_classes = "error 500"
+    utils.log("ERROR: 500")
     
     return stamped_render(request, '500.html', {
         'body_classes'      : body_classes, 
