@@ -202,7 +202,7 @@ class CustomCSSTemplateLibrary(object):
         proxy   = ".%s.%s.less" % (template_name, threading.currentThread().getName())
         
         if utils.is_ec2():
-            prog = "/stamped/node_modules/less/bin/lessc"
+            prog = "/usr/bin/lessc"
         else:
             prog = "lessc"
         
