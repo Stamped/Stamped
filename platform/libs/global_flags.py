@@ -18,6 +18,7 @@ __global_flags = None
 
 
 def is_bowser():
+    return False
     import ec2_utils
     stack = ec2_utils.get_stack()
     return stack and str(stack['instance']['stack']) == 'bowser'
@@ -34,3 +35,4 @@ def parse_global_flags():
 
 def get_global_flags():
     return __global_flags
+
