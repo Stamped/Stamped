@@ -75,8 +75,8 @@ def stamped_view(schema=None,
                     expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
                     cache_control = 'no-cache'
                 elif utils.is_ec2():
-                    expires = (dt.datetime.utcnow() + dt.timedelta(minutes=60)).ctime()
-                    cache_control = 'max-age=600'
+                    expires = (dt.datetime.utcnow() + dt.timedelta(minutes=60000)).ctime()
+                    cache_control = 'max-age=600000'
                 else:
                     # disable caching for local development / debugging
                     expires = (dt.datetime.utcnow() - dt.timedelta(minutes=10)).ctime()
