@@ -131,6 +131,9 @@ def pushNewIndexToS3():
 
 
 def loadIndexFromS3(stack_name=None):
+    # temp
+    return {}
+    
     with TemporaryFile() as tmpFile:
         with closing(getS3Key(stack_name)) as key:
             key.get_contents_to_file(tmpFile)

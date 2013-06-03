@@ -43,7 +43,7 @@ class MongoDBConfig(Singleton):
         return 'mongodb' in self.config and 'hosts' in self.config.mongodb 
     
     def _init(self):
-        if utils.is_ec2():
+        if False: #utils.is_ec2():
             dbNodes = libs.ec2_utils.get_db_nodes()
 
             hosts = []
@@ -154,7 +154,7 @@ class MongoLogDBConfig(Singleton):
         return 'mongodb' in self.config and 'hosts' in self.config.mongodb 
     
     def _init(self):
-        if utils.is_ec2():
+        if False: #utils.is_ec2():
             dbNodes = libs.ec2_utils.get_db_nodes('logger')
 
             hosts = []
@@ -247,7 +247,7 @@ class AMongoCollection(object):
             self._dbConfig = MongoDBConfig.getInstance()
 
         if isCapped:
-            size = LOG_COLLECTION_SIZE if libs.ec2_utils.is_ec2() else LOG_LOCAL_COLLECTION_SIZE
+            size = LOG_COLLECTION_SIZE if False else LOG_LOCAL_COLLECTION_SIZE
             self._init_collection(self._dbConfig.database_name, collection, size)
         else:
             self._init_collection(self._dbConfig.database_name, collection)

@@ -172,6 +172,7 @@ class StampedAPI(AStampedAPI):
                 stack_info = libs.ec2_utils.get_stack()
                 self._node_name = "%s.%s" % (stack_info.instance.stack, stack_info.instance.name)
             except Exception:
+                self._node_name = "test"
                 pass
 
         return self._node_name
@@ -1880,6 +1881,8 @@ class StampedAPI(AStampedAPI):
         return [{'completion' : name} for name in self.__autocomplete[category][normalizeTitle(unicode(query))]]
 
     def reloadAutoCompleteIndex(self, retries=5, delay=0):
+        return
+        
         def setIndex(greenlet):
             try:
                 self.__autocomplete = greenlet.get()
