@@ -375,14 +375,14 @@ footer {
     pointer-events: none;
     
     @c0: fade(#f2f2f2, 100%);
-    @c1: fade(#f2f2f2, 0%);
-    @angle: 90deg;
+    @c1: fade(@c0, 0%);
+    @end: bottom;
     
     background: transparent;
-    background: -webkit-linear-gradient(@angle, @c0, @c1);
-    background: -moz-linear-gradient(@angle, @c0, @c1);
-    background: -o-linear-gradient(@angle, @c0, @c1);
-    background: linear-gradient(@angle, @c0, @c1);
+    background: -moz-linear-gradient(@end, @c0, @c1);
+    background: -webkit-linear-gradient(@end, @c0, @c1);
+    background: -o-linear-gradient(@end, @c0, @c1);
+    background: linear-gradient(@end, @c0, @c1);
 }
 
 .social {

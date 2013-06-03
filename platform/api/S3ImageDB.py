@@ -33,14 +33,17 @@ class S3ImageDB(AImageDB):
     def __init__(self, bucket_name='stamped.com.static.images'):
         # find or create bucket
         # ---------------------
-        conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
+        try:
+            conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
 
-        self.bucket = conn.lookup(bucket_name)
+            self.bucket = conn.lookup(bucket_name)
 
-        if not self.bucket:
-            self.bucket = conn.create_bucket(bucket_name)
-        
-        self.bucket_name = bucket_name
+            if not self.bucket:
+                self.bucket = conn.create_bucket(bucket_name)
+            
+            self.bucket_name = bucket_name
+        except:
+            utils.printException()
 
         self.base_url = 'http://static.stamped.com'
     
@@ -59,7 +62,7 @@ class S3ImageDB(AImageDB):
         result = {}
         for size in sizes:
             result['%sx%s' % (size, size)] = (size, size)
-
+        
         return result
         
         ### DEPRECATED
@@ -322,7 +325,18 @@ class S3ImageDB(AImageDB):
     def addDataToS3(self, name, data, contentType):
         num_retries = 0
         max_retries = 5
-
+        
+        # NOTE (tfischer): this is temporary
+        
+        n = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'servers/web2/assets')
+        name = os.path.join(n, name)
+        
+        f = open(name, 'wb')
+        f.write(data.getvalue())
+        f.close()
+        
+        return
+        
         while True:
             try:
                 conn = S3Connection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)

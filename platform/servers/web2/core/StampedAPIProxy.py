@@ -23,7 +23,8 @@ IS_PROD         = libs.ec2_utils.is_prod_stack()
 if IS_PROD:
     _baseurl    = "https://api.stamped.com/v1"
 else:
-    _baseurl    = "https://dev.stamped.com/v1"
+    _baseurl    = "http://localhost:9000/v1"
+#"https://dev.stamped.com/v1"
 
 class StampedAPIProxy(object):
     

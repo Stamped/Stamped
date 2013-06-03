@@ -56,9 +56,9 @@ urlpatterns = patterns('',
     
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com/mobile, stamped.com/mobile/index, stamped.com/mobile/index.html
-    url(r'^mobile/index$',                              'mobile.views.yahoo_index'), 
-    url(r'^mobile/index\.html?$',                       'mobile.views.yahoo_index'), 
-    url(r'^mobile/?$',                                  'mobile.views.yahoo_index'), 
+    url(r'^mobile/index$',                              'mobile.views.index'), 
+    url(r'^mobile/index\.html?$',                       'mobile.views.index'), 
+    url(r'^mobile/?$',                                  'mobile.views.index'), 
     
     
     # ------------------------------ ABOUT -------------------------------------
@@ -167,12 +167,12 @@ urlpatterns = patterns('',
     
     # ------------------------------ INDEX -------------------------------------
     # e.g., stamped.com, stamped.com/index, stamped.com/index.html
-    url(r'^index$',                             'core.views.yahoo_index'), 
-    url(r'^index\.html?$',                      'core.views.yahoo_index'), 
-    url(r'^/?$',                                'core.views.yahoo_index'), 
-    url(r'^1$',                                 'core.views.yahoo_index'), 
-    url(r'^2$',                                 'core.views.yahoo_index'), 
-    url(r'^3$',                                 'core.views.yahoo_index'), 
+    url(r'^index$',                             'core.views.index'), 
+    url(r'^index\.html?$',                      'core.views.index'), 
+    url(r'^/?$',                                'core.views.index'), 
+    url(r'^1$',                                 'core.views.index'), 
+    url(r'^2$',                                 'core.views.index'), 
+    url(r'^3$',                                 'core.views.index'), 
     
     
     # ------------------------ APP STORE DOWNLOAD ------------------------------

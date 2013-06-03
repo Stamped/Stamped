@@ -1189,15 +1189,15 @@ class StampedAPI(AStampedAPI):
     def getUserFromIdOrScreenName(self, userTiny):
         if not isinstance(userTiny, Schema):
             userTiny = UserTiny().dataImport(userTiny)
-
+        
         if userTiny.user_id is None and userTiny.screen_name is None:
             raise StampedMissingParametersError("Required field missing (user id or screen name)")
-
+        
         if userTiny.user_id is not None:
             return self._userDB.getUser(userTiny.user_id)
-
+        
         return self._userDB.getUserByScreenName(userTiny.screen_name)
-
+    
     def _getUserStampDistribution(self, userId):
         stampIds    = self._collectionDB.getUserStampIds(userId)
         stamps      = self._stampDB.getStamps(stampIds)

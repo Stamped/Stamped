@@ -18,7 +18,6 @@ TODO:
         * copy screenshot to clipboard
 
 SKETCH IDEAS:
-    * 
     * metropolis sampler visualization!
     * play around with different sampling methods
 

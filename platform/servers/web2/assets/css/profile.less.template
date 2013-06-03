@@ -118,7 +118,7 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
 
 .user-logo-large {
     {{#user}}
-    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png) no-repeat;
+    background: url(/assets/logos/{{color_primary}}-{{color_secondary}}-logo-195x195.png) no-repeat;
     {{/user}}
     
     background-size: 100% 100%;
@@ -126,7 +126,7 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
 
 .user-logo-small {
     {{#user}}
-    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
+    background: url(/assets/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     {{/user}}
     background-size: 100% 100%;
     
@@ -136,7 +136,7 @@ body.app        #stamp-category-nav-bar ol li.app .icon {
 
 .user-logo-tiny {
     {{#user}}
-    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
+    background: url(/assets/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     {{/user}}
     background-size: 100% 100%;
     

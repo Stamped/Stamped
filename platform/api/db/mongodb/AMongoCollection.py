@@ -89,10 +89,13 @@ class MongoDBConfig(Singleton):
             max_delay = 16
             delay = 1
 
+            """
             if utils.is_ec2():
                 replicaset = 'stamped-dev-01'
             else:
                 replicaset = None
+            """
+            replicaset = None
 
             while True:
                 try:

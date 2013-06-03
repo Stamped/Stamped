@@ -97,6 +97,8 @@ class MongoUserCollection(AMongoCollection, AUserDB):
     
     def getUserByScreenName(self, screenName):
         screenName = str(screenName).lower()
+        utils.log("getUserByScreenName: %s" % screenName)
+        
         document = self._collection.find_one({"screen_name_lower": screenName})
         if document is None:
             raise StampedAccountNotFoundError("Unable to find user (%s)" % screenName)

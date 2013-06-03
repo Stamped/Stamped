@@ -30,6 +30,7 @@ facebookUserExceptions = [
                    http_schema=HTTPUserId,
                    exceptions=userExceptions)
 def show(request, authUserId, http_schema, uri, **kwargs):
+    logs.warning("TEST")
     if authUserId is None:
         try:
             return getCache(uri, http_schema)
@@ -37,7 +38,9 @@ def show(request, authUserId, http_schema, uri, **kwargs):
             pass
         except Exception as e:
             logs.warning("Failed to get cache: %s" % e)
-
+    
+    utils.log(str(http_schema))
+    
     user = stampedAPI.getUser(http_schema, authUserId)
     user = HTTPUser().importUser(user)
     

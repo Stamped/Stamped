@@ -13,7 +13,7 @@
 }
 
 .tastemaker-logo-{{screen_name}} {
-    background: url(http://static.stamped.com/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
+    background: url(/assets/logos/{{color_primary}}-{{color_secondary}}-email-36x36.png) no-repeat;
     background-size: 100% 100%;
 }
 

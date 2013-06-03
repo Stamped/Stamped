@@ -198,7 +198,7 @@ if (typeof(StampedClient) == "undefined") {
         
         var _verify_auth = function() {
             if (!!_token) {
-                var func = arguments.callee.caller.name || "authorized function";
+                var func = arguments.callee.caller.name || "unauthorized function";
                 
                 _throw(func + " requires authorization; please login first.");
             }

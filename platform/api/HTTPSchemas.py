@@ -84,14 +84,14 @@ def _profileImageURL(screenName, cache=None, size=None):
         image = "%s-%dx%d.jpg" % (str(screenName).lower(), size, size)
     
     if not cache:
-        url = 'http://static.stamped.com/users/default.jpg'
+        url = '/assets//users/default.jpg'
     elif cache + timedelta(days=1) <= datetime.utcnow():
-        url = 'http://static.stamped.com/users/%s?%s' % \
+        url = '/assets//users/%s?%s' % \
               (image, int(time.mktime(cache.timetuple())))
     else:
-        url = 'http://stamped.com.static.images.s3.amazonaws.com/users/%s?%s' % \
+        url = '/assets/users/%s?%s' % \
               (image, int(time.mktime(cache.timetuple())))
-
+    
     return url
 
 def _formatURL(url):
@@ -175,7 +175,7 @@ def _buildOpenTableURL(opentable_id=None, opentable_nickname=None, client=None):
     return None
 
 def _getIconURL(filename, client=None):
-    base_url = 'http://static.stamped.com/assets/icons'
+    base_url = '/assets/icons'
 
     if client is None or not isinstance(client, Client):
         return '%s/default/%s.png' % (base_url, filename)

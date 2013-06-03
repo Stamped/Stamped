@@ -32,7 +32,7 @@
                         {% endif %}
                     </div>
                     
-                    <img class="stamp" src="http://static.stamped.com/logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png" />
+                    <img class="stamp" src="{{ STAMPED_STATIC_URL }}logos/{{ user.color_primary }}-{{ user.color_secondary }}-credit-18x18.png" />
                     
                     <div class="name">
                         <p class="fullname"><a href="/{{user.screen_name}}">{{user.name}}</a></p>

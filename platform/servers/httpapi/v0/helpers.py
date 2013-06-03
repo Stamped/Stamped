@@ -30,7 +30,7 @@ IS_PROD = libs.ec2_utils.is_prod_stack()
 
 # TODO (travis): VALID_ORIGINS should be dependent on IS_PROD to be 100% as 
 # restrictive as possible.
-# TODO: (travis): does localhost as a valid origin mean any computer's localhost is valid? methinks yes...
+# TODO: (travis): does localhost as a valid origin mean any computer's localhost is valid?
 # TODO: (travis): should https also be a valid origin prefix?
 
 VALID_ORIGINS = [

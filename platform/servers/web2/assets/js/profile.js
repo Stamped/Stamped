@@ -1417,7 +1417,7 @@ var g_update_stamps = null;
         var $fixedwidth     = $(".fixedwidth");
         
         var update_navbar_count  = 0;
-        var wide_gallery_enabled = false;
+        var wide_gallery_enabled = true;
         
         // control stamp category navbar's location
         update_navbar_layout = function(should_update_gallery) {

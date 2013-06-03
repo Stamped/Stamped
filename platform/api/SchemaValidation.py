@@ -14,7 +14,7 @@ from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from api          import Constants
 
-from bson.objectid          import ObjectId
+#from bson.objectid          import ObjectId
 
 # ########## #
 # VALIDATION #
@@ -64,7 +64,8 @@ def validateObjectId(string):
     if string is None or string == '':
         return None
     try:
-        r = ObjectId(string)
+        #r = ObjectId(string)
+        pass
     except Exception as e:
         logs.warning("Invalid id: %s" % e)
         raise StampedObjectIdError("Invalid id")

@@ -56,8 +56,10 @@ def user_profile_image(template_name, pad, scope, *args, **kwargs):
     except Exception:
         pass
     
-    if url is None:
-        url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
+    url = "/assets/img/default-%sx%s.jpg" % (size, size)
+    
+    #if url is None:
+    #    url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)
     
     #if not url.endswith('default.jpg'):
     #    url = "http://static.stamped.com/users/%s-%sx%s.jpg" % (screen_name, size, size)

@@ -126,7 +126,7 @@ class RRTree {
             alpha1   = temp;
         }
         
-        fill(sample_color(int(random(alpha0, alpha1))));
+        fill(random_color(int(random(alpha0, alpha1))));
         ellipse(newV.x, newV.y, distance, distance);
         
         return true;
