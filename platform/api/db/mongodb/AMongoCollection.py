@@ -200,10 +200,10 @@ class MongoLogDBConfig(Singleton):
             max_delay = 16
             delay = 1
 
-            if utils.is_ec2():
-                replicaset = 'stamped-dev-01'
-            else:
-                replicaset = None
+            #if utils.is_ec2():
+            #    replicaset = 'stamped-dev-01'
+            #else:
+            replicaset = None
 
             while True:
                 try:
