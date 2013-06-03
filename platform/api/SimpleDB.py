@@ -22,12 +22,17 @@ class SimpleDB(object):
         self.conn = SDBConnection(keys.aws.AWS_ACCESS_KEY_ID, keys.aws.AWS_SECRET_KEY)
         self.domain_name = None
         self.domains = {}
-
+        
         if domain is None and is_ec2():
-            stack = get_stack()
-            stack_name = str(stack['instance']['stack'])
-            self.domain_name = stack_name
-        elif domain is not None:
+            try:
+                stack = get_stack()
+                stack_name = str(stack['instance']['stack'])
+                domain = stack_name
+            except:
+                domain = "test"
+                pass
+        
+        if domain is not None:
             self.domain_name = domain
 
     def addStat(self, stat):
