@@ -269,14 +269,17 @@ def get_api_elb(stack=None):
     return None
 
 def is_prod_stack():
-    if not is_ec2():
-        return False
-    
-    stack = get_stack()
-    prodStacks  = get_prod_stacks()
-    
-    if stack is not None and prodStacks is not None:
-        return stack.instance.stack in prodStacks
+    try:
+        if not is_ec2():
+            return False
+        
+        stack = get_stack()
+        prodStacks = get_prod_stacks()
+        
+        if stack is not None and prodStacks is not None:
+            return stack.instance.stack in prodStacks
+    except:
+        pass
     
     return False
 
