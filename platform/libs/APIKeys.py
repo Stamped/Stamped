@@ -10,12 +10,8 @@ import Globals
 import os
 import keys
 import logs
-from ec2_utils import get_stack
 
-try:
-    __stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
-except:
-    __stack_name = "local"
+__stack_name = "local"
 
 __keys_dir = os.path.dirname(keys.__file__)
 __api_keys = None
