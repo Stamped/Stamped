@@ -143,7 +143,7 @@ def call(queue, key, payload, **options):
                 msg = "Unable to connect to task broker: %s" % getHosts()
                 logs.warning(msg)
 
-                if utils.is_ec2():
+                if False: #utils.is_ec2():
                     # Send email
                     email = {}
                     try:

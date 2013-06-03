@@ -181,6 +181,7 @@ class StampedAPI(AStampedAPI):
         return '%s::%s' % (queue, fn.__name__)
 
     def callTask(self, fn, payload, **options):
+        """
         try:
             queue = options.pop('queue', 'api').lower()
             key = self.taskKey(queue, fn)
@@ -194,7 +195,14 @@ class StampedAPI(AStampedAPI):
                 return fn(**payload)
 
             raise
-
+        """
+        
+        if options.pop('fallback', True):
+            logs.info("Running locally '%s'" % fn.__name__)
+            return fn(**payload)
+        
+        return None
+    
     def API_CALL(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
