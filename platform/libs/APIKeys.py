@@ -12,22 +12,26 @@ import keys
 import logs
 from ec2_utils import get_stack
 
-__stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
-__keys_dir = os.path.dirname(keys.__file__)
+try:
+    __stack_name = get_stack().instance.stack if get_stack() is not None else 'local'
+except:
+    __stack_name = "main"
 
+__keys_dir = os.path.dirname(keys.__file__)
 __api_keys = None
+
 def _api_keys():
     """ Singleton for api-key definitions. On first load, opens keys/apikeys-<stack>.conf to load stack-specific
         api keys
     """
-
+    
     global __api_keys, __stack_name, __keys_dir
     if __api_keys is not None:
         return __api_keys
-
+    
     filename = 'apikeys-%s.conf' % __stack_name
     apikeys_path = '%s/%s' % (__keys_dir, filename)
-
+    
     print ('apikeys_path: %s' % apikeys_path)
     try:
         meta = {}
@@ -49,3 +53,4 @@ def _api_keys():
 
 def get_api_key(service_name, key):
     return _api_keys()[service_name][key]
+
