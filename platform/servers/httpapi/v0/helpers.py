@@ -63,6 +63,7 @@ if duration > 2:
     logs.warning("LONG INIT: %s sec" % duration)
 
 defaultExceptions = [
+    (StampedDeprecatedError,            410,    'deprecated',           'Stamped is currently read-only and will be shut down on Dec 1st.'),
     (StampedDocumentNotFoundError,      404,    'not_found',            'There was a problem retrieving the requested data'),
     (StampedAuthError,                  401,    'invalid_credentials',  'There was an error during authentication'),
     (StampedInputError,                 400,    'invalid_request',      'An error occurred. Please try again later.'),

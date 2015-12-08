@@ -19,18 +19,24 @@ exceptions = [
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def create(request, authUserId, http_schema, **kwargs):
-    comment = stampedAPI.addComment(authUserId, http_schema.stamp_id, http_schema.blurb)
-    comment = HTTPComment().importComment(comment)
-    
-    return transformOutput(comment.dataExport())
+
+    raise StampedDeprecatedError()
+
+#    comment = stampedAPI.addComment(authUserId, http_schema.stamp_id, http_schema.blurb)
+#    comment = HTTPComment().importComment(comment)
+#
+#    return transformOutput(comment.dataExport())
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPCommentId,
                    exceptions=exceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    stampedAPI.removeComment(authUserId, http_schema.comment_id)
-    return transformOutput(True)
+
+    raise StampedDeprecatedError()
+
+#    stampedAPI.removeComment(authUserId, http_schema.comment_id)
+#    return transformOutput(True)
 
 
 @handleHTTPRequest(http_schema=HTTPCommentSlice,

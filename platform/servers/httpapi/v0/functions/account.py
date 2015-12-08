@@ -64,15 +64,18 @@ createTwitterAccountExceptions = [
                    parse_request_kwargs={'obfuscate':['password']},
                    exceptions=accountExceptions)
 def create(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
-    user   = HTTPUser().importAccount(account)
-    logs.user(user.user_id)
+    raise StampedDeprecatedError()
 
-    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
-    output = { 'user': user.dataExport(), 'token': token }
-
-    return transformOutput(output)
+#    account = stampedAPI.addAccount(schema, tempImageUrl=http_schema.temp_image_url)
+#
+#    user   = HTTPUser().importAccount(account)
+#    logs.user(user.user_id)
+#
+#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+#    output = { 'user': user.dataExport(), 'token': token }
+#
+#    return transformOutput(output)
 
 
 # upgrade account from third party auth to stamped auth
@@ -82,14 +85,17 @@ def create(request, client_id, http_schema, schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['password']},
                    exceptions=upgradeAccountExceptions)
 def upgrade(request, client_id, authUserId, http_schema, **kwargs):
-    account = stampedAPI.upgradeAccount(authUserId, http_schema.email, http_schema.password)
 
-    user   = HTTPUser().importAccount(account)
+    raise StampedDeprecatedError()
 
-    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
-    output = { 'user': user.dataExport(), 'token': token }
-
-    return transformOutput(output)
+#    account = stampedAPI.upgradeAccount(authUserId, http_schema.email, http_schema.password)
+#
+#    user   = HTTPUser().importAccount(account)
+#
+#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+#    output = { 'user': user.dataExport(), 'token': token }
+#
+#    return transformOutput(output)
 
 
 @require_http_methods(["POST"])
@@ -100,15 +106,18 @@ def upgrade(request, client_id, authUserId, http_schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token']},
                    exceptions=createFacebookAccountExceptions)
 def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
-    user   = HTTPUser().importAccount(account)
-    logs.user(user.user_id)
+    raise StampedDeprecatedError()
 
-    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
-    output = { 'user': user.dataExport(), 'token': token }
-
-    return transformOutput(output)
+#    account = stampedAPI.addFacebookAccount(schema, tempImageUrl=http_schema.temp_image_url)
+#
+#    user   = HTTPUser().importAccount(account)
+#    logs.user(user.user_id)
+#
+#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+#    output = { 'user': user.dataExport(), 'token': token }
+#
+#    return transformOutput(output)
 
 
 @require_http_methods(["POST"])
@@ -119,24 +128,30 @@ def createWithFacebook(request, client_id, http_schema, schema, **kwargs):
                    parse_request_kwargs={'obfuscate':['user_token', 'user_secret']},
                    exceptions=createTwitterAccountExceptions)
 def createWithTwitter(request, client_id, http_schema, schema, **kwargs):
-    account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
 
-    user   = HTTPUser().importAccount(account)
-    logs.user(user.user_id)
+    raise StampedDeprecatedError()
 
-    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
-    output = { 'user': user.dataExport(), 'token': token }
-
-    return transformOutput(output)
+#    account = stampedAPI.addTwitterAccount(schema, tempImageUrl=http_schema.temp_image_url)
+#
+#    user   = HTTPUser().importAccount(account)
+#    logs.user(user.user_id)
+#
+#    token  = stampedAuth.addRefreshToken(client_id, user.user_id)
+#    output = { 'user': user.dataExport(), 'token': token }
+#
+#    return transformOutput(output)
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest()
 def remove(request, authUserId, **kwargs):
-    account = stampedAPI.removeAccount(authUserId)
-    account = HTTPAccount().importAccount(account)
 
-    return transformOutput(account.dataExport())
+    raise StampedDeprecatedError()
+
+#    account = stampedAPI.removeAccount(authUserId)
+#    account = HTTPAccount().importAccount(account)
+#
+#    return transformOutput(account.dataExport())
 
 
 @require_http_methods(["GET"])
@@ -153,19 +168,25 @@ def show(request, authUserId, **kwargs):
                    conversion=HTTPAccountUpdateForm.convertToAccountUpdateForm,
                    exceptions=updateAccountExceptions)
 def update(request, authUserId, http_schema, schema, **kwargs):
-    account = stampedAPI.updateAccount(authUserId, schema)
 
-    user    = HTTPUser().importUser(account)
-    return transformOutput(user.dataExport())
+    raise StampedDeprecatedError()
+
+#    account = stampedAPI.updateAccount(authUserId, schema)
+#
+#    user    = HTTPUser().importUser(account)
+#    return transformOutput(user.dataExport())
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPCustomizeStamp, exceptions=accountExceptions)
 def customizeStamp(request, authUserId, data, **kwargs):
-    account = stampedAPI.customizeStamp(authUserId, data)
-    user    = HTTPUser().importUser(account)
 
-    return transformOutput(user.dataExport())
+    raise StampedDeprecatedError()
+
+#    account = stampedAPI.customizeStamp(authUserId, data)
+#    user    = HTTPUser().importUser(account)
+#
+#    return transformOutput(user.dataExport())
 
 
 @require_http_methods(["POST"])
@@ -184,21 +205,27 @@ def check(request, client_id, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPAccountChangePassword,
                    parse_request_kwargs={'obfuscate':['old_password', 'new_password']})
 def changePassword(request, authUserId, http_schema, **kwargs):
-    new = http_schema.new_password
-    old = http_schema.old_password
 
-    stampedAuth.verifyPassword(authUserId, old)
-    result = stampedAuth.updatePassword(authUserId, new)
+    raise StampedDeprecatedError()
 
-    return transformOutput(True)
+#    new = http_schema.new_password
+#    old = http_schema.old_password
+#
+#    stampedAuth.verifyPassword(authUserId, old)
+#    result = stampedAuth.updatePassword(authUserId, new)
+#
+#    return transformOutput(True)
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(requires_auth=False, http_schema=HTTPEmail)
 def resetPassword(request, client_id, http_schema, **kwargs):
-    stampedAuth.resetPassword(http_schema.email)
 
-    return transformOutput(True)
+    raise StampedDeprecatedError()
+
+#    stampedAuth.resetPassword(http_schema.email)
+#
+#    return transformOutput(True)
 
 
 def _buildAlertsFromAccount(account):
@@ -250,36 +277,45 @@ def showAlerts(request, authUserId, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPSettingsToggleRequest)
 def updateAlerts(request, authUserId, http_schema, **kwargs):
-    on = None
-    if http_schema.on is not None:
-        on = set(http_schema.on.split(','))
 
-    off = None
-    if http_schema.off is not None:
-        off = set(http_schema.off.split(','))
+    raise StampedDeprecatedError()
 
-    account  = stampedAPI.updateAlerts(authUserId, on, off)
-    result = _buildAlertsFromAccount(account)
-
-    return transformOutput(result)
+#    on = None
+#    if http_schema.on is not None:
+#        on = set(http_schema.on.split(','))
+#
+#    off = None
+#    if http_schema.off is not None:
+#        off = set(http_schema.off.split(','))
+#
+#    account  = stampedAPI.updateAlerts(authUserId, on, off)
+#    result = _buildAlertsFromAccount(account)
+#
+#    return transformOutput(result)
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPAPNSToken)
 def updateApns(request, authUserId, http_schema, **kwargs):
-    if len(http_schema.token) != 64:
-        raise StampedInputError('Invalid token length')
 
-    stampedAPI.updateAPNSToken(authUserId, http_schema.token)
-    return transformOutput(True)
+    raise StampedDeprecatedError()
+
+#    if len(http_schema.token) != 64:
+#        raise StampedInputError('Invalid token length')
+#
+#    stampedAPI.updateAPNSToken(authUserId, http_schema.token)
+#    return transformOutput(True)
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPAPNSToken)
 def removeApns(request, authUserId, http_schema, **kwargs):
-    if len(http_schema.token) != 64:
-        raise StampedInputError('Invalid token length')
 
-    stampedAPI.removeAPNSTokenForUser(authUserId, http_schema.token)
-    return transformOutput(True)
+    raise StampedDeprecatedError()
+
+#    if len(http_schema.token) != 64:
+#        raise StampedInputError('Invalid token length')
+#
+#    stampedAPI.removeAPNSTokenForUser(authUserId, http_schema.token)
+#    return transformOutput(True)
 

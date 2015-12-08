@@ -35,12 +35,15 @@ def _convertHTTPEntity(entity,
 @handleHTTPRequest(http_schema=HTTPEntityNew,
                    exceptions=entityExceptions)
 def create(request, authUserId, authClientId, http_schema, **kwargs):
-    entity          = http_schema.exportEntity(authUserId)
-    
-    entity          = stampedAPI.addEntity(entity)
-    entity          = _convertHTTPEntity(entity, authClientId)
-    
-    return transformOutput(entity.dataExport())
+
+    raise StampedDeprecatedError()
+
+#    entity          = http_schema.exportEntity(authUserId)
+#
+#    entity          = stampedAPI.addEntity(entity)
+#    entity          = _convertHTTPEntity(entity, authClientId)
+#
+#    return transformOutput(entity.dataExport())
 
 
 @require_http_methods(["GET"])
@@ -69,10 +72,13 @@ def show(request, authUserId, authClientId, http_schema, uri, **kwargs):
 @handleHTTPRequest(http_schema=HTTPEntityId,
                    exceptions=entityExceptions)
 def remove(request, authUserId, authClientId, http_schema, **kwargs):
-    entity = stampedAPI.removeCustomEntity(authUserId, http_schema.entity_id)
-    entity = _convertHTTPEntity(entity, authClientId)
 
-    return transformOutput(entity.dataExport())
+    raise StampedDeprecatedError()
+
+#    entity = stampedAPI.removeCustomEntity(authUserId, http_schema.entity_id)
+#    entity = _convertHTTPEntity(entity, authClientId)
+#
+#    return transformOutput(entity.dataExport())
 
 
 @require_http_methods(["GET"])
@@ -169,46 +175,54 @@ def stampedBy(request, authUserId, http_schema, **kwargs):
 @handleHTTPRequest(http_schema=HTTPActionComplete,
                    exceptions=entityExceptions)
 def completeAction(request, authUserId, http_schema, **kwargs):
-    # Hack for Python 2.6 where unicode keys aren't valid...
-    data = {}
-    for k, v in http_schema.dataExport().items():
-        data[str(k)] = v
-    
-    result = stampedAPI.completeAction(authUserId, **data)
-    return transformOutput(result)
+
+    raise StampedDeprecatedError()
+#    # Hack for Python 2.6 where unicode keys aren't valid...
+#    data = {}
+#    for k, v in http_schema.dataExport().items():
+#        data[str(k)] = v
+#
+#    result = stampedAPI.completeAction(authUserId, **data)
+#    return transformOutput(result)
 
 _secret = 'supersmash'
 
 @require_http_methods(["GET"])
 @handleHTTPRequest(http_schema=HTTPEntityEdit, requires_auth=False)
 def edit(request, authUserId, http_schema, **kwargs):
-    from resolve        import ManualEdit
-    if _secret != http_schema.secret:
-        raise StampedHTTPError(403, 'Not authorized')
-    form = ManualEdit.formForEntity(http_schema.entity_id, secret=http_schema.secret)
-    kwargs = {}
-    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
-    kwargs.setdefault('mimetype', 'text/html')
-    output      = HttpResponse(form, **kwargs)
-    
-    return output
+
+    raise StampedDeprecatedError()
+
+#    from resolve        import ManualEdit
+#    if _secret != http_schema.secret:
+#        raise StampedHTTPError(403, 'Not authorized')
+#    form = ManualEdit.formForEntity(http_schema.entity_id, secret=http_schema.secret)
+#    kwargs = {}
+#    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
+#    kwargs.setdefault('mimetype', 'text/html')
+#    output      = HttpResponse(form, **kwargs)
+#
+#    return output
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPEntityUpdate, requires_auth=False)
 def update(request, authUserId, http_schema, **kwargs):
-    from resolve        import ManualEdit
-    if _secret != http_schema.secret:
-        raise StampedHTTPError(403, 'Not authorized')
-    # try:
-    ManualEdit.update(http_schema)
-    # except Exception as e:
-    #     raise StampedHTTPError(400, 'bad form: %s' % e)
 
-    form = ManualEdit.formForEntity(http_schema.entity_id, secret=http_schema.secret)
-    kwargs = {}
-    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
-    kwargs.setdefault('mimetype', 'text/html')
-    output      = HttpResponse(form, **kwargs)
-    
-    return output
+    raise StampedDeprecatedError()
+
+#    from resolve        import ManualEdit
+#    if _secret != http_schema.secret:
+#        raise StampedHTTPError(403, 'Not authorized')
+#    # try:
+#    ManualEdit.update(http_schema)
+#    # except Exception as e:
+#    #     raise StampedHTTPError(400, 'bad form: %s' % e)
+#
+#    form = ManualEdit.formForEntity(http_schema.entity_id, secret=http_schema.secret)
+#    kwargs = {}
+#    kwargs.setdefault('content_type', 'text/javascript; charset=UTF-8')
+#    kwargs.setdefault('mimetype', 'text/html')
+#    output      = HttpResponse(form, **kwargs)
+#
+#    return output

@@ -48,34 +48,40 @@ def show(request, authUserId, **kwargs):
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def add(request, authUserId, http_schema, schema, **kwargs):
-    if http_schema.service_name is None:
-        if 'service_name' not in kwargs:
-            raise StampedMissingParametersError("Missing linked account service_name parameter")
-        else:
-            schema.service_name = kwargs['service_name']
 
-    # Quick fix to prevent share settings from being overwritten
-    acct = stampedAPI.getAccount(authUserId)
-    if schema.service_name == 'facebook':
-        if acct.linked is not None and acct.linked.facebook is not None:
-            schema.share_settings = acct.linked.facebook.share_settings
-    result = stampedAPI.addLinkedAccount(authUserId, schema)
+    raise StampedDeprecatedError()
 
-    return transformOutput(True)
+#    if http_schema.service_name is None:
+#        if 'service_name' not in kwargs:
+#            raise StampedMissingParametersError("Missing linked account service_name parameter")
+#        else:
+#            schema.service_name = kwargs['service_name']
+#
+#    # Quick fix to prevent share settings from being overwritten
+#    acct = stampedAPI.getAccount(authUserId)
+#    if schema.service_name == 'facebook':
+#        if acct.linked is not None and acct.linked.facebook is not None:
+#            schema.share_settings = acct.linked.facebook.share_settings
+#    result = stampedAPI.addLinkedAccount(authUserId, schema)
+#
+#    return transformOutput(True)
 
 @handleHTTPRequest(http_schema=HTTPServiceNameForm,
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def remove(request, authUserId, http_schema, **kwargs):
-    if http_schema.service_name is None:
-        if 'service_name' not in kwargs:
-            raise StampedMissingParametersError("Missing Linked account service_name parameter")
-        else:
-            http_schema.service_name = kwargs['service_name']
 
-    result = stampedAPI.removeLinkedAccount(authUserId, http_schema.service_name)
+    raise StampedDeprecatedError()
 
-    return transformOutput(True)
+#    if http_schema.service_name is None:
+#        if 'service_name' not in kwargs:
+#            raise StampedMissingParametersError("Missing Linked account service_name parameter")
+#        else:
+#            http_schema.service_name = kwargs['service_name']
+#
+#    result = stampedAPI.removeLinkedAccount(authUserId, http_schema.service_name)
+#
+#    return transformOutput(True)
 
 def _buildShareSettingsFromLinkedAccount(linked):
     shares = getattr(linked, 'share_settings', None)
@@ -111,19 +117,22 @@ def _buildShareSettingsFromLinkedAccount(linked):
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def updateSettings(request, authUserId, http_schema, **kwargs):
-    on = None
-    if http_schema.on is not None:
-        on = set(http_schema.on.split(','))
 
-    off = None
-    if http_schema.off is not None:
-        off = set(http_schema.off.split(','))
+    raise StampedDeprecatedError()
 
-    logs.info('### on: %s' % on)
-    linkedAccount  = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, on, off)
-    result = _buildShareSettingsFromLinkedAccount(linkedAccount)
-
-    return transformOutput(result)
+#    on = None
+#    if http_schema.on is not None:
+#        on = set(http_schema.on.split(','))
+#
+#    off = None
+#    if http_schema.off is not None:
+#        off = set(http_schema.off.split(','))
+#
+#    logs.info('### on: %s' % on)
+#    linkedAccount  = stampedAPI.updateLinkedAccountShareSettings(authUserId, http_schema.service_name, on, off)
+#    result = _buildShareSettingsFromLinkedAccount(linkedAccount)
+#
+#    return transformOutput(result)
 
 @handleHTTPRequest(http_schema=HTTPServiceNameForm,
                    exceptions=exceptions)
@@ -154,7 +163,10 @@ def createNetflixLoginResponse(authUserId, netflixAddId=None):
                    exceptions=exceptions)
 @require_http_methods(["GET"])
 def netflixLogin(request, http_schema, authUserId, **kwargs):
-    return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+
+    raise StampedDeprecatedError()
+
+    #return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
 @handleThirdPartyOAuthToken()
 @handleHTTPRequest(requires_auth=False,
@@ -162,36 +174,39 @@ def netflixLogin(request, http_schema, authUserId, **kwargs):
                    exceptions=exceptions)
 @require_http_methods(["GET"])
 def netflixLoginCallback(request, http_schema, **kwargs):
-    netflix = globalNetflix()
 
-    logs.info('### http_schema: %s ' % http_schema)
-    oid = http_schema.state
-    authUserId = stampedAPI.getCallbackToken(oid)
+    raise StampedDeprecatedError()
 
-    # Acquire the user's final oauth_token/secret pair and add the netflix linked account
-    try:
-        result = netflix.requestUserAuth(http_schema.thirdparty_oauth_token, http_schema.secret)
-    except Exception as e:
-        return HttpResponseRedirect("stamped://netflix/link/fail")
-
-    linked                          = LinkedAccount()
-    linked.service_name             = 'netflix'
-    linked.linked_user_id           = result['user_id']
-    linked.token                    = result['oauth_token']
-    linked.secret                   = result['oauth_token_secret']
-    stampedAPI.addLinkedAccount(authUserId, linked)
-
-    if http_schema.netflix_add_id is not None:
-        try:
-            result = stampedAPI.addToNetflixInstant(linked.linked_user_id, linked.token, linked.secret, http_schema.netflix_add_id)
-        except Exception as e:
-            logs.warning('Error adding to netflix: %s' % e)
-            return HttpResponseRedirect("stamped://netflix/add/fail")
-        if result == None:
-            logs.warning('Error adding to netflix.  Returned no result.')
-            return HttpResponseRedirect("stamped://netflix/add/fail")
-        return HttpResponseRedirect("stamped://netflix/add/success")
-    return HttpResponseRedirect("stamped://netflix/link/success")
+#    netflix = globalNetflix()
+#
+#    logs.info('### http_schema: %s ' % http_schema)
+#    oid = http_schema.state
+#    authUserId = stampedAPI.getCallbackToken(oid)
+#
+#    # Acquire the user's final oauth_token/secret pair and add the netflix linked account
+#    try:
+#        result = netflix.requestUserAuth(http_schema.thirdparty_oauth_token, http_schema.secret)
+#    except Exception as e:
+#        return HttpResponseRedirect("stamped://netflix/link/fail")
+#
+#    linked                          = LinkedAccount()
+#    linked.service_name             = 'netflix'
+#    linked.linked_user_id           = result['user_id']
+#    linked.token                    = result['oauth_token']
+#    linked.secret                   = result['oauth_token_secret']
+#    stampedAPI.addLinkedAccount(authUserId, linked)
+#
+#    if http_schema.netflix_add_id is not None:
+#        try:
+#            result = stampedAPI.addToNetflixInstant(linked.linked_user_id, linked.token, linked.secret, http_schema.netflix_add_id)
+#        except Exception as e:
+#            logs.warning('Error adding to netflix: %s' % e)
+#            return HttpResponseRedirect("stamped://netflix/add/fail")
+#        if result == None:
+#            logs.warning('Error adding to netflix.  Returned no result.')
+#            return HttpResponseRedirect("stamped://netflix/add/fail")
+#        return HttpResponseRedirect("stamped://netflix/add/success")
+#    return HttpResponseRedirect("stamped://netflix/link/success")
 
 
 def createFacebookLoginResponse(authUserId):
@@ -216,9 +231,12 @@ def createFacebookLoginResponse(authUserId):
 @handleHTTPRequest(exceptions=exceptions)
 @require_http_methods(["POST"])
 def facebookLogin(request, authUserId, **kwargs):
-    result =  createFacebookLoginResponse(authUserId)
-    logs.info('result: %s' % result)
-    return result
+
+    raise StampedDeprecatedError()
+
+#    result =  createFacebookLoginResponse(authUserId)
+#    logs.info('result: %s' % result)
+#    return result
 
 
 @handleHTTPRequest(requires_auth=False,
@@ -226,91 +244,97 @@ def facebookLogin(request, authUserId, **kwargs):
                    exceptions=exceptions)
 @require_http_methods(["GET"])
 def facebookLoginCallback(request, http_schema, **kwargs):
-    facebook = globalFacebook()
 
-    logs.info('### http_schema: %s ' % http_schema)
+    raise StampedDeprecatedError()
 
-    oid = http_schema.state
-    authUserId = stampedAPI.getCallbackToken(oid)
-
-    # Acquire the user's FB access token
-    try:
-        access_token, expires = facebook.getUserAccessToken(http_schema.code)
-        logs.info('### FIRST: token: %s  expires: %s' % (access_token, expires))
-
-        access_token, expires = facebook.extendAccessToken(access_token)
-        logs.info('### SECOND: token: %s  expires: %s' % (access_token, expires))
-    except Exception as e:
-        return HttpResponseRedirect("stamped://facebook/link/fail")
-
-    acct = stampedAPI.getAccount(authUserId)
-
-
-    expires_dt = datetime.fromtimestamp(time.time() + expires)
-    # If the user already has a FB account, then update it with the new access_token
-    if acct.linked is not None and acct.linked.facebook is not None:
-        linked = acct.linked.facebook
-        linked.token = access_token
-        linked.token_expiration = expires_dt
-        linked.extended_timestamp = datetime.utcnow()
-
-        linked.share_settings = LinkedAccountShareSettings()
-        linked.share_settings.share_stamps  = True
-        linked.share_settings.share_likes   = True
-        linked.share_settings.share_todos   = True
-        linked.share_settings.share_follows = True
-
-        stampedAPI._accountDB.updateLinkedAccount(authUserId, linked)
-    # Otherwise, we'll get the User's info with the access token and create a new linked account
-    else:
-        userInfo = facebook.getUserInfo(access_token)
-        linked                          = LinkedAccount()
-        linked.service_name             = 'facebook'
-        linked.token                    = access_token
-        linked.token_expiration         = expires_dt
-        linked.extended_timestamp       = datetime.utcnow()
-        linked.linked_user_id           = userInfo['id']
-        linked.linked_screen_name       = userInfo.get('username', None)
-        linked.linked_name              = userInfo['name']
-        linked.third_party_id           = userInfo['third_party_id']
-
-        linked.share_settings = LinkedAccountShareSettings()
-        linked.share_settings.share_stamps  = True
-        linked.share_settings.share_likes   = True
-        linked.share_settings.share_todos   = True
-        linked.share_settings.share_follows = True
-
-        stampedAPI.addLinkedAccount(authUserId, linked)
-
-    #return HttpResponseRedirect("stamped://facebook/link/success")
-    url = "fb297022226980395://authorize/#access_token=%s&expires_in=%s&code=%s" % (access_token, expires, http_schema.code)
-    return HttpResponseRedirect(url)
+#    facebook = globalFacebook()
+#
+#    logs.info('### http_schema: %s ' % http_schema)
+#
+#    oid = http_schema.state
+#    authUserId = stampedAPI.getCallbackToken(oid)
+#
+#    # Acquire the user's FB access token
+#    try:
+#        access_token, expires = facebook.getUserAccessToken(http_schema.code)
+#        logs.info('### FIRST: token: %s  expires: %s' % (access_token, expires))
+#
+#        access_token, expires = facebook.extendAccessToken(access_token)
+#        logs.info('### SECOND: token: %s  expires: %s' % (access_token, expires))
+#    except Exception as e:
+#        return HttpResponseRedirect("stamped://facebook/link/fail")
+#
+#    acct = stampedAPI.getAccount(authUserId)
+#
+#
+#    expires_dt = datetime.fromtimestamp(time.time() + expires)
+#    # If the user already has a FB account, then update it with the new access_token
+#    if acct.linked is not None and acct.linked.facebook is not None:
+#        linked = acct.linked.facebook
+#        linked.token = access_token
+#        linked.token_expiration = expires_dt
+#        linked.extended_timestamp = datetime.utcnow()
+#
+#        linked.share_settings = LinkedAccountShareSettings()
+#        linked.share_settings.share_stamps  = True
+#        linked.share_settings.share_likes   = True
+#        linked.share_settings.share_todos   = True
+#        linked.share_settings.share_follows = True
+#
+#        stampedAPI._accountDB.updateLinkedAccount(authUserId, linked)
+#    # Otherwise, we'll get the User's info with the access token and create a new linked account
+#    else:
+#        userInfo = facebook.getUserInfo(access_token)
+#        linked                          = LinkedAccount()
+#        linked.service_name             = 'facebook'
+#        linked.token                    = access_token
+#        linked.token_expiration         = expires_dt
+#        linked.extended_timestamp       = datetime.utcnow()
+#        linked.linked_user_id           = userInfo['id']
+#        linked.linked_screen_name       = userInfo.get('username', None)
+#        linked.linked_name              = userInfo['name']
+#        linked.third_party_id           = userInfo['third_party_id']
+#
+#        linked.share_settings = LinkedAccountShareSettings()
+#        linked.share_settings.share_stamps  = True
+#        linked.share_settings.share_likes   = True
+#        linked.share_settings.share_todos   = True
+#        linked.share_settings.share_follows = True
+#
+#        stampedAPI.addLinkedAccount(authUserId, linked)
+#
+#    #return HttpResponseRedirect("stamped://facebook/link/success")
+#    url = "fb297022226980395://authorize/#access_token=%s&expires_in=%s&code=%s" % (access_token, expires, http_schema.code)
+#    return HttpResponseRedirect(url)
 
 
 @handleHTTPRequest(http_schema=HTTPNetflixId,
                    exceptions=exceptions)
 @require_http_methods(["POST"])
 def addToNetflixInstant(request, authUserId, authClientId, http_schema, **kwargs):
-    try:
-        result = stampedAPI.addToNetflixInstantWithUserId(authUserId, http_schema.netflix_id)
-    except StampedThirdPartyInvalidCredentialsError:
-        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
-    if result == None:
-        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
 
-    response = HTTPActionResponse()
+    raise StampedDeprecatedError()
 
-    source                              = HTTPActionSource()
-    source.name                         = 'Added to Netflix Instant Queue'
-    source.source                       = 'stamped'
-    source.source_data                  = dict()
-    source.source_data['title']         = 'Added to Netflix'
-    source.source_data['subtitle']      = 'Instant Queue'
-    source.setIcon('act_response_netflix', stampedAuth.getClientDetails(authClientId))
-    #source.endpoint         = 'account/linked/netflix/login_callback.json'
-    response.setAction('stamped_confirm', 'Added to Netflix', [source])
-    #TODO throw status codes on error
-    #TODO return an HTTPAction
-    return transformOutput(response.dataExport())
+#    try:
+#        result = stampedAPI.addToNetflixInstantWithUserId(authUserId, http_schema.netflix_id)
+#    except StampedThirdPartyInvalidCredentialsError:
+#        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+#    if result == None:
+#        return createNetflixLoginResponse(authUserId, http_schema.netflix_id)
+#
+#    response = HTTPActionResponse()
+#
+#    source                              = HTTPActionSource()
+#    source.name                         = 'Added to Netflix Instant Queue'
+#    source.source                       = 'stamped'
+#    source.source_data                  = dict()
+#    source.source_data['title']         = 'Added to Netflix'
+#    source.source_data['subtitle']      = 'Instant Queue'
+#    source.setIcon('act_response_netflix', stampedAuth.getClientDetails(authClientId))
+#    #source.endpoint         = 'account/linked/netflix/login_callback.json'
+#    response.setAction('stamped_confirm', 'Added to Netflix', [source])
+#    #TODO throw status codes on error
+#    #TODO return an HTTPAction
+#    return transformOutput(response.dataExport())
 
 

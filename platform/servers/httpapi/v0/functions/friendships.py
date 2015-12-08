@@ -17,19 +17,25 @@ friendshipExceptions = [
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def create(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.addFriendship(authUserId, http_schema)
-    user = HTTPUser().importUser(user)
-    
-    return transformOutput(user.dataExport())
+
+    raise StampedDeprecatedError()
+
+#    user = stampedAPI.addFriendship(authUserId, http_schema)
+#    user = HTTPUser().importUser(user)
+#
+#    return transformOutput(user.dataExport())
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def remove(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.removeFriendship(authUserId, http_schema)
-    user = HTTPUser().importUser(user)
-    
-    return transformOutput(user.dataExport())
+
+    raise StampedDeprecatedError()
+
+#    user = stampedAPI.removeFriendship(authUserId, http_schema)
+#    user = HTTPUser().importUser(user)
+#
+#    return transformOutput(user.dataExport())
 
 
 @require_http_methods(["GET"])
@@ -60,10 +66,13 @@ def followers(request, authUserId, http_schema, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def blocksCreate(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.addBlock(authUserId, http_schema)
-    user = HTTPUser().importUser(user)
-    
-    return transformOutput(user.dataExport())
+
+    raise StampedDeprecatedError()
+
+#    user = stampedAPI.addBlock(authUserId, http_schema)
+#    user = HTTPUser().importUser(user)
+#
+#    return transformOutput(user.dataExport())
 
 
 @require_http_methods(["GET"])
@@ -86,17 +95,23 @@ def blocking(request, authUserId, **kwargs):
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPUserId, exceptions=friendshipExceptions)
 def blocksRemove(request, authUserId, http_schema, **kwargs):
-    user = stampedAPI.removeBlock(authUserId, http_schema)
-    user = HTTPUser().importUser(user)
-    
-    return transformOutput(user.dataExport())
+
+    raise StampedDeprecatedError()
+
+#    user = stampedAPI.removeBlock(authUserId, http_schema)
+#    user = HTTPUser().importUser(user)
+#
+#    return transformOutput(user.dataExport())
 
 
 @require_http_methods(["POST"])
 @handleHTTPRequest(http_schema=HTTPEmails, exceptions=friendshipExceptions)
 def invite(request, authUserId, http_schema, **kwargs):
-    emails = http_schema.emails.split(',')
-    result = stampedAPI.inviteFriends(authUserId, emails)
 
-    return transformOutput(True)
+    raise StampedDeprecatedError()
+
+#    emails = http_schema.emails.split(',')
+#    result = stampedAPI.inviteFriends(authUserId, emails)
+#
+#    return transformOutput(True)
 

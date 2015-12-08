@@ -157,6 +157,10 @@ class StampedNotLoggedInError(StampedPermissionsError):
 
 # Specific Stamped Exceptions
 
+class StampedDeprecatedError(StampedUnavailableError):
+    def __init__(self, msg=None):
+        StampedUnavailableError.__init__(self, msg)
+
 
 #Validation Errors
 class StampedInvalidColorError(StampedInputError):
